@@ -7,11 +7,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.citi.put.checks.studio.authoring.AuthoringRevisionIdentity;
 import com.citi.put.checks.studio.dto.AuthoringStep;
 import com.citi.put.checks.studio.dto.AuthoringV2Request;
-import com.citi.put.checks.studio.guided.publication.GuidedPlanBuilder;
 import com.citi.put.checks.studio.guided.publication.GuidedPublicationBaseRepository;
-import com.citi.put.checks.studio.guided.publication.GuidedPublicationEvidenceRepository;
 import com.citi.put.checks.studio.guided.publication.GuidedPublicationRepository;
-import com.citi.put.checks.studio.guided.publication.ObservedArtifactLowerer;
 import com.citi.put.checks.studio.guided.publication.PublicationContracts;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.guided.session.GuidedSessionRepository;
@@ -50,6 +47,7 @@ public final class LegacyV20ConfirmedBaseFixture {
       String revisionDigest,
       String immutableBaseRowBytes,
       String immutableReceiptRowBytes,
+      String immutableActionEvidenceBytes,
       String sessionId) {}
 
   public record PreparedCases(Seed incompleteImmutableBase, StaleSeed staleCurrentCache) {}
@@ -157,9 +155,11 @@ public final class LegacyV20ConfirmedBaseFixture {
                 // well-shaped derived cache is deliberately retained. No protected historical row
                 // changes.
                 jdbc.update(
-                    "UPDATE ui_tests SET authoring=?::jsonb,steps=?::jsonb,variables=?::jsonb,"
-                        + "source_revision=source_revision+1,configuration_revision=configuration_revision+1 WHERE "
-                        + "id=?",
+                    "UPDATE ui_tests SET"
+                        + " authoring=?::jsonb,steps=?::jsonb,variables=?::jsonb,source"
+                        + "_revision=source_revision+1,configuration_revision=configura"
+                        + "tion_revision+1"
+                        + " WHERE id=?",
                     currentAuthoring.toString(),
                     mapper.writeValueAsString(List.of(sourceText)),
                     com.citi.put.checks.studio.dto.CanonicalStudioCodec.variablesToJson(
@@ -199,6 +199,10 @@ public final class LegacyV20ConfirmedBaseFixture {
     var tx = new TransactionTemplate(new DataSourceTransactionManager(source));
     requireV20(jdbc);
     String url = sourceText.substring(sourceText.indexOf("http"));
+    int end = url.indexOf(' ');
+    if (end > 0) {
+      url = url.substring(0, end);
+    }
     if (url.endsWith(".")) {
       url = url.substring(0, url.length() - 1);
     }
@@ -222,13 +226,11 @@ public final class LegacyV20ConfirmedBaseFixture {
             .putObject("scope")
             .put("principalId", PRINCIPAL)
             .put("csiId", csiId)
-            .put("applicationId", APPLICATION)
             .put("environmentId", environment)
             .put("sourceRevision", "1")
             .put("configurationRevision", "1")
             .put("modelDataPolicyId", "fixture-model-policy")
             .putNull("valueTransferPolicyId");
-    scope.putArray("approvedOrigins").add(origin);
     scope
         .putArray("capabilities")
         .add("observe")
@@ -281,16 +283,17 @@ public final class LegacyV20ConfirmedBaseFixture {
       var authoring =
           new AuthoringV2Request(2, null, List.of(new AuthoringStep(step, sourceText, null)));
       jdbc.update(
-          "INSERT INTO users(sso_id,name,email) VALUES ('user-1','Legacy fixture','fixture@example.invalid') "
-              + "ON CONFLICT(email) DO NOTHING");
+          "INSERT INTO users(sso_id,name,email) VALUES ('user-1','Legacy"
+              + " fixture','fixture@example.invalid') ON CONFLICT(email) DO NOTHING");
       jdbc.update(
-          "INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment) VALUES (?,"
-              + "'Legacy fixture','unit','LOW','fixture@example.invalid','Development') ON CONFLICT(id) DO NOTHING",
+          "INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment)"
+              + " VALUES (?,'Legacy fixture','unit','LOW','fixture@example.invalid','Development')"
+              + " ON CONFLICT(id) DO NOTHING",
           csiId);
       jdbc.update(
-          "INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,created_by,authoring,"
-              + "authoring_revision_inputs) VALUES (?,'Legacy observed base',?,?,'chromium',?::jsonb,?,?::jsonb,?::"
-              + "jsonb)",
+          "INSERT INTO"
+              + " ui_tests(id,name,csi_id,environment,browser,steps,created_by,authoring,authoring_revision_inputs)"
+              + " VALUES (?,'Legacy observed base',?,?,'chromium',?::jsonb,?,?::jsonb,?::jsonb)",
           test,
           csiId,
           environment,
@@ -306,15 +309,7 @@ public final class LegacyV20ConfirmedBaseFixture {
           sessions.insert(session);
           GuidedPublicationEvidenceFixture.freezeSource(jdbc, tx, session);
         });
-    ObjectNode requirements =
-        C.object()
-            .put("csiId", csiId)
-            .put("environment", environment)
-            .put("applicationId", APPLICATION)
-            .put("policyId", "legacy-fixture-policy")
-            .put("policyVersion", "1")
-            .put("entryPolicyId", "legacy-entry");
-    requirements.putArray("allowedOrigins").add(origin);
+    ObjectNode requirements = C.object().put("csiId", csiId).put("environment", environment);
     // Match ObservedReplayPins.requirements: guided observation stays in scope; replay lists
     // executable operations only. Preserve every executable capability and its original order.
     ArrayNode executableCapabilities = requirements.putArray("capabilities");
@@ -348,7 +343,8 @@ public final class LegacyV20ConfirmedBaseFixture {
                   (ObjectNode)
                       C.parse(
                           jdbc.queryForObject(
-                              "SELECT manifest::text FROM studio_guided_source_manifests WHERE session_id=?",
+                              "SELECT manifest::text FROM studio_guided_source_manifests WHERE"
+                                  + " session_id=?",
                               String.class,
                               id));
               ObjectNode input =
@@ -385,17 +381,20 @@ public final class LegacyV20ConfirmedBaseFixture {
                       .put("workerId", "legacy-worker")
                       .put("expectedFence", 0);
               jdbc.update(
-                  "INSERT INTO studio_guided_assignments(session_id,assignment_id,scope_hash,worker_id,"
-                      + "expected_fence,intent) VALUES (?,?,?,'legacy-worker',0,?::jsonb)",
+                  "INSERT INTO"
+                      + " studio_guided_assignments(session_id,assignment_id,scope_ha"
+                      + "sh,worker_id,expected_fence,intent)"
+                      + " VALUES (?,?,?,'legacy-worker',0,?::jsonb)",
                   id,
                   id,
                   session.path("scopeHash").asText(),
                   intent.toString());
               jdbc.update(
                   "INSERT INTO studio_guided_materializations(session_id,scope_hash,context_id,"
-                      + "context_revision,materialization_revision,worker_id,owner_fence,source_revision,"
-                      + "configuration_revision,authored_inputs_hash,authored_inputs) VALUES (?,?,?,1,1,"
-                      + "'legacy-worker',1,'1','1',?,?::jsonb)",
+                      + "context_revision,materialization_revision,worker_id,owner_fe"
+                      + "nce,source_revision,configuration_revision,authored_inputs_h"
+                      + "ash,authored_inputs)"
+                      + " VALUES (?,?,?,1,1,'legacy-worker',1,'1','1',?,?::jsonb)",
                   id,
                   session.path("scopeHash").asText(),
                   id + "-context",
@@ -418,14 +417,15 @@ public final class LegacyV20ConfirmedBaseFixture {
               plan.putArray("needs");
               com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlan.validate(C, plan);
               jdbc.update(
-                  "INSERT INTO studio_guided_translation_plans(session_id,plan_revision,parent_revision,plan,"
-                      + "plan_hash) VALUES (?,1,0,?::jsonb,?)",
+                  "INSERT INTO"
+                      + " studio_guided_translation_plans(session_id,plan_revision,parent_revision,plan,plan_hash)"
+                      + " VALUES (?,1,0,?::jsonb,?)",
                   id,
                   plan.toString(),
                   GuidedContracts.hash(plan));
               jdbc.update(
-                  "UPDATE studio_guided_translation_state SET plan_revision=1,continuation='OBSERVING' WHERE "
-                      + "session_id=?",
+                  "UPDATE studio_guided_translation_state SET"
+                      + " plan_revision=1,continuation='OBSERVING' WHERE session_id=?",
                   id);
               ObjectNode execution =
                   C.object()
@@ -480,16 +480,19 @@ public final class LegacyV20ConfirmedBaseFixture {
               current.progress().set("executionEvidence", execution);
               sessions.save(current);
               jdbc.update(
-                  "INSERT INTO studio_guided_preparations(session_id,preparation_id,context_id,owner_fence,"
-                      + "request_digest,proof,expires_at) VALUES (?,?,?,1,?,?::jsonb,?::timestamptz)",
+                  "INSERT INTO"
+                      + " studio_guided_preparations(session_id,preparation_id,contex"
+                      + "t_id,owner_fence,request_digest,proof,expires_at)"
+                      + " VALUES (?,?,?,1,?,?::jsonb,?::timestamptz)",
                   id,
                   id + "-prep",
                   id + "-context",
                   digest,
                   proof.toString(),
                   proof.path("expiresAt").asText());
-              var evidence = new GuidedPublicationEvidenceRepository(jdbc, C);
-              evidence.capturePreparation(current, proposal, proof, Instant.now());
+              // Persist historical bytes under the actual V20 CHECK/FK/trigger guards. Today's
+              // bridge proof requires target; a V20 proof must not acquire that future field.
+              insertV20Preparation(jdbc, id, proposal, proof, execution);
               ObjectNode op = C.object();
               op.set("coordinate", proposal.path("coordinate"));
               op.putNull("origin").putNull("locator");
@@ -532,22 +535,26 @@ public final class LegacyV20ConfirmedBaseFixture {
               C.validate("v3/action", proposal);
               C.validate("v3/ledger", ledger);
               jdbc.update(
-                  "INSERT INTO studio_guided_actions(admission_id,session_id,step_id,ordinal,document,"
-                      + "proposal) VALUES (?,?,?,0,?::jsonb,?::jsonb)",
+                  "INSERT INTO"
+                      + " studio_guided_actions(admission_id,session_id,step_id,ordinal,document,proposal)"
+                      + " VALUES (?,?,?,0,?::jsonb,?::jsonb)",
                   id + "-admission",
                   id,
                   step.toString(),
                   ledger.toString(),
                   proposal.toString());
               jdbc.update(
-                  "UPDATE studio_guided_preparations SET admission_id=? WHERE session_id=? AND preparation_id=?",
+                  "UPDATE studio_guided_preparations SET admission_id=? WHERE session_id=? AND"
+                      + " preparation_id=?",
                   id + "-admission",
                   id,
                   id + "-prep");
               jdbc.update(
-                  "INSERT INTO studio_guided_obligation_admissions(session_id,obligation_id,plan_revision,"
-                      + "meaning,proposal,proposal_digest,admission_key,admission_id) VALUES (?,?,1,?::jsonb,?::"
-                      + "jsonb,?,?,?)",
+                  "INSERT INTO"
+                      + " studio_guided_obligation_admissions(session_id,obligation_i"
+                      + "d,plan_revision,meaning,proposal,proposal_digest,admission_k"
+                      + "ey,admission_id)"
+                      + " VALUES (?,?,1,?::jsonb,?::jsonb,?,?,?)",
                   id,
                   meaning.path("obligationId").asText(),
                   meaning.toString(),
@@ -555,25 +562,34 @@ public final class LegacyV20ConfirmedBaseFixture {
                   digest,
                   id + "-action",
                   id + "-admission");
-              evidence.attachAdmission(current.document(), ledger, proposal, Instant.now());
+              // The enabled historical guard verifies the original locator-based operation hash.
+              jdbc.update(
+                  "INSERT INTO"
+                      + " studio_guided_publication_admissions(session_id,admission_i"
+                      + "d,preparation_id,obligation_id,proposal_hash,captured_at)"
+                      + " VALUES (?,?,?,?,?,?)",
+                  id,
+                  id + "-admission",
+                  id + "-prep",
+                  meaning.path("obligationId").asText(),
+                  digest,
+                  Timestamp.from(PublicationContracts.millisecond(Instant.now())));
               current = sessions.lock(id);
               current.progress().put("stepIndex", 1);
               ((ObjectNode) current.document().path("counters")).put("actions", 1);
               sessions.save(current);
-              var builder = new GuidedPlanBuilder(C);
               ObjectNode result =
-                  builder.basis(
-                      base,
-                      bases.lockCurrent(test),
-                      readHistoricalV20(jdbc, id, manifest),
-                      current.document(),
-                      builder.learningProvenance(manifest));
+                  historicalNavigationBasis(
+                      base.document(),
+                      bases.lockCurrent(test).document(),
+                      readHistoricalV20(jdbc, id, manifest).document(),
+                      current.document());
               current.document().put("state", "FINALIZING");
               sessions.save(current);
               jdbc.execute("SET CONSTRAINTS ALL IMMEDIATE");
               return result;
             });
-    var candidate = new ObservedArtifactLowerer(C).lower(basis, profile);
+    var candidate = historicalNavigationCandidate(basis, profile);
     ObjectNode identity =
         C.object()
             .put("ownerWorkerId", "legacy-worker")
@@ -674,6 +690,7 @@ public final class LegacyV20ConfirmedBaseFixture {
         candidate.hashes().path("revisionDigest").asText(),
         row(jdbc, "ui_test_revisions", "id", revision),
         row(jdbc, "studio_guided_publications", "session_id", id),
+        historicalActionEvidenceBytes(jdbc, id),
         id);
   }
 
@@ -703,14 +720,16 @@ public final class LegacyV20ConfirmedBaseFixture {
     assertThat(
             C.parse(
                 jdbc.queryForObject(
-                    "SELECT authored_inputs::text FROM studio_guided_materializations WHERE session_id=?",
+                    "SELECT authored_inputs::text FROM studio_guided_materializations WHERE"
+                        + " session_id=?",
                     String.class,
                     id)))
         .isEqualTo(inputs);
     String inputsHash = GuidedContracts.hash(inputs);
     assertThat(
             jdbc.queryForObject(
-                "SELECT authored_inputs_hash FROM studio_guided_materializations WHERE session_id=?",
+                "SELECT authored_inputs_hash FROM studio_guided_materializations WHERE"
+                    + " session_id=?",
                 String.class,
                 id))
         .isEqualTo(inputsHash);
@@ -730,7 +749,6 @@ public final class LegacyV20ConfirmedBaseFixture {
             .put("expiresAt", session.path("expiresAt").asText())
             .put("leaseExpiresAt", session.path("owner").path("leaseExpiresAt").asText());
     context.putObject("versions").put("contract", 3);
-    context.set("approvedOrigins", session.path("scope").path("approvedOrigins").deepCopy());
     ArrayNode ids = context.putArray("sourceStepIds");
     session.path("sourceSteps").forEach(step -> ids.add(step.path("stepId")));
     context.set("authoredInputs", inputs.deepCopy());
@@ -750,17 +768,6 @@ public final class LegacyV20ConfirmedBaseFixture {
               id)
           .forEach(json -> facts.add(C.parse(json)));
     }
-    JsonNode application =
-        C.parse(
-                jdbc.queryForObject(
-                    "SELECT v.document::text FROM studio_guided_session_policies s JOIN "
-                        + "studio_guided_policy_versions v ON v.policy_id=s.policy_id AND "
-                        + "v.version=s.policy_version WHERE s.session_id=?",
-                    String.class,
-                    id))
-            .path("applicationPolicy");
-    context.set("applicationPolicy", application.deepCopy());
-    context.put("policyHash", GuidedContracts.hash(application));
     ObjectNode identity =
         C.object()
             .put("workerId", worker)
@@ -800,39 +807,44 @@ public final class LegacyV20ConfirmedBaseFixture {
     assertThat(
             jdbc.queryForObject(
                 "SELECT max(version::int) FROM flyway_schema_history WHERE success", Integer.class))
-        .isEqualTo(23);
+        .isEqualTo(29);
     assertThat(row(jdbc, "ui_test_revisions", "id", seed.baseRevisionId()))
         .isEqualTo(seed.immutableBaseRowBytes());
     assertThat(row(jdbc, "studio_guided_publications", "session_id", seed.sessionId()))
         .isEqualTo(seed.immutableReceiptRowBytes());
+    assertThat(historicalActionEvidenceBytes(jdbc, seed.sessionId()))
+        .isEqualTo(seed.immutableActionEvidenceBytes());
     assertThat(
             jdbc.queryForObject(
                 "SELECT confirmed_revision_id FROM ui_tests WHERE id=?", UUID.class, seed.testId()))
         .isEqualTo(seed.baseRevisionId());
     assertThat(
             jdbc.queryForObject(
-                "SELECT NOT(\"references\" ?? 'authoringIdentityVersion') AND step_snapshot_hashes IS NULL "
-                    + "AND step_reuse_provenance IS NULL FROM ui_test_revisions WHERE id=?",
+                "SELECT NOT(\"references\" ?? 'authoringIdentityVersion') AND step_snapshot_hashes"
+                    + " IS NULL AND step_reuse_provenance IS NULL FROM ui_test_revisions WHERE"
+                    + " id=?",
                 Boolean.class,
                 seed.baseRevisionId()))
         .isTrue();
     assertThat(
             jdbc.queryForObject(
-                "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND attempt_ordinal=0",
+                "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND"
+                    + " attempt_ordinal=0",
                 Integer.class,
                 seed.sessionId()))
         .isEqualTo(1);
     assertThat(
             jdbc.queryForObject(
-                "SELECT count(*) FROM studio_guided_materialization_snapshots WHERE session_id=? AND "
-                    + "authored_inputs_hash=studio_publication_hash(authored_inputs)",
+                "SELECT count(*) FROM studio_guided_materialization_snapshots WHERE session_id=?"
+                    + " AND authored_inputs_hash=studio_publication_hash(authored_inputs)",
                 Integer.class,
                 seed.sessionId()))
         .isEqualTo(1);
     assertThat(
             jdbc.queryForObject(
-                "SELECT to_regprocedure('studio_015_relearned_from(text)') IS NOT NULL AND EXISTS(SELECT 1 "
-                    + "FROM pg_trigger WHERE tgname='tr_015_revision_guard' AND tgenabled='O')",
+                "SELECT to_regprocedure('studio_015_relearned_from(text)') IS NOT NULL AND"
+                    + " EXISTS(SELECT 1 FROM pg_trigger WHERE tgname='tr_015_revision_guard' AND"
+                    + " tgenabled='O')",
                 Boolean.class))
         .isTrue();
     assertThat(
@@ -862,7 +874,8 @@ public final class LegacyV20ConfirmedBaseFixture {
                           PublicationContracts.copy(
                               C.parse(
                                   jdbc.queryForObject(
-                                      "SELECT document::text FROM studio_guided_sessions WHERE session_id=?",
+                                      "SELECT document::text FROM studio_guided_sessions WHERE"
+                                          + " session_id=?",
                                       String.class,
                                       seed.sessionId())));
                       shadow.put("sessionId", probe).put("state", "PREPARING");
@@ -894,7 +907,8 @@ public final class LegacyV20ConfirmedBaseFixture {
                       JsonNode originalBase =
                           C.parse(
                               jdbc.queryForObject(
-                                  "SELECT document::text FROM studio_guided_publication_bases WHERE session_id=?",
+                                  "SELECT document::text FROM studio_guided_publication_bases WHERE"
+                                      + " session_id=?",
                                   String.class,
                                   seed.sessionId()));
                       sessions.lock(probe);
@@ -904,12 +918,14 @@ public final class LegacyV20ConfirmedBaseFixture {
                               + "configuration_revision,source,source_hash,artifact,artifact_hash,"
                               + "artifact_schema_version,configuration,\"references\",provenance,created_by,"
                               + "confirmed_by,confirmed_at,confirmation_source,reference_policy,publication_kind,"
-                              + "guided_session_id,learned_plan_hash,revision_digest,step_snapshot_hashes,"
-                              + "step_reuse_provenance) SELECT ?,test_id,csi_id,source_revision,"
+                              + "guided_session_id,learned_plan_hash,revision_digest,step_sna"
+                              + "pshot_hashes,step_reuse_provenance)"
+                              + " SELECT ?,test_id,csi_id,source_revision,"
                               + "configuration_revision,source,source_hash,artifact,artifact_hash,"
                               + "artifact_schema_version,configuration,\"references\",provenance,created_by,"
-                              + "confirmed_by,clock_timestamp(),confirmation_source,reference_policy,"
-                              + "publication_kind,?,learned_plan_hash,?,NULL,NULL FROM ui_test_revisions WHERE id=?",
+                              + "confirmed_by,clock_timestamp(),confirmation_source,reference"
+                              + "_policy,publication_kind,?,learned_plan_hash,?,NULL,NULL"
+                              + " FROM ui_test_revisions WHERE id=?",
                           refusedRevision,
                           probe,
                           GuidedContracts.hash(C.object().put("probe", refusedRevision.toString())),
@@ -930,6 +946,8 @@ public final class LegacyV20ConfirmedBaseFixture {
         .isEqualTo(seed.immutableBaseRowBytes());
     assertThat(row(jdbc, "studio_guided_publications", "session_id", seed.sessionId()))
         .isEqualTo(seed.immutableReceiptRowBytes());
+    assertThat(historicalActionEvidenceBytes(jdbc, seed.sessionId()))
+        .isEqualTo(seed.immutableActionEvidenceBytes());
   }
 
   /** Call before any supported HTTP save/run; this proves the actual preserved stale cache. */
@@ -993,18 +1011,19 @@ public final class LegacyV20ConfirmedBaseFixture {
 
   private static void requireV20(JdbcTemplate jdbc) {
     if (!jdbc.queryForObject(
-            "SELECT count(*)=20 AND bool_and(success) AND min(version::int)=1 AND max(version::int)=20 AND "
-                + "count(DISTINCT version::int)=20 FROM flyway_schema_history WHERE version IS NOT NULL",
+            "SELECT count(*)=20 AND bool_and(success) AND min(version::int)=1 AND"
+                + " max(version::int)=20 AND count(DISTINCT version::int)=20 FROM"
+                + " flyway_schema_history WHERE version IS NOT NULL",
             Boolean.class)
         || jdbc.queryForObject(
             "SELECT to_regprocedure('studio_015_relearned_from(text)') IS NOT NULL OR "
                 + "to_regclass('studio_guided_materialization_versions') IS NOT NULL",
             Boolean.class)
         || !jdbc.queryForObject(
-            "SELECT current_setting('server_version_num')::integer BETWEEN 150000 AND 159999 AND "
-                + "current_setting('session_replication_role')='origin' AND NOT EXISTS(SELECT 1 FROM pg_trigger "
-                + "WHERE NOT tgisinternal AND tgenabled<>'O' AND tgrelid IN (SELECT oid FROM pg_class WHERE "
-                + "relnamespace=current_schema()::regnamespace))",
+            "SELECT current_setting('server_version_num')::integer BETWEEN 150000 AND 159999 AND"
+                + " current_setting('session_replication_role')='origin' AND NOT EXISTS(SELECT 1"
+                + " FROM pg_trigger WHERE NOT tgisinternal AND tgenabled<>'O' AND tgrelid IN"
+                + " (SELECT oid FROM pg_class WHERE relnamespace=current_schema()::regnamespace))",
             Boolean.class)) {
       throw new IllegalArgumentException(
           "Legacy fixture requires exact V20 with all guards active");
@@ -1024,8 +1043,9 @@ public final class LegacyV20ConfirmedBaseFixture {
     snapshot.putNull("pinnedBase").putNull("baseProof");
     var plan =
         jdbc.queryForMap(
-            "SELECT p.plan_revision,p.plan::text,p.plan_hash FROM studio_guided_translation_state s JOIN "
-                + "studio_guided_translation_plans p USING(session_id,plan_revision) WHERE s.session_id=?",
+            "SELECT p.plan_revision,p.plan::text,p.plan_hash FROM studio_guided_translation_state s"
+                + " JOIN studio_guided_translation_plans p USING(session_id,plan_revision) WHERE"
+                + " s.session_id=?",
             id);
     JsonNode planBody = C.parse((String) plan.get("plan"));
     com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlan.validate(C, planBody);
@@ -1037,9 +1057,11 @@ public final class LegacyV20ConfirmedBaseFixture {
     raw.set("translationPlan", planBody);
     var m =
         jdbc.queryForMap(
-            "SELECT context_id,context_revision,materialization_revision,worker_id,owner_fence,"
-                + "source_revision,configuration_revision,authored_inputs_hash,authored_inputs::text,scope_hash "
-                + "FROM studio_guided_materializations WHERE session_id=?",
+            "SELECT"
+                + " context_id,context_revision,materialization_revision,worker"
+                + "_id,owner_fence,source_revision,configuration_revision,autho"
+                + "red_inputs_hash,authored_inputs::text,scope_hash"
+                + " FROM studio_guided_materializations WHERE session_id=?",
             id);
     JsonNode full = C.parse((String) m.get("authored_inputs"));
     C.validate("v3/authored-inputs", full);
@@ -1093,8 +1115,10 @@ public final class LegacyV20ConfirmedBaseFixture {
     C.validate("v3/replay-validation#/definitions/MaterializationEvidence", materialEvidence);
     ArrayNode preps = raw.putArray("preparations");
     jdbc.query(
-            "SELECT preparation_id,proposal::text,proof::text,execution_evidence::text,observation_hash,"
-                + "materialization_revision FROM studio_guided_publication_preparations WHERE session_id=? ORDER BY "
+            "SELECT"
+                + " preparation_id,proposal::text,proof::text,execution_evidenc"
+                + "e::text,observation_hash,materialization_revision"
+                + " FROM studio_guided_publication_preparations WHERE session_id=? ORDER BY "
                 + "preparation_id",
             (rs, n) -> {
               ObjectNode out =
@@ -1123,8 +1147,10 @@ public final class LegacyV20ConfirmedBaseFixture {
         .forEach(admissions::add);
     ArrayNode obligations = raw.putArray("obligationAssociations");
     jdbc.query(
-            "SELECT obligation_id,meaning::text,proposal::text,proposal_digest,admission_id,plan_revision "
-                + "FROM studio_guided_obligation_admissions WHERE session_id=? ORDER BY obligation_id",
+            "SELECT"
+                + " obligation_id,meaning::text,proposal::text,proposal_digest,admission_id,plan_revision"
+                + " FROM studio_guided_obligation_admissions WHERE session_id=? ORDER BY"
+                + " obligation_id",
             (rs, n) -> {
               ObjectNode out =
                   C.object()
@@ -1212,14 +1238,17 @@ public final class LegacyV20ConfirmedBaseFixture {
     JsonNode captured =
         C.parse(
             jdbc.queryForObject(
-                "SELECT document::text FROM studio_guided_publication_bases WHERE session_id=? FOR UPDATE",
+                "SELECT document::text FROM studio_guided_publication_bases WHERE session_id=? FOR"
+                    + " UPDATE",
                 String.class,
                 commit.sessionId()));
     var a =
         jdbc.queryForObject(
-            "SELECT attempt_id,claim_id,attempt_number,status,validation_deadline,identity::text,"
-                + "validator_receipt::text,failure_code FROM studio_guided_publication_attempts WHERE session_id=? "
-                + "AND attempt_id=? FOR UPDATE",
+            "SELECT"
+                + " attempt_id,claim_id,attempt_number,status,validation_deadli"
+                + "ne,identity::text,validator_receipt::text,failure_code"
+                + " FROM studio_guided_publication_attempts WHERE session_id=? AND attempt_id=? FOR"
+                + " UPDATE",
             (rs, n) ->
                 new PublicationContracts.Attempt(
                     commit.sessionId(),
@@ -1271,8 +1300,9 @@ public final class LegacyV20ConfirmedBaseFixture {
         new PublicationContracts.Base(captured), new PublicationContracts.CurrentSource(draft));
     require(
         jdbc.queryForObject(
-                "SELECT p.plan_hash FROM studio_guided_translation_state s JOIN "
-                    + "studio_guided_translation_plans p USING(session_id,plan_revision) WHERE s.session_id=?",
+                "SELECT p.plan_hash FROM studio_guided_translation_state s JOIN"
+                    + " studio_guided_translation_plans p USING(session_id,plan_revision) WHERE"
+                    + " s.session_id=?",
                 String.class,
                 commit.sessionId())
             .equals(a.identity().path("translationHash").asText()),
@@ -1286,8 +1316,8 @@ public final class LegacyV20ConfirmedBaseFixture {
                     commit.sessionId())
                 == 0
             && jdbc.queryForObject(
-                    "SELECT count(*) FROM studio_guided_model_attempts WHERE session_id=? AND status IN "
-                        + "('RESERVED','CALLING')",
+                    "SELECT count(*) FROM studio_guided_model_attempts WHERE session_id=? AND"
+                        + " status IN ('RESERVED','CALLING')",
                     Integer.class,
                     commit.sessionId())
                 == 0
@@ -1315,15 +1345,15 @@ public final class LegacyV20ConfirmedBaseFixture {
     for (JsonNode step : basis.path("sourceSteps")) {
       source.add(step.path("source"));
     }
+    JsonNode originalSource =
+        C.parse(
+            jdbc.queryForObject(
+                "SELECT manifest::text FROM studio_guided_source_manifests WHERE session_id=?",
+                String.class,
+                commit.sessionId()));
     require(
-        basis
-                .path("snapshotEvidence")
-                .path("current")
-                .path("authoring")
-                .equals(current.path("authoring"))
-            && basis
-                .path("snapshotEvidence")
-                .path("current")
+        originalSource.path("authoringSnapshot").equals(current.path("authoring"))
+            && originalSource
                 .path("authoredDeclarations")
                 .equals(current.path("authoredDeclarations")),
         "PUBLICATION_CONFLICT",
@@ -1490,7 +1520,7 @@ public final class LegacyV20ConfirmedBaseFixture {
   private static void verifyHistoricalCandidate(
       PublicationContracts.Snapshot snapshot, PublicationContracts.Candidate c, JsonNode verdict) {
     PublicationContracts.Candidate recomputed =
-        new ObservedArtifactLowerer(C).lower(snapshot.basis(), c.artifact().path("profile"));
+        historicalNavigationCandidate(snapshot.basis(), c.artifact().path("profile"));
     require(
         recomputed.learnedPlan().equals(c.learnedPlan())
             && recomputed.artifact().equals(c.artifact())
@@ -1586,5 +1616,393 @@ public final class LegacyV20ConfirmedBaseFixture {
                 .equals(a.identity().path("validationBuildHash").asText()),
         "PROFILE_MISMATCH",
         409);
+  }
+
+  /**
+   * Historical construction only: one V20 initial-blank navigate, with no target added to the proof
+   * and no current builder/lowerer. This is deliberately not a current-runtime adapter. Format
+   * sources: the pre-ADR publication fixtures and the preserved pre-ADR publication source listed
+   * in dependency-helpers-r5/source-provenance.json.
+   */
+  private static ObjectNode historicalNavigationBasis(
+      JsonNode base, JsonNode current, JsonNode raw, JsonNode session) {
+    JsonNode manifest = raw.path("sourceManifest"), plan = raw.path("translationPlan");
+    assertThat(raw.path("actions")).hasSize(1);
+    assertThat(raw.path("preparations")).hasSize(1);
+    assertThat(raw.path("admissionAssociations")).hasSize(1);
+    assertThat(raw.path("obligationAssociations")).hasSize(1);
+    assertThat(manifest.path("sourceSteps")).hasSize(1);
+    assertThat(plan.path("obligations")).hasSize(1);
+    for (String field : List.of("allocations", "producers", "consumerEdges", "observations")) {
+      assertThat(raw.path(field)).isEmpty();
+    }
+    assertThat(GuidedContracts.hash(manifest)).isEqualTo(base.path("sourceManifestHash").asText());
+    assertThat(GuidedContracts.hash(plan)).isEqualTo(raw.path("translationHash").asText());
+    JsonNode prepared = raw.path("preparations").get(0),
+        proof = prepared.path("proof"),
+        proposal = prepared.path("proposal"),
+        execution = prepared.path("executionEvidence"),
+        ledger = raw.path("actions").get(0),
+        admission = raw.path("admissionAssociations").get(0),
+        obligation = raw.path("obligationAssociations").get(0);
+    assertThat(proof.has("target")).isFalse();
+    assertThat(execution.path("kind").asText()).isEqualTo("initialBlank");
+    assertThat(execution.path("origin").isNull()).isTrue();
+    assertThat(execution.path("generation").asInt()).isZero();
+    assertThat(proposal.path("target").path("kind").asText()).isEqualTo("page");
+    assertThat(proposal.path("target").path("documentId")).isEqualTo(execution.path("documentId"));
+    assertThat(proposal.path("operation").path("kind").asText()).isEqualTo("navigate");
+    assertThat(proposal.path("coordinate").path("ordinal").asInt()).isZero();
+    assertThat(ledger.path("state").asText()).isEqualTo("SUCCEEDED");
+    assertThat(ledger.path("dispatchCount").asInt()).isEqualTo(1);
+    assertThat(ledger.path("outcomeCode").asText()).isEqualTo("OK");
+    assertThat(proposal.path("executionEvidence")).isEqualTo(execution);
+    assertThat(ledger.path("executionEvidence")).isEqualTo(execution);
+    assertThat(proof.path("evidenceHash").asText()).isEqualTo(GuidedContracts.hash(execution));
+    assertThat(ledger.path("evidenceHash")).isEqualTo(proof.path("evidenceHash"));
+    String digest = GuidedContracts.hash(proposal);
+    for (JsonNode row : List.of(proof, ledger)) {
+      assertThat(row.path("requestDigest").asText()).isEqualTo(digest);
+    }
+    assertThat(admission.path("proposalHash").asText()).isEqualTo(digest);
+    assertThat(obligation.path("proposalDigest").asText()).isEqualTo(digest);
+    assertThat(obligation.path("proposal")).isEqualTo(proposal);
+    assertThat(obligation.path("meaning")).isEqualTo(plan.path("obligations").get(0));
+    assertThat(admission.path("obligationId")).isEqualTo(obligation.path("obligationId"));
+    assertThat(admission.path("preparationId")).isEqualTo(prepared.path("preparationId"));
+    assertThat(ledger.path("preparationId")).isEqualTo(prepared.path("preparationId"));
+    assertThat(ledger.path("admission").path("admissionId"))
+        .isEqualTo(admission.path("admissionId"));
+    assertThat(obligation.path("admissionId")).isEqualTo(admission.path("admissionId"));
+    ObjectNode oldIdentity = C.object();
+    oldIdentity.set("coordinate", proposal.path("coordinate"));
+    oldIdentity.putNull("origin").putNull("locator");
+    oldIdentity.set("operation", proposal.path("operation"));
+    assertThat(ledger.path("operationHash").asText()).isEqualTo(GuidedContracts.hash(oldIdentity));
+    ObjectNode policyDecision = C.object();
+    policyDecision.set("scopeHash", session.path("scopeHash"));
+    policyDecision.put("requestDigest", digest);
+    policyDecision.set("preparation", proof);
+    assertThat(ledger.path("admission").path("policyDecisionHash").asText())
+        .isEqualTo(GuidedContracts.hash(policyDecision));
+    assertThat(ledger.path("admission").path("authorizationId"))
+        .isEqualTo(session.path("runAuthorization").path("authorizationId"));
+    assertThat(proof.path("scopeHash")).isEqualTo(session.path("scopeHash"));
+    assertThat(proof.path("workerId")).isEqualTo(session.path("owner").path("workerId"));
+    assertThat(proof.path("ownerFence")).isEqualTo(session.path("owner").path("fence"));
+    ObjectNode basis = C.object().put("schemaVersion", 1);
+    for (String field :
+        List.of(
+            "sessionId",
+            "testId",
+            "csiId",
+            "sourceRevision",
+            "configurationRevision",
+            "sourceHash",
+            "configurationHash",
+            "authoringHash",
+            "sourceManifestHash")) {
+      basis.set(field, base.path(field));
+    }
+    basis.set("configuration", current.path("configuration"));
+    basis.set("scope", session.path("scope"));
+    basis.set("runAuthorization", session.path("runAuthorization"));
+    basis.set("replayRequirements", base.path("replayRequirements"));
+    for (String field :
+        List.of(
+            "translationRevision",
+            "translationHash",
+            "translationPlan",
+            "sourceSelections",
+            "observations",
+            "allocations",
+            "producers",
+            "consumerEdges")) {
+      basis.set(field, raw.path(field));
+    }
+    // V20 PreparationFact predates the later materializationRevision projection field.
+    ObjectNode historicalPreparation = basis.putArray("preparations").addObject();
+    for (String field :
+        List.of("preparationId", "proposal", "proof", "executionEvidence", "observationHash")) {
+      historicalPreparation.set(field, prepared.path(field));
+    }
+    JsonNode pins = manifest.path("schemaPins");
+    basis
+        .putObject("learningProvenance")
+        .put("guidedModelContractHash", pins.path("strictSchemaHash").asText())
+        .put("guidedProviderSchemaHash", GuidedContracts.hash(pins.path("providerSchemaHashes")))
+        .putNull("guidedPromptHash")
+        .put("outputContractHash", pins.path("outputContractHash").asText())
+        .put("publicationResultVersion", 3)
+        .putNull("configuredModel")
+        .putNull("providerReturnedModelVersion");
+    JsonNode source = manifest.path("sourceSteps").get(0);
+    basis
+        .putArray("sourceSteps")
+        .addObject()
+        .put("stepId", source.path("stepId").asText())
+        .put("ordinal", 0)
+        .put("source", source.path("text").asText());
+    ArrayNode orderedSource = C.object().putArray("items");
+    orderedSource.add(source.path("text"));
+    assertThat(GuidedContracts.hash(orderedSource)).isEqualTo(base.path("sourceHash").asText());
+    assertThat(GuidedContracts.hash(basis.path("sourceSteps")))
+        .isEqualTo(base.path("authoringHash").asText());
+    assertThat(GuidedContracts.hash(current.path("configuration")))
+        .isEqualTo(base.path("configurationHash").asText());
+    JsonNode materialization = raw.path("materialization");
+    assertThat(materialization.path("inputs")).hasSize(1);
+    JsonNode input = materialization.path("inputs").get(0);
+    assertThat(input.has("value")).isFalse();
+    assertThat(input.path("inputId"))
+        .isEqualTo(proposal.path("operation").path("destinationInputId"));
+    ObjectNode historicalInput = input.deepCopy();
+    historicalInput.set("stepId", historicalInput.remove("sourceStepId"));
+    basis.putArray("inputs").add(historicalInput);
+    basis.putArray("configurationReferences");
+    basis.set("authoredInputsHash", materialization.path("authoredInputsHash"));
+    basis
+        .putArray("actions")
+        .addObject()
+        .put("obligationId", admission.path("obligationId").asText())
+        .put("preparationId", admission.path("preparationId").asText())
+        .set("ledger", ledger);
+    ObjectNode joined =
+        basis
+            .putArray("obligationAssociations")
+            .addObject()
+            .put("obligationId", admission.path("obligationId").asText())
+            .put("admissionId", admission.path("admissionId").asText())
+            .put("proposalHash", digest);
+    joined.set("coordinate", ledger.path("coordinate"));
+    basis.putArray("bindings");
+    basis.putArray("transfers");
+    JsonNode marker = raw.path("bootstrap").path("marker"),
+        context = marker.path("context"),
+        metadataAck = marker.path("metadataAcknowledgement"),
+        identity = marker.path("identity"),
+        receipt = raw.path("bootstrap").path("receipt");
+    assertThat(marker.path("phase").asText()).isEqualTo("READY");
+    assertThat(metadataAck.path("contextHash").asText()).isEqualTo(GuidedContracts.hash(context));
+    assertThat(metadataAck.path("identityHash").asText()).isEqualTo(GuidedContracts.hash(identity));
+    for (String field :
+        List.of(
+            "contextId",
+            "contextRevision",
+            "sourceRevision",
+            "configurationRevision",
+            "scopeHash",
+            "workerId",
+            "ownerFence")) {
+      assertThat(receipt.path(field)).isEqualTo(context.path(field));
+    }
+    assertThat(context.path("contextId")).isEqualTo(proof.path("contextId"));
+    assertThat(context.path("authoredInputsHash")).isEqualTo(proof.path("authoredInputsHash"));
+    assertThat(raw.path("bootstrap").path("initialEvidence")).isEqualTo(execution);
+    ObjectNode bootstrap = basis.putObject("bootstrap");
+    for (String field : List.of("contextId", "contextRevision", "materializationRevision")) {
+      bootstrap.set(field, context.path(field));
+    }
+    bootstrap.set("ownerFence", identity.path("fence"));
+    bootstrap.set("inputsHash", context.path("authoredInputsHash"));
+    bootstrap
+        .put("allocationHash", GuidedContracts.hash(raw.path("allocations")))
+        .put("metadataAcknowledged", true)
+        .set("initialEvidence", execution);
+    return basis;
+  }
+
+  /** Exact singleton specialization of the documented pre-ADR locator-based plan/lowering. */
+  private static PublicationContracts.Candidate historicalNavigationCandidate(
+      JsonNode basis, JsonNode profile) {
+    assertThat(basis.path("actions")).hasSize(1);
+    assertThat(basis.path("preparations")).hasSize(1);
+    JsonNode fact = basis.path("actions").get(0),
+        ledger = fact.path("ledger"),
+        prepared = basis.path("preparations").get(0),
+        proposal = prepared.path("proposal"),
+        input = basis.path("inputs").get(0),
+        source = basis.path("sourceSteps").get(0);
+    assertThat(prepared.path("proof").has("target")).isFalse();
+    ObjectNode plan =
+        C.object()
+            .put("schemaVersion", 3)
+            .put(
+                "planId",
+                "plan-"
+                    + GuidedContracts.hash(
+                        C.object().put("sessionId", basis.path("sessionId").asText())))
+            .put("scopeHash", GuidedContracts.hash(basis.path("scope")));
+    for (String field : List.of("sourceRevision", "configurationRevision", "authoredInputsHash")) {
+      plan.set(field, basis.path(field));
+    }
+    plan.set("initialContext", basis.path("replayRequirements").path("initialContext"));
+    plan.putObject("versions").set("contract", profile.path("contract"));
+    plan.putArray("sourceSteps").add(source.path("stepId"));
+    ObjectNode action = plan.putArray("actions").addObject();
+    action.set("coordinate", ledger.path("coordinate"));
+    action.putNull("origin").putNull("locator");
+    action.set("operation", proposal.path("operation"));
+    action.set("admissionId", ledger.path("admission").path("admissionId"));
+    action.set("operationHash", ledger.path("operationHash"));
+    plan.set("bindings", basis.path("bindings"));
+    ArrayNode recipes = C.object().putArray("items");
+    ObjectNode recipe = recipes.addObject();
+    for (String field : List.of("inputId", "stepId", "kind", "intendedSlot")) {
+      recipe.set(field, input.path(field));
+    }
+    JsonNode provenance = input.path("provenance");
+    int start = provenance.path("startUtf16").asInt(-1),
+        end = provenance.path("endUtf16").asInt(-1);
+    assertThat(start).isGreaterThanOrEqualTo(0);
+    assertThat(end)
+        .isGreaterThan(start)
+        .isLessThanOrEqualTo(source.path("source").asText().length());
+    assertThat(provenance.path("sourceRevision")).isEqualTo(basis.path("sourceRevision"));
+    recipe
+        .putObject("provenance")
+        .put("kind", "sourceSpan")
+        .put("start", start)
+        .put("end", end)
+        .set("sourceHash", basis.path("sourceHash"));
+    ArrayNode admissions = C.object().putArray("items");
+    ObjectNode tuple = admissions.addObject();
+    for (String field : List.of("coordinate", "admission", "operationHash", "scopeHash")) {
+      tuple.set(field, ledger.path(field));
+    }
+    ObjectNode evidence =
+        C.object()
+            .put("version", 1)
+            .put("basisHash", GuidedContracts.hash(basis))
+            .put("runAuthorizationHash", GuidedContracts.hash(basis.path("runAuthorization")))
+            .put("translationHash", basis.path("translationHash").asText())
+            .put("bootstrapHash", GuidedContracts.hash(basis.path("bootstrap")))
+            .put("sourceManifestHash", basis.path("sourceManifestHash").asText());
+    ObjectNode policy =
+        C.object()
+            .put("schemaVersion", 4)
+            .put("learnedPlanHash", GuidedContracts.hash(plan))
+            .put("admissionProvenanceHash", GuidedContracts.hash(admissions))
+            .put("publicationEvidenceHash", GuidedContracts.hash(evidence))
+            .put("runAuthorizationHash", GuidedContracts.hash(basis.path("runAuthorization")));
+    policy.set("scope", basis.path("replayRequirements"));
+    policy.set("inputs", recipes);
+    policy.set("bindings", basis.path("bindings"));
+    policy.set("transfers", basis.path("transfers"));
+    ObjectNode artifact = C.object().put("version", 3).put("kind", "observed");
+    artifact.set("profile", profile);
+    for (String field : List.of("sourceHash", "configurationHash", "authoringHash")) {
+      artifact.set(field, basis.path(field));
+    }
+    artifact.set("learnedPlan", plan);
+    artifact.put("learnedPlanHash", GuidedContracts.hash(plan));
+    artifact.set("inputRecipes", recipes);
+    artifact.set("replayPolicy", policy);
+    ObjectNode guard =
+        artifact.putArray("guards").addObject().put("guardId", "g0").putNull("origin");
+    guard.putObject("target").put("kind", "initialBlank");
+    ObjectNode operation = C.object().put("guardId", "g0");
+    operation.set("coordinate", proposal.path("coordinate"));
+    operation.set("operation", proposal.path("operation"));
+    ObjectNode step =
+        artifact
+            .putArray("steps")
+            .addObject()
+            .put("stepIndex", 0)
+            .put("stepId", source.path("stepId").asText());
+    step.putArray("operations").add(operation);
+    ObjectNode equivalence = C.object();
+    equivalence.putArray("operations").add(operation);
+    equivalence.set("guards", artifact.path("guards"));
+    equivalence.set("inputRecipes", recipes);
+    equivalence.set("bindings", basis.path("bindings"));
+    equivalence.set("transfers", basis.path("transfers"));
+    ObjectNode hashes = C.object();
+    for (String field : List.of("sourceHash", "configurationHash", "authoringHash")) {
+      hashes.set(field, basis.path(field));
+    }
+    hashes
+        .put("learnedPlanHash", GuidedContracts.hash(plan))
+        .put("artifactHash", GuidedContracts.hash(artifact))
+        .put("referencePolicyHash", GuidedContracts.hash(policy))
+        .put("operationEquivalenceHash", GuidedContracts.hash(equivalence))
+        .put("admissionProvenanceHash", policy.path("admissionProvenanceHash").asText())
+        .put("publicationEvidenceHash", policy.path("publicationEvidenceHash").asText())
+        .put("runAuthorizationHash", policy.path("runAuthorizationHash").asText())
+        .put("profileHash", GuidedContracts.hash(profile));
+    ObjectNode revision = C.object().put("version", 1);
+    for (String field : List.of("testId", "csiId", "sourceRevision", "configurationRevision")) {
+      revision.set(field, basis.path(field));
+    }
+    for (String field :
+        List.of(
+            "sourceHash",
+            "configurationHash",
+            "authoringHash",
+            "learnedPlanHash",
+            "artifactHash",
+            "referencePolicyHash",
+            "operationEquivalenceHash",
+            "admissionProvenanceHash",
+            "publicationEvidenceHash",
+            "runAuthorizationHash",
+            "profileHash")) {
+      revision.set(field, hashes.path(field));
+    }
+    hashes.put("revisionDigest", GuidedContracts.hash(revision));
+    return new PublicationContracts.Candidate(plan, artifact, policy, hashes);
+  }
+
+  private static void insertV20Preparation(
+      JdbcTemplate jdbc, String id, ObjectNode proposal, ObjectNode proof, JsonNode execution) {
+    requireV20(jdbc);
+    assertThat(proof.has("target")).isFalse();
+    var base = new GuidedPublicationBaseRepository(jdbc, C).find(id).orElseThrow();
+    Integer revision =
+        jdbc.queryForObject(
+            "SELECT materialization_revision FROM studio_guided_materializations WHERE"
+                + " session_id=?",
+            Integer.class,
+            id);
+    jdbc.update(
+        "INSERT INTO studio_guided_publication_preparations(session_id,preparation_id,context_id,"
+            + "owner_fence,request_digest,evidence_hash,inputs_hash,materialization_revision,"
+            + "source_manifest_hash,observation_hash,execution_evidence,pro"
+            + "posal,proof,captured_at,observed_choice_receipt)"
+            + " VALUES (?,?,?,?,?,?,?,?,?,?,?::jsonb,?::jsonb,?::jsonb,?,?::jsonb)",
+        id,
+        proof.path("preparationId").asText(),
+        proof.path("contextId").asText(),
+        proof.path("ownerFence").asInt(),
+        GuidedContracts.hash(proposal),
+        GuidedContracts.hash(execution),
+        proof.path("authoredInputsHash").asText(),
+        revision,
+        base.document().path("sourceManifestHash").asText(),
+        null,
+        execution.toString(),
+        proposal.toString(),
+        proof.toString(),
+        Timestamp.from(PublicationContracts.millisecond(Instant.now())),
+        null);
+  }
+
+  private static String historicalActionEvidenceBytes(JdbcTemplate jdbc, String id) {
+    // Compare only historical fields: later migrations may add SQL columns, but may never
+    // rewrite the original preparation proofs, action, admission or proposal evidence.
+    return jdbc.queryForObject(
+        "SELECT jsonb_build_object('runtimeProof',p.proof,'runtimeAdmission',p.admission_id,"
+            + "'publicationProof',e.proof,'publicationProposal',e.proposal,"
+            + "'executionEvidence',e.execution_evidence,'action',a.document,'proposal',a.proposal,"
+            + "'publicationAdmission',jsonb_build_array(j.admission_id,j.pr"
+            + "eparation_id,j.obligation_id,j.proposal_hash,j.captured_at))"
+            + "::text"
+            + " FROM studio_guided_preparations p JOIN studio_guided_publication_preparations e"
+            + " USING(session_id,preparation_id) JOIN studio_guided_actions a ON"
+            + " a.session_id=p.session_id AND a.admission_id=p.admission_id JOIN"
+            + " studio_guided_publication_admissions j ON j.session_id=a.session_id AND"
+            + " j.admission_id=a.admission_id WHERE p.session_id=?",
+        String.class,
+        id);
   }
 }

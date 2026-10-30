@@ -1,3 +1,4 @@
+import { TEST_DOMAINS } from '../../helpers/allowedDomains.js';
 /**
  * Fixtures-tier harness for the guided-close cases (STUDIO-OBS-009 AC-11 D5, lane R2). Lifted from the PR-RT probe
  * (`guidedCloseProbe.test.ts`, replaced by `guidedCloseBound.test.ts`), minus the observation windows: after D5 every
@@ -32,7 +33,7 @@ type Grant = ReturnType<typeof ownershipSession>;
 type Context = ReturnType<typeof guidedContext>;
 
 /** The origin the stub sessions approve; nothing is ever served from it. */
-export const ORIGIN = 'http://127.0.0.1:9';
+export const ORIGIN = 'http://localhost:9';
 
 export const sleep = (ms: number): Promise<void> => new Promise<void>((resolve) => { setTimeout(resolve, ms); });
 export const rounded = (value: number | null): number | null => (value === null ? null : Math.round(value));
@@ -246,7 +247,7 @@ export async function startHarness(launch: Launch, control: Control): Promise<Ha
   const controllerAddress = controller.address();
   if (controllerAddress === null || typeof controllerAddress === 'string') throw new Error('PORT');
   const client = { baseUrl: `https://127.0.0.1:${String(controllerAddress.port)}`, tls: testTls, controllerCertificateFingerprint256: testFingerprint, token: () => Promise.resolve(jwt({ aud: 'studio-guided-controller', role: 'owning-worker', sub: 'worker-one' })) };
-  const app = createGuidedServer({ workerId: 'worker-one', journalDirectory, tls: testTls, controllerJwt: jwtPolicy, controllerCertificateFingerprint256: testFingerprint, launch, claim: guidedClaimClient(client), callback: guidedCallback(client) });
+  const app = createGuidedServer({ workerId: 'worker-one', allowedDomains: TEST_DOMAINS, journalDirectory, tls: testTls, controllerJwt: jwtPolicy, controllerCertificateFingerprint256: testFingerprint, launch, claim: guidedClaimClient(client), callback: guidedCallback(client) });
   await new Promise<void>((resolve) => { app.server.listen(0, '127.0.0.1', resolve); });
   const address = app.server.address();
   if (address === null || typeof address === 'string') throw new Error('PORT');

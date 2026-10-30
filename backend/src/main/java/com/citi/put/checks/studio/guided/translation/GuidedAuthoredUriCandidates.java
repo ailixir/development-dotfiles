@@ -3,6 +3,7 @@ package com.citi.put.checks.studio.guided.translation;
 import com.citi.put.checks.studio.guided.bridge.GuidedSourceReferenceValidator;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.guided.session.GuidedSessionException;
+import com.citi.put.checks.studio.navigation.AllowedDomains;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import java.util.ArrayList;
@@ -16,12 +17,21 @@ import java.util.Set;
 final class GuidedAuthoredUriCandidates {
   private static final int REFERENCE_CAP = 200;
   private final GuidedContracts contracts;
+  private final AllowedDomains domains;
 
-  GuidedAuthoredUriCandidates(GuidedContracts contracts) {
+  GuidedAuthoredUriCandidates(GuidedContracts contracts, AllowedDomains domains) {
     this.contracts = contracts;
+    this.domains = domains;
   }
 
   ArrayNode candidates(JsonNode session, JsonNode manifest) {
+    return candidates(session, manifest, null);
+  }
+
+  /**
+   * @param stepIds when non-null, only suggestions for these steps (an incremental re-learn).
+   */
+  ArrayNode candidates(JsonNode session, JsonNode manifest, Set<String> stepIds) {
     ArrayNode result = contracts.object().arrayNode();
     JsonNode steps = manifest.path("sourceSteps");
     if (!steps.isArray()
@@ -71,15 +81,16 @@ final class GuidedAuthoredUriCandidates {
             manifest.path("configurationRevision").asText(),
             sources,
             Map.of());
-    var resolver = new GuidedSourceReferenceValidator(contracts);
+    var resolver = new GuidedSourceReferenceValidator(contracts, domains);
     var seen = new HashSet<String>();
     int checked = 0;
     for (var entry : sources.entrySet()) {
+      if (stepIds != null && !stepIds.contains(entry.getKey())) {
+        continue;
+      }
       var source = entry.getValue();
       for (Span span : literals(source.text())) {
-        if (source.approvedNonsecretRegions().stream()
-            .noneMatch(
-                region -> region.startUtf16() <= span.start() && region.endUtf16() >= span.end())) {
+        if (!source.approves(span.start(), span.end())) {
           continue;
         }
         var candidate =
@@ -100,7 +111,7 @@ final class GuidedAuthoredUriCandidates {
         }
         checked++;
         try {
-          resolver.resolve(session, sourceOnly, candidate);
+          resolver.resolveSourceOnly(session, sourceOnly, candidate);
           result.add(candidate);
         } catch (GuidedSessionException refused) {
           if (!Set.of(
@@ -111,13 +122,60 @@ final class GuidedAuthoredUriCandidates {
         }
       }
     }
+    // Exact offsets of each quoted literal, so the model copies them instead of counting UTF-16
+    // code units (a miscount is refused by GuidedSourceInputResolver). The slot is the model's
+    // call.
+    for (var entry : sources.entrySet()) {
+      if (stepIds != null && !stepIds.contains(entry.getKey())) {
+        continue;
+      }
+      var source = entry.getValue();
+      for (int[] span : GuidedSourceInputResolver.quotedSpans(source.text())) {
+        if (scheme(source.text(), span[0])) {
+          continue; // already offered above as a destination
+        }
+        if (!source.approves(span[0], span[1])) {
+          continue;
+        }
+        for (String slot : LITERAL_SLOTS) {
+          var candidate =
+              contracts
+                  .object()
+                  .put("referenceKind", "sourceSpan")
+                  .put("sourceRevision", sourceOnly.sourceRevision())
+                  .put("stepId", entry.getKey())
+                  .put("startUtf16", span[0])
+                  .put("endUtf16", span[1])
+                  .put("kind", "nonsecretText")
+                  .put("intendedSlot", slot);
+          if (checked == REFERENCE_CAP) {
+            return result;
+          }
+          checked++;
+          try {
+            resolver.resolveSourceOnly(session, sourceOnly, candidate);
+            if (seen.add(GuidedContracts.hash(candidate))) {
+              result.add(candidate);
+            }
+          } catch (GuidedSessionException refused) {
+            if (!Set.of("INVALID_CONTRACT", "FORBIDDEN_SCOPE", "REVISION_CONFLICT")
+                .contains(refused.getMessage())) {
+              throw refused;
+            }
+          }
+        }
+      }
+    }
     return result;
   }
 
-  private record Span(int start, int end) {}
+  private static final List<String> LITERAL_SLOTS =
+      List.of("fill.value", "selectOption.value", "assert.expected");
+
+  record Span(int start, int end) {}
 
   /** Lex the original whole step before classified-region checks, never a clipped substring. */
-  private static List<Span> literals(String text) {
+  static List<Span> literals(String text) {
     var result = new ArrayList<Span>();
     int at = 0;
     while (at < text.length()) {
@@ -175,7 +233,7 @@ final class GuidedAuthoredUriCandidates {
     return text.startsWith("http://", start) || text.startsWith("https://", start);
   }
 
-  private static boolean ambiguousUnquoted(String value) {
+  static boolean ambiguousUnquoted(String value) {
     if (".,;:!?)]}>".indexOf(value.charAt(value.length() - 1)) >= 0) {
       return true;
     }

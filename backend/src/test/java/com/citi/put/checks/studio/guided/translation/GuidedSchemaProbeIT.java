@@ -118,7 +118,10 @@ class GuidedSchemaProbeIT {
   @EnumSource(GuidedModelRequest.Kind.class)
   void providerSchemaIsSelfContainedClosedAndItsKeywordCensusIsPublished(
       GuidedModelRequest.Kind kind, TestReporter report) {
-    JsonNode schema = new GuidedPromptAssembler(new GuidedContracts()).providerSchema(kind);
+    JsonNode schema =
+        new GuidedPromptAssembler(
+                new GuidedContracts(), com.citi.put.checks.studio.support.TestDomains.FIXTURES)
+            .providerSchema(kind);
     String text = schema.toString();
     assertThat(text)
         .as("a provider schema is self-contained: no contract id, no $schema")

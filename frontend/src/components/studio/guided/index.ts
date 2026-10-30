@@ -21,6 +21,7 @@ export {
   GuidedStartFeedback,
   guidedCompletionView,
   guidedStartFeedbackView,
+  learnedReceiptLines,
 } from './GuidedCompletion';
 export type {
   GuidedCompletionInput,

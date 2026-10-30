@@ -410,7 +410,7 @@ describe('AC-2 — the API ingress NetworkPolicy: the connector port is open to 
   it.each(VALUE_SETS.map((file) => [valueSetName(file), file] as const))(
     '%s: not rendered while guided mode is off (the API has no ingress policy, as today)',
     (_label, valuesFile) => {
-      const outcome = render({ valuesFile });
+      const outcome = render({ valuesFile, guided: false });
       expect(apiGuidedPolicies(outcome)).toEqual([]);
       // The only NetworkPolicy is still the runner's.
       expect(byKind(outcome, 'NetworkPolicy').map((d) => d.metadata?.name)).toEqual(

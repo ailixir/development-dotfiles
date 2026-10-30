@@ -156,7 +156,7 @@ class GuidedServiceTransportFaultIT {
           new DriverManagerDataSource(
               DATABASE.getJdbcUrl(), DATABASE.getUsername(), DATABASE.getPassword());
       // STUDIO-OBS-014 S3: governance (V19) and recordings (V20) are part of every start; head.
-      Flyway.configure().dataSource(source).target("23").load().migrate();
+      Flyway.configure().dataSource(source).target("29").load().migrate();
       actualJdbc = new JdbcTemplate(source);
       actualJdbc.update(
           "INSERT INTO users(sso_id,name,email) VALUES ('service-user','fixture',?)", EMAIL);
@@ -344,7 +344,8 @@ class GuidedServiceTransportFaultIT {
 
     @Bean
     GuidedMaterializationService materialization(JdbcTemplate jdbc) {
-      return new GuidedMaterializationService(jdbc, C);
+      return new GuidedMaterializationService(
+          jdbc, C, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     }
 
     @Bean
@@ -415,6 +416,7 @@ class GuidedServiceTransportFaultIT {
             C,
             productionAccess(jdbc, C, access, ORIGIN),
             new GuidedSessionProperties(true, Map.of("maxSessionSeconds", seconds)),
+            com.citi.put.checks.studio.support.TestDomains.FIXTURES,
             clock);
     installTranslation(service, jdbc, C);
     service.installBridge(
@@ -424,8 +426,7 @@ class GuidedServiceTransportFaultIT {
         new GuidedAssignmentStore(jdbc, C));
     service.installSecretAudit(new SecretAuditLifecycle(jdbc, new SecretUseAuditRecorder(jdbc)));
     // STUDIO-OBS-014 S3: every start needs an approved governed policy for its scope.
-    com.citi.put.checks.studio.support.ObservedPublicationFixture.installGovernance(
-        service, jdbc, "CSI-123", "orders", "fixture", java.util.List.of(ORIGIN), null);
+    com.citi.put.checks.studio.support.ObservedPublicationFixture.installCsiBudget(service, jdbc);
     return service;
   }
 
@@ -439,6 +440,12 @@ class GuidedServiceTransportFaultIT {
     steps.addObject().put("stepId", STEP_ID).put("text", "Enter <secret PASS> as password.");
     var variables = C.object().putArray("variables");
     variables.addObject().put("name", "PASS").put("kind", "secretRef").put("secretId", "PASS");
+    // A test may only be learned on the origins it names (STUDIO-GOV-001.4).
+    variables
+        .addObject()
+        .put("name", "appUrl")
+        .put("kind", "plain")
+        .put("value", "https://orders.example.test");
     scenario.source = steps;
     scenario.configuration = variables;
     actualJdbc.update(
@@ -457,14 +464,7 @@ class GuidedServiceTransportFaultIT {
             mode == Mode.CALLER_EXPIRY_AFTER_CONSUME ? 3 : 600);
     var client = client();
     var dispatch = new GuidedDispatchService(sessions, materialization, client);
-    dispatch.installReferences(
-        new VaultStudioReferenceResolver(
-            new CountedProvider(),
-            (principal, csi, environment, secret) ->
-                principal.equals("user-1")
-                    && csi.equals("CSI-123")
-                    && environment.equals("fixture")
-                    && secret.equals("PASS")));
+    dispatch.installReferences(new VaultStudioReferenceResolver(new CountedProvider()));
     sessions.installStopSender(dispatch::stop);
     var observer =
         HttpRunnerDispatchClient.class.getDeclaredMethod(
@@ -489,7 +489,6 @@ class GuidedServiceTransportFaultIT {
                     .put("sourceRevision", "1")
                     .put("configurationRevision", "1")
                     .put("environmentId", "fixture")
-                    .put("applicationId", "orders")
                     .set("versions", DOCUMENTS.path("versions")))
             .path("sessionId")
             .asText();
@@ -632,8 +631,7 @@ class GuidedServiceTransportFaultIT {
           .containsEntry("usage_outcome", mode.ownerOk() ? "USED" : "UNKNOWN_OUTCOME");
       var restarted = service(repository, materialization, access, 600);
       var recovered = new GuidedDispatchService(restarted, materialization, client());
-      recovered.installReferences(
-          new VaultStudioReferenceResolver(new CountedProvider(), (p, c, e, n) -> true));
+      recovered.installReferences(new VaultStudioReferenceResolver(new CountedProvider()));
       String terminalRefusal =
           mode == Mode.COMPLETE_200_OWNER_FAILED ? "PUBLICATION_CONFLICT" : "UNKNOWN_OUTCOME";
       if (mode == Mode.CALLER_EXPIRY_AFTER_CONSUME) {
@@ -714,7 +712,9 @@ class GuidedServiceTransportFaultIT {
       route.attach(stopWork);
       var routedRepository =
           new GuidedSessionRepository(routedJdbc, new TrackingTransactionTemplate(routedSource), C);
-      var routedMaterialization = new GuidedMaterializationService(routedJdbc, C);
+      var routedMaterialization =
+          new GuidedMaterializationService(
+              routedJdbc, C, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
       var routedAccess = new FixtureAccess(routedJdbc);
       assertThat(routedJdbc.getDataSource()).isSameAs(routedSource);
       var scenario = new Scenario(Mode.INTERRUPT_AFTER_HEADERS);
@@ -730,6 +730,12 @@ class GuidedServiceTransportFaultIT {
         steps.addObject().put("stepId", STEP_ID).put("text", "Enter <secret PASS> as password.");
         var variables = C.object().putArray("variables");
         variables.addObject().put("name", "PASS").put("kind", "secretRef").put("secretId", "PASS");
+        // A test may only be learned on the origins it names (STUDIO-GOV-001.4).
+        variables
+            .addObject()
+            .put("name", "appUrl")
+            .put("kind", "plain")
+            .put("value", "https://orders.example.test");
         scenario.source = steps;
         scenario.configuration = variables;
         actualJdbc.update(
@@ -740,14 +746,7 @@ class GuidedServiceTransportFaultIT {
             variables.toString(),
             EMAIL);
         saveSource(actualJdbc, scenario);
-        dispatch.installReferences(
-            new VaultStudioReferenceResolver(
-                new CountedProvider(),
-                (principal, csi, environment, secret) ->
-                    principal.equals("user-1")
-                        && csi.equals("CSI-123")
-                        && environment.equals("fixture")
-                        && secret.equals("PASS")));
+        dispatch.installReferences(new VaultStudioReferenceResolver(new CountedProvider()));
         sessions.installStopSender(
             (contextToStop, reason) -> stopWork.send(dispatch, contextToStop, reason));
         var observer =
@@ -773,7 +772,6 @@ class GuidedServiceTransportFaultIT {
                         .put("sourceRevision", "1")
                         .put("configurationRevision", "1")
                         .put("environmentId", "fixture")
-                        .put("applicationId", "orders")
                         .set("versions", DOCUMENTS.path("versions")))
                 .path("sessionId")
                 .asText();
@@ -925,14 +923,7 @@ class GuidedServiceTransportFaultIT {
         var restarted =
             service(routedJdbc, routedRepository, routedMaterialization, routedAccess, 600);
         var recovered = new GuidedDispatchService(restarted, routedMaterialization, client());
-        recovered.installReferences(
-            new VaultStudioReferenceResolver(
-                new CountedProvider(),
-                (principal, csi, environment, secret) ->
-                    principal.equals("user-1")
-                        && csi.equals("CSI-123")
-                        && environment.equals("fixture")
-                        && secret.equals("PASS")));
+        recovered.installReferences(new VaultStudioReferenceResolver(new CountedProvider()));
         restarted.installStopSender(
             (contextToStop, reason) -> stopWork.send(recovered, contextToStop, reason));
         for (String key : List.of("consume", "new-consume-key")) {
@@ -2246,7 +2237,9 @@ class GuidedServiceTransportFaultIT {
     var routedRepository =
         new GuidedSessionRepository(
             routedJdbc, new HeldRowTransactionTemplate(routedSource, trace), C);
-    var routedMaterialization = new GuidedMaterializationService(routedJdbc, C);
+    var routedMaterialization =
+        new GuidedMaterializationService(
+            routedJdbc, C, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     var routedAccess = new FixtureAccess(routedJdbc);
     var scenario = new Scenario(Mode.INTERRUPT_AFTER_HEADERS);
     scenario.heldRowSetupCase = true;
@@ -2267,6 +2260,12 @@ class GuidedServiceTransportFaultIT {
     steps.addObject().put("stepId", STEP_ID).put("text", "Enter <secret PASS> as password.");
     var variables = C.object().putArray("variables");
     variables.addObject().put("name", "PASS").put("kind", "secretRef").put("secretId", "PASS");
+    // A test may only be learned on the origins it names (STUDIO-GOV-001.4).
+    variables
+        .addObject()
+        .put("name", "appUrl")
+        .put("kind", "plain")
+        .put("value", "https://orders.example.test");
     scenario.source = steps;
     scenario.configuration = variables;
     actualJdbc.update(
@@ -2277,14 +2276,7 @@ class GuidedServiceTransportFaultIT {
         variables.toString(),
         EMAIL);
     saveSource(actualJdbc, scenario);
-    dispatch.installReferences(
-        new VaultStudioReferenceResolver(
-            new CountedProvider(),
-            (principal, csi, environment, secret) ->
-                principal.equals("user-1")
-                    && csi.equals("CSI-123")
-                    && environment.equals("fixture")
-                    && secret.equals("PASS")));
+    dispatch.installReferences(new VaultStudioReferenceResolver(new CountedProvider()));
     sessions.installStopSender(
         (contextToStop, reason) -> stopWork.send(dispatch, contextToStop, reason));
     var observer =
@@ -2306,7 +2298,6 @@ class GuidedServiceTransportFaultIT {
             .put("sourceRevision", "1")
             .put("configurationRevision", "1")
             .put("environmentId", "fixture")
-            .put("applicationId", "orders")
             .set("versions", DOCUMENTS.path("versions"));
     setup.phase = "START_ENTERED";
     String id = sessions.start(user, setup.startKey, setup.startRequest).path("sessionId").asText();
@@ -2409,121 +2400,10 @@ class GuidedServiceTransportFaultIT {
       ObjectNode advance) {}
 
   @Test
-  void composedClaimRevocationCommitsBeforeRefusalAndOriginalStop() throws Exception {
+  void composedClaimSharesTransactionAndPreservesIdempotencyAndRollback() throws Exception {
     var owner = new SourceStopOwner(actualJdbc.getDataSource());
     Scenario[] created = new Scenario[1];
     GuidedSessionService[] services = new GuidedSessionService[1];
-    Throwable primary = null;
-    try {
-      var fixture = prepareClaimRelease(owner, created, services, access);
-      String id = fixture.scenario().sessionId;
-      var release = claimReleaseRows(id);
-      var commands = claimCommandRows(id);
-      assertThat(release.size()).isEqualTo(1);
-      var atSender = new AtomicInteger();
-      var senderFailure = new AtomicReference<Throwable>();
-      fixture
-          .sessions()
-          .installStopSender(
-              (contextToStop, reason) -> {
-                try {
-                  // This is the original sender's entry, before send/ACK or confirmation.
-                  assertThat(
-                          org.springframework.transaction.support.TransactionSynchronizationManager
-                              .getResource(actualJdbc.getDataSource()))
-                      .isNull();
-                  var committed = claimOwnerRow(id);
-                  assertThat(committed.get("revoked_at") != null).isTrue();
-                  assertThat(C.parse((String) committed.get("document")).path("state").asText())
-                      .isEqualTo("CANCELLED");
-                  assertThat(C.parse((String) committed.get("progress")).path("errorCode").asText())
-                      .isEqualTo("SECRET_USE_REVOKED");
-                  assertThat(claimReleaseRows(id).equals(release)).isTrue();
-                  assertThat(claimCommandRows(id).equals(commands)).isTrue();
-                  assertThat(
-                          actualJdbc.queryForObject(
-                              "SELECT count(*) FROM studio_secret_use_audit WHERE session_id=? "
-                                  + "AND decision_stage='LIVE_RECHECK' AND outcome='REVOKED_MID_RUN'",
-                              Integer.class,
-                              id))
-                      .isEqualTo(1);
-                  assertThat(fixture.scenario().stops.get()).isZero();
-                  atSender.incrementAndGet();
-                } catch (RuntimeException | Error failure) {
-                  senderFailure.compareAndSet(null, failure);
-                }
-                // Observation failures never replace or prevent the original stop operation.
-                owner.send(fixture.dispatch(), contextToStop, reason);
-              });
-      var sweep =
-          new com.citi.put.checks.studio.secrets.SecretRevocationSweep(
-              actualJdbc,
-              (principal, csi, environment, secret) -> false,
-              new SecretUseAuditRecorder(actualJdbc),
-              new DataSourceTransactionManager(actualJdbc.getDataSource()),
-              context.getEnvironment());
-      sweep.installGuidedStop(fixture.sessions()::secretRevoked);
-      fixture.sessions().installSecretRevocation(sweep);
-      owner.expect(id);
-      assertThatThrownBy(
-              () ->
-                  fixture
-                      .sessions()
-                      .claim(
-                          new GuidedInternalSecurity.Identity("worker-1", "owning-worker"),
-                          id,
-                          "claim-denied",
-                          claimRequest(id)))
-          .isInstanceOfSatisfying(
-              GuidedSessionException.class,
-              failure -> {
-                assertThat(failure.getMessage()).isEqualTo("SECRET_USE_REVOKED");
-                assertThat(failure.status()).isEqualTo(409);
-              });
-      var committed = claimOwnerRow(id);
-      assertThat(committed.get("revoked_at") != null).isTrue();
-      assertThat(C.parse((String) committed.get("document")).path("state").asText())
-          .isEqualTo("CANCELLED");
-      assertThat(C.parse((String) committed.get("progress")).path("errorCode").asText())
-          .isEqualTo("SECRET_USE_REVOKED");
-      assertThat(claimCommandRows(id).equals(commands)).isTrue();
-      assertThat(claimReleaseRows(id).equals(release)).isTrue();
-      owner.drainUninterruptibly();
-      assertThat(senderFailure.get() == null).isTrue();
-      assertThat(atSender.get()).isEqualTo(1);
-      assertThat(owner.initiated.get()).isEqualTo(1);
-      assertThat(owner.finished.get()).isEqualTo(1);
-      assertThat(owner.confirmationCalls.get()).isEqualTo(1);
-      assertThat(fixture.scenario().stops.get()).isEqualTo(1);
-      assertThat(
-              actualJdbc.queryForObject(
-                  "SELECT progress->>'teardownStatus' FROM studio_guided_sessions WHERE session_id=?",
-                  String.class,
-                  id))
-          .isEqualTo("CONFIRMED");
-      assertThat(
-              actualJdbc.queryForObject(
-                  "SELECT live FROM studio_guided_materializations WHERE session_id=?",
-                  Boolean.class,
-                  id))
-          .isFalse();
-      assertThat(fixture.scenario().reads.get()).isZero();
-      assertThat(fixture.scenario().posts.get()).isZero();
-    } catch (Exception | Error failure) {
-      primary = failure;
-      throw failure;
-    } finally {
-      closeClaimFixture(owner, created, services, primary);
-    }
-  }
-
-  @Test
-  void permittedComposedClaimSharesTransactionAndPreservesIdempotencyAndRollback()
-      throws Exception {
-    var owner = new SourceStopOwner(actualJdbc.getDataSource());
-    Scenario[] created = new Scenario[1];
-    GuidedSessionService[] services = new GuidedSessionService[1];
-    var authorizationHolders = new java.util.ArrayList<ClaimResource>();
     var currentHolders = new java.util.ArrayList<ClaimResource>();
     var observing = new AtomicBoolean();
     var observedAccess =
@@ -2539,28 +2419,11 @@ class GuidedServiceTransportFaultIT {
       var fixture = prepareClaimRelease(owner, created, services, observedAccess);
       String id = fixture.scenario().sessionId;
       var release = claimReleaseRows(id);
-      var sweep =
-          new com.citi.put.checks.studio.secrets.SecretRevocationSweep(
-              actualJdbc,
-              (principal, csi, environment, secret) -> {
-                if (observing.get()) {
-                  authorizationHolders.add(currentClaimResource());
-                }
-                return principal.equals("user-1")
-                    && csi.equals("CSI-123")
-                    && environment.equals("fixture")
-                    && secret.equals("PASS");
-              },
-              new SecretUseAuditRecorder(actualJdbc),
-              new DataSourceTransactionManager(actualJdbc.getDataSource()),
-              context.getEnvironment());
-      sweep.installGuidedStop(fixture.sessions()::secretRevoked);
-      fixture.sessions().installSecretRevocation(sweep);
       var worker = new GuidedInternalSecurity.Identity("worker-1", "owning-worker");
       ObjectNode request = claimRequest(id);
       observing.set(true);
       JsonNode renewed = fixture.sessions().claim(worker, id, "claim-permitted", request);
-      assertClaimResourceIdentity(authorizationHolders, currentHolders);
+      assertClaimResourceIdentity(currentHolders);
       var stableOwner = claimOwnerRow(id);
       var stableCommands = claimCommandRows(id);
       var stableAudit =
@@ -2574,14 +2437,12 @@ class GuidedServiceTransportFaultIT {
                   Integer.class,
                   id))
           .isEqualTo(1);
-      authorizationHolders.clear();
       currentHolders.clear();
       JsonNode duplicate = fixture.sessions().claim(worker, id, "claim-permitted", request);
-      assertClaimResourceIdentity(authorizationHolders, currentHolders);
+      assertClaimResourceIdentity(currentHolders);
       assertThat(duplicate.equals(renewed)).isTrue();
       assertThat(claimOwnerRow(id).equals(stableOwner)).isTrue();
       assertThat(claimCommandRows(id).equals(stableCommands)).isTrue();
-      authorizationHolders.clear();
       currentHolders.clear();
       assertThatThrownBy(
               () ->
@@ -2598,11 +2459,10 @@ class GuidedServiceTransportFaultIT {
                 assertThat(failure.getMessage()).isEqualTo("IDEMPOTENCY_CONFLICT");
                 assertThat(failure.status()).isEqualTo(409);
               });
-      assertClaimResourceIdentity(authorizationHolders, currentHolders);
+      assertClaimResourceIdentity(currentHolders);
       assertThat(claimOwnerRow(id).equals(stableOwner)).isTrue();
       assertThat(claimCommandRows(id).equals(stableCommands)).isTrue();
       var rollback = new AssertionError("Controlled caller rollback");
-      authorizationHolders.clear();
       currentHolders.clear();
       assertThatThrownBy(
               () ->
@@ -2610,7 +2470,7 @@ class GuidedServiceTransportFaultIT {
                       () -> {
                         JsonNode inside =
                             fixture.sessions().claim(worker, id, "claim-rollback", request);
-                        assertClaimResourceIdentity(authorizationHolders, currentHolders);
+                        assertClaimResourceIdentity(currentHolders);
                         assertThat(
                                 C.parse((String) claimOwnerRow(id).get("document")).equals(inside))
                             .isTrue();
@@ -2720,18 +2580,11 @@ class GuidedServiceTransportFaultIT {
             .isActualTransactionActive());
   }
 
-  private static void assertClaimResourceIdentity(
-      List<ClaimResource> authorization, List<ClaimResource> current) {
-    assertThat(authorization.isEmpty()).isFalse();
+  private static void assertClaimResourceIdentity(List<ClaimResource> current) {
     assertThat(current.size()).isEqualTo(1);
     var expected = current.getFirst();
     assertThat(expected.active()).isTrue();
     assertThat(expected.holder() != null && expected.connection() != null).isTrue();
-    for (ClaimResource observed : authorization) {
-      assertThat(observed.active()).isTrue();
-      assertThat(observed.holder()).isSameAs(expected.holder());
-      assertThat(observed.connection()).isSameAs(expected.connection());
-    }
   }
 
   private void closeClaimFixture(
@@ -3028,14 +2881,7 @@ class GuidedServiceTransportFaultIT {
           .isZero();
       var restarted = service(repository, materialization, access, 600);
       var recovery = new GuidedDispatchService(restarted, materialization, client());
-      recovery.installReferences(
-          new VaultStudioReferenceResolver(
-              new CountedProvider(),
-              (principal, csi, environment, name) ->
-                  principal.equals("user-1")
-                      && csi.equals("CSI-123")
-                      && environment.equals("fixture")
-                      && name.equals("PASS")));
+      recovery.installReferences(new VaultStudioReferenceResolver(new CountedProvider()));
       for (String key : List.of("controller-crash-consume", "controller-crash-new-key")) {
         assertThat(
                 recovery.dispatch(controller, id, 1, key, fixture.advance()).path("state").asText())
@@ -3296,6 +3142,12 @@ class GuidedServiceTransportFaultIT {
     steps.addObject().put("stepId", STEP_ID).put("text", "Enter <secret PASS> as password.");
     var variables = C.object().putArray("variables");
     variables.addObject().put("name", "PASS").put("kind", "secretRef").put("secretId", "PASS");
+    // A test may only be learned on the origins it names (STUDIO-GOV-001.4).
+    variables
+        .addObject()
+        .put("name", "appUrl")
+        .put("kind", "plain")
+        .put("value", "https://orders.example.test");
     scenario.source = steps;
     scenario.configuration = variables;
     actualJdbc.update(
@@ -3309,14 +3161,7 @@ class GuidedServiceTransportFaultIT {
     var sessions = service(repository, materialization, fixtureAccess, 600);
     var client = client();
     var dispatch = new GuidedDispatchService(sessions, materialization, client);
-    dispatch.installReferences(
-        new VaultStudioReferenceResolver(
-            new CountedProvider(),
-            (principal, csi, environment, secret) ->
-                principal.equals("user-1")
-                    && csi.equals("CSI-123")
-                    && environment.equals("fixture")
-                    && secret.equals("PASS")));
+    dispatch.installReferences(new VaultStudioReferenceResolver(new CountedProvider()));
     sessions.installStopSender(
         (contextToStop, reason) -> owner.send(dispatch, contextToStop, reason));
     String id =
@@ -3330,7 +3175,6 @@ class GuidedServiceTransportFaultIT {
                     .put("sourceRevision", "1")
                     .put("configurationRevision", "1")
                     .put("environmentId", "fixture")
-                    .put("applicationId", "orders")
                     .set("versions", DOCUMENTS.path("versions")))
             .path("sessionId")
             .asText();
@@ -3420,7 +3264,9 @@ class GuidedServiceTransportFaultIT {
       var jdbc = new JdbcTemplate(source);
       var transactions = new TransactionTemplate(new DataSourceTransactionManager(source));
       var repo = new GuidedSessionRepository(jdbc, transactions, contracts);
-      var materializer = new GuidedMaterializationService(jdbc, contracts);
+      var materializer =
+          new GuidedMaterializationService(
+              jdbc, contracts, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
       String testId = cfg.path("testId").asText();
       GuidedSessionAccess childAccess =
           new GuidedSessionAccess() {
@@ -3431,26 +3277,7 @@ class GuidedServiceTransportFaultIT {
             }
 
             @Override
-            public void checkCurrent(JsonNode session) {
-              require(
-                  session.path("testId").asText().equals(testId)
-                      && session.path("sessionId").asText().equals(cfg.path("sessionId").asText())
-                      && session.path("scope").path("principalId").asText().equals("user-1")
-                      && session.path("scope").path("csiId").asText().equals("CSI-123")
-                      && session.path("scope").path("environmentId").asText().equals("fixture")
-                      && jdbc.queryForObject(
-                              "SELECT count(*) FROM ui_tests WHERE id=? AND csi_id='CSI-123'"
-                                  + " AND environment='fixture' AND deleted_at IS NULL",
-                              Integer.class,
-                              UUID.fromString(testId))
-                          == 1,
-                  "FORBIDDEN_SCOPE",
-                  403);
-            }
-
-            @Override
             public void checkSourceCurrent(JsonNode session) {
-              checkCurrent(session);
               var row =
                   jdbc.queryForMap(
                       "SELECT steps::text,variables::text FROM ui_tests WHERE id=? FOR SHARE",
@@ -3466,7 +3293,6 @@ class GuidedServiceTransportFaultIT {
 
             @Override
             public void checkUser(Authentication actor, JsonNode session) {
-              checkCurrent(session);
               require(
                   actor instanceof BffAuthenticationToken
                       && ((UserIdentity) actor.getPrincipal())
@@ -3492,7 +3318,7 @@ class GuidedServiceTransportFaultIT {
                   "REVISION_CONFLICT",
                   409);
               return new com.citi.put.checks.studio.guided.translation.GuidedSourceInputResolver(
-                      contracts)
+                      contracts, com.citi.put.checks.studio.support.TestDomains.FIXTURES)
                   .sources(
                       session,
                       new GuidedTranslationStore(jdbc, contracts)
@@ -3505,6 +3331,7 @@ class GuidedServiceTransportFaultIT {
               contracts,
               childAccess,
               new GuidedSessionProperties(true, Map.of("maxSessionSeconds", 600)),
+              com.citi.put.checks.studio.support.TestDomains.FIXTURES,
               Clock.systemUTC());
       service.installBridge(
           materializer,
@@ -3517,8 +3344,7 @@ class GuidedServiceTransportFaultIT {
               jdbc, contracts));
       service.installSecretAudit(new SecretAuditLifecycle(jdbc, new SecretUseAuditRecorder(jdbc)));
       // STUDIO-OBS-014 S3: every start needs an approved governed policy for its scope.
-      com.citi.put.checks.studio.support.ObservedPublicationFixture.installGovernance(
-          service, jdbc, "CSI-123", "orders", "fixture", java.util.List.of(ORIGIN), null);
+      com.citi.put.checks.studio.support.ObservedPublicationFixture.installCsiBudget(service, jdbc);
       KeyStore keys = KeyStore.getInstance("PKCS12");
       try (var input = Files.newInputStream(Path.of(cfg.path("tlsKeyStore").asText()))) {
         keys.load(input, "fixture".toCharArray());
@@ -3547,14 +3373,7 @@ class GuidedServiceTransportFaultIT {
               Path.of(cfg.path("stage").asText()),
               com.citi.put.checks.studio.guided.publication.ObservedResolverProcessCrashIT.Cut
                   .READ_BEFORE_DECISION);
-      var originalResolver =
-          new VaultStudioReferenceResolver(
-              provider,
-              (principal, csi, environment, secret) ->
-                  principal.equals("user-1")
-                      && csi.equals("CSI-123")
-                      && environment.equals("fixture")
-                      && secret.equals("PASS"));
+      var originalResolver = new VaultStudioReferenceResolver(provider);
       if (cfg.path("beforeResolve").asBoolean()) {
         dispatch.installReferences(
             new com.citi.put.checks.studio.dispatch.StudioReferenceResolver() {
@@ -3838,17 +3657,12 @@ class GuidedServiceTransportFaultIT {
       route.attach(owner);
       var repository =
           new GuidedSessionRepository(jdbc, new TrackingTransactionTemplate(source), C);
-      var materializer = new GuidedMaterializationService(jdbc, C);
+      var materializer =
+          new GuidedMaterializationService(
+              jdbc, C, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
       var sessions = service(jdbc, repository, materializer, new FixtureAccess(jdbc), 600);
       var dispatch = new GuidedDispatchService(sessions, materializer, client());
-      dispatch.installReferences(
-          new VaultStudioReferenceResolver(
-              new CountedProvider(),
-              (principal, csi, environment, secret) ->
-                  principal.equals("user-1")
-                      && csi.equals("CSI-123")
-                      && environment.equals("fixture")
-                      && secret.equals("PASS")));
+      dispatch.installReferences(new VaultStudioReferenceResolver(new CountedProvider()));
       sessions.installStopSender((context, reason) -> owner.send(dispatch, context, reason));
       Scenario scenario = null;
       Throwable primary = null, assertedRefusal = null;
@@ -4843,6 +4657,12 @@ class GuidedServiceTransportFaultIT {
     steps.addObject().put("stepId", STEP_ID).put("text", "Enter <secret PASS> as password.");
     var variables = C.object().putArray("variables");
     variables.addObject().put("name", "PASS").put("kind", "secretRef").put("secretId", "PASS");
+    // A test may only be learned on the origins it names (STUDIO-GOV-001.4).
+    variables
+        .addObject()
+        .put("name", "appUrl")
+        .put("kind", "plain")
+        .put("value", "https://orders.example.test");
     scenario.source = steps;
     scenario.configuration = variables;
     actualJdbc.update(
@@ -4864,7 +4684,6 @@ class GuidedServiceTransportFaultIT {
                     .put("sourceRevision", "1")
                     .put("configurationRevision", "1")
                     .put("environmentId", "fixture")
-                    .put("applicationId", "orders")
                     .set("versions", DOCUMENTS.path("versions")))
             .path("sessionId")
             .asText();
@@ -5068,6 +4887,12 @@ class GuidedServiceTransportFaultIT {
     steps.addObject().put("stepId", STEP_ID).put("text", "Enter <secret PASS> as password.");
     var variables = C.object().putArray("variables");
     variables.addObject().put("name", "PASS").put("kind", "secretRef").put("secretId", "PASS");
+    // A test may only be learned on the origins it names (STUDIO-GOV-001.4).
+    variables
+        .addObject()
+        .put("name", "appUrl")
+        .put("kind", "plain")
+        .put("value", "https://orders.example.test");
     scenario.source = steps;
     scenario.configuration = variables;
     actualJdbc.update(
@@ -5089,7 +4914,6 @@ class GuidedServiceTransportFaultIT {
                     .put("sourceRevision", "1")
                     .put("configurationRevision", "1")
                     .put("environmentId", "fixture")
-                    .put("applicationId", "orders")
                     .set("versions", DOCUMENTS.path("versions")))
             .path("sessionId")
             .asText();
@@ -5516,32 +5340,14 @@ class GuidedServiceTransportFaultIT {
           .put("principalId", "user-1")
           .put("csiId", "CSI-123")
           .put("environmentId", "fixture")
-          .put("applicationId", "orders")
           .put("sourceRevision", "1")
           .put("configurationRevision", "1");
       scope.remove("accountRef");
-      scope.putArray("approvedOrigins").add(ORIGIN);
       return new Snapshot(
           scope,
           C.object()
               .putArray("steps")
               .add(C.object().put("stepId", STEP_ID).put("requiresAssertion", false)));
-    }
-
-    @Override
-    public void checkCurrent(JsonNode session) {
-      require(
-          jdbc.queryForObject(
-                  "SELECT count(*) FROM ui_tests WHERE id=? AND csi_id='CSI-123' "
-                      + "AND environment='fixture' AND deleted_at IS NULL",
-                  Integer.class,
-                  UUID.fromString(session.path("testId").asText()))
-              == 1,
-          "FORBIDDEN_SCOPE",
-          403);
-      if (currentObserver != null) {
-        currentObserver.accept(session);
-      }
     }
 
     @Override
@@ -5556,6 +5362,9 @@ class GuidedServiceTransportFaultIT {
               && C.parse((String) row.get("variables")).equals(scenario.configuration),
           "REVISION_CONFLICT",
           409);
+      if (currentObserver != null) {
+        currentObserver.accept(session);
+      }
     }
 
     @Override
@@ -5773,12 +5582,9 @@ class GuidedServiceTransportFaultIT {
               "CANCELLED",
               "EXPIRED",
               "SECRET_UNAVAILABLE",
-              "SECRET_USE_NOT_AUTHORIZED",
-              "SECRET_USE_REVOKED",
               "VAULT_UNAVAILABLE",
               "LOGIN_REQUIRED",
-              "SECRET_TOO_LONG",
-              "POLICY_NOT_APPROVED" ->
+              "SECRET_TOO_LONG" ->
           code;
       default -> "UNPROVEN";
     };
@@ -5824,7 +5630,6 @@ class GuidedServiceTransportFaultIT {
     if (type.equals(
         "com.citi.put.checks.studio.guided.translation.GuidedProductionSessionAccess")) {
       return switch (method) {
-        case "checkCurrent" -> "CHECK_CURRENT";
         case "checkSourceCurrent" -> "CHECK_SOURCE";
         default -> "NONE";
       };
@@ -5982,6 +5787,13 @@ class GuidedServiceTransportFaultIT {
                 .put(
                     "authoredInputsHash", body.path("proposal").path("authoredInputsHash").asText())
                 .put("expiresAt", body.path("expiresAt").asText());
+        // ADR-SC-007: the runner reports the locator and identity it derived for the picked ref.
+        response.set(
+            "target",
+            body.path("proposal").path("target").path("kind").asText().equals("node")
+                ? com.citi.put.checks.studio.support.ObservationFixtures.resolvedTarget(
+                    "order-reference", "text", "Order number")
+                : com.fasterxml.jackson.databind.node.NullNode.instance);
         respond(exchange, 200, response);
       } else if (path.endsWith("/dispatch")) {
         scenario.posts.incrementAndGet();
@@ -6466,14 +6278,7 @@ class GuidedServiceTransportFaultIT {
   private static com.citi.put.checks.studio.guided.translation.GuidedTranslationProperties
       planningProperties() {
     return new com.citi.put.checks.studio.guided.translation.GuidedTranslationProperties(
-        true,
-        true,
-        List.of("orders", "other"),
-        List.of("fixture", "other"),
-        131072,
-        2048,
-        60,
-        "worker-1");
+        true, 131072, 2048, 60, "worker-1");
   }
 
   /** The controls can only narrow real current/source/user checks; initialize is never stubbed. */
@@ -6485,34 +6290,6 @@ class GuidedServiceTransportFaultIT {
           String origin) {
     var store =
         new com.citi.put.checks.studio.guided.translation.GuidedTranslationStore(jdbc, contracts);
-    var policy =
-        contracts
-            .object()
-            .put("version", 1)
-            .put("policyId", "gs-t-source-policy")
-            .put("policyVersion", "1")
-            .put("applicationId", "orders")
-            .put("environment", "fixture")
-            .put("entryPolicyId", "blank");
-    policy.putArray("allowedOrigins").add(origin);
-    policy.putArray("rules");
-    policy.putNull("applicationPolicy");
-    var policies = contracts.object().putArray("policies");
-    for (String application : List.of("orders", "other")) {
-      for (String environment : List.of("fixture", "other")) {
-        var configured = policy.deepCopy();
-        configured
-            .put("policyId", "gs-t-" + application + "-" + environment)
-            .put("applicationId", application)
-            .put("environment", environment);
-        policies.add(configured);
-      }
-    }
-    var pins =
-        new com.citi.put.checks.studio.guided.publication.ObservedReplayPins(
-            contracts,
-            new com.citi.put.checks.studio.guided.publication.ObservedReplayProperties(
-                true, 30000, 1048576, 4194304, 2097152, "[]", policies.toString(), 1280, 720));
     var access =
         org.mockito.Mockito.spy(
             new com.citi.put.checks.studio.guided.translation.GuidedProductionSessionAccess(
@@ -6520,24 +6297,16 @@ class GuidedServiceTransportFaultIT {
                     sourceRepository(jdbc, contracts), contracts),
                 new com.citi.put.checks.studio.guided.translation.GuidedSourceClassifier(
                     contracts,
-                    planningProperties(),
-                    new com.citi.put.checks.studio.guided.translation.CredentialPatternScreen()),
+                    new com.citi.put.checks.studio.guided.translation.CredentialPatternScreen(),
+                    com.citi.put.checks.studio.support.TestDomains.FIXTURES),
                 new com.citi.put.checks.studio.guided.translation.GuidedSourceInputResolver(
-                    contracts),
+                    contracts, com.citi.put.checks.studio.support.TestDomains.FIXTURES),
                 store,
                 new com.citi.put.checks.studio.guided.translation.GuidedStepVerifier(store),
                 new CsiOwnershipEvaluator(),
-                pins,
+                com.citi.put.checks.studio.support.TestDomains.FIXTURES,
                 org.mockito.Mockito.mock(
-                    com.citi.put.checks.studio.dispatch.StudioReferenceResolver.class),
-                (principal, csi, environment, secret) -> true));
-    org.mockito.Mockito.doAnswer(
-            call -> {
-              controls.checkCurrent(call.getArgument(0));
-              return call.callRealMethod();
-            })
-        .when(access)
-        .checkCurrent(org.mockito.ArgumentMatchers.any());
+                    com.citi.put.checks.studio.dispatch.StudioReferenceResolver.class)));
     org.mockito.Mockito.doAnswer(
             call -> {
               controls.checkSourceCurrent(call.getArgument(0));
@@ -6617,7 +6386,8 @@ class GuidedServiceTransportFaultIT {
   /** Authenticated worker protocol at the existing trusted transport seam, not browser proof. */
   private static ObjectNode blankBootstrap(GuidedContracts contracts, JsonNode context) {
     var request =
-        new com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService(null, contracts)
+        new com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService(
+                null, contracts, com.citi.put.checks.studio.support.TestDomains.FIXTURES)
             .identity(context);
     var evidence =
         contracts
@@ -6688,7 +6458,6 @@ class GuidedServiceTransportFaultIT {
                     .SOURCE_PLAN) {
               var references = response.putArray("sourceReferences");
               var obligations = response.putArray("obligations");
-              response.putArray("needs");
               for (JsonNode step : context.path("sourceSteps")) {
                 String stepId = step.path("stepId").asText();
                 JsonNode secret = null;
@@ -6705,7 +6474,7 @@ class GuidedServiceTransportFaultIT {
                         .put("stepId", stepId)
                         .put("occurrence", 0)
                         .put("operationKind", kind)
-                        .put("targetIntent", secret == null ? "order-reference" : "Password")
+                        .put("targetIntent", secret == null ? "Order number" : "Password")
                         .putNull("scopeIntent")
                         .putNull("needId");
                 if (secret == null) {
@@ -6770,9 +6539,10 @@ class GuidedServiceTransportFaultIT {
               stopped,
               gateway,
               contracts,
-              new com.citi.put.checks.studio.guided.translation.GuidedPromptAssembler(contracts),
+              new com.citi.put.checks.studio.guided.translation.GuidedPromptAssembler(
+                  contracts, com.citi.put.checks.studio.support.TestDomains.FIXTURES),
               new com.citi.put.checks.studio.guided.translation.GuidedSourceInputResolver(
-                  contracts),
+                  contracts, com.citi.put.checks.studio.support.TestDomains.FIXTURES),
               new com.citi.put.checks.studio.guided.translation.GuidedProposalValidator(contracts),
               new com.citi.put.checks.studio.guided.translation.GuidedDependencyPlanner(sessions),
               planningProperties(),

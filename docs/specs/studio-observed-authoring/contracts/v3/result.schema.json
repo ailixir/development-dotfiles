@@ -150,7 +150,15 @@
           ]
         },
         "video": {
-          "$ref": "#/definitions/videoEvidence"
+          "description": "The recording of the learning attempt. Null exactly when publication.status is PUBLISHED: a published learn's recording is discarded and its proof is the observed replay named by proof.executionId. Never null otherwise.",
+          "oneOf": [
+            {
+              "$ref": "#/definitions/videoEvidence"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -166,6 +174,28 @@
         "$ref": "#/definitions/actionTiming"
       }
     },
+    "proof": {
+      "description": "The observed replay of the published revision that the finalize request accepted (trigger source AFTER_LEARN). Null unless publication.status is PUBLISHED, and null while that replay was refused or has not been accepted. A refusal code is never carried.",
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "executionId": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
+            }
+          },
+          "required": [
+            "executionId"
+          ]
+        }
+      ]
+    },
     "errorCode": {
       "oneOf": [
         {
@@ -175,7 +205,7 @@
           "not": {
             "const": "AUTH_CONNECTION_REQUIRED"
           },
-          "description": "Existing failure vocabulary plus SECRET_UNAVAILABLE, SECRET_USE_NOT_AUTHORIZED, SECRET_USE_REVOKED, VAULT_UNAVAILABLE and LOGIN_REQUIRED. LOGIN_REQUIRED requires the closed detail."
+          "description": "Existing failure vocabulary plus SECRET_UNAVAILABLE, VAULT_UNAVAILABLE and LOGIN_REQUIRED. LOGIN_REQUIRED requires the closed detail."
         },
         {
           "type": "null"
@@ -231,8 +261,6 @@
                 "CANCELLED",
                 "EXPIRED",
                 "SECRET_UNAVAILABLE",
-                "SECRET_USE_NOT_AUTHORIZED",
-                "SECRET_USE_REVOKED",
                 "VAULT_UNAVAILABLE",
                 "LOGIN_REQUIRED",
                 "SECRET_TOO_LONG"
@@ -347,6 +375,7 @@
     "currentReadiness",
     "evidence",
     "actionTimings",
+    "proof",
     "errorCode",
     "relearnedFrom",
     "progress",
@@ -573,6 +602,69 @@
             "maxItems": 0
           }
         }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "publication": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "const": "PUBLISHED"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          }
+        },
+        "required": [
+          "publication"
+        ]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "evidence": {
+            "type": "object",
+            "properties": {
+              "video": {
+                "type": "null"
+              }
+            },
+            "required": [
+              "video"
+            ]
+          }
+        },
+        "required": [
+          "evidence"
+        ]
+      },
+      "else": {
+        "type": "object",
+        "properties": {
+          "evidence": {
+            "type": "object",
+            "properties": {
+              "video": {
+                "type": "object"
+              }
+            },
+            "required": [
+              "video"
+            ]
+          },
+          "proof": {
+            "type": "null"
+          }
+        },
+        "required": [
+          "evidence",
+          "proof"
+        ]
       }
     }
   ],

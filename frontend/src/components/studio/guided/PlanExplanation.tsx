@@ -8,6 +8,7 @@ import type {
 } from '@/types/studio/studioGuidedTypes';
 import { READY_CHIP_LABEL, guidedCopy, type GuidedCopyKey } from './guidedNarratives';
 import { readinessChipLabel } from './ReadinessChip';
+import { stoppedStepOf } from './guidedStoppedStep';
 
 /**
  * "Steps as learned" (STUDIO-OBS-008 AC-6; architect P3): a read-only account of what this session
@@ -24,6 +25,9 @@ import { readinessChipLabel } from './ReadinessChip';
  *  - **Reference flows** read "<binding> from step 2 → Fill field in step 4", numbered by the
  *    explanation's own steps. A flow whose producer or consumer step it does not number is left out,
  *    never linked by guess.
+ *  - **A failed learn marks where it stopped** (STUDIO-UNIFY-001.6 AC-02): a "Stopped here" chip on
+ *    the step `stoppedStepOf` proves, in place of "Learned in this run" on that step. A run that
+ *    proves no step marks none.
  *  - **History and current readiness are two facts** (AC-6). "Completed — learned from this run."
  *    comes from the learned receipt (`publication.status: PUBLISHED`), and the current-readiness line
  *    from `currentReadiness.ready`. Neither implies the other.
@@ -80,7 +84,7 @@ export type PlanTest = Pick<
   'sourceRevision' | 'steps' | 'readiness' | 'readinessReason' | 'firstChangedStepId' | 'confirmedRevisionId'
 >;
 
-type PlanResult = Pick<GuidedResult, 'explanation' | 'publication' | 'currentReadiness'>;
+type PlanResult = Pick<GuidedResult, 'outcome' | 'explanation' | 'publication' | 'currentReadiness'>;
 
 /** Round 067 D3: the test's readiness speaks for "now" only when it describes the revision this run published. */
 function testDescribesThisRun(result: PlanResult, test: PlanTest | null | undefined): test is PlanTest {
@@ -153,13 +157,16 @@ export interface PlanExplanationProps {
   readonly result: PlanResult;
   /** The page's server draft. Absent: the plan reads from the result alone. */
   readonly test?: PlanTest | null;
+  /** The learned line is already shown once, above the proof replay: leave the history fact out. */
+  readonly omitHistory?: boolean;
 }
 
-export function PlanExplanation({ result, test = null }: PlanExplanationProps) {
+export function PlanExplanation({ result, test = null, omitHistory = false }: PlanExplanationProps) {
   const { explanation } = result;
   const facts = { ...explanationFacts(result), current: currentReadinessLine(result, test) };
   const stepTexts = planStepTexts(result, test);
   const changedStepId = changedStepIdOf(result, test);
+  const stoppedStepId = stoppedStepOf(result)?.stepId ?? null;
   const flows = referenceFlowLines(explanation);
   const steps = [...explanation.steps].sort((a, b) => a.number - b.number);
 
@@ -170,7 +177,7 @@ export function PlanExplanation({ result, test = null }: PlanExplanationProps) {
           {guidedCopy('planTitle')}
         </Typography>
         <Stack spacing={0.25} data-testid="plan-explanation-facts">
-          {facts.history !== null && (
+          {facts.history !== null && !omitHistory && (
             <Typography variant="body2" data-testid="plan-explanation-history">
               {facts.history}
             </Typography>
@@ -182,17 +189,29 @@ export function PlanExplanation({ result, test = null }: PlanExplanationProps) {
         <Divider />
         <Stack component="ol" spacing={1.5} sx={{ listStyle: 'none', p: 0, m: 0 }}>
           {steps.map((step) => {
-            const claims = stepProvenance(step);
+            const stoppedHere = stoppedStepId === step.stepId;
+            // A stopped step is not also "learned in this run" (AC-02).
+            const claims = stepProvenance(stoppedHere ? { ...step, learnedFromThisRun: false } : step);
             return (
               <Box component="li" key={step.stepId} data-testid={`plan-step-${step.number}`} sx={{ minWidth: 0 }}>
                 <Stack spacing={0.5}>
                   <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', alignItems: 'center', rowGap: 0.5 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    {/* Tabular figures: "Step 1" and "Step 4" are equally wide, so the chips start at one x. */}
+                    <Typography variant="body2" sx={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
                       {guidedCopy('stepHeading', { N: step.number })}
                     </Typography>
                     {claims.map((claim) => (
                       <Chip key={claim} size="small" variant="outlined" label={claim} />
                     ))}
+                    {stoppedHere && (
+                      <Chip
+                        size="small"
+                        variant="outlined"
+                        color="error"
+                        label={guidedCopy('stoppedHere')}
+                        data-testid="plan-step-stopped"
+                      />
+                    )}
                     {changedStepId === step.stepId && (
                       <Chip
                         size="small"

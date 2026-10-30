@@ -122,6 +122,7 @@ describe('MED-2 — the production path supplies no test seam', () => {
 
   /** The complete set production is allowed to construct. Asserted as equality, not containment. */
   const PRODUCTION_KEYS = [
+    'allowedDomains',
     'launchTimeoutMs',
     'maxFailureMessageLength',
     'recording',
@@ -151,6 +152,7 @@ describe('MED-2 — the production path supplies no test seam', () => {
       width: config.recordingWidth,
       height: config.recordingHeight,
     });
+    expect(options.allowedDomains).toEqual(config.allowedDomains);
     expect(options.stepTimeoutMs).toBe(config.stepTimeoutMs);
     expect(options.launchTimeoutMs).toBe(config.browserLaunchTimeoutMs);
     expect(options.stopTimeoutMs).toBe(config.browserStopTimeoutMs);

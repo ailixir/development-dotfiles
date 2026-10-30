@@ -640,8 +640,8 @@ describe('story 10.11a: the execute route’s refusals are read from the documen
  *
  * Contract steps: the class-A guided-session video operation (`getGuidedSessionVideo`) landed with
  * contract step C1 (STUDIO-OBS-013) during STUDIO-OBS-012B's run and is entered below. The five
- * class-C OBS-014 guided-policy operations landed public with contract step C2b and were entered at
- * the post-C2b re-run, each `operationId` quoted from the landed document.
+ * class-C OBS-014 guided-policy operations were entered at the post-C2b re-run and removed with the
+ * governed policy itself (STUDIO-GOV-001.3).
  */
 type AllowlistClass = 'A' | 'B' | 'C';
 interface AllowlistEntry {
@@ -656,15 +656,6 @@ const UNCOVERED_PUBLIC_OPERATIONS: Readonly<Record<string, AllowlistEntry>> = {
   // Class B — permanent: the stream route's contract-checked mirror is the 10.11b scripted
   // transport, whose frames are validated against ExecutionSnapshot in this file.
   streamExecution: { class: 'B', owner: 'story 10.11b scripted transport', reason: 'text/event-stream; mirrored by executionScenarios.ts, not by an MSW handler' },
-  // Class C — conditional: STUDIO-OBS-014 AC-1 governed policy routes, landed by contract step C2b;
-  // operationIds quoted from openapi.yaml sha256 afec6c04…. No story in this wave has a frontend
-  // consumer. The first story that adds a frontend client for them adds the handlers and removes
-  // these entries (P4 makes that mandatory).
-  lookupGuidedPolicy: { class: 'C', owner: 'first story with a frontend policy client', reason: 'STUDIO-OBS-014 AC-1 policy lookup; no frontend consumer in this wave' },
-  createGuidedPolicy: { class: 'C', owner: 'first story with a frontend policy client', reason: 'STUDIO-OBS-014 AC-1 policy create; no frontend consumer in this wave' },
-  readGuidedPolicy: { class: 'C', owner: 'first story with a frontend policy client', reason: 'STUDIO-OBS-014 AC-1 policy read; no frontend consumer in this wave' },
-  createGuidedPolicyVersion: { class: 'C', owner: 'first story with a frontend policy client', reason: 'STUDIO-OBS-014 AC-1 policy version create; no frontend consumer in this wave' },
-  approveGuidedPolicyVersion: { class: 'C', owner: 'first story with a frontend policy client', reason: 'STUDIO-OBS-014 AC-1 policy version approval; no frontend consumer in this wave' },
 };
 
 const STUDIO_HANDLER_BASE = '*/api/v1/studio';
@@ -827,6 +818,7 @@ const GUIDED_CLIENT_METHOD: Readonly<Record<string, keyof typeof studioGuidedApi
   cancelGuidedSession: 'cancel',
   finalizeObservedPublication: 'finalize',
   getGuidedSessionVideo: 'videoPath',
+  readLatestGuidedAttempts: 'readLatestAttempts',
 };
 
 describe('STUDIO-OBS-008 AC-1: every guided route has a client method', () => {
@@ -841,8 +833,8 @@ describe('STUDIO-OBS-008 AC-1: every guided route has a client method', () => {
         if (operation && operation['x-internal'] !== true) derived.push(operation.operationId ?? '');
       }
     }
-    // D-2: eight public guided operations.
-    expect(derived).toHaveLength(8);
+    // D-2: eight public guided operations, and the ninth added by STUDIO-UNIFY-001.6 (AC-10).
+    expect(derived).toHaveLength(9);
     assertSameSet(derived, Object.keys(GUIDED_CLIENT_METHOD), 'guided operation → client method');
     for (const [operationId, member] of Object.entries(GUIDED_CLIENT_METHOD)) {
       expect(typeof studioGuidedApi[member], `${operationId} → studioGuidedApi.${String(member)}`).toBe('function');

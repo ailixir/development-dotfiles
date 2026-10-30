@@ -12,22 +12,46 @@ import com.google.genai.types.HttpRetryOptions;
 import com.google.genai.types.Part;
 import com.google.genai.types.ThinkingConfig;
 import com.google.genai.types.ThinkingLevel;
+import io.micrometer.core.instrument.DistributionSummary;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.TimeUnit;
 
 /** One provider call for an already reserved guided attempt. No retry or allocation authority. */
 public final class GenAiGuidedLlmGatewayClient implements GuidedLlmGatewayClient {
+  static final String CALL_TIMER = "studio.guided.model.call";
+  static final String CACHED_TOKENS = "studio.guided.model.cached.tokens";
+
+  /** Bucket bounds in seconds, spanning the per-send cap and the call budget. */
+  private static final long[] CALL_BUCKETS = {1, 5, 10, 20, 30, 45, 50, 60, 90, 120};
+
   private final GenAiGatewayTransport transport;
   private final GuidedResponseParser parser;
+  private final MeterRegistry registry;
+  private final DistributionSummary cachedTokens;
   private final ObjectMapper mapper = new ObjectMapper();
 
   public GenAiGuidedLlmGatewayClient(GenAiGatewayTransport transport, GuidedResponseParser parser) {
+    this(transport, parser, new SimpleMeterRegistry());
+  }
+
+  public GenAiGuidedLlmGatewayClient(
+      GenAiGatewayTransport transport, GuidedResponseParser parser, MeterRegistry registry) {
     this.transport = transport;
     this.parser = parser;
+    this.registry = registry;
+    cachedTokens =
+        DistributionSummary.builder(CACHED_TOKENS)
+            .description("Prompt tokens served from the provider cache, per model call")
+            .baseUnit("tokens")
+            .register(registry);
   }
 
   @Override
@@ -40,6 +64,54 @@ public final class GenAiGuidedLlmGatewayClient implements GuidedLlmGatewayClient
       GuidedModelRequest request,
       GuidedCallBudget budget,
       GuidedRefusalDiagnostics.Capture capture) {
+    long entered = System.nanoTime();
+    long[] sendStarted = {0};
+    GuidedModelResponse response = send(request, budget, capture, sendStarted);
+    // Timed from the send itself, so waiting for a permit never inflates the model's latency. A
+    // call that never reached the wire (busy, oversized, no credential) is timed from entry.
+    long began = sendStarted[0] == 0 ? entered : sendStarted[0];
+    Timer.builder(CALL_TIMER)
+        .description("One guided model call, by request kind and outcome")
+        .tag("kind", request.kind().name())
+        .tag("outcome", outcome(response))
+        .serviceLevelObjectives(
+            java.util.Arrays.stream(CALL_BUCKETS)
+                .mapToObj(java.time.Duration::ofSeconds)
+                .toArray(Duration[]::new))
+        .register(registry)
+        .record(System.nanoTime() - began, TimeUnit.NANOSECONDS);
+    return response;
+  }
+
+  /** A small fixed set: the result code, with the transport reasons that mean something apart. */
+  private static String outcome(GuidedModelResponse response) {
+    return switch (response.code()) {
+      case OK -> "ok";
+      case INVALID_RESPONSE -> "invalid_response";
+      case TOO_LARGE -> "too_large";
+      case BUSY -> "busy";
+      case TIMEOUT -> "timeout";
+      case DISABLED -> "disabled";
+      case TRANSPORT -> transportOutcome(response.reason());
+    };
+  }
+
+  private static String transportOutcome(GuidedModelResponse.Reason reason) {
+    return switch (reason) {
+      case TRANSPORT_STALL -> "stall";
+      case TRANSPORT_HTTP_429 -> "throttled";
+      case TRANSPORT_HTTP_503, TRANSPORT_HTTP_5XX -> "server_error";
+      case TRANSPORT_HTTP_400, TRANSPORT_HTTP_401_403, TRANSPORT_HTTP_4XX -> "refused";
+      case TRANSPORT_CONNECT -> "connect";
+      default -> "error";
+    };
+  }
+
+  private GuidedModelResponse send(
+      GuidedModelRequest request,
+      GuidedCallBudget budget,
+      GuidedRefusalDiagnostics.Capture capture,
+      long[] sendStarted) {
     var properties = transport.properties();
     Integer inputTokens = null;
     Integer outputTokens = null;
@@ -83,6 +155,7 @@ public final class GenAiGuidedLlmGatewayClient implements GuidedLlmGatewayClient
         int timeout = (int) Math.max(1, Math.min(Integer.MAX_VALUE, Math.min(otherLimit, cap)));
         boolean system = properties.providerFeatures().systemInstruction();
         generating = true;
+        sendStarted[0] = System.nanoTime();
         GenerateContentResponse raw;
         try {
           raw =
@@ -104,6 +177,9 @@ public final class GenAiGuidedLlmGatewayClient implements GuidedLlmGatewayClient
         }
         inputTokens = usage.input();
         outputTokens = usage.output();
+        if (usage.cached() != null) {
+          cachedTokens.record(usage.cached());
+        }
         if (raw.candidates().isEmpty() || raw.candidates().get().size() != 1) {
           GuidedRefusalDiagnostics.record(capture, GuidedRefusalDiagnostics.Gate.ADAPTER_CANDIDATE);
           return result(GuidedModelResponse.Code.INVALID_RESPONSE, inputTokens, outputTokens);
@@ -259,7 +335,7 @@ public final class GenAiGuidedLlmGatewayClient implements GuidedLlmGatewayClient
     return new GuidedModelResponse(code, null, input, output, transport.properties().model());
   }
 
-  private record Usage(Integer input, Integer output) {}
+  private record Usage(Integer input, Integer output, Integer cached) {}
 
   /**
    * Counts reported supplements without reading thought content or counting cached prompts twice.
@@ -267,22 +343,23 @@ public final class GenAiGuidedLlmGatewayClient implements GuidedLlmGatewayClient
   private static Usage reportedUsage(GenerateContentResponse response) {
     var metadata = response.usageMetadata();
     if (metadata.isEmpty()) {
-      return new Usage(null, null);
+      return new Usage(null, null, null);
     }
     var usage = metadata.get();
     Integer prompt = nonnegative(usage.promptTokenCount().orElse(null));
     Integer candidates = nonnegative(usage.candidatesTokenCount().orElse(null));
     Integer tools = nonnegative(usage.toolUsePromptTokenCount().orElse(null));
     Integer thoughts = nonnegative(usage.thoughtsTokenCount().orElse(null));
-    // Cached content is already included in promptTokenCount. Validate, never add it again.
-    nonnegative(usage.cachedContentTokenCount().orElse(null));
+    // Cached content is already included in promptTokenCount. Validate, never add it again. The
+    // provider omits the field when nothing was cached, so absent beside usage reads as zero.
+    Integer cached = nonnegative(usage.cachedContentTokenCount().orElse(0));
     Integer total = nonnegative(usage.totalTokenCount().orElse(null));
     Integer input = sumReported(prompt, tools);
     Integer output = sumReported(candidates, thoughts);
     if (total != null && input != null && output != null && Math.addExact(input, output) != total) {
       throw new IllegalArgumentException("Inconsistent provider usage metadata");
     }
-    return new Usage(input, output);
+    return new Usage(input, output, cached);
   }
 
   private static Integer sumReported(Integer required, Integer supplement) {

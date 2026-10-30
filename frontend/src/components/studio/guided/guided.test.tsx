@@ -1,3 +1,4 @@
+import type React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -11,6 +12,7 @@ import type {
   GuidedStartRefusal,
   PublicSession,
 } from '@/types/studio/studioGuidedTypes';
+import { GUIDED_ERROR_CODES } from '@/types/studio/studioGuidedTypes';
 import type { TestDetailDto } from '@/types/studio/studioTypes';
 import { EXECUTION_ERROR_NARRATIVES } from '@/components/studio/run/executionErrorNarratives';
 import {
@@ -32,6 +34,7 @@ import {
   GuidedCompletion,
   GuidedStartFeedback,
   guidedCompletionView,
+  learnedReceiptLines,
   guidedStartFeedbackView,
 } from './GuidedCompletion';
 import { GuidedClarification } from './GuidedClarification';
@@ -56,6 +59,8 @@ const clone = <T,>(value: T): T => structuredClone(value);
 
 /** `publication-fixtures.json` positive[0]: SUCCEEDED, PUBLISHED, currentReadiness HEAD_CHANGED. */
 const publishedResult = (): GuidedResult => clone(publicationFixtures.positive[0].value) as GuidedResult;
+/** The replay that is a published learn's proof (`result.proof`); the fixture itself carries none. */
+const PROOF = { executionId: '7d2f5c1e-3b4a-4e8d-9f10-2a6b8c9d0e11' } as const;
 /** `fixtures.json` documents.loginResult: FAILED, errorCode LOGIN_REQUIRED, top-level detail. */
 const loginResult = (): GuidedResult => clone(fixtures.documents.loginResult) as GuidedResult;
 /** `fixtures.json` documents.publicSessionPreparing. */
@@ -303,18 +308,52 @@ describe('GuidedCompletion: success comes from the learned receipt (AC-3, AC-6)'
     result.explanation = drifted.explanation;
     result.progress = drifted.progress;
     result.relearnedFrom = drifted.relearnedFrom;
+    result.proof = { ...PROOF };
     expect(result.relearnedFrom).toEqual({ stepId: STEP(2), driftSwitchStepId: STEP(2) });
 
     const n = result.progress.stepCount;
     expect(guidedCompletionView(result, STEP(3))).toEqual({
       kind: 'succeeded',
-      lines: [`Completed — steps 2–${n} learned again.`, 'Step 2 was re-learned because the page changed.'],
+      lines: [
+        `Completed — steps 2–${n} learned again.`,
+        'Step 2 was re-learned because the page changed.',
+        GUIDED_COPY.proofReplaying.template,
+      ],
     });
+    // The receipt kept above the proof replay is the same learned lines without the proof line.
+    expect(learnedReceiptLines(result, STEP(3))).toEqual([
+      `Completed — steps 2–${n} learned again.`,
+      'Step 2 was re-learned because the page changed.',
+    ]);
     // Without the session's original k, "j…" is filled as the AC writes it.
     expect(guidedCompletionView(result, null)).toEqual({
       kind: 'succeeded',
-      lines: [`Completed — steps 2–${n} learned again.`, 'Steps 2… were re-learned because the page changed.'],
+      lines: [
+        `Completed — steps 2–${n} learned again.`,
+        'Steps 2… were re-learned because the page changed.',
+        GUIDED_COPY.proofReplaying.template,
+      ],
     });
+  });
+
+  it('proof replay: the learned line is followed by "Replaying the saved steps to record proof…" while result.proof names it', () => {
+    const result = publishedResult();
+    result.proof = { ...PROOF };
+    renderCompletion(result);
+    const completion = screen.getByTestId('guided-completion');
+    expect(completion).toHaveTextContent('Completed — learned from this run.');
+    expect(completion).toHaveTextContent('Replaying the saved steps to record proof…');
+    expect(completion).not.toHaveTextContent(GUIDED_COPY.proofNotStarted.template);
+  });
+
+  it('published with proof null: "Studio could not start the proof replay. Run the test to record proof."', () => {
+    const result = publishedResult();
+    expect(result.proof).toBeNull();
+    renderCompletion(result);
+    const completion = screen.getByTestId('guided-completion');
+    expect(completion).toHaveTextContent('Completed — learned from this run.');
+    expect(completion).toHaveTextContent('Studio could not start the proof replay. Run the test to record proof.');
+    expect(completion).not.toHaveTextContent('Replaying the saved steps');
   });
 
   it('SUCCEEDED but publication PENDING is never shown as success', () => {
@@ -386,6 +425,7 @@ describe('GuidedCompletion: success comes from the learned receipt (AC-3, AC-6)'
     ['ASSERTION_FAILED', GUIDED_COPY.assertionFailed.template],
     ['UNSUPPORTED_SURFACE', GUIDED_COPY.unsupportedSurface.template],
     ['BUDGET_EXCEEDED', GUIDED_COPY.budgetExceeded.template],
+    ['ORIGIN_NOT_ALLOWED', GUIDED_COPY.originLeft.template],
   ])('FAILED %s has its own narrative', (code, text) => {
     renderCompletion(failedWith(code));
     expect(screen.getByTestId('guided-completion')).toHaveTextContent(text);
@@ -396,6 +436,86 @@ describe('GuidedCompletion: success comes from the learned receipt (AC-3, AC-6)'
     expect(screen.getByTestId('guided-completion')).toHaveTextContent('Nothing starts again on its own.');
   });
 
+  describe('model failures (compliance-model latency hardening)', () => {
+    const error = JSON.parse(fs.readFileSync(path.join(V3, 'error.schema.json'), 'utf8'));
+    const errorCodes: string[] = error.properties.code.enum;
+
+    it('UNSUPPORTED_STEP names the step Studio cannot do yet instead of "runtime incompatible"', () => {
+      const view = guidedCompletionView(headingShape('UNSUPPORTED_STEP'));
+      expect(view).toEqual({
+        kind: 'failed',
+        code: 'UNSUPPORTED_STEP',
+        lines: ["Studio can't do this step yet, so this run stopped.", 'Studio stopped at step 2.', 'Try rewording the step, or split it into smaller steps.'],
+      });
+      renderCompletion(failedWith('UNSUPPORTED_STEP'));
+      const completion = screen.getByTestId('guided-completion');
+      expect(completion).toHaveTextContent(GUIDED_COPY.unsupportedStep.template);
+      expect(completion).toHaveTextContent(GUIDED_COPY.unsupportedStepRemedy.template);
+      expect(completion).not.toHaveTextContent(GUIDED_COPY.failedUnnamed.template);
+      expect(completion).not.toHaveTextContent('RUNTIME_INCOMPATIBLE');
+    });
+
+    it.each(['MODEL_UNAVAILABLE', 'MODEL_REFUSED'])('%s is in the contract and in GUIDED_ERROR_CODES', (code) => {
+      expect(errorCodes).toContain(code);
+      expect(GUIDED_ERROR_CODES as readonly string[]).toContain(code);
+    });
+
+    it('MODEL_UNAVAILABLE: did not answer in time or busy, stopped, try again in a few minutes; no contract-defect text', () => {
+      const view = guidedCompletionView(headingShape('MODEL_UNAVAILABLE'));
+      expect(view).toEqual({
+        kind: 'failed',
+        code: 'MODEL_UNAVAILABLE',
+        lines: [
+          'The model service did not answer in time or is busy, so Studio stopped learning.',
+          'Studio stopped at step 2.',
+          'Trying again in a few minutes can help.',
+        ],
+      });
+      renderCompletion(failedWith('MODEL_UNAVAILABLE'));
+      const completion = screen.getByTestId('guided-completion');
+      expect(completion).toHaveAttribute('data-kind', 'failed');
+      expect(completion).toHaveTextContent(GUIDED_COPY.modelUnavailable.template);
+      expect(completion).toHaveTextContent(GUIDED_COPY.modelUnavailableRetry.template);
+      expect(completion).not.toHaveTextContent(GUIDED_COPY.failedUnnamed.template);
+      expect(screen.queryByTestId('guided-completion-code')).not.toBeInTheDocument();
+    });
+
+    it('MODEL_REFUSED: the service refused, stopped, a retry is unlikely to help, contact the Studio team; no contract-defect text', () => {
+      const view = guidedCompletionView(headingShape('MODEL_REFUSED'));
+      expect(view).toEqual({
+        kind: 'failed',
+        code: 'MODEL_REFUSED',
+        lines: [
+          'The model service refused the request, so Studio stopped learning.',
+          'Studio stopped at step 2.',
+          'Trying again unchanged is unlikely to help. Contact the Studio team.',
+        ],
+      });
+      renderCompletion(failedWith('MODEL_REFUSED'));
+      const completion = screen.getByTestId('guided-completion');
+      expect(completion).toHaveTextContent(GUIDED_COPY.modelRefused.template);
+      expect(completion).toHaveTextContent(GUIDED_COPY.modelRefusedRemedy.template);
+      expect(completion).not.toHaveTextContent(GUIDED_COPY.failedUnnamed.template);
+      expect(screen.queryByTestId('guided-completion-code')).not.toBeInTheDocument();
+    });
+
+    it.each(['MODEL_UNAVAILABLE', 'MODEL_REFUSED'])('%s is named when only errorCode carries it (no typed failure)', (code) => {
+      const result = failedWith(code);
+      result.failure = null;
+      const view = guidedCompletionView(result);
+      expect(view?.kind).toBe('failed');
+      expect(view !== null && 'code' in view && view.code).toBe(code);
+    });
+
+    it('neither message offers a new action: no buttons', () => {
+      for (const code of ['MODEL_UNAVAILABLE', 'MODEL_REFUSED']) {
+        const { unmount } = renderCompletion(failedWith(code));
+        expect(screen.queryAllByRole('button')).toHaveLength(0);
+        unmount();
+      }
+    });
+  });
+
   it('LOGIN_REQUIRED hands over to the login notice (landed loginResult fixture)', () => {
     const result = loginResult();
     renderCompletion(result, {});
@@ -403,7 +523,7 @@ describe('GuidedCompletion: success comes from the learned receipt (AC-3, AC-6)'
     expect(screen.getByTestId('login-required-notice')).toBeInTheDocument();
   });
 
-  it('inherited 014-a: a governed POLICY_DENIED has its own narrative, names no cause, and is not the secret copy', () => {
+  it('inherited 014-a: an action-guard POLICY_DENIED has its own narrative, names no cause, and is not the secret copy', () => {
     const result = loginResult();
     delete result.detail;
     result.errorCode = 'POLICY_DENIED';
@@ -411,10 +531,10 @@ describe('GuidedCompletion: success comes from the learned receipt (AC-3, AC-6)'
     renderCompletion(result);
     const completion = screen.getByTestId('guided-completion');
     expect(completion).toHaveTextContent('This action could not be run.');
-    expect(completion).toHaveTextContent(GUIDED_COPY.governedPolicyDeniedBody.template);
-    expect(completion).toHaveTextContent(GUIDED_COPY.governedPolicyDeniedRemedy.template);
+    expect(completion).toHaveTextContent(GUIDED_COPY.guardDeniedBody.template);
+    expect(completion).toHaveTextContent(GUIDED_COPY.guardDeniedRemedy.template);
     expect(completion).not.toHaveTextContent(STRUCK_SECRET_FILL_COPY);
-    for (const hidden of ['UNGROUNDED_TARGET', 'DESTRUCTIVE_VERB', 'SIDE_EFFECT_DENIED']) {
+    for (const hidden of ['UNGROUNDED_TARGET', 'DESTRUCTIVE_VERB']) {
       expect(completion).not.toHaveTextContent(hidden);
     }
   });
@@ -432,6 +552,8 @@ describe('GuidedCompletion: success comes from the learned receipt (AC-3, AC-6)'
     delete result.detail;
     result.errorCode = null;
     result.failure = null;
+    // The landed loginResult explanation proves a stopped step (STUDIO-UNIFY-001.6); this case is about the reason line.
+    result.explanation = { ...result.explanation, steps: [] };
     expect(guidedCompletionView(result)).toEqual({
       kind: 'failedUnnamed',
       code: null,
@@ -466,7 +588,216 @@ describe('GuidedCompletion: success comes from the learned receipt (AC-3, AC-6)'
 });
 
 // ---------------------------------------------------------------------------------------------
-// Start feedback (P4; D-3, D-4, D-11; inherited POLICY_NOT_APPROVED)
+// A failed learn names the step it stopped at (STUDIO-UNIFY-001.6 AC-01; @po D2)
+// ---------------------------------------------------------------------------------------------
+
+type ExplanationStep = GuidedResult['explanation']['steps'][number];
+type ExplanationOutcome = ExplanationStep['actions'][number]['outcome'];
+
+/** One explanation step: `completed` as given, one action per outcome (none = nothing retained). */
+function explStep(number: number, completed: boolean, ...outcomes: ExplanationOutcome[]): ExplanationStep {
+  return {
+    stepId: STEP(number),
+    number,
+    completed,
+    learnedFromThisRun: completed,
+    reusedFrom: null,
+    relearnedAfterDrift: false,
+    actions: outcomes.map((outcome, index) => ({
+      admissionId: `a-${number}-${index}`,
+      ordinal: 0,
+      attemptOrdinal: index,
+      operationKind: 'click' as const,
+      safeLabel: 'Click control',
+      outcome,
+      referenceIds: [],
+    })),
+  };
+}
+
+/** A failed result (code on the typed carrier) over the given explanation steps, source revision 2. */
+function failedOver(code: string, ...steps: ExplanationStep[]): GuidedResult {
+  const result = failedWith(code);
+  result.explanation = { ...result.explanation, sourceRevision: '2', steps, referenceFlows: [] };
+  return result;
+}
+
+/** The heading-test shape (visual-recheck-001.5 R6): step 1 done, step 2 never acted on. */
+const headingShape = (code: string) => failedOver(code, explStep(1, true, 'SUCCEEDED'), explStep(2, false));
+
+const draftOver = (over: Partial<NonNullable<React.ComponentProps<typeof GuidedCompletion>['test']>> = {}) => ({
+  sourceRevision: 2,
+  readiness: 'UNLEARNED' as const,
+  firstChangedStepId: null,
+  confirmedRevisionId: null,
+  steps: [1, 2, 3, 4].map((n) => ({ id: STEP(n), text: `Authored sentence ${n}` })),
+  ...over,
+});
+
+describe('GuidedCompletion: a failed learn names the step it stopped at (STUDIO-UNIFY-001.6 AC-01)', () => {
+  it('BUDGET_EXCEEDED: the existing sentence, the step, the hedged next step, then "Nothing starts again on its own."', () => {
+    const view = guidedCompletionView(headingShape('BUDGET_EXCEEDED'));
+    expect(view).toEqual({
+      kind: 'failed',
+      code: 'BUDGET_EXCEEDED',
+      lines: [
+        GUIDED_COPY.budgetExceeded.template,
+        'Studio stopped at step 2.',
+        'Studio most likely could not find what step 2 describes. Check the page or reword the step, then press Run again.',
+        GUIDED_COPY.nothingStartsOnItsOwn.template,
+      ],
+    });
+  });
+
+  it('the authored sentence follows only where planStepTexts provides it (same sourceRevision)', () => {
+    const view = guidedCompletionView(headingShape('BUDGET_EXCEEDED'), null, draftOver());
+    expect(view?.kind === 'failed' && view.lines).toContain('Studio stopped at step 2: "Authored sentence 2"');
+    expect(view?.kind === 'failed' && view.lines).not.toContain('Studio stopped at step 2.');
+  });
+
+  it('a draft edited since the run (other sourceRevision, not the published one) gives the number and no sentence', () => {
+    const view = guidedCompletionView(headingShape('BUDGET_EXCEEDED'), null, draftOver({ sourceRevision: 3 }));
+    expect(view?.kind === 'failed' && view.lines).toContain('Studio stopped at step 2.');
+    expect(JSON.stringify(view)).not.toContain('Authored sentence');
+  });
+
+  it('ASSERTION_FAILED: its existing sentence, then the step, and no budget sentence', () => {
+    expect(guidedCompletionView(headingShape('ASSERTION_FAILED'))).toEqual({
+      kind: 'failed',
+      code: 'ASSERTION_FAILED',
+      lines: [GUIDED_COPY.assertionFailed.template, 'Studio stopped at step 2.'],
+    });
+  });
+
+  it("UNSUPPORTED_SURFACE tells the author to use the control's visible text", () => {
+    // ADR-SC-007: the sentence is unchanged (it is also the code for an observation deadline), the step
+    // line follows, then the remedy; no budget sentence.
+    expect(guidedCompletionView(headingShape('UNSUPPORTED_SURFACE'))).toEqual({
+      kind: 'failed',
+      code: 'UNSUPPORTED_SURFACE',
+      lines: [
+        GUIDED_COPY.unsupportedSurface.template,
+        'Studio stopped at step 2.',
+        "If the step names a control, use the control's visible text (the label or button text shown on the page).",
+      ],
+    });
+    renderCompletion(failedWith('UNSUPPORTED_SURFACE'));
+    const completion = screen.getByTestId('guided-completion');
+    expect(completion).toHaveTextContent(GUIDED_COPY.unsupportedSurface.template);
+    expect(completion).toHaveTextContent(GUIDED_COPY.unsupportedSurfaceRemedy.template);
+    expect(completion).not.toHaveTextContent('learning budget');
+  });
+
+  it('an unnamed failure gets the step statement only, and keeps its code line', () => {
+    const result = headingShape('INVALID_CONTRACT');
+    expect(guidedCompletionView(result)).toEqual({
+      kind: 'failedUnnamed',
+      code: 'INVALID_CONTRACT',
+      lines: [GUIDED_COPY.failedUnnamed.template, 'Studio stopped at step 2.'],
+    });
+    renderCompletion(result);
+    expect(screen.getByTestId('guided-completion')).toHaveTextContent('Studio stopped at step 2.');
+    expect(screen.getByTestId('guided-completion-code')).toHaveTextContent('INVALID_CONTRACT');
+  });
+
+  it('FAILED with no reason still names the step', () => {
+    const result = headingShape('X');
+    result.errorCode = null;
+    result.failure = null;
+    expect(guidedCompletionView(result)).toEqual({
+      kind: 'failedUnnamed',
+      code: null,
+      lines: [GUIDED_COPY.failedNoReason.template, 'Studio stopped at step 2.'],
+    });
+  });
+
+  it('names the first step that is not completed, whatever later steps hold', () => {
+    const result = failedOver(
+      'ASSERTION_FAILED',
+      explStep(1, true, 'SUCCEEDED'),
+      explStep(2, false, 'UNKNOWN_OUTCOME'),
+      explStep(3, false, 'FAILED'),
+    );
+    expect(guidedCompletionView(result)).toMatchObject({ lines: [expect.any(String), 'Studio stopped at step 2.'] });
+  });
+
+  it('never names a completed step that holds an excluded FAILED attempt (D2)', () => {
+    const result = failedOver(
+      'ASSERTION_FAILED',
+      explStep(1, true, 'SUCCEEDED'),
+      explStep(2, true, 'FAILED', 'SUCCEEDED'),
+      explStep(3, false, 'FAILED'),
+    );
+    const view = guidedCompletionView(result);
+    expect(view?.kind === 'failed' && view.lines).toContain('Studio stopped at step 3.');
+    expect(view?.kind === 'failed' && view.lines).not.toContain('Studio stopped at step 2.');
+  });
+
+  it.each([
+    ['no step has an action', [explStep(1, false), explStep(2, false)]],
+    ['every step is completed', [explStep(1, true, 'SUCCEEDED'), explStep(2, true, 'SUCCEEDED')]],
+    ['there are no steps', []],
+  ])('%s: no step is named and the text is unchanged', (_name, steps) => {
+    for (const [code, expected] of [
+      ['BUDGET_EXCEEDED', [GUIDED_COPY.budgetExceeded.template, GUIDED_COPY.nothingStartsOnItsOwn.template]],
+      ['ASSERTION_FAILED', [GUIDED_COPY.assertionFailed.template]],
+      ['INVALID_CONTRACT', [GUIDED_COPY.failedUnnamed.template]],
+    ] as const) {
+      const view = guidedCompletionView(failedOver(code, ...steps), null, draftOver());
+      expect(view !== null && 'lines' in view && view.lines, `${code}`).toEqual(expected);
+    }
+  });
+
+  it('LOGIN_REQUIRED, POLICY_DENIED, CANCELLED, EXPIRED and UNKNOWN_OUTCOME read the same over a stopped explanation', () => {
+    const stopped = [explStep(1, true, 'SUCCEEDED'), explStep(2, false, 'FAILED')];
+    const login = loginResult();
+    const policy = loginResult();
+    delete policy.detail;
+    policy.errorCode = 'POLICY_DENIED';
+    policy.failure = null;
+    const withOutcome = (outcome: GuidedResult['outcome']) => {
+      const r = failedWith(outcome);
+      r.outcome = outcome;
+      return r;
+    };
+    const cases = [login, policy, withOutcome('CANCELLED'), withOutcome('EXPIRED'), withOutcome('UNKNOWN_OUTCOME')];
+    for (const base of cases) {
+      const marked = { ...base, explanation: { ...base.explanation, steps: stopped } };
+      const plain = { ...base, explanation: { ...base.explanation, steps: [] } };
+      expect(guidedCompletionView(marked, null, draftOver()), `${base.outcome} ${base.errorCode}`).toEqual(
+        guidedCompletionView(plain, null, draftOver()),
+      );
+    }
+  });
+
+  it('a succeeded result is unaffected', () => {
+    const result = publishedResult();
+    result.explanation = { ...result.explanation, steps: [explStep(1, false, 'FAILED')] };
+    expect(JSON.stringify(guidedCompletionView(result))).not.toContain('stopped at step');
+  });
+
+  it('renders the step lines in the alert, the authored sentence as escaped text', () => {
+    const { container } = render(
+      <GuidedCompletion
+        input={{ kind: 'guided', result: headingShape('BUDGET_EXCEEDED'), firstLearnStepId: null }}
+        draftStepIds={DRAFT}
+        test={draftOver({ steps: [{ id: STEP(2), text: '<img src=x onerror=alert(1)> Check the heading' }] })}
+        onGoToStep={noop}
+        onOpenVariables={noop}
+      />,
+    );
+    const completion = screen.getByTestId('guided-completion');
+    expect(container.querySelector('img')).toBeNull();
+    expect(completion).toHaveTextContent('Studio stopped at step 2: "<img src=x onerror=alert(1)> Check the heading"');
+    expect(completion).toHaveTextContent('Studio most likely could not find what step 2 describes.');
+    expect(completion).toHaveTextContent(GUIDED_COPY.budgetExceeded.template);
+    expect(completion).toHaveTextContent('Nothing starts again on its own.');
+    expect(screen.queryByRole('button')).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+// Start feedback (P4; D-3, D-4, D-11)
 // ---------------------------------------------------------------------------------------------
 
 function refusal(httpStatus: number, error: Partial<NonNullable<GuidedStartRefusal['error']>> | null, extra: Partial<GuidedStartRefusal> = {}): GuidedStartRefusal {
@@ -483,17 +814,6 @@ function refusal(httpStatus: number, error: Partial<NonNullable<GuidedStartRefus
 }
 
 describe('GuidedStartFeedback: a refused start is inline feedback, not a session (P4)', () => {
-  it.each([
-    ['GUIDED_POLICY_ABSENT', GUIDED_COPY.policyAbsent.template],
-    ['GUIDED_POLICY_UNAPPROVED', GUIDED_COPY.policyUnapproved.template],
-    ['GUIDED_POLICY_PENDING_VERSION', GUIDED_COPY.policyPendingVersion.template],
-  ])('POLICY_NOT_APPROVED %s: approval needed, plus the message-specific line', (messageCode, line) => {
-    const view = guidedStartFeedbackView({ kind: 'refusal', refusal: refusal(409, { code: 'POLICY_NOT_APPROVED', messageCode }) });
-    expect(view.lines).toEqual([GUIDED_COPY.policyNotApproved.template, line]);
-    expect(view.action).toBeNull();
-    expect(view.lines.join(' ')).not.toContain(STRUCK_SECRET_FILL_COPY);
-  });
-
   it('BASE_IDENTITY_INCOMPLETE offers "Learn again from step 1" and calls back only when pressed (D-4)', async () => {
     const onLearn = vi.fn();
     render(
@@ -523,13 +843,33 @@ describe('GuidedStartFeedback: a refused start is inline feedback, not a session
     },
   );
 
-  it('MISSING_SOURCE offers "Open Variables"; ORIGIN_NOT_ALLOWED names approved access', () => {
+  it('MISSING_SOURCE offers "Open Variables"; ORIGIN_NOT_ALLOWED says the page is not in the environment\'s allowed domains', () => {
     expect(
       guidedStartFeedbackView({ kind: 'refusal', refusal: refusal(409, { code: 'MISSING_SOURCE', messageCode: 'AUTHORING_REFERENCE_MISSING' }) }),
     ).toMatchObject({ lines: [GUIDED_COPY.referenceMissing.template], action: 'openVariables' });
     expect(
-      guidedStartFeedbackView({ kind: 'refusal', refusal: refusal(403, { code: 'ORIGIN_NOT_ALLOWED', messageCode: 'PREFIX_ORIGIN_NOT_GOVERNED' }) }),
+      guidedStartFeedbackView({ kind: 'refusal', refusal: refusal(403, { code: 'ORIGIN_NOT_ALLOWED', messageCode: 'ORIGIN_NOT_ALLOWED' }) }),
     ).toMatchObject({ lines: [GUIDED_COPY.originNotAllowed.template], action: null });
+    expect(GUIDED_COPY.originNotAllowed.template).toContain("not in this environment's allowed domains");
+    // Plain text: no test-URL-origin or approved-access wording, no origin, no list, no action.
+    expect(GUIDED_COPY.originNotAllowed.template).not.toMatch(/origin|approved access|approved/iu);
+  });
+
+  it('SECRET_IN_TEXT names the secret rule and starts nothing; any other INVALID_CONTRACT keeps the generic refusal', () => {
+    expect(
+      guidedStartFeedbackView({ kind: 'refusal', refusal: refusal(422, { code: 'INVALID_CONTRACT', messageCode: 'SECRET_IN_TEXT' }) }),
+    ).toEqual({ title: null, lines: [GUIDED_COPY.secretInText.template], code: null, action: null, unavailable: false });
+    expect(GUIDED_COPY.secretInText.template).toContain('A secret can only be the whole value of a step.');
+    expect(
+      guidedStartFeedbackView({ kind: 'refusal', refusal: refusal(422, { code: 'INVALID_CONTRACT', messageCode: 'INVALID_CONTRACT' }) }).lines,
+    ).not.toContain(GUIDED_COPY.secretInText.template);
+  });
+
+  it('NO_APPLICATION_URL asks for a step that opens the application URL and starts nothing', () => {
+    expect(
+      guidedStartFeedbackView({ kind: 'refusal', refusal: refusal(422, { code: 'NO_APPLICATION_URL', messageCode: 'NO_APPLICATION_URL' }) }),
+    ).toMatchObject({ lines: ["Add a step that opens the application's URL."], action: null, unavailable: false });
+    expect(GUIDED_COPY.applicationUrlMissing.template).toBe("Add a step that opens the application's URL.");
   });
 
   it('RUNTIME_INCOMPATIBLE, refused or unavailable, says learning could not start and shows the code; no cause, no "save again" (D-11, W5 UX-01)', () => {
@@ -582,6 +922,34 @@ describe('GuidedStartFeedback: a refused start is inline feedback, not a session
       'Nothing starts again on its own.',
     ]);
     expect(view.action).toBeNull();
+  });
+
+  it('LEARNING_CAPACITY_EXHAUSTED says every learning slot is busy, states the Retry-After wait, and never starts on its own', () => {
+    const view = guidedStartFeedbackView({
+      kind: 'refusal',
+      refusal: refusal(429, { code: 'BUDGET_EXCEEDED', messageCode: 'LEARNING_CAPACITY_EXHAUSTED', retryable: true }, { retryAfterSeconds: 30 }),
+    });
+    expect(view.lines).toEqual([
+      GUIDED_COPY.learningCapacityBusy.template,
+      'You can Run again in 30 s.',
+      'Nothing starts again on its own.',
+    ]);
+    expect(view.lines.join(' ')).toContain('All learning slots are busy');
+    // Not the per-CSI budget sentence: a busy slot is not a used-up budget.
+    expect(view.lines).not.toContain(GUIDED_COPY.budgetCsi.template);
+    expect(view.action).toBeNull();
+  });
+
+  it('LEARNING_CAPACITY_EXHAUSTED without a Retry-After header says to try again in a moment', () => {
+    const view = guidedStartFeedbackView({
+      kind: 'refusal',
+      refusal: refusal(429, { code: 'BUDGET_EXCEEDED', messageCode: 'LEARNING_CAPACITY_EXHAUSTED', retryable: true }),
+    });
+    expect(view.lines).toEqual([
+      GUIDED_COPY.learningCapacityBusy.template,
+      GUIDED_COPY.learningCapacityTryAgain.template,
+      'Nothing starts again on its own.',
+    ]);
   });
 
   it('BUDGET_EXCEEDED per session says waiting will not help, and gives no wait', () => {
@@ -784,7 +1152,7 @@ describe('never-echo (AC-5(c); I-B6/I-C11): clarification, result and explanatio
     question.expiresAt = '2999-01-01T00:00:00Z';
     question.choices = [
       ...question.choices,
-      { choiceId: 'saved-input', safeLabel: VARIABLE_ID, labelSource: 'SAVED_INPUT', nodeId: null, bindingId: 'binding-order' } satisfies GuidedChoice,
+      { choiceId: 'saved-input', safeLabel: VARIABLE_ID, labelSource: 'SAVED_INPUT', bindingId: 'binding-order' } satisfies GuidedChoice,
     ].map((choice) => withCanaryKeys(choice));
     return withCanaryKeys(question);
   }
@@ -852,7 +1220,12 @@ describe('never-echo (AC-5(c); I-B6/I-C11): clarification, result and explanatio
             onOpenVariables={onOpenVariables}
           />
           <PlanExplanation result={explained} />
-          <VideoEvidencePanel guided={{ sessionId: explained.sessionId, result: explained }} />
+          <VideoEvidencePanel
+            guided={{
+              sessionId: explained.sessionId,
+              result: { executionId: explained.executionId, evidence: { video: explained.evidence.video! } },
+            }}
+          />
           <GuidedSeekControls result={explained} onSeek={() => undefined} />
         </>,
       );

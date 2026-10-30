@@ -74,13 +74,27 @@ function runnerHpas(outcome: RenderOutcome): readonly K8sDocument[] {
   });
 }
 
+/**
+ * `AUTOSCALING_ON`, with guided learning off for the value set that ships it on (`values-uat.yaml`,
+ * STUDIO-FLEX-001 item 5): guided mode and the autoscaler are exclusive, and the exclusion is asserted
+ * by its own block below.
+ */
+function autoscalingOn(valuesFile: string | null): Readonly<Record<string, string>> {
+  return valuesFile === 'values-uat.yaml' ? { ...AUTOSCALING_ON, 'studioRunner.guided.enabled': 'false' } : AUTOSCALING_ON;
+}
+
+/** Static replicas per value set: two, except UAT, whose guided learning needs exactly one pod (A2.6). */
+function staticReplicas(valuesFile: string | null): number {
+  return valuesFile === 'values-uat.yaml' ? 1 : 2;
+}
+
 const EACH_SET = VALUE_SETS.map((file) => [valueSetName(file), file] as const);
 
-describe('WP7 — the default: two static pods and no autoscaler', () => {
-  it.each(EACH_SET)('%s renders replicas: 2, no ScaledObject and no runner HPA', (_label, valuesFile) => {
+describe('WP7 — the default: static pods (two; one where guided learning is on) and no autoscaler', () => {
+  it.each(EACH_SET)('%s renders its static replicas, no ScaledObject and no runner HPA', (_label, valuesFile) => {
     const outcome = render({ valuesFile });
 
-    expect((runnerDeployment(outcome).spec as { replicas?: number }).replicas).toBe(2);
+    expect((runnerDeployment(outcome).spec as { replicas?: number }).replicas).toBe(staticReplicas(valuesFile));
     expect(scaledObjects(outcome), 'a ScaledObject rendered while autoscaling is off').toEqual([]);
     expect(runnerHpas(outcome), 'an HPA targets the runner').toEqual([]);
   });
@@ -94,7 +108,7 @@ describe('WP7 — the default: two static pods and no autoscaler', () => {
 
 describe('WP7 — autoscaling on: a backlog trigger, never CPU', () => {
   it.each(EACH_SET)('%s renders one ScaledObject aimed at the runner Deployment', (_label, valuesFile) => {
-    const outcome = render({ valuesFile, set: AUTOSCALING_ON });
+    const outcome = render({ valuesFile, set: autoscalingOn(valuesFile) });
     const spec = runnerScaledObject(outcome);
 
     expect(spec.scaleTargetRef?.kind).toBe('Deployment');
@@ -102,7 +116,7 @@ describe('WP7 — autoscaling on: a backlog trigger, never CPU', () => {
   });
 
   it.each(EACH_SET)('%s triggers on the dispatch backlog at about one queued run per pod', (_label, valuesFile) => {
-    const spec = runnerScaledObject(render({ valuesFile, set: AUTOSCALING_ON }));
+    const spec = runnerScaledObject(render({ valuesFile, set: autoscalingOn(valuesFile) }));
     const trigger = one((spec.triggers ?? []) as unknown as K8sDocument[], 'trigger') as unknown as NonNullable<
       ScaledObjectSpec['triggers']
     >[number];
@@ -122,7 +136,7 @@ describe('WP7 — autoscaling on: a backlog trigger, never CPU', () => {
   });
 
   it.each(EACH_SET)('%s renders min/max replicas and a cooldown no shorter than the run deadline', (_label, valuesFile) => {
-    const outcome = render({ valuesFile, set: AUTOSCALING_ON });
+    const outcome = render({ valuesFile, set: autoscalingOn(valuesFile) });
     const spec = runnerScaledObject(outcome);
 
     expect(spec.minReplicaCount ?? 0).toBeGreaterThanOrEqual(1);
@@ -135,7 +149,7 @@ describe('WP7 — autoscaling on: a backlog trigger, never CPU', () => {
   });
 
   it.each(EACH_SET)('%s still renders no HPA, and no replica count for the scaler to fight', (_label, valuesFile) => {
-    const outcome = render({ valuesFile, set: AUTOSCALING_ON });
+    const outcome = render({ valuesFile, set: autoscalingOn(valuesFile) });
 
     expect(runnerHpas(outcome), 'an HPA targets the runner').toEqual([]);
     expect((runnerDeployment(outcome).spec as { replicas?: number }).replicas).toBeUndefined();
@@ -227,7 +241,7 @@ describe('STUDIO-OBS-009 A2.6 — guided mode and the autoscaler are exclusive',
     expect(refused.ok, 'a ScaledObject would own the replica count of a pod guided mode needs to be exactly one').toBe(false);
     expect(refused.error).toContain('autoscaling.enabled: false');
     // The control: without guided mode the very same autoscaler values render a ScaledObject.
-    expect(scaledObjects(render({ valuesFile, set: AUTOSCALING_ON }))).toHaveLength(1);
+    expect(scaledObjects(render({ valuesFile, set: autoscalingOn(valuesFile) }))).toHaveLength(1);
   });
 
   it('a guided pod does not shrink the replay drain: the grace period is still at least the drain timeout', () => {

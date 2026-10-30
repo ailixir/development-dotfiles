@@ -1,0 +1,81 @@
+{
+ "schema": 1,
+ "purpose": "ADR-SC-007 WI-4 S0: first line of locator.ariaSnapshot() for the identity check (role and accessible name only; the snapshot also carries a textbox VALUE after the colon, which the parser never returns)",
+ "playwright": "1.63.0",
+ "chromium": "153.0.8010.12",
+ "page": "<main>\n<h1>Docs</h1>\n<button>Search</button>\n<button>Say \"hi\" \\ there</button>\n<a href=\"/a\"><img alt=\"logo\"></a>\n<a href=\"/b\">Plain link</a>\n<a href=\"/c\"></a>\n<label>User <input name=\"u\" placeholder=\"who\"></label>\n<input type=\"password\" aria-label=\"Secret pw\">\n<input type=\"checkbox\" checked=\"\" aria-label=\"Opt in\">\n<select aria-label=\"Version\"><option>3.12</option><option selected=\"\">3.13</option></select>\n<table><tbody><tr><th>K</th><td>V1</td></tr><tr><th>K2</th><td>V2</td></tr></tbody></table>\n<div role=\"group\" aria-label=\"G1\"><button>Buy</button></div>\n<div role=\"group\" aria-label=\"G2\"><button>Buy</button></div>\n<button disabled=\"\">Off</button>\n<button aria-label=\"  spaced   name  \">x</button>\n<ul><li>one</li><li>two</li></ul>\n</main>",
+ "cases": {
+  "attrInput": {
+   "count": 1,
+   "snapshot": "- textbox \"User\":\n  - /placeholder: who"
+  },
+  "namedButton": {
+   "count": 1,
+   "snapshot": "- button \"Search\""
+  },
+  "quoteButton": {
+   "count": 1,
+   "snapshot": "- button \"Say \\\"hi\\\" \\\\ there\""
+  },
+  "imgLink": {
+   "count": 1,
+   "snapshot": "- link \"logo\":\n  - /url: /a\n  - img \"logo\""
+  },
+  "plainLink": {
+   "count": 1,
+   "snapshot": "- link \"Plain link\":\n  - /url: /b"
+  },
+  "unnamedLink": {
+   "count": 1,
+   "snapshot": "- link:\n  - /url: /c"
+  },
+  "textboxLabel": {
+   "count": 1,
+   "snapshot": "- textbox \"User\":\n  - /placeholder: who"
+  },
+  "passwordBox": {
+   "count": 1,
+   "snapshot": "- textbox \"Secret pw\""
+  },
+  "checkbox": {
+   "count": 1,
+   "snapshot": "- checkbox \"Opt in\" [checked]"
+  },
+  "select": {
+   "count": 1,
+   "snapshot": "- combobox \"Version\":\n  - option \"3.12\"\n  - option \"3.13\" [selected]"
+  },
+  "cellV1": {
+   "count": 1,
+   "snapshot": "- cell \"V1\""
+  },
+  "heading": {
+   "count": 1,
+   "snapshot": "- heading \"Docs\" [level=1]"
+  },
+  "buyInG2": {
+   "count": 1,
+   "snapshot": "- button \"Buy\""
+  },
+  "filterHas": {
+   "count": 1,
+   "snapshot": "- main:\n  - heading \"Docs\" [level=1]\n  - button \"Search\"\n  - button \"Say \\\"hi\\\" \\\\ there\"\n  - link \"logo\":\n    - /url: /a\n    - img \"logo\"\n  - link \"Plain link\":\n    - /url: /b\n  - link:\n    - /url: /c\n  - text: User\n  - textbox \"User\":\n    - /placeholder: who\n  - textbox \"Secret pw\"\n  - checkbox \"Opt in\" [checked]\n  - combobox \"Version\":\n    - option \"3.12\"\n    - option \"3.13\" [selected]\n  - table:\n    - rowgroup:\n      - row \"K V1\":\n        - rowheader \"K\"\n        - cell \"V1\"\n      - row \"K2 V2\":\n        - rowheader \"K2\"\n        - cell \"V2\"\n  - group \"G1\":\n    - button \"Buy\"\n  - group \"G2\":\n    - button \"Buy\"\n  - button \"Off\" [disabled]\n  - button \"spaced name\": x\n  - list:\n    - listitem: one\n    - listitem: two"
+  },
+  "disabled": {
+   "count": 1,
+   "snapshot": "- button \"Off\" [disabled]"
+  },
+  "spaced": {
+   "count": 1,
+   "snapshot": "- button \"spaced name\": x"
+  },
+  "li": {
+   "count": 1,
+   "snapshot": "- listitem: two"
+  },
+  "nthButton": {
+   "count": 1,
+   "snapshot": "- button \"Say \\\"hi\\\" \\\\ there\""
+  }
+ }
+}

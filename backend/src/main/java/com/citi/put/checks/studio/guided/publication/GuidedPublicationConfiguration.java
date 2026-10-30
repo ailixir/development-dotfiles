@@ -46,6 +46,26 @@ public class GuidedPublicationConfiguration {
   }
 
   @Bean
+  LearnProofRepository learnProofs(JdbcTemplate jdbc) {
+    return new LearnProofRepository(jdbc);
+  }
+
+  /**
+   * The proof of every publication is accepted through the observed replay authorization; without
+   * that bean acceptance would refuse every proof as {@code AUTHORIZATION_REQUIRED} on its first
+   * use, so a missing one stops startup instead.
+   */
+  @Bean
+  PublicationProofLauncher publicationProofLauncher(
+      com.citi.put.checks.studio.dispatch.StudioAcceptanceService acceptance,
+      LearnProofRepository proofs,
+      ObservedReplayAuthorization replayAuthorization) {
+    java.util.Objects.requireNonNull(replayAuthorization, "observed replay authorization");
+    return new com.citi.put.checks.studio.dispatch.StudioPublicationProofLauncher(
+        acceptance, proofs);
+  }
+
+  @Bean
   GuidedPlanPublisher guidedPlanPublisher(
       GuidedSessionRepository sessions,
       GuidedSessionService lifecycle,
@@ -59,6 +79,7 @@ public class GuidedPublicationConfiguration {
       GuidedSessionAccess access,
       GuidedPublicationProperties properties,
       ObservedReplayProperties replay,
+      PublicationProofLauncher proofs,
       JdbcTemplate jdbc) {
     return new GuidedPlanPublisher(
         sessions,
@@ -73,6 +94,7 @@ public class GuidedPublicationConfiguration {
         access,
         properties,
         replay,
+        proofs,
         new DatabaseClock(jdbc));
   }
 
@@ -86,7 +108,8 @@ public class GuidedPublicationConfiguration {
       GuidedContracts contracts,
       com.citi.put.checks.studio.readiness.ExecutionReadinessService readiness,
       ObservedReplayProperties replay,
-      GuidedPublicPresentationProjector presentation) {
+      GuidedPublicPresentationProjector presentation,
+      LearnProofRepository proofs) {
     return new GuidedPublicationResultProjector(
         bases,
         publications,
@@ -96,7 +119,8 @@ public class GuidedPublicationConfiguration {
         contracts,
         readiness,
         replay,
-        presentation);
+        presentation,
+        proofs);
   }
 
   @Bean
@@ -114,6 +138,15 @@ public class GuidedPublicationConfiguration {
                 if (properties.enabled()) {
                   bases.capture(session, pins.requirements(session), now);
                 }
+              }
+
+              @Override
+              public void capturePreparationObservation(
+                  GuidedSessionRepository.Session current,
+                  JsonNode proposal,
+                  JsonNode proof,
+                  Instant now) {
+                evidence.capturePreparationObservation(current, proposal, proof, now);
               }
 
               @Override

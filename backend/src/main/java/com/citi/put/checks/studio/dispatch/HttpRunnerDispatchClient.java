@@ -670,15 +670,22 @@ public class HttpRunnerDispatchClient implements RunnerDispatchClient {
       remaining(deadline);
       var request = builder.POST(owned.publisher()).build();
       boolean context = operation.equals("context");
+      boolean observe = operation.equals("observe");
+      // ADR-SC-007 D8: the body of an ORDINARY prepare 409 is read too (at most 4 KiB); the prefix
+      // prepare keeps WAIT and DRIFT and is never classified here.
+      boolean ordinaryPrepare = operation.equals("prepare") && !prefixPrepare;
       exchange =
           guidedClient.sendAsync(
               request,
               info -> {
-                // A context 409 body is read too (at most 4 KiB): it may be a definite refusal.
+                // A context, observe or ordinary prepare 409 body is read too (at most 4 KiB): it
+                // may be a closed refusal that decides how the session ends.
                 var subscriber =
                     info.statusCode() == 200
                         ? new BoundedResponse(true, BoundedResponse.LIMIT)
-                        : new BoundedResponse(context && info.statusCode() == 409, REFUSAL_LIMIT);
+                        : new BoundedResponse(
+                            (context || observe || ordinaryPrepare) && info.statusCode() == 409,
+                            REFUSAL_LIMIT);
                 responseBody.set(subscriber);
                 if (stopped.get()) {
                   subscriber.close();
@@ -689,6 +696,12 @@ public class HttpRunnerDispatchClient implements RunnerDispatchClient {
           exchange.get(remaining(deadline).toNanos(), java.util.concurrent.TimeUnit.NANOSECONDS);
       if (context && response.statusCode() == 409) {
         throw contextRefusal(id, body, response.body());
+      }
+      if (observe && response.statusCode() == 409) {
+        throw observeRefusal(response.body());
+      }
+      if (ordinaryPrepare && response.statusCode() == 409) {
+        throw prepareRefusal(response.body());
       }
       require(
           response.statusCode() == 200 && response.body().length <= 1048576,
@@ -810,6 +823,78 @@ public class HttpRunnerDispatchClient implements RunnerDispatchClient {
           "UNKNOWN_OUTCOME", 409, CONTEXT_CLOSED_REFUSAL, false, null);
     }
     return new GuidedSessionException("RUNTIME_INCOMPATIBLE", 409, CONTEXT_REFUSED, false, null);
+  }
+
+  /**
+   * Classifies a runner's 409 to an observe (STUDIO-FLEX-001). A validated closed refusal {@code
+   * POLICY_DENIED} is the runner saying the page is off the allowed domains and did not come back
+   * (an observe is refused for no other policy reason), so it is {@code 403 ORIGIN_NOT_ALLOWED}; a
+   * validated {@code BUDGET_EXCEEDED} with reason {@code OBSERVATION_DEADLINE} is the runner giving
+   * up collecting a page (ADR-SC-007), a surface Studio cannot work with ({@code
+   * UNSUPPORTED_SURFACE 422}); every other body stays {@code UNKNOWN_OUTCOME}. The body is never
+   * logged or echoed.
+   */
+  private GuidedSessionException observeRefusal(byte[] reply) {
+    try {
+      JsonNode refusal = contracts.parseWire(reply);
+      contracts.validate("v3/bridge#/definitions/refusal", refusal);
+      if (refusal.path("code").asText().equals("POLICY_DENIED")) {
+        return new GuidedSessionException("ORIGIN_NOT_ALLOWED", 403);
+      }
+      // ADR-SC-007 D8: the runner stopped collecting at its observation deadline.
+      if (refusal.path("code").asText().equals("BUDGET_EXCEEDED")
+          && refusal.path("reason").asText("").equals("OBSERVATION_DEADLINE")) {
+        return new GuidedSessionException(
+            "UNSUPPORTED_SURFACE", 422, "OBSERVATION_DEADLINE", false, null);
+      }
+    } catch (RuntimeException unclassified) {
+      // Not a closed refusal: transport uncertainty.
+    } finally {
+      java.util.Arrays.fill(reply, (byte) 0);
+    }
+    return new GuidedSessionException("UNKNOWN_OUTCOME", 409);
+  }
+
+  /**
+   * Classifies a runner's 409 to an ORDINARY prepare (ADR-SC-007 D8). Only a body that validates
+   * against the closed {@code v3/bridge#/definitions/refusal} with code {@code PREPARATION_DENIED}
+   * and one of three closed reasons is a definite, no-effect refusal; each ends the run with a
+   * public code that already exists and never re-asks the model:
+   *
+   * <ul>
+   *   <li>{@code OPTION_NOT_PRESENT} (the authored literal is not among the live options): {@code
+   *       TARGET_MISMATCH};
+   *   <li>{@code NO_DURABLE_LOCATOR} (no durable locator for the picked element) and {@code
+   *       READ_NOT_ALLOWED} (the kept read profile refuses the read): {@code UNSUPPORTED_SURFACE}.
+   * </ul>
+   *
+   * The reason is the {@code messageCode}. Every other body, an unknown reason, a non-conforming or
+   * oversize body stays {@code UNKNOWN_OUTCOME}. The body is never logged or echoed.
+   */
+  private GuidedSessionException prepareRefusal(byte[] reply) {
+    try {
+      JsonNode refusal = contracts.parseWire(reply);
+      contracts.validate("v3/bridge#/definitions/refusal", refusal);
+      String reason = refusal.path("reason").asText("");
+      if (refusal.path("code").asText().equals("PREPARATION_DENIED")) {
+        switch (reason) {
+          case "OPTION_NOT_PRESENT" -> {
+            return new GuidedSessionException("TARGET_MISMATCH", 422, reason, false, null);
+          }
+          case "NO_DURABLE_LOCATOR", "READ_NOT_ALLOWED" -> {
+            return new GuidedSessionException("UNSUPPORTED_SURFACE", 422, reason, false, null);
+          }
+          default -> {
+            // Not one of the closed prepare reasons.
+          }
+        }
+      }
+    } catch (RuntimeException unclassified) {
+      // Not a closed refusal: transport uncertainty.
+    } finally {
+      java.util.Arrays.fill(reply, (byte) 0);
+    }
+    return new GuidedSessionException("UNKNOWN_OUTCOME", 409);
   }
 
   private static long transportDeadline(java.time.Instant callerDeadline) {

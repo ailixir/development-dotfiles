@@ -13,6 +13,8 @@ import {
   Chip,
   List,
   ListItem,
+  ListItemIcon,
+  ListItemText,
   Avatar,
   Stack,
   LinearProgress,
@@ -24,6 +26,7 @@ import {
   DialogActions,
   FormControl,
   Select,
+  Menu,
   MenuItem,
   Tooltip,
   Badge,
@@ -55,6 +58,7 @@ import {
   Refresh,
   KeyboardArrowUp,
   KeyboardArrowDown,
+  MoreVert,
   HelpOutline,
   PlayArrow,
 } from '@mui/icons-material';
@@ -104,11 +108,17 @@ import {
   GuidedRunStatus,
   PlanExplanation,
   guidedCopy,
+  learnedReceiptLines,
 } from '@/components/studio/guided';
 import {
+  readGuidedPointer,
   useGuidedSession,
   type UseGuidedSessionOptions,
 } from '@/components/studio/guided/useGuidedSession';
+import { GuidedLearningLog } from '@/components/studio/guided/GuidedLearningLog';
+import { stoppedStepOf } from '@/components/studio/guided/guidedStoppedStep';
+import { LastLearningAttemptNote } from '@/components/studio/guided/LastLearningAttemptNote';
+import { useLatestLearningAttempts } from '@/components/studio/guided/useLatestLearningAttempts';
 import {
   ReferencePicker,
   insertAtSelection,
@@ -118,11 +128,9 @@ import {
 import { isGuidedTerminalState } from '@/types/studio/studioGuidedTypes';
 import { saveErrorMessage } from './saveErrorMessage';
 import { declareInsertedSecret, toContractVariables, variableDeclarationIssue, type EditableVariable, type VariableDeclarationIssue } from './secretDeclaration';
-import { StudioScheduleDialog } from '@/components/studio/scheduling/StudioScheduleDialog';
-import { StudioScheduleSummary } from '@/components/studio/scheduling/StudioScheduleSummary';
 import { STUDIO_TEST_ENVIRONMENTS } from '@/components/studio/tests/testListPresentation';
 import { StudioUnavailable, TestNotAvailable, isUnavailableTestRead } from '@/components/studio/StudioUnavailable';
-import { uiTestPath, uiTestRunPath } from '@/components/studio/uiTestPaths';
+import { uiTestPath } from '@/components/studio/uiTestPaths';
 
 
 function toEditableVariables(variables: StudioVariable[] | null | undefined): EditableVariable[] {
@@ -162,6 +170,9 @@ export const RELOAD_TEST_LABEL = 'Reload test';
 
 type SaveOutcome = 'saved' | 'conflict' | 'error';
 
+/** The header's buttons are 42 px tall (the tap size the rest of the page uses). */
+const HEADER_BUTTON_HEIGHT = 42;
+
 const VARIABLE_DECLARATION_MESSAGES: Record<VariableDeclarationIssue, string> = {
   invalidSecretId: 'Select a valid secret reference.',
   duplicateName: 'Variable names must be unique. Rename or remove the duplicate.',
@@ -177,15 +188,24 @@ function formatExecutionTime(durationMs: number): string {
     : `${seconds.toFixed(1)}s`;
 }
 
+/**
+ * The run's time. `durationMs` is browser execution time only (queue time is not included), so a run
+ * that was accepted and has not started has no time to show: the chip appears when the run has a
+ * start time or a duration and counts from `startedAt`, never from `acceptedAt` (STUDIO-UNIFY-001.6
+ * AC-07).
+ */
 const ExecutionTime: React.FC<{ snapshot: ExecutionSnapshot; running: boolean }> = ({ snapshot, running }) => {
   const [now, setNow] = useState(() => Date.now());
+  const hasStarted = snapshot.startedAt !== null || snapshot.durationMs !== null;
   useEffect(() => {
-    if (!running || snapshot.durationMs !== null) return undefined;
+    if (!running || !hasStarted || snapshot.durationMs !== null) return undefined;
+    setNow(Date.now());
     const timer = window.setInterval(() => setNow(Date.now()), 250);
     return () => window.clearInterval(timer);
-  }, [running, snapshot.durationMs]);
+  }, [running, hasStarted, snapshot.durationMs]);
 
-  const started = Date.parse(snapshot.startedAt ?? snapshot.acceptedAt);
+  if (!hasStarted) return null;
+  const started = snapshot.startedAt === null ? Number.NaN : Date.parse(snapshot.startedAt);
   const elapsed = snapshot.durationMs ?? (Number.isFinite(started) ? now - started : 0);
   return (
     <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between" sx={{ mb: 1.5 }}>
@@ -310,16 +330,59 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
     sessionId: string | null;
     refusal: typeof guided.startRefusal;
   }>({ sessionId: null, refusal: null });
+  /** The proof execution this page has subscribed to: a learn's proof is followed once, never started. */
+  const proofSubscribedRef = useRef<string | null>(null);
+  /** The execution on screen is the proof of a learn, so the learned receipt sits above it. */
+  const [proofRunId, setProofRunId] = useState<string | null>(null);
+  /** The execution whose subscription ended (denied, gone, exhausted) without this page ever getting a snapshot. */
+  const [unfollowedRunId, setUnfollowedRunId] = useState<string | null>(null);
   const guidedSessionId = guidedView?.session.sessionId ?? null;
   /** The session this page follows for the test, known from the pointer before its first read. */
   const followedSessionId = useAppSelector((state) =>
     selectedScenario ? (state.studio.guidedSessionByTestId[selectedScenario] ?? null) : null,
   );
   const guidedVisible = guidedView !== null && guidedSessionId !== supersededByReplay.sessionId;
+  /**
+   * STUDIO-UNIFY-001.6 AC-02: the step a failed learn stopped at, when its explanation proves one
+   * (`stoppedStepOf`). Derived from the result on screen, so it is gone the moment a new guided
+   * session starts (its state is no longer terminal) or a replay replaces the session on screen
+   * (`guidedVisible`); nothing has to clear it. A step is marked only if it is still in the editor.
+   */
+  const guidedStoppedStepId = useMemo(
+    () => (guidedVisible && guidedTerminal && guided.result ? (stoppedStepOf(guided.result)?.stepId ?? null) : null),
+    [guided.result, guidedTerminal, guidedVisible],
+  );
+  /**
+   * The recording of a learn that did not publish, shown as the learning attempt and never as a proof.
+   * A published learn has none (`evidence.video` is null; its proof is the replay).
+   */
+  const attemptVideo = guidedTerminal && guided.result !== null ? guided.result.evidence.video : null;
+  /** The execution on screen is the proof of the learn this page follows (not a later Run's replay). */
+  const proofOfLearn =
+    proofRunId !== null && guidedView !== null && guided.result !== null && guided.result.proof?.executionId === proofRunId;
+  /** "Learned from this run": the learned receipt that stays above the proof replay once the page follows it. */
+  const proofReceiptLines = useMemo(
+    () =>
+      guided.result !== null && guided.result.publication.status === 'PUBLISHED'
+        ? learnedReceiptLines(guided.result, guidedView?.session.firstLearnStepId ?? null)
+        : [],
+    [guided.result, guidedView],
+  );
   const visibleStartRefusal =
     guided.startRefusal !== null && guided.startRefusal !== supersededByReplay.refusal ? guided.startRefusal : null;
-  /** A replay in flight, or a guided session that has not ended. Either locks the editor. */
-  const running = isRunning || guidedActive;
+  /**
+   * The proof of a learn that published: the observed replay of the revision it just published
+   * (`result.proof`, trigger source `AFTER_LEARN`). Null while the learn runs, when it did not
+   * publish, and when the replay was refused or not accepted (then Run is the action).
+   */
+  const proofExecutionId =
+    guidedTerminal && guided.result !== null && guided.result.publication.status === 'PUBLISHED'
+      ? (guided.result.proof?.executionId ?? null)
+      : null;
+  /** The result names a proof replay this page has not subscribed to yet: Run stays off (no second run). */
+  const proofStarting = guidedVisible && proofExecutionId !== null;
+  /** A replay in flight, a proof about to be followed, or a guided session that has not ended. Any locks the editor. */
+  const running = isRunning || guidedActive || proofStarting;
   const editorLocked = running || isPreparing;
   /** STUDIO-OBS-008 AC-5: the server's capability for this saved test, never a build switch. */
   const capabilities = useStudioCapabilities(selectedScenario);
@@ -394,8 +457,6 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
   const navigate = useNavigate();
   const params = useParams();
   const selectedScenarioData = scenarios?.find(s => s.id === selectedScenario) || null;
-  /** The test the editor is open on: the in-page back and the schedule dialog's run links belong to it. */
-  const openTestId = selectedScenarioData?.id ?? params.id ?? null;
   const dispatch = useDispatch();
 
   /** Puts a draft the server returned into the editor. The server's copy is the only draft. */
@@ -450,13 +511,36 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /**
+   * A learn this tab followed before (its pointer is in session storage) is read first: a learn still
+   * running, or a published learn whose proof replay is still running, must lock Run before an autorun
+   * can ask for a second run. A proof is known to be over only from its first snapshot, and a terminal
+   * one only once the page has stopped counting the run as live (the store clears that a render later).
+   * A session that cannot be read, or whose result is pending, does not hold the request back, and
+   * neither does a proof this page cannot follow (access refused, or the execution is gone).
+   */
+  const guidedSettledForAutorun =
+    guided.unreadable ||
+    guided.pending !== null ||
+    (guidedView !== null &&
+      (!guidedTerminal || guided.result !== null) &&
+      (proofExecutionId === null ||
+        (proofRunId === proofExecutionId &&
+          ((snapshot !== null &&
+            snapshot.executionId === proofExecutionId &&
+            (!isTerminalExecutionStatus(snapshot.status) || !isRunning)) ||
+            (unfollowedRunId === proofExecutionId && !isRunning)))));
+
   useEffect(() => {
     if (!autorunWanted.current) return;
     if (!draft || draft.id !== params.id || selectedScenario !== draft.id) return;
+    // The store learns of the pointer a render after mount, so the pointer itself says "followed".
+    const followsSession = followedSessionId !== null || (readGuidedPointer(draft.id)?.sessionId ?? null) !== null;
+    if (followsSession && !guidedSettledForAutorun) return;
     autorunWanted.current = false;
     autorunBaseline.current = { steps: testSteps, variables: variablesList, environment };
     setAutorunRequest({ token: 1, testId: draft.id });
-  }, [draft, environment, params.id, selectedScenario, testSteps, variablesList]);
+  }, [followedSessionId, guidedSettledForAutorun, draft, environment, params.id, selectedScenario, testSteps, variablesList]);
 
   useEffect(() => {
     const baseline = autorunBaseline.current;
@@ -478,9 +562,12 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
   const hasPendingStep = newStep.trim() !== '';
   /** VAL-038: the run outcome alerts render here, full width below the header. */
   const [runAlertsSlot, setRunAlertsSlot] = useState<HTMLDivElement | null>(null);
-  const [scheduleOpen, setScheduleOpen] = useState(false);
+  /** STUDIO-UNIFY-001.6 AC-05: the captions beside Run render in a slot under the header. */
+  const [runCaptionSlot, setRunCaptionSlot] = useState<HTMLDivElement | null>(null);
 
   const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
+  /** The step row whose "⋮" menu is open (Move up, Move down, Delete step), and the button it hangs from. */
+  const [stepMenu, setStepMenu] = useState<{ anchor: HTMLElement; index: number } | null>(null);
   const pendingNavigationRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
@@ -653,14 +740,16 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
    * still lifted into page state, so 10.11a's `ExecutionProgressView` renders it unchanged; that
    * is the substitution its own comment anticipated.
    */
-  const beginRun = useCallback((executionId: string) => {
+  const beginRun = useCallback((executionId: string, isProof = false) => {
     setSupersededByReplay({ sessionId: guidedSessionId, refusal: guided.startRefusal });
+    setProofRunId(isProof ? executionId : null);
     dispatch(setExecuting(true));
     dispatch(clearLogs());
     setSnapshot(null);
     currentExecutionIdRef.current = executionId;
     closeSubscription();
     setAccessDenied(null);
+    setUnfollowedRunId(null);
     setIsStopping(false);
     setStopError(null);
     subscriptionRef.current = subscribeToExecution(executionId, {
@@ -673,7 +762,7 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
         const passedCount = exec.stepResults?.filter((r) => r.status === 'PASS').length ?? 0;
         dispatch(setCurrentStepAction(runningIndex >= 0 ? runningIndex : passedCount - 1));
         if (Array.isArray(exec.logs)) {
-          dispatch(setExecutionLogs(toStudioLogLines(exec.logs)));
+          dispatch(setExecutionLogs(toStudioLogLines(exec.logs, exec.endedAt)));
         }
         // The *run* stops being in flight on a terminal outcome. The **stream** does not close
         // here: §5.4 row 5 keeps it open while evidence is still being produced, and that rule
@@ -703,16 +792,34 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
       onStatus: (status) => setTransportStatus(status),
       onAccessDenied: ({ status }) => {
         setAccessDenied(status);
+        setUnfollowedRunId(executionId);
         dispatch(setExecuting(false));
         setIsStopping(false);
       },
-      onClosed: () => {
+      onClosed: (reason) => {
+        if (reason !== 'caller') setUnfollowedRunId(executionId);
         subscriptionRef.current = null;
         dispatch(setExecuting(false));
         setIsStopping(false);
       },
     });
   }, [closeSubscription, dispatch, guidedSessionId, guided.startRefusal, replaceScenario]);
+
+  /*
+   * The proof of a learn that published is followed here, once per execution id. The backend accepted
+   * that replay inside the publication commit (`result.proof`), so this subscribes through `beginRun`
+   * and never calls execute: the single execute call site stays `RunControl`'s. A reload re-reads the
+   * result, which names the same execution, and subscribes again. It waits for a replay already in
+   * flight on this page and for a guided view a replay has superseded, so an older session's proof
+   * never takes the screen from a Run the author just started.
+   */
+  useEffect(() => {
+    if (proofExecutionId === null || !guidedVisible || isRunning) return;
+    if (proofSubscribedRef.current === proofExecutionId) return;
+    proofSubscribedRef.current = proofExecutionId;
+    setRightTab('proof');
+    beginRun(proofExecutionId, true);
+  }, [proofExecutionId, guidedVisible, isRunning, beginRun]);
 
   /*
    * Story 10.11a, AC-3(a): the client-side Python regeneration that used to run here on every
@@ -748,6 +855,8 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
     setStopError(null);
     setSaveConflict(null);
     setSupersededByReplay({ sessionId: null, refusal: null });
+    proofSubscribedRef.current = null;
+    setProofRunId(null);
     setFocusRequest(null);
     setReferenceRefusal(null);
     dispatch(setExecuting(false));
@@ -917,6 +1026,14 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
   }, [loadDraftIntoEditor, replaceScenario, selectedScenarioData?.id]);
 
   /**
+   * STUDIO-UNIFY-001.6 AC-04: this test's latest terminal learning attempt, from the server (a failed
+   * learn is persisted there, so it is still known after leaving the editor). One read when the test
+   * is selected and one more when a guided session on this page ends; no polling, no client store.
+   */
+  const attemptTestIds = useMemo(() => (selectedScenario ? [selectedScenario] : []), [selectedScenario]);
+  const { byTestId: latestAttempts, refresh: refreshLatestAttempt } = useLatestLearningAttempts(attemptTestIds);
+
+  /**
    * A guided session this page followed has just ended: read the test again, because its readiness
    * may have changed (learned, or still not ready). This is a read, never a run: learning completion
    * and finalization never cause a second execution (AC-2).
@@ -930,6 +1047,9 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
     if (previous === null || isGuidedTerminalState(previous)) return;
     const id = latestSelectionRef.current;
     if (!id) return;
+    // The attempt that just ended is the test's new latest one (AC-04): read it once, so the line is
+    // right without a reload.
+    refreshLatestAttempt();
     studioApi.getTest(id).then(
       (fresh) => {
         if (latestSelectionRef.current !== id) return;
@@ -938,7 +1058,7 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
       },
       () => undefined,
     );
-  }, [guidedState, replaceScenario]);
+  }, [guidedState, refreshLatestAttempt, replaceScenario]);
 
   /**
    * W5-1 (ruling `w5-unreadable-and-alias.md` §2): the followed session's read was refused before any
@@ -990,9 +1110,9 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
     [answerGuided],
   );
   /**
-   * T0 ruling A3: "None of these — I'll edit step N", and declining a side-effect confirmation,
-   * cancel the session with `reason: userRequested` under its one stable key, and only then move
-   * focus to step N's editor row. Never a `clarify`, never a second cancel, never a new start. The
+   * T0 ruling A3: "None of these — I'll edit step N" cancels the session with
+   * `reason: userRequested` under its one stable key, and only then moves focus to step N's editor
+   * row. Never a `clarify`, never a second cancel, never a new start. The
    * server's answer is shown as it is (the existing `CANCELLED` narrative, or whatever state the
    * session had already reached).
    */
@@ -1150,15 +1270,38 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
           flexDirection: { xs: 'column', lg: 'row' },
           alignItems: { xs: 'stretch', lg: 'center' },
           justifyContent: 'space-between',
-          gap: 2,
+          gap: { xs: 2, lg: 1.5 },
         }}
       >
-        <Stack direction="row" spacing={1.5} alignItems="center" minWidth={0}>
+        {/*
+         * STUDIO-UNIFY-001.6 AC-05. Side by side (`lg` and up) the title column takes the width the
+         * actions leave (`1 1 0`, `minWidth: 0`). The actions are one right-aligned row: guide,
+         * Templates, Save, then Run Test flush with the header's right edge. The captions beside Run
+         * render in a slot under that row, inside the header, and Run keeps its readiness chip out of
+         * the column's width, so neither moves a button; the title column is the taller one, so the
+         * slot holds a one-line caption without making the header taller, and the panels do not move
+         * when it goes. Stacked below `lg`: one wrapping row, ordered Templates, guide, Save, Run.
+         */}
+        <Stack
+          direction="row"
+          spacing={1.5}
+          alignItems="center"
+          sx={{ minWidth: 0, flex: { xs: '0 0 auto', lg: '1 1 0' } }}
+        >
           <Avatar sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}>
             <Science aria-hidden="true" />
           </Avatar>
           <Box minWidth={0}>
-            <Breadcrumbs separator="›">
+            <Breadcrumbs
+              separator="›"
+              sx={{
+                // One line: the test-name crumb gives way (ellipsis), "All Checks" and "Studio" do not.
+                '& .MuiBreadcrumbs-ol': { flexWrap: 'nowrap' },
+                '& .MuiBreadcrumbs-li': { minWidth: 0 },
+                '& .MuiBreadcrumbs-li:first-of-type, & .MuiBreadcrumbs-li:last-of-type': { flexShrink: 0 },
+                '& .MuiBreadcrumbs-separator': { flexShrink: 0 },
+              }}
+            >
               <Link
                 component={RouterLink}
                 to="/checks/all"
@@ -1183,6 +1326,7 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                   variant="body2"
                   noWrap
                   data-testid="studio-breadcrumb-test"
+                  sx={{ display: 'block' }}
                   onClick={(event: React.MouseEvent) => {
                     // The same leave guard as the All Checks crumb and the in-page back.
                     if (!isDirty) return;
@@ -1219,76 +1363,102 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
           </Box>
         </Stack>
 
-        <Stack direction="row" spacing={1} alignItems="flex-start" justifyContent="flex-end" flexWrap="wrap" useFlexGap>
-          <Button disabled={!selectedScenarioData} onClick={() => setScheduleOpen(true)} sx={{ minHeight: 42 }}>Manage schedule</Button>
-          <Button
-            variant="text"
-            size="small"
-            onClick={() => setTemplatesOpen(true)}
-            disabled={editorLocked}
-            sx={{ minHeight: 42, whiteSpace: 'nowrap' }}
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: { xs: 'flex-start', lg: 'flex-end' },
+            alignSelf: { lg: 'flex-start' },
+            flex: { xs: '0 0 auto', lg: '0 1 auto' },
+          }}
+        >
+          <Stack
+            direction="row"
+            spacing={1}
+            alignItems="flex-start"
+            justifyContent="flex-end"
+            flexWrap="wrap"
+            useFlexGap
+            sx={{ flexWrap: { xs: 'wrap', lg: 'nowrap' } }}
           >
-            Templates
-          </Button>
-          <Tooltip title="Show guide">
-            <IconButton
+            {/* `order` sets the sequence: below `lg` Templates, guide, Save, Run; from `lg` guide first. */}
+            <Tooltip title="Show guide">
+              <IconButton
+                size="small"
+                onClick={() => {
+                  setForceCoach(true);
+                  setCoachStep(0);
+                  try { localStorage.removeItem('studio:coachStep'); } catch { /* storage unavailable */ }
+                }}
+                aria-label="Show guide"
+                sx={{ width: HEADER_BUTTON_HEIGHT, height: HEADER_BUTTON_HEIGHT, order: { xs: 2, lg: 0 } }}
+              >
+                <HelpOutline />
+              </IconButton>
+            </Tooltip>
+            <Button
+              variant="text"
               size="small"
-              onClick={() => {
-                setForceCoach(true);
-                setCoachStep(0);
-                try { localStorage.removeItem('studio:coachStep'); } catch { /* storage unavailable */ }
-              }}
-              aria-label="Show guide"
-              sx={{ width: 42, height: 42 }}
+              onClick={() => setTemplatesOpen(true)}
+              disabled={editorLocked}
+              sx={{ minHeight: HEADER_BUTTON_HEIGHT, whiteSpace: 'nowrap', order: 1 }}
             >
-              <HelpOutline />
-            </IconButton>
-          </Tooltip>
-          <Button
-            variant={isDirty ? 'contained' : 'outlined'}
-            startIcon={<Save />}
-            disabled={editorLocked || isSaving || !selectedScenarioData}
-            onClick={() => { void saveDraft(); }}
-            sx={{ minHeight: 42, whiteSpace: 'nowrap' }}
-          >
-            {isSaving ? 'Saving…' : 'Save'}
-          </Button>
-          <RunControl
-            testId={selectedScenarioData?.id ?? null}
-            refreshToken={`${selectedScenarioData?.sourceRevision ?? 0}:${selectedScenarioData?.configurationRevision ?? 0}:${selectedScenarioData?.readiness ?? ''}:${selectedScenarioData?.confirmedRevisionId ?? ''}:${guidedRefresh}`}
-            isRunning={running}
-            onPreparingChange={setIsPreparing}
-            isDirty={isDirty || hasPendingStep}
-            onSaveBeforeRun={saveDraft}
-            hasSteps={testSteps.length > 0 || hasPendingStep}
-            runRequest={runRequest}
-            autorunRequest={autorunRequest}
-            onAutorunSettled={dropAutorun}
-            onAccepted={(executionId) => {
-              setRightTab('proof');
-              beginRun(executionId);
+              Templates
+            </Button>
+            <Button
+              variant={isDirty ? 'contained' : 'outlined'}
+              startIcon={<Save />}
+              disabled={editorLocked || isSaving || !selectedScenarioData}
+              onClick={() => { void saveDraft(); }}
+              sx={{ minHeight: HEADER_BUTTON_HEIGHT, whiteSpace: 'nowrap', order: 3 }}
+            >
+              {isSaving ? 'Saving…' : 'Save'}
+            </Button>
+            <Box sx={{ order: 4 }}>
+              <RunControl
+                testId={selectedScenarioData?.id ?? null}
+                refreshToken={`${selectedScenarioData?.sourceRevision ?? 0}:${selectedScenarioData?.configurationRevision ?? 0}:${selectedScenarioData?.readiness ?? ''}:${selectedScenarioData?.confirmedRevisionId ?? ''}:${guidedRefresh}`}
+                isRunning={running}
+                onPreparingChange={setIsPreparing}
+                isDirty={isDirty || hasPendingStep}
+                onSaveBeforeRun={saveDraft}
+                hasSteps={testSteps.length > 0 || hasPendingStep}
+                runRequest={runRequest}
+                autorunRequest={autorunRequest}
+                onAutorunSettled={dropAutorun}
+                onAccepted={(executionId) => {
+                  setRightTab('proof');
+                  beginRun(executionId);
+                }}
+                onStop={guidedActive ? stopGuided : handleStop}
+                isStopping={guidedActive ? guidedStopping : isStopping}
+                alertsContainer={runAlertsSlot}
+                captionContainer={runCaptionSlot}
+                startLearn={guided.startLearn}
+                guidedStartRefusal={visibleStartRefusal}
+                onOpenVariables={openVariables}
+                learnRequest={learnRequest}
+                followsLearningSession={followedSessionId !== null && !guidedTerminal}
+                sessionUnreadable={guided.unreadable}
+              />
+            </Box>
+          </Stack>
+          {/*
+            * The captions beside Run (why a start was not made, why Run is off, "Add a step"), under the
+            * action row and right-aligned with it from `lg`, at most 280 px wide. Empty, it takes no space.
+            */}
+          <Box
+            ref={setRunCaptionSlot}
+            data-testid="run-caption-slot"
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: { xs: 'flex-start', lg: 'flex-end' },
+              '&:empty': { display: 'none' },
             }}
-            onStop={guidedActive ? stopGuided : handleStop}
-            isStopping={guidedActive ? guidedStopping : isStopping}
-            alertsContainer={runAlertsSlot}
-            startLearn={guided.startLearn}
-            guidedStartRefusal={visibleStartRefusal}
-            onOpenVariables={openVariables}
-            learnRequest={learnRequest}
-            followsLearningSession={followedSessionId !== null && !guidedTerminal}
-            sessionUnreadable={guided.unreadable}
           />
-        </Stack>
+        </Box>
       </Paper>
-      {selectedScenarioData && <Box sx={{ mb: 2 }}><StudioScheduleSummary testId={selectedScenarioData.id}
-        refreshToken={`${selectedScenarioData.sourceRevision}:${selectedScenarioData.configurationRevision}:${selectedScenarioData.confirmedRevisionId ?? ''}`} /></Box>}
-      <StudioScheduleDialog
-        test={scheduleOpen ? selectedScenarioData : null}
-        dirty={isDirty || hasPendingStep}
-        runHref={(executionId) => (openTestId ? uiTestRunPath(openTestId, executionId) : '/checks/all')}
-        onClose={() => setScheduleOpen(false)}
-      />
-
       {/* VAL-038: Run's outcome alerts, full width so the header keeps its title and actions. */}
       <Box
         ref={setRunAlertsSlot}
@@ -1332,6 +1502,15 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                     )}
                     {(selectedScenarioData.updatedAt || selectedScenarioData.createdAt) && (
                       <Typography variant="caption" color="text.secondary">Updated: {new Date((selectedScenarioData.updatedAt || selectedScenarioData.createdAt) as string).toLocaleString()}</Typography>
+                    )}
+                    {/* A learn in flight is not "the last attempt"; the note returns when it ends. */}
+                    {!guidedActive && (
+                      <LastLearningAttemptNote
+                        testId={selectedScenarioData.id}
+                        readiness={selectedScenarioData.readiness}
+                        sourceRevision={selectedScenarioData.sourceRevision}
+                        attempt={latestAttempts.get(selectedScenarioData.id)}
+                      />
                     )}
                   </Stack>
                 ) : (
@@ -1435,7 +1614,9 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
 
                 <List dense>
                   {testSteps.map((step, index) => {
-                    const stepResult = stepResultsMap[index];
+                    // A replay's per-step result wins; otherwise the step a failed learn stopped at is
+                    // marked as failed (STUDIO-UNIFY-001.6 AC-02).
+                    const stepResult = stepResultsMap[index] ?? (step.id === guidedStoppedStepId ? 'failed' : undefined);
                     const isCurrentStep = index === currentStep;
                     
                     return (
@@ -1479,7 +1660,7 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                             variant="standard"
                             fullWidth
                             multiline
-                            minRows={2}
+                            minRows={1}
                             maxRows={8}
                             inputProps={{
                               'aria-label': `Step ${index + 1}`,
@@ -1509,57 +1690,71 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                             }}
                           />
                         </Box>
-                        <Stack
-                          direction="row"
-                          spacing={0.25}
-                          sx={{ flexShrink: 0, '& .MuiIconButton-root': { width: 36, height: 36 } }}
+                        {/* One "⋮" per row, level with the first text line: the step text keeps the row width. */}
+                        <IconButton
+                          size="small"
+                          aria-label={`Actions for step ${index + 1}`}
+                          aria-haspopup="menu"
+                          disabled={editorLocked}
+                          onClick={(e) => setStepMenu({ anchor: e.currentTarget, index })}
+                          sx={{ flexShrink: 0, width: 28, height: 28, mt: 0.5 }}
                         >
-                          <Tooltip title="Move up">
-                            <span>
-                              <IconButton aria-label={`Move step ${index + 1} up`} size="small" disabled={editorLocked || index === 0} onClick={(e) => {
-                                e.stopPropagation();
-                                const next = [...testSteps];
-                                const [moved] = next.splice(index, 1);
-                                next.splice(index - 1, 0, moved);
-                                setTestSteps(next);
-                              }}>
-                                <KeyboardArrowUp fontSize="small" />
-                              </IconButton>
-                            </span>
-                          </Tooltip>
-                          <Tooltip title="Move down">
-                            <span>
-                              <IconButton aria-label={`Move step ${index + 1} down`} size="small" disabled={editorLocked || index === testSteps.length - 1} onClick={(e) => {
-                                e.stopPropagation();
-                                const next = [...testSteps];
-                                const [moved] = next.splice(index, 1);
-                                next.splice(index + 1, 0, moved);
-                                setTestSteps(next);
-                              }}>
-                                <KeyboardArrowDown fontSize="small" />
-                              </IconButton>
-                            </span>
-                          </Tooltip>
-                          <Tooltip title="Remove step">
-                            <span>
-                              <IconButton 
-                                aria-label={`Remove step ${index + 1}`}
-                                size="small" 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  removeTestStep(index);
-                                }}
-                                disabled={editorLocked}
-                              >
-                                <Delete sx={{ fontSize: 16 }} />
-                              </IconButton>
-                            </span>
-                          </Tooltip>
-                        </Stack>
+                          <MoreVert fontSize="small" />
+                        </IconButton>
                       </ListItem>
                     );
                   })}
                 </List>
+                <Menu
+                  anchorEl={stepMenu?.anchor ?? null}
+                  open={stepMenu !== null}
+                  onClose={() => setStepMenu(null)}
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                  transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                >
+                  <MenuItem
+                    disabled={editorLocked || stepMenu === null || stepMenu.index === 0}
+                    onClick={() => {
+                      if (stepMenu === null) return;
+                      const { index } = stepMenu;
+                      setStepMenu(null);
+                      const next = [...testSteps];
+                      const [moved] = next.splice(index, 1);
+                      next.splice(index - 1, 0, moved);
+                      setTestSteps(next);
+                    }}
+                  >
+                    <ListItemIcon><KeyboardArrowUp fontSize="small" /></ListItemIcon>
+                    <ListItemText>Move up</ListItemText>
+                  </MenuItem>
+                  <MenuItem
+                    disabled={editorLocked || stepMenu === null || stepMenu.index === testSteps.length - 1}
+                    onClick={() => {
+                      if (stepMenu === null) return;
+                      const { index } = stepMenu;
+                      setStepMenu(null);
+                      const next = [...testSteps];
+                      const [moved] = next.splice(index, 1);
+                      next.splice(index + 1, 0, moved);
+                      setTestSteps(next);
+                    }}
+                  >
+                    <ListItemIcon><KeyboardArrowDown fontSize="small" /></ListItemIcon>
+                    <ListItemText>Move down</ListItemText>
+                  </MenuItem>
+                  <MenuItem
+                    disabled={editorLocked}
+                    onClick={() => {
+                      if (stepMenu === null) return;
+                      const { index } = stepMenu;
+                      setStepMenu(null);
+                      removeTestStep(index);
+                    }}
+                  >
+                    <ListItemIcon><Delete fontSize="small" /></ListItemIcon>
+                    <ListItemText>Delete step</ListItemText>
+                  </MenuItem>
+                </Menu>
 
                 {/* Add Step */}
                 <Box sx={{ mt: 2 }}>
@@ -1724,8 +1919,19 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                      */
                     <Stack spacing={2} data-testid="guided-run" sx={{ mb: 2, minWidth: 0 }}>
                       {(guided.pending === 'NOT_READY' || guided.pending === 'REAUTHENTICATION_REQUIRED') && (
-                        <Alert severity="info" data-testid="guided-pending" data-pending={guided.pending}>
-                          {guidedCopy('notReadyNow')}
+                        <Alert
+                          severity={guided.pending === 'REAUTHENTICATION_REQUIRED' ? 'warning' : 'info'}
+                          data-testid="guided-pending"
+                          data-pending={guided.pending}
+                          action={finalizeHeld ? (
+                            <Button color="inherit" size="small" data-testid="guided-finalize-retry" onClick={guided.retryFinalize}>
+                              {guidedCopy('tryAgain')}
+                            </Button>
+                          ) : undefined}
+                        >
+                          {guided.pending === 'REAUTHENTICATION_REQUIRED' && guidedState === 'FINALIZING'
+                            ? guidedCopy('signInToFinish')
+                            : guidedCopy('notReadyNow')}
                         </Alert>
                       )}
                       {!finalizeHeld && <GuidedRunStatus session={guidedView.session} draftStepIds={draftStepIds} />}
@@ -1747,33 +1953,33 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                               firstLearnStepId: guidedView.session.firstLearnStepId ?? null,
                             }}
                             draftStepIds={draftStepIds}
+                            test={draft}
                             onGoToStep={requestStepFocus}
                             onOpenVariables={openVariables}
                           />
                           <PlanExplanation result={guided.result} test={draft} />
                         </>
                       )}
-                      <Paper variant="outlined" sx={{ p: 2, minWidth: 0 }}>
-                        {guided.result !== null ? (
-                          <Stack spacing={1.5}>
-                            <VideoEvidencePanel
-                              ref={videoRef}
-                              guided={{ sessionId: guided.result.sessionId, result: guided.result }}
-                            />
-                            <GuidedSeekControls
-                              key={guided.result.sessionId}
-                              result={guided.result}
-                              onSeek={handleSeekStep}
-                              recording={{ durationMs: recordingDurationMs }}
-                            />
-                          </Stack>
-                        ) : (
-                          <VideoEvidencePanel ref={videoRef} snapshot={null} runInProgress={guidedActive} />
-                        )}
-                      </Paper>
+                      {guidedActive && (
+                        <Typography variant="body2" color="text.secondary" data-testid="guided-proof-notice">
+                          {guidedCopy('proofWillReplay')}
+                        </Typography>
+                      )}
+                      {guidedTerminal && attemptVideo !== null && (
+                        <Typography variant="body2" color="text.secondary" data-testid="learning-recording-in-logs">
+                          No execution proof is available for this learning attempt. Its recording is available in Logs.
+                        </Typography>
+                      )}
                     </Stack>
                   ) : (
                     <>
+                      {proofRunId !== null && (snapshot === null || snapshot.executionId === proofRunId) && (
+                        <Stack spacing={0.5} sx={{ mb: 1.5 }} data-testid="guided-proof-receipt">
+                          {proofReceiptLines.map((line) => (
+                            <Typography key={line} variant="body2">{line}</Typography>
+                          ))}
+                        </Stack>
+                      )}
                       {isRunning && currentStep < 0 && (
                         <Box sx={{ mb: 2 }}>
                           <LinearProgress aria-label="Waiting for execution progress" />
@@ -1825,8 +2031,22 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                         </Box>
                       )}
                       <Paper variant="outlined" sx={{ p: 2 }}>
-                        <VideoEvidencePanel ref={videoRef} snapshot={snapshot} runInProgress={isRunning} />
+                        {/*
+                         * A run that has not ended has no outcome to describe, and its recording is not
+                         * "still being produced" yet: only a terminal snapshot reaches the evidence
+                         * narratives; before that the panel says the run is in progress (AC-07).
+                         */}
+                        <VideoEvidencePanel
+                          ref={videoRef}
+                          snapshot={snapshot !== null && isTerminalExecutionStatus(snapshot.status) ? snapshot : null}
+                          runInProgress={isRunning}
+                        />
                       </Paper>
+                      {proofOfLearn && guided.result !== null && (
+                        <Box sx={{ mt: 2 }}>
+                          <PlanExplanation result={guided.result} test={draft} omitHistory />
+                        </Box>
+                      )}
                     </>
                   )}
                 </Box>
@@ -1835,15 +2055,50 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                   <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Code sx={{ fontSize: 18 }} /> Live execution logs
                   </Typography>
-                  <Paper variant="outlined" sx={{ minHeight: 360, maxHeight: 520, overflow: 'auto', bgcolor: 'grey.900', color: 'white', fontFamily: 'monospace', fontSize: '0.8rem', p: 1.5 }}>
-                    {executionLogs.map((log: { timestamp: string; message: string; type: 'info' | 'error' | 'success' }, index: number) => (
-                      <Box key={`${log.timestamp}-${index}`} sx={{ mb: 0.75, display: 'flex', gap: 1 }}>
-                        <Typography component="span" sx={{ color: 'grey.400', minWidth: 64, fontFamily: 'inherit', fontSize: 'inherit' }}>{log.timestamp}</Typography>
-                        <Typography component="span" sx={{ color: log.type === 'error' ? 'error.light' : 'white', fontFamily: 'inherit', fontSize: 'inherit' }}>{log.message}</Typography>
-                      </Box>
-                    ))}
-                    {executionLogs.length === 0 && <Box sx={{ color: 'grey.400' }}>No logs are available.</Box>}
-                  </Paper>
+                  {guidedVisible && guidedView ? (
+                    /* A learning run has no log stream: what it did, from its counters and explanation (AC-03). */
+                    <>
+                      <GuidedLearningLog session={guidedView.session} result={guided.result} />
+                      {rightTab === 'logs' && guidedTerminal && attemptVideo !== null && guided.result !== null && (
+                        <Paper variant="outlined" sx={{ p: 2, minWidth: 0 }} data-testid="guided-attempt">
+                          <Stack spacing={1.5}>
+                            <Typography variant="subtitle2" component="h3" data-testid="guided-attempt-title">
+                              {guidedCopy('learningAttemptTitle')}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" data-testid="guided-attempt-note">
+                              {guidedCopy('learningAttemptNote')}
+                            </Typography>
+                            <VideoEvidencePanel
+                              ref={videoRef}
+                              guided={{
+                                sessionId: guided.result.sessionId,
+                                result: { executionId: guided.result.executionId, evidence: { video: attemptVideo } },
+                              }}
+                            />
+                            <GuidedSeekControls
+                              key={guided.result.sessionId}
+                              result={guided.result}
+                              onSeek={seekToOffset}
+                              recording={{ durationMs: recordingDurationMs }}
+                            />
+                          </Stack>
+                        </Paper>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                    {proofOfLearn && guidedView && <GuidedLearningLog session={guidedView.session} result={guided.result} />}
+                    <Paper variant="outlined" sx={{ minHeight: executionLogs.length === 0 ? 360 : undefined, maxHeight: 520, overflow: 'auto', bgcolor: 'grey.900', color: 'white', fontFamily: 'monospace', fontSize: '0.8rem', p: 1.5, mt: proofOfLearn ? 2 : 0 }}>
+                      {executionLogs.map((log: { timestamp: string; message: string; type: 'info' | 'error' | 'success' }, index: number) => (
+                        <Box key={`${log.timestamp}-${index}`} sx={{ mb: 0.75, display: 'flex', gap: 1 }}>
+                          <Typography component="span" sx={{ color: 'grey.400', minWidth: 64, fontFamily: 'inherit', fontSize: 'inherit' }}>{log.timestamp}</Typography>
+                          <Typography component="span" sx={{ color: log.type === 'error' ? 'error.light' : 'white', fontFamily: 'inherit', fontSize: 'inherit' }}>{log.message}</Typography>
+                        </Box>
+                      ))}
+                      {executionLogs.length === 0 && <Box sx={{ color: 'grey.400' }}>No logs are available.</Box>}
+                    </Paper>
+                    </>
+                  )}
                 </Box>
               </Box>
             </CardContent>
@@ -1962,7 +2217,7 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
             </Table>
           </Paper>
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={() => setVariablesOpen(false)}>Close</Button>
           <Button
             variant="contained"
@@ -2036,7 +2291,7 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
             ))}
           </Stack>
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={() => setTemplatesOpen(false)}>Close</Button>
         </DialogActions>
       </Dialog>
@@ -2048,7 +2303,7 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
             Your latest checklist, environment, or secret-reference changes have not been saved.
           </Typography>
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button
             color="error"
             onClick={() => {

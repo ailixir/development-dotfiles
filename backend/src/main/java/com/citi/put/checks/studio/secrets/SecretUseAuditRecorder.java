@@ -348,29 +348,6 @@ public class SecretUseAuditRecorder {
             usage));
   }
 
-  @Transactional(propagation = Propagation.MANDATORY)
-  public void recordLiveRevocation(Release release) {
-    Objects.requireNonNull(release);
-    if (release.outcome() != ResolutionOutcome.RESOLVED) {
-      throw invalid();
-    }
-    UUID id = identity("revocation", release.scope(), release.id());
-    append(
-        release.scope(),
-        row(
-            release.scope(),
-            id,
-            now(),
-            release.releasedAt(),
-            "RELEASE",
-            id,
-            release.id(),
-            "LIVE_RECHECK",
-            release.vaultVersion(),
-            ResolutionOutcome.REVOKED_MID_RUN,
-            null));
-  }
-
   /** Durable possible-read entry, committed by the caller before the existing provider call. */
   @Transactional(propagation = Propagation.MANDATORY)
   public void recordObservedReadEntry(JsonNode binding, String leaseOwner, String secretId) {

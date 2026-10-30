@@ -82,23 +82,20 @@ public final class ObservedArtifactLowerer {
                         "observationHash",
                         text(preparation, "observationHash"))
                     .path("observation");
-            JsonNode node =
-                GuidedPlanBuilder.unique(
-                    observation.path("nodes"), "nodeId", text(target, "nodeId"));
+            // ADR-SC-007 D3: the Guard is the target the runner reported for this very preparation,
+            // copied as reported; the lowerer derives no locator and no role. Only the read grant
+            // is added, from the observation the read was admitted on.
+            JsonNode reported = preparation.path("proof").path("target");
+            require(reported.isObject(), "OPERATION_MISMATCH", 422);
             targetGuard.put("kind", "element");
-            targetGuard.set("locator", target.path("locator").deepCopy());
-            for (String field :
-                List.of(
-                    "role",
-                    "elementType",
-                    "controlType",
-                    "classification",
-                    "visible",
-                    "actionable")) {
-              targetGuard.set(field, node.path(field));
+            targetGuard.set("locator", reported.path("locator").deepCopy());
+            targetGuard.set("tier", reported.path("tier").deepCopy());
+            targetGuard.set("identity", reported.path("identity").deepCopy());
+            if (reported.has("assertTextMode")) {
+              targetGuard.set("assertTextMode", reported.path("assertTextMode"));
             }
             if (proposal.path("operation").path("kind").asText().equals("read")) {
-              targetGuard.set("readRuleId", node.path("policyRuleId"));
+              targetGuard.set("readRuleId", observation.path("readRuleId"));
             } else {
               targetGuard.putNull("readRuleId");
             }
@@ -221,6 +218,12 @@ public final class ObservedArtifactLowerer {
           require(
               end <= secretToken.start() || start >= secretToken.end(), "REFERENCE_MISMATCH", 422);
         }
+        // A template span never cuts a <var NAME> token in half.
+        require(
+            !com.citi.put.checks.studio.guided.bridge.SourceTemplate.splitsToken(
+                source, start, end),
+            "REFERENCE_MISMATCH",
+            422);
         projected
             .put("kind", "sourceSpan")
             .put("start", start)

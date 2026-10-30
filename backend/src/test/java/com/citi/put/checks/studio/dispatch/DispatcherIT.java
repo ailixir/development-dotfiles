@@ -6,7 +6,6 @@ import com.citi.put.checks.studio.StudioExecutionFixtures;
 import com.citi.put.checks.studio.StudioService;
 import com.citi.put.checks.studio.dto.ExecutionErrorCode;
 import com.citi.put.checks.studio.secrets.FakeStudioVaultProvider;
-import com.citi.put.checks.studio.secrets.StudioSecretFixtures;
 import com.citi.put.checks.studio.secrets.StudioVaultProvider;
 import com.citi.put.checks.studio.secrets.VaultScope;
 import com.citi.put.checks.studio.support.ObservedPublicationFixture;
@@ -68,7 +67,7 @@ class DispatcherIT {
     }
 
     /**
-     * A vault and an entitlement set this test can change (story 10.17).
+     * A vault this test can change (story 10.17).
      *
      * <p>Story 10.7's two reference tests arranged their conditions by inserting into and deleting
      * from the platform {@code secrets} table, because the stub resolver read it. The stub is gone
@@ -80,12 +79,6 @@ class DispatcherIT {
     FakeStudioVaultProvider fakeStudioVaultProvider() {
       return new FakeStudioVaultProvider(java.util.Map.of());
     }
-
-    @Bean
-    @Primary
-    StudioSecretFixtures.MutableSecretUseAuthorization mutableSecretUseAuthorization() {
-      return new StudioSecretFixtures.MutableSecretUseAuthorization();
-    }
   }
 
   @Autowired private StudioService studioService;
@@ -96,7 +89,6 @@ class DispatcherIT {
   @Autowired private JdbcTemplate jdbc;
   @Autowired private org.springframework.context.ApplicationContext applicationContext;
   @Autowired private FakeStudioVaultProvider vault;
-  @Autowired private StudioSecretFixtures.MutableSecretUseAuthorization entitlements;
 
   private StudioExecutionFixtures fixtures;
   private Authentication owner;
@@ -107,7 +99,6 @@ class DispatcherIT {
   void setUp() {
     runner.reset();
     vault.clear();
-    entitlements.clear();
     fixtures = new StudioExecutionFixtures(jdbc);
     fixtures.seedUser(OWNER);
     fixtures.seedCsi(CSI_ID, OWNER);
@@ -583,7 +574,6 @@ class DispatcherIT {
         CSI_ID,
         List.of("Go to the home page"),
         StudioExecutionFixtures.references(List.of(), List.of("vanishing-reference")));
-    entitlements.grant(OWNER, CSI_ID, ENVIRONMENT, "vanishing-reference");
     vault.rotate(
         StudioVaultProvider.ReferenceKind.SECRET,
         VaultScope.of(CSI_ID, ENVIRONMENT, withReference),
@@ -609,6 +599,79 @@ class DispatcherIT {
         .isEqualTo(ExecutionErrorCode.REFERENCE_UNAVAILABLE);
   }
 
+  /**
+   * GOV-001.1: secrets belong to the test they were saved for. Tests A and B in one CSI and
+   * environment each hold {@code LOGIN_PW} with their own value, and each dispatch resolves only
+   * its own. The scope comes from the persisted test and ledger row: acceptance takes the test from
+   * the route, and the dispatcher takes it from the execution row.
+   */
+  @Test
+  void eachTestResolvesOnlyItsOwnSecretValueAndNeverAnotherTestsSecret() {
+    UUID testA = seedSecretTest("Secret test A", "LOGIN_PW");
+    UUID testB = seedSecretTest("Secret test B", "LOGIN_PW");
+    vault.rotate(
+        StudioVaultProvider.ReferenceKind.SECRET,
+        VaultScope.of(CSI_ID, ENVIRONMENT, testA),
+        "LOGIN_PW",
+        "value-saved-for-test-a");
+    vault.rotate(
+        StudioVaultProvider.ReferenceKind.SECRET,
+        VaultScope.of(CSI_ID, ENVIRONMENT, testB),
+        "LOGIN_PW",
+        "value-saved-for-test-b");
+    UUID executionA = acceptSecretRun(testA);
+    UUID executionB = acceptSecretRun(testB);
+
+    var resolved = new java.util.ArrayList<String>();
+    runner.onSend(
+        job -> {
+          var secret = job.resolvedSecrets().get("LOGIN_PW");
+          resolved.add(
+              secret.matches("value-saved-for-test-a")
+                  ? "A"
+                  : secret.matches("value-saved-for-test-b") ? "B" : "OTHER");
+        });
+    dispatcher.dispatch(executionA);
+    dispatcher.dispatch(executionB);
+
+    assertThat(resolved).containsExactly("A", "B");
+  }
+
+  @Test
+  void aSecretNameSavedOnlyForAnotherTestIsRefusedAndNothingIsSent() {
+    UUID testA = seedSecretTest("Secret owner test", "A_ONLY");
+    UUID testB = seedSecretTest("Secret borrower test", "A_ONLY");
+    vault.rotate(
+        StudioVaultProvider.ReferenceKind.SECRET,
+        VaultScope.of(CSI_ID, ENVIRONMENT, testA),
+        "A_ONLY",
+        "value-saved-for-test-a");
+
+    assertThat(acceptSecretRun(testA)).isNotNull();
+    org.assertj.core.api.Assertions.assertThatThrownBy(() -> acceptSecretRun(testB))
+        .isInstanceOf(
+            com.citi.put.checks.studio.dispatch.StudioReferenceResolver.UnknownReferenceException
+                .class)
+        .hasMessageContaining("A_ONLY");
+    assertThat(runner.sendCount()).as("nothing is sent for the refused test").isZero();
+  }
+
+  private UUID seedSecretTest(String name, String secret) {
+    UUID id = fixtures.seedTest(name, CSI_ID, OWNER, List.of("Go to the home page"));
+    fixtures.confirmRevision(
+        id,
+        CSI_ID,
+        List.of("Go to the home page"),
+        StudioExecutionFixtures.references(List.of(), List.of(secret)));
+    return id;
+  }
+
+  private UUID acceptSecretRun(UUID test) {
+    return studioService
+        .executeTest(test, owner, null, ObservedPublicationFixture.request(owner))
+        .executionId();
+  }
+
   @Test
   void aVaultOutageRequeuesTheClaimWithoutIssuingAnAttemptOrMislabelingTheReference() {
     UUID withReference =
@@ -618,7 +681,6 @@ class DispatcherIT {
         CSI_ID,
         List.of("Go to the home page"),
         StudioExecutionFixtures.references(List.of(), List.of("LOGIN_PW")));
-    entitlements.grant(OWNER, CSI_ID, ENVIRONMENT, "LOGIN_PW");
     vault.rotate(
         StudioVaultProvider.ReferenceKind.SECRET,
         VaultScope.of(CSI_ID, ENVIRONMENT, withReference),
@@ -653,23 +715,6 @@ class DispatcherIT {
   }
 
   @Test
-  void theDispatchedPolicyIdentityIsRecordedOnTheExecution() {
-    dispatcher.dispatch(executionId);
-
-    // STUDIO-OBS-012A: an observed execution records the policy identity it was authorized and
-    // dispatched under in its immutable binding (currentPolicyHash), not in the artifact-1
-    // dispatcher's configuration_snapshot key.
-    assertThat(
-            jdbc.queryForObject(
-                "SELECT observed_revision_binding->>'currentPolicyHash' FROM ui_test_executions"
-                    + " WHERE id = ?",
-                String.class,
-                executionId))
-        .as("the honest minimum while ADR-002 O-6 is open: decidable today, costs 10.18 nothing")
-        .matches("[0-9a-f]{64}");
-  }
-
-  @Test
   void noResolvedReferenceValueIsEverPersistedOrLogged() {
     UUID withReference =
         fixtures.seedTest("Canary draft", CSI_ID, OWNER, List.of("Go to the home page"));
@@ -678,7 +723,6 @@ class DispatcherIT {
         CSI_ID,
         List.of("Go to the home page"),
         StudioExecutionFixtures.references(List.of(), List.of("canary-reference")));
-    entitlements.grant(OWNER, CSI_ID, ENVIRONMENT, "canary-reference");
     String canaryValue = "studio-canary-value-do-not-persist";
     vault.rotate(
         StudioVaultProvider.ReferenceKind.SECRET,
@@ -739,13 +783,13 @@ class DispatcherIT {
    * A test with {@code timeoutSeconds: 30} is sent a total browser runtime of 120 s, and its
    * per-step value travels untouched beside it.
    *
-   * <p>Architecture §5.2: "Default step timeout is 30 seconds and total browser runtime 120
-   * seconds". Until this test existed the dispatcher derived {@code deadlines.totalRuntimeMs} from
-   * the revision's own {@code configuration.timeoutSeconds}, so the per-step value <em>was</em> the
-   * whole-run budget: every run was killed at thirty seconds, the stop was orderly, the recording
-   * was marked {@code partial: false}, and the user saw a clean video that ended mid-test. This
-   * pins the decoupling in both directions: the total comes from {@code
-   * studio.execution.total-runtime} and the step timeout stays the revision's.
+   * <p>Architecture §5.2: "Default step timeout is 30 seconds"; the total browser runtime is 300
+   * seconds since STUDIO-FLEX-001. Until this test existed the dispatcher derived {@code
+   * deadlines.totalRuntimeMs} from the revision's own {@code configuration.timeoutSeconds}, so the
+   * per-step value <em>was</em> the whole-run budget: every run was killed at thirty seconds, the
+   * stop was orderly, the recording was marked {@code partial: false}, and the user saw a clean
+   * video that ended mid-test. This pins the decoupling in both directions: the total comes from
+   * {@code studio.execution.total-runtime} and the step timeout stays the revision's.
    */
   @Test
   void theTotalRuntimeBudgetIsTheServersAndNotTheRevisionsStepTimeout() {
@@ -761,11 +805,11 @@ class DispatcherIT {
     assertThat(job.configuration().path("timeoutSeconds").asLong())
         .as("the per-step timeout stays on the job's configuration")
         .isEqualTo(30L);
-    // The whole-run budget is the server's, four times the per-step value, so the two cannot be
+    // The whole-run budget is the server's, ten times the per-step value, so the two cannot be
     // one number wearing two names.
     assertThat(job.deadlines().totalRuntimeMs())
         .as("deadlines.totalRuntimeMs is studio.execution.total-runtime, not timeoutSeconds")
-        .isEqualTo(120_000L)
+        .isEqualTo(300_000L)
         .isEqualTo(executionProperties.totalRuntimeOrDefault().toMillis())
         .isNotEqualTo(job.configuration().path("timeoutSeconds").asLong() * 1000L);
     assertThat(job.deadlines().admittedStartMs())

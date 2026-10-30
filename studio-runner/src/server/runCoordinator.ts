@@ -1,6 +1,6 @@
-import type { AdmissionReceipt, AdmissionRequest, BuildIdentity, ObservedJob, TrustedPolicy, ValidationVerdict } from '../executor/observedOperations.js';
+import type { AdmissionReceipt, AdmissionRequest, BuildIdentity, ObservedJob, ValidationVerdict } from '../executor/observedOperations.js';
 import { validateObservedJob, validateObservedRequest } from '../validator/observedReplay.js';
-import { demand, ObservedRefusal, validateObserved, validateTrustedPolicy } from '../validator/observedReferencePolicy.js';
+import { demand, ObservedRefusal, validateObserved } from '../validator/observedReferencePolicy.js';
 import { admitObserved } from '../reporting/admissionClient.js';
 /**
  * `POST /v2/runs`: order of operations, admission and the run itself (AC-6..AC-10, AC-12..AC-21).
@@ -227,9 +227,11 @@ interface RunControl {
   end: ((reason: SessionKillReason) => void) | null;
 }
 
-export interface ObservedRunnerSupport { readonly build:BuildIdentity; readonly policies:readonly TrustedPolicy[]; readonly validationEnabled:boolean; readonly replayEnabled:boolean; }
+export interface ObservedRunnerSupport { readonly build:BuildIdentity; readonly validationEnabled:boolean; readonly replayEnabled:boolean; }
 export interface RunCoordinatorOptions {
   readonly observed?: ObservedRunnerSupport;
+  /** The runner's navigation whitelist (`STUDIO_RUNNER_ALLOWED_DOMAINS`); a job's destinations must be on it. */
+  readonly allowedDomains: readonly string[];
   readonly pool: CapacityPool;
   readonly launcher: BrowserLauncher;
   readonly scratch: ScratchStore;
@@ -467,7 +469,7 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
     admissionId: string,
     admittedAtMs: number,
     control: RunControl,
-    observed: {job:ObservedJob;admission:AdmissionReceipt;policy:TrustedPolicy},
+    observed: {job:ObservedJob;admission:AdmissionReceipt},
   ): Promise<void> {
     const identity = {
       executionId: job.executionId,
@@ -591,7 +593,7 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
       // child cannot refuse a spawn that has already happened.
       const support=options.observed;demand(support?.replayEnabled,'PROFILE_MISMATCH');
       // Grant freshness was established at admission; no renewal/regrant is made after it.
-      validateObservedJob(observed.job,support.build,observed.policy,Date.parse(observed.admission.admittedAt));
+      validateObservedJob(observed.job,support.build,options.allowedDomains,Date.parse(observed.admission.admittedAt));
       // ── The start deadline is a refusal, not a race (AC-4, §5.2). ──────────────────────────
       const elapsedSinceAdmission = options.now() - admittedAtMs;
       if (elapsedSinceAdmission >= job.deadlines.admittedStartMs) {
@@ -1046,24 +1048,23 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
     }} : {}),
     async submitObserved(body:unknown):Promise<RunDecision>{
       const support=options.observed;if(!support?.replayEnabled)return {status:503,code:'OBSERVED_REPLAY_DISABLED'};
-      let observedJob:ObservedJob,policy:TrustedPolicy;
+      let observedJob:ObservedJob;
       try{
         observedJob=validateObserved<ObservedJob>('replay-job',body,4194304);
-        const selected=support.policies.find(p=>p.policyId===observedJob.binding.scope.policyId&&p.policyVersion===observedJob.binding.scope.policyVersion);demand(selected,'POLICY_REFUSED');policy=validateTrustedPolicy(selected,observedJob.binding.scope);
-        validateObservedJob(observedJob,support.build,policy);demand(observedJob.runtime.stepTimeoutMs<=options.maxima.stepTimeoutMs,'LIMIT_EXCEEDED');
+        validateObservedJob(observedJob,support.build,options.allowedDomains);demand(observedJob.runtime.stepTimeoutMs<=options.maxima.stepTimeoutMs,'LIMIT_EXCEEDED');
         demand(/^[A-Za-z0-9_-]{1,20}$/u.test(observedJob.binding.csiId),'INVALID_CONTRACT');
       }catch(error){const code=error instanceof ObservedRefusal?error.code:'INVALID_CONTRACT';return {status:['PROFILE_MISMATCH','AUTHORIZATION_EXPIRED','POLICY_REFUSED','REFERENCE_REFUSED'].includes(code)?409:400,code};}
       if(pool.draining)return {status:503,code:'RUNNER_DRAINING'};
       const slot=pool.tryAcquire();if(!slot)return {status:429,code:'CAPACITY_SATURATED',retryAfterSeconds:options.retryAfterSeconds};
       const b=observedJob.binding,identity=newAdmissionIdentity(options.runnerInstanceId);
-      const request:AdmissionRequest={schemaVersion:3,kind:'observed',executionId:b.executionId,startedAt:b.startedAt,attemptId:b.attemptId,runnerInstanceId:identity.runnerInstanceId,admissionId:identity.admissionId,revisionId:b.revisionId,revisionDigest:b.revisionDigest,artifactHash:b.artifactHash,configurationHash:b.configurationHash,learnedPlanHash:b.learnedPlanHash,referencePolicyHash:b.referencePolicyHash,publicationEvidenceHash:b.publicationEvidenceHash,scopeHash:b.scopeHash,currentPolicyHash:b.currentPolicyHash,grantId:b.replayGrant.grantId,profile:b.requiredProfile,build:b.requiredBuild};
+      const request:AdmissionRequest={schemaVersion:3,kind:'observed',executionId:b.executionId,startedAt:b.startedAt,attemptId:b.attemptId,runnerInstanceId:identity.runnerInstanceId,admissionId:identity.admissionId,revisionId:b.revisionId,revisionDigest:b.revisionDigest,artifactHash:b.artifactHash,configurationHash:b.configurationHash,learnedPlanHash:b.learnedPlanHash,referencePolicyHash:b.referencePolicyHash,publicationEvidenceHash:b.publicationEvidenceHash,scopeHash:b.scopeHash,grantId:b.replayGrant.grantId,profile:b.requiredProfile,build:b.requiredBuild};
       let receipt:AdmissionReceipt;
       try{receipt=await admitObserved({http:options.http,baseUrl:options.callbackBaseUrl,identityToken:options.callbackIdentityToken,timeoutMs:options.reportTimeoutMs,logger},request);}catch{slot.release();return {status:503,code:'ADMISSION_NOT_ACKNOWLEDGED'};}
       const prefix=`studio/${b.csiId}/${b.testId}/${b.executionId}/${b.attemptId}`;
       // Internal evidence metadata only: no artifact source travels in this projection.
       const job:JobEnvelope={executionId:b.executionId,attemptId:b.attemptId,revisionId:b.revisionId,artifactHash:b.artifactHash,configuration:observedJob.configuration,csi:b.csiId,references:{variables:[],secrets:Object.keys(observedJob.secrets)},resolvedSecrets:observedJob.secrets,deadlines:{admittedStartMs:Math.max(0,Date.parse(receipt.startDeadlineAt)-Date.now()),totalRuntimeMs:observedJob.runtime.totalRuntimeMs},videoKey:prefix+'.webm',manifestKey:prefix+'.result.json'};
       const control:RunControl={cancelled:false,recorded:false,end:null};controls.set(b.executionId,control);
-      const task=execute(job,identity.admissionId,options.now(),control,{job:observedJob,admission:receipt,policy}).catch(()=>{logger.error('observed.run.failed',{code:'INTERNAL_ERROR'});}).finally(()=>{slot.release();inFlight.delete(task);});inFlight.add(task);
+      const task=execute(job,identity.admissionId,options.now(),control,{job:observedJob,admission:receipt}).catch(()=>{logger.error('observed.run.failed',{code:'INTERNAL_ERROR'});}).finally(()=>{slot.release();inFlight.delete(task);});inFlight.add(task);
       return {status:202,code:'ADMITTED'};
     },
   };

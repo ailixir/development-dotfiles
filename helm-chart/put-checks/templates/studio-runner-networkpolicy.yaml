@@ -5,10 +5,9 @@
 # every destination into a silent hang rather than a refusal — and a hang is the failure mode that
 # looks like a runner bug for a day.
 #
-# **The limit §9.3 names, stated here rather than discovered in staging:** *"Standard Kubernetes
-# NetworkPolicy operates at network layers, not URL paths."* If SPK-05 finds only static L3/L4
-# policy exists, per-run destination checks in the runner become the primary control and Security
-# must accept that limitation explicitly (AC-8b, ED-04).
+# **The limit §9.3 names:** *"Standard Kubernetes NetworkPolicy operates at network layers, not URL
+# paths."* Target pages are therefore not filtered here at all (rule 3 is open); the runner's domain
+# whitelist is the navigation control, and reachability is the firewalls' (STUDIO-FLEX-001).
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -72,16 +71,13 @@ spec:
               - 10.0.0.0/8
               - 172.16.0.0/12
               - 192.168.0.0/16
-    # 3. `target-page` — the approved destinations of ED-04 / SPK-05. **Empty until the spike
-    #    rules**, which is default-deny for this class and the correct failing direction.
-    {{- range .Values.studioRunner.networkPolicy.approvedTargets }}
-    - to:
-        - ipBlock:
-            cidr: {{ .cidr }}
-      ports:
-        - port: {{ .port }}
-          protocol: TCP
-    {{- end }}
+    # 3. `target-page` — OPEN (STUDIO-FLEX-001): an empty rule allows any destination and port. The
+    #    user decided that firewalls own reachability and that the domain whitelist
+    #    (`studioNavigation.allowedDomains`, enforced by the runner) is the only navigation control.
+    #    Accepted risk, stated rather than hidden: the browser can reach internal endpoints,
+    #    including cloud metadata, and this policy no longer narrows rules 1 and 2 in practice.
+    #    This rule is not derived from the list, so `studioNavigation.allowAllDomains` needs no change here.
+    - {}
     # DNS. Not a destination class — it is what makes the three above resolvable at all.
     - to:
         - namespaceSelector: {}

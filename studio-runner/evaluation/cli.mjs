@@ -174,7 +174,7 @@ async function main() {
     const startedAt = new Date().toISOString();
     const originalAdmission = guardStart({ ledger, manifestSha256: manifest.manifestSha256, now: new Date(startedAt) });
     if (ledgerPath && sha256Hex(readFileSync(ledgerPath, 'utf8')) !== sha256Hex(ledgerText)) throw new AdmissionError('LEDGER_CHANGED_BEFORE_START');
-    const client = createPublicApiClient({ baseUrl: config.apiBaseUrl, token, csiId: config.csiId, environmentId: config.environmentId, applicationId: config.applicationId });
+    const client = createPublicApiClient({ baseUrl: config.apiBaseUrl, token, csiId: config.csiId, environmentId: config.environmentId });
     await mkdir(output, { recursive: false });
     const { runs, benchmark } = await runBenchmark({ manifest, mode: 'D_C', client, ledger, repoRoot: repoRootFrom() });
     const rawRunsText = `${runs.map((r) => JSON.stringify(r)).join('\n')}\n`;

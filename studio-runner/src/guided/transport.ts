@@ -10,8 +10,11 @@ import type {
 } from './types.js';
 import { GuidedOwnership } from './ownership.js';
 import { describeStartFailure } from './diagnostics.js';
+import { RECORDING_NOT_RETAINED } from './evidence.js';
 import type { ClaimPort } from './ownership.js';
 import type { GuidedRuntimeOptions } from './runtime.js';
+import { recordCallbackFailure, CALLBACK_PROBLEM_CODES } from './runtime.js';
+import type { CallbackFailureFacts } from './runtime.js';
 
 export interface GuidedJwtPolicy { issuer: string; publicKey: string; subject: string; }
 /** JWT uses the same fatal, duplicate-aware parser as the wire, with a closed flat shape. */
@@ -92,15 +95,21 @@ export const GUIDED_REFUSAL_CODES = [
   'TARGET_CHANGED','PREPARATION_DENIED','ADMISSION_DENIED','BINDING_UNAVAILABLE','BINDING_DENIED','BINDING_ORDER',
   'ACTION_ORDER','CONTEXT_REVISION','INPUT_IDENTITY','BUDGET_EXCEEDED'
 ] as const;
+/** The eight reasons of bridge#/definitions/refusal (WI-3 schemas.bridge.refusalReasonEnum). */
 export const GUIDED_REFUSAL_REASONS = [
-  'PASSWORD_TARGET_ABSENT','PASSWORD_TARGET_AMBIGUOUS','PASSWORD_FORM_ACTION_NOT_ALLOWED','PASSWORD_CONTROL_READ_REFUSED'
+  'PASSWORD_TARGET_ABSENT','PASSWORD_TARGET_AMBIGUOUS','PASSWORD_FORM_ACTION_NOT_ALLOWED','PASSWORD_CONTROL_READ_REFUSED',
+  'OPTION_NOT_PRESENT','NO_DURABLE_LOCATOR','READ_NOT_ALLOWED','OBSERVATION_DEADLINE'
 ] as const;
+export type GuidedRefusalReason = (typeof GUIDED_REFUSAL_REASONS)[number];
+/** The code a reason travels with (the allOf of bridge#/definitions/refusal): a closed table, never a guess from an error text. */
+export const GUIDED_REASON_CODES: Readonly<Record<GuidedRefusalReason, (typeof GUIDED_REFUSAL_CODES)[number] | 'POLICY_DENIED'>> = Object.freeze({
+  PASSWORD_TARGET_ABSENT: 'POLICY_DENIED', PASSWORD_TARGET_AMBIGUOUS: 'POLICY_DENIED', PASSWORD_FORM_ACTION_NOT_ALLOWED: 'POLICY_DENIED', PASSWORD_CONTROL_READ_REFUSED: 'POLICY_DENIED',
+  OPTION_NOT_PRESENT: 'PREPARATION_DENIED', NO_DURABLE_LOCATOR: 'PREPARATION_DENIED', READ_NOT_ALLOWED: 'PREPARATION_DENIED',
+  OBSERVATION_DEADLINE: 'BUDGET_EXCEEDED',
+});
 export function createGuidedBridge(options: GuidedBridgeOptions): GuidedBridge {
   insist(!process.env.DEBUG && !process.env.PWDEBUG && !process.env.NODE_DEBUG && !process.env.NODE_OPTIONS, 'CONFIGURATION_DENIED');
-  insist((options.capacity ?? 1) === 1, 'CONFIGURATION_DENIED');
-  // STUDIO-OBS-014 AC-1: the policy is per session, from the hash-bound runner context only; neither a
-  // policy nor field rules may be configured on the server (ar-mounted-rules: refused in every form).
-  insist(!Object.hasOwn(options, 'applicationPolicy'), 'CONFIGURATION_DENIED');
+  // The observation read profile is a runner constant and field rules do not exist: neither may be configured on the server.
   insist(!Object.hasOwn(options, 'rules'), 'CONFIGURATION_DENIED');
   const ownership = new GuidedOwnership(options);
   const replay = new Map<string, {digest:string;secretIdentity:string;promise:Promise<unknown>}>();
@@ -166,8 +175,8 @@ export function createGuidedBridge(options: GuidedBridgeOptions): GuidedBridge {
       res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify(result));
     };
     void handle().catch((error:unknown)=>{
-      const code=error instanceof Error&&(GUIDED_REFUSAL_CODES as readonly string[]).includes(error.message)?error.message:'POLICY_DENIED';
-      const reason = error instanceof Error && (GUIDED_REFUSAL_REASONS as readonly string[]).includes(error.message) ? error.message : null;
+      const reason = error instanceof Error && (GUIDED_REFUSAL_REASONS as readonly string[]).includes(error.message) ? error.message as GuidedRefusalReason : null;
+      const code=reason!==null?GUIDED_REASON_CODES[reason]:error instanceof Error&&(GUIDED_REFUSAL_CODES as readonly string[]).includes(error.message)?error.message:'POLICY_DENIED';
       // REL-001: a refused assign/context ends the session, so the worker says why on stderr. The wire answer below is unchanged.
       if(code==='CONTEXT_LOST'&&routed&&(routed.operation==='assign'||routed.operation==='context')){
         try{
@@ -205,6 +214,13 @@ export interface GuidedCallbackOptions {
   tls: Pick<ServerOptions, 'key' | 'cert' | 'ca'>;
   token: () => Promise<string>;
   controllerCertificateFingerprint256: string;
+  diagnosticStderr?: (line: string) => void;
+}
+const callbackTransportPhases = new WeakMap<object, {phase:'TRANSPORT'|'DEADLINE'|'HTTP';status:number|null}>();
+function callbackProblemCode(body: unknown): string {
+  if (typeof body !== 'object' || body === null || Array.isArray(body)) return 'UNKNOWN';
+  const code = (body as { code?: unknown }).code;
+  return typeof code === 'string' && CALLBACK_PROBLEM_CODES.has(code) ? code : 'UNKNOWN';
 }
 /** One authenticated send, bounded response and wall time including credential lookup. No POST retry. */
 async function controllerRequest(
@@ -216,6 +232,7 @@ async function controllerRequest(
   insist(base.protocol === 'https:' && !base.username && !base.password && !base.search && !base.hash, 'CONFIGURATION_DENIED');
   const body = JSON.stringify(message); insist(Buffer.byteLength(body) <= 1024 * 1024, 'BUDGET_EXCEEDED');
   const deadline = AbortSignal.timeout(Math.max(1,Math.floor(timeoutMs)));
+  const responseState:{status:number|null}={status:null};
   const cancellation = signal ? AbortSignal.any([signal,deadline]) : deadline;
   let abortListener: (() => void) | undefined;
   const aborted = new Promise<never>((_resolve,reject) => {
@@ -235,6 +252,7 @@ async function controllerRequest(
           'idempotency-key':key,...(fence === undefined ? {} : {'x-owner-fence':String(fence)})
         }
       },response => {
+        responseState.status=response.statusCode!==undefined&&response.statusCode>=100&&response.statusCode<=599?response.statusCode:null;
         let bytes=0;const chunks:Buffer[]=[];
         response.on('data',(part:Buffer)=>{
           bytes+=part.length;if(bytes>1024*1024)req.destroy(new Error('CALLBACK_DENIED'));else chunks.push(part);
@@ -256,27 +274,49 @@ async function controllerRequest(
       req.on('error',()=>{reject(new Error('CALLBACK_DENIED'));});req.end(body);
     });
   };
-  try{return await Promise.race([send(),aborted]);}finally{if(abortListener)cancellation.removeEventListener('abort',abortListener);}
+  try{return await Promise.race([send(),aborted]);}
+  catch(error){
+    if(typeof error==='object'&&error!==null)callbackTransportPhases.set(error,{phase:deadline.aborted?'DEADLINE':responseState.status!==null?'HTTP':'TRANSPORT',status:responseState.status});
+    throw error;
+  }finally{if(abortListener)cancellation.removeEventListener('abort',abortListener);}
 }
 export function guidedCallback(options: GuidedCallbackOptions): GuidedRuntimeOptions['callback'] {
   return async(route,message,idempotencyKey)=>{
+    const closedRoute: CallbackFailureFacts['route'] = route==='outcomes'?'OUTCOME':route==='observations'?'OBSERVATION':route==='bootstrap-evidence'?'BOOTSTRAP':route==='recording-evidence'?'RECORDING':'LIFECYCLE';
+    let phase: CallbackFailureFacts['phase']='SCHEMA';
+    let status: number|null=null;
+    let backendCode='UNKNOWN';
+    try {
     const definition=route==='bootstrap-evidence'?'bootstrap':route==='observations'?'observation':
       route==='outcomes'?'outcome':route==='recording-evidence'?'recordingEvidence':'lifecycle';
     const notice=validate<BridgeIdentity|AssignmentLifecycle|BridgePrefixDriftCallback>('bridge',message,definition);
     const drift='kind' in notice && notice.kind==='prefixDrift' ? notice.receipt : null;
     const assignment='kind' in notice && notice.kind==='assignment' ? notice.assignment : null;
+    phase='TRANSPORT';
     const result=await controllerRequest(
       options,assignment?.sessionId??drift?.sessionId??(notice as BridgeIdentity).sessionId,route,message,
       assignment?undefined:drift?.ownerFence??(notice as BridgeIdentity).ownerFence,idempotencyKey??randomUUID(),10_000
     );
+    phase='HTTP';status=Number.isInteger(result.status)&&result.status>=100&&result.status<=599?result.status:null;
+    backendCode=callbackProblemCode(result.body);
+    // `409 RECORDING_NOT_RETAINED`: the session's learn published, so no recording is kept. Definite; the recorder settles on it.
+    if(route==='recording-evidence'&&result.status===409&&retainedRefusal(result.body))throw new Error(RECORDING_NOT_RETAINED);
     insist(result.status===202,'CALLBACK_DENIED');
+    } catch(error) {
+      const transport=typeof error==='object'&&error!==null?callbackTransportPhases.get(error):undefined;
+      if(transport){phase=transport.phase;status=transport.status;}
+      recordCallbackFailure(error,{route:closedRoute,phase,status,backendCode},options.diagnosticStderr??(line=>{process.stderr.write(line);}));
+      throw error;
+    }
   };
+}
+function retainedRefusal(body: unknown): boolean {
+  return typeof body==='object'&&body!==null&&!Array.isArray(body)&&(body as {code?:unknown}).code===RECORDING_NOT_RETAINED;
 }
 export function guidedClaimClient(options: GuidedCallbackOptions): ClaimPort {
   return async(command,key,timeoutMs,signal)=>{
     const result=await controllerRequest(options,command.sessionId,'claim',command,command.expectedFence,key,timeoutMs,signal);
-    if (result.status === 403 || result.status === 409 && typeof result.body === 'object' && result.body !== null &&
-      'code' in result.body && result.body.code === 'SECRET_USE_REVOKED') throw new Error('REVOKED');
+    if (result.status === 403) throw new Error('REVOKED');
     insist(result.status===202,'CLAIM_DENIED');
     return validate<Session>('session',result.body);
   };

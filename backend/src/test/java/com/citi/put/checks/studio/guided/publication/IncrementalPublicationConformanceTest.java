@@ -564,7 +564,7 @@ class IncrementalPublicationConformanceTest {
         }
       }
       assertThat(pointers).doesNotHaveDuplicates();
-      assertThat(pointers).hasSize(new int[] {79, 175, 284}[parentIndex]);
+      assertThat(pointers).hasSize(new int[] {79, 173, 285}[parentIndex]);
       ObjectNode originalEnvelope = expectedPublicationEvidencePreimage(basis);
       assertThat(GuidedContracts.hash(originalEnvelope))
           .isEqualTo(artifact.path("replayPolicy").path("publicationEvidenceHash").asText());
@@ -597,7 +597,7 @@ class IncrementalPublicationConformanceTest {
       assertThat(basis).isEqualTo(before);
       total += pointers.size();
     }
-    assertThat(total).isEqualTo(538);
+    assertThat(total).isEqualTo(537);
   }
 
   @ParameterizedTest(name = "recomputed commitment cannot bypass semantic join {0}")

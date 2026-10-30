@@ -29,12 +29,9 @@ import { guidedCopy } from './guidedNarratives';
  *    session's `progress.activeStep`, which the server guarantees matches the question's coordinate
  *    (P2). If the two disagree, or the step is not named, no question is shown: a prompt without its
  *    step would be worded from nothing.
- *  - **Side-effect confirmation** (`reason: SIDE_EFFECT_CONFIRMATION`, `promptCode: CONFIRM_ACTION`):
- *    rendered as a confirmation before an action, never with the disambiguation question. "Continue"
- *    answers with the single choice the contract sends.
  *  - **"None of these" never answers.** The contract has no "none" choice (plan B6), so it calls
  *    `onNoneOfThese(stepId)` and the page cancels the session, then moves focus to step N (A3).
- *    Nothing here fabricates a `choiceId`. Declining a confirmation is the same callback.
+ *    Nothing here fabricates a `choiceId`.
  *  - **Page-derived labels are untrusted text** (AC-3; ADR-SC-006 keeps this as a security rule).
  *    A `labelSource: PAGE` label is rendered as a text node inside `<bdi>` (so its characters cannot
  *    reorder the surrounding sentence), in a dashed, tinted box, marked "Page-derived", with its role
@@ -67,11 +64,6 @@ function useNowMs(): number {
     return () => clearInterval(handle);
   }, []);
   return now;
-}
-
-/** True for the question the inherited OBS-014 item b renders as a confirmation. */
-function isSideEffectConfirmation(question: Pick<GuidedClarificationQuestion, 'reason'>): boolean {
-  return question.reason === 'SIDE_EFFECT_CONFIRMATION';
 }
 
 /** One choice's label. Only `PAGE` is decorated, and it is always text. */
@@ -129,7 +121,7 @@ export interface GuidedClarificationProps {
   readonly step: GuidedActiveStep | null;
   /** Answer with a server `choiceId`. */
   readonly onAnswer: (choiceId: string) => void;
-  /** "None of these — I'll edit step N", or a declined confirmation. The page cancels, then focuses. */
+  /** "None of these — I'll edit step N". The page cancels, then focuses. */
   readonly onNoneOfThese: (stepId: string) => void;
   /** True while an answer or cancel is in flight. */
   readonly disabled?: boolean;
@@ -158,49 +150,6 @@ export function GuidedClarification({
   const warning = expiryWarning(clarification.expiresAt, now);
   const noneLabel = guidedCopy('noneOfThese', { N: step.number });
   const actionsSx = (theme: Theme) => ({ width: '100%', [theme.breakpoints.up('sm')]: { width: 'auto' } });
-
-  if (isSideEffectConfirmation(clarification)) {
-    const only = clarification.choices.length === 1 ? clarification.choices[0] : null;
-    return (
-      <Paper variant="outlined" data-testid="guided-confirmation" sx={{ p: 2, minWidth: 0 }}>
-        <Stack spacing={1.5}>
-          <Typography variant="subtitle2" component="h3">
-            {guidedCopy('confirmTitle')}
-          </Typography>
-          <Typography variant="body2" data-testid="guided-question" sx={{ overflowWrap: 'anywhere' }}>
-            {guidedCopy('confirmBody', { N: step.number, '<authored step text>': step.text })}
-          </Typography>
-          {warning !== null && (
-            <Typography variant="body2" color="warning.main" data-testid="guided-expiry-warning">
-              {warning}
-            </Typography>
-          )}
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} data-testid="guided-question-actions">
-            {only !== null && (
-              <Button
-                variant="contained"
-                size="small"
-                disabled={disabled}
-                onClick={() => onAnswer(only.choiceId)}
-                sx={actionsSx}
-              >
-                {guidedCopy('continue')}
-              </Button>
-            )}
-            <Button
-              variant="outlined"
-              size="small"
-              disabled={disabled}
-              onClick={() => onNoneOfThese(step.stepId)}
-              sx={actionsSx}
-            >
-              {noneLabel}
-            </Button>
-          </Stack>
-        </Stack>
-      </Paper>
-    );
-  }
 
   const submit = () => {
     if (selected === null) return;

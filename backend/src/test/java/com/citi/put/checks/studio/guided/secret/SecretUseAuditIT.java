@@ -227,7 +227,7 @@ class SecretUseAuditIT {
   }
 
   @Test
-  void releaseUsageAndRevocationAreIdempotentImmutableScopedMetadata() {
+  void releaseAndUsageAreIdempotentImmutableScopedMetadata() {
     consumedSecret("PENDING", false);
     var scope = guided("session:1", 1, "admission");
     var release =
@@ -241,16 +241,8 @@ class SecretUseAuditIT {
         status -> {
           audit.recordUsage(release, UsageOutcome.USED);
           audit.recordUsage(release, UsageOutcome.USED);
-          audit.recordLiveRevocation(release);
-          audit.recordLiveRevocation(release);
         });
-    assertThat(count()).isEqualTo(3);
-    assertThat(
-            jdbc.queryForObject(
-                ("SELECT count(*) FROM studio_secret_use_audit WHERE "
-                    + "decision_stage='LIVE_RECHECK' AND outcome='REVOKED_MID_RUN'"),
-                Integer.class))
-        .isEqualTo(1);
+    assertThat(count()).isEqualTo(2);
     assertThatThrownBy(
             () ->
                 transaction.executeWithoutResult(

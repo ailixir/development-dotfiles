@@ -1,3 +1,4 @@
+import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 import { it,expect } from 'vitest';
 import { createServer as httpServer } from 'node:http';
 import { createServer as httpsServer } from 'node:https';
@@ -7,22 +8,22 @@ import { tmpdir } from 'node:os';
 import { TLSSocket } from 'node:tls';
 import { createGuidedServer,guidedCallback,guidedClaimClient,verifyGuidedJwt } from '../../src/guided/transport.js';
 import { launchGuidedBrowser } from '../../src/run/browser.js';
-import { guidedContext,proposal,dispatch,ownershipSession,assignmentFor,withContextPolicy } from '../helpers/guided.js';
+import { guidedContext,proposal,dispatch,ownershipSession,assignmentFor } from '../helpers/guided.js';
 import { testTls,testFingerprint,jwtPolicy,jwt,post } from '../helpers/guidedTls.js';
 import { identity,hash,validate } from '../../src/guided/contracts.js';
 import type { BridgeBootstrap,BridgePreparation,BridgeOrdinaryOutcome as BridgeOutcome,CommandsClaim,AssignmentReceipt,BridgeObservation } from '../../src/guided/types.js';
 
 it('uses real mTLS + service JWT for blank-to-Chromium control and data-free callbacks',async()=>{
-  let receipts=0;const pages=httpServer((_req,res)=>{receipts++;res.setHeader('content-type','text/html');res.end('<button>Ready</button>');});await new Promise<void>(resolve=>pages.listen(0,'127.0.0.1',resolve));const pageAddress=pages.address();if(!pageAddress||typeof pageAddress==='string')throw new Error('PORT');
+  let receipts=0;const pages=httpServer((req,res)=>{if(req.url!=='/favicon.ico')receipts++;res.setHeader('content-type','text/html');res.end('<button>Ready</button>');});await new Promise<void>(resolve=>pages.listen(0,'127.0.0.1',resolve));const pageAddress=pages.address();if(!pageAddress||typeof pageAddress==='string')throw new Error('PORT');
   const messages:{route:string;body:unknown;key?:string}[]=[];const claims:CommandsClaim[]=[];let currentGrant:ReturnType<typeof ownershipSession>|null=null;
   const callbacks=httpsServer({...testTls,requestCert:true,rejectUnauthorized:true},(req,res)=>{
     try {expect(req.socket).toBeInstanceOf(TLSSocket);verifyGuidedJwt(req.headers.authorization,{...jwtPolicy,subject:'worker-one'},'studio-guided-controller','owning-worker');}catch{res.writeHead(401);res.end();return;}
     let text='';req.on('data',(b:Buffer)=>{text+=b.toString();});req.on('end',()=>{const route=req.url?.split('/').at(-1)??'';const body=JSON.parse(text) as unknown;if(route==='claim'){const command=validate<CommandsClaim>('commands',body,'claim');claims.push(command);if(!currentGrant){res.writeHead(409);res.end('{}');return;}currentGrant.owner.leaseExpiresAt=new Date(Math.min(Date.now()+30_000,Date.parse(currentGrant.expiresAt))).toISOString();res.writeHead(202);res.end(JSON.stringify(currentGrant));return;}messages.push({route,body,...(typeof req.headers['idempotency-key']==='string'?{key:req.headers['idempotency-key']}:{})});res.writeHead(202);res.end(JSON.stringify({sessionResponse:'x'.repeat(70_000)}));});
   });await new Promise<void>(resolve=>callbacks.listen(0,'127.0.0.1',resolve));const callbackAddress=callbacks.address();if(!callbackAddress||typeof callbackAddress==='string')throw new Error('PORT');
-  const directory=await mkdtemp(join(tmpdir(),'guided-wire-'));const context=withContextPolicy(guidedContext(`http://127.0.0.1:${String(pageAddress.port)}`),{policyRuleId:'application',allowStructuralDiscovery:true,readGrants:[]});
+  const directory=await mkdtemp(join(tmpdir(),'guided-wire-'));const context=guidedContext(`http://localhost:${String(pageAddress.port)}`);
   currentGrant=ownershipSession(context);const assignment=assignmentFor(context);
   const client={baseUrl:`https://127.0.0.1:${String(callbackAddress.port)}`,tls:testTls,controllerCertificateFingerprint256:testFingerprint,token:()=>Promise.resolve(jwt({aud:'studio-guided-controller',role:'owning-worker',sub:context.workerId}))};
-  const app=createGuidedServer({workerId:context.workerId,journalDirectory:directory,tls:testTls,controllerJwt:jwtPolicy,controllerCertificateFingerprint256:testFingerprint,launch:launchGuidedBrowser,claim:guidedClaimClient(client),callback:guidedCallback({baseUrl:`https://127.0.0.1:${String(callbackAddress.port)}`,tls:testTls,controllerCertificateFingerprint256:testFingerprint,token:()=>Promise.resolve(jwt({aud:'studio-guided-controller',role:'owning-worker',sub:context.workerId}))})});
+  const app=createGuidedServer({workerId:context.workerId,allowedDomains: TEST_DOMAINS, journalDirectory:directory,tls:testTls,controllerJwt:jwtPolicy,controllerCertificateFingerprint256:testFingerprint,launch:launchGuidedBrowser,claim:guidedClaimClient(client),callback:guidedCallback({baseUrl:`https://127.0.0.1:${String(callbackAddress.port)}`,tls:testTls,controllerCertificateFingerprint256:testFingerprint,token:()=>Promise.resolve(jwt({aud:'studio-guided-controller',role:'owning-worker',sub:context.workerId}))})});
   await new Promise<void>(resolve=>app.server.listen(0,'127.0.0.1',resolve));const address=app.server.address();if(!address||typeof address==='string')throw new Error('PORT');const path=`/internal/v2/studio/guided-sessions/${context.sessionId}`;
   try {
     await expect(post(address.port,`${path}/context`,context,{certificate:false})).rejects.toThrow();
@@ -45,7 +46,7 @@ it('uses real mTLS + service JWT for blank-to-Chromium control and data-free cal
     const request=dispatch(context,p,validate<BridgePreparation>('bridge',prepared.body,'preparation'));const completed=await post(address.port,`${path}/dispatch`,request);expect(completed.status).toBe(200);expect((completed.body as BridgeOutcome).ledger.state).toBe('SUCCEEDED');expect(receipts).toBe(1);
     expect((await post(address.port,`${path}/dispatch`,request)).status).toBe(409);expect(receipts).toBe(1);expect(messages.map(m=>m.route)).toEqual(['bootstrap-evidence','outcomes','observations']);
     const priorObservation=(messages.filter(m=>m.route==='observations').at(-1)?.body as BridgeObservation).observation;
-    const refresh={...identity(context),expectedGeneration:priorObservation.generation};const refreshKey='refresh-one';
+    const refresh={...identity(context),expectedGeneration:priorObservation.generation,focus:{stepText:'',targetIntents:[]}};const refreshKey='refresh-one';
     const refreshed=await Promise.all([post(address.port,`${path}/observe`,refresh,{key:refreshKey}),post(address.port,`${path}/observe`,refresh,{key:refreshKey})]);expect(refreshed.map(result=>result.status)).toEqual([200,200]);expect(refreshed[0].body).toEqual(refreshed[1].body);expect(messages.filter(m=>m.route==='observations')).toHaveLength(2);expect(receipts).toBe(1);
     expect(messages.at(-1)?.key).toBe(`oref-${hash({identity:identity(refresh),idempotencyKey:refreshKey,requestDigest:hash(refresh)})}`);
     expect((await post(address.port,`${path}/observe`,{...refresh,expectedGeneration:0},{key:refreshKey})).body).toEqual({code:'IDEMPOTENCY_CONFLICT'});

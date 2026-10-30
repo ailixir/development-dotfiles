@@ -1,7 +1,7 @@
 {{- /*
 Studio v1 WP7, decision D3: the runner's only autoscaler, and it is OFF by default.
 
-Scales runner PODS (one browser each) on the dispatch backlog the worker exports as
+Scales runner PODS (two browsers each) on the dispatch backlog the worker exports as
 `studio_dispatch_backlog{state}`: ledger rows accepted and not yet handed to a runner. Never on CPU:
 a saturated runner refuses with 429 and stays ready, so CPU is not the constraint.
 
@@ -10,7 +10,7 @@ HorizontalPodAutoscaler for the runner, CPU-based or otherwise.
 */ -}}
 {{- if and .Values.studioRunner.enabled .Values.studioRunner.autoscaling.enabled }}
 {{- $as := .Values.studioRunner.autoscaling }}
-{{- $runDeadline := div (int (default 120000 (get .Values.studioRunner.runnerEnv "STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS"))) 1000 }}
+{{- $runDeadline := div (int (default 300000 (get .Values.studioRunner.runnerEnv "STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS"))) 1000 }}
 {{- $cooldown := int $as.cooldownPeriodSeconds }}
 {{- if lt $cooldown $runDeadline }}
 {{- fail (printf "studioRunner.autoscaling.cooldownPeriodSeconds (%d) must be >= the runner's run deadline, STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS (%d s), so a scale-in never lands inside a run's lifetime" $cooldown $runDeadline) }}

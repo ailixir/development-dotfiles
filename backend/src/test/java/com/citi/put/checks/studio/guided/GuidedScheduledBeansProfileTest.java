@@ -228,5 +228,8 @@ class GuidedScheduledBeansProfileTest {
     context.registerBean(GuidedDispatchService.class, () -> mock(GuidedDispatchService.class));
     context.registerBean(GuidedLlmGatewayClient.class, () -> mock(GuidedLlmGatewayClient.class));
     context.registerBean(StudioRunnerTls.class, StudioRunnerTls::unconfigured);
+    context.registerBean(
+        com.citi.put.checks.studio.navigation.AllowedDomains.class,
+        com.citi.put.checks.studio.navigation.AllowedDomains::none);
   }
 }

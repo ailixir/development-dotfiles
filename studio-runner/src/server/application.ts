@@ -1,8 +1,7 @@
 import { loadObservedBuild } from '../compat/runtime-versions.js';
 import type { ObservedRunnerSupport } from './runCoordinator.js';
-import { readFileSync } from 'node:fs';
 import { X509Certificate } from 'node:crypto';
-import { demand, projectMountedPolicy, parseObservedBytes } from '../validator/observedReferencePolicy.js';
+import { demand } from '../validator/observedReferencePolicy.js';
 /**
  * Wiring (AC-11, AC-12). `main.ts` is the thin shell around this; everything testable lives here.
  *
@@ -71,6 +70,8 @@ export interface GuidedModeDependencies {
   readonly launch: GuidedRuntimeOptions['launch'];
   /** The result of the RUNNER-SCRATCH startup sweep (`prepareRecordingScratch`), done by `main`. */
   readonly recordingScratch: RecordingScratch;
+  /** Learning sessions this process owns at once (`STUDIO_RUNNER_GUIDED_CAPACITY`, 1..8). */
+  readonly capacity: number;
 }
 
 export interface ApplicationDependencies {
@@ -158,7 +159,7 @@ export function createApplication(
 
   const now = dependencies.now ?? ((): number => performance.now());
 
-  const observed = dependencies.observed ?? loadObservedRunnerSupport({STUDIO_RUNNER_OBSERVED_VALIDATION_ENABLED:String(config.observedValidationEnabled),STUDIO_RUNNER_OBSERVED_REPLAY_ENABLED:String(config.observedReplayEnabled),STUDIO_RUNNER_OBSERVED_CATALOG_FILE:config.observedCatalogFile,STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST:config.observedImageDigest,STUDIO_RUNNER_OBSERVED_POLICY_FILE:config.observedPolicyFile,PLAYWRIGHT_BROWSERS_PATH:process.env.PLAYWRIGHT_BROWSERS_PATH});
+  const observed = dependencies.observed ?? loadObservedRunnerSupport({STUDIO_RUNNER_OBSERVED_VALIDATION_ENABLED:String(config.observedValidationEnabled),STUDIO_RUNNER_OBSERVED_REPLAY_ENABLED:String(config.observedReplayEnabled),STUDIO_RUNNER_OBSERVED_CATALOG_FILE:config.observedCatalogFile,STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST:config.observedImageDigest,PLAYWRIGHT_BROWSERS_PATH:process.env.PLAYWRIGHT_BROWSERS_PATH});
   const coordinator = createRunCoordinator({
     ...(observed ? {observed} : {}),
     pool,
@@ -181,6 +182,7 @@ export function createApplication(
     objectStore,
     evidenceFileSystem,
     evidence: evidenceBoundsFrom(config),
+    allowedDomains: config.allowedDomains,
     now,
     wallClock: dependencies.wallClock ?? ((): Date => new Date()),
     sleep: dependencies.sleep ?? defaultSleep,
@@ -240,6 +242,8 @@ export function createApplication(
         poolSize: pool.size,
         runnerInstanceId: config.runnerInstanceId,
         guided: bridge !== undefined,
+        // The navigation whitelist, comma-joined so a misconfigured (empty) list is visible in the log.
+        allowedDomains: config.allowedDomains.join(','),
       });
       return port;
     },
@@ -329,6 +333,8 @@ function guidedBridgeOptions(guided: GuidedModeDependencies, wiring: GuidedWirin
     journalDirectory: guided.journalDirectory,
     controllerJwt: guided.controllerJwt,
     controllerCertificateFingerprint256: fingerprint,
+    capacity: guided.capacity,
+    allowedDomains: wiring.config.allowedDomains,
     launch: guided.launch,
     recorder,
     claim: guidedClaimClient(callbacks),
@@ -341,9 +347,5 @@ export function loadObservedRunnerSupport(env:Readonly<Record<string,string|unde
   for(const flag of [env.STUDIO_RUNNER_OBSERVED_VALIDATION_ENABLED,env.STUDIO_RUNNER_OBSERVED_REPLAY_ENABLED])demand(flag===undefined||flag==='true'||flag==='false','INVALID_CONTRACT');
   if(!validationEnabled&&!replayEnabled)return undefined;
   const build=loadObservedBuild(env);demand(build,'PROFILE_MISMATCH');
-  const raw:unknown=env.STUDIO_RUNNER_OBSERVED_POLICY_FILE?parseObservedBytes(readFileSync(env.STUDIO_RUNNER_OBSERVED_POLICY_FILE),2097152):[];
-  demand(Array.isArray(raw)&&raw.length<=32,'POLICY_REFUSED');
-  const policies=raw.map(projectMountedPolicy);
-  demand(new Set(policies.map(p=>p.policyId+':'+p.policyVersion)).size===policies.length,'POLICY_REFUSED');
-  return {build,policies,validationEnabled,replayEnabled};
+  return {build,validationEnabled,replayEnabled};
 }

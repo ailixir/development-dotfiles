@@ -41,30 +41,15 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "mode": {
-          "enum": [
-            "semantic",
-            "boundedDom"
-          ]
-        },
-        "complete": {
-          "type": "boolean"
-        },
-        "truncated": {
-          "type": "boolean"
-        },
         "withheldRegions": {
           "type": "integer",
           "minimum": 0,
           "maximum": 2147483647
         },
-        "reason": {
-          "enum": [
-            "complete",
-            "budget",
-            "sensitivity",
-            "unsupportedSurface"
-          ]
+        "unsupportedRegions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
         },
         "passwordControls": {
           "type": "integer",
@@ -73,209 +58,87 @@
         }
       },
       "required": [
-        "mode",
-        "complete",
-        "truncated",
         "withheldRegions",
-        "reason",
+        "unsupportedRegions",
         "passwordControls"
       ]
     },
-    "nodes": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "nodeId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "documentId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "generation": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 2147483647
-          },
-          "role": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "elementType": {
-            "enum": [
-              "button",
-              "input",
-              "textarea",
-              "select",
-              "text",
-              "link",
-              "other"
-            ]
-          },
-          "controlType": {
-            "enum": [
-              "none",
-              "text",
-              "search",
-              "email",
-              "tel",
-              "url",
-              "textarea",
-              "password",
-              "hidden",
-              "other"
-            ]
-          },
-          "classification": {
-            "enum": [
-              "structuralOnly",
-              "permittedBusinessData",
-              "nonsecretApproved",
-              "withheld"
-            ]
-          },
-          "policyRuleId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "visible": {
-            "type": "boolean"
-          },
-          "actionable": {
-            "type": "boolean"
-          },
-          "depth": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 2147483647
-          },
-          "parentNodeId": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "regionId": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "formId": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "labelNodeIds": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 256
-            },
-            "minItems": 0,
-            "maxItems": 20
-          },
-          "locatorHints": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "kind": {
-                      "const": "role"
-                    },
-                    "role": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 256
-                    },
-                    "name": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 256
-                    },
-                    "exact": {
-                      "const": true
-                    }
-                  },
-                  "required": [
-                    "kind",
-                    "role",
-                    "name",
-                    "exact"
-                  ]
-                },
-                {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "kind": {
-                      "enum": [
-                        "label",
-                        "testId",
-                        "text",
-                        "placeholder"
-                      ]
-                    },
-                    "value": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 256
-                    },
-                    "exact": {
-                      "const": true
-                    }
-                  },
-                  "required": [
-                    "kind",
-                    "value",
-                    "exact"
-                  ]
-                }
-              ]
-            },
-            "minItems": 0,
-            "maxItems": 5
-          }
+    "projection": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "projected": {
+          "type": "boolean"
         },
-        "required": [
-          "nodeId",
-          "documentId",
-          "generation",
-          "role",
-          "name",
-          "elementType",
-          "controlType",
-          "classification",
-          "policyRuleId",
-          "visible",
-          "actionable",
-          "depth",
-          "parentNodeId",
-          "regionId",
-          "formId",
-          "labelNodeIds",
-          "locatorHints"
-        ]
+        "tier": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "enum": [
+            "focus+parent+siblings",
+            "focus+parent",
+            "focus",
+            "truncated",
+            null
+          ]
+        },
+        "totalNodes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "shownNodes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "notShown": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "outlineBytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 40000
+        }
       },
-      "minItems": 0,
-      "maxItems": 500
+      "required": [
+        "projected",
+        "tier",
+        "totalNodes",
+        "shownNodes",
+        "notShown",
+        "outlineBytes"
+      ]
+    },
+    "readRuleId": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "outline": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 40000
+    },
+    "facts": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^e[0-9]{1,6}$"
+      },
+      "additionalProperties": {
+        "$ref": "#/definitions/ObservationFact"
+      }
     }
   },
   "required": [
@@ -287,6 +150,212 @@
     "scopeHash",
     "observedAt",
     "coverage",
-    "nodes"
-  ]
+    "projection",
+    "readRuleId",
+    "outline",
+    "facts"
+  ],
+  "definitions": {
+    "ObservationFact": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "name": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 256
+        },
+        "editable": {
+          "type": "boolean"
+        },
+        "evidence": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 256
+        },
+        "evidenceSegments": {
+          "type": "array",
+          "maxItems": 128,
+          "items": {
+            "$ref": "#/definitions/EvidenceSegment"
+          }
+        },
+        "text": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 256
+        },
+        "nameComplete": {
+          "type": "boolean"
+        },
+        "ownTextComplete": {
+          "type": "boolean"
+        },
+        "ordinal": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "index": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            "count": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "index",
+            "count"
+          ]
+        },
+        "nearSource": {
+          "const": "WITHHELD_ADJACENT_PUBLIC"
+        },
+        "readScope": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "relation": {
+              "enum": [
+                "SAME_ROW_LABEL",
+                "IMMEDIATE_HEADING_SAME_PARENT",
+                "R7_ADJACENT_PUBLIC"
+              ]
+            },
+            "sourceRefs": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 8,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "pattern": "^e[0-9]{1,6}$"
+              }
+            },
+            "tableTitleRef": {
+              "type": "string",
+              "pattern": "^e[0-9]{1,6}$"
+            }
+          },
+          "required": [
+            "relation",
+            "sourceRefs"
+          ],
+          "allOf": [
+            {
+              "if": {
+                "required": [
+                  "tableTitleRef"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "relation": {
+                    "const": "SAME_ROW_LABEL"
+                  },
+                  "sourceRefs": {
+                    "minItems": 2
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "scopeRefs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^e[0-9]{1,6}$"
+          }
+        },
+        "directTextAssertion": {
+          "const": true
+        }
+      },
+      "required": [
+        "role",
+        "name",
+        "editable",
+        "evidence",
+        "evidenceSegments",
+        "nameComplete",
+        "ownTextComplete"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "directTextAssertion"
+            ]
+          },
+          "then": {
+            "properties": {
+              "role": {
+                "const": "paragraph"
+              },
+              "name": {
+                "const": ""
+              },
+              "editable": {
+                "const": false
+              },
+              "ownTextComplete": {
+                "const": true
+              }
+            },
+            "required": [
+              "text"
+            ]
+          }
+        }
+      ]
+    },
+    "EvidenceSegment": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "field": {
+          "enum": [
+            "name",
+            "placeholder",
+            "near",
+            "ownText",
+            "text",
+            "group",
+            "header",
+            "sibling"
+          ]
+        },
+        "start": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 512
+        },
+        "end": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 512
+        },
+        "purpose": {
+          "const": "READ_ASSERT_ONLY"
+        }
+      },
+      "required": [
+        "field",
+        "start",
+        "end"
+      ]
+    }
+  }
 }

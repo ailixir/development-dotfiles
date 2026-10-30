@@ -37,7 +37,6 @@
                     "sourceRevision",
                     "configurationRevision",
                     "environmentId",
-                    "applicationId",
                     "versions"
                   ],
                   "properties": {
@@ -58,11 +57,6 @@
                       "pattern": "^(0|[1-9][0-9]{0,18})$"
                     },
                     "environmentId": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 256
-                    },
-                    "applicationId": {
                       "type": "string",
                       "minLength": 1,
                       "maxLength": 256

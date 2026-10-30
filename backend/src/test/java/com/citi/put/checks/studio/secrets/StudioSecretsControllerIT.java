@@ -117,12 +117,6 @@ class StudioSecretsControllerIT {
 
     @Bean
     @Primary
-    StudioSecretFixtures.MutableSecretUseAuthorization mutableSecretUseAuthorization() {
-      return new StudioSecretFixtures.MutableSecretUseAuthorization();
-    }
-
-    @Bean
-    @Primary
     RecordingRunnerDispatchClient recordingRunnerDispatchClient() {
       return new RecordingRunnerDispatchClient();
     }
@@ -132,7 +126,6 @@ class StudioSecretsControllerIT {
   @Autowired private ObjectMapper objectMapper;
   @Autowired private JdbcTemplate jdbc;
   @Autowired private SwitchableVault vault;
-  @Autowired private StudioSecretFixtures.MutableSecretUseAuthorization entitlements;
   @Autowired private RecordingRunnerDispatchClient runner;
   @Autowired private StudioService studioService;
   @Autowired private StudioDispatcher dispatcher;
@@ -146,7 +139,6 @@ class StudioSecretsControllerIT {
   @BeforeEach
   void setUp() {
     vault.reset();
-    entitlements.clear();
     runner.reset();
     fixtures = new StudioExecutionFixtures(jdbc);
     fixtures.seedUser(OWNER);
@@ -334,7 +326,6 @@ class StudioSecretsControllerIT {
         CSI_ID,
         List.of("Go to the home page"),
         StudioExecutionFixtures.references(List.of(), List.of("LOGIN_PW")));
-    entitlements.grant(OWNER, CSI_ID, ENVIRONMENT, "LOGIN_PW");
     // Saved for another test with the same CSI and environment: must not satisfy this one.
     create(otherTestId, body("LOGIN_PW"), owner());
     ResponseEntity<String> refused = execute(declaring);

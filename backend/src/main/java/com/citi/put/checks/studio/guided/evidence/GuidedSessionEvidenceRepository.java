@@ -103,6 +103,20 @@ public class GuidedSessionEvidenceRepository {
     return Boolean.TRUE.equals(within);
   }
 
+  /**
+   * Whether the session published: a receipt row exists in {@code studio_guided_publications}. This
+   * is the one fact that decides a recording is not retained (its proof is the replay of the
+   * published revision), never the session's state string: a session can be {@code SUCCEEDED} with
+   * its publication still pending or refused, and that learn keeps its recording.
+   */
+  public boolean published(String sessionId) {
+    return Boolean.TRUE.equals(
+        jdbc.queryForObject(
+            "SELECT EXISTS (SELECT 1 FROM studio_guided_publications WHERE session_id=?)",
+            Boolean.class,
+            sessionId));
+  }
+
   /** Whether the session already holds its write-once recording fact. */
   public boolean recorded(String sessionId) {
     Integer count =

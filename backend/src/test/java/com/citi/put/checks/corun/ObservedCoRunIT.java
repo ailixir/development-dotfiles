@@ -33,7 +33,6 @@ import com.citi.put.checks.studio.guided.translation.GuidedModelRequest;
 import com.citi.put.checks.studio.guided.translation.GuidedModelResponse;
 import com.citi.put.checks.studio.recovery.RunningReaper;
 import com.citi.put.checks.studio.secrets.FakeStudioVaultProvider;
-import com.citi.put.checks.studio.secrets.StudioSecretFixtures;
 import com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture;
 import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import com.citi.put.checks.studio.support.RunnerProcessHarness;
@@ -146,7 +145,6 @@ class ObservedCoRunIT {
 
   private static final String CSI_ID = "60491";
   private static final String OWNER = "corun-owner@citi.com";
-  private static final String APPLICATION = "corun-app";
   private static final String ENVIRONMENT = "Production";
   private static final String RUNNER_INSTANCE_PREFIX = "corun";
   private static final String BUILD_DIGEST = "c".repeat(64);
@@ -173,9 +171,7 @@ class ObservedCoRunIT {
   private static final String ORIGIN;
   private static final ObjectNode CATALOG;
   private static final String CATALOG_JSON;
-  private static final String POLICIES_JSON;
   private static final Path CATALOG_FILE;
-  private static final Path POLICY_FILE;
   private static final AtomicInteger START_HITS = new AtomicInteger();
   private static final AtomicInteger HOLD_HITS = new AtomicInteger();
   private static final AtomicInteger LOGIN_HITS = new AtomicInteger();
@@ -215,7 +211,7 @@ class ObservedCoRunIT {
               + "\n-----END PUBLIC KEY-----\n");
       TARGET = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
       TARGET.setExecutor(TARGET_THREADS);
-      ORIGIN = "http://127.0.0.1:" + TARGET.getAddress().getPort();
+      ORIGIN = "http://localhost:" + TARGET.getAddress().getPort();
       TARGET.createContext(
           "/start",
           exchange -> {
@@ -273,9 +269,7 @@ class ObservedCoRunIT {
       TARGET.start();
       CATALOG = realCatalog();
       CATALOG_JSON = JSON.createArrayNode().add(CATALOG).toString();
-      POLICIES_JSON = policies();
       CATALOG_FILE = Files.writeString(TEMP.resolve("catalog.json"), CATALOG.toString());
-      POLICY_FILE = Files.writeString(TEMP.resolve("policies.json"), POLICIES_JSON);
       EVIDENCE.put("distDigest", DIST_DIGEST);
       EVIDENCE.put("runnerEntry", "dist/main.js (folded, TLS listener)");
       EVIDENCE.put("target", "loopback http page (no external host)");
@@ -318,26 +312,6 @@ class ObservedCoRunIT {
     return (ObjectNode) C.parse(out.strip());
   }
 
-  private static String policies() {
-    ArrayNode all = JSON.createArrayNode();
-    ObjectNode policy =
-        all.addObject()
-            .put("version", 1)
-            .put("policyId", "policy-" + APPLICATION)
-            .put("policyVersion", "1")
-            .put("applicationId", APPLICATION)
-            .put("environment", ENVIRONMENT)
-            .put("entryPolicyId", "entry-" + APPLICATION);
-    policy.putArray("allowedOrigins").add(ORIGIN);
-    policy
-        .putObject("applicationPolicy")
-        .put("policyRuleId", "app")
-        .put("allowStructuralDiscovery", true)
-        .putArray("readGrants");
-    policy.putArray("rules");
-    return all.toString();
-  }
-
   @DynamicPropertySource
   static void properties(DynamicPropertyRegistry registry) {
     // The backend is the TLS server of the runner's callbacks. The replay callback presents no
@@ -365,9 +339,6 @@ class ObservedCoRunIT {
           "studio.guided-authoring.controller-token-file",
           () -> TEMP.resolve("controller.jwt").toString());
       registry.add("studio.guided-authoring.translation.enabled", () -> true);
-      registry.add("studio.guided-authoring.translation.allow-authored-nonsecret", () -> true);
-      registry.add("studio.guided-authoring.translation.applications", () -> APPLICATION);
-      registry.add("studio.guided-authoring.translation.environments", () -> ENVIRONMENT);
       registry.add("studio.guided-authoring.translation.worker-id", () -> WORKER_ID);
       registry.add(
           "studio.guided-authoring.translation.controller-origin",
@@ -392,7 +363,6 @@ class ObservedCoRunIT {
     registry.add("studio.execution.video-store.directory", () -> OBJECTS.toString());
     registry.add("studio.observed-replay.enabled", () -> "true");
     registry.add("studio.observed-replay.catalog-json", () -> CATALOG_JSON);
-    registry.add("studio.observed-replay.policies-json", () -> POLICIES_JSON);
   }
 
   // ── wiring: the faulting client and the callback recorder ────────────────
@@ -414,12 +384,6 @@ class ObservedCoRunIT {
     @Primary
     FakeStudioVaultProvider fakeVault() {
       return VAULT;
-    }
-
-    @Bean
-    @Primary
-    StudioSecretFixtures.MutableSecretUseAuthorization mutableSecretUseAuthorization() {
-      return ENTITLEMENTS;
     }
 
     @Bean
@@ -448,8 +412,6 @@ class ObservedCoRunIT {
 
   static final ScriptedGateway GATEWAY = new ScriptedGateway();
   static final FakeStudioVaultProvider VAULT = new FakeStudioVaultProvider(Map.of());
-  static final StudioSecretFixtures.MutableSecretUseAuthorization ENTITLEMENTS =
-      new StudioSecretFixtures.MutableSecretUseAuthorization();
 
   /**
    * The model, replaced at its seam and nowhere else: the source plan is the one the authored step
@@ -498,7 +460,6 @@ class ObservedCoRunIT {
               .putNull("predicate")
               .putNull("needId")
               .put("referenceIndex", 0);
-          reply.putArray("needs");
         }
         case NEXT_ACTION -> {
           nextActions.incrementAndGet();
@@ -1380,8 +1341,6 @@ class ObservedCoRunIT {
       throws Exception {
     org.junit.jupiter.api.Assumptions.assumeTrue(GUIDED, "CORUN_GUIDED=0");
     Generation generation = startRunner();
-    ObservedPublicationFixture.seedPolicy(
-        jdbc, CSI_ID, APPLICATION, ENVIRONMENT, List.of(ORIGIN), null, "ALLOW");
     UUID testId = guidedDraft("Open " + ORIGIN + "/hold");
     HttpResponse<String> started =
         publicJson(
@@ -1517,8 +1476,6 @@ class ObservedCoRunIT {
       throws Exception {
     org.junit.jupiter.api.Assumptions.assumeTrue(GUIDED, "CORUN_GUIDED=0");
     Generation generation = startRunner();
-    ObservedPublicationFixture.seedPolicy(
-        jdbc, CSI_ID, APPLICATION, ENVIRONMENT, List.of(ORIGIN), null, "ALLOW");
     UUID testId = guidedDraft("Open " + ORIGIN + "/hold");
     HttpResponse<String> started =
         publicJson(
@@ -1689,17 +1646,12 @@ class ObservedCoRunIT {
 
   private void aSecretReachesTheRealRunnerAndLeavesNoCanaryAnywhereOnce() throws Exception {
     VAULT.clear();
-    ENTITLEMENTS.clear();
     RECEIPT.set(null);
     Generation generation = startRunner();
     String step = "Open " + ORIGIN + "/login";
     UUID testId =
         new StudioExecutionFixtures(jdbc).seedTest("Co-run secret", CSI_ID, OWNER, List.of(step));
     publisher.publish(testId, List.of(SECRET_NAME));
-    // The public Run's principal is the Core user id the identity headers carry ("uid-" + email),
-    // which is what the secret-use entitlement is keyed by.
-    ENTITLEMENTS.grant("uid-" + OWNER, CSI_ID, ENVIRONMENT, SECRET_NAME);
-    ENTITLEMENTS.grant(OWNER, CSI_ID, ENVIRONMENT, SECRET_NAME);
     String secretBody =
         JSON.writeValueAsString(
             Map.of("name", SECRET_NAME, "value", CANARY, "allowedOrigins", List.of(ORIGIN)));
@@ -1873,8 +1825,7 @@ class ObservedCoRunIT {
             .put("testId", testId.toString())
             .put("sourceRevision", "1")
             .put("configurationRevision", "1")
-            .put("environmentId", ENVIRONMENT)
-            .put("applicationId", APPLICATION);
+            .put("environmentId", ENVIRONMENT);
     request.putObject("versions").put("contract", 3);
     return request;
   }
@@ -2092,7 +2043,6 @@ class ObservedCoRunIT {
             .env("STUDIO_RUNNER_OBSERVED_VALIDATION_ENABLED", "true")
             .env("STUDIO_RUNNER_OBSERVED_REPLAY_ENABLED", "true")
             .env("STUDIO_RUNNER_OBSERVED_CATALOG_FILE", CATALOG_FILE.toString())
-            .env("STUDIO_RUNNER_OBSERVED_POLICY_FILE", POLICY_FILE.toString())
             .env("STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST", BUILD_DIGEST)
             .env("NODE_EXTRA_CA_CERTS", TLS.caCertificate().toAbsolutePath().toString())
             .preload(measurementPrelude(counters));
@@ -2345,7 +2295,7 @@ class ObservedCoRunIT {
           new ObservedReplayPins(
               C,
               new ObservedReplayProperties(
-                  true, 30000, 1048576, 4194304, 2097152, CATALOG_JSON, POLICIES_JSON, 1280, 720));
+                  true, 30000, 1048576, 4194304, 2097152, CATALOG_JSON, 1280, 720));
     }
 
     UUID publish(UUID testId) {
@@ -2379,12 +2329,10 @@ class ObservedCoRunIT {
               .put("principalId", principal)
               .put("csiId", csiId)
               .put("environmentId", environment)
-              .put("applicationId", APPLICATION)
               .put("sourceRevision", current.path("sourceRevision").asText())
               .put("configurationRevision", current.path("configurationRevision").asText())
               .put("modelDataPolicyId", "labels-only-1")
               .putNull("valueTransferPolicyId");
-      scope.putArray("approvedOrigins").add(ORIGIN);
       scope
           .putArray("capabilities")
           .add("observe")

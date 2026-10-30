@@ -35,6 +35,7 @@ public final class GuidedPlanPublisher {
   private final GuidedSessionAccess access;
   private final GuidedPublicationProperties properties;
   private final ObservedReplayProperties replay;
+  private final PublicationProofLauncher proofs;
   private final Clock clock;
 
   private record Prepared(
@@ -57,6 +58,7 @@ public final class GuidedPlanPublisher {
       GuidedSessionAccess access,
       GuidedPublicationProperties properties,
       ObservedReplayProperties replay,
+      PublicationProofLauncher proofs,
       Clock clock) {
     this.sessions = sessions;
     this.lifecycle = lifecycle;
@@ -70,6 +72,7 @@ public final class GuidedPlanPublisher {
     this.access = access;
     this.properties = properties;
     this.replay = replay;
+    this.proofs = proofs;
     this.clock = clock;
     builder = new GuidedPlanBuilder(contracts);
     lowerer = new ObservedArtifactLowerer(contracts);
@@ -189,7 +192,6 @@ public final class GuidedPlanPublisher {
                 bases.find(id).orElseThrow(() -> new GuidedSessionException("MISSING_SOURCE", 409));
             var source = bases.lockCurrent(UUID.fromString(text(base.document(), "testId")));
             bases.requireCurrent(base, source);
-            access.checkCurrent(currentSession.document());
             return null;
           });
       PublicationContracts.Grant grant =
@@ -232,6 +234,15 @@ public final class GuidedPlanPublisher {
                         prepared.candidate(),
                         grant),
                     clock.instant());
+            // The proof of this publication, accepted in the same transaction (fail-closed: a
+            // failure here rolls the revision, the receipt and the session state back). The
+            // learner's fresh execute proof was obtained by authorizePublication above.
+            JsonNode published = receipt.document();
+            proofs.launch(
+                id,
+                UUID.fromString(text(published, "testId")),
+                UUID.fromString(text(published, "revisionId")),
+                text(published, "originalPrincipalId"));
             lifecycle.publicationCommitted(id);
             return receipt;
           });
@@ -358,7 +369,6 @@ public final class GuidedPlanPublisher {
         409);
     var source = bases.lockCurrent(UUID.fromString(text(base.document(), "testId")));
     bases.requireCurrent(base, source);
-    access.checkCurrent(document);
     var raw = evidence.read(id);
     return new LoweringCapture(base, source, raw, session.document().deepCopy());
   }
@@ -446,7 +456,6 @@ public final class GuidedPlanPublisher {
         409);
     var source = bases.lockCurrent(UUID.fromString(text(base.document(), "testId")));
     bases.requireCurrent(base, source);
-    access.checkCurrent(document);
     var raw = evidence.read(id);
     // Ruling E-2: the pre-lock lowering input is a basis() result validated outside this lock.
     ObjectNode basis =

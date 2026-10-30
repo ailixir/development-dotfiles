@@ -130,7 +130,8 @@ class GuidedBridgeIntegrationTest {
 
     @Bean
     GuidedMaterializationService materialization(JdbcTemplate jdbc) {
-      return new GuidedMaterializationService(jdbc, ENV.contracts);
+      return new GuidedMaterializationService(
+          jdbc, ENV.contracts, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     }
 
     @Bean
@@ -145,6 +146,7 @@ class GuidedBridgeIntegrationTest {
               ENV.contracts,
               access,
               new GuidedSessionProperties(true, Map.of()),
+              com.citi.put.checks.studio.support.TestDomains.FIXTURES,
               Clock.systemUTC());
       service.installBridge(
           materialization,
@@ -158,14 +160,7 @@ class GuidedBridgeIntegrationTest {
           new com.citi.put.checks.studio.guided.translation.GuidedClarificationContextStore(
               jdbc, ENV.contracts));
       // STUDIO-OBS-014 S3: one uniform governed policy for the class (ar-mounted-rules B14).
-      com.citi.put.checks.studio.support.ObservedPublicationFixture.installGovernance(
-          service,
-          jdbc,
-          "CSI-123",
-          "orders",
-          "fixture",
-          java.util.List.of(ENV.origin),
-          governedPolicy());
+      com.citi.put.checks.studio.support.ObservedPublicationFixture.installCsiBudget(service, jdbc);
       return service;
     }
 
@@ -189,16 +184,6 @@ class GuidedBridgeIntegrationTest {
     }
   }
 
-  /**
-   * The class's governed observation application policy (ar-mounted-rules B14): a structural policy
-   * with one business-read grant on {@code <main aria-label='Operations'>}. On pages without that
-   * anchor (privacyEcho, nativeToggle, /echo) the grant yields no candidate, so the uniform policy
-   * behaves as "no grants" there.
-   */
-  static ObjectNode governedPolicy() {
-    return ENV.governedPolicy();
-  }
-
   static class FixtureAccess implements GuidedSessionAccess, GuidedSessionService.StepVerifier {
     final JdbcTemplate jdbc;
 
@@ -215,12 +200,10 @@ class GuidedBridgeIntegrationTest {
               .put("principalId", "user-1")
               .put("csiId", "CSI-123")
               .put("environmentId", "fixture")
-              .put("applicationId", "orders")
               .put("sourceRevision", "source-1")
               .put("configurationRevision", "config-1")
               .put("modelDataPolicyId", "labels-only-1")
               .putNull("valueTransferPolicyId");
-      scope.putArray("approvedOrigins").add(ENV.origin);
       scope
           .putArray("capabilities")
           .add("observe")
@@ -278,9 +261,6 @@ class GuidedBridgeIntegrationTest {
                   session.path("sessionId").asText())
               == 1;
     }
-
-    @Override
-    public void checkCurrent(JsonNode session) {}
 
     @Override
     public void checkUser(Authentication principal, JsonNode session) {
@@ -381,8 +361,6 @@ class GuidedBridgeIntegrationTest {
         ENV.configInput);
     // STUDIO-OBS-014 S3b: each test runs on a freshly migrated isolated database, so the class's
     // approved governed policy is seeded here; the bean-time seed only reached the base database.
-    com.citi.put.checks.studio.support.ObservedPublicationFixture.seedPolicy(
-        jdbc, "CSI-123", "orders", "fixture", List.of(ENV.origin), governedPolicy(), "ALLOW");
     ENV.resetWorkerState();
     Path journal = ENV.prepareWorkerJournal();
     // STUDIO-OBS-009 AC-3 / AC-12 h: the one folded entry point over TLS, spawned and reaped by the
@@ -1190,7 +1168,7 @@ class GuidedBridgeIntegrationTest {
                     + "\"coordinate\":{\"stepId\":\"step-2\",\"ordinal\":0},\"documentId\":\"document-1\","
                     + "\"generation\":1,\"reason\":\"AMBIGUOUS_TARGET\",\"promptCode\":\"CHOOSE_FIELD\","
                     + "\"choices\":[{\"choiceId\":\"choice-1\",\"safeLabel\":\"Order reference\","
-                    + "\"nodeId\":\"node-1\",\"bindingId\":null}],\"expiresAt\":\"2026-10-08T03:10:00Z\"}");
+                    + "\"bindingId\":null}],\"expiresAt\":\"2026-10-08T03:10:00Z\"}");
     legacyQuestion.put("sessionId", id);
     assertThatThrownBy(
             () -> sessions.clarification(controller, id, 1, "legacy-question", legacyQuestion))
@@ -1414,8 +1392,7 @@ class GuidedBridgeIntegrationTest {
             .put("testId", "test-1")
             .put("sourceRevision", "source-1")
             .put("configurationRevision", "config-1")
-            .put("environmentId", "fixture")
-            .put("applicationId", "orders");
+            .put("environmentId", "fixture");
     start.set("versions", versions());
     String id =
         sessions.start(user, UUID.randomUUID().toString(), start).path("sessionId").asText();

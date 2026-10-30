@@ -45,7 +45,13 @@ class GuidedGatewayPrivacyTest {
           "account-canary",
           "secret-canary",
           "runtime-capture-canary",
-          "cookie-canary");
+          "cookie-canary",
+          // ADR-SC-007: what the backend keeps in the facts table of an observation (the evidence
+          // string with its group/header/sibling parts, the visible text of an element) never
+          // leaves it; the model receives the outline string only.
+          "fact-evidence-canary",
+          "fact-group-canary",
+          "fact-text-canary");
   private final WireMockServer server =
       new WireMockServer(WireMockConfiguration.options().dynamicPort());
   @TempDir java.nio.file.Path temporary;
@@ -149,7 +155,6 @@ class GuidedGatewayPrivacyTest {
     current.putObject("account").put("token", FORBIDDEN.get(1));
     ObjectNode scope =
         JSON.createObjectNode()
-            .put("applicationId", "fixture-app")
             .put("environmentId", "fixture")
             .put("csiId", "CSI-test")
             .put("sourceRevision", "1")
@@ -157,16 +162,8 @@ class GuidedGatewayPrivacyTest {
     var classifier =
         new GuidedSourceClassifier(
             contracts,
-            new GuidedTranslationProperties(
-                true,
-                true,
-                List.of("fixture-app"),
-                List.of("fixture"),
-                65536,
-                1024,
-                60,
-                "fixture-worker"),
-            new CredentialPatternScreen());
+            new CredentialPatternScreen(),
+            com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     ObjectNode manifest = classifier.classify(current, scope);
     assertThat(manifest.path("configurationValues").toString()).contains(FORBIDDEN.getFirst());
     var session =
@@ -189,6 +186,17 @@ class GuidedGatewayPrivacyTest {
             .put("runtimeCapture", FORBIDDEN.get(3))
             .put("cookie", FORBIDDEN.get(4))
             .put("error", String.join(" ", FORBIDDEN));
+    ObjectNode observation = progress.putObject("observation");
+    observation.put("outline", "- document\n  - button \"Continue\" [e1]");
+    ObjectNode fact = observation.putObject("facts").putObject("e1");
+    fact.put("role", "button").put("name", "Continue").put("editable", false);
+    fact.put("evidence", "Continue " + FORBIDDEN.get(5) + " " + FORBIDDEN.get(6));
+    fact.putArray("evidenceSegments")
+        .addObject()
+        .put("field", "name")
+        .put("start", 0)
+        .put("end", 8);
+    fact.put("text", FORBIDDEN.get(7));
     var safeInputs = JSON.createArrayNode();
     safeInputs
         .addObject()
@@ -196,7 +204,8 @@ class GuidedGatewayPrivacyTest {
         .put("sourceStepId", STEP)
         .put("kind", "nonsecretText")
         .put("intendedSlot", "fill.value");
-    return new GuidedPromptAssembler(contracts)
+    return new GuidedPromptAssembler(
+            contracts, com.citi.put.checks.studio.support.TestDomains.FIXTURES)
         .assemble(
             "synthetic-request",
             attempt,
@@ -220,7 +229,6 @@ class GuidedGatewayPrivacyTest {
     switch (request.kind()) {
       case SOURCE_PLAN -> {
         answer.putArray("sourceReferences");
-        answer.putArray("needs");
         answer
             .putArray("obligations")
             .addObject()
@@ -294,7 +302,6 @@ class GuidedGatewayPrivacyTest {
         .put("kind", "secretRef")
         .put("secretId", "PASSWORD");
     ObjectNode scope = GuidedSourceClassifierTest.scope();
-    scope.putArray("approvedOrigins").add("https://example.test");
     ObjectNode manifest = GuidedSourceClassifierTest.classifier().classify(draft, scope);
     ObjectNode session =
         JSON.createObjectNode()
@@ -307,7 +314,8 @@ class GuidedGatewayPrivacyTest {
     ObjectNode state = JSON.createObjectNode();
     state.set("manifest", manifest);
     GuidedModelRequest request =
-        new GuidedPromptAssembler(new GuidedContracts())
+        new GuidedPromptAssembler(
+                new GuidedContracts(), com.citi.put.checks.studio.support.TestDomains.FIXTURES)
             .assemble(
                 "uri-private-request",
                 1,
@@ -380,6 +388,8 @@ class GuidedGatewayPrivacyTest {
                 + " authoritative")
         .doesNotContain("https://checks.citi.example/contracts/", "\"$schema\"", "\"$id\"");
     assertThat(body.at("/generationConfig/maxOutputTokens").asInt()).isEqualTo(1024);
+    // Wire golden: the thinking level is sent explicitly on every request, LOW by default.
+    assertThat(body.at("/generationConfig/thinkingConfig/thinkingLevel").asText()).isEqualTo("LOW");
     assertThat(received.getBodyAsString()).contains(AUTHORED);
     for (String forbidden : FORBIDDEN) {
       assertThat(received.getBodyAsString()).doesNotContain(forbidden);
@@ -690,6 +700,80 @@ class GuidedGatewayPrivacyTest {
       assertThat(client.propose(request, budget(Duration.ofSeconds(5))).code())
           .isEqualTo(GuidedModelResponse.Code.OK);
       server.verify(1, postRequestedFor(urlPathMatching(".*generateContent")));
+    }
+  }
+
+  /** A permit holder with no deadline of its own, so the test controls when the permit frees. */
+  static GenAiGatewayTransport.Budget open() {
+    return new GenAiGatewayTransport.Budget() {
+      @Override
+      public Duration remaining() {
+        return Duration.ofSeconds(30);
+      }
+
+      @Override
+      public AutoCloseable onCancel(Runnable action) {
+        return GuidedGatewayPrivacyTest::nothingRegistered;
+      }
+    };
+  }
+
+  private static void nothingRegistered() {
+    // The holder never cancels, so nothing needs removing.
+  }
+
+  @Test
+  void aCallWaitsForAFreedPermitInsteadOfFailingBusy() throws Exception {
+    var request = request(GuidedModelRequest.Kind.VERIFY_STEP, projection(), 1);
+    server.stubFor(
+        post(urlPathMatching(".*generateContent"))
+            .willReturn(okJson(provider(answer(request).toString()))));
+    try (var transport = new GenAiGatewayTransport(properties(server.baseUrl(), 65536, 65536))) {
+      var held = transport.tryAcquire(open());
+      assertThat(held).isNotNull();
+      var running =
+          CompletableFuture.supplyAsync(
+              () -> client(transport).propose(request, budget(Duration.ofSeconds(10))));
+      Thread.sleep(300);
+      assertThat(running).isNotDone();
+      assertThat(server.getAllServeEvents()).isEmpty();
+      held.close();
+      assertThat(running.get(5, TimeUnit.SECONDS).code()).isEqualTo(GuidedModelResponse.Code.OK);
+      server.verify(1, postRequestedFor(urlPathMatching(".*generateContent")));
+    }
+  }
+
+  @Test
+  void aCallIsBusyOnlyAfterWaitingOutItsOwnBudgetAndNeverSends() throws Exception {
+    var request = request(GuidedModelRequest.Kind.VERIFY_STEP, projection(), 1);
+    try (var transport = new GenAiGatewayTransport(properties(server.baseUrl(), 65536, 65536));
+        var held = transport.tryAcquire(open())) {
+      assertThat(held).isNotNull();
+      long start = System.nanoTime();
+      var busy = client(transport).propose(request, budget(Duration.ofMillis(400)));
+      Duration waited = Duration.ofNanos(System.nanoTime() - start);
+      assertThat(busy.code()).isEqualTo(GuidedModelResponse.Code.BUSY);
+      assertThat(busy.reason()).isEqualTo(GuidedModelResponse.Reason.BUSY);
+      assertThat(waited).isBetween(Duration.ofMillis(300), Duration.ofSeconds(3));
+      assertThat(server.getAllServeEvents()).isEmpty();
+    }
+  }
+
+  @Test
+  void anExpiredSendIsAbortedAndReleasesItsPermit() throws Exception {
+    var request = request(GuidedModelRequest.Kind.VERIFY_STEP, projection(), 1);
+    server.stubFor(
+        post(urlPathMatching(".*generateContent"))
+            .willReturn(okJson(provider(answer(request).toString())).withFixedDelay(10000)));
+    try (var transport = new GenAiGatewayTransport(properties(server.baseUrl(), 65536, 65536))) {
+      long start = System.nanoTime();
+      assertThat(client(transport).propose(request, budget(Duration.ofMillis(300))).code())
+          .isEqualTo(GuidedModelResponse.Code.TIMEOUT);
+      assertThat(Duration.ofNanos(System.nanoTime() - start)).isLessThan(Duration.ofSeconds(3));
+      // Capacity is 1: the permit is back as soon as the aborted send has returned.
+      try (var again = transport.tryAcquire(open())) {
+        assertThat(again).isNotNull();
+      }
     }
   }
 

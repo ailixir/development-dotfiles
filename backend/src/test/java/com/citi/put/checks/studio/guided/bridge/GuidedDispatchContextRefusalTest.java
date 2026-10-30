@@ -109,7 +109,14 @@ class GuidedDispatchContextRefusalTest {
     }
     verify(sessions, org.mockito.Mockito.times(2))
         .failTranslation(controller, "session-1", 1L, "RUNTIME_INCOMPATIBLE");
-    verify(sessions, never()).admit(any(), anyString(), anyLong(), anyString(), any());
+    verify(sessions, never())
+        .admit(
+            any(),
+            anyString(),
+            anyLong(),
+            anyString(),
+            any(),
+            org.mockito.ArgumentMatchers.nullable(String.class));
   }
 
   @Test

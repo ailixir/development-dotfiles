@@ -90,9 +90,40 @@ class StudioContractTest {
   // ReportedRuntimeVersions describe the observed identities (T0 A7) and startGuidedSession
   // declares 422 INVALID_CONTRACT (AUTHORING_REFERENCE_AMBIGUOUS); operations stay 44.
   // Previous digest b5ecdcad…ae29244.
-  // new "bbf37fd1f96c0da33bbca6db4c04c94222a44429a4b6f0e33c92dfc59fca02c4".
+  // old "bbf37fd1f96c0da33bbca6db4c04c94222a44429a4b6f0e33c92dfc59fca02c4".
+  // STUDIO-GOV-001.3: the five guided-policies operations and the startGuidedSession
+  // POLICY_NOT_APPROVED conflict are deleted (ADR-002 §13). STUDIO-GOV-001.2: the eight Studio
+  // schedule operations and the snapshot provenance fields are removed (ADR-002 §13). The digest
+  // also carries STUDIO-UNIFY-001.6's readLatestGuidedAttempts; 45 -> 32 operations.
+  // STUDIO-GOV-001.4: startGuidedSession drops `applicationId` from its body and declares the 422
+  // NO_APPLICATION_URL refusal; the capability `guidedStart.context` drops `applicationId`
+  // (ADR-002 §13).
+  // old "ffb9934ad95f4dc99cedd1022e3e14f2eb77d6dc8be10f728fb034941fd3c7f6".
+  // new "8daf493b427fbe472df6b69131423abd8427f032036db695bad472328943a7b2".
+  // Proof = replay of the published revision (ADR-002 §13): GuidedResult gains `proof` and a
+  // publication-keyed `evidence.video` (null when PUBLISHED), ExecutionSnapshot.triggerSource gains
+  // AFTER_LEARN, and getGuidedSessionVideo documents its 404 for a published session; operations
+  // stay 32.
+  // old "8daf493b427fbe472df6b69131423abd8427f032036db695bad472328943a7b2".
+  // new "a3328f879e0a367233a48196290dbfe05a422bea320ab559ee601752dfff4957".
+  // STUDIO-FLEX-001: text only. startGuidedSession declares 403 ORIGIN_NOT_ALLOWED (first URL
+  // not on the allowed-domains list) and the 429 messageCode LEARNING_CAPACITY_EXHAUSTED;
+  // createTestSecret's INVALID_SECRET_ORIGINS also covers an origin off the list; operations
+  // stay 32.
+  // old "a3328f879e0a367233a48196290dbfe05a422bea320ab559ee601752dfff4957".
+  // new "10b0cb1ead65f234e30d8eacd4c63dcd4f995fb8f96a739cd0e77303530b84ea".
+  // Wording only: getGuidedSessionVideo names the published-session 404 by its wire code
+  // VIDEO_UNAVAILABLE (was NO_EVIDENCE, the Java constant name); operations stay 32.
+  // old "10b0cb1ead65f234e30d8eacd4c63dcd4f995fb8f96a739cd0e77303530b84ea".
+  // new "35d42df7d2dca7099e3be1cc98fa2993bea8a6f3271007fb7738726ffa5afc7a".
+  // ADR-SC-007 (WI-3): wording only: the clarification example choice carries no element id.
+  // The observed clarification choice is {choiceId, safeLabel, labelSource, role, region,
+  // bindingId}.
+  // operations stay 32.
+  // old "35d42df7d2dca7099e3be1cc98fa2993bea8a6f3271007fb7738726ffa5afc7a".
+  // new "cd28f40b3e96c6e6c9ffd34afdf704702a2a6c6cd01eeee00c76acb8abf9b663".
   private static final String BASE_SHA256 =
-      "bbf37fd1f96c0da33bbca6db4c04c94222a44429a4b6f0e33c92dfc59fca02c4";
+      "cd28f40b3e96c6e6c9ffd34afdf704702a2a6c6cd01eeee00c76acb8abf9b663";
 
   private static Map<String, Object> contract;
 
@@ -296,15 +327,6 @@ class StudioContractTest {
     // STUDIO-OBS-008 P1: one saved test's runtime capabilities; absent and denied both answer 403.
     expected.put("GET /tests/{id}/capabilities", "200,400,401,403");
     expected.put("PUT /tests/{id}", "200,400,401,403,409");
-    // STUDIO-SCHED-001 adds these eight operations; the prior 23 status sets stay pinned.
-    expected.put("GET /tests/{id}/schedule", "200,401,403");
-    expected.put("GET /tests/{id}/schedule/capabilities", "200,400,401,403");
-    expected.put("GET /tests/{id}/schedule/occurrences", "200,400,401,403");
-    expected.put("POST /tests/{id}/schedule", "201,400,401,403,409,503");
-    expected.put("PUT /tests/{id}/schedule", "200,400,401,403,409,503");
-    expected.put("PATCH /tests/{id}/schedule/enabled", "200,400,401,403,409,503");
-    expected.put("DELETE /tests/{id}/schedule", "204,400,401,403,409,503");
-    expected.put("POST /schedules/preview", "200,400,401");
     // Approved OBS006 adds only these three internal operations; the preceding 31 remain exact.
     expected.put("POST /v2/validate-observed", "200,400,401,403,413,503");
     expected.put("POST /v2/runs", "202,400,401,403,409,413,429,503");
@@ -316,6 +338,8 @@ class StudioContractTest {
     expected.put("POST /tests/{id}/validate-variables", "200,400,401,403");
     // STUDIO-OBS-009 C9 (C-OBS008-4): startGuidedSession declares 422 (ambiguous declarations).
     expected.put("POST /guided-sessions", "202,400,401,403,409,422,429,503");
+    // STUDIO-UNIFY-001.6: the caller's latest learning attempt per test (readLatestGuidedAttempts).
+    expected.put("GET /guided-sessions/latest", "200,400,401,403");
     expected.put("GET /guided-sessions/{id}", "200,400,401,403,409,503");
     expected.put("GET /guided-sessions/{id}/result", "200,202,400,401,403,409,503");
     expected.put("GET /guided-sessions/{id}/clarification", "200,204,400,401,403,409,503");
@@ -325,13 +349,8 @@ class StudioContractTest {
     expected.put("DELETE /v2/runs/{id}", "202,401,403,404,409");
     // STUDIO-OBS-013 C1 (AR-1): the guided recording, getExecutionVideo's status set unchanged.
     expected.put("GET /guided-sessions/{id}/video", "200,206,401,403,404,410,416,503");
-    // STUDIO-OBS-014 C2b (c2b-spec.json): five public Class C guided-policies operations, and
-    // startGuidedSession gains 429 (409 now documents POLICY_NOT_APPROVED).
-    expected.put("GET /guided-policies", "200,400,401,403,404");
-    expected.put("POST /guided-policies", "201,400,401,403,409");
-    expected.put("GET /guided-policies/{id}", "200,400,401,403");
-    expected.put("POST /guided-policies/{id}/versions", "201,400,401,403,409");
-    expected.put("POST /guided-policies/{id}/versions/{version}/approval", "200,400,401,403,409");
+    // STUDIO-UNIFY-001.6: the caller's latest terminal attempt per test.
+    expected.put("GET /guided-sessions/latest", "200,400,401,403");
 
     Map<String, String> declared = declaredStatusSets();
 
@@ -340,10 +359,14 @@ class StudioContractTest {
     // STUDIO-OBS-014 C2a re-anchor: 39 -> 38 (claimAdmission deleted, AR-3).
     // STUDIO-OBS-014 C2b re-anchor: 38 -> 43 (five guided-policies operations).
     // STUDIO-OBS-008 P1 re-anchor: 43 -> 44 (getStudioTestCapabilities).
+    // STUDIO-UNIFY-001.6 re-anchor: 44 -> 45 (readLatestGuidedAttempts).
+    // STUDIO-GOV-001.3 (-5 guided-policies operations) and STUDIO-GOV-001.2 (-8 Studio schedule
+    // operations; UI tests are scheduled through /api/v1/schedules, which is not part of this
+    // document) re-anchor: 45 -> 32 (STUDIO-UNIFY-001.6's readLatestGuidedAttempts included).
     // The total, asserted separately. Without it, both comparisons below could agree on a set that
     // had silently shrunk to nothing on both sides at once.
-    assertThat(declared).as("the document declares a different number of operations").hasSize(44);
-    assertThat(expected).hasSize(44);
+    assertThat(declared).as("the document declares a different number of operations").hasSize(32);
+    assertThat(expected).hasSize(32);
 
     assertThat(declared.keySet())
         .as("an operation the document declares that this copy does not name")
@@ -358,13 +381,15 @@ class StudioContractTest {
                 + "ruling (ESC-1, ESC-2), and studio-vault-secrets adding GET and POST "
                 + "/tests/{id}/secrets by ADR-002 §32's ruling, and story 10.46's GET /tests and "
                 + "GET /executions gaining 400 for their validated list parameters, and "
-                + "STUDIO-SCHED-001's eight public scheduling operations and OBS006's three "
-                + "internal observed operations and STUDIO-OBS-012A's nine added operations "
+                + "OBS006's three internal observed operations and STUDIO-OBS-012A's nine added operations "
                 + "and STUDIO-OBS-013's GET /guided-sessions/{id}/video, and STUDIO-OBS-014's "
                 + "deletion of POST /internal/studio/executions/{id}/admission (AR-3), and "
-                + "STUDIO-OBS-014 C2b's five guided-policies operations and POST /guided-sessions "
-                + "gaining 429, and STUDIO-OBS-008's GET /tests/{id}/capabilities, and "
-                + "STUDIO-OBS-009 C9's POST /guided-sessions gaining 422 (C-OBS008-4). "
+                + "STUDIO-OBS-014 C2b's POST /guided-sessions gaining 429 (its five guided-policies "
+                + "operations were deleted by STUDIO-GOV-001.3), and STUDIO-OBS-008's "
+                + "GET /tests/{id}/capabilities, and "
+                + "STUDIO-OBS-009 C9's POST /guided-sessions gaining 422 (C-OBS008-4), and "
+                + "STUDIO-UNIFY-001.6's readLatestGuidedAttempts, and STUDIO-GOV-001.2's removal of "
+                + "the eight Studio schedule operations. "
                 + "Every earlier "
                 + "row remains pinned, and a "
                 + "row that moves without a ruling is the drift this copy exists to catch")
@@ -373,25 +398,6 @@ class StudioContractTest {
     assertThat(pendingOperations())
         .as("story 10.15 removed the last x-not-yet-implemented; none came back here")
         .isEmpty();
-    for (String operation :
-        List.of(
-            "GET /tests/{id}/schedule",
-            "GET /tests/{id}/schedule/capabilities",
-            "GET /tests/{id}/schedule/occurrences",
-            "POST /tests/{id}/schedule",
-            "PUT /tests/{id}/schedule",
-            "PATCH /tests/{id}/schedule/enabled",
-            "DELETE /tests/{id}/schedule",
-            "POST /schedules/preview")) {
-      String[] route = operation.split(" ", 2);
-      assertThat(operationFlag(route[1], route[0].toLowerCase(Locale.ROOT), "x-implemented-by"))
-          .as("%s must retain its reviewed scheduling implementation attribution", operation)
-          .isEqualTo("STUDIO-SCHED-001");
-      assertThat(
-              operationFlag(route[1], route[0].toLowerCase(Locale.ROOT), "x-not-yet-implemented"))
-          .as("%s is implemented rather than a pending contract promise", operation)
-          .isNull();
-    }
     // STUDIO-OBS-008 P1: the capability route is attributed to the story that serves it.
     assertThat(operationFlag("/tests/{id}/capabilities", "get", "x-implemented-by"))
         .as("GET /tests/{id}/capabilities must carry its reviewed implementation attribution")

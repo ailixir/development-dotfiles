@@ -57,10 +57,17 @@ const UiTestCreateForm: React.FC<UiTestCreateFormProps> = ({ values, onChange, o
   const systemMissing = !selectedCsiIsRegistered;
   const canSubmit = !nameMissing && !nameTooLong && !systemMissing && !creating;
 
-  // Names every reason the button is disabled, from the same conditions as canSubmit. Absent while creating.
+  // The Name field says what is wrong with the name in its helper text, beside the counter: the too-long
+  // sentence always, the empty-name one once the field has been left (the same moment it turns red).
+  const nameSentence = nameTooLong
+    ? `Shorten the name to ${TEST_NAME_MAX_LENGTH} characters or fewer.`
+    : nameTouched && nameMissing
+      ? 'Enter a name to continue.'
+      : '';
+  // Each missing item has one visible reason in one place. The footer names the empty name until the Name field
+  // has been left, after which the field's helper text says it instead, and the missing system. Absent while creating.
   const missingItems: string[] = [];
-  if (nameMissing) missingItems.push('Enter a name to continue.');
-  if (nameTooLong) missingItems.push(`Shorten the name to ${TEST_NAME_MAX_LENGTH} characters or fewer.`);
+  if (nameMissing && !nameTouched) missingItems.push('Enter a name to continue.');
   if (systemMissing) missingItems.push('Choose a system to continue.');
   const disabledReason = creating ? '' : missingItems.join(' ');
 
@@ -93,8 +100,13 @@ const UiTestCreateForm: React.FC<UiTestCreateFormProps> = ({ values, onChange, o
           onBlur={() => setNameTouched(true)}
           error={nameTooLong || (nameTouched && nameMissing)}
           inputProps={{ 'data-testid': 'ui-test-create-name' }}
-          helperText={`${values.name.length}/${TEST_NAME_MAX_LENGTH}`}
-          FormHelperTextProps={{ sx: { textAlign: 'right', mx: 0 } }}
+          helperText={(
+            <Box component="span" sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}>
+              <span>{nameSentence}</span>
+              <span>{`${values.name.length}/${TEST_NAME_MAX_LENGTH}`}</span>
+            </Box>
+          )}
+          FormHelperTextProps={{ sx: { mx: 0 } }}
         />
         <FormControl fullWidth required error={csiTouched && csiLoading === 'succeeded' && !selectedCsiIsRegistered}>
           <InputLabel id="ui-test-create-system-label">System (CSI)</InputLabel>
@@ -111,7 +123,7 @@ const UiTestCreateForm: React.FC<UiTestCreateFormProps> = ({ values, onChange, o
               <MenuItem key={csi.id} value={csi.id}>{csi.id}: {csi.name}</MenuItem>
             ))}
           </Select>
-          <FormHelperText>
+          <FormHelperText sx={{ mx: 0 }}>
             {csiLoading === 'loading'
               ? 'Loading available systems…'
               : csiError

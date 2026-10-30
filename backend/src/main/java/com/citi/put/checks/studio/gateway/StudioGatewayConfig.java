@@ -5,7 +5,10 @@ import com.citi.put.checks.studio.guided.translation.GenAiGuidedLlmGatewayClient
 import com.citi.put.checks.studio.guided.translation.GuidedLlmGatewayClient;
 import com.citi.put.checks.studio.guided.translation.GuidedModelResponse;
 import com.citi.put.checks.studio.guided.translation.GuidedResponseParser;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.io.IOException;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -43,9 +46,12 @@ public class StudioGatewayConfig {
 
   @Bean
   @ConditionalOnProperty(prefix = PREFIX, name = "provider", havingValue = "vertex")
-  public GuidedLlmGatewayClient guidedLlmGatewayClient(GenAiGatewayTransport transport) {
+  public GuidedLlmGatewayClient guidedLlmGatewayClient(
+      GenAiGatewayTransport transport, ObjectProvider<MeterRegistry> registry) {
     return new GenAiGuidedLlmGatewayClient(
-        transport, new GuidedResponseParser(new GuidedContracts()));
+        transport,
+        new GuidedResponseParser(new GuidedContracts()),
+        registry.getIfAvailable(SimpleMeterRegistry::new));
   }
 
   /** Any provider other than Vertex answers DISABLED; nothing is synthesized. */

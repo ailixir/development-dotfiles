@@ -3,8 +3,11 @@
  *
  * A template is a first draft, not a demo. Its job is to get the persona in the BRD (an L2
  * support engineer replacing a 45-minute wiki walkthrough, who does not write code) to a
- * *runnable* checklist without learning the grammar first. Everything below is therefore
- * constrained by what the mechanism can actually do, not by what reads nicely:
+ * *runnable* checklist without learning the grammar first. The six cover the PRD personas' most
+ * common moments, in the order of a working day: L2 support's morning sign-on, key screens and
+ * overnight batch; the SRE's release check and on-call record lookup; the operations analyst's
+ * filtered report. Everything below is therefore constrained by what the mechanism can actually
+ * do, not by what reads nicely:
  *
  * 1. **Every line starts with a familiar action verb** (`Go to`, `Click`, `Type`, `Select`,
  *    `Press`, `Check that`) that maps to an operation in the runner's allowlist. `Scroll` and
@@ -25,6 +28,9 @@
  *    says Vault is configured (see {@link availableQuickStartTemplates}).
  * 5. **One page, one tab, no frames.** V1 runs a single page; nothing here opens a pop-up, a new
  *    tab or an embedded frame.
+ * 6. **No negation, no unnamed target, and a `<var>` only as a typed value.** "is not visible" and
+ *    "Click the button" are the observed-authoring benchmark's refused cases (C09, C12); a typed
+ *    `<var>` is the case it covers (C03), a `<var>` in a click target or an assertion is not.
  */
 
 /** A reference a template needs. Secret rows carry no value; the author points them at a vault entry. */
@@ -64,6 +70,36 @@ export const QUICK_START_TEMPLATES: readonly QuickStartTemplate[] = [
     ],
   },
   {
+    id: 'key-screens-open',
+    title: 'Key screens open from the menu',
+    purpose:
+      'The wiki walkthrough as a checklist: open each screen your team checks every morning and confirm it shows its own heading. Add three lines per screen.',
+    steps: [
+      'Go to "https://put.internal.citi.com/home"',
+      'Click the "Accounts" link',
+      'Check that the URL contains "/accounts"',
+      'Check that the "Accounts" heading is visible',
+      'Click the "Payments" link',
+      'Check that the URL contains "/payments"',
+      'Check that the "Payments" heading is visible',
+    ],
+    variables: [],
+  },
+  {
+    id: 'overnight-batch-finished',
+    title: 'Overnight batch finished',
+    purpose:
+      'Before the business day starts: did the job\'s latest run finish? Reads the job monitor so nobody has to open it.',
+    steps: [
+      'Go to "https://put.internal.citi.com/jobs"',
+      'Type "<var JOB_NAME>" in the "Job name" field',
+      'Click the "Search" button',
+      'Check that "Results" is visible on the page',
+      'Check that the "Last run status" column contains "Completed"',
+    ],
+    variables: [{ name: 'JOB_NAME', type: 'plain', value: '' }],
+  },
+  {
     id: 'page-reachable-after-release',
     title: 'Page still reachable after a release',
     purpose:
@@ -75,6 +111,21 @@ export const QUICK_START_TEMPLATES: readonly QuickStartTemplate[] = [
       'Check that "All systems operational" is visible on the page',
     ],
     variables: [],
+  },
+  {
+    id: 'find-a-known-record',
+    title: 'Find a known record',
+    purpose:
+      'The first move in triage: search for a reference that always exists, such as a test account, and open it. Proves search and the details screen answer, not just the home page.',
+    steps: [
+      'Go to "https://put.internal.citi.com/search"',
+      'Type "<var RECORD_ID>" in the "Search" field',
+      'Press Enter in the "Search" field',
+      'Click the "View details" button',
+      'Check that the URL contains "/details"',
+      'Check that "Record details" is visible on the page',
+    ],
+    variables: [{ name: 'RECORD_ID', type: 'plain', value: '' }],
   },
   {
     id: 'filter-a-report',

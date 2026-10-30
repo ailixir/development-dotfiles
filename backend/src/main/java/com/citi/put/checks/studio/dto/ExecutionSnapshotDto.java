@@ -48,12 +48,7 @@ public record ExecutionSnapshotDto(
     boolean streamComplete,
     String triggerSource,
     UUID scheduleId,
-    Long scheduleVersion,
-    UUID occurrenceId,
     Instant scheduledAt,
-    UUID activationId,
-    String activatedBy,
-    Instant activatedAt,
     ReplayFailure replayFailure) {
 
   /** Existing call sites retain unknown provenance unless the persisted history supplies it. */
@@ -101,11 +96,6 @@ public record ExecutionSnapshotDto(
         null,
         null,
         null,
-        null,
-        null,
-        null,
-        null,
-        null,
         null);
   }
 
@@ -133,12 +123,7 @@ public record ExecutionSnapshotDto(
         streamComplete,
         triggerSource,
         scheduleId,
-        scheduleVersion,
-        occurrenceId,
         scheduledAt,
-        activationId,
-        activatedBy,
-        activatedAt,
         replayFailure);
   }
 }

@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config';
+import { configDefaults, defineConfig } from 'vitest/config';
 
 /**
  * Fixture-corpus tier (ADR-001 §7.1, story 10.3 AC-6a).
@@ -23,6 +23,8 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['test/fixtures-tier/**/*.test.ts'],
+    // The perception tier is dist-free and has its own config (vitest.perception.config.ts, `test:perception`).
+    exclude: [...configDefaults.exclude, 'test/fixtures-tier/perception/**'],
     testTimeout: 120_000,
     hookTimeout: 120_000,
     globalSetup: ['test/fixtures-tier/globalSetup.ts'],
@@ -31,6 +33,8 @@ export default defineConfig({
     fileParallelism: false,
     // Never fetch a browser at run time: the browsers come from the image, or from a local
     // install at the pinned version (ADR-001 §4.2, `npm run browsers:install`).
+    // This tier serves its pages on loopback, reached as `localhost` (a whitelisted domain, see
+    // `test/helpers/allowedDomains.ts`); there is no egress proxy and no local-run signal any more.
     env: { PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1' },
   },
 });

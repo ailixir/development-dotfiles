@@ -1,6 +1,7 @@
 package com.citi.put.checks.studio.guided.translation;
 
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
+import com.citi.put.checks.studio.navigation.AllowedDomains;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
@@ -10,6 +11,7 @@ import java.util.List;
 /** Only explicitly approved source and structural fields can cross the model boundary. */
 public final class GuidedPromptAssembler {
   private final GuidedContracts contracts;
+  private final AllowedDomains domains;
   private final String output;
   private final JsonNode schema;
   private final java.util.Map<String, JsonNode> schemaInputs;
@@ -17,12 +19,14 @@ public final class GuidedPromptAssembler {
   private final ObjectNode provenance;
   private final PreparationCapability preparationCapability;
 
-  public GuidedPromptAssembler(GuidedContracts contracts) {
-    this(contracts, false);
+  public GuidedPromptAssembler(GuidedContracts contracts, AllowedDomains domains) {
+    this(contracts, domains, false);
   }
 
-  private GuidedPromptAssembler(GuidedContracts contracts, boolean productionFactory) {
+  private GuidedPromptAssembler(
+      GuidedContracts contracts, AllowedDomains domains, boolean productionFactory) {
     this.contracts = contracts;
+    this.domains = domains;
     output = resource("/studio/guided-output-contract.md");
     schema =
         contracts.parse(
@@ -46,8 +50,9 @@ public final class GuidedPromptAssembler {
     preparationCapability = productionFactory ? new PreparationCapability(this) : null;
   }
 
-  static GuidedPromptAssembler createForProductionFactory(GuidedContracts contracts) {
-    return new GuidedPromptAssembler(contracts, true);
+  static GuidedPromptAssembler createForProductionFactory(
+      GuidedContracts contracts, AllowedDomains domains) {
+    return new GuidedPromptAssembler(contracts, domains, true);
   }
 
   PreparationCapability preparationCapability() {
@@ -141,10 +146,33 @@ public final class GuidedPromptAssembler {
       var references = context.putArray("sourceReferences");
       if (state.hasNonNull("plan")) {
         state.path("plan").path("sourceReferences").forEach(ref -> references.add(ref.deepCopy()));
+        if (progress.has("learningWindow")) {
+          // An incremental re-learn selects spans in the edited steps too, so it gets the same
+          // exact
+          // offsets (only for the learnable steps; reused prefix steps keep their retained
+          // meaning).
+          var learnable = new java.util.HashSet<String>();
+          progress
+              .path("learningWindow")
+              .path("learnableStepIds")
+              .forEach(n -> learnable.add(n.asText()));
+          for (JsonNode candidate :
+              new GuidedAuthoredUriCandidates(contracts, domains)
+                  .candidates(session, manifest, learnable)) {
+            boolean present = false;
+            for (JsonNode existing : references) {
+              present |= existing.equals(candidate);
+            }
+            if (!present) {
+              references.add(candidate);
+            }
+          }
+        }
       } else if (!progress.has("learningWindow")
           && selectedSources.isArray()
           && selectedSources.isEmpty()) {
-        references.addAll(new GuidedAuthoredUriCandidates(contracts).candidates(session, manifest));
+        references.addAll(
+            new GuidedAuthoredUriCandidates(contracts, domains).candidates(session, manifest));
       }
     }
     var obligations = context.putArray("obligations");
@@ -163,8 +191,16 @@ public final class GuidedPromptAssembler {
               "predicate")) {
         safe.set(key, item.path(key));
       }
-      if (item.has("selectedLocator")) {
-        safe.set("selectedLocator", item.path("selectedLocator"));
+      // ADR-SC-007 D6: the model sees an earlier choice only as {role, name, ref}, the ref being
+      // the
+      // fresh element the backend matched; the stored {role, name, evidence} triple (the internal
+      // property "selection") is deliberately not in this allow-list. An earlier choice that no
+      // longer identifies exactly one element travels as reconfirm true instead.
+      if (item.path("selectedChoice").isObject()) {
+        safe.set("selectedChoice", item.path("selectedChoice"));
+      }
+      if (item.path("reconfirm").asBoolean(false)) {
+        safe.put("reconfirm", true);
       }
       obligations.add(safe);
     }
@@ -181,10 +217,12 @@ public final class GuidedPromptAssembler {
               : com.fasterxml.jackson.databind.node.NullNode.instance);
       needs.add(safe);
     }
+    // ADR-SC-007 D1: the model receives the sanitized outline string only. The facts (evidence and
+    // text) stay in the backend and are never part of a request.
     context.set(
         "observation",
-        progress.has("observation")
-            ? progress.path("observation")
+        progress.path("observation").path("outline").isTextual()
+            ? progress.path("observation").path("outline")
             : com.fasterxml.jackson.databind.node.NullNode.instance);
     context.set(
         "executionEvidence",

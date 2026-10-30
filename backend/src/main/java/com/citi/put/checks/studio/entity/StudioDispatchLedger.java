@@ -51,17 +51,6 @@ public class StudioDispatchLedger {
   @Column(name = "request_digest", length = 64, updatable = false)
   private String requestDigest;
 
-  @Column(name = "scheduled_occurrence_id", updatable = false)
-  private UUID scheduledOccurrenceId;
-
-  public UUID getScheduledOccurrenceId() {
-    return scheduledOccurrenceId;
-  }
-
-  public void setScheduledOccurrenceId(UUID value) {
-    scheduledOccurrenceId = value;
-  }
-
   @Column(name = "attempt_id")
   private UUID attemptId;
 

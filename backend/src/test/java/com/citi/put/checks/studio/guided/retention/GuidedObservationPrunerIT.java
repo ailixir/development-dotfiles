@@ -52,12 +52,6 @@ class GuidedObservationPrunerIT {
     ObservedPublicationFixture.register(registry);
     // A live (never-published) session is read through the session service, which re-checks that
     // the fixture application and environment are an administrator-approved guided scope.
-    registry.add(
-        "studio.guided-authoring.translation.applications",
-        () -> ObservedPublicationFixture.APPLICATION);
-    registry.add(
-        "studio.guided-authoring.translation.environments",
-        () -> String.join(",", ObservedPublicationFixture.ENVIRONMENTS));
     // The guided reaper would race the FINALIZING case below (it expires overdue sessions); this
     // context runs it once at start-up and not again during the class.
     registry.add("studio.guided-authoring.reaper-delay-ms", () -> "3600000");

@@ -20,11 +20,11 @@ import org.springframework.boot.context.properties.bind.ConstructorBinding;
  * AC-19 exists to fail.
  *
  * <p>{@link #totalRuntime()} and a revision's {@code configuration.timeoutSeconds} are two
- * different budgets (architecture §5.2: "Default step timeout is 30 seconds and total browser
- * runtime 120 seconds"). The per-step value travels on the job's configuration and the runner
- * clamps it per step; the whole-run value travels on {@code deadlines.totalRuntimeMs} and comes
- * from here. Deriving one from the other made every run die at the per-step value, which is the
- * defect this property exists to close.
+ * different budgets (architecture §5.2: "Default step timeout is 30 seconds"; the total browser
+ * runtime is 300 seconds since STUDIO-FLEX-001). The per-step value travels on the job's
+ * configuration and the runner clamps it per step; the whole-run value travels on {@code
+ * deadlines.totalRuntimeMs} and comes from here. Deriving one from the other made every run die at
+ * the per-step value, which is the defect this property exists to close.
  *
  * @param enabled the kill switch (§8.5). When false, new executions are refused {@code 503
  *     DISPATCH_DISABLED}, queued undispatched work is closed explicitly, and admitted work,
@@ -52,7 +52,7 @@ public record StudioExecutionProperties(
     Sse sse) {
 
   /** §5.2's total browser runtime, the starting value the runner's own maximum mirrors. */
-  static final Duration DEFAULT_TOTAL_RUNTIME = Duration.ofSeconds(120);
+  static final Duration DEFAULT_TOTAL_RUNTIME = Duration.ofSeconds(300);
 
   /** §8.5's run deadline: browser runtime plus finalization and delivery margins. */
   static final Duration DEFAULT_RUN_DEADLINE = Duration.ofSeconds(600);
@@ -62,7 +62,7 @@ public record StudioExecutionProperties(
    *
    * <p>{@code run-deadline} is what the running reaper closes a run at; a browser budget at or past
    * it would have the reaper close rows under a live, in-budget runner and refuse its {@code
-   * FINAL}. The check uses the effective values, so an unconfigured deployment (120 s inside 600 s)
+   * FINAL}. The check uses the effective values, so an unconfigured deployment (300 s inside 600 s)
    * binds, and only an explicit misconfiguration is refused.
    */
   @ConstructorBinding
@@ -133,7 +133,7 @@ public record StudioExecutionProperties(
     }
 
     public int maxStepsPerTestOrDefault() {
-      return maxStepsPerTest == null ? 200 : maxStepsPerTest;
+      return maxStepsPerTest == null ? 100 : maxStepsPerTest;
     }
   }
 

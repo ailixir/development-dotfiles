@@ -7,6 +7,7 @@ import type {
   GuidedFailure,
   GuidedFailureCode,
   GuidedOperationKind,
+  GuidedProof,
   GuidedPublication,
   GuidedResult,
   GuidedSessionState,
@@ -116,19 +117,6 @@ export interface GuidedMockRefusal {
  * name. Each is a complete response: no session, no publication base, no budget charge.
  */
 export const GUIDED_START_REFUSALS = {
-  POLICY_NOT_APPROVED_ABSENT: () => ({
-    status: 409,
-    body: guidedError('POLICY_NOT_APPROVED', { messageCode: 'GUIDED_POLICY_ABSENT' }),
-  }),
-  POLICY_NOT_APPROVED_UNAPPROVED: () => ({
-    status: 409,
-    body: guidedError('POLICY_NOT_APPROVED', { messageCode: 'GUIDED_POLICY_UNAPPROVED' }),
-  }),
-  // The contract's own example (`fixtures.json` documents.policyNotApprovedError).
-  POLICY_NOT_APPROVED_PENDING_VERSION: () => ({
-    status: 409,
-    body: contractDocument<GuidedError>('policyNotApprovedError'),
-  }),
   FIRST_LEARN_STEP_NARROWED: () => ({
     status: 409,
     body: guidedError('REVISION_CONFLICT', { messageCode: 'FIRST_LEARN_STEP_NARROWED' }),
@@ -161,6 +149,17 @@ export const GUIDED_START_REFUSALS = {
     }),
     retryAfterSeconds: 120,
   }),
+  /** The page is not in the environment's allowed domains (STUDIO-FLEX-001): refused before any session. */
+  ORIGIN_NOT_ALLOWED: () => ({
+    status: 403,
+    body: guidedError('ORIGIN_NOT_ALLOWED'),
+  }),
+  /** The deployment-wide cap on concurrent learning sessions (STUDIO-FLEX-001 item 5). */
+  LEARNING_CAPACITY_EXHAUSTED: () => ({
+    status: 429,
+    body: guidedError('BUDGET_EXCEEDED', { messageCode: 'LEARNING_CAPACITY_EXHAUSTED', retryable: true }),
+    retryAfterSeconds: 30,
+  }),
   CSI_DAILY_TOKENS_EXHAUSTED: () => ({
     status: 429,
     body: guidedError('BUDGET_EXCEEDED', { messageCode: 'CSI_DAILY_TOKENS_EXHAUSTED', retryable: true }),
@@ -190,12 +189,12 @@ export type GuidedStartRefusalName = keyof typeof GUIDED_START_REFUSALS;
 // ---------------------------------------------------------------------------
 
 /** What kind of question a scenario asks. */
-export type GuidedQuestionKind = 'PAGE_CHOICE' | 'SOURCE_CHOICE' | 'SIDE_EFFECT_CONFIRMATION';
+export type GuidedQuestionKind = 'PAGE_CHOICE' | 'SOURCE_CHOICE';
 
 /**
  * The pending question for `kind`, at `stepId`. `PAGE_CHOICE` is the contract's own
- * `labelledQuestion` document (page-derived labels with role and region); the other two follow the
- * rules the schema states for `phase: source` and for authored labels.
+ * `labelledQuestion` document (page-derived labels with role and region); `SOURCE_CHOICE` follows
+ * the rules the schema states for `phase: source` and for authored labels.
  */
 export function clarificationFor(
   kind: GuidedQuestionKind,
@@ -213,26 +212,16 @@ export function clarificationFor(
     expiresAt,
   };
   if (kind === 'PAGE_CHOICE') return common;
-  if (kind === 'SOURCE_CHOICE') {
-    return {
-      ...common,
-      phase: 'source',
-      documentId: null,
-      generation: 0,
-      reason: 'MISSING_SOURCE',
-      promptCode: 'CHOOSE_SOURCE',
-      choices: [
-        { choiceId: 'choice-1', safeLabel: 'Use authored text', labelSource: 'AUTHORED', nodeId: null, bindingId: null },
-        { choiceId: 'choice-2', safeLabel: 'Use a saved input', labelSource: 'SAVED_INPUT', nodeId: null, bindingId: null },
-      ],
-    };
-  }
   return {
     ...common,
-    reason: 'SIDE_EFFECT_CONFIRMATION',
-    promptCode: 'CONFIRM_ACTION',
+    phase: 'source',
+    documentId: null,
+    generation: 0,
+    reason: 'MISSING_SOURCE',
+    promptCode: 'CHOOSE_SOURCE',
     choices: [
-      { choiceId: 'choice-1', safeLabel: 'Continue', labelSource: 'AUTHORED', nodeId: null, bindingId: null },
+      { choiceId: 'choice-1', safeLabel: 'Use authored text', labelSource: 'AUTHORED', bindingId: null },
+      { choiceId: 'choice-2', safeLabel: 'Use a saved input', labelSource: 'SAVED_INPUT', bindingId: null },
     ],
   };
 }
@@ -370,9 +359,12 @@ export interface ResultInputs {
   failure: GuidedFailure | null;
   detail: LoginRequiredDetail | null;
   relearnedFrom: RelearnedFrom | null;
+  /** The learning recording's state. Ignored for a published learn, whose recording is discarded (`video: null`). */
   video: GuidedVideoMode;
   /** Steps whose timings the recording holds (only used when the video carries timings). */
   timedSteps: number;
+  /** The proof replay of a published learn (`result.proof`); absent or null when it was refused. */
+  proof?: GuidedProof | null;
 }
 
 export function resultFor(input: ResultInputs): GuidedResult {
@@ -397,14 +389,18 @@ export function resultFor(input: ResultInputs): GuidedResult {
     evidence: {
       kind: 'guidedLedger',
       ref: input.sessionId,
-      video: {
-        status: hasTimings ? 'AVAILABLE' : input.video === 'PROCESSING' ? 'PROCESSING' : 'UNAVAILABLE',
-        error: null,
-        expiresAt: hasTimings ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() : null,
-        partial: input.video === 'PARTIAL',
-      },
+      // Keyed on the publication (architect R1): a published learn has no learning recording.
+      video: published
+        ? null
+        : {
+            status: hasTimings ? 'AVAILABLE' : input.video === 'PROCESSING' ? 'PROCESSING' : 'UNAVAILABLE',
+            error: null,
+            expiresAt: hasTimings ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() : null,
+            partial: input.video === 'PARTIAL',
+          },
     },
-    actionTimings: hasTimings ? timingsFor(input.steps, input.timedSteps) : [],
+    actionTimings: hasTimings && !published ? timingsFor(input.steps, input.timedSteps) : [],
+    proof: published ? (input.proof ?? null) : null,
     errorCode: input.errorCode,
     relearnedFrom: input.relearnedFrom,
     progress: progressFor(input.steps, null),
@@ -497,8 +493,13 @@ export interface GuidedPlan {
   terminal?: GuidedTerminal;
   /** Result reads that still show the recording as `PROCESSING` after the session is terminal. */
   videoProcessingReads?: number;
-  /** The recording of a failed run, when it exists. */
+  /** The recording of a learn that did not publish (its learning attempt), when it exists. */
   video?: GuidedVideoMode;
+  /**
+   * How the proof replay of a published learn resolves at finalize: `ACCEPTED` (default) creates an
+   * `AFTER_LEARN` execution and names it in `result.proof`; `REFUSED` publishes with `proof: null`.
+   */
+  proof?: 'ACCEPTED' | 'REFUSED';
 }
 
 export interface GuidedScenario {
@@ -540,16 +541,14 @@ export const LEARN_SCENARIO: GuidedScenario = {
   }),
 };
 
-/** As {@link LEARN_SCENARIO}, with the recording still settling for `reads` result reads. */
-export function learnWithSettlingVideo(reads: number): GuidedScenario {
-  return {
-    name: `LEARN_VIDEO_SETTLING_${reads}`,
-    plan: (context) => ({
-      ...(LEARN_SCENARIO.plan as (context: GuidedPlanContext) => GuidedPlan)(context),
-      videoProcessingReads: reads,
-    }),
-  };
-}
+/** As {@link LEARN_SCENARIO}, but the proof replay is refused at finalize: published with `proof: null`. */
+export const LEARN_PROOF_REFUSED_SCENARIO: GuidedScenario = {
+  name: 'LEARN_PROOF_REFUSED',
+  plan: (context) => ({
+    ...(LEARN_SCENARIO.plan as (context: GuidedPlanContext) => GuidedPlan)(context),
+    proof: 'REFUSED',
+  }),
+};
 
 /** A learn that stops to ask a question at step index `stepIndex`, then publishes. */
 export function learnWithQuestion(kind: GuidedQuestionKind, stepIndex = 1): GuidedScenario {
@@ -575,6 +574,10 @@ export function endsIn(
     loginStepsPresent?: boolean;
     /** `PENDING` makes the result read answer `202`, as the backend does for a pending publication. */
     publicationStatus?: GuidedUnpublishedStatus;
+    /** The kept learning recording. Default `UNAVAILABLE`. */
+    video?: GuidedVideoMode;
+    /** Result reads that still show that recording as `PROCESSING` after the session is terminal. */
+    videoProcessingReads?: number;
   } = {},
 ): GuidedScenario {
   return {
@@ -596,7 +599,8 @@ export function endsIn(
           completed: stopAt,
           failedIndex: state === 'FAILED' ? stopAt : null,
         },
-        video: 'UNAVAILABLE',
+        video: options.video ?? 'UNAVAILABLE',
+        ...(options.videoProcessingReads !== undefined ? { videoProcessingReads: options.videoProcessingReads } : {}),
       };
     },
   };

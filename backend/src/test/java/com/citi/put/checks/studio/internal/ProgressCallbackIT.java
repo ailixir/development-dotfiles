@@ -750,13 +750,6 @@ class ProgressCallbackIT {
   @org.springframework.test.context.DynamicPropertySource
   static void observedReportCatalog(
       org.springframework.test.context.DynamicPropertyRegistry properties) {
-    var fixtureScope = observedFixtureDocument().path("basis");
-    String entitlement =
-        com.citi.put.checks.studio.secrets.ConfiguredSecretUseAuthorization.key(
-            "owner@example.test",
-            fixtureScope.path("csiId").asText(),
-            fixtureScope.path("replayRequirements").path("environment").asText());
-    properties.add("studio.secrets.entitlements[" + entitlement + "]", () -> "PASS");
     // STUDIO-OBS-012A: the execution fixtures publish under ObservedPublicationFixture's trusted
     // catalog entry and policies; the canonical contract fixture's entry and policy follow them.
     properties.add("studio.observed-replay.enabled", () -> "true");
@@ -769,11 +762,6 @@ class ProgressCallbackIT {
           entry.set("build", fixture.path("build"));
           return ObservedPublicationFixture.catalogJsonWith(entry);
         });
-    properties.add(
-        "studio.observed-replay.policies-json",
-        () ->
-            ObservedPublicationFixture.policiesJsonWith(
-                observedFixtureDocument().path("trustedPolicy")));
   }
 
   private static com.fasterxml.jackson.databind.node.ObjectNode observedFixtureDocument() {
@@ -931,6 +919,9 @@ class ProgressCallbackIT {
             .set("documentId", proposal.path("executionEvidence").path("documentId"));
         ((com.fasterxml.jackson.databind.node.ObjectNode) proposal.path("target"))
             .set("generation", proposal.path("executionEvidence").path("generation"));
+        // ADR-SC-007: a password control reports no element target.
+        ((com.fasterxml.jackson.databind.node.ObjectNode) preparation.path("proof"))
+            .putNull("target");
       }
       var proof = (com.fasterxml.jackson.databind.node.ObjectNode) preparation.path("proof");
       if (observationHashes.containsKey(preparation.path("observationHash").asText())) {
@@ -959,10 +950,7 @@ class ProgressCallbackIT {
         op.set("coordinate", proposal.path("coordinate"));
         op.set("origin", proposal.path("executionEvidence").path("origin"));
         op.set(
-            "locator",
-            proposal.path("target").has("locator")
-                ? proposal.path("target").path("locator")
-                : contracts.object().nullNode());
+            "target", proof.has("target") ? proof.path("target") : contracts.object().nullNode());
         op.set("operation", proposal.path("operation"));
         ledger.put(
             "operationHash", com.citi.put.checks.studio.guided.session.GuidedContracts.hash(op));
@@ -1026,14 +1014,7 @@ class ProgressCallbackIT {
           scope,
           "PASS",
           "https://orders.example.test");
-      var resolver =
-          new com.citi.put.checks.studio.secrets.VaultStudioReferenceResolver(
-              vault,
-              (principal, csi, environment, name) ->
-                  principal.equals("owner@example.test")
-                      && csi.equals(scope.csiId())
-                      && environment.equals(scope.environment())
-                      && name.equals("PASS"));
+      var resolver = new com.citi.put.checks.studio.secrets.VaultStudioReferenceResolver(vault);
       try (var resolved =
           resolver.resolve(
               scope.csiId(),
@@ -1083,8 +1064,7 @@ class ProgressCallbackIT {
             "learnedPlanHash",
             "referencePolicyHash",
             "publicationEvidenceHash",
-            "scopeHash",
-            "currentPolicyHash")) {
+            "scopeHash")) {
       ownedRequest.set(field, fixture.original().path(field));
     }
     ownedRequest.put("runnerInstanceId", RUNNER).put("admissionId", UUID.randomUUID().toString());

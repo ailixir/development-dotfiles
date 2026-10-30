@@ -354,6 +354,13 @@
         },
         "snapshotEvidence": {
           "$ref": "https://checks.citi.example/contracts/observed/v3/authoring-snapshot.schema.json"
+        },
+        "guardAuthorizations": {
+          "type": "array",
+          "maxItems": 200,
+          "items": {
+            "$ref": "https://checks.citi.example/contracts/observed/v3/replay-validation.schema.json#/definitions/GuardSourceAuthorization"
+          }
         }
       },
       "required": [
@@ -392,7 +399,8 @@
         "transfers",
         "materializationEvidence",
         "incrementalEvidence",
-        "snapshotEvidence"
+        "snapshotEvidence",
+        "guardAuthorizations"
       ]
     },
     "ValidationVerdict": {
@@ -1004,11 +1012,6 @@
           "minLength": 1,
           "maxLength": 256
         },
-        "nodeId": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 256
-        },
         "bindingId": {
           "oneOf": [
             {
@@ -1041,7 +1044,6 @@
         "documentId",
         "generation",
         "choiceId",
-        "nodeId",
         "bindingId",
         "sourceRevision",
         "configurationRevision",
@@ -1116,10 +1118,9 @@
           "type": "string",
           "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
         },
-        "nodeId": {
+        "ref": {
           "type": "string",
-          "minLength": 1,
-          "maxLength": 256
+          "pattern": "^e[0-9]{1,6}$"
         },
         "bindingId": {
           "oneOf": [
@@ -1132,16 +1133,12 @@
               "type": "null"
             }
           ]
-        },
-        "locator": {
-          "$ref": "https://checks.citi.example/contracts/observed/v3/action.schema.json#/properties/target/oneOf/0/properties/locator"
         }
       },
       "required": [
         "obligationId",
-        "nodeId",
-        "bindingId",
-        "locator"
+        "ref",
+        "bindingId"
       ]
     },
     "ModelObservedQuestion": {
@@ -1379,11 +1376,62 @@
               },
               "meaning": {
                 "$ref": "https://checks.citi.example/contracts/observed/v3/replay-validation.schema.json#/definitions/ObservedQuestionMeaning"
+              },
+              "selection": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "role": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 256
+                  },
+                  "evidence": {
+                    "type": "string",
+                    "minLength": 0,
+                    "maxLength": 256
+                  },
+                  "ordinal": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "index": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 2147483647
+                      },
+                      "count": {
+                        "type": "integer",
+                        "minimum": 2,
+                        "maximum": 2147483647
+                      }
+                    },
+                    "required": [
+                      "index",
+                      "count"
+                    ]
+                  },
+                  "scopeHash": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  }
+                },
+                "required": [
+                  "role",
+                  "name",
+                  "evidence"
+                ]
               }
             },
             "required": [
               "choiceId",
-              "meaning"
+              "meaning",
+              "selection"
             ]
           }
         },
@@ -1717,6 +1765,365 @@
         "translationHash",
         "bootstrapHash",
         "sourceManifestHash"
+      ]
+    },
+    "GuardSourceAuthorization": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "pressAdmissionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "predecessorAdmissionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "pressPreparationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "predecessorPreparationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "contextId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "sourceRevision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "configurationRevision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "workerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "pressProofHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "predecessorProofHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "pressObservationHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "predecessorObservationHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "sourceManifestHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "sourceIdentityHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "authoredInputsHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "scopeHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "version": {
+          "const": 1
+        },
+        "contextRevision": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 201
+        },
+        "ownerFence": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "predecessorGrounding": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "field": {
+              "enum": [
+                "NAME",
+                "OWN_TEXT",
+                "ROLE"
+              ]
+            },
+            "mode": {
+              "enum": [
+                "WHOLE_PHRASE",
+                "ALL_WORDS",
+                "ROLE"
+              ]
+            },
+            "source": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "const": "AUTHORED"
+                    },
+                    "stepId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 256
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "stepId"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "const": "SAVED_INPUT"
+                    },
+                    "stepId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 256
+                    },
+                    "declarationId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 256
+                    },
+                    "declarationHash": {
+                      "type": "string",
+                      "pattern": "^[a-f0-9]{64}$"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "stepId",
+                    "declarationId",
+                    "declarationHash"
+                  ]
+                }
+              ]
+            }
+          },
+          "required": [
+            "field",
+            "mode",
+            "source"
+          ]
+        },
+        "predecessorDestructive": {
+          "type": "array",
+          "maxItems": 15,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "verb": {
+                "enum": [
+                  "delete",
+                  "remove",
+                  "erase",
+                  "destroy",
+                  "purge",
+                  "pay",
+                  "transfer",
+                  "send money",
+                  "submit order",
+                  "place order",
+                  "confirm payment",
+                  "cancel subscription",
+                  "close account",
+                  "deactivate",
+                  "revoke"
+                ]
+              },
+              "source": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "kind": {
+                        "const": "AUTHORED"
+                      },
+                      "stepId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "stepId"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "kind": {
+                        "const": "SAVED_INPUT"
+                      },
+                      "stepId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      "declarationId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      "declarationHash": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "stepId",
+                      "declarationId",
+                      "declarationHash"
+                    ]
+                  }
+                ]
+              }
+            },
+            "required": [
+              "verb",
+              "source"
+            ]
+          }
+        },
+        "currentDestructive": {
+          "type": "array",
+          "maxItems": 15,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "verb": {
+                "enum": [
+                  "delete",
+                  "remove",
+                  "erase",
+                  "destroy",
+                  "purge",
+                  "pay",
+                  "transfer",
+                  "send money",
+                  "submit order",
+                  "place order",
+                  "confirm payment",
+                  "cancel subscription",
+                  "close account",
+                  "deactivate",
+                  "revoke"
+                ]
+              },
+              "source": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "kind": {
+                        "const": "AUTHORED"
+                      },
+                      "stepId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "stepId"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "kind": {
+                        "const": "SAVED_INPUT"
+                      },
+                      "stepId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      "declarationId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      },
+                      "declarationHash": {
+                        "type": "string",
+                        "pattern": "^[a-f0-9]{64}$"
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "stepId",
+                      "declarationId",
+                      "declarationHash"
+                    ]
+                  }
+                ]
+              }
+            },
+            "required": [
+              "verb",
+              "source"
+            ]
+          }
+        }
+      },
+      "required": [
+        "pressAdmissionId",
+        "predecessorAdmissionId",
+        "pressPreparationId",
+        "predecessorPreparationId",
+        "contextId",
+        "sourceRevision",
+        "configurationRevision",
+        "workerId",
+        "pressProofHash",
+        "predecessorProofHash",
+        "pressObservationHash",
+        "predecessorObservationHash",
+        "sourceManifestHash",
+        "sourceIdentityHash",
+        "authoredInputsHash",
+        "scopeHash",
+        "version",
+        "contextRevision",
+        "ownerFence",
+        "predecessorGrounding",
+        "predecessorDestructive",
+        "currentDestructive"
       ]
     }
   }

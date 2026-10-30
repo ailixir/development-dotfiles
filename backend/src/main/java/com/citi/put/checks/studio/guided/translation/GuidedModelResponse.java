@@ -71,6 +71,33 @@ public record GuidedModelResponse(
       return definiteTransient;
     }
 
+    /**
+     * The session failure code when this result ends a call. The model not answering for
+     * availability reasons (busy, timeout, stall, connection, 408/429/5xx) is {@code
+     * MODEL_UNAVAILABLE}; a provider HTTP 4xx other than those is {@code MODEL_REFUSED}; an
+     * unusable answer, a wire limit or a fault on this side stays {@code INVALID_CONTRACT}. A
+     * safety or policy block is not observable here: it arrives as a finish reason or empty
+     * candidate list, which the adapter reports as {@link #INVALID_RESPONSE}.
+     */
+    public String failureCode() {
+      return switch (this) {
+        case BUSY,
+                TIMEOUT,
+                DISABLED,
+                TRANSPORT_CREDENTIAL,
+                TRANSPORT_CONNECT,
+                TRANSPORT_HTTP_429,
+                TRANSPORT_HTTP_503,
+                TRANSPORT_HTTP_5XX,
+                TRANSPORT_OTHER,
+                TRANSPORT_STALL ->
+            "MODEL_UNAVAILABLE";
+        case TRANSPORT_HTTP_400, TRANSPORT_HTTP_401_403, TRANSPORT_HTTP_4XX -> "MODEL_REFUSED";
+        case INVALID_RESPONSE, TOO_LARGE, TRANSPORT_USAGE, TRANSPORT_ADAPTER_FAULT ->
+            "INVALID_CONTRACT";
+      };
+    }
+
     static Reason defaultFor(Code code) {
       return switch (code) {
         case OK -> null;

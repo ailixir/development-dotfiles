@@ -1,5 +1,6 @@
 import type { ValidationBasis, MaterializationVersion, PreparationFact, EffectiveActionFact, OriginalAllocation, OriginalConsumerEdge } from '../executor/observedOperations.js';
 import { demand, equalObserved, hashObserved } from './observedReferencePolicy.js';
+import { operationPreimage } from './operationPreimage.js';
 const same = (a: unknown,b: unknown): void => { demand(equalObserved(a,b),'EVIDENCE_MISMATCH'); };
 const unique = (ids: readonly string[]): void => { demand(new Set(ids).size === ids.length,'EVIDENCE_MISMATCH'); };
 export function historicalVersion(b: ValidationBasis, revision: number): MaterializationVersion {
@@ -16,7 +17,7 @@ export function validateHistoricalAction(b: ValidationBasis,fact: EffectiveActio
   same(evidence.sessionId,b.sessionId);same(evidence.contextId,header.contextId);same(l.documentId,evidence.documentId);same(l.generation,evidence.generation);same(proposal.generation,evidence.generation);same(proposal.target.documentId,evidence.documentId);same(proposal.target.generation,evidence.generation);
   if(evidence.kind==='initialBlank')same(evidence,b.bootstrap.initialEvidence);
   else {const snapshot=b.observations.find(o=>o.observationHash===evidence.observationHash);demand(snapshot,'EVIDENCE_MISMATCH');for(const key of ['documentId','generation','origin'] as const)same(snapshot.observation[key],evidence[key]);}
-  same(l.operationHash,hashObserved({coordinate:l.coordinate,origin:evidence.origin,locator:'locator'in proposal.target?proposal.target.locator:null,operation:proposal.operation}));
+  same(l.operationHash,hashObserved(operationPreimage(l.coordinate,evidence.origin,proof.target,proposal.operation)));
   same(l.admission.policyDecisionHash,hashObserved({scopeHash,preparation:proof,requestDigest:l.requestDigest}));same(l.admission.authorizationId,b.runAuthorization.authorizationId);
   const ids=new Set(b.materializationEvidence.entries.slice(0,header.inputCount).map(e=>e.inputId));
   const op=proposal.operation, ref=op.kind==='navigate'?op.destinationInputId:op.kind==='fill'||op.kind==='selectOption'?('sourceInputId'in op.value?op.value.sourceInputId:null):op.kind==='assert'&&op.expected&&'sourceInputId'in op.expected?op.expected.sourceInputId:null;
@@ -47,6 +48,16 @@ export function validateIncrementalHistory(b: ValidationBasis): void {
   for(const request of inc.prefixRequests) {
     const header=historicalVersion(b,request.contextRevision);for(const key of ['sessionId','scopeHash','workerId','ownerFence','contextId','contextRevision','authoredInputsHash','sourceRevision','configurationRevision']as const)same(request[key],header[key]);same(request.prefixProgramHash,inc.plan.prefixProgramHash);
     const index=b.sourceSteps.findIndex(s=>s.stepId===request.coordinate.stepId);demand(index>=0&&index<inc.plan.initialFirstLearnIndex,'EVIDENCE_MISMATCH');
+    const frozen=inc.program.actions.find(action=>equalObserved(action.coordinate,request.coordinate));demand(frozen,'EVIDENCE_MISMATCH');
+    same(request.assertSourceBinding!==undefined,frozen.target?.assertTextMode==='READ_BINDING_SOURCE');
+    if(request.assertSourceBinding){
+      const source=request.assertSourceBinding,op=frozen.operation;
+      demand(op.kind==='assert'&&op.predicate==='containsText'&&op.expected?.kind==='binding'&&op.expected.bindingId===source.bindingId,'REFERENCE_MISMATCH');
+      const read=b.actions.find(action=>action.ledger.admission.admissionId===source.producerAdmissionId),prior=b.preparations.find(prep=>prep.preparationId===source.producerPreparationId);
+      demand(read&&prior&&read.preparationId===prior.preparationId&&read.ledger.preparationId===prior.preparationId&&prior.proof.preparationId===prior.preparationId
+        &&read.ledger.state==='SUCCEEDED'&&read.ledger.outcomeCode==='OK'&&read.ledger.dispatchCount===1&&prior.proposal.operation.kind==='read'&&prior.proposal.operation.bindingId===source.bindingId,'REFERENCE_MISMATCH');
+      for(const key of ['sessionId','workerId','ownerFence','scopeHash','contextId','contextRevision','authoredInputsHash','sourceRevision','configurationRevision']as const)same(request[key],prior.proof[key]);
+    }
     let generation=hashObserved(b.bootstrap.initialEvidence)===request.evidenceHash?0:-1;
     for(const row of b.observations){const o=row.observation;const e={kind:'observedDocument',sessionId:b.sessionId,contextId:header.contextId,documentId:o.documentId,generation:o.generation,origin:o.origin,observationHash:row.observationHash};if(hashObserved(e)===request.evidenceHash)generation=o.generation;}
     demand(generation>=0,'EVIDENCE_MISMATCH');const tuple=[index,request.coordinate.ordinal,generation,hashObserved(request)]as const;
@@ -55,7 +66,8 @@ export function validateIncrementalHistory(b: ValidationBasis): void {
   const receipt=inc.driftReceipt, excluded=inc.excludedAttempts;
   if(change.reason!=='DRIFT'){same(receipt,null);same(excluded.length,0);demand(b.actions.every(a=>a.ledger.attemptOrdinal===0),'EVIDENCE_MISMATCH');return;}
   demand(receipt&&!receipt.nativeInvocationStarted,'EVIDENCE_MISMATCH');const request=requests.get(receipt.requestDigest);demand(request,'EVIDENCE_MISMATCH');
-  for(const key of ['sessionId','workerId','ownerFence','scopeHash','contextId','contextRevision','authoredInputsHash','sourceRevision','configurationRevision','prefixProgramHash','coordinate','evidenceHash']as const)same(receipt[key],request[key]);
+  for(const key of ['sessionId','workerId','ownerFence','scopeHash','contextId','contextRevision','authoredInputsHash','sourceRevision','configurationRevision','prefixProgramHash','coordinate','evidenceHash','pressInheritance']as const)same(receipt[key],request[key]);
+  same(receipt.assertSourceBinding??null,request.assertSourceBinding??null);
   const program=inc.program.actions.find(a=>equalObserved(a.coordinate,receipt.coordinate));demand(program,'EVIDENCE_MISMATCH');same(program.operationHash,receipt.operationHash);
   if(receipt.phase==='PRE_ADMISSION')same(excluded.length,0);
   else {

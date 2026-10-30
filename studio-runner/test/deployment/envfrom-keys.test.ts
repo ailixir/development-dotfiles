@@ -103,10 +103,17 @@ function springProperties(outcome: RenderOutcome, role: 'api' | 'worker'): Recor
   return parse(yaml ?? '') as Record<string, unknown>;
 }
 
-/** The two properties the chart adds while `studioObserved` is on. Names read from `ObservedReplayProperties`'s prefix. */
-const OBSERVED_REPLAY_PROPERTIES: readonly string[] = [
+/**
+ * The properties the chart adds beyond `configOverrides`, besides the runner TLS and guided sets:
+ * the catalog while `studioObserved` is on (`ObservedReplayProperties`'s prefix), and the two the
+ * runner-side values feed in every deployment (STUDIO-FLEX-001): the domain whitelist and, with the
+ * runner on, the run deadline read back out of `runnerEnv`.
+ */
+const CHART_OWNED_PROPERTIES: readonly string[] = [
   'studio.observed-replay.catalog-json',
-  'studio.observed-replay.policies-json',
+  'studio.navigation.allowed-domains',
+  'studio.navigation.allow-all-domains',
+  'studio.execution.total-runtime',
 ];
 
 interface ChartValues {
@@ -138,7 +145,12 @@ describe('AC-18 — envFrom names and lossless Spring configuration delivery', (
         // key still reddens this.
         const extras = Object.keys(delivered).filter((key) => !(key in expected));
         expect(
-          extras.filter((key) => !key.startsWith('studio.runner.tls.') && !OBSERVED_REPLAY_PROPERTIES.includes(key)),
+          extras.filter(
+            (key) =>
+              !key.startsWith('studio.runner.tls.') &&
+              !key.startsWith('studio.guided-authoring.') &&
+              !CHART_OWNED_PROPERTIES.includes(key),
+          ),
         ).toEqual([]);
         expect(extras.length, 'the runner TLS properties were not delivered').toBeGreaterThan(0);
       }

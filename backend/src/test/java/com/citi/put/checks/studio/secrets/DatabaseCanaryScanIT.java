@@ -107,12 +107,6 @@ class DatabaseCanaryScanIT {
 
     @Bean
     @Primary
-    StudioSecretFixtures.MutableSecretUseAuthorization mutableSecretUseAuthorization() {
-      return new StudioSecretFixtures.MutableSecretUseAuthorization();
-    }
-
-    @Bean
-    @Primary
     RecordingRunnerDispatchClient recordingRunnerDispatchClient() {
       return new RecordingRunnerDispatchClient();
     }
@@ -122,7 +116,6 @@ class DatabaseCanaryScanIT {
   @Autowired private ObjectMapper objectMapper;
   @Autowired private JdbcTemplate jdbc;
   @Autowired private FakeStudioVaultProvider vault;
-  @Autowired private StudioSecretFixtures.MutableSecretUseAuthorization entitlements;
   @Autowired private RecordingRunnerDispatchClient runner;
   @Autowired private StudioService studioService;
   @Autowired private StudioDispatcher dispatcher;
@@ -135,7 +128,6 @@ class DatabaseCanaryScanIT {
   @BeforeEach
   void setUp() {
     vault.clear();
-    entitlements.clear();
     runner.reset();
     fixtures = new StudioExecutionFixtures(jdbc);
     fixtures.seedUser(OWNER);
@@ -201,7 +193,6 @@ class DatabaseCanaryScanIT {
         CSI_ID,
         List.of("Go to the home page"),
         StudioExecutionFixtures.references(List.of(), List.of(SECRET_NAME)));
-    entitlements.grant(OWNER, CSI_ID, ENVIRONMENT, SECRET_NAME);
     assertThat(create(declaring, stranger()).getStatusCode().value()).isEqualTo(403);
     assertThat(create(UUID.randomUUID(), owner()).getStatusCode().value()).isEqualTo(403);
     vault.makeUnavailable();

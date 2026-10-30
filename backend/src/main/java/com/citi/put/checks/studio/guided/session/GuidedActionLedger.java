@@ -20,18 +20,9 @@ public final class GuidedActionLedger {
       JsonNode session,
       JsonNode proposal,
       String key,
-      String policyHash,
-      String origin,
+      String policyDecisionHash,
+      JsonNode preparationTarget,
       Instant now) {
-    ObjectNode operation = contracts.object();
-    operation.set("coordinate", proposal.path("coordinate"));
-    operation.put("origin", origin);
-    operation.set(
-        "locator",
-        proposal.path("target").has("locator")
-            ? proposal.path("target").path("locator")
-            : com.fasterxml.jackson.databind.node.NullNode.instance);
-    operation.set("operation", proposal.path("operation"));
     ObjectNode ledger = contracts.object();
     ledger.put("schemaVersion", 3);
     ledger.put("attemptOrdinal", 0);
@@ -40,7 +31,8 @@ public final class GuidedActionLedger {
     ledger.put("idempotencyKey", key);
     ledger.put("requestDigest", GuidedContracts.hash(proposal));
     ledger.set("scopeHash", session.path("scopeHash"));
-    ledger.put("operationHash", GuidedContracts.hash(operation));
+    // ADR-SC-007 D2: the hash covers the target the runner reported for this proposal.
+    ledger.put("operationHash", GuidedOperationIdentity.of(proposal, preparationTarget));
     ledger.set("generation", proposal.path("generation"));
     ledger.set("documentId", proposal.path("target").path("documentId"));
     ledger.set("ownerFence", session.path("owner").path("fence"));
@@ -48,7 +40,7 @@ public final class GuidedActionLedger {
     admission.put("admissionId", UUID.randomUUID().toString());
     admission.set("authorizationId", session.path("runAuthorization").path("authorizationId"));
     admission.put("admittedAt", now.toString());
-    admission.put("policyDecisionHash", policyHash);
+    admission.put("policyDecisionHash", policyDecisionHash);
     ledger.put("state", "ADMITTED");
     ledger.put("dispatchCount", 0);
     ledger.put("outcomeCode", "PENDING");

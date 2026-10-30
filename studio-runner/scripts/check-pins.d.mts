@@ -4,7 +4,17 @@
  * here so the type-checked tests can import them.
  */
 
+/** The Playwright engine pin of the perception modules (ADR-SC-007 D7 item 4), or what could not be read. */
+export interface EnginePinCopies {
+  readonly pin: { readonly playwright: string; readonly coreBundleSha256: string };
+  readonly coreVersion: string | null;
+  readonly coreBundleSha256: string | null;
+  readonly error: string | null;
+}
+
 export interface PinCopies {
+  /** `null` for a root that does not ship `src/run/playwrightEnginePin.json`. */
+  readonly engine: EnginePinCopies | null;
   readonly declared: string | null;
   readonly locked: string | null;
   readonly image: string | null;
@@ -25,6 +35,7 @@ export interface PinCheckResult {
 }
 
 export declare function collectPins(root: string): PinCopies;
+export declare function collectEnginePin(root: string): EnginePinCopies | null;
 export declare function engineFloorMajor(range: unknown): string | null;
 /** `false` for absent, null, empty and whitespace-only values (QA MED-1). */
 export declare function isAsserted(value: unknown): boolean;

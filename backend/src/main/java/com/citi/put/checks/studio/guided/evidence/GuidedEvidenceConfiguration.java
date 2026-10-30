@@ -54,11 +54,12 @@ public class GuidedEvidenceConfiguration {
       JdbcTemplate jdbc,
       GuidedContracts contracts,
       GuidedRecordingProperties properties,
-      StudioExecutionProperties execution) {
+      StudioExecutionProperties execution,
+      com.citi.put.checks.studio.navigation.AllowedDomains domains) {
     return new GuidedSessionEvidenceService(
         sessions,
         evidence,
-        new GuidedMaterializationService(jdbc, contracts),
+        new GuidedMaterializationService(jdbc, contracts, domains),
         contracts,
         properties,
         execution);

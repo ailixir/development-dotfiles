@@ -16,6 +16,7 @@ import com.citi.put.checks.studio.dispatch.DispatchAuthorization;
 import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.guided.session.GuidedSessionException;
+import com.citi.put.checks.studio.guided.translation.GuidedRefusalDiagnostics;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.charset.StandardCharsets;
@@ -26,6 +27,7 @@ import java.time.Instant;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.StreamSupport;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -224,7 +226,8 @@ class ObservedArtifactLowererTest {
     var original =
         new GuidedPlanBuilderTest.Original(fixture("fresh-order-reference").path("basis"));
     ObjectNode schemaPins =
-        new com.citi.put.checks.studio.guided.translation.GuidedPromptAssembler(C)
+        new com.citi.put.checks.studio.guided.translation.GuidedPromptAssembler(
+                C, com.citi.put.checks.studio.support.TestDomains.FIXTURES)
             .schemaProvenance();
     object(original.raw, "sourceManifest").set("schemaPins", schemaPins);
     String manifestHash = hash(original.raw.path("sourceManifest"));
@@ -256,7 +259,6 @@ class ObservedArtifactLowererTest {
     var pinDepths = new java.util.ArrayList<Integer>();
     var sourceReadDepths = new java.util.ArrayList<Integer>();
     var evidenceReadDepths = new java.util.ArrayList<Integer>();
-    var currentGuardDepths = new java.util.ArrayList<Integer>();
     var lastSessionRead = new java.util.concurrent.atomic.AtomicReference<ObjectNode>();
     var captured = new java.util.concurrent.atomic.AtomicReference<PublicationContracts.Claim>();
     var checked = org.mockito.Mockito.spy(new GuidedContracts());
@@ -379,14 +381,6 @@ class ObservedArtifactLowererTest {
             })
         .when(access)
         .checkUser(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
-    org.mockito.Mockito.doAnswer(
-            invocation -> {
-              currentGuardDepths.add(depth.get());
-              assertThat(depth.get()).isEqualTo(1);
-              return null;
-            })
-        .when(access)
-        .checkCurrent(org.mockito.ArgumentMatchers.any());
     var validator = org.mockito.Mockito.mock(HttpRunnerDispatchClient.class);
     var publisher =
         new GuidedPlanPublisher(
@@ -402,8 +396,8 @@ class ObservedArtifactLowererTest {
             org.mockito.Mockito.mock(DispatchAuthorization.class),
             access,
             new GuidedPublicationProperties(true, 3, 15000, 5000, 8388608),
-            new ObservedReplayProperties(
-                true, 30000, 1048576, 4194304, 2097152, "[]", "[]", 1280, 720),
+            new ObservedReplayProperties(true, 30000, 1048576, 4194304, 2097152, "[]", 1280, 720),
+            org.mockito.Mockito.mock(PublicationProofLauncher.class),
             java.time.Clock.fixed(now, java.time.ZoneOffset.UTC));
     ObjectNode body =
         C.object()
@@ -458,7 +452,6 @@ class ObservedArtifactLowererTest {
     var guardedDepths = java.util.Collections.nCopies(guardedPasses, 1);
     assertThat(sourceReadDepths).containsExactlyElementsOf(guardedDepths);
     assertThat(evidenceReadDepths).containsExactlyElementsOf(guardedDepths);
-    assertThat(currentGuardDepths).containsExactlyElementsOf(guardedDepths);
     org.mockito.Mockito.verify(bases, org.mockito.Mockito.times(guardedPasses))
         .requireCurrent(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
     org.mockito.Mockito.verifyNoInteractions(validator);
@@ -619,6 +612,34 @@ class ObservedArtifactLowererTest {
     at(wrongConfig, "configurationReferences", 0).put("referenceId", "different-saved-reference");
     assertThatThrownBy(() -> lowerer.recipes(wrongConfig))
         .isInstanceOf(GuidedSessionException.class);
+  }
+
+  @Test
+  void aTemplateSpanBecomesASourceSpanRecipeThatNeverCutsAVariableToken() throws Exception {
+    var original = fixture("fresh-order-reference").path("basis");
+    var lowerer = new ObservedArtifactLowerer(C);
+    var template = copy(original);
+    String source = "Type \"A <var X> B\" now";
+    ((ObjectNode) template.path("sourceSteps").get(2)).put("source", source);
+    int start = source.indexOf("A <"), end = source.lastIndexOf('"');
+    object(at(template, "inputs", 1), "provenance").put("startUtf16", start).put("endUtf16", end);
+    var recipes = lowerer.recipes(template);
+    var recipe =
+        StreamSupport.stream(recipes.spliterator(), false)
+            .filter(r -> r.path("provenance").path("start").asInt() == start)
+            .findFirst()
+            .orElseThrow();
+    assertThat(recipe.path("provenance").path("kind").asText()).isEqualTo("sourceSpan");
+    assertThat(recipe.path("provenance").path("end").asInt()).isEqualTo(end);
+    // An edge inside the token would type half of it.
+    for (int[] bounds :
+        new int[][] {{start, source.indexOf("X") + 0}, {source.indexOf("var"), end}}) {
+      var cut = copy(template);
+      object(at(cut, "inputs", 1), "provenance")
+          .put("startUtf16", bounds[0])
+          .put("endUtf16", bounds[1]);
+      assertThatThrownBy(() -> lowerer.recipes(cut)).isInstanceOf(GuidedSessionException.class);
+    }
   }
 
   @Test
@@ -897,16 +918,19 @@ class ObservedArtifactLowererTest {
     int observationBytes = 0, sourceBytes = 0;
     for (JsonNode row : basis.path("observations")) {
       int bytes = IncrementalBoundaryFixture.bytes(row.path("observation"));
-      assertThat(bytes).isLessThanOrEqualTo(32_768);
+      // ADR-SC-007: one observation is at most 524,288 bytes (limits.maxObservationBytes).
+      assertThat(bytes).isLessThanOrEqualTo(524_288);
       observationBytes += bytes;
       C.validate("v3/observation", row.path("observation"));
-      assertThat(row.path("observation").path("nodes")).hasSize(2);
+      assertThat(row.path("observation").path("facts")).hasSize(2);
       assertThat(row.path("observation").path("observedAt").asText())
           .isEqualTo("2026-10-08T03:00:05.123456789Z");
       assertThat(hash(row.path("observation"))).isEqualTo(row.path("observationHash").asText());
       assertThat(observations.put(row.path("observationHash").asText(), row)).isNull();
     }
-    assertThat(observationBytes).isLessThanOrEqualTo(1_048_576);
+    // The session's sanitized evidence total is 4,194,304 bytes
+    // (limits.maxSanitizedEvidenceBytesTotal).
+    assertThat(observationBytes).isLessThanOrEqualTo(4_194_304);
     for (JsonNode source : basis.path("sourceSteps")) {
       sourceBytes += source.path("source").asText().getBytes(StandardCharsets.UTF_8).length;
     }
@@ -973,7 +997,9 @@ class ObservedArtifactLowererTest {
             basis.path("translationPlan"),
             obligation,
             proposal,
-            actionContext);
+            actionContext,
+            null,
+            GuidedRefusalDiagnostics.Capture.NONE);
         continue;
       }
       JsonNode witness = prep.path("observedChoice");
@@ -997,6 +1023,10 @@ class ObservedArtifactLowererTest {
       for (JsonNode provider : witness.at("/attempt/modelQuestion/choices")) {
         assertThat(providerIds.add(provider.path("choiceId").asText())).isTrue();
       }
+      // The gates replay on the facts of the observation the model was judged on.
+      progress.set(
+          "observation",
+          observations.get(prep.path("observationHash").asText()).path("observation"));
       JsonNode effective =
           builder.effectiveObservedObligation(
               parent.session(),
@@ -1005,14 +1035,16 @@ class ObservedArtifactLowererTest {
               prep,
               observations,
               obligation);
-      assertThat(effective.path("selectedLocator")).isEqualTo(proposal.at("/target/locator"));
+      assertThat(effective.path("selection")).isEqualTo(selectedSelection(witness));
       proposals.action(
           parent.session(),
           progress,
           basis.path("translationPlan"),
           effective,
           proposal,
-          actionContext);
+          actionContext,
+          null,
+          GuidedRefusalDiagnostics.Capture.NONE);
       assertThat(prep.at("/executionEvidence/generation").asInt())
           .isGreaterThan(witness.at("/context/question/generation").asInt());
     }
@@ -1060,9 +1092,11 @@ class ObservedArtifactLowererTest {
           .as(entry.getKey())
           .isEqualTo(entry.getValue());
     }
-    // Current unchanged independently authored choice vector, not the reconstructed manifest.
+    // Current choice vector (resealed by STUDIO-GOV-001.4 when the scope lost its policy fields;
+    // the
+    // lowerer recomputes the same hash from the basis), not the reconstructed manifest.
     assertThat(independent.path("hashes").path("artifactHash").asText())
-        .isEqualTo("b4a66254ffed31ef2f21ba08cd1d555faa19471064e1558c3dd4b503699deae3");
+        .isEqualTo("1ba1668823c8f9feb34d78be96b53d856f77a9744e894d9b7b538da4c8de94eb");
     assertThat(hash(candidate.artifact()))
         .isEqualTo(independent.path("hashes").path("artifactHash").asText());
     assertThat(
@@ -1072,6 +1106,7 @@ class ObservedArtifactLowererTest {
                 .get(3)
                 .path("target")
                 .path("locator")
+                .get(0)
                 .path("value")
                 .asText())
         .isEqualTo("backup-label-é");
@@ -1082,7 +1117,7 @@ class ObservedArtifactLowererTest {
                 .get(3)
                 .path("targetIntent")
                 .asText())
-        .isEqualTo("label-input");
+        .isEqualTo("label");
   }
 
   @Test
@@ -1321,8 +1356,7 @@ class ObservedArtifactLowererTest {
                         "missing original question observation",
                         "coherent changed operation",
                         "coherent alternative authored input",
-                        "meaning cannot replace authored argument with binding",
-                        "unapproved original question origin coherently resealed")
+                        "meaning cannot replace authored argument with binding")
                     .contains(m.name()));
   }
 
@@ -1398,5 +1432,15 @@ class ObservedArtifactLowererTest {
     actualPolicy.remove("publicationEvidenceHash");
     expectedPolicy.remove("publicationEvidenceHash");
     assertThat(actualPolicy).isEqualTo(expectedPolicy);
+  }
+
+  /** The stored semantic selection the author accepted: the entry of the accepted choice. */
+  private static JsonNode selectedSelection(JsonNode witness) {
+    for (JsonNode mapping : witness.path("meanings")) {
+      if (mapping.path("choiceId").equals(witness.path("acceptedChoiceId"))) {
+        return mapping.path("selection");
+      }
+    }
+    throw new AssertionError("the accepted choice has no mapping");
   }
 }

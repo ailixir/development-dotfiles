@@ -120,10 +120,15 @@ public final class GuidedPublicationEvidenceRepository {
         id);
   }
 
-  private List<ObjectNode> observedChoices(String id) {
+  /**
+   * The accepted observed clarifications that count: the latest accepted question per obligation.
+   * An earlier answer that a later question superseded stays in the database and never enters the
+   * basis.
+   */
+  List<ObjectNode> observedChoices(String id) {
     return new com.citi.put.checks.studio.guided.translation.GuidedClarificationContextStore(
             jdbc, contracts)
-        .acceptedObserved(id);
+        .effectiveObserved(id);
   }
 
   private JsonNode selectedMeaning(JsonNode row) {
@@ -314,6 +319,34 @@ public final class GuidedPublicationEvidenceRepository {
     }
   }
 
+  /** Capture the exact current observation before the preparation INSERT that depends on it. */
+  public void capturePreparationObservation(
+      GuidedSessionRepository.Session current, JsonNode proposal, JsonNode proof, Instant now) {
+    GuidedPublicationBaseRepository.transaction();
+    if (new GuidedPublicationBaseRepository(jdbc, contracts)
+        .find(current.document().path("sessionId").asText())
+        .isEmpty()) {
+      return;
+    }
+    contracts.validate("v3/action", proposal);
+    contracts.validate("v3/bridge#/definitions/preparation", proof);
+    JsonNode evidence = proposal.path("executionEvidence");
+    require(
+        evidence.equals(current.progress().path("executionEvidence"))
+            && GuidedContracts.hash(evidence).equals(proposal.path("evidenceHash").asText())
+            && GuidedContracts.hash(proposal).equals(proof.path("requestDigest").asText()),
+        "EVIDENCE_MISMATCH",
+        422);
+    if (evidence.path("kind").asText().equals("observedDocument")) {
+      captureObservation(
+          current,
+          proof.path("contextId").asText(),
+          proof.path("ownerFence").asInt(),
+          evidence,
+          now);
+    }
+  }
+
   public void capturePreparation(
       GuidedSessionRepository.Session current, JsonNode proposal, JsonNode proof, Instant now) {
     GuidedPublicationBaseRepository.transaction();
@@ -430,17 +463,19 @@ public final class GuidedPublicationEvidenceRepository {
             id,
             admission,
             GuidedContracts.hash(proposal));
-    ObjectNode op = contracts.object();
-    op.set("coordinate", proposal.path("coordinate"));
-    op.set("origin", proposal.path("executionEvidence").path("origin"));
-    op.set(
-        "locator",
-        proposal.path("target").has("locator")
-            ? proposal.path("target").path("locator")
-            : com.fasterxml.jackson.databind.node.NullNode.instance);
-    op.set("operation", proposal.path("operation"));
+    // The runner-reported target the preparation stored with this proposal is part of the identity.
+    JsonNode proof =
+        contracts.parse(
+            jdbc.queryForObject(
+                "SELECT proof::text FROM studio_guided_publication_preparations WHERE session_id=?"
+                    + " AND preparation_id=?",
+                String.class,
+                id,
+                ledger.path("preparationId").asText()));
     require(
-        GuidedContracts.hash(op).equals(ledger.path("operationHash").asText()),
+        com.citi.put.checks.studio.guided.session.GuidedOperationIdentity.of(
+                proposal, proof.path("target"))
+            .equals(ledger.path("operationHash").asText()),
         "EVIDENCE_MISMATCH",
         422);
     var prior =
@@ -517,6 +552,7 @@ public final class GuidedPublicationEvidenceRepository {
         "EVIDENCE_MISMATCH",
         422);
     out.set("snapshotEvidence", snapshotEvidence(id, source));
+    ObjectNode privateManifest = source.deepCopy();
     source.remove("configurationValues");
     out.set("sourceManifest", source);
     var plan =
@@ -776,7 +812,8 @@ public final class GuidedPublicationEvidenceRepository {
     }
     require(initial != null, "MISSING_SOURCE", 409);
     bootstrap.set("initialEvidence", initial.deepCopy());
-    return new PublicationContracts.Evidence(out);
+    return new PublicationContracts.Evidence(
+        out, GuidedGuardSourceAuthority.verify(contracts, privateManifest, out));
   }
 
   private ObjectNode snapshotEvidence(String id, JsonNode manifest) {
@@ -833,12 +870,12 @@ public final class GuidedPublicationEvidenceRepository {
         jdbc.queryForList(
             "SELECT p.base_revision_id,p.initial_step_index,p.prefix_program::text,"
                 + "r.revision_digest,r.authoring::text,r.authoring_revision_inputs::text,"
-                + "r.configuration::text,"
-                + "r.\"references\"::text AS reference_identity,r.step_snapshot_hashes::text,"
-                + "r.step_reuse_provenance::text,"
-                + "b.document::text AS start_base FROM studio_guided_relearn_plans p "
-                + "JOIN ui_test_revisions r ON r.id=p.base_revision_id"
-                + " JOIN studio_guided_publication_bases b ON b.session_id=p.session_id WHERE p.session_id=?",
+                + "r.configuration::text,r.\"references\"::text AS"
+                + " reference_identity,r.step_snapshot_hashes::text,"
+                + "r.step_reuse_provenance::text,b.document::text AS start_base FROM"
+                + " studio_guided_relearn_plans p JOIN ui_test_revisions r ON"
+                + " r.id=p.base_revision_id JOIN studio_guided_publication_bases b ON"
+                + " b.session_id=p.session_id WHERE p.session_id=?",
             id);
     if (!plans.isEmpty()) {
       var row = plans.getFirst();

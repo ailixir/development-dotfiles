@@ -88,10 +88,20 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * STUDIO-OBS-009 AC-7 FOCUS-MUTATION-01 c (T0 ruling A9, rule FM): one guided learn on the real
- * runner, with a field whose focus handler inserts helper text elsewhere on the page. The fill
- * succeeds and the session continues; before the rule, the runner refused the write as {@code
- * POST_FOCUS_CHANGED}, mapped it to {@code UNKNOWN_OUTCOME} and the whole session stopped.
+ * STUDIO-OBS-009 AC-7 FOCUS-MUTATION-01 c (T0 ruling A9, rule FM), re-based on ADR-SC-007 WI-4
+ * (plan D-16, AC9 and AC10): one guided learn on the real runner, with a field whose focus handler
+ * does something on the page. The runner acts only on the element it verified at prepare, so:
+ *
+ * <ul>
+ *   <li>helper text inserted elsewhere on focus: the fill writes and the session continues;
+ *   <li>a change to the target's own attribute that the locator does not use: the write lands on
+ *       the same verified element and the session continues (the retired rule FM stopped it);
+ *   <li>the locator's attributes removed on focus, or focus moved to a password field: nothing is
+ *       written to any element and the session ends {@code UNKNOWN_OUTCOME};
+ *   <li>a fill that fails after the journal fence (the field turned read-only on focus): no page
+ *       text of the failure reaches any stored document or the worker log (the closed error
+ *       boundary, AC9).
+ * </ul>
  *
  * <p><b>Runs after the F-merge only.</b> It needs the rebuilt runner {@code dist} (the one that
  * carries the rule) and the spawn lane I migrates. It is a trimmed copy of {@code
@@ -150,7 +160,21 @@ class GuidedFocusMutationJoinedIT {
    * FOCUS-MUTATION-01 page variants: helper text inserted elsewhere on focus; a real target change
    * on focus.
    */
-  static volatile boolean focusHelper, focusTargetChange;
+  static volatile boolean focusHelper,
+      focusTargetChange,
+      focusLocatorChange,
+      focusToPassword,
+      focusReadOnly;
+
+  /**
+   * Page-resident canaries of the read-only variant: attributes that Playwright's call log prints.
+   */
+  static final String CANARY_ATTRIBUTE = "canary-attr-" + UUID.randomUUID();
+
+  static final String CANARY_VALUE = "canary-value-" + UUID.randomUUID();
+
+  /** What the page's password field received (null: nothing was typed into it). */
+  static final AtomicReference<String> PASSWORD_RECEIPT = new AtomicReference<>();
 
   static final java.util.concurrent.atomic.AtomicBoolean HOLD_NEXT_REFRESH =
       new java.util.concurrent.atomic.AtomicBoolean();
@@ -234,7 +258,7 @@ class GuidedFocusMutationJoinedIT {
       // AC-12 h: an exclusive bind on both loopback families, outside the database range.
       RUNNER_PORT = RunnerProcessHarness.exclusivelyFreePort();
       APPLICATION = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-      ORIGIN = "http://127.0.0.1:" + APPLICATION.getAddress().getPort();
+      ORIGIN = "http://localhost:" + APPLICATION.getAddress().getPort();
       APPLICATION.createContext(
           "/connect",
           exchange -> {
@@ -267,7 +291,27 @@ class GuidedFocusMutationJoinedIT {
                     + (focusTargetChange
                         ? "onfocus=\"this.setAttribute('name','changed-on-focus')\" "
                         : "")
-                    + "oninput=\"fetch('/receipt',{method:'POST',body:this.value})\"><button "
+                    + (focusLocatorChange
+                        ? "onfocus=\"this.setAttribute('data-testid','moved');"
+                            + "this.setAttribute('aria-label','Moved')\" "
+                        : "")
+                    + (focusToPassword
+                        ? "onfocus=\"document.getElementById('account-secret').focus()\" "
+                        : "")
+                    + (focusReadOnly
+                        ? "data-canary='"
+                            + CANARY_ATTRIBUTE
+                            + "' value='"
+                            + CANARY_VALUE
+                            + "' onfocus=\"this.readOnly=true\" "
+                        : "")
+                    + "oninput=\"fetch('/receipt',{method:'POST',body:this.value})\">"
+                    + (focusToPassword
+                        ? "<input id='account-secret' type='password' aria-label='Account secret' "
+                            + "oninput=\"fetch('/password-receipt',{method:'POST',body:this.value})"
+                            + "\">"
+                        : "")
+                    + "<button "
                     + "data-testid='replace' onclick=\"document.querySelector('[data-testid=destin"
                     + "ation]').outerHTML='<input data-testid=destination "
                     + "aria-label=Destination>'\">Replace</button><script>setInterval(async()=>{if"
@@ -347,6 +391,14 @@ class GuidedFocusMutationJoinedIT {
             exchange.close();
           });
       APPLICATION.createContext(
+          "/password-receipt",
+          exchange -> {
+            PASSWORD_RECEIPT.set(
+                new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
+            exchange.sendResponseHeaders(204, -1);
+            exchange.close();
+          });
+      APPLICATION.createContext(
           "/mutation",
           exchange -> {
             byte[] body = (replaceTarget ? "yes" : "no").getBytes(StandardCharsets.UTF_8);
@@ -414,7 +466,7 @@ class GuidedFocusMutationJoinedIT {
       Flyway.configure()
           .dataSource(DATABASE.getJdbcUrl(), DATABASE.getUsername(), DATABASE.getPassword())
           .locations("classpath:db/migration")
-          .target("23") // STUDIO-OBS-014 S3: governance tables (V19) at head
+          .target("29")
           .load()
           .migrate();
     } catch (Exception failure) {
@@ -534,8 +586,7 @@ class GuidedFocusMutationJoinedIT {
 
     @Bean
     GuidedTranslationProperties properties() {
-      return new GuidedTranslationProperties(
-          true, true, List.of("orders"), List.of("fixture"), 131072, 2048, 60, "worker-1");
+      return new GuidedTranslationProperties(true, 131072, 2048, 60, "worker-1");
     }
 
     @Bean
@@ -545,36 +596,21 @@ class GuidedFocusMutationJoinedIT {
 
     @Bean
     GuidedSourceClassifier classifier(GuidedTranslationProperties props) {
-      return new GuidedSourceClassifier(CONTRACTS, props, new CredentialPatternScreen());
+      return new GuidedSourceClassifier(
+          CONTRACTS,
+          new CredentialPatternScreen(),
+          com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     }
 
     @Bean
     GuidedSourceInputResolver inputs() {
-      return new GuidedSourceInputResolver(CONTRACTS);
+      return new GuidedSourceInputResolver(
+          CONTRACTS, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     }
 
     @Bean
     GuidedStepVerifier verifier(GuidedTranslationStore store) {
       return new GuidedStepVerifier(store);
-    }
-
-    private com.citi.put.checks.studio.guided.publication.ObservedReplayPins fixturePins() {
-      var policy =
-          CONTRACTS
-              .object()
-              .put("version", 1)
-              .put("policyId", "fixture-policy")
-              .put("policyVersion", "1")
-              .put("applicationId", "orders")
-              .put("environment", "fixture")
-              .put("entryPolicyId", "blank");
-      policy.putArray("allowedOrigins").add(ORIGIN);
-      policy.putArray("rules");
-      policy.putNull("applicationPolicy");
-      return new com.citi.put.checks.studio.guided.publication.ObservedReplayPins(
-          CONTRACTS,
-          new com.citi.put.checks.studio.guided.publication.ObservedReplayProperties(
-              true, 30000, 1048576, 4194304, 2097152, "[]", "[" + policy + "]", 1280, 720));
     }
 
     @Bean
@@ -591,16 +627,15 @@ class GuidedFocusMutationJoinedIT {
           store,
           verifier,
           new CsiOwnershipEvaluator(),
-          fixturePins(),
+          com.citi.put.checks.studio.support.TestDomains.FIXTURES,
           new com.citi.put.checks.studio.secrets.VaultStudioReferenceResolver(
-              new com.citi.put.checks.studio.secrets.FakeStudioVaultProvider(java.util.Map.of()),
-              (principal, csi, env, secret) -> true),
-          (principal, csi, env, secret) -> true);
+              new com.citi.put.checks.studio.secrets.FakeStudioVaultProvider(java.util.Map.of())));
     }
 
     @Bean
     GuidedMaterializationService materialization(JdbcTemplate jdbc) {
-      return new GuidedMaterializationService(jdbc, CONTRACTS);
+      return new GuidedMaterializationService(
+          jdbc, CONTRACTS, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     }
 
     @Bean
@@ -617,6 +652,7 @@ class GuidedFocusMutationJoinedIT {
               CONTRACTS,
               access,
               new GuidedSessionProperties(true, Map.of()),
+              com.citi.put.checks.studio.support.TestDomains.FIXTURES,
               Clock.systemUTC());
       service.installBridge(
           materialization,
@@ -632,14 +668,7 @@ class GuidedFocusMutationJoinedIT {
               CONTRACTS));
       // STUDIO-OBS-014 S3: one uniform governed policy for the class (ar-mounted-rules B14); the
       // migrated reads rely on its business-read grant.
-      com.citi.put.checks.studio.support.ObservedPublicationFixture.installGovernance(
-          service,
-          jdbc,
-          "CSI-123",
-          "orders",
-          "fixture",
-          java.util.List.of(ORIGIN),
-          governedPolicy());
+      com.citi.put.checks.studio.support.ObservedPublicationFixture.installCsiBudget(service, jdbc);
       return service;
     }
 
@@ -706,7 +735,8 @@ class GuidedFocusMutationJoinedIT {
               dispatch,
               gateway,
               CONTRACTS,
-              new GuidedPromptAssembler(CONTRACTS),
+              new GuidedPromptAssembler(
+                  CONTRACTS, com.citi.put.checks.studio.support.TestDomains.FIXTURES),
               inputs,
               new GuidedProposalValidator(CONTRACTS),
               new GuidedDependencyPlanner(sessions),
@@ -739,31 +769,6 @@ class GuidedFocusMutationJoinedIT {
     } catch (ReflectiveOperationException failure) {
       throw new IllegalStateException(failure);
     }
-  }
-
-  static ObjectNode governedPolicy() {
-    ObjectNode policy =
-        CONTRACTS
-            .object()
-            .put("policyRuleId", "structural-policy")
-            .put("allowStructuralDiscovery", true);
-    ObjectNode grant =
-        CONTRACTS.object().put("policyRuleId", "business-read").put("origin", ORIGIN);
-    grant
-        .putObject("region")
-        .put("kind", "role")
-        .put("role", "main")
-        .put("name", "Operations")
-        .put("exact", true);
-    grant.putObject("visibleText").put("classification", "permittedBusinessData");
-    grant
-        .putObject("controlValue")
-        .put("classification", "nonsecretApproved")
-        .putArray("types")
-        .add("text")
-        .add("textarea");
-    policy.putArray("readGrants").add(grant);
-    return policy;
   }
 
   /**
@@ -935,8 +940,6 @@ class GuidedFocusMutationJoinedIT {
         .migrate();
     // STUDIO-OBS-014 S3b: each test runs on a freshly migrated isolated database, so the class's
     // approved governed policy is seeded here; the bean-time seed only reached the base database.
-    com.citi.put.checks.studio.support.ObservedPublicationFixture.seedPolicy(
-        jdbc, "CSI-123", "orders", "fixture", List.of(ORIGIN), governedPolicy(), "ALLOW");
     // aria-bridge-ruling01 N6: the real source of truth is one ui_tests row (planning IT shape).
     configuredInput =
         testName.equals("authorizedConfigurationReferenceIsAllocatedTransportedAndConsumedExactly");
@@ -984,15 +987,18 @@ class GuidedFocusMutationJoinedIT {
     replaceTarget = false;
     focusHelper = false;
     focusTargetChange = false;
+    focusLocatorChange = false;
+    focusToPassword = false;
+    focusReadOnly = false;
+    PASSWORD_RECEIPT.set(null);
     wideSession = false;
     MUTATIONS.set(0);
     Files.writeString(
         TEMP.resolve("worker.jwt"), token("owning-worker", "worker-1", "studio-guided-controller"));
     Path journal = Files.createTempDirectory(TEMP, "journal-");
-    // STUDIO-OBS-014 S3 (RK-2, ar-mounted-rules): the worker is given neither `rules` nor
-    // `applicationPolicy`; the class's governed policy (governedPolicy()) is frozen into each
-    // session and reaches the worker in the hash-bound context. This record is what the runner was
-    // configured with (no secret); the runner refuses any key it does not enumerate.
+    // The worker is given no `rules`: the read profile is the runner's own constant. This record is
+    // what the runner was configured with (no secret); the runner refuses any key it does not
+    // enumerate.
     ObjectNode config =
         CONTRACTS
             .object()
@@ -1037,7 +1043,8 @@ class GuidedFocusMutationJoinedIT {
       // survivor.
       var report = harness.teardown();
       assertThat(Files.readString(harness.logFile()))
-          .doesNotContain(CAPTURE, PASSWORD_ECHO, ORDINARY_ECHO.strip());
+          .doesNotContain(
+              CAPTURE, PASSWORD_ECHO, ORDINARY_ECHO.strip(), CANARY_ATTRIBUTE, CANARY_VALUE);
       report.assertNoSurvivors();
       report.assertCleanExit();
     }
@@ -1089,29 +1096,116 @@ class GuidedFocusMutationJoinedIT {
   }
 
   @Test
-  void aFocusHandlerThatChangesTheTargetItselfStillStopsTheSessionAndWritesNothing()
+  void aFocusHandlerThatChangesTheTargetsOwnAttributeStillWritesToTheSameVerifiedElement()
       throws Exception {
+    // ADR-SC-007 WI-4 (plan D-16, AC10 bullet 3): the retired rule FM treated any change of the
+    // field itself on focus as unsafe and stopped the session. The runner now verifies the element
+    // it prepared: the handler only sets an attribute the locator does not use, so the write lands
+    // on the very element that was verified, the receipt is the authored literal and the session
+    // continues. What stays refused is a write to ANOTHER element (the next methods).
     focusTargetChange = true;
     String id = plannedSession(planNavLit());
     advance(id, admit(id, reserve(id, navigation(id))), "navigate");
+    ObjectNode fill = fillProposal(id);
+    JsonNode ledger = admit(id, reserve(id, fill));
+    advance(id, ledger, "target-fill");
+    await(() -> RECEIPT.get() != null, 10000);
+    assertThat(RECEIPT.get()).isEqualTo("fixture-input");
+    awaitActionState(id, ledger, "SUCCEEDED", 10000);
+    assertThat(stateOf(id)).isNotIn("UNKNOWN_OUTCOME", "FAILED", "CANCELLED", "EXPIRED");
+    assertThat(actionCount(id)).isEqualTo(2);
+  }
+
+  @Test
+  void aFocusHandlerThatRemovesTheLocatorsMatchStopsTheSessionAndWritesNothing() throws Exception {
+    // The handler changes the attributes every locator of the field is built from, so after the
+    // journal fence the verified element no longer matches its locator: nothing may be written.
+    focusLocatorChange = true;
+    String id = plannedSession(planNavLit());
+    advance(id, admit(id, reserve(id, navigation(id))), "navigate");
+    advance(id, admit(id, reserve(id, fillProposal(id))), "locator-fill");
+    awaitState(id, "UNKNOWN_OUTCOME", 10000);
+    assertThat(RECEIPT.get()).isNull();
+    assertThat(PASSWORD_RECEIPT.get()).isNull();
+  }
+
+  @Test
+  void aFocusHandlerThatMovesFocusToAPasswordFieldWritesNothingToEither() throws Exception {
+    // Playwright's fill writes into whatever holds focus. The runner verifies, after the target's
+    // own focus(), that the target holds focus and no password element does; it does not write.
+    focusToPassword = true;
+    String id = plannedSession(planNavLit());
+    advance(id, admit(id, reserve(id, navigation(id))), "navigate");
+    advance(id, admit(id, reserve(id, fillProposal(id))), "password-fill");
+    awaitState(id, "UNKNOWN_OUTCOME", 10000);
+    assertThat(RECEIPT.get()).isNull();
+    assertThat(PASSWORD_RECEIPT.get()).isNull();
+  }
+
+  @Test
+  void aPostFenceActionFailureLeavesNoPageTextInAnyStoredOrLoggedError() throws Exception {
+    // The field turns read-only on focus, so the fill itself fails after the fence with a real
+    // Playwright TimeoutError whose call log prints the element (attributes, prefilled value).
+    // AC9: none of that text may reach a stored document, the session progress or the worker log.
+    focusReadOnly = true;
+    String id = plannedSession(planNavLit());
+    advance(id, admit(id, reserve(id, navigation(id))), "navigate");
+    advance(id, admit(id, reserve(id, fillProposal(id))), "readonly-fill");
+    awaitState(id, "UNKNOWN_OUTCOME", 20000);
+    assertThat(RECEIPT.get()).isNull();
+    String stored = storedText(id);
+    assertThat(stored).isNotEmpty().doesNotContain(CANARY_ATTRIBUTE).doesNotContain(CANARY_VALUE);
+    assertThat(Files.readString(workerHarness.logFile()))
+        .doesNotContain(CANARY_ATTRIBUTE)
+        .doesNotContain(CANARY_VALUE);
+  }
+
+  /** The fill of the authored literal into Destination (action ordinal 1). */
+  ObjectNode fillProposal(String id) {
     ObjectNode fill = proposal(id, 1, "fill", "destination");
     fill.withObject("/operation")
         .set(
             "value",
             CONTRACTS.object().put("kind", "authoredLiteral").put("sourceInputId", inputId(id, 1)));
-    advance(id, admit(id, reserve(id, fill)), "target-fill");
+    return fill;
+  }
+
+  String stateOf(String id) {
+    return jdbc.queryForObject(
+        "SELECT state FROM studio_guided_sessions WHERE session_id=?", String.class, id);
+  }
+
+  void awaitState(String id, String state, long timeout) throws Exception {
+    await(() -> state.equals(stateOf(id)), timeout);
+  }
+
+  void awaitActionState(String id, JsonNode ledger, String state, long timeout) throws Exception {
+    String admission = ledger.path("admission").path("admissionId").asText();
     await(
         () ->
-            "UNKNOWN_OUTCOME"
-                .equals(
-                    jdbc.queryForObject(
-                        "SELECT state FROM studio_guided_sessions WHERE session_id=?",
-                        String.class,
-                        id)),
-        10000);
-    // At-most-once and the UNKNOWN_OUTCOME mapping are unchanged for a real target change: nothing
-    // was written.
-    assertThat(RECEIPT.get()).isNull();
+            state.equals(
+                jdbc.queryForObject(
+                    "SELECT document->>'state' FROM studio_guided_actions WHERE admission_id=?",
+                    String.class,
+                    admission)),
+        timeout);
+  }
+
+  /** Every stored row of this session, as text: every table that has a session_id column. */
+  String storedText(String id) {
+    var all = new StringBuilder();
+    for (String table :
+        jdbc.queryForList(
+            "SELECT DISTINCT table_name FROM information_schema.columns WHERE"
+                + " table_schema='public' AND column_name='session_id'",
+            String.class)) {
+      for (String row :
+          jdbc.queryForList(
+              "SELECT t::text FROM " + table + " t WHERE t.session_id::text=?", String.class, id)) {
+        all.append(row).append('\n');
+      }
+    }
+    return all.toString();
   }
 
   int actionCount(String id) {
@@ -1211,8 +1305,7 @@ class GuidedFocusMutationJoinedIT {
             .put("testId", testId.toString())
             .put("sourceRevision", "1")
             .put("configurationRevision", "1")
-            .put("environmentId", "fixture")
-            .put("applicationId", "orders");
+            .put("environmentId", "fixture");
     start.set("versions", versions());
     return sessions.start(user, UUID.randomUUID().toString(), start).path("sessionId").asText();
   }
@@ -1272,7 +1365,6 @@ class GuidedFocusMutationJoinedIT {
     ObjectNode plan = CONTRACTS.object();
     references.forEach(plan.putArray("sourceReferences")::add);
     obligations.forEach(plan.putArray("obligations")::add);
-    plan.putArray("needs");
     return plan;
   }
 
@@ -1304,14 +1396,6 @@ class GuidedFocusMutationJoinedIT {
                 obligation(step.toString(), 0, "navigate", "page", 0, null),
                 obligation(step.toString(), 1, "read", "source", null, "order"),
                 obligation(step.toString(), 2, "fill", "destination", null, "order")));
-    plan.withArray("needs")
-        .addObject()
-        .put("needId", "order")
-        .put("producerStepId", step.toString())
-        .putArray("consumers")
-        .addObject()
-        .put("stepId", step.toString())
-        .put("argumentSlot", "fill.value");
     return plan;
   }
 
@@ -1414,7 +1498,8 @@ class GuidedFocusMutationJoinedIT {
             stopped,
             gateway,
             CONTRACTS,
-            new GuidedPromptAssembler(CONTRACTS),
+            new GuidedPromptAssembler(
+                CONTRACTS, com.citi.put.checks.studio.support.TestDomains.FIXTURES),
             inputs,
             new GuidedProposalValidator(CONTRACTS),
             new GuidedDependencyPlanner(sessions),
@@ -1485,18 +1570,13 @@ class GuidedFocusMutationJoinedIT {
     if (testId == null) {
       target.put("kind", "page");
     } else {
-      JsonNode selected = null;
-      for (JsonNode node : progress(id).path("observation").path("nodes")) {
-        for (JsonNode hint : node.path("locatorHints")) {
-          if (hint.path("kind").asText().equals("testId")
-              && hint.path("value").asText().equals(testId)) {
-            selected = node;
-          }
-        }
-      }
-      assertThat(selected).isNotNull();
-      target.put("nodeId", selected.path("nodeId").asText());
-      target.putObject("locator").put("kind", "testId").put("value", testId).put("exact", true);
+      // ADR-SC-007: the model names a ref of the outline; the runner derives the locator.
+      target
+          .put("kind", "node")
+          .put(
+              "ref",
+              com.citi.put.checks.studio.support.JoinedRefs.refOfTestId(
+                  progress(id).path("observation"), testId));
     }
     return p;
   }
@@ -1560,11 +1640,9 @@ class GuidedFocusMutationJoinedIT {
     ObjectNode identity = CONTRACTS.object();
     identity.set("coordinate", proposal.path("coordinate"));
     identity.set("origin", proposal.path("executionEvidence").path("origin"));
-    identity.set(
-        "locator",
-        proposal.path("target").has("locator")
-            ? proposal.path("target").path("locator")
-            : com.fasterxml.jackson.databind.node.NullNode.instance);
+    // ADR-SC-007: the identity covers the target the runner reported on the preparation proof, null
+    // for the page action this helper is used on.
+    identity.set("target", com.fasterxml.jackson.databind.node.NullNode.instance);
     identity.set("operation", proposal.path("operation"));
     return GuidedContracts.hash(identity);
   }

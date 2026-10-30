@@ -1,3 +1,4 @@
+import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 /**
  * W48 (STUDIO-OBS-009/010 real-stack 431): a Username + Password login form, driven through the real GuidedRuntime and
  * real Chromium exactly as the controller's prepare -> dispatch path drives it.
@@ -61,7 +62,7 @@ async function serve(login: string): Promise<{ origin: string; posts: string[] }
   const address = server.address();
   if (!address || typeof address === 'string') throw new Error('PORT');
   resources.push(async () => { server.closeAllConnections(); await new Promise<void>(resolve => server.close(() => { resolve(); })); });
-  return { origin: `http://127.0.0.1:${String(address.port)}`, posts };
+  return { origin: `http://localhost:${String(address.port)}`, posts };
 }
 
 async function harness(login: string, withUser: boolean) {
@@ -77,7 +78,7 @@ async function harness(login: string, withUser: boolean) {
   ];
   context.authoredInputsHash = hash(context.authoredInputs);
   const messages: { route: string; body: unknown }[] = [];
-  const runtime = new GuidedRuntime(context, { workerId: context.workerId, journalDirectory: directory, applicationPolicy: { policyRuleId: 'app-structural', allowStructuralDiscovery: true, readGrants: [] }, launch: launchGuidedBrowser, callback: (route, body) => { messages.push({ route, body }); return Promise.resolve(); } });
+  const runtime = new GuidedRuntime(context, { workerId: context.workerId, allowedDomains: TEST_DOMAINS, journalDirectory: directory, launch: launchGuidedBrowser, callback: (route, body) => { messages.push({ route, body }); return Promise.resolve(); } });
   resources.push(() => runtime.stop('CANCELLED')); await runtime.start();
   let evidence = (messages[0]?.body as BridgeBootstrap).executionEvidence as ExecutionEvidence;
   const observation = (): BridgeObservation['observation'] | undefined => (messages.filter(m => m.route === 'observations').at(-1)?.body as BridgeObservation | undefined)?.observation;
@@ -85,7 +86,7 @@ async function harness(login: string, withUser: boolean) {
   const act = async (step: string, operation: Action['operation'], target?: Action['target'], secret?: string): Promise<{ state: string; refusal: string | null }> => {
     const p = proposal(context, evidence, step, operation, target);
     let preparation: BridgePreparation;
-    try { preparation = await runtime.prepare({ ...identity(context), proposal: p, requestDigest: hash(p), expiresAt: new Date(Date.now() + 20_000).toISOString() }); }
+    try { preparation = await runtime.prepare({ pressInheritance: null, ...identity(context), proposal: p, requestDigest: hash(p), expiresAt: new Date(Date.now() + 20_000).toISOString() }); }
     catch (error) { return { state: 'PREPARE_REFUSED', refusal: (error as Error).message }; }
     const request = dispatch(context, p, preparation);
     const frame = secret === undefined ? request : { ...request, secret: { secretId: 'PASS', value: secret, versionId: 'fixture-version', allowedOrigins: [fixture.origin] } };
@@ -95,18 +96,21 @@ async function harness(login: string, withUser: boolean) {
     if (seen) evidence = { kind: 'observedDocument', sessionId: context.sessionId, contextId: context.contextId, documentId: seen.documentId, generation: seen.generation, origin: seen.origin, observationHash: hash(seen) };
     return { state, refusal: null };
   };
-  /** The target a correct model builds: the node's own id and one of the node's own exported hints. */
-  const target = (name: string, hintKind: 'role' | 'label' = 'role', role?: string): Action['target'] => {
-    const node = observation()?.nodes.find(n => n.name === name && (role === undefined || n.role === role) && n.locatorHints.some(h => h.kind === hintKind));
-    const hint = node?.locatorHints.find(h => h.kind === hintKind);
-    if (!node || !hint) throw new Error(`NODE_UNAVAILABLE:${name}:${hintKind}`);
-    return { nodeId: node.nodeId, documentId: node.documentId, generation: node.generation, locator: hint };
+  /** The target a correct model builds: the ref of the node the outline shows (the runner derives the locator at prepare). */
+  const target = (name: string, _hintKind: 'role' | 'label' = 'role', role?: string): Action['target'] => {
+    void _hintKind; // the hint kinds of the old protocol: a ref is the only target now
+    const seen = observation();
+    const found = seen && Object.entries(seen.facts).find(([, fact]) => fact.name === name && (role === undefined || fact.role === role));
+    if (!seen || !found) throw new Error(`NODE_UNAVAILABLE:${name}`);
+    return { kind: 'node', ref: found[0], documentId: seen.documentId, generation: seen.generation };
   };
   const open = (): Promise<{ state: string; refusal: string | null }> => act('open', { kind: 'navigate', destinationInputId: 'input-open' });
   const fillUser = (hintKind: 'role' | 'label'): Promise<{ state: string; refusal: string | null }> => act('user', { kind: 'fill', value: { kind: 'authoredLiteral', sourceInputId: 'input-user' } }, target('Username', hintKind, 'textbox'));
   const fillPassword = (): Promise<{ state: string; refusal: string | null }> => act('pass', { kind: 'fill', value: { kind: 'secretRef', sourceInputId: 'input-pass' } }, { kind: 'passwordControl', documentId: evidence.documentId, generation: evidence.generation }, PASS_VALUE);
   const signIn = (): Promise<{ state: string; refusal: string | null }> => act('signin', { kind: 'click' }, target('Sign in', 'role'));
-  return { open, fillUser, fillPassword, signIn, fixture, observation, messages };
+  /** A secretRef fill aimed at a (non-password) textbox ref of the outline: the password step's own input, the target the model must not use. */
+  const secretFillAt = (name: string): Promise<{ state: string; refusal: string | null }> => act('pass', { kind: 'fill', value: { kind: 'secretRef', sourceInputId: 'input-pass' } }, target(name, 'role', 'textbox'), PASS_VALUE);
+  return { open, fillUser, fillPassword, signIn, secretFillAt, fixture, observation, messages };
 }
 
 const OK = { state: 'SUCCEEDED', refusal: null };
@@ -138,31 +142,68 @@ describe('guided login journey on a Username + Password form (real Chromium)', (
   });
 
   it('stays fail-closed: a password field whose own label equals the Username hint makes that hint ambiguous', async () => {
+    // ADR-SC-007 (ruling Q16 b): hints are gone, so nothing is ambiguous any more. What the old case protected stays: the Username fill reaches the
+    // Username textbox (the one ref), the password input has no ref and stays untouched, and naming the password field's label never writes into it.
     const h = await harness(LOGIN_COLLIDING, true);
     expect(await h.open()).toEqual(OK);
-    expect(await h.fillUser('role')).toEqual({ state: 'PREPARE_REFUSED', refusal: 'TARGET_CHANGED' });
-    expect(await h.fillUser('label')).toEqual({ state: 'PREPARE_REFUSED', refusal: 'TARGET_CHANGED' });
+    expect(await h.fillUser('role')).toEqual(OK);
+    // The password field's label is also "Username": a secret fill that names it as its target hits the Username textbox ref, is refused, and types nothing.
+    const named = await h.secretFillAt('Username');
+    expect(named.state).toMatch(/_REFUSED$/u);
+    expect(h.observation()?.outline).not.toMatch(/passwordControl[^\n]*\[e\d+\]/u);
+    expect(Object.values(h.observation()?.facts ?? {}).filter(fact => fact.name === 'Username').map(fact => fact.role)).toEqual(['textbox']);
     expect(h.fixture.posts).toEqual([]);
+    expect(await h.signIn()).toEqual(OK);
+    await expect.poll(() => h.fixture.posts.length).toBe(1);
+    const form = new URLSearchParams(h.fixture.posts[0]);
+    expect(form.get('username')).toBe(USER_VALUE);
+    expect(form.get('password')).toBe('');
   });
 });
 
 describe('the password label is used locally and never exported', () => {
+  // ADR-SC-007 D1 / ruling Q16 (a): the visible text of a label is exported, the secret never is. A password control gets no ref, the secret appears in no
+  // message or observation, the label appears only as text (or as the name of a different, non-password control), and a secret fill aimed at a
+  // non-password textbox is refused and types nothing.
+  const refusedFill = async (h: Awaited<ReturnType<typeof harness>>, name: string): Promise<void> => {
+    const refused = await h.secretFillAt(name);
+    expect(refused.state).toMatch(/_REFUSED$/u);
+    expect(refused.refusal).not.toBeNull();
+  };
   for (const [label, html] of [['wrapping label', PHRASE_WRAP], ['label for=', PHRASE_FOR]] as const) {
     it(`no observation or outgoing message contains the password label text: ${label}`, async () => {
       const h = await harness(html, true);
       expect(await h.open()).toEqual(OK);
       expect(await h.fillUser('role')).toEqual(OK);
+      await refusedFill(h, 'Username');
       expect(await h.fillPassword()).toEqual(OK);
-      expect(JSON.stringify(h.messages)).not.toMatch(/Zebra/u);
-      expect(JSON.stringify(h.observation())).not.toMatch(/Zebra/u);
+      expect(JSON.stringify(h.messages)).not.toContain(PASS_VALUE);
+      expect(JSON.stringify(h.observation())).not.toContain(PASS_VALUE);
+      expect(h.observation()?.outline).not.toMatch(/passwordControl[^\n]*\[e\d+\]/u);
+      expect(Object.values(h.observation()?.facts ?? {}).some(fact => fact.name === 'Zebra phrase')).toBe(false);
+      expect(await h.signIn()).toEqual(OK);
+      await expect.poll(() => h.fixture.posts.length).toBe(1);
+      const form = new URLSearchParams(h.fixture.posts[0]);
+      expect(form.get('username')).toBe(USER_VALUE);
+      expect(form.get('password')).toBe(PASS_VALUE);
     });
   }
 
   it('a text input cannot borrow the password label through aria-labelledby: it stays withheld and the text is not exported', async () => {
     const h = await harness(ALIAS, true);
     expect(await h.open()).toEqual(OK);
-    expect(JSON.stringify(h.observation())).not.toMatch(/Zebra/u);
-    expect(JSON.stringify(h.messages)).not.toMatch(/Zebra/u);
-    expect(h.observation()?.nodes.some(n => n.controlType === 'text' && n.name !== 'Username')).toBe(false);
+    expect(JSON.stringify(h.observation())).not.toContain(PASS_VALUE);
+    expect(JSON.stringify(h.messages)).not.toContain(PASS_VALUE);
+    // The label is text, and the aliasing input is a different, non-password control that carries its accessible name.
+    const named = Object.values(h.observation()?.facts ?? {}).filter(fact => fact.name === 'Zebra phrase');
+    expect(named.map(fact => fact.role)).toEqual(['textbox']);
+    expect(h.observation()?.outline).not.toMatch(/passwordControl[^\n]*\[e\d+\]/u);
+    await refusedFill(h, 'Zebra phrase');
+    expect(await h.fillUser('role')).toEqual(OK);
+    expect(await h.signIn()).toEqual(OK);
+    await expect.poll(() => h.fixture.posts.length).toBe(1);
+    const form = new URLSearchParams(h.fixture.posts[0]);
+    expect(form.get('alias')).toBe('');
+    expect(form.get('password')).toBe('');
   });
 });

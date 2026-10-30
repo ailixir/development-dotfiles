@@ -41,7 +41,6 @@ class GuidedSourceClassifierTest {
 
   static ObjectNode scope() {
     return C.object()
-        .put("applicationId", "orders")
         .put("environmentId", "fixture")
         .put("csiId", "CSI-123")
         .put("sourceRevision", "1")
@@ -50,10 +49,7 @@ class GuidedSourceClassifierTest {
 
   static GuidedSourceClassifier classifier() {
     return new GuidedSourceClassifier(
-        C,
-        new GuidedTranslationProperties(
-            true, true, List.of("orders"), List.of("fixture"), 65536, 4096, 60, "worker-1"),
-        new CredentialPatternScreen());
+        C, new CredentialPatternScreen(), com.citi.put.checks.studio.support.TestDomains.FIXTURES);
   }
 
   @Test
@@ -87,8 +83,14 @@ class GuidedSourceClassifierTest {
     session.set("scope", scope());
     session.putArray("sourceSteps").addObject().put("stepId", STEP);
     var input =
-        new com.citi.put.checks.studio.guided.bridge.GuidedSourceReferenceValidator(C)
-            .resolve(session, new GuidedSourceInputResolver(C).sources(session, manifest), ref);
+        new com.citi.put.checks.studio.guided.bridge.GuidedSourceReferenceValidator(
+                C, com.citi.put.checks.studio.support.TestDomains.FIXTURES)
+            .resolve(
+                session,
+                new GuidedSourceInputResolver(
+                        C, com.citi.put.checks.studio.support.TestDomains.FIXTURES)
+                    .sources(session, manifest),
+                ref);
     assertThat(input.has("value")).isFalse();
     assertThat(input.path("secretId").asText()).isEqualTo("PASS");
     assertThat(input.path("sourceStepId").asText()).isEqualTo(STEP);
@@ -125,15 +127,10 @@ class GuidedSourceClassifierTest {
   }
 
   @Test
-  void knownCredentialShapesAndUnapprovedSourcePoliciesRefuseBeforePromptConstruction() {
+  void knownCredentialShapesAndStaleRevisionsRefuseBeforePromptConstruction() {
     assertThatThrownBy(
             () -> classifier().classify(current("password=FORBIDDEN_INLINE_CREDENTIAL"), scope()))
         .hasMessageNotContaining("FORBIDDEN_INLINE_CREDENTIAL");
-    assertThatThrownBy(
-            () ->
-                classifier()
-                    .classify(current("Enter London"), scope().put("applicationId", "other")))
-        .hasMessage("FORBIDDEN_SCOPE");
     assertThatThrownBy(
             () ->
                 classifier().classify(current("Enter London"), scope().put("sourceRevision", "2")))

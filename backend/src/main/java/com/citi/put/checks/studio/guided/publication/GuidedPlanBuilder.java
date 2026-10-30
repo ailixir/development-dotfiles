@@ -3,8 +3,12 @@ package com.citi.put.checks.studio.guided.publication;
 import static com.citi.put.checks.studio.guided.session.GuidedSessionException.require;
 
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
+import com.citi.put.checks.studio.guided.session.GuidedOperationIdentity;
+import com.citi.put.checks.studio.guided.session.GuidedPreparationCrossCheck;
+import com.citi.put.checks.studio.guided.translation.GuidedGates;
 import com.citi.put.checks.studio.guided.translation.GuidedProposalValidator;
-import com.citi.put.checks.studio.guided.translation.GuidedQualifiedLabel;
+import com.citi.put.checks.studio.guided.translation.GuidedRefusalDiagnostics;
+import com.citi.put.checks.studio.guided.translation.GuidedSourceInputResolver;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -108,6 +112,16 @@ public final class GuidedPlanBuilder {
     require(
         GuidedContracts.hash(plan).equals(text(raw, "translationHash")), "EVIDENCE_MISMATCH", 422);
     ObjectNode result = contracts.object().put("schemaVersion", 1);
+    boolean inherited = false;
+    for (JsonNode prepared : raw.path("preparations")) {
+      inherited |= prepared.path("proof").path("pressInheritance").isObject();
+    }
+    require(!inherited || evidence.sourceAuthority() != null, "EVIDENCE_MISMATCH", 422);
+    result.set(
+        "guardAuthorizations",
+        evidence.sourceAuthority() == null
+            ? contracts.object().putArray("empty")
+            : evidence.sourceAuthority().requireFor(raw));
     for (String key :
         List.of(
             "sessionId",
@@ -397,12 +411,43 @@ public final class GuidedPlanBuilder {
       ObjectNode effective =
           effectiveObservedObligation(
               session, plan, actionMaterialization, prepared, observations, obligation);
-      if (proposal.path("target").path("kind").asText().equals("passwordControl")) {
+      if (!proposal.path("target").path("kind").asText().equals("page")) {
+        // The same gates that admitted the action re-run on the facts the model was judged on.
         JsonNode observed = observations.get(text(prepared, "observationHash"));
         require(observed != null, "EVIDENCE_MISMATCH", 422);
         progress.set("observation", observed.path("observation"));
       }
-      proposals.action(session, progress, plan, effective, proposal, actionContext);
+      var sourceHistory = contracts.object().putArray("history");
+      for (JsonNode historical : raw.path("actions")) {
+        JsonNode associationRow =
+            unique(
+                raw.path("admissionAssociations"),
+                "admissionId",
+                historical.path("admission").path("admissionId").asText());
+        JsonNode preparedRow =
+            unique(
+                raw.path("preparations"),
+                "preparationId",
+                associationRow.path("preparationId").asText());
+        var row = sourceHistory.addObject();
+        row.set("ledger", historical);
+        row.set("proposal", preparedRow.path("proposal"));
+        row.set("proof", preparedRow.path("proof"));
+      }
+      GuidedPreparationCrossCheck.verifySourceHistory(
+          contracts, plan, proposal, proof, sourceHistory, raw.path("producers"));
+      if (proof.has("assertSourceBinding")) {
+        progress.set("assertSourceBinding", proof.path("assertSourceBinding"));
+      }
+      proposals.action(
+          session,
+          progress,
+          plan,
+          effective,
+          proposal,
+          actionContext,
+          authoredLiteral(manifest, plan, obligation),
+          GuidedRefusalDiagnostics.Capture.NONE);
       if (prepared.has("observedChoice")) {
         String questionObservation =
             prepared
@@ -413,17 +458,9 @@ public final class GuidedPlanBuilder {
                 .asText();
         questionObservations.add(questionObservation);
       }
-      ObjectNode operationIdentity = contracts.object();
-      operationIdentity.set("coordinate", proposal.path("coordinate"));
-      operationIdentity.set("origin", execution.path("origin"));
-      operationIdentity.set(
-          "locator",
-          proposal.path("target").has("locator")
-              ? proposal.path("target").path("locator")
-              : contracts.object().nullNode());
-      operationIdentity.set("operation", proposal.path("operation"));
       require(
-          GuidedContracts.hash(operationIdentity).equals(text(ledger, "operationHash")),
+          GuidedOperationIdentity.of(proposal, proof.path("target"))
+              .equals(text(ledger, "operationHash")),
           "OPERATION_MISMATCH",
           422);
       if (proposal.path("operation").path("kind").asText().equals("assert")) {
@@ -460,19 +497,17 @@ public final class GuidedPlanBuilder {
             "EVIDENCE_MISMATCH",
             422);
         if (!java.util.Set.of("page", "passwordControl").contains(target.path("kind").asText())) {
-          JsonNode node = unique(obs.path("nodes"), "nodeId", text(target, "nodeId"));
-          require(
-              list(node.path("locatorHints")).contains(target.path("locator")),
-              "EVIDENCE_MISMATCH",
-              422);
+          // The runner-reported target must agree with the fact the gates judged (D-15, replayed).
+          GuidedPreparationCrossCheck.verify(proposal, proof, obs);
           if (proposal.path("operation").path("kind").asText().equals("read")) {
+            // The recipe is the backend's completion from the page-level read grant: any other
+            // recipe, or an invented rule id, is not a recipe this backend ever admitted.
             JsonNode recipe = proposal.path("operation").path("recipe");
             require(
-                node.path("visible").asBoolean()
-                    && recipe.path("classification").equals(node.path("classification"))
-                    && recipe.path("policyRuleId").equals(node.path("policyRuleId"))
-                    && (!recipe.path("kind").asText().equals("controlValue")
-                        || recipe.path("controlType").equals(node.path("controlType"))),
+                recipe.path("kind").asText().equals("visibleText")
+                    && recipe.path("classification").asText().equals("permittedBusinessData")
+                    && obs.path("readRuleId").isTextual()
+                    && recipe.path("policyRuleId").equals(obs.path("readRuleId")),
                 "REFERENCE_MISMATCH",
                 422);
           }
@@ -649,7 +684,7 @@ public final class GuidedPlanBuilder {
       JsonNode obligation) {
     ObjectNode effective = PublicationContracts.copy(obligation);
     if (!prepared.has("observedChoice")) {
-      return qualifiedEffective(effective, prepared, observations);
+      return effective;
     }
     JsonNode witness = prepared.path("observedChoice");
     PublicationContracts.bounded(witness, 262144);
@@ -791,15 +826,7 @@ public final class GuidedPlanBuilder {
             && oldObservation.path("scopeHash").equals(session.path("scopeHash"))
             && oldObservation.path("documentId").equals(question.path("documentId"))
             && oldObservation.path("generation").equals(question.path("generation"))
-            && oldObservation.path("origin").equals(evidence.path("origin"))
-            && list(session.path("scope").path("approvedOrigins"))
-                .contains(oldObservation.path("origin"))
-            && !oldObservation.path("coverage").path("truncated").asBoolean()
-            && !oldObservation
-                .path("coverage")
-                .path("reason")
-                .asText()
-                .equals("unsupportedSurface"),
+            && oldObservation.path("origin").equals(evidence.path("origin")),
         "EVIDENCE_MISMATCH",
         422);
     int count = modelQuestion.path("choices").size();
@@ -823,87 +850,56 @@ public final class GuidedPlanBuilder {
           provider.path("meaning").equals(meaning)
               && meaning.path("obligationId").equals(obligation.path("obligationId"))
               && mapping.path("choiceId").equals(choice.path("choiceId"))
-              && meaning.path("nodeId").equals(choice.path("nodeId"))
               && meaning.path("bindingId").equals(choice.path("bindingId"))
               && serverIds.add(choice.path("choiceId").asText())
               && providerIds.add(provider.path("choiceId").asText())
               && meaningHashes.add(GuidedContracts.hash(meaning)),
           "EVIDENCE_MISMATCH",
           422);
-      JsonNode oldNode =
-          unique(oldObservation.path("nodes"), "nodeId", meaning.path("nodeId").asText());
+      // The stored semantic selection is the fact of the question-time observation it names.
       require(
-          oldNode.path("visible").asBoolean()
-              && list(oldNode.path("locatorHints")).contains(meaning.path("locator")),
+          mapping.path("selection").isObject()
+              && oldObservation.path("facts").path(meaning.path("ref").asText()).isObject()
+              && GuidedGates.selectionOf(
+                      oldObservation.path("facts"),
+                      oldObservation.path("facts").path(meaning.path("ref").asText()))
+                  .equals(GuidedGates.selectionOf(mapping.path("selection"))),
           "EVIDENCE_MISMATCH",
           422);
       if (choice.path("choiceId").equals(witness.path("acceptedChoiceId"))) {
         require(
-            answer.path("nodeId").equals(choice.path("nodeId"))
-                && answer.path("bindingId").equals(choice.path("bindingId")),
-            "EVIDENCE_MISMATCH",
-            422);
-        selected = meaning;
+            answer.path("bindingId").equals(choice.path("bindingId")), "EVIDENCE_MISMATCH", 422);
+        selected = mapping;
       }
     }
-    require(
-        selected != null
-            && selected.path("locator").equals(proposal.path("target").path("locator")),
-        "EVIDENCE_MISMATCH",
-        422);
-    JsonNode locator = selected.path("locator");
+    require(selected != null, "EVIDENCE_MISMATCH", 422);
+    // Re-established by a count, never by position: exactly one equal fact in the question-time
+    // observation, and exactly one in the fresh observation, which is the element acted on.
+    GuidedGates.Selection selection = GuidedGates.selectionOf(selected.path("selection"));
     JsonNode freshEntry = observations.get(prepared.path("observationHash").asText());
     require(
         freshEntry != null
-            && locatorCardinality(oldObservation, locator) == 1
-            && locatorCardinality(freshEntry.path("observation"), locator) == 1,
+            && GuidedGates.matchingRefs(oldObservation.path("facts"), selection).size() == 1
+            && GuidedGates.matchingRefs(freshEntry.path("observation").path("facts"), selection)
+                .equals(List.of(proposal.path("target").path("ref").asText())),
         "EVIDENCE_MISMATCH",
         422);
-    effective.put(
-        "targetIntent",
-        locator.path(locator.path("kind").asText().equals("role") ? "name" : "value").asText());
-    effective.set("selectedLocator", locator.deepCopy());
+    effective.set("selection", selected.path("selection").deepCopy());
     return effective;
   }
 
   /**
-   * Round 057: with no human choice, a qualified obligation (non-null scopeIntent) is resolved by
-   * the same rule admission used: the proposed node is the only node of that name in that region,
-   * and its locator is one of its hints and unique in the evidence observation. The effective
-   * obligation then has the accepted-choice shape, so the unchanged target-intent check applies.
+   * The authored literal an assert containsText expects, for the G2 text gate: the quoted source
+   * span of the obligation's reference. Null when the obligation has no source reference or the
+   * reference is a configuration or secret value.
    */
-  private ObjectNode qualifiedEffective(
-      ObjectNode effective, JsonNode prepared, Map<String, JsonNode> observations) {
-    if (!effective.path("scopeIntent").isTextual()) {
-      return effective;
+  private static String authoredLiteral(JsonNode manifest, JsonNode plan, JsonNode obligation) {
+    if (!obligation.path("referenceIndex").isIntegralNumber()) {
+      return null;
     }
-    JsonNode proposal = prepared.path("proposal"), target = proposal.path("target");
-    JsonNode entry = observations.get(prepared.path("observationHash").asText());
-    require(entry != null, "EVIDENCE_MISMATCH", 422);
-    JsonNode observation = entry.path("observation");
-    require(
-        target.path("documentId").equals(observation.path("documentId"))
-            && target.path("generation").equals(observation.path("generation")),
-        "EVIDENCE_MISMATCH",
-        422);
-    JsonNode locator =
-        GuidedQualifiedLabel.qualifiedLocator(
-            observation,
-            observation.path("documentId"),
-            observation.path("generation"),
-            effective,
-            target,
-            "OPERATION_MISMATCH",
-            422);
-    effective.put("targetIntent", GuidedQualifiedLabel.locatorLabel(locator));
-    effective.set("selectedLocator", locator.deepCopy());
-    return effective;
-  }
-
-  private static long locatorCardinality(JsonNode observation, JsonNode locator) {
-    return list(observation.path("nodes")).stream()
-        .filter(node -> list(node.path("locatorHints")).contains(locator))
-        .count();
+    JsonNode reference =
+        plan.path("sourceReferences").get(obligation.path("referenceIndex").asInt());
+    return reference == null ? null : GuidedSourceInputResolver.literalOf(manifest, reference);
   }
 
   private ObjectNode bootstrap(JsonNode original, JsonNode session) {
@@ -1177,11 +1173,8 @@ public final class GuidedPlanBuilder {
       ObjectNode action = actions.addObject();
       action.set("coordinate", ledger.path("coordinate"));
       action.set("origin", proposal.path("executionEvidence").path("origin"));
-      action.set(
-          "locator",
-          proposal.path("target").has("locator")
-              ? proposal.path("target").path("locator")
-              : contracts.object().nullNode());
+      // ADR-SC-007: the learned plan carries what the runner reported, never a derived locator.
+      action.set("target", proofTarget(basis, fact));
       action.set("operation", proposal.path("operation"));
       action.set("admissionId", ledger.path("admission").path("admissionId"));
       action.set("operationHash", ledger.path("operationHash"));
@@ -1190,6 +1183,15 @@ public final class GuidedPlanBuilder {
     new GuidedSnapshotDeriver(contracts).apply(basis, plan);
     contracts.validate("v3/learned-plan", plan);
     return plan;
+  }
+
+  /** The ResolvedTarget the runner reported when it prepared this action, or JSON null. */
+  public static JsonNode proofTarget(JsonNode basis, JsonNode action) {
+    JsonNode target =
+        unique(basis.path("preparations"), "preparationId", text(action, "preparationId"))
+            .path("proof")
+            .path("target");
+    return target.isObject() ? target : com.fasterxml.jackson.databind.node.NullNode.instance;
   }
 
   public static JsonNode proposal(JsonNode basis, JsonNode action) {

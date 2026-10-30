@@ -1,0 +1,400 @@
+{
+ "description": "WI-1 measurement sets (ADR-SC-007). Task texts are copied from studio-runner/evaluation/grounding/corpus/tasks.jsonl; alpha steps from the 2026-10-26 alpha E2E suite.",
+ "corpusTasksSha256": "9fe9b0ff9867a3f67031535796ae36f158897d947d632c3c37beedc677d9e938",
+ "sets": {
+  "alpha": [
+   {
+    "id": "wikipedia",
+    "reps": 10,
+    "steps": [
+     "Go to \"https://en.wikipedia.org/wiki/Python_(programming_language)\"",
+     "Copy the \"Designed by\" value from the infobox",
+     "Type the copied value in the \"Search Wikipedia\" field",
+     "Press Enter",
+     "Check that the page shows the heading \"Guido van Rossum\"",
+     "Check that the main heading contains the copied value"
+    ],
+    "recordedInputTokens": [
+     6786,
+     6783
+    ]
+   },
+   {
+    "id": "hackernews",
+    "reps": 10,
+    "steps": [
+     "Go to \"https://news.ycombinator.com/\"",
+     "Click the \"show\" link",
+     "Check that the page title is \"Show | Hacker News\"",
+     "Copy the title of the first story",
+     "Click the comments link of the first story",
+     "Check that the story title on the page contains the copied title"
+    ],
+    "recordedInputTokens": [
+     6548
+    ]
+   },
+   {
+    "id": "pydocs-reuse",
+    "reps": 10,
+    "steps": [
+     "Go to \"https://docs.python.org/3/\"",
+     "Copy the welcome text at the top of the page",
+     "Type the copied text in the \"Quick search\" field"
+    ],
+    "recordedInputTokens": [
+     6169,
+     6177
+    ]
+   },
+   {
+    "id": "github",
+    "reps": 10,
+    "steps": [
+     "Go to \"https://github.com/microsoft/playwright\"",
+     "Copy the repository description from the About section",
+     "Click the \"Search or jump to\" button",
+     "Type the copied description in the \"Search or jump to\" field",
+     "Press Enter",
+     "Check that the page shows the link \"microsoft/playwright\""
+    ],
+    "recordedInputTokens": [
+     6755,
+     6761
+    ]
+   }
+  ],
+  "radio": [
+   {
+    "id": "arxiv-sel-05",
+    "heldOut": true,
+    "steps": [
+     "Choose \"Exclude cross-listed papers\""
+    ],
+    "targetStep": 0,
+    "expectKind": "check",
+    "reps": 3
+   },
+   {
+    "id": "ol-sel-01",
+    "heldOut": true,
+    "steps": [
+     "Choose the \"Grid\" view"
+    ],
+    "targetStep": 0,
+    "expectKind": "check",
+    "reps": 3
+   },
+   {
+    "id": "ol-sel-02",
+    "heldOut": true,
+    "steps": [
+     "Choose the \"List\" view"
+    ],
+    "targetStep": 0,
+    "expectKind": "check",
+    "reps": 3
+   },
+   {
+    "id": "wiki-sel-03",
+    "heldOut": false,
+    "steps": [
+     "Choose \"Dark\" under \"Color\""
+    ],
+    "targetStep": 0,
+    "expectKind": "check",
+    "reps": 3
+   },
+   {
+    "id": "wiki-sel-04",
+    "heldOut": false,
+    "steps": [
+     "Choose \"Small\" under \"Text\""
+    ],
+    "targetStep": 0,
+    "expectKind": "check",
+    "reps": 3
+   },
+   {
+    "id": "deb-sel-02",
+    "heldOut": true,
+    "steps": [
+     "Choose \"Descriptions\" next to \"Search on:\""
+    ],
+    "targetStep": 0,
+    "expectKind": "check",
+    "reps": 3
+   }
+  ],
+  "radioInfo": [
+   {
+    "id": "arxiv-dup-04",
+    "heldOut": true,
+    "steps": [
+     "Under \"Date\", choose \"Announcement date\""
+    ],
+    "targetStep": 0,
+    "expectKind": "check",
+    "reps": 3
+   }
+  ],
+  "selectControls": [
+   {
+    "id": "arxiv-sel-01",
+    "heldOut": true,
+    "steps": [
+     "Select \"Author(s)\" in the \"Field to search\" menu"
+    ],
+    "targetStep": 0,
+    "expectKind": "selectOption",
+    "reps": 3
+   },
+   {
+    "id": "arxiv-chain-01",
+    "heldOut": true,
+    "steps": [
+     "Type \"graph neural networks\" in the \"Search term...\" box",
+     "Select \"Title\" in the \"Field to search\" menu",
+     "Click the \"Search\" button right under the search term box"
+    ],
+    "targetStep": 1,
+    "expectKind": "selectOption",
+    "reps": 3
+   },
+   {
+    "id": "fx-c06",
+    "heldOut": false,
+    "steps": [
+     "Select GBP from Currency."
+    ],
+    "targetStep": 0,
+    "expectKind": "selectOption",
+    "reps": 3
+   },
+   {
+    "id": "fx-q3",
+    "heldOut": false,
+    "steps": [
+     "Select London from City."
+    ],
+    "targetStep": 0,
+    "expectKind": "selectOption",
+    "reps": 3
+   },
+   {
+    "id": "govuk-chain-04",
+    "heldOut": false,
+    "steps": [
+     "Click the \"Filter and sort\" button",
+     "Click \"Filter by Topic\" to open it",
+     "Select \"Money\" in the \"Topic\" menu",
+     "Click the \"Apply\" button"
+    ],
+    "targetStep": 2,
+    "expectKind": "selectOption",
+    "reps": 3
+   },
+   {
+    "id": "neg-pydocs-01",
+    "heldOut": false,
+    "steps": [
+     "Select \"3.99\" in the Python version menu at the top"
+    ],
+    "targetStep": 0,
+    "expectKind": "selectOption",
+    "reps": 3
+   },
+   {
+    "id": "pydocs-sel-01",
+    "heldOut": false,
+    "steps": [
+     "Select \"3.13\" in the Python version menu at the top"
+    ],
+    "targetStep": 0,
+    "expectKind": "selectOption",
+    "reps": 3
+   },
+   {
+    "id": "pydocs-sel-02",
+    "heldOut": false,
+    "steps": [
+     "Select \"3.12\" in the Python version menu at the bottom of the page"
+    ],
+    "targetStep": 0,
+    "expectKind": "selectOption",
+    "reps": 3
+   },
+   {
+    "id": "rfc-sel-05",
+    "heldOut": true,
+    "steps": [
+     "Select \"Newest first\" in the \"Sort by\" menu"
+    ],
+    "targetStep": 0,
+    "expectKind": "selectOption",
+    "reps": 3
+   },
+   {
+    "id": "rfc-sel-06",
+    "heldOut": true,
+    "steps": [
+     "Select \"50 per page\" in the \"Results per page\" menu"
+    ],
+    "targetStep": 0,
+    "expectKind": "selectOption",
+    "reps": 3
+   },
+   {
+    "id": "wx-vis-02",
+    "heldOut": true,
+    "steps": [
+     "Select \"Satellite\" in the dropdown under the map"
+    ],
+    "targetStep": 0,
+    "expectKind": "selectOption",
+    "reps": 3
+   },
+   {
+    "id": "wx-sel-02",
+    "heldOut": true,
+    "steps": [
+     "Select \"Streets\" in the map style menu"
+    ],
+    "targetStep": 0,
+    "expectKind": "selectOption",
+    "reps": 3
+   },
+   {
+    "id": "wiki-vis-02",
+    "heldOut": false,
+    "steps": [
+     "Select \"50 items\" in the dropdown above the list of results"
+    ],
+    "targetStep": 0,
+    "expectKind": "selectOption",
+    "reps": 3
+   },
+   {
+    "id": "wiki-vis-03",
+    "heldOut": false,
+    "steps": [
+     "Select \"100 items\" in the dropdown below the list of results"
+    ],
+    "targetStep": 0,
+    "expectKind": "selectOption",
+    "reps": 3
+   },
+   {
+    "id": "deb-dup-04",
+    "heldOut": true,
+    "steps": [
+     "Select \"testing\" in the \"Distribution:\" menu under the \"Search the contents of packages\" heading"
+    ],
+    "targetStep": 0,
+    "expectKind": "selectOption",
+    "reps": 3
+   },
+   {
+    "id": "deb-sel-01",
+    "heldOut": true,
+    "steps": [
+     "Select \"64-bit ARM (AArch64)\" in the \"Architecture:\" menu"
+    ],
+    "targetStep": 0,
+    "expectKind": "selectOption",
+    "reps": 3
+   },
+   {
+    "id": "alpha-pythondocs",
+    "heldOut": false,
+    "steps": [
+     "Go to \"https://docs.python.org/3/\"",
+     "Select \"3.13\" in the \"Python version\" dropdown",
+     "Type \"asyncio\" in the \"Quick search\" field",
+     "Click the \"Go\" button",
+     "Check that the page shows the heading \"Search Results\"",
+     "Check that the page shows the link \"asyncio — Asynchronous I/O\""
+    ],
+    "targetStep": 1,
+    "expectKind": "selectOption",
+    "reps": 3
+   },
+   {
+    "id": "synthetic-choose-from-menu",
+    "heldOut": false,
+    "steps": [
+     "Go to \"https://shop.example.test/order\"",
+     "Choose \"Express\" from the \"Delivery speed\" menu"
+    ],
+    "targetStep": 1,
+    "expectKind": "selectOption",
+    "reps": 3
+   },
+   {
+    "id": "synthetic-choose-from-field",
+    "heldOut": false,
+    "steps": [
+     "Go to \"https://shop.example.test/order\"",
+     "Choose \"Spanish\" from the \"Language\" list"
+    ],
+    "targetStep": 1,
+    "expectKind": "selectOption",
+    "reps": 3
+   }
+  ],
+  "checkControls": [
+   {
+    "id": "govuk-sel-04",
+    "heldOut": false,
+    "steps": [
+     "Tick the \"Services\" box under Type"
+    ],
+    "targetStep": 0,
+    "expectKind": "check",
+    "reps": 3
+   },
+   {
+    "id": "govuk-sel-05",
+    "heldOut": false,
+    "steps": [
+     "Tick \"Research and statistics\" under Type"
+    ],
+    "targetStep": 0,
+    "expectKind": "check",
+    "reps": 3
+   },
+   {
+    "id": "deb-sel-03",
+    "heldOut": true,
+    "steps": [
+     "Tick the \"Only show exact matches:\" box"
+    ],
+    "targetStep": 0,
+    "expectKind": "check",
+    "reps": 3
+   }
+  ],
+  "heldoutChains": [
+   {
+    "id": "deb-chain-01",
+    "heldOut": true,
+    "steps": [
+     "Copy the \"Code Name\" of Debian 13 from the \"Index of releases\" table",
+     "Type the copied code name in the small box left of the \"Search\" button at the top right of the page",
+     "Click the \"Search\" button at the top right of the page"
+    ],
+    "reps": 3
+   },
+   {
+    "id": "dt-chain-02",
+    "heldOut": true,
+    "steps": [
+     "Copy the text of the page heading \"Document Search\"",
+     "Type the copied text in the \"Document name/title/RFC number\" box",
+     "Click the \"Search\" button next to that box"
+    ],
+    "reps": 3
+   }
+  ]
+ }
+}

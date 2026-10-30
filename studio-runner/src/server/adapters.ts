@@ -1,4 +1,4 @@
-import type { AdmissionReceipt, ObservedJob, TrustedPolicy } from '../executor/observedOperations.js';
+import type { AdmissionReceipt, ObservedJob } from '../executor/observedOperations.js';
 /**
  * The two seams `POST /v2/runs` needs beyond the run package (AC-6, AC-12, AC-21).
  *
@@ -156,7 +156,7 @@ export interface ChildDiagnosticsSink {
 export interface LaunchOptions {
   readonly signal?: AbortSignal;
   /** The admitted observed job this launch is for; the only family a session may start. */
-  readonly observed: { readonly job: ObservedJob; readonly admission: AdmissionReceipt; readonly policy: TrustedPolicy };
+  readonly observed: { readonly job: ObservedJob; readonly admission: AdmissionReceipt };
   readonly browser: string;
   readonly viewport: { readonly width: number; readonly height: number };
   /**

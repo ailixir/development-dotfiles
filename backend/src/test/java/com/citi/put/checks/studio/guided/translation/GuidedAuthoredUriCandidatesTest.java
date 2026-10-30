@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.citi.put.checks.studio.guided.bridge.GuidedSourceReferenceValidator;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
+import com.citi.put.checks.studio.navigation.AllowedDomains;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -16,7 +17,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class GuidedAuthoredUriCandidatesTest {
   static final GuidedContracts C = new GuidedContracts();
-  private final GuidedAuthoredUriCandidates hints = new GuidedAuthoredUriCandidates(C);
+  static final AllowedDomains DOMAINS = new AllowedDomains(List.of("example.test", "localhost"));
+  private final GuidedAuthoredUriCandidates hints = new GuidedAuthoredUriCandidates(C, DOMAINS);
 
   record Fixture(ObjectNode session, ObjectNode manifest) {}
 
@@ -25,7 +27,6 @@ class GuidedAuthoredUriCandidatesTest {
         C.object().put("sessionId", "uri-hint-session").put("scopeHash", "a".repeat(64));
     var scope =
         session.putObject("scope").put("sourceRevision", "1").put("configurationRevision", "1");
-    scope.putArray("approvedOrigins").add("https://example.test").add("http://127.0.0.1:18182");
     ObjectNode manifest = C.object().put("sourceRevision", "1").put("configurationRevision", "1");
     manifest.putArray("configurationReferences");
     manifest.putObject("configurationValues");
@@ -48,7 +49,7 @@ class GuidedAuthoredUriCandidatesTest {
       ObjectNode progress,
       JsonNode selections) {
     state.set("manifest", fixture.manifest());
-    return new GuidedPromptAssembler(C)
+    return new GuidedPromptAssembler(C, DOMAINS)
         .assemble(
             "uri-hint-request",
             1,
@@ -68,24 +69,60 @@ class GuidedAuthoredUriCandidatesTest {
   }
 
   private String resolve(Fixture fixture, JsonNode reference) {
-    return new GuidedSourceReferenceValidator(C)
+    return new GuidedSourceReferenceValidator(C, DOMAINS)
         .resolve(
             fixture.session(),
-            new GuidedSourceInputResolver(C).sources(fixture.session(), fixture.manifest()),
+            new GuidedSourceInputResolver(C, DOMAINS)
+                .sources(fixture.session(), fixture.manifest()),
             reference)
         .path("value")
         .asText();
   }
 
   @Test
+  void quotedLiteralsAreSuggestedWithExactOffsetsPerLiteralSlot() {
+    String assertion = "Check that the page shows the text \"Your username is invalid!\"";
+    Fixture fixture =
+        fixture(
+            "Go to \"https://example.test/login\"",
+            "Type \"incorrectUser\" in the \"Username\" field",
+            "Click the \"Submit\" button",
+            assertion);
+    var all = candidates(fixture);
+    var literals = new java.util.ArrayList<String>();
+    for (var candidate : all) {
+      if (candidate.path("kind").asText().equals("nonsecretText")) {
+        String value = resolve(fixture, candidate);
+        literals.add(candidate.path("intendedSlot").asText() + "=" + value);
+        if (value.equals("Your username is invalid!")) {
+          // The E2E-016 miscount was 33-59 and 35-60; the suggestion is the exact [36,61).
+          assertThat(candidate.path("startUtf16").asInt()).isEqualTo(36);
+          assertThat(candidate.path("endUtf16").asInt()).isEqualTo(61);
+        }
+      }
+    }
+    assertThat(literals)
+        .contains(
+            "fill.value=incorrectUser",
+            "assert.expected=incorrectUser",
+            "selectOption.value=Username",
+            "fill.value=Submit",
+            "assert.expected=Your username is invalid!")
+        .noneMatch(literal -> literal.contains("https://"));
+    // 1 destination + 3 slots x 4 quoted non-URL literals.
+    assertThat(all).hasSize(13);
+    assertThat(all.toString().length()).isLessThan(4000);
+  }
+
+  @Test
   void completeLastCharacterIsSuggestedWithoutChangingPreviouslyValidShorterSpans() {
-    Fixture fixture = fixture("Open http://127.0.0.1:18182/fixture");
+    Fixture fixture = fixture("Open http://localhost:18182/fixture");
     var candidate = candidates(fixture).get(0);
     assertThat(candidate.path("startUtf16").asInt()).isEqualTo(5);
     assertThat(candidate.path("endUtf16").asInt()).isEqualTo(35);
-    assertThat(resolve(fixture, candidate)).isEqualTo("http://127.0.0.1:18182/fixture");
+    assertThat(resolve(fixture, candidate)).isEqualTo("http://localhost:18182/fixture");
     ObjectNode shorter = ((ObjectNode) candidate).deepCopy().put("endUtf16", 34);
-    assertThat(resolve(fixture, shorter)).isEqualTo("http://127.0.0.1:18182/fixtur");
+    assertThat(resolve(fixture, shorter)).isEqualTo("http://localhost:18182/fixtur");
     assertThat(shorter.path("endUtf16").asInt()).isEqualTo(34);
     assertThat(candidate.size()).isEqualTo(7);
     assertThat(candidate.toString()).doesNotContain("inputId", "value", "obligationId");
@@ -193,7 +230,7 @@ class GuidedAuthoredUriCandidatesTest {
         "https://denied.test/path",
         "https://user:synthetic@example.test/path",
         "ftp://example.test/path",
-        "https://example.test/%invalid",
+        "https://example.test:99999/path",
         "https://[invalid]/path",
         "https://example.test/"
       })
@@ -284,7 +321,7 @@ class GuidedAuthoredUriCandidatesTest {
     ObjectNode state = C.object();
     state.putObject("plan").set("sourceReferences", reversed);
     ObjectNode context =
-        new GuidedPromptAssembler(C)
+        new GuidedPromptAssembler(C, DOMAINS)
             .buildPositiveContext(
                 GuidedModelRequest.Kind.SOURCE_PLAN,
                 fixture.session(),
@@ -367,6 +404,51 @@ class GuidedAuthoredUriCandidatesTest {
             .document();
     assertThat(context.path("clarificationSelections")).isEqualTo(selected);
     assertThat(context.path("sourceReferences")).isEmpty();
+  }
+
+  @Test
+  void aReLearnPlanGetsExactLiteralOffsetsForTheLearnableStepsOnly() {
+    Fixture fixture =
+        fixture(
+            "Go to \"https://example.test/login\"",
+            "Type \"student\" in the \"Username\" field",
+            "Check that the page shows the text \"Test login\"");
+    String reused = fixture.session().path("sourceSteps").get(0).path("stepId").asText();
+    String edited = fixture.session().path("sourceSteps").get(1).path("stepId").asText();
+    String last = fixture.session().path("sourceSteps").get(2).path("stepId").asText();
+    ObjectNode state = C.object();
+    var plan = state.putObject("plan");
+    plan.putArray("sourceReferences");
+    plan.putArray("obligations");
+    plan.putArray("needs");
+    ObjectNode progress = C.object();
+    var window =
+        progress
+            .putObject("learningWindow")
+            .put("firstLearnStepId", edited)
+            .put("nextSemanticOrdinal", 0);
+    window.putArray("learnableStepIds").add(edited).add(last);
+    window.putArray("completedCoordinates");
+    window.putArray("availableBindingIds");
+    var references =
+        request(
+                fixture,
+                GuidedModelRequest.Kind.SOURCE_PLAN,
+                state,
+                progress,
+                C.object().arrayNode())
+            .projection()
+            .document()
+            .path("sourceReferences");
+    assertThat(references).isNotEmpty();
+    for (var reference : references) {
+      assertThat(reference.path("stepId").asText()).isIn(edited, last).isNotEqualTo(reused);
+      String value = resolve(fixture, reference);
+      int start = reference.path("startUtf16").asInt();
+      int end = reference.path("endUtf16").asInt();
+      assertThat(value).hasSize(end - start);
+    }
+    assertThat(references.toString()).contains("\"startUtf16\":36,\"endUtf16\":46");
   }
 
   @ParameterizedTest

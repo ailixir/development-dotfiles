@@ -164,7 +164,7 @@ backend:
     spring.datasource.hikari.maximum-pool-size: "20"
     # The API advertises Studio only when its source is enabled. Deployed profiles couple this
     # value to the Vertex provider in the chart so the application readiness guard cannot be
-    # bypassed by leaving UI_TEST at its application.yml default (`false`).
+    # bypassed by an override that turns the source off (application.yml defaults it to `true`).
     checks.sources.UI_TEST: "true"
     checks.scheduling.min-interval-seconds: "60"
 
@@ -379,9 +379,10 @@ studioRunner:
     tag: ""  # defaults to Chart.appVersion
     pullPolicy: IfNotPresent
 
-  # One pod, one browser (§5.2: POOL_SIZE starts at 1; measure before increasing). Scale PODS, not
-  # the pool. No CPU-based HPA, ever: the runner refuses work with 429/503 and stays ready, so
-  # CPU-based scaling would fight the capacity gate rather than help it.
+  # Two browsers per pod (`runnerEnv.STUDIO_RUNNER_POOL_SIZE`, STUDIO-FLEX-001 item 4); scale PODS for
+  # more. The resource sizes below are unmeasured starting values. No CPU-based HPA, ever: the runner
+  # refuses work with 429/503 and stays ready, so CPU-based scaling would fight the capacity gate
+  # rather than help it.
   #
   # Studio v1 decision D3: a static two pods for the pilot. Ignored while `autoscaling.enabled` is
   # true, when the ScaledObject owns the replica count and the Deployment renders none.
@@ -453,13 +454,14 @@ studioRunner:
     # The runner calls no Kubernetes API. A mounted token is a credential it has no use for.
     automountServiceAccountToken: false
 
+  # Two replay browsers per pod (pool 2). Unmeasured starting values (STUDIO-FLEX-001 item 4).
   resources:
     requests:
-      cpu: 500m
-      memory: 1Gi
-    limits:
-      cpu: "2"
+      cpu: "1"
       memory: 2Gi
+    limits:
+      cpu: "4"
+      memory: 4Gi
 
   # **One key, and never `Unconfined`** (ADR-001 O-4, SPK-04 question 3).
   #
@@ -502,11 +504,11 @@ studioRunner:
     mountPath: /scratch
     # Rendered as `{mountPath}/studio-runner`; see `put-checks.studioRunner.scratchDir`.
     directory: studio-runner
-    sizeLimit: 4Gi
+    sizeLimit: 8Gi
 
   # Chromium needs a real /dev/shm; the container default of 64Mi crashes tabs under load.
   devShm:
-    sizeLimit: 1Gi
+    sizeLimit: 2Gi
 
   drain:
     # preStop flips readiness before the drain begins, so the endpoint is removed while admitted
@@ -610,7 +612,9 @@ studioRunner:
   #
   # **Off in every shipped values file.** Enabling it is a deliberate per-environment decision, and
   # `put-checks.studioRunner.guidedGuard` fails the render unless the pod is the one-replica shape
-  # A2.6 allows. Guided mode does not exist without these prerequisites:
+  # A2.6 allows (more than one concurrent learning session on that one pod is `capacity` below;
+  # several learning pods would need per-pod routing and are deferred). Guided mode does not exist
+  # without these prerequisites:
   #   - a single replica and no autoscaler (A2.6): the worker holds sessions in memory and refuses
   #     calls it does not own, so a second pod would only produce fail-closed refusals;
   #   - `shareProcessNamespace: true` (PID-1 b): with it the pause container is PID 1 and node is
@@ -626,6 +630,12 @@ studioRunner:
     # every session to that one id and the runner refuses any other (IDENTITY_MISMATCH). The default
     # is the backend's own (`GuidedTranslationProperties`).
     workerId: worker-1
+    # **One key, two consumers (STUDIO-FLEX-001 item 5).** How many learning sessions the one guided
+    # pod runs at once, 1..8. Rendered as the runner's `STUDIO_RUNNER_GUIDED_CAPACITY` and as the
+    # backend's deployment-wide cap `studio.guided-authoring.max-concurrent-sessions` (the
+    # (capacity+1)th start gets 429 LEARNING_CAPACITY_EXHAUSTED; the runner's own CAPACITY refusal is
+    # the backstop). Both are chart-managed: setting either elsewhere fails the render.
+    capacity: 1
     # The pinned RSA public key and the issuer/subject of the external guided-token issuer.
     # **Rotation inputs for the OBS-010 runbook** (GuidedInternalSecurity: "rotate by draining
     # sessions, updating the configured key/issuer together and restarting"). Each is single-source:
@@ -685,26 +695,26 @@ studioRunner:
     # Basis: the recorder has no byte bound of its own (its bounds are attempts and windows). The
     # nominal video bound is `maxSessionSeconds` (600 s default, GuidedSessionProperties) times
     # Playwright's `-b:v 1M` (about 75 MB); the Chromium profile and disk cache are unmeasured.
-    # 1Gi is a starting value, not a measurement (GA plan G-4).
+    # 3Gi is a starting value, not a measurement (GA plan G-4).
     tmp:
-      sizeLimit: 1Gi
+      sizeLimit: 3Gi
     # Liveness tolerance for a guided-enabled pod. UNMEASURED [I]: the probe's cost on a pod with a
     # busy browser has not been measured in a cluster (owner @devops/@qa, G-4). Larger than the
     # default 3 because a liveness restart ends the live session.
     livenessFailureThreshold: 6
-    # Pod resources for a guided-enabled pod: ONE replay browser plus ONE guided browser (A2.6 a).
-    # They replace `studioRunner.resources` and `studioRunner.devShm` when guided is on. Starting
-    # values with an explicit basis: the single-browser values doubled, because the pod can run
-    # one replay browser and one guided browser at once. The measurement is owed (GA plan G-4).
+    # Pod resources for a guided-enabled pod: the replay pool PLUS `capacity` guided browsers
+    # (A2.6 a, STUDIO-FLEX-001 item 5). They replace `studioRunner.resources` and
+    # `studioRunner.devShm` when guided is on. Unmeasured starting values, sized for pool 2 and
+    # capacity 3 (GA plan G-4).
     resources:
       requests:
-        cpu: "1"
-        memory: 2Gi
-      limits:
-        cpu: "3"
+        cpu: "2"
         memory: 4Gi
+      limits:
+        cpu: "6"
+        memory: 10Gi
     devShm:
-      sizeLimit: 2Gi
+      sizeLimit: 4Gi
 
   objectStore:
     # **ED-03 / SPK-03.** A *different* Kubernetes Secret from the one the API and worker read
@@ -730,11 +740,13 @@ studioRunner:
     # Default-deny egress plus exactly the three destination classes the runner declares in its
     # own PERMITTED_DESTINATIONS: callback-api, object-store, target-page. A fourth class here
     # without a fourth there is a divergence the assertion catches.
+    #
+    # `target-page` is OPEN (STUDIO-FLEX-001): any address and port. The user decided that firewalls
+    # own reachability, and the runner no longer filters addresses itself; the only navigation
+    # control is the domain whitelist (`studioNavigation.allowedDomains`). Accepted risk: the browser
+    # can reach internal endpoints, including cloud metadata.
     dnsPort: 53
     objectStorePort: 443
-    # **ED-04 / SPK-05.** The approved target destinations. Empty until the egress spike rules:
-    # an empty list is default-deny for `target-page`, which is the correct failing direction.
-    approvedTargets: []
 
   # ---------------------------------------------------------------------------
   # The enumerated environment. Every key here must be one of the runner's own ACCEPTED_KEYS;
@@ -743,8 +755,12 @@ studioRunner:
   # Starting values under §8.5, tuned against staging measurements — not commitments.
   # ---------------------------------------------------------------------------
   runnerEnv:
-    STUDIO_RUNNER_POOL_SIZE: "1"
-    STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS: "120000"
+    # Two browsers per pod (STUDIO-FLEX-001 item 4).
+    STUDIO_RUNNER_POOL_SIZE: "2"
+    # **One fact, three consumers:** the runner's run deadline, the termination grace period (derived,
+    # `put-checks.studioRunner.derivedGraceSeconds`) and the backend's `studio.execution.total-runtime`
+    # (rendered from this key into the mounted application.yaml). Raising it moves all three.
+    STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS: "300000"
     # = the authoring maximum (timeoutSeconds ≤ 120); the runner refuses a lower value at startup (aria-g-ruling01)
     STUDIO_RUNNER_MAX_STEP_TIMEOUT_MS: "120000"
     # The ordered stop's grace: context close + webm finalization before the tree is killed. Raised
@@ -758,7 +774,7 @@ studioRunner:
     STUDIO_RUNNER_BROWSER_STOP_TIMEOUT_MS: "15000"
     STUDIO_RUNNER_TERMINAL_DELIVERY_WINDOW_MS: "30000"
     STUDIO_RUNNER_OBJECT_STORE_WINDOW_MS: "15000"
-    STUDIO_RUNNER_DRAIN_TIMEOUT_MS: "150000"
+    STUDIO_RUNNER_DRAIN_TIMEOUT_MS: "360000"
     STUDIO_RUNNER_RECORDING_WIDTH: "1280"
     STUDIO_RUNNER_RECORDING_HEIGHT: "720"
     # Uncalibrated (ADR-002 §26.3). NOT a measurement: a non-zero value comes only from SPK-06
@@ -775,27 +791,27 @@ studioRunner:
 # Observed replay (STUDIO-OBS-009 residue; architect ruling OI-06, B5).
 #
 # **One source of truth for both images.** The runner (`STUDIO_RUNNER_OBSERVED_*`) and the backend
-# (`studio.observed-replay.catalog-json` / `policies-json`) must hold the SAME catalog entry and the
-# SAME policies, so this one block feeds both; none of them is settable through `studioRunner.runnerEnv`
-# or the backend's `configOverrides` / `env` while this is on (the render fails). Under the single
+# (`studio.observed-replay.catalog-json`) must hold the SAME catalog entry, so this one block feeds
+# both; none of them is settable through `studioRunner.runnerEnv` or the backend's `configOverrides`
+# / `env` while this is on (the render fails). Under the single
 # path every Studio run is an observed run, so a runner with both flags off answers 503 to every run
 # (routes.ts `OBSERVED_VALIDATION_DISABLED`, runCoordinator.ts `OBSERVED_REPLAY_DISABLED`) and a
 # backend with an empty catalog answers 409 RUNTIME_INCOMPATIBLE to every publication.
 #
 # OFF by default in every values file; `values-uat.yaml` turns both on. While EITHER flag is on:
-#   - `studioRunner.enabled` must be true, `catalog` and `policies` must be supplied (the render fails
-#     naming the key otherwise);
+#   - `studioRunner.enabled` must be true and `catalog` must be supplied (the render fails naming the
+#     key otherwise);
 #   - the runner image is pinned by digest, `<repository>@sha256:<catalog.build.executableImageDigest>`,
 #     and `studioRunner.image.tag` is ignored. The runner checks that digest against the catalog, so
 #     pinning is what binds the catalog to the image that is actually pulled;
-#   - the runner gets `catalog.json` and `policies.json` from a ConfigMap this chart renders.
+#   - the runner gets `catalog.json` from a ConfigMap this chart renders.
 #
 # **A runner image change ALWAYS comes with a new catalog values file**: the entry is specific to
 # one image.
 #
-# Security: catalog and policies are integrity-relevant, not secret. Whoever can edit them decides
-# which origins replay may touch. Treat `policies` as reviewed configuration under the same change
-# control as `values-uat.yaml`, never as runtime input.
+# Which domains a test may navigate to is not configured here: it is `studioNavigation.allowedDomains`
+# below. The catalog is integrity-relevant, not secret: treat it as reviewed configuration under the
+# same change control as `values-uat.yaml`, never as runtime input.
 # ---------------------------------------------------------------------------
 studioObserved:
   # Runner STUDIO_RUNNER_OBSERVED_VALIDATION_ENABLED (serves /v2/validate-observed) and
@@ -811,12 +827,38 @@ studioObserved:
   # The runner never sees these. The backend's catalog is `[catalog] + additionalBackendCatalog`, the
   # runner's entry first, because the backend selects the first element.
   additionalBackendCatalog: []
-  # TrustedPolicy list (replay-ipc.schema.json `#/definitions/TrustedPolicy`), per environment.
-  # Required and non-empty while on; at most 16 entries and 65,536 bytes of JSON (the backend's
-  # bounds, tighter than the runner's 32 entries and 2 MiB). Content owner: see the receipt, open item.
-  policies: []
-  # Where the runner mounts the ConfigMap (catalog.json, policies.json), read-only.
+  # Where the runner mounts the ConfigMap (catalog.json), read-only.
   mountPath: /etc/studio-observed
+
+# ---------------------------------------------------------------------------
+# Studio navigation: the domain whitelist (STUDIO-FLEX-001 item 1).
+#
+# **The only navigation control**, per-environment deployment configuration. Ships EMPTY, and an empty
+# list denies every navigation, so no environment can reach a page until this is filled in (the
+# bank's approved list, supplied at deploy time, e.g. `-f studio-navigation.<env>.yaml`).
+#
+# One source for both images: rendered to the backend's `studio.navigation.allowed-domains` (API and
+# worker) and to the runner's `STUDIO_RUNNER_ALLOWED_DOMAINS`. Neither is settable anywhere else
+# (`configOverrides`, `env`, `runnerEnv`): the render fails, so the two cannot diverge.
+#
+# Entries are lower-case ASCII (punycode for IDN) domain names, matched on label boundaries: a host
+# matches an entry when it equals it or ends with `.<entry>`, so `citi.com` covers `www.citi.com`
+# and not `evilciti.com`. Refused at render time, as the backend and the runner refuse them at
+# start-up: wildcards, IP literals, schemes, ports, paths, trailing dots, upper case, more than 32
+# entries, and overlapping entries (no entry may equal or be a subdomain of another).
+#
+# `allowAllDomains` (default `true` for now, user decision 2026-10-25; set `false` to enforce the list): when `true`, navigation may
+# reach ANY http(s) URL whose host is a DNS name (still no userinfo, no IP literal, no other scheme),
+# and `allowedDomains` is ignored (it is still validated, so a typo is not hidden). It is per
+# environment like the list, and one value feeds both images: the backend's
+# `studio.navigation.allow-all-domains` and the runner's `STUDIO_RUNNER_ALLOW_ALL_DOMAINS`, so the
+# backend can never admit a navigation the runner refuses. Must be a YAML boolean (`true` or `false`;
+# `--set-string` or a quoted value fails the render). Both images log one WARN line at start-up
+# when it is on. The runner's NetworkPolicy does not depend on it (its page egress is already open).
+# ---------------------------------------------------------------------------
+studioNavigation:
+  allowedDomains: []
+  allowAllDomains: true
 
 # ---------------------------------------------------------------------------
 # The object-store principal the API and the recovery path read with — **read-only**, and a

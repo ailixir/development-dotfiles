@@ -471,9 +471,10 @@ class SnapshotBasisValidationTest {
           basis,
           "incrementalEvidence/program/"
               + (kind.equals("guard")
-                  ? "actions/1/guard/target/visible"
+                  // ADR-SC-007: a guard target is the runner-reported locator, tier and identity.
+                  ? "actions/1/guard/target/identity/role"
                   : "actions/0/operation/destinationInputId"),
-          kind.equals("guard") ? M.valueToTree(false) : M.valueToTree("other-input"));
+          kind.equals("guard") ? M.valueToTree("other-role") : M.valueToTree("other-input"));
       put(
           basis,
           "incrementalEvidence/plan/prefixProgramHash",

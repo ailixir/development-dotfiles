@@ -53,7 +53,7 @@ checks:
     GRAFANA: false
     ITRS: false
     APPDYNAMICS: false
-    UI_TEST: false
+    UI_TEST: true
   executor:
     max-concurrency: 250
     source-limits:
@@ -195,7 +195,25 @@ resilience4j:
 # (Story 10.7, architecture §8.5). Every value here is a §8.5 STARTING value tuned against staging
 # measurements (§10), not a commitment, and every bound AC-38 inventories has its name here.
 studio:
+  # The domain allow-list: the only control on where Studio navigates (STUDIO-FLEX-001). A comma-separated
+  # list of lowercase punycode host suffixes with no spaces, at most 32, none a suffix of another; a page may
+  # be any http(s) URL whose host is an entry or ends with "." + entry. Empty (the shipped value) denies
+  # everything. An invalid value stops startup. The runner reads STUDIO_RUNNER_ALLOWED_DOMAINS, which the
+  # chart renders from the same value.
+  #
+  # allow-all-domains (ON by default for now, user decision 2026-10-25): when true, navigation may reach ANY http(s) URL whose host is a
+  # DNS name (still no userinfo, no IP literal) and the list above is ignored (it is still validated).
+  # Only exactly true or false is accepted; anything else stops startup. The runner reads
+  # STUDIO_RUNNER_ALLOW_ALL_DOMAINS, which the chart renders from the same value, so the two sides can
+  # never disagree. A WARN line is logged at startup when it is on.
+  navigation:
+    allowed-domains: ${STUDIO_ALLOWED_DOMAINS:}
+    allow-all-domains: ${STUDIO_ALLOW_ALL_DOMAINS:true}
   guided-authoring:
+    # Deployment-wide cap on concurrent learning sessions, whichever CSI started them. It equals the
+    # capacity of the one guided runner pod; the chart renders both from studioRunner.guided.capacity.
+    # The 429 refusal is BUDGET_EXCEEDED / LEARNING_CAPACITY_EXHAUSTED.
+    max-concurrent-sessions: 1
     # Distinct receivers require distinct textual JWT audiences; no credential is stored in session data.
     controller-token-file: ${STUDIO_GUIDED_RUNNER_CONTROLLER_TOKEN_FILE:}
     # The mutual-TLS chain of the guided bridge (STUDIO-OBS-009 AC-2). The API pod checks every call
@@ -227,7 +245,7 @@ studio:
       # takes effect while it is shorter than the call budget left after authentication
       # (call-seconds, default 60). A send that receives no response headers within the cap is
       # abandoned as a TRANSPORT_STALL and retried as a new charged attempt.
-      # A call budget at or below the cap makes every overrun a terminal TIMEOUT instead.
+      # Start-up refuses call-seconds below send-timeout-seconds + 10, so raise both together.
       send-timeout-seconds: ${STUDIO_GUIDED_SEND_TIMEOUT_SECONDS:50}
     # STUDIO-OBS-014 AC-3 (ruling AR-2 b): sanitized observations, model output and the publication
     # copies of never-published sessions are pruned this long after a terminal session's expiry.
@@ -245,26 +263,6 @@ studio:
       max-concurrent-sessions: ${STUDIO_GUIDED_CSI_MAX_CONCURRENT:3}
       daily-model-input-tokens: ${STUDIO_GUIDED_CSI_DAILY_INPUT_TOKENS:0}
       daily-model-output-tokens: ${STUDIO_GUIDED_CSI_DAILY_OUTPUT_TOKENS:0}
-    # STUDIO-OBS-014 AC-1/AC-5 (rulings AR-2 f, h): governed observation policy. No approver group
-    # by default, so every approval is refused (fail closed until OBS-010 provisions one).
-    policy:
-      approver-groups: []
-      default-destructive-vocabulary:
-        - delete
-        - remove
-        - erase
-        - destroy
-        - purge
-        - pay
-        - transfer
-        - send money
-        - submit order
-        - place order
-        - confirm payment
-        - cancel subscription
-        - close account
-        - deactivate
-        - revoke
   guided:
     publication:
       enabled: ${STUDIO_OBSERVED_PUBLICATION_ENABLED:true}
@@ -279,7 +277,6 @@ studio:
     max-job-bytes: 4194304
     max-execute-frame-bytes: 2097152
     catalog-json: '${STUDIO_OBSERVED_CATALOG_JSON:[]}'
-    policies-json: '${STUDIO_OBSERVED_POLICIES_JSON:[]}'
     recording-width: ${STUDIO_OBSERVED_RECORDING_WIDTH:1280}
     recording-height: ${STUDIO_OBSERVED_RECORDING_HEIGHT:720}
   # Save-time authoring bounds: over-limit drafts are refused 400 before anything is written.
@@ -317,12 +314,12 @@ studio:
     pending-sla: ${STUDIO_PENDING_SLA:600s}
     start-deadline: ${STUDIO_START_DEADLINE:30s}
     run-deadline: ${STUDIO_RUN_DEADLINE:600s}
-    # The total browser runtime every job carries as deadlines.totalRuntimeMs (§5.2: "total
-    # browser runtime 120 seconds"). Server configuration, NOT the per-test timeoutSeconds, which
+    # The total browser runtime every job carries as deadlines.totalRuntimeMs (300 seconds since
+    # STUDIO-FLEX-001; the runner's STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS default matches). Server configuration, NOT the per-test timeoutSeconds, which
     # is the per-step timeout and stays on the job's configuration. Must be strictly shorter than
     # run-deadline (refused at startup otherwise); the runner clamps it to its own
     # STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS.
-    total-runtime: ${STUDIO_TOTAL_RUNTIME:120s}
+    total-runtime: ${STUDIO_TOTAL_RUNTIME:300s}
     admission-timeout: ${STUDIO_ADMISSION_TIMEOUT:10s}
     evidence-retention: ${STUDIO_EVIDENCE_RETENTION:30d}
     # Deployment configuration, never job-supplied (§8.4, §8.5).
@@ -347,7 +344,7 @@ studio:
     quotas:
       per-csi: ${STUDIO_QUOTA_PER_CSI:20}
       global: ${STUDIO_QUOTA_GLOBAL:200}
-      max-steps-per-test: ${STUDIO_MAX_STEPS:200}
+      max-steps-per-test: ${STUDIO_MAX_STEPS:100}
     recovery:
       # Both reapers and finalization reconciliation, worker profile only (§5.4).
       poll-interval-ms: ${STUDIO_RECOVERY_POLL_MS:5000}
@@ -403,7 +400,7 @@ studio:
       mode: ${STUDIO_GATEWAY_CREDENTIALS_MODE:application-default}
       service-account-key-file: ${STUDIO_GATEWAY_CREDENTIALS_KEY_FILE:}
     request-timeout: ${STUDIO_GATEWAY_REQUEST_TIMEOUT:150s}
-    max-concurrency: ${STUDIO_GATEWAY_MAX_CONCURRENCY:4}
+    max-concurrency: ${STUDIO_GATEWAY_MAX_CONCURRENCY:8}
     max-input-bytes: ${STUDIO_GATEWAY_MAX_INPUT_BYTES:262144}
     max-output-bytes: ${STUDIO_GATEWAY_MAX_OUTPUT_BYTES:262144}
     max-output-tokens: ${STUDIO_GATEWAY_MAX_OUTPUT_TOKENS:32768}

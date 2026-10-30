@@ -142,7 +142,7 @@ class GuidedIncrementalQualifiedPlanIT {
     Flyway.configure()
         .dataSource(source)
         .locations("classpath:db/migration")
-        .target("23")
+        .target("29")
         .load()
         .migrate();
     jdbc = new JdbcTemplate(source);
@@ -151,23 +151,22 @@ class GuidedIncrementalQualifiedPlanIT {
     store = new GuidedTranslationStore(jdbc, C);
     translationProperties =
         new GuidedTranslationProperties(
-            true,
-            true,
-            List.of("orders"),
-            List.of("fixture"),
-            65536,
-            4096,
-            60,
-            "worker-1",
-            false,
-            (int) BASE_MILLIS);
-    var prompts = new GuidedPromptAssembler(C);
+            true, 65536, 4096, 60, "worker-1", false, (int) BASE_MILLIS);
+    var prompts =
+        new GuidedPromptAssembler(C, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     seedSource();
     var access = new PersistedSourceAccess();
     service =
         new GuidedSessionService(
-            repository, C, access, new GuidedSessionProperties(true, limits), clock);
-    var materialization = new GuidedMaterializationService(jdbc, C);
+            repository,
+            C,
+            access,
+            new GuidedSessionProperties(true, limits),
+            com.citi.put.checks.studio.support.TestDomains.FIXTURES,
+            clock);
+    var materialization =
+        new GuidedMaterializationService(
+            jdbc, C, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     service.installBridge(
         materialization,
         new GuidedPreparationStore(jdbc, C),
@@ -182,22 +181,14 @@ class GuidedIncrementalQualifiedPlanIT {
             false,
             C));
     service.installPresentation(new GuidedPublicPresentationProjector(jdbc, C));
-    com.citi.put.checks.studio.support.ObservedPublicationFixture.installGovernance(
-        service,
-        jdbc,
-        "CSI-123",
-        "orders",
-        "fixture",
-        List.of("https://orders.example.test"),
-        null);
+    com.citi.put.checks.studio.support.ObservedPublicationFixture.installCsiBudget(service, jdbc);
     ObjectNode start =
         C.object()
             .put("schemaVersion", 3)
             .put("testId", testId.toString())
             .put("sourceRevision", "1")
             .put("configurationRevision", "1")
-            .put("environmentId", "fixture")
-            .put("applicationId", "orders");
+            .put("environmentId", "fixture");
     start.set("versions", C.parse("{\"contract\":3}"));
     sessionId = service.start(user, "retry-start", start).path("sessionId").asText();
     repository.transaction(
@@ -232,7 +223,8 @@ class GuidedIncrementalQualifiedPlanIT {
             gateway,
             C,
             prompts,
-            new GuidedSourceInputResolver(C),
+            new GuidedSourceInputResolver(
+                C, com.citi.put.checks.studio.support.TestDomains.FIXTURES),
             new GuidedProposalValidator(C),
             new GuidedDependencyPlanner(service),
             translationProperties,
@@ -351,7 +343,6 @@ class GuidedIncrementalQualifiedPlanIT {
               .put("targetIntent", "Open");
       obligation.put("scopeIntent", scopeIntent);
       obligation.putNull("referenceIndex").putNull("needId").putNull("predicate");
-      proposal.putArray("needs");
       return new GuidedModelResponse(GuidedModelResponse.Code.OK, proposal, null, null, "model");
     };
   }
@@ -474,7 +465,10 @@ class GuidedIncrementalQualifiedPlanIT {
 
   private final class PersistedSourceAccess implements GuidedSessionAccess {
     private final GuidedSourceClassifier classifier =
-        new GuidedSourceClassifier(C, translationProperties, new CredentialPatternScreen());
+        new GuidedSourceClassifier(
+            C,
+            new CredentialPatternScreen(),
+            com.citi.put.checks.studio.support.TestDomains.FIXTURES);
 
     ObjectNode current() {
       var row =
@@ -515,12 +509,10 @@ class GuidedIncrementalQualifiedPlanIT {
               .put("principalId", "retry-user")
               .put("csiId", current.path("csiId").asText())
               .put("environmentId", current.path("environment").asText())
-              .put("applicationId", "orders")
               .put("sourceRevision", current.path("sourceRevision").asText())
               .put("configurationRevision", current.path("configurationRevision").asText())
               .put("modelDataPolicyId", "INPUT-POLICY-01-A")
               .putNull("valueTransferPolicyId");
-      scope.putArray("approvedOrigins").add("https://orders.example.test");
       scope.putArray("capabilities").add("observe").add("click");
       var approved = classifier.classify(current, scope);
       var steps = JSON.createArrayNode();
@@ -531,11 +523,6 @@ class GuidedIncrementalQualifiedPlanIT {
             .put("requiresAssertion", false);
       }
       return new Snapshot(scope, steps);
-    }
-
-    @Override
-    public void checkCurrent(JsonNode session) {
-      classifier.requireCurrentPolicy(session.path("scope"));
     }
 
     @Override

@@ -2,7 +2,9 @@ package com.citi.put.checks.studio.guided.translation;
 
 import static com.citi.put.checks.studio.guided.session.GuidedSessionException.require;
 
+import com.citi.put.checks.studio.guided.bridge.SourceTemplate;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
+import com.citi.put.checks.studio.navigation.AllowedDomains;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.charset.StandardCharsets;
@@ -19,38 +21,22 @@ public final class GuidedSourceClassifier {
   private static final List<String> SLOTS =
       List.of("navigate.destination", "fill.value", "selectOption.value", "assert.expected");
   private final GuidedContracts contracts;
-  private final GuidedTranslationProperties properties;
   private final CredentialPatternScreen screen;
   private final GuidedPromptAssembler prompts;
 
   public GuidedSourceClassifier(
-      GuidedContracts contracts,
-      GuidedTranslationProperties properties,
-      CredentialPatternScreen screen) {
-    this(contracts, properties, screen, new GuidedPromptAssembler(contracts));
+      GuidedContracts contracts, CredentialPatternScreen screen, AllowedDomains domains) {
+    this(contracts, screen, new GuidedPromptAssembler(contracts, domains));
   }
 
   public GuidedSourceClassifier(
-      GuidedContracts contracts,
-      GuidedTranslationProperties properties,
-      CredentialPatternScreen screen,
-      GuidedPromptAssembler prompts) {
+      GuidedContracts contracts, CredentialPatternScreen screen, GuidedPromptAssembler prompts) {
     this.contracts = contracts;
-    this.properties = properties;
     this.screen = screen;
     this.prompts = java.util.Objects.requireNonNull(prompts);
   }
 
-  public void requireCurrentPolicy(JsonNode scope) {
-    require(
-        properties.permits(
-            scope.path("applicationId").asText(), scope.path("environmentId").asText()),
-        "FORBIDDEN_SCOPE",
-        403);
-  }
-
   public ObjectNode classify(JsonNode current, JsonNode scope) {
-    requireCurrentPolicy(scope);
     require(
         current.path("sourceRevision").equals(scope.path("sourceRevision"))
             && current.path("configurationRevision").equals(scope.path("configurationRevision"))
@@ -116,6 +102,7 @@ public final class GuidedSourceClassifier {
       }
       require(ids.add(id) && !text.isBlank() && text.length() <= 4000, "INVALID_CONTRACT", 422);
       screen.requireNoInlineCredentials(List.of(text));
+      requireSecretsWholeValue(text);
       ObjectNode item = steps.addObject().put("stepId", id).put("text", text);
       var regions = item.putArray("regions");
       var token = TOKEN.matcher(text);
@@ -189,6 +176,29 @@ public final class GuidedSourceClassifier {
     }
     require(steps.size() <= 100 && configs.size() <= 200, "BUDGET_EXCEEDED", 429);
     return result;
+  }
+
+  /**
+   * A secret is the whole typed value (secret-login design): inside quoted text that also holds
+   * other characters it would be mixed into a value the model and the artifact treat as plain text,
+   * so it is refused at start with its own reason, before any model call. Straight single quotes
+   * and curly single quotes are skipped: they are also apostrophes.
+   */
+  private static void requireSecretsWholeValue(String text) {
+    for (int[] span : GuidedSourceInputResolver.quotedSpans(text)) {
+      char open = text.charAt(span[0] - 1);
+      if (open == '\'' || open == '\u2018') {
+        continue;
+      }
+      for (var secret : SourceTemplate.secrets(text)) {
+        if (secret.start() >= span[0]
+            && secret.end() <= span[1]
+            && (secret.start() != span[0] || secret.end() != span[1])) {
+          throw new com.citi.put.checks.studio.guided.session.GuidedSessionException(
+              "INVALID_CONTRACT", 422, "SECRET_IN_TEXT", false, null);
+        }
+      }
+    }
   }
 
   private void safeContext(

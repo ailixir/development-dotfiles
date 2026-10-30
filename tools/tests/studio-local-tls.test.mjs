@@ -198,3 +198,17 @@ test('launcher execs the real TLS-only runner and drains only its owned child', 
     await exited;
   }
 });
+
+test('the generated runner environment carries the local navigation whitelist', () => {
+  const config = JSON.parse(readFileSync(join(generated.dir, 'runner-environment.json'), 'utf8'));
+  assert.equal(config.STUDIO_RUNNER_ALLOWED_DOMAINS, 'localhost,example.com,practicetestautomation.com');
+});
+
+test('the allow-all option is left to its default (on) locally unless STUDIO_ALLOW_ALL_DOMAINS is set, and then reaches the runner verbatim', () => {
+  const unset = JSON.parse(readFileSync(join(generated.dir, 'runner-environment.json'), 'utf8'));
+  assert.equal('STUDIO_RUNNER_ALLOW_ALL_DOMAINS' in unset, false);
+  for (const value of ['true', 'false']) {
+    const set = prepare(join(root, `allow-all-${value}`), { ...baseEnv, ...generated.tls, STUDIO_ALLOW_ALL_DOMAINS: value });
+    assert.equal(JSON.parse(readFileSync(join(set.dir, 'runner-environment.json'), 'utf8')).STUDIO_RUNNER_ALLOW_ALL_DOMAINS, value);
+  }
+});

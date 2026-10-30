@@ -1,3 +1,4 @@
+import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 // eslint-disable-next-line no-restricted-imports -- Fault injection wraps an actual sandboxed Chromium context, never a fake browser.
 import {chromium} from 'playwright';
 // eslint-disable-next-line no-restricted-imports -- Actual recorded page/context types for this real-browser oracle.
@@ -21,7 +22,7 @@ it('deletes only the captured startup-native capability before creating the dist
   const newPage=context.newPage.bind(context);vi.spyOn(context,'newPage').mockImplementation(async()=>{emptyBeforeCreation=context.pages().length===0&&(await readdir(join(scratch,'video'))).length===0;return newPage();});return context;
  });
  try{
-  const browser=await playwrightBrowserFactory.launch({browser:'chromium',scratchPath:scratch,viewport:{width:800,height:600},recording:{width:800,height:600},observedScope:corpus.job.binding.scope});
+  const browser=await playwrightBrowserFactory.launch({allowedDomains: TEST_DOMAINS, browser:'chromium',scratchPath:scratch,viewport:{width:800,height:600},recording:{width:800,height:600},observedScope:corpus.job.binding.scope});
   try{
    const app=browser.page as unknown as Page,video=app.video();if(!video)throw new Error('APP_VIDEO');expect(video).not.toBe(startupVideo);expect(deleteCount).toBe(1);expect(emptyBeforeCreation).toBe(true);const soleAppAtReady=browser.observedStartupReady?.();expect(soleAppAtReady).toBe(true);await expect(stat(startupPath)).rejects.toThrow();const appDeleted=vi.spyOn(video,'delete');const produced=await browser.close();expect(produced).toBe(await video.path());expect(produced).not.toBe(startupPath);expect(appDeleted).not.toHaveBeenCalled();expect(await readdir(join(scratch,'video'))).toEqual([produced?.split('/').at(-1)]);
    await writeFile(resolve('../docs/qa/evidence/STUDIO-OBS-007/runner-bootstrap-capability-oracle.json'),JSON.stringify({actualSandboxedFullChromium:true,samePersistentRecordedContext:true,distinctNativeCapabilities:true,startupVideoPath:startupPath,appVideoPath:produced,startupNativeDeleteCount:deleteCount,zeroPagesAndZeroVideoArtifactsBeforeAppCreation:emptyBeforeCreation,soleAppAtReady,startupArtifactAbsent:true,appNativeVideoNotDeleted:true,imageProvenance:'NOT_ASSERTED: local Chromium fixture'},null,2)+'\n');
@@ -45,14 +46,14 @@ it.each(['probe-popup','delete-popup','competing-new-page','delete-failure','sym
   });return actual;
  });
  try{
-  await expect(playwrightBrowserFactory.launch({browser:'chromium',scratchPath:scratch,viewport:{width:800,height:600},recording:{width:800,height:600},observedScope:corpus.job.binding.scope,startup:{signal:controller.signal,deadlineEpochMs:Date.now()+(fault==='expired-delete'?1800:10000)}})).rejects.toThrow();
+  await expect(playwrightBrowserFactory.launch({allowedDomains: TEST_DOMAINS, browser:'chromium',scratchPath:scratch,viewport:{width:800,height:600},recording:{width:800,height:600},observedScope:corpus.job.binding.scope,startup:{signal:controller.signal,deadlineEpochMs:Date.now()+(fault==='expired-delete'?1800:10000)}})).rejects.toThrow();
   expect(context).toBeDefined();if(fault!=='expired-delete'){expect(context?.pages()).toHaveLength(0);expect(context?.browser()?.isConnected()).toBe(false);}
   if(fault==='symlink-video'){expect(deleteCalled).toBe(false);expect(await readdir(join(scratch,'video'))).toContain('linked.webm');}
  }finally{await lateDelete?.catch(()=>undefined);await context?.close();await context?.browser()?.close();await rm(scratch,{recursive:true,force:true});}
 },15000);
 it('retains an unexpected app-page latch until a subscriber is attached and never deletes the app video as bootstrap',async()=>{
  const scratch=await mkdtemp(join(tmpdir(),'bootstrap-late-latch-'));try{
-  const browser=await playwrightBrowserFactory.launch({browser:'chromium',scratchPath:scratch,viewport:{width:800,height:600},recording:{width:800,height:600},observedScope:corpus.job.binding.scope});
+  const browser=await playwrightBrowserFactory.launch({allowedDomains: TEST_DOMAINS, browser:'chromium',scratchPath:scratch,viewport:{width:800,height:600},recording:{width:800,height:600},observedScope:corpus.job.binding.scope});
   try{
    const page=browser.page as unknown as Page;expect(browser.observedStartupReady?.()).toBe(true);const video=page.video();if(!video)throw new Error('APP_VIDEO');const deleted=vi.spyOn(video,'delete');
    await page.context().newPage().catch(()=>undefined);expect(browser.observedStartupReady?.()).toBe(false);const notified=vi.fn();browser.onExtraPage(notified);expect(notified).toHaveBeenCalledOnce();const produced=await browser.close();expect(produced).toBe(await video.path());expect(deleted).not.toHaveBeenCalled();

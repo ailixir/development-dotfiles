@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * <p>Kept apart from {@link StudioSecretsController}, whose route set is pinned to the two secret
  * routes. There is no global capability route: what a caller may do depends on one persisted test.
- * The answer is never cacheable, because it moves with configuration and entitlement.
+ * The answer is never cacheable, because it moves with configuration.
  */
 @RestController
 @Profile("!worker")

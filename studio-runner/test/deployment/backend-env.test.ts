@@ -362,18 +362,17 @@ describe('AC-5 — the studio audit stream is marked for the SIEM forwarder by v
 });
 
 /**
- * STUDIO-OBS-009 OI-06 B5 — the backend's trusted catalog and policies are delivered by the chart.
+ * STUDIO-OBS-009 OI-06 B5 — the backend's trusted catalog is delivered by the chart.
  *
- * `application.yml` defaults `studio.observed-replay.catalog-json` and `policies-json` to `[]`, and
+ * `application.yml` defaults `studio.observed-replay.catalog-json` to `[]`, and
  * with an empty catalog `ObservedReplayPins.selected()` answers 409 RUNTIME_INCOMPATIBLE, so a
  * chart-deployed stack could not publish a plan, authorize a replay or run any Studio test. The
- * chart renders both properties from the SAME `studioObserved` values the runner's files come from,
+ * chart renders the property from the SAME `studioObserved` values the runner's file comes from,
  * into the mounted `application.yaml` (never an environment variable). The fixture values are TEST
  * VALUES.
  */
-describe('STUDIO-OBS-009 OI-06 B5 — the backend receives the same catalog and policies as the runner', () => {
+describe('STUDIO-OBS-009 OI-06 B5 — the backend receives the same catalog as the runner', () => {
   const CATALOG_KEY = 'studio.observed-replay.catalog-json';
-  const POLICIES_KEY = 'studio.observed-replay.policies-json';
 
   it('uses the property names the backend binds (read out of application.yml, not restated)', () => {
     const documents = parseAllDocuments(
@@ -383,21 +382,19 @@ describe('STUDIO-OBS-009 OI-06 B5 — the backend receives the same catalog and 
     expect(bound, 'application.yml no longer binds studio.observed-replay').toBeDefined();
     const prefix = 'studio.observed-replay.';
     expect(Object.keys(bound ?? {})).toEqual(
-      expect.arrayContaining([CATALOG_KEY, POLICIES_KEY].map((key) => key.slice(prefix.length))),
+      expect.arrayContaining([CATALOG_KEY].map((key) => key.slice(prefix.length))),
     );
   });
 
-  it.each(['api', 'worker'] as const)('%s: both properties are delivered as JSON strings, the runner’s entry first', (role) => {
+  it.each(['api', 'worker'] as const)('%s: the property is delivered as a JSON string, the runner’s entry first', (role) => {
     const properties = mountedSpringProperties(render({ observed: true }), role);
     expect(typeof properties[CATALOG_KEY]).toBe('string');
-    expect(typeof properties[POLICIES_KEY]).toBe('string');
     expect(JSON.parse(String(properties[CATALOG_KEY]))).toEqual([OBSERVED_FIXTURE.catalog]);
-    expect(JSON.parse(String(properties[POLICIES_KEY]))).toEqual(OBSERVED_FIXTURE.policies);
   });
 
-  it.each(['api', 'worker'] as const)('%s: neither property is delivered through the environment', (role) => {
+  it.each(['api', 'worker'] as const)('%s: the property is not delivered through the environment', (role) => {
     const container = role === 'api' ? api(render({ observed: true })) : worker(render({ observed: true }));
-    expect(envNames(container).filter((name) => /OBSERVED_(CATALOG|POLICIES)_JSON/u.test(name))).toEqual([]);
+    expect(envNames(container).filter((name) => name.includes('OBSERVED_CATALOG_JSON'))).toEqual([]);
   });
 
   it('puts additionalBackendCatalog after the runner’s entry, and the runner never receives it', () => {
@@ -420,16 +417,15 @@ describe('STUDIO-OBS-009 OI-06 B5 — the backend receives the same catalog and 
     expect(JSON.parse(runnerFile ?? 'null')).toEqual(OBSERVED_FIXTURE.catalog);
   });
 
-  it('delivers neither property while both flags are off, and the pod rolls when the catalog or policies change', () => {
+  it('delivers no property while both flags are off, and the pod rolls when the catalog changes', () => {
     const off = render({ set: { 'studioObserved.validationEnabled': 'false', 'studioObserved.replayEnabled': 'false' } });
     for (const role of ['api', 'worker'] as const) {
       const properties = mountedSpringProperties(off, role);
       expect(properties).not.toHaveProperty(CATALOG_KEY);
-      expect(properties).not.toHaveProperty(POLICIES_KEY);
     }
     const changed = render({
       observed: true,
-      args: ['-f', writeValuesOverlay('observed-policies-rolled.json', { studioObserved: { policies: [{ ...OBSERVED_FIXTURE.policies[0], policyVersion: '2' }] } })],
+      args: ['-f', writeValuesOverlay('observed-catalog-rolled.json', { studioObserved: { catalog: { ...OBSERVED_FIXTURE.catalog, build: { ...OBSERVED_FIXTURE.catalog.build, chromiumBuild: 'TEST-ONLY-chromium-1' } } } })],
     });
     const annotation = (outcome: RenderOutcome, role: string): unknown =>
       (deploymentNamed(outcome, `-${role}`).spec?.template as { metadata: { annotations: Record<string, unknown> } }).metadata.annotations['checksum/config'];

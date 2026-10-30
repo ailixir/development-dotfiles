@@ -1,3 +1,4 @@
+import { TEST_DOMAINS } from './allowedDomains.js';
 /**
  * One assembled runner, all seams faked, for the behavioural suite.
  *
@@ -152,6 +153,12 @@ export function createHarness(options: HarnessOptions = {}): Harness {
     [`${CONFIG_PREFIX}CALLBACK_BASE_URL`]: 'https://api.internal.example',
     [`${CONFIG_PREFIX}INSTANCE_ID`]: 'runner-a',
     [`${CONFIG_PREFIX}DRAIN_TIMEOUT_MS`]: '2000',
+    [`${CONFIG_PREFIX}ALLOWED_DOMAINS`]: TEST_DOMAINS.join(','),
+    // Allow-all is ON when unset (the default for now); the unit tiers exercise the list.
+    [`${CONFIG_PREFIX}ALLOW_ALL_DOMAINS`]: 'false',
+    // The suites that drive capacity and the total-runtime clamp were written against one slot and 120 s; they say so here.
+    [`${CONFIG_PREFIX}POOL_SIZE`]: '1',
+    [`${CONFIG_PREFIX}MAX_TOTAL_RUNTIME_MS`]: '120000',
     ...options.env,
   });
 

@@ -9,15 +9,13 @@ accepted execution carries an observed replay binding, and a row without one is 
 accept (10.7)
   │  readiness (observed revision only) + quotas
   │  preflight                    typed {variables, secrets} from the LEARNED revision
-  │    ├─ vault: does this reference exist for this CSI and environment?
-  │    └─ secret use: may THIS principal use THIS secret?   ← a separate decision (§9.2)
+  │    └─ vault: does this reference exist for this CSI, environment and test?
   └─ PENDING row + ledger row + observed binding
 
 dispatch (10.7 ordering)
   │  claim                        one conditional UPDATE; two dispatchers → exactly one 1
   │  refresh                      observed replay authorization re-checked for this attempt
   │  resolve                      values, here and nowhere else
-  │    ├─ entitlement withdrawn → AUTHORIZATION_REVOKED, no send
   │    └─ reference vanished    → REFERENCE_UNAVAILABLE, no send
   │  beginObservedDispatch        fresh attempt, committed before the send
   └─ send                         the observed job, then close() erases everything
@@ -39,9 +37,8 @@ Everything else is a defect, and each of these is asserted rather than assumed (
 after `send` returns.
 
 A refusal names the **reference** and never the value — not the value, not its length, not
-`lastFour`, not a hash, not a prefix (§9.2, AC-6). `SecretUseNotAuthorizedException` and
-`UnknownReferenceException` deliberately carry the same wording on the wire, because telling them
-apart would let an unentitled caller learn whether a secret exists.
+`lastFour`, not a hash, not a prefix (§9.2, AC-6). A secret saved for another test, CSI or
+environment is `UnknownReferenceException`, exactly like one that does not exist.
 
 ## The residual, stated rather than claimed away
 
@@ -73,7 +70,7 @@ count being exactly zero rather than on a log line.
 
 | Code | The condition observed (ADR-002 §15.3) |
 |---|---|
-| `AUTHORIZATION_REVOKED` | a fact about the **principal** — entitlement withdrawn between acceptance and dispatch |
+| `AUTHORIZATION_REVOKED` | a fact about the **principal** — the dispatch authorization was withdrawn between acceptance and dispatch |
 | `REFERENCE_UNAVAILABLE` | a fact about the **draft and its environment** — the reference vanished from the vault, or the confirmed revision's reference declaration is absent, unreadable or of an unrecognised shape |
 
 Neither is reachable from a runner, and `x-runner-error-codes ∩ ExecutionErrorCode.enum = {TIMEOUT}`
@@ -81,8 +78,8 @@ stays true.
 
 ## What is not here
 
-Real vault integration, real per-principal entitlement and the removal of the authentication bypass
-are `ED-02` and story 10.18. Approved-destination enforcement is `ED-04`, ADR-002 O-6 and 10.18's
+Real vault integration and the removal of the authentication bypass are `ED-02` and story 10.18.
+There is no per-principal secret entitlement: secrets are scoped to the test they were saved for. Approved-destination enforcement is `ED-04`, ADR-002 O-6 and 10.18's
 SPK-05; this package records the **policy identity** a dispatch ran under and invents no policy
 field on a closed body. Uploading anything is story 10.14 — deriving a key is not writing an
 object.

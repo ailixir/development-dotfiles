@@ -105,7 +105,7 @@ class RevisionRetentionIT {
   /**
    * An executed run of {@code revisionId}: its dispatch-ledger locator, then the history row with
    * the observed revision binding the V15 execution guard requires of a row that names a {@code
-   * GUIDED_RUN} revision ({@code StudioSchedulingSchemaIT} history/ledger shape).
+   * GUIDED_RUN} revision.
    *
    * @param startedAt millisecond precision, the precision the binding records
    */

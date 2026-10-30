@@ -96,6 +96,8 @@ final class GuidedBasisValidator {
         422);
     var observations = new HashMap<String, JsonNode>();
     for (JsonNode row : basis.path("observations")) {
+      com.citi.put.checks.studio.guided.translation.GuidedOutline.requireConsistent(
+          row.path("observation"));
       require(
           GuidedContracts.hash(row.path("observation")).equals(row.path("observationHash").asText())
               && observations.putIfAbsent(
@@ -136,6 +138,7 @@ final class GuidedBasisValidator {
       }
     }
     require(usedObservations.equals(observations.keySet()), "EVIDENCE_MISMATCH", 422);
+    GuidedGuardSourceAuthority.validatePublic(contracts, basis);
   }
 
   private void validateAction(
@@ -215,17 +218,10 @@ final class GuidedBasisValidator {
     if (preparation.has("observedChoice")) {
       choiceObservation(basis, fact, preparation, context, observations, used);
     }
-    ObjectNode operation = contracts.object();
-    operation.set("coordinate", proposal.path("coordinate"));
-    operation.set("origin", proposal.path("executionEvidence").path("origin"));
-    operation.set(
-        "locator",
-        proposal.path("target").has("locator")
-            ? proposal.path("target").path("locator")
-            : contracts.object().nullNode());
-    operation.set("operation", proposal.path("operation"));
     require(
-        GuidedContracts.hash(operation).equals(ledger.path("operationHash").asText()),
+        com.citi.put.checks.studio.guided.session.GuidedOperationIdentity.of(
+                proposal, proof.path("target"))
+            .equals(ledger.path("operationHash").asText()),
         "EVIDENCE_MISMATCH",
         422);
     ObjectNode policy =
@@ -239,6 +235,25 @@ final class GuidedBasisValidator {
             .equals(ledger.path("admission").path("policyDecisionHash").asText()),
         "EVIDENCE_MISMATCH",
         422);
+    var sourceHistory = contracts.object().putArray("history");
+    for (JsonNode historical : basis.path("actions")) {
+      JsonNode preparedRow =
+          GuidedPlanBuilder.unique(
+              basis.path("preparations"),
+              "preparationId",
+              historical.path("preparationId").asText());
+      var row = sourceHistory.addObject();
+      row.set("ledger", historical.path("ledger"));
+      row.set("proposal", preparedRow.path("proposal"));
+      row.set("proof", preparedRow.path("proof"));
+    }
+    com.citi.put.checks.studio.guided.session.GuidedPreparationCrossCheck.verifySourceHistory(
+        contracts,
+        basis.path("translationPlan"),
+        proposal,
+        proof,
+        sourceHistory,
+        basis.path("producers"));
     JsonNode op = proposal.path("operation");
     var ids = new HashSet<String>();
     context.path("inputs").forEach(input -> ids.add(input.path("inputId").asText()));

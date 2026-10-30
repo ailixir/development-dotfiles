@@ -13,7 +13,7 @@ import com.citi.put.checks.studio.entity.StudioDispatchLedger;
 import com.citi.put.checks.studio.entity.UITest;
 import com.citi.put.checks.studio.entity.UITestExecution;
 import com.citi.put.checks.studio.entity.UITestRevision;
-import com.citi.put.checks.studio.scheduling.StudioScheduleException;
+import com.citi.put.checks.studio.guided.session.GuidedSessionException;
 import com.citi.put.checks.studio.secrets.VaultProviderUnavailableException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -87,50 +87,83 @@ public class StudioAcceptanceService {
   private com.citi.put.checks.studio.guided.publication.ObservedReplayAuthorization observed;
 
   /** Trusted internal identity, independent of client-supplied manual idempotency strings. */
-  public record ScheduledIdentity(
-      UUID occurrenceId,
-      UUID scheduleId,
-      long scheduleVersion,
-      UUID activationId,
-      Instant scheduledAt,
-      UUID revisionId) {}
+  public record ScheduledIdentity(UUID scheduleId, Instant scheduledAt) {}
 
   public record ScheduledResult(UUID executionId, String decision, String code) {}
+
+  /**
+   * The proof replay a publication accepted: its execution, or exactly one closed refusal code (the
+   * set {@code ck_studio_learn_proofs_refusal} accepts).
+   */
+  public record PublishedResult(UUID executionId, String refusalCode) {}
 
   /**
    * Expected refusals are caught inside this non-proxied core path; SQL failures still roll back.
    */
   public ScheduledResult acceptScheduled(
-      UUID testId, String principal, ScheduledIdentity identity, Runnable beforeWrite) {
+      UUID testId, String principal, ScheduledIdentity identity) {
     if (!org.springframework.transaction.support.TransactionSynchronizationManager
         .isActualTransactionActive()) {
-      throw new IllegalStateException("Scheduled acceptance requires its occurrence transaction");
+      throw new IllegalStateException("Scheduled acceptance requires its schedule transaction");
     }
     try {
       return new ScheduledResult(
-          acceptCore(testId, principal, null, identity, beforeWrite), "ACCEPTED", "ACCEPTED");
+          acceptCore(testId, principal, null, identity, null, null), "ACCEPTED", "ACCEPTED");
     } catch (StudioConflictException ex) {
-      return new ScheduledResult(
-          null,
-          java.util.Set.of("GRACE_EXPIRED", "DISPATCH_DISABLED").contains(ex.getCode())
-              ? "SKIPPED"
-              : "REFUSED",
-          ex.getCode());
+      return new ScheduledResult(null, "REFUSED", ex.getCode());
     } catch (StudioQuotaExceededException ex) {
       return new ScheduledResult(null, "DEFERRED", ex.getCode());
     } catch (StudioDispatchDisabledException ex) {
       return new ScheduledResult(null, "SKIPPED", "DISPATCH_DISABLED");
-    } catch (StudioReferenceResolver.SecretUseNotAuthorizedException ex) {
-      return new ScheduledResult(null, "REFUSED", "BACKGROUND_AUTHORIZATION_DENIED");
     } catch (StudioReferenceResolver.UnknownReferenceException ex) {
       return new ScheduledResult(null, "REFUSED", "REFERENCE_UNAVAILABLE");
     } catch (VaultProviderUnavailableException ex) {
       return new ScheduledResult(null, "DEFERRED", "VAULT_UNAVAILABLE");
-    } catch (StudioScheduleException ex) {
-      return new ScheduledResult(
-          null, ex.getStatus() == 503 ? "DEFERRED" : "REFUSED", ex.getCode());
     } catch (StudioValidationException ex) {
       return new ScheduledResult(null, "REFUSED", ex.getCode());
+    }
+  }
+
+  /**
+   * Accepts the one observed replay of the revision a publication has just made the confirmed one
+   * (trigger source {@code AFTER_LEARN}). It runs inside the publication's own transaction, so the
+   * revision, the receipt and the proof commit together or not at all.
+   *
+   * <p>Like {@link #acceptScheduled} it is deliberately not {@code @Transactional}: the expected
+   * refusals are caught here and every one of them is thrown before any row is written, so none can
+   * leave the publication transaction rollback-only. A refusal is returned as its closed code and
+   * the publication is kept. Anything else (a SQL error, a trigger refusal, a bug) is not caught
+   * and rolls the whole publication back: a defect in proof acceptance blocks publishing, it never
+   * produces an unproven publication. The ledger idempotency key is {@code null}, so its unique
+   * index can never be involved; exactly-once is the link table's primary key under the session
+   * lock.
+   */
+  public PublishedResult acceptPublished(UUID testId, UUID revisionId, String principal) {
+    if (!org.springframework.transaction.support.TransactionSynchronizationManager
+        .isActualTransactionActive()) {
+      throw new IllegalStateException("Proof acceptance requires the publication transaction");
+    }
+    try {
+      return new PublishedResult(acceptCore(testId, principal, null, null, null, revisionId), null);
+    } catch (StudioConflictException ex) {
+      return new PublishedResult(null, "NOT_READY");
+    } catch (StudioQuotaExceededException ex) {
+      return new PublishedResult(null, "PENDING_QUOTA_EXCEEDED");
+    } catch (StudioDispatchDisabledException ex) {
+      return new PublishedResult(null, "DISPATCH_DISABLED");
+    } catch (StudioReferenceResolver.UnknownReferenceException ex) {
+      return new PublishedResult(null, "REFERENCE_UNAVAILABLE");
+    } catch (VaultProviderUnavailableException ex) {
+      return new PublishedResult(null, "VAULT_UNAVAILABLE");
+    } catch (StudioValidationException ex) {
+      return new PublishedResult(
+          null,
+          "STEP_LIMIT_EXCEEDED".equals(ex.getCode())
+              ? "STEP_LIMIT_EXCEEDED"
+              : "RUNTIME_INCOMPATIBLE");
+    } catch (GuidedSessionException ex) {
+      // The observed binding was refused before any row was written (unsupported pin, scope drift).
+      return new PublishedResult(null, "RUNTIME_INCOMPATIBLE");
     }
   }
 
@@ -224,23 +257,7 @@ public class StudioAcceptanceService {
   // calls this inside a transaction, so the two are equivalent there.
   @Transactional
   public UUID accept(UUID testId, String principal, String idempotencyKey) {
-    return acceptCore(
-        testId,
-        principal,
-        idempotencyKey,
-        null,
-        () -> {
-          /* Manual requests have no scheduling deadline. */
-        });
-  }
-
-  private UUID acceptCore(
-      UUID testId,
-      String principal,
-      String idempotencyKey,
-      ScheduledIdentity scheduled,
-      Runnable beforeWrite) {
-    return acceptCore(testId, principal, idempotencyKey, scheduled, beforeWrite, null);
+    return acceptCore(testId, principal, idempotencyKey, null, null, null);
   }
 
   @Transactional
@@ -250,15 +267,7 @@ public class StudioAcceptanceService {
       String key,
       com.citi.put.checks.studio.guided.publication.ObservedReplayAuthorization.Prepared
           authorization) {
-    return acceptCore(
-        testId,
-        principal,
-        key,
-        null,
-        () -> {
-          /* No additional acceptance guard. */
-        },
-        authorization);
+    return acceptCore(testId, principal, key, null, authorization, null);
   }
 
   private UUID acceptCore(
@@ -266,9 +275,9 @@ public class StudioAcceptanceService {
       String principal,
       String idempotencyKey,
       ScheduledIdentity scheduled,
-      Runnable beforeWrite,
       com.citi.put.checks.studio.guided.publication.ObservedReplayAuthorization.Prepared
-          observedGrant) {
+          observedGrant,
+      UUID publishedRevisionId) {
     if (!properties.enabledOrDefault()) {
       throw new StudioDispatchDisabledException("Studio execution is currently disabled");
     }
@@ -306,10 +315,6 @@ public class StudioAcceptanceService {
     if (!verdict.ready()) {
       throw new StudioConflictException(verdict.errorCode(), verdict.message());
     }
-    if (scheduled != null && !scheduled.revisionId().equals(test.getConfirmedRevisionId())) {
-      throw new StudioConflictException(
-          "ACTIVATION_REVISION_MISMATCH", "The activated revision changed before admission");
-    }
 
     UITestRevision revision =
         revisions
@@ -327,11 +332,22 @@ public class StudioAcceptanceService {
           ExecutionReadiness.Verdict.LEARN_REQUIRED,
           "This test has no learned revision. Run it to learn the steps before it can replay.");
     }
-    if (scheduled != null && observedGrant == null && observed != null) {
-      // STUDIO-OBS-009 AC-6 (A17): an observed schedule runs under background authority. The
-      // scheduler has required the live background grant for this principal before it got here and
-      // requires it again in beforeWrite; this mints the same binding an explicit Run carries.
-      observedGrant = observed.prepareScheduled(test, revision, principal);
+    if (publishedRevisionId != null && !publishedRevisionId.equals(revision.getId())) {
+      // Unreachable under the locks the publication holds; if it ever happens it is a defect, and
+      // the publication must not commit with a proof of some other revision.
+      throw new IllegalStateException("The proof must replay the revision that was just published");
+    }
+    if (observedGrant == null && observed != null) {
+      if (scheduled != null) {
+        // A scheduled run has no caller session: it runs as the constant scheduler principal
+        // against the test's current confirmed revision, and this mints the same binding an
+        // explicit Run carries.
+        observedGrant = observed.prepareScheduled(test, revision, principal);
+      } else if (publishedRevisionId != null) {
+        // The proof of a publication runs as the learner, on the authority of the fresh execute
+        // proof the finalize request has just obtained (see prepareForPublication).
+        observedGrant = observed.prepareForPublication(test, revision, principal);
+      }
     }
     if (observedGrant == null || observed == null) {
       throw new StudioConflictException(
@@ -349,9 +365,8 @@ public class StudioAcceptanceService {
     // Names are taken from the immutable confirmed revision. Plain values are already persisted on
     // the draft and are snapshotted with this accepted execution; Vault is reserved for secrets.
     //
-    // Execution is open to every authenticated application user. Secret use remains a separate,
-    // narrower decision: the resolver consults StudioSecretUseAuthorization for each declared
-    // secret. A user's ability to start an ordinary run does not grant access to secret material.
+    // Whoever may run the test may use its secrets: the resolver reads them under the test's own
+    // Vault scope, so no secret of another test is reachable.
     //
     // The declaration is read from the confirmed revision the execution is about to snapshot,
     // never from the draft's current `variables` and never from the request (AC-5a). An
@@ -363,10 +378,6 @@ public class StudioAcceptanceService {
         test.getCsiId(), test.getEnvironment(), test.getId(), principal, secretsOnly(declarations));
 
     enforcePendingQuotas(test.getCsiId());
-
-    // Quota locks or Vault preflight may wait across grace expiry or a grant withdrawal.
-    // The schedule supplies a fresh injected-clock/grant check at the final write boundary.
-    beforeWrite.run();
 
     Instant acceptedAt =
         com.citi.put.checks.studio.guided.publication.PublicationContracts.millisecond(
@@ -387,19 +398,11 @@ public class StudioAcceptanceService {
     execution.setPrincipal(principal);
     execution.setEnvironment(test.getEnvironment());
     execution.setRevisionId(revision.getId());
-    execution.setTriggerSource(scheduled == null ? "MANUAL" : "SCHEDULED");
+    execution.setTriggerSource(
+        scheduled != null ? "SCHEDULED" : publishedRevisionId != null ? "AFTER_LEARN" : "MANUAL");
     if (scheduled != null) {
       execution.setScheduleId(scheduled.scheduleId());
-      execution.setScheduleVersion(scheduled.scheduleVersion());
-      execution.setOccurrenceId(scheduled.occurrenceId());
       execution.setScheduledAt(scheduled.scheduledAt());
-      execution.setActivationId(scheduled.activationId());
-      Map<String, Object> activation =
-          jdbc.queryForMap(
-              "SELECT activated_by,activated_at FROM studio_schedule_activations WHERE id=?",
-              scheduled.activationId());
-      execution.setActivatedBy((String) activation.get("activated_by"));
-      execution.setActivatedAt(((java.sql.Timestamp) activation.get("activated_at")).toInstant());
     }
     execution.setConfigurationSnapshot(configurationSnapshot(test, revision, plainVariables));
     execution.setStepResults(pendingStepResults(steps));
@@ -417,9 +420,6 @@ public class StudioAcceptanceService {
     // Queue time and browser runtime are separate budgets (AC-19): this is the pending SLA, and
     // start/run deadlines are assigned by the admission CAS from a different origin.
     row.setPendingDeadlineAt(acceptedAt.plus(properties.pendingSlaOrDefault()));
-    if (scheduled != null) {
-      row.setScheduledOccurrenceId(scheduled.occurrenceId());
-    }
     try {
       ledger.saveAndFlush(row);
     } catch (DataIntegrityViolationException e) {

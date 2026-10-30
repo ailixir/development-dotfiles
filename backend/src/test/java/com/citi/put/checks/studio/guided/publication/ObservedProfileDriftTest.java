@@ -154,19 +154,6 @@ class ObservedProfileDriftTest {
       entry.set("profile", profile);
       entry.set("build", build);
       var catalog = CONTRACTS.object().putArray("catalog").add(entry);
-      var policy =
-          CONTRACTS
-              .object()
-              .put("version", 1)
-              .put("policyId", "profile-policy")
-              .put("policyVersion", "1")
-              .put("applicationId", "profile-app")
-              .put("environment", "Development")
-              .put("entryPolicyId", "blank-entry")
-              .putNull("applicationPolicy");
-      policy.putArray("allowedOrigins").add(ORIGIN);
-      policy.putArray("rules");
-      var policies = CONTRACTS.object().putArray("policies").add(policy);
       String model = "benign-learning-default-" + publication + "-" + replay;
       String[] options = {
         "--spring.profiles.active=test",
@@ -192,12 +179,8 @@ class ObservedProfileDriftTest {
         "--studio.guided.publication.enabled=" + publication,
         "--studio.observed-replay.enabled=" + replay,
         "--studio.observed-replay.catalog-json=" + catalog,
-        "--studio.observed-replay.policies-json=" + policies,
         "--studio.guided-authoring.enabled=true",
         "--studio.guided-authoring.translation.enabled=true",
-        "--studio.guided-authoring.translation.allow-authored-nonsecret=true",
-        "--studio.guided-authoring.translation.applications=profile-app",
-        "--studio.guided-authoring.translation.environments=Development",
         "--studio.guided-authoring.translation.poll-ms=86400000",
         "--studio.guided-authoring.runner-origin=https://127.0.0.1:"
             + peer.server.getAddress().getPort(),
@@ -268,8 +251,6 @@ class ObservedProfileDriftTest {
         JdbcTemplate jdbc = application.getBean(JdbcTemplate.class);
         UUID testId = seedAuthoring(jdbc);
         // STUDIO-OBS-014 S3: a learning start needs an approved governed policy for its scope.
-        com.citi.put.checks.studio.support.ObservedPublicationFixture.ensurePolicy(
-            jdbc, CSI, "profile-app", "Development", java.util.List.of(ORIGIN), null, "ALLOW");
         int port = ((ServletWebServerApplicationContext) application).getWebServer().getPort();
         String origin = "http://127.0.0.1:" + port;
         HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
@@ -280,8 +261,7 @@ class ObservedProfileDriftTest {
                 .put("testId", testId.toString())
                 .put("sourceRevision", "1")
                 .put("configurationRevision", "1")
-                .put("environmentId", "Development")
-                .put("applicationId", "profile-app");
+                .put("environmentId", "Development");
         start.set("versions", fixture.path("artifact").path("learnedPlan").path("versions"));
         var started = send(http, origin + "/api/v1/studio/guided-sessions", start);
         assertThat(started.statusCode()).as(started.body()).isEqualTo(202);

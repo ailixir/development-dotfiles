@@ -6,7 +6,12 @@ import {
   logsCompleteExecution,
   logsTruncatedExecution,
 } from '@/services/mocks/studio/executionFixtures';
-import { ExecutionProgressView, LOGS_TRUNCATED_STATEMENT, NOT_ATTEMPTED } from './ExecutionProgressView';
+import {
+  ExecutionProgressView,
+  LOGS_TRUNCATED_STATEMENT,
+  NOT_ATTEMPTED,
+  seekControlLabel,
+} from './ExecutionProgressView';
 
 /**
  * Story 10.11a — the bounded report rendered without being turned into a false one
@@ -144,7 +149,7 @@ describe('Studio v1 gaps: a log line with no reading', () => {
       ...logsCompleteExecution,
       logs: [
         { at: '2026-09-18T06:00:00Z', level: 'INFO' as const, message: 'browser started' },
-        { at: null, level: 'INFO' as const, message: 'run finished' },
+        { at: null, level: 'INFO' as const, message: 'browser heartbeat' },
       ],
     };
     render(<ExecutionProgressView snapshot={snapshot} />);
@@ -152,7 +157,93 @@ describe('Studio v1 gaps: a log line with no reading', () => {
     expect(screen.getByTestId('log-line-0').textContent).toBe(
       '2026-09-18T06:00:00Z INFO browser started',
     );
-    expect(screen.getByTestId('log-line-1').textContent).toBe('INFO run finished');
+    expect(screen.getByTestId('log-line-1').textContent).toBe('INFO browser heartbeat');
+  });
+});
+
+/**
+ * STUDIO-UNIFY-001.6 AC-08 (N6): the runner writes 0-based step numbers into the log text and leaves
+ * the closing line untimed; the view shows 1-based steps and the run's end time on the closing line.
+ */
+describe('AC-08: log lines read like the steps', () => {
+  const ENDED_AT = '2026-09-18T06:00:09Z';
+  const lines = [
+    { at: '2026-09-18T06:00:01Z', level: 'INFO' as const, message: 'step 0 started', stepIndex: 0 },
+    { at: '2026-09-18T06:00:02Z', level: 'INFO' as const, message: 'step 2 PASS', stepIndex: 2 },
+    { at: '2026-09-18T06:00:03Z', level: 'INFO' as const, message: 'step 1 mismatch', stepIndex: 2 },
+    { at: null, level: 'INFO' as const, message: 'run PASSED' },
+  ];
+
+  it('shows step N+1 for the exact prefix, leaves other text alone, and times the closing line', () => {
+    render(
+      <ExecutionProgressView
+        snapshot={{ ...logsCompleteExecution, status: 'PASSED', endedAt: ENDED_AT, logs: lines }}
+      />,
+    );
+
+    expect(screen.getByTestId('log-line-0').textContent).toBe('2026-09-18T06:00:01Z INFO step 1 started');
+    expect(screen.getByTestId('log-line-1').textContent).toBe('2026-09-18T06:00:02Z INFO step 3 PASS');
+    expect(screen.getByTestId('log-line-2').textContent).toBe('2026-09-18T06:00:03Z INFO step 1 mismatch');
+    expect(screen.getByTestId('log-line-3').textContent).toBe(`${ENDED_AT} INFO run PASSED`);
+  });
+
+  it('keeps the closing line untimed while the run has not ended', () => {
+    render(
+      <ExecutionProgressView
+        snapshot={{ ...logsCompleteExecution, status: 'RUNNING', endedAt: null, logs: lines }}
+      />,
+    );
+
+    expect(screen.getByTestId('log-line-3').textContent).toBe('INFO run PASSED');
+  });
+});
+
+/**
+ * STUDIO-UNIFY-001.6 AC-07 (N5, step side): a step that has not started says so once, in a run that
+ * has not ended. A finished run keeps the 10.16a words and values.
+ */
+describe('AC-07: waiting words for steps that have not started', () => {
+  const inFlight = {
+    ...failedWithSkippedTailExecution,
+    status: 'RUNNING' as const,
+    errorCode: null,
+    endedAt: null,
+    stepResults: failedWithSkippedTailExecution.stepResults.map((step, index) => ({
+      ...step,
+      status: index === 0 ? ('RUNNING' as const) : ('PENDING' as const),
+      offsetMs: null,
+      durationMs: null,
+      message: null,
+    })),
+  };
+
+  it('shows one word per step, not two "not attempted" slots', () => {
+    render(<ExecutionProgressView snapshot={inFlight} onSeekStep={() => undefined} />);
+
+    expect(screen.getByTestId('step-waiting-0').textContent).toBe('Running');
+    expect(screen.getByTestId('step-waiting-1').textContent).toBe('Waiting to start');
+    for (const step of inFlight.stepResults) {
+      expect(screen.queryByTestId(`step-offset-${step.stepIndex}`)).toBeNull();
+      expect(screen.queryByTestId(`step-duration-${step.stepIndex}`)).toBeNull();
+    }
+    expect(screen.queryByText(NOT_ATTEMPTED)).toBeNull();
+    // The 10.16a seek naming is untouched.
+    expect(screen.getByTestId('step-seek-1').getAttribute('aria-label')).toBe(
+      seekControlLabel(inFlight.stepResults[1]),
+    );
+    expect(seekControlLabel(inFlight.stepResults[1])).toContain(NOT_ATTEMPTED);
+  });
+
+  it('a terminal snapshot keeps "not attempted" for a step it never reached', () => {
+    render(
+      <ExecutionProgressView
+        snapshot={{ ...inFlight, status: 'ERROR', errorCode: 'CANCELLED', endedAt: '2026-09-18T06:00:09Z' }}
+      />,
+    );
+
+    expect(screen.queryByTestId('step-waiting-1')).toBeNull();
+    expect(screen.getByTestId('step-offset-1').textContent).toBe(NOT_ATTEMPTED);
+    expect(screen.getByTestId('step-duration-1').textContent).toBe(NOT_ATTEMPTED);
   });
 });
 

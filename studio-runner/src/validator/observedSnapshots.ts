@@ -4,26 +4,31 @@ const same = (a: unknown, b: unknown): void => { demand(equalObserved(a, b), 'EV
 function omit<T extends object,K extends keyof T>(value:T,keys:readonly K[]):Omit<T,K> { const excluded=new Set<PropertyKey>(keys);return Object.fromEntries(Object.entries(value).filter(([key])=>!excluded.has(key))) as Omit<T,K>; }
 const sort = (a: string, b: string): number => Buffer.compare(Buffer.from(a), Buffer.from(b));
 /** Frozen source identity only. No current variable lookup or materialized value reconstruction. */
-export function inputChains(identity: AuthoringSnapshotIdentity, configuration: Configuration): string[] {
+/** Resolve only immutable public declaration eligibility; no argument materialization or private
+ * value is required for a saved source legitimately referenced by the step/global authoring context. */
+export function authoringReferences(identity: AuthoringSnapshotIdentity, context: AuthoringSnapshotIdentity['authoring']['steps'][number]['context'], text?: string): Declaration[] {
   const declarations = new Map(identity.authoredDeclarations.map(d => [d.referenceId, d]));
   demand(declarations.size === identity.authoredDeclarations.length, 'EVIDENCE_MISMATCH');
+  const local = new Map<string, Declaration>();
+  const add = (id: string, kind: Declaration['kind'], direct = false): void => {
+    const declaration = direct ? identity.authoredDeclarations.find(d => d.kind === 'secretRef' && d.secretId === id && d.referenceId === id) : declarations.get(id);
+    demand(declaration?.kind === kind, 'REFERENCE_MISMATCH'); local.set(declaration.referenceId, declaration);
+  };
+  for (const item of context.entries) {
+    const entry = item.kind === 'default' ? item.value : item;
+    if (entry.kind === 'variableRef') add(entry.referenceId, 'plain');
+    if (entry.kind === 'secretRef') add(entry.referenceId, 'secretRef');
+  }
+  for (const token of text?.matchAll(/<var\s+([A-Za-z0-9_.-]{1,64})>/gu) ?? []) add(token[1] ?? '', 'plain');
+  for (const token of text?.matchAll(/<secret\s+([A-Za-z0-9_.-]{1,64})>/gu) ?? []) add(token[1] ?? '', 'secretRef', true);
+  return [...local.values()].sort((a,b) => sort(a.referenceId,b.referenceId));
+}
+export function inputChains(identity: AuthoringSnapshotIdentity, configuration: Configuration): string[] {
   const used = new Map<string, Declaration>();
   const collect = (context: AuthoringSnapshotIdentity['authoring']['steps'][number]['context'], text?: string): Declaration[] => {
-    const local = new Map<string, Declaration>();
-    const add = (id: string, kind: Declaration['kind'], direct = false): void => {
-      const d = direct ? identity.authoredDeclarations.find(item => item.kind === 'secretRef' && item.secretId === id && item.referenceId === id) : declarations.get(id);
-      demand(d?.kind === kind, 'REFERENCE_MISMATCH');
-      const prior = used.get(d.referenceId); demand(!prior || equalObserved(prior, d), 'REFERENCE_MISMATCH');
-      used.set(d.referenceId, d); local.set(d.referenceId, d);
-    };
-    for (const item of context.entries) {
-      const entry = item.kind === 'default' ? item.value : item;
-      if (entry.kind === 'variableRef') add(entry.referenceId, 'plain');
-      if (entry.kind === 'secretRef') add(entry.referenceId, 'secretRef');
-    }
-    for (const token of text?.matchAll(/<var\s+([A-Za-z0-9_.-]{1,64})>/gu) ?? []) add(token[1] ?? '', 'plain');
-    for (const token of text?.matchAll(/<secret\s+([A-Za-z0-9_.-]{1,64})>/gu) ?? []) add(token[1] ?? '', 'secretRef', true);
-    return [...local.values()].sort((a,b) => sort(a.referenceId,b.referenceId));
+    const references = authoringReferences(identity, context, text);
+    for (const declaration of references) { const prior = used.get(declaration.referenceId); demand(!prior || equalObserved(prior,declaration),'REFERENCE_MISMATCH'); used.set(declaration.referenceId,declaration); }
+    return references;
   };
   const globalReferences = collect(identity.authoring.globalContext);
   let previous = hashObserved({ domain: 'studio.test-config', version: 1, ...configuration, globalContextHash: hashObserved(identity.authoring.globalContext), globalReferences });

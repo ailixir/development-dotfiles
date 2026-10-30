@@ -12,8 +12,8 @@
 
 | Actor | Trusted for | Notes |
 |---|---|---|
-| Studio backend (API pods) | Authorization, policy, persistence, validation of every model proposal | Holds the governed policy, the session row lock and the audit emitter. |
-| Guided worker (`studio-runner`, separate Deployment) | Driving the browser and producing **sanitized** observations | Mounted configuration carries TLS/JWT/callback material only. Since S3 it refuses a mounted `applicationPolicy` or `rules` key in any form (`CONFIGURATION_DENIED`) and receives the policy in the hash-bound context. |
+| Studio backend (API pods) | Authorization, persistence, validation of every model proposal | Holds the session row lock and the audit emitter; learning origins are the test's own URLs. |
+| Guided worker (`studio-runner`, separate Deployment) | Driving the browser and producing **sanitized** observations | Mounted configuration carries TLS/JWT/callback material only. It refuses a mounted `rules` key in any form (`CONFIGURATION_DENIED`) and applies the runner's one constant observation read profile to the origins of the context. |
 | Model gateway (GenAI provider behind the platform gateway) | Nothing. It proposes; trusted code decides (ADR-SC-004). | **Outside the trust boundary.** |
 | Application under test | Nothing | The page is untrusted input. |
 | SIEM | Receives the audit stream | Sink provisioning is OBS-009. |
@@ -22,18 +22,26 @@
 
 Per model call the backend sends one prompt built by `GuidedPromptAssembler` **(code)**:
 
-1. **The sanitized observation of the current page** (`progress.observation`, exported unchanged):
-   - `origin` of the page (one of the session's approved origins);
-   - per node: `role`, `name` (accessible name), `elementType`, `controlType`, `classification`,
-     `policyRuleId`, visibility/actionability flags, structural ids (`nodeId`, `parentNodeId`,
-     `regionId`, `formId`, `labelNodeIds`), and `locatorHints` (role+name, label, testId, text or
-     placeholder **values**);
-   - coverage metadata (counts of withheld regions and password controls).
-   Under `allowStructuralDiscovery` (always `true` in a governed policy) this includes the names of
-   controls, headings and links on the page. **These can carry personal or business data** (a
-   customer's name in a heading, an account number in a link text). Visible text and control values
-   are exported only where an approved governed read grant (`visibleText` / `controlValue`) covers
-   the region.
+1. **The sanitized outline of the current page** (ADR-SC-007; the string `progress.observation.outline`
+   and nothing else of the observation). It is at most 40,000 bytes, one line per shown element, and
+   each line is `role "name" [ref]` followed by closed, bounded hints:
+   - `ref`: a short per-observation reference (`e1`, `e2`, ...) the model names to pick an element;
+   - `name`: the accessible name, cut at 160 characters;
+   - states, `placeholder`, `url`, `near` (the nearest visible text) and `in` (the form, row, dialog
+     or region that contains the element) where the page has them, and the visible text of an
+     element where a read grant of the observation policy (`visibleText`) covers it;
+   - `origin` of the page (its host is on the deployment's allowed domains) in the context, with the
+     coverage counts (withheld regions, unsupported regions, password controls).
+   Password controls, withheld elements and unsupported regions appear as lines **without a ref**, so
+   the model cannot name them. The **facts table** (`progress.observation.facts`: per ref the role,
+   name, editable flag, the evidence string with the parts that supplied it, and the text where the
+   grant allowed it) **never leaves the backend**: the gates run over it, and a canary test proves it
+   is absent from every request body.
+   Under `allowStructuralDiscovery` (always `true` in the observation policy) the outline includes the
+   names of controls, headings and links on the page. **These can carry personal or business data**
+   (a customer's name in a heading, an account number in a link text). Visible text is exported only
+   where a read grant of the observation policy covers the region; current control values are never
+   rendered.
 2. **The execution evidence** of the last action (kind, document id, generation, origin).
 3. **Authored source text** of the test steps, limited to the regions INPUT-POLICY-01 branch A
    approves, plus opaque tokens for `<secret ID>` / `<var NAME>` (names only).
@@ -68,8 +76,8 @@ four append-only publication tables. **The content is not IDs/codes only.**
 | Table | Field-level content |
 |---|---|
 | `studio_guided_publication_bases` | Session/test/CSI identity, revisions and hashes, the original principal id, `runAuthorization`, `replayRequirements`, and `initialContext` `{kind, origin}` (a page origin). |
-| `studio_guided_publication_observations` | The full sanitized `observation` of each captured page: `origin`, and per node `role`, `name`, `locatorHints` values, and `permittedBusinessData` / `nonsecretApproved` content where a governed read grant allowed it. |
-| `studio_guided_publication_preparations` | `execution_evidence`, the model-derived `proposal` (target locator role/name or value, operation), and the runner's preparation `proof` (ids, hashes, expiry). |
+| `studio_guided_publication_observations` | The full sanitized `observation` of each captured page (at most 512 KiB a row, 4 MiB a session): `origin`, the `outline`, and per ref in the `facts` table the `role`, `name`, `editable`, `evidence` with its segments, and the `text` where a read grant allowed it. |
+| `studio_guided_publication_preparations` | `execution_evidence`, the model-derived `proposal` (target `{kind: node, ref}` with its document and generation, operation), and the runner's preparation `proof` (ids, hashes, expiry, and the `target` the runner reported: the locator it synthesized, its tier and the `{role, name}` identity of the element). |
 | `studio_guided_publication_admissions` | Ids and hashes only (admission, preparation, obligation, proposal hash). |
 
 Retention:
@@ -110,9 +118,24 @@ disclosed indefinite retention, the follow-up becomes an OBS-010 release blocker
 
 ### 3.4 Video (STUDIO-OBS-013)
 
-The learning run's recording is stored in the object store and expires with
-`studio.execution.evidence-retention` (default 30 days), the same window as observations.
-Details are OBS-013's.
+The learning run is recorded during every learn. The recording is kept and shown only for a
+learn that did not publish (`FAILED`, `CANCELLED`, `EXPIRED`, `UNKNOWN_OUTCOME`,
+`PUBLICATION_CONFLICT`, and a `SUCCEEDED` outcome whose publication is still `PENDING` or
+`REFUSED`), as the learning attempt and never as a proof. For a learn that publishes, the
+publication commit sends the `PUBLISHED` stop reason and the runner discards the recording before
+upload: no object, no manifest and no `recording-evidence` callback. The proof of a published learn
+is the observed replay of the published revision (trigger source `AFTER_LEARN`), stored and
+retained like every replay video, not a learning recording. A kept recording is stored in the
+object store and expires with `studio.execution.evidence-retention` (default 30 days), the same
+window as observations. Details are OBS-013's.
+
+If the runner misses the stop (lease lost, crash or context loss during finalize) and uploads
+anyway, the backend refuses the `recording-evidence` callback for a session whose learn published
+(`409 RECORDING_NOT_RETAINED`), writes no row and serves nothing: the unreferenced object is
+unreadable, and the bucket lifecycle removes it within 30 days, the retention every learn
+recording already has. The video route and the result projection decide on the publication, not
+on the session state string, so a recording row written before the commit is never shown for a
+published learn.
 
 Local recording scratch uses a private worker scope and process-incarnation marker. Normal
 settlement removes the owned recording after its upload attempt. After SIGKILL, the next startup
@@ -130,22 +153,19 @@ the five-second cooperative budget cannot cancel a stalled OS filesystem call. A
 cannot declare worker readiness while operations remain pending. The exact boundary and required
 platform proofs are in the [dated portability ruling](../../qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/architecture/portability-addendum.md).
 
-### 3.5 Governance and metering records (new in STUDIO-OBS-014)
+### 3.5 Metering records (new in STUDIO-OBS-014)
 
 | Store | Content | Retention |
 |---|---|---|
-| `studio_guided_policies`, `_policy_versions`, `_policy_approvals`, `_policy_audit` | The governed policy per application environment: allowed origins, observation application policy, side-effect stance, destructive vocabulary; author, approver, approval reference; trigger-written change chain | Indefinite, immutable (audit trail) |
-| `studio_guided_session_policies` | Which policy version each session ran under, and its hash | Indefinite, immutable |
 | `studio_guided_csi_token_days` | Per-CSI daily token counters (ids and integers only) | One row per CSI per day; not pruned (residual) |
 
 ### 3.6 Audit stream (AC-10)
 
 Every admitted guided action and every replay dispatch emits one event; validator-refused
-proposals emit `GUIDED_ACTION_REFUSED` at the implemented AC-4/5/6 decision. Events use logger `com.citi.put.checks.audit.studio` (`stream=studio-audit`, no MDC). Fields:
+proposals emit `GUIDED_ACTION_REFUSED` at the implemented AC-4/5 decision. Events use logger `com.citi.put.checks.audit.studio` (`stream=studio-audit`, no MDC). Fields:
 `schemaVersion, eventType, eventId, principalId, csiId, testId, sessionId|executionId,
 admissionId|attemptId, origin, obligationKind, targetRole, targetLabelHash, outcome, reasonCode`.
-IDs and closed codes only. The origin is emitted only after it is verified to be one of the
-session's approved origins (otherwise `UNAPPROVED`); the target's label leaves only as
+IDs and closed codes only. The origin is emitted only when it is a bare http(s) origin (an action ran on it only after the allowed-domains check; otherwise `UNAPPROVED`); the target's label leaves only as
 `targetLabelHash` = first 32 hex characters of `sha256(scopeHash + ":" + label)`.
 Volume bound: at most 200 admitted + 100 refused events per session, one per replay dispatch.
 Retention in SIEM is the sink's (OBS-009).
@@ -154,12 +174,13 @@ Retention in SIEM is the sink's (OBS-009).
 
 | Control | Where | Effect |
 |---|---|---|
-| Governed observation policy (AC-1) | Backend policy service + V19 (start-time enforcement implemented in S3) | Per application environment, versioned, approved by a Security approver who is not the author, audited by triggers. A learning session starts only under an approved, current version; its origins must stay inside the platform-trusted origins. |
-| Hash-bound policy in context | Backend context + runner | The runner refuses (`IDENTITY_MISMATCH`) a context whose policy hash it does not reproduce; the backend ends the session `RUNTIME_INCOMPATIBLE` on first receipt. Implemented in S3 with C2b. |
-| No mounted read authority | Runner (implemented in S3) | `applicationPolicy` and `rules` are refused in the worker's mounted configuration. |
+| Allowed domains | Backend (`AllowedDomains`) and runner | The deployment's allowed-domains list (`studio.navigation.allowed-domains`, runner `STUDIO_RUNNER_ALLOWED_DOMAINS`) is the only navigation control; empty denies everything. The session scope, runner context and replay requirements carry no origin list: each side checks its current list, and replay also pins each step to the origin it learned on. A test that names no URL is refused at start (`NO_APPLICATION_URL`); its first URL, in step order, must be on the list (`ORIGIN_NOT_ALLOWED`). Other authored URLs are checked when used as a destination. There is no per-CSI policy and no approval (STUDIO-GOV-001.3 and .4, then STUDIO-FLEX-001, user decisions). |
+| Page hosts outside the list | Runner (`browser.ts`) | Only an author-directed navigation needs a listed host. Page-initiated navigations, redirect chains, iframes and subresources may use any host (an SSO hop, say). Before an observation, or a replay step's guard check, the runner waits up to 15 s for the main frame to be on a listed host again; it observes and acts on nothing while it waits. If the page does not return, learning ends `FAILED` (`ORIGIN_NOT_ALLOWED` when the observation is a refresh; only the host reaches runner diagnostics) and the replay step fails `POLICY_REFUSED`. IP addresses are open: the runner has no egress proxy or address deny list, and firewalls own reachability (STUDIO-FLEX-001, user decision; accepted risk in `docs/architecture/studio-execution.md`). |
+| Observation read profile | Runner (`observationReadProfile.ts`) | One constant for every test: structural discovery on, visible text readable in the application region of every allowed domain, no field value readable. One grant per list entry; learning and replay take their grant ids from it (a function of the entry), so a learned read recipe replays under the same grant and is refused (`READ_REFUSED`) once its entry has left the list. |
+| No mounted read authority | Runner | `rules` are refused in the worker's mounted configuration. |
 | Sanitizer | Runner (`observationSanitizer.ts`) | Exports only policy-permitted classifications; withholds password controls and any `knownSecrets` value. |
 | INPUT-POLICY-01 branch A | Backend | Only approved authored source regions reach the model; secrets as names only. |
-| Semantic grounding, destructive-verb guard, side-effect stance (AC-4/5/6) | Backend validator | A click/press/check must trace to authored text; destructive verbs need the author's word; `CLARIFY_FIRST` (default) asks before the first side-effecting action, `DENY` refuses. Side-effecting is fail-closed (ruling AR-SEC001-FM): every click except one that only focuses a text field, textarea or select, every Enter press, and any press inside a form. So under `DENY` the learning run can navigate to authored URLs, fill, check/uncheck, select, read and assert, but cannot click buttons, links, labels or toggles. *(Implementation status: see the story's Dev Agent Record.)* |
+| Semantic grounding and destructive-verb guard (AC-4/5) | Backend validator | A click/press/check must trace to authored text, and a control whose label holds a destructive verb (a fixed backend list: delete, remove, erase, destroy, purge, pay, transfer, send money, submit order, place order, confirm payment, cancel subscription, close account, deactivate, revoke) needs the author's own word for it. A side-effecting click or Enter is allowed: it raises no confirmation question and is never denied by a stance (STUDIO-GOV-001.3). |
 | `labelSource` on clarification choices (AC-7) | Backend + UI | Page-derived labels are marked `PAGE` with role/region so the UI can mark them untrusted. |
 | Per-CSI budgets (AC-8) | Backend + V19 (implemented in S3) | Concurrent sessions and daily model tokens per CSI, persisted across replicas. |
 | Retention (AC-3) | Backend + V19 | §3.1–3.2. |
@@ -171,16 +192,11 @@ Retention in SIEM is the sink's (OBS-009).
    rationale; and of the stores in §3.3.
 3. `targetLabelHash` is reversible by dictionary for common labels within one scope (no keyed HMAC
    this wave; see `artifact-hmac-design-note.md` for the key infrastructure question).
-4. **Two policy sources for one application (interim, AC-2 clarification R-2).** Learning sessions
-   take origins and read rules from the governed policy (AC-1); replay still binds
-   `currentPolicyHash` to the platform-configured `TrustedPolicy` (AR-2 g). Interim behaviour:
-   (1) governed origins must be a subset of the trusted origins, re-checked at every learning
-   start, so governance can narrow but never widen; (2) approving or narrowing a governed policy
-   version changes **no** replay binding or verdict for an existing revision, so a CSI owner who
-   removes an origin stops new learning on it while published revisions keep replaying against it
-   for as long as the platform `TrustedPolicy` allows it; (3) replay is bounded by the platform
-   `TrustedPolicy` alone. Unifying the two sources is a follow-up story for @pm, @architect ruling
-   first.
+4. **The deployment list is the only navigation control (STUDIO-FLEX-001).** Which domains a learning
+   session and every replay may open is `studio.navigation.allowed-domains`, set per environment (with the `studio.navigation.allow-all-domains` option, ON by default for now, one chart value for backend and runner, that
+   ignores the list and allows any DNS-named http(s) host). IP
+   addresses are open (firewalls own reachability): the browser can reach internal endpoints, including
+   cloud metadata, and an IdP page can appear in the video evidence (accepted risks, user decision).
 5. Guards are proven with a controlled model provider only; real-model behaviour of the guards is
    measured in OBS-009's benchmark.
 6. `studio_guided_csi_token_days` grows by one row per CSI per day (ids and integers).

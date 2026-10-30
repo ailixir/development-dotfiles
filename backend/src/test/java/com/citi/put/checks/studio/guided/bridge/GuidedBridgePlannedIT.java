@@ -35,6 +35,7 @@ import com.citi.put.checks.studio.guided.translation.GuidedStepVerifier;
 import com.citi.put.checks.studio.guided.translation.GuidedTranslationProperties;
 import com.citi.put.checks.studio.guided.translation.GuidedTranslationService;
 import com.citi.put.checks.studio.guided.translation.GuidedTranslationStore;
+import com.citi.put.checks.studio.support.ObservedReadProfile;
 import com.citi.put.checks.studio.support.RunnerProcessHarness;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -124,6 +125,18 @@ class GuidedBridgePlannedIT {
   /** Set in {@code @BeforeEach} for the configuration-reference case only. */
   static volatile boolean configuredInput;
 
+  /**
+   * ADR-SC-007 WI-4 (T-J5 to T-J7): the authored page is the actions page (a select, an input and a
+   * button) instead of the controlled /start page.
+   */
+  static volatile boolean actionsPage;
+
+  /** Test names that run on the actions page. */
+  static final java.util.Set<String> ACTIONS_PAGE_TESTS =
+      java.util.Set.of(
+          "realPrepareProofAgreesWithTheGatedFactAndAMutatedProofIsRefusedBeforeAdmission",
+          "closedPrepareRefusalIsDefiniteAndAStalePrepareStaysUnknownOutcome");
+
   record Selection(int occurrence, ObjectNode action) {}
 
   static {
@@ -168,6 +181,21 @@ class GuidedBridgePlannedIT {
             }
           });
       PROVIDER.start();
+      ENV.application.createContext(
+          "/actions",
+          exchange -> {
+            byte[] page =
+                ("<html><body><main aria-label='Operations'><label>Plan<select>"
+                        + "<option>Alpha</option><option>Beta</option></select></label>"
+                        + "<label>Destination<input oninput=\"fetch('/receipt',{method:'POST',"
+                        + "body:this.value})\"></label><button onclick=\"fetch('/clicked',"
+                        + "{method:'POST'})\">Go</button></main></body></html>")
+                    .getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().add("Content-Type", "text/html; charset=utf-8");
+            exchange.sendResponseHeaders(200, page.length);
+            exchange.getResponseBody().write(page);
+            exchange.close();
+          });
       ENV.start();
     } catch (Exception failure) {
       throw new ExceptionInInitializerError(failure);
@@ -229,8 +257,7 @@ class GuidedBridgePlannedIT {
 
     @Bean
     GuidedTranslationProperties properties() {
-      return new GuidedTranslationProperties(
-          true, true, List.of("orders"), List.of("fixture"), 131072, 2048, 60, "worker-1");
+      return new GuidedTranslationProperties(true, 131072, 2048, 60, "worker-1");
     }
 
     @Bean
@@ -240,36 +267,21 @@ class GuidedBridgePlannedIT {
 
     @Bean
     GuidedSourceClassifier classifier(GuidedTranslationProperties props) {
-      return new GuidedSourceClassifier(ENV.contracts, props, new CredentialPatternScreen());
+      return new GuidedSourceClassifier(
+          ENV.contracts,
+          new CredentialPatternScreen(),
+          com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     }
 
     @Bean
     GuidedSourceInputResolver inputs() {
-      return new GuidedSourceInputResolver(ENV.contracts);
+      return new GuidedSourceInputResolver(
+          ENV.contracts, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     }
 
     @Bean
     GuidedStepVerifier verifier(GuidedTranslationStore store) {
       return new GuidedStepVerifier(store);
-    }
-
-    private com.citi.put.checks.studio.guided.publication.ObservedReplayPins fixturePins() {
-      var policy =
-          ENV.contracts
-              .object()
-              .put("version", 1)
-              .put("policyId", "fixture-policy")
-              .put("policyVersion", "1")
-              .put("applicationId", "orders")
-              .put("environment", "fixture")
-              .put("entryPolicyId", "blank");
-      policy.putArray("allowedOrigins").add(ENV.origin);
-      policy.putArray("rules");
-      policy.putNull("applicationPolicy");
-      return new com.citi.put.checks.studio.guided.publication.ObservedReplayPins(
-          ENV.contracts,
-          new com.citi.put.checks.studio.guided.publication.ObservedReplayProperties(
-              true, 30000, 1048576, 4194304, 2097152, "[]", "[" + policy + "]", 1280, 720));
     }
 
     @Bean
@@ -286,16 +298,15 @@ class GuidedBridgePlannedIT {
           store,
           verifier,
           new CsiOwnershipEvaluator(),
-          fixturePins(),
+          com.citi.put.checks.studio.support.TestDomains.FIXTURES,
           new com.citi.put.checks.studio.secrets.VaultStudioReferenceResolver(
-              new com.citi.put.checks.studio.secrets.FakeStudioVaultProvider(java.util.Map.of()),
-              (principal, csi, env, secret) -> true),
-          (principal, csi, env, secret) -> true);
+              new com.citi.put.checks.studio.secrets.FakeStudioVaultProvider(java.util.Map.of())));
     }
 
     @Bean
     GuidedMaterializationService materialization(JdbcTemplate jdbc) {
-      return new GuidedMaterializationService(jdbc, ENV.contracts);
+      return new GuidedMaterializationService(
+          jdbc, ENV.contracts, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     }
 
     @Bean
@@ -312,6 +323,7 @@ class GuidedBridgePlannedIT {
               ENV.contracts,
               access,
               new GuidedSessionProperties(true, Map.of()),
+              com.citi.put.checks.studio.support.TestDomains.FIXTURES,
               Clock.systemUTC());
       service.installBridge(
           materialization,
@@ -327,14 +339,7 @@ class GuidedBridgePlannedIT {
               ENV.contracts));
       // STUDIO-OBS-014 S3: one uniform governed policy for the class (ar-mounted-rules B14); the
       // migrated reads rely on its business-read grant.
-      com.citi.put.checks.studio.support.ObservedPublicationFixture.installGovernance(
-          service,
-          jdbc,
-          "CSI-123",
-          "orders",
-          "fixture",
-          java.util.List.of(ENV.origin),
-          governedPolicy());
+      com.citi.put.checks.studio.support.ObservedPublicationFixture.installCsiBudget(service, jdbc);
       return service;
     }
 
@@ -401,7 +406,8 @@ class GuidedBridgePlannedIT {
               dispatch,
               gateway,
               ENV.contracts,
-              new GuidedPromptAssembler(ENV.contracts),
+              new GuidedPromptAssembler(
+                  ENV.contracts, com.citi.put.checks.studio.support.TestDomains.FIXTURES),
               inputs,
               new GuidedProposalValidator(ENV.contracts),
               new GuidedDependencyPlanner(sessions),
@@ -410,16 +416,6 @@ class GuidedBridgePlannedIT {
       service.installDatabase(jdbc);
       return service;
     }
-  }
-
-  /**
-   * The class's governed observation application policy (ar-mounted-rules B14): a structural policy
-   * with one business-read grant on {@code <main aria-label='Operations'>}. On pages without that
-   * anchor (privacyEcho, nativeToggle, /echo) the grant yields no candidate, so the uniform policy
-   * behaves as "no grants" there.
-   */
-  static ObjectNode governedPolicy() {
-    return ENV.governedPolicy();
   }
 
   /**
@@ -511,6 +507,11 @@ class GuidedBridgePlannedIT {
 
   /** The single authored step; the configuration case declares and references a plain input. */
   static String sourceText() {
+    if (actionsPage) {
+      return "Visit "
+          + ENV.origin
+          + "/actions then type fixture-input, select Beta, select Gamma and click Go.";
+    }
     return "Visit "
         + ENV.origin
         + "/start then copy the displayed order into Destination and type fixture-input."
@@ -552,11 +553,10 @@ class GuidedBridgePlannedIT {
     ENV.isolateDatabase(fixtureDataSource);
     // STUDIO-OBS-014 S3b: each test runs on a freshly migrated isolated database, so the class's
     // approved governed policy is seeded here; the bean-time seed only reached the base database.
-    com.citi.put.checks.studio.support.ObservedPublicationFixture.seedPolicy(
-        jdbc, "CSI-123", "orders", "fixture", List.of(ENV.origin), governedPolicy(), "ALLOW");
     // aria-bridge-ruling01 N6: the real source of truth is one ui_tests row (planning IT shape).
     configuredInput =
         testName.equals("authorizedConfigurationReferenceIsAllocatedTransportedAndConsumedExactly");
+    actionsPage = ACTIONS_PAGE_TESTS.contains(testName);
     PROVIDER_KINDS.clear();
     sourcePlan = null;
     nextSelection = null;
@@ -587,10 +587,9 @@ class GuidedBridgePlannedIT {
         mapper.writeValueAsString(AuthoringRevisionIdentity.create(authoring, Map.of())));
     ENV.resetWorkerState();
     Path journal = ENV.prepareWorkerJournal();
-    // STUDIO-OBS-014 S3 (RK-2, ar-mounted-rules): the worker is given neither `rules` nor
-    // `applicationPolicy`; the class's governed policy (governedPolicy()) is frozen into each
-    // session and reaches the worker in the hash-bound context. This record is what the runner was
-    // configured with (no secret); the runner refuses any key it does not enumerate.
+    // The worker is given no `rules`: the read profile is the runner's own constant. This record is
+    // what the runner was configured with (no secret); the runner refuses any key it does not
+    // enumerate.
     ObjectNode config =
         ENV.contracts
             .object()
@@ -670,7 +669,7 @@ class GuidedBridgePlannedIT {
                 .object()
                 .put("kind", "visibleText")
                 .put("classification", "permittedBusinessData")
-                .put("policyRuleId", "business-read"));
+                .put("policyRuleId", ObservedReadProfile.ruleId(ENV.origin)));
     JsonNode readLedger = admit(id, reserve(id, read));
     advance(id, readLedger, "read");
     assertThat(
@@ -890,12 +889,10 @@ class GuidedBridgePlannedIT {
     assertThat(progress(id).path("teardownStatus").asText().equals("CONFIRMED")).isTrue();
 
     assertThatThrownBy(() -> sessions.runnerContext(controller, id, 1)).hasMessage("CANCELLED");
-    // ar-mounted-rules qaOracle (3), moved from the retired configured-region case: the mounted
-    // worker.json carries neither `rules` nor `applicationPolicy`; the read above was authorized by
-    // the governed policy alone.
+    // The mounted worker.json carries no `rules`; the read above was authorized by the runner's
+    // constant read profile alone.
     JsonNode mounted = ENV.contracts.parse(Files.readString(ENV.temp.resolve("worker.json")));
     assertThat(mounted.has("rules")).isFalse();
-    assertThat(mounted.has("applicationPolicy")).isFalse();
     // aria-bridge-ruling01 §4.3: compensating DB oracle for the retired private-echo case.
     assertThat(
             jdbc.queryForObject(
@@ -1194,6 +1191,105 @@ class GuidedBridgePlannedIT {
     assertThat(ENV.navigations.get()).isEqualTo(1);
   }
 
+  /**
+   * T-J5 (ADR-SC-007 D2, WI-3 I-15): for a click, a fill and a select the real runner's prepare
+   * proof agrees with the fact the gates judged (the production admit stores it only after
+   * GuidedPreparationCrossCheck, so EVIDENCE_MISMATCH would have been a 422 here), and the same
+   * proof with a mutated identity role is refused EVIDENCE_MISMATCH before it is stored.
+   */
+  @Test
+  void realPrepareProofAgreesWithTheGatedFactAndAMutatedProofIsRefusedBeforeAdmission()
+      throws Exception {
+    String id = plannedSession(planActions());
+    advance(id, admit(id, reserve(id, navigation(id))), "navigate");
+    ObjectNode fill = proposalByName(id, 1, "fill", "Destination");
+    fill.withObject("/operation").set("value", authoredLiteral(id, 1));
+    ObjectNode select = proposalByName(id, 2, "selectOption", "Plan");
+    select.withObject("/operation").set("value", authoredLiteral(id, 2));
+    ObjectNode click = proposalByName(id, 3, "click", "Go");
+    int checked = 0;
+    for (ObjectNode hand : List.of(fill, select, click)) {
+      JsonNode association = reserve(id, hand);
+      JsonNode observation = progress(id).path("observation").deepCopy();
+      JsonNode admitted = admit(id, association);
+      String admission = admitted.path("admission").path("admissionId").asText();
+      JsonNode proof =
+          ENV.contracts.parse(
+              jdbc.queryForObject(
+                  "SELECT proof::text FROM studio_guided_preparations WHERE session_id=? AND"
+                      + " admission_id=?",
+                  String.class,
+                  id,
+                  admission));
+      JsonNode proposal = association.path("proposal");
+      assertThat(proof.path("target").isObject()).as("a node ref reports a target").isTrue();
+      GuidedPreparationCrossCheck.verify(proposal, proof, observation);
+      ObjectNode mutated = proof.deepCopy();
+      mutated.withObject("/target/identity").put("role", "mutated-role");
+      assertThatThrownBy(() -> GuidedPreparationCrossCheck.verify(proposal, mutated, observation))
+          .isInstanceOfSatisfying(
+              GuidedSessionException.class,
+              refusal -> assertThat(refusal.getMessage()).isEqualTo("EVIDENCE_MISMATCH"));
+      assertThatThrownBy(() -> sessions.storePreparation(controller, id, 1, proposal, mutated))
+          .isInstanceOfSatisfying(
+              GuidedSessionException.class,
+              refusal -> assertThat(refusal.getMessage()).isEqualTo("EVIDENCE_MISMATCH"));
+      advance(id, admitted, "tj5-" + checked);
+      checked++;
+    }
+    assertThat(checked).isEqualTo(3);
+    assertThat(ENV.receipt.get()).isEqualTo("fixture-input");
+    assertThat(ENV.clickReceipts.get()).isEqualTo(1);
+  }
+
+  /**
+   * T-J7 (ADR-SC-007 D8): a closed {PREPARATION_DENIED, OPTION_NOT_PRESENT} answer of the real
+   * runner is a definite refusal (TARGET_MISMATCH carrying its reason, never UNKNOWN_OUTCOME),
+   * while a prepare the runner answers with an unclosed 409 (a stale document) stays
+   * UNKNOWN_OUTCOME. Both go to the real runner exactly as prepareAndAdmit sends them.
+   */
+  @Test
+  void closedPrepareRefusalIsDefiniteAndAStalePrepareStaysUnknownOutcome() throws Exception {
+    String id = plannedSession(planAbsentOption());
+    advance(id, admit(id, reserve(id, navigation(id))), "navigate");
+    ObjectNode select = proposalByName(id, 1, "selectOption", "Plan");
+    select.withObject("/operation").set("value", authoredLiteral(id, 1));
+    JsonNode association = reserve(id, select);
+    JsonNode proposal = association.path("proposal");
+    ObjectNode context = sessions.runnerContext(controller, id, 1);
+    runner.send("context", context);
+    assertThatThrownBy(() -> runner.send("prepare", prepareRequest(context, proposal)))
+        .isInstanceOfSatisfying(
+            GuidedSessionException.class,
+            refusal -> {
+              assertThat(refusal.getMessage()).isEqualTo("TARGET_MISMATCH");
+              assertThat(refusal.messageCode()).isEqualTo("OPTION_NOT_PRESENT");
+            });
+    ObjectNode stale = proposal.deepCopy();
+    stale.withObject("/target").put("documentId", UUID.randomUUID().toString());
+    assertThatThrownBy(() -> runner.send("prepare", prepareRequest(context, stale)))
+        .isInstanceOfSatisfying(
+            GuidedSessionException.class,
+            refusal -> assertThat(refusal.getMessage()).isEqualTo("UNKNOWN_OUTCOME"));
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM studio_guided_preparations WHERE session_id=? AND admission_id IS NULL",
+                Integer.class,
+                id))
+        .as("neither refused prepare stored a preparation (the navigation's is admitted)")
+        .isZero();
+    assertThat(session(id).path("state").asText()).isEqualTo("PROPOSING");
+  }
+
+  /** The prepare request prepareAndAdmit sends for a proposal. */
+  ObjectNode prepareRequest(ObjectNode context, JsonNode proposal) {
+    ObjectNode request = materialization.identity(context);
+    request.set("proposal", proposal);
+    request.put("requestDigest", GuidedContracts.hash(proposal));
+    request.set("expiresAt", context.path("leaseExpiresAt"));
+    return request;
+  }
+
   @Test
   void producerReceiptAndOutcomeRollbackTogetherAfterRealReadAndNoReplay() throws Exception {
     String id = plannedSession(planDataflow());
@@ -1207,7 +1303,7 @@ class GuidedBridgePlannedIT {
                 .object()
                 .put("kind", "visibleText")
                 .put("classification", "permittedBusinessData")
-                .put("policyRuleId", "business-read"));
+                .put("policyRuleId", ObservedReadProfile.ruleId(ENV.origin)));
     JsonNode admission = admit(id, reserve(id, read));
     jdbc.execute(
         "CREATE FUNCTION bridge_fail_producer() RETURNS trigger LANGUAGE plpgsql AS $$ "
@@ -1452,7 +1548,7 @@ class GuidedBridgePlannedIT {
                 .object()
                 .put("kind", "visibleText")
                 .put("classification", "permittedBusinessData")
-                .put("policyRuleId", "business-read"));
+                .put("policyRuleId", ObservedReadProfile.ruleId(ENV.origin)));
     advance(id, admit(id, reserve(id, read)), "read");
     // Trusted coordinator test setup ONLY (R-5 round trip); this does not implement005 question
     // semantics/UI.
@@ -1971,6 +2067,11 @@ class GuidedBridgePlannedIT {
   ObjectNode refreshRequest(String id) {
     ObjectNode request = materialization.identity(sessions.runnerContext(controller, id, 1));
     request.put("expectedGeneration", progress(id).path("generation").asInt());
+    // ADR-SC-007 D1: a refresh names the projection focus (step text and target intents) the
+    // outline is keyed by.
+    ObjectNode focus = request.putObject("focus");
+    focus.put("stepText", "");
+    focus.putArray("targetIntents");
     return request;
   }
 
@@ -1990,8 +2091,7 @@ class GuidedBridgePlannedIT {
             .put("testId", testId.toString())
             .put("sourceRevision", "1")
             .put("configurationRevision", "1")
-            .put("environmentId", "fixture")
-            .put("applicationId", "orders");
+            .put("environmentId", "fixture");
     start.set("versions", versions());
     return sessions.start(user, UUID.randomUUID().toString(), start).path("sessionId").asText();
   }
@@ -2038,7 +2138,54 @@ class GuidedBridgePlannedIT {
 
   /** The authored navigation destination. */
   ObjectNode destinationReference() {
-    return span("destination", "navigate.destination", 6, 6 + (ENV.origin + "/start").length());
+    String path = actionsPage ? "/actions" : "/start";
+    return span("destination", "navigate.destination", 6, 6 + (ENV.origin + path).length());
+  }
+
+  /** The authored select literal {@code word} (T-J5 and T-J7). */
+  ObjectNode selectReference(String word) {
+    int start = sourceText().indexOf(word);
+    return span("nonsecretText", "selectOption.value", start, start + word.length());
+  }
+
+  /** The actions page plan: navigate, fill, select Beta, click Go. */
+  ObjectNode planActions() {
+    return planTemplate(
+        List.of(destinationReference(), literalReference(), selectReference("Beta")),
+        List.of(
+            obligation(step.toString(), 0, "navigate", "page", 0, null),
+            obligation(step.toString(), 1, "fill", "Destination", 1, null),
+            obligation(step.toString(), 2, "selectOption", "Plan", 2, null),
+            obligation(step.toString(), 3, "click", "Go", null, null)));
+  }
+
+  /** The actions page plan whose select literal "Gamma" is not among the live options. */
+  ObjectNode planAbsentOption() {
+    return planTemplate(
+        List.of(destinationReference(), selectReference("Gamma")),
+        List.of(
+            obligation(step.toString(), 0, "navigate", "page", 0, null),
+            obligation(step.toString(), 1, "selectOption", "Plan", 1, null)));
+  }
+
+  /** A hand-built proposal whose target is the shown outline line named {@code name}. */
+  ObjectNode proposalByName(String id, int ordinal, String kind, String name) {
+    ObjectNode proposal = proposal(id, ordinal, kind, null);
+    proposal
+        .withObject("/target")
+        .put("kind", "node")
+        .put(
+            "ref",
+            com.citi.put.checks.studio.support.JoinedRefs.refByName(
+                progress(id).path("observation"), name));
+    return proposal;
+  }
+
+  ObjectNode authoredLiteral(String id, int referenceIndex) {
+    return ENV.contracts
+        .object()
+        .put("kind", "authoredLiteral")
+        .put("sourceInputId", inputId(id, referenceIndex));
   }
 
   /** The authored literal {@code fixture-input}. */
@@ -2051,7 +2198,6 @@ class GuidedBridgePlannedIT {
     ObjectNode plan = ENV.contracts.object();
     references.forEach(plan.putArray("sourceReferences")::add);
     obligations.forEach(plan.putArray("obligations")::add);
-    plan.putArray("needs");
     return plan;
   }
 
@@ -2081,16 +2227,8 @@ class GuidedBridgePlannedIT {
             List.of(destinationReference()),
             List.of(
                 obligation(step.toString(), 0, "navigate", "page", 0, null),
-                obligation(step.toString(), 1, "read", "source", null, "order"),
+                obligation(step.toString(), 1, "read", "Order number", null, "order"),
                 obligation(step.toString(), 2, "fill", "destination", null, "order")));
-    plan.withArray("needs")
-        .addObject()
-        .put("needId", "order")
-        .put("producerStepId", step.toString())
-        .putArray("consumers")
-        .addObject()
-        .put("stepId", step.toString())
-        .put("argumentSlot", "fill.value");
     return plan;
   }
 
@@ -2172,7 +2310,11 @@ class GuidedBridgePlannedIT {
     ObjectNode target = hand.path("target").deepCopy();
     target.remove(List.of("documentId", "generation"));
     action.set("target", target);
-    action.set("operation", hand.path("operation").deepCopy());
+    ObjectNode scripted = hand.path("operation").deepCopy();
+    // ADR-SC-007: the model names no read recipe; the server derives it from the grant under which
+    // the runner read.
+    scripted.remove("recipe");
+    action.set("operation", scripted);
     int occurrence = hand.path("coordinate").path("ordinal").asInt();
     nextSelection = new Selection(occurrence, action);
     var stopped = org.mockito.Mockito.spy(dispatch);
@@ -2193,7 +2335,8 @@ class GuidedBridgePlannedIT {
             stopped,
             gateway,
             ENV.contracts,
-            new GuidedPromptAssembler(ENV.contracts),
+            new GuidedPromptAssembler(
+                ENV.contracts, com.citi.put.checks.studio.support.TestDomains.FIXTURES),
             inputs,
             new GuidedProposalValidator(ENV.contracts),
             new GuidedDependencyPlanner(sessions),
@@ -2264,18 +2407,13 @@ class GuidedBridgePlannedIT {
     if (testId == null) {
       target.put("kind", "page");
     } else {
-      JsonNode selected = null;
-      for (JsonNode node : progress(id).path("observation").path("nodes")) {
-        for (JsonNode hint : node.path("locatorHints")) {
-          if (hint.path("kind").asText().equals("testId")
-              && hint.path("value").asText().equals(testId)) {
-            selected = node;
-          }
-        }
-      }
-      assertThat(selected).isNotNull();
-      target.put("nodeId", selected.path("nodeId").asText());
-      target.putObject("locator").put("kind", "testId").put("value", testId).put("exact", true);
+      // ADR-SC-007: the model names a ref of the outline; the runner derives the locator.
+      target
+          .put("kind", "node")
+          .put(
+              "ref",
+              com.citi.put.checks.studio.support.JoinedRefs.refOfTestId(
+                  progress(id).path("observation"), testId));
     }
     return p;
   }
@@ -2339,11 +2477,9 @@ class GuidedBridgePlannedIT {
     ObjectNode identity = ENV.contracts.object();
     identity.set("coordinate", proposal.path("coordinate"));
     identity.set("origin", proposal.path("executionEvidence").path("origin"));
-    identity.set(
-        "locator",
-        proposal.path("target").has("locator")
-            ? proposal.path("target").path("locator")
-            : com.fasterxml.jackson.databind.node.NullNode.instance);
+    // ADR-SC-007: the identity covers the target the runner reported on the preparation proof, null
+    // for the page action this helper is used on.
+    identity.set("target", com.fasterxml.jackson.databind.node.NullNode.instance);
     identity.set("operation", proposal.path("operation"));
     return GuidedContracts.hash(identity);
   }

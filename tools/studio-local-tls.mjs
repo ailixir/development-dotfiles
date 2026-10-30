@@ -102,6 +102,12 @@ export function prepare(workDirectory, env = process.env) {
     PATH: env.PATH || '', HOME: env.HOME || '', TMPDIR: dir,
     ...(env.PLAYWRIGHT_BROWSERS_PATH ? { PLAYWRIGHT_BROWSERS_PATH: env.PLAYWRIGHT_BROWSERS_PATH } : {}),
     STUDIO_RUNNER_HOST: '127.0.0.1', STUDIO_RUNNER_PORT: env.DEV_STUDIO_RUNNER_PORT || '8090', STUDIO_RUNNER_POOL_SIZE: '1',
+    // The local navigation whitelist; the backend's application-local.yml carries the same list.
+    STUDIO_RUNNER_ALLOWED_DOMAINS: 'localhost,example.com,practicetestautomation.com',
+    // Allow-all is ON when this key is absent (the default for now). STUDIO_ALLOW_ALL_DOMAINS (the backend's own
+    // variable) is passed through verbatim, so `false` enforces the list on both local processes and the runner
+    // validates the value exactly.
+    ...(env.STUDIO_ALLOW_ALL_DOMAINS ? { STUDIO_RUNNER_ALLOW_ALL_DOMAINS: env.STUDIO_ALLOW_ALL_DOMAINS } : {}),
     STUDIO_RUNNER_SERVICE_IDENTITY: env.STUDIO_RUNNER_SERVICE_TOKEN || randomBytes(32).toString('base64url'),
     STUDIO_RUNNER_CALLBACK_IDENTITY: env.STUDIO_CALLBACK_SERVICE_TOKEN || randomBytes(32).toString('base64url'),
     STUDIO_RUNNER_CALLBACK_BASE_URL: `http://127.0.0.1:${env.DEV_BACKEND_PORT || '8080'}`,

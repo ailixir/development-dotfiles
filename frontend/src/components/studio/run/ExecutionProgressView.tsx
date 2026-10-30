@@ -10,7 +10,13 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import type { ExecutionSnapshot, StepResult, TestDetailDto } from '@/types/studio/studioTypes';
+import {
+  isTerminalExecutionStatus,
+  type ExecutionSnapshot,
+  type StepResult,
+  type TestDetailDto,
+} from '@/types/studio/studioTypes';
+import { displayLogMessage, logEntryTime } from '@/utils/studio/logTime';
 import {
   executionErrorNarrative,
   learnAgainOffered,
@@ -61,6 +67,8 @@ import {
 export const NOT_ATTEMPTED = 'not attempted';
 export const LOGS_TRUNCATED_STATEMENT =
   'Earlier log lines were dropped before this report reached you: the run produced more than the server retains.';
+export const STEP_WAITING_WORD = 'Waiting to start';
+export const STEP_RUNNING_WORD = 'Running';
 export const RERUN_LABEL = 'Run again';
 /**
  * The replay per-step seek's visible label (STUDIO-OBS-008 AC-7): "Seek to step N", the same cited
@@ -122,16 +130,31 @@ function timingText(value: number | null, label: string): string {
   return value === null ? NOT_ATTEMPTED : `${label} ${value}ms`;
 }
 
-const StepTimings: React.FC<{ step: StepResult }> = ({ step }) => (
-  <Stack direction="row" spacing={2}>
-    <Typography variant="caption" data-testid={`step-offset-${step.stepIndex}`}>
-      {timingText(step.offsetMs, 'starts at')}
-    </Typography>
-    <Typography variant="caption" data-testid={`step-duration-${step.stepIndex}`}>
-      {timingText(step.durationMs, 'took')}
-    </Typography>
-  </Stack>
-);
+/**
+ * In a snapshot that has not ended, a step that is still `PENDING` or `RUNNING` has no reading to
+ * show, so it says so with one word instead of two "not attempted" slots. "Not attempted" stays
+ * what it always was: the words for a step a finished run never reached (and the seek control's
+ * 10.16a name, {@link seekControlLabel}).
+ */
+const StepTimings: React.FC<{ step: StepResult; runEnded: boolean }> = ({ step, runEnded }) => {
+  if (!runEnded && (step.status === 'PENDING' || step.status === 'RUNNING')) {
+    return (
+      <Typography variant="caption" data-testid={`step-waiting-${step.stepIndex}`}>
+        {step.status === 'RUNNING' ? STEP_RUNNING_WORD : STEP_WAITING_WORD}
+      </Typography>
+    );
+  }
+  return (
+    <Stack direction="row" spacing={2}>
+      <Typography variant="caption" data-testid={`step-offset-${step.stepIndex}`}>
+        {timingText(step.offsetMs, 'starts at')}
+      </Typography>
+      <Typography variant="caption" data-testid={`step-duration-${step.stepIndex}`}>
+        {timingText(step.durationMs, 'took')}
+      </Typography>
+    </Stack>
+  );
+};
 
 /**
  * The seek control's accessible name, per step: its visible label, and for a step with no reading the
@@ -167,6 +190,8 @@ const StepSeekControl: React.FC<{
         aria-label={seekControlLabel(step)}
         data-testid={`step-seek-${step.stepIndex}`}
         data-seek-active={active ? 'true' : undefined}
+        // Text variant: no side padding, so the label sits on the column's left edge with the step's text.
+        sx={{ px: active ? 0.75 : 0, minWidth: 0 }}
         onClick={() => {
           if (eligibility.seekable) {
             onUsed();
@@ -444,7 +469,7 @@ export const ExecutionProgressView: React.FC<ExecutionProgressViewProps> = ({
               <Typography variant="caption" data-testid={`step-status-${step.stepIndex}`}>
                 {step.status}
               </Typography>
-              <StepTimings step={step} />
+              <StepTimings step={step} runEnded={isTerminalExecutionStatus(snapshot.status)} />
               {onSeekStep && failureSeekOffset(snapshot, step) === null && (
                 <StepSeekControl
                   step={step}
@@ -489,8 +514,11 @@ export const ExecutionProgressView: React.FC<ExecutionProgressViewProps> = ({
                 component="div"
                 data-testid={`log-line-${index}`}
               >
-                {/* `at` is nullable by contract; a line without a reading shows no time, not "null". */}
-                {[entry.at, entry.level, entry.message].filter((part) => part !== null).join(' ')}
+                {/* `at` is nullable by contract; a line without a reading shows no time, not "null".
+                    The closing line takes the run's end time, and steps count from 1 like the list. */}
+                {[logEntryTime(entry, snapshot.endedAt), entry.level, displayLogMessage(entry)]
+                  .filter((part) => part !== null)
+                  .join(' ')}
               </Typography>
             ))}
           </Box>

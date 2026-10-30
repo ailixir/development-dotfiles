@@ -8,6 +8,7 @@ import type { StudioVariable, TestDto } from '@/types/studio/studioTypes';
 import {
   GUIDED_ERROR_CODES,
   type GuidedClarification,
+  type GuidedLatestAttempts,
   type GuidedResult,
   type GuidedSessionView,
   type GuidedStartRequest,
@@ -19,7 +20,6 @@ import {
   PUBLICATION_CONFLICT_SCENARIO,
   endsIn,
   learnWithQuestion,
-  learnWithSettlingVideo,
   loginRequired,
   refusesStart,
   type GuidedMockRefusal,
@@ -35,8 +35,11 @@ import {
   hasAmbiguousDeclarations,
   resetGuidedMocks,
   setGuidedScenario,
+  SEEDED_FAILED_ATTEMPT_SESSION_ID,
+  SEEDED_FAILED_ATTEMPT_TEST_ID,
   UNAUTHENTICATED_REFUSAL,
 } from './guidedHandlers';
+import { stoppedStepOf } from '@/components/studio/guided/guidedStoppedStep';
 import {
   capabilityHandlers,
   capabilityRequestCount,
@@ -46,7 +49,7 @@ import {
   setGuidedStartCapability,
   setVaultSecrets,
 } from './capabilityHandlers';
-import { MOCK_EXECUTE_DENIED_CSIS } from './fixtures';
+import { MOCK_EXECUTE_DENIED_CSIS, mockTests } from './fixtures';
 import { draftsByReadiness } from './readinessFixtures';
 
 /**
@@ -199,7 +202,6 @@ describe('every body the mirror returns validates against the v3 contract', () =
   it.each([
     ['page choice', 'PAGE_CHOICE' as const],
     ['source choice', 'SOURCE_CHOICE' as const],
-    ['side-effect confirmation', 'SIDE_EFFECT_CONFIRMATION' as const],
   ])('asks a %s question that validates and holds the session until it is answered', async (_name, kind) => {
     setGuidedScenario(learnWithQuestion(kind));
     const id = (await start()).body.session.sessionId;
@@ -317,20 +319,32 @@ describe('every body the mirror returns validates against the v3 contract', () =
     expect(result.body.failure).toEqual({ code: 'LOGIN_REQUIRED', detail: result.body.detail });
   });
 
-  it('keeps the recording PROCESSING (no timings) for the scripted reads, then AVAILABLE with timings', async () => {
-    setGuidedScenario(learnWithSettlingVideo(2));
+  it('a learn that did not publish keeps the recording PROCESSING (no timings) for the scripted reads, then AVAILABLE with timings', async () => {
+    setGuidedScenario(endsIn('FAILED', { video: 'AVAILABLE', videoProcessingReads: 2 }));
     const id = (await start()).body.session.sessionId;
-    await readUntil(id, 'FINALIZING');
-    await call('POST', `/guided-sessions/${id}/finalize`, { key: 'f', body: FINALIZE_BODY });
+    await readUntil(id, 'FAILED');
     const first = await call<GuidedResult>('GET', `/guided-sessions/${id}/result`);
     const second = await call<GuidedResult>('GET', `/guided-sessions/${id}/result`);
     const third = await call<GuidedResult>('GET', `/guided-sessions/${id}/result`);
     for (const reply of [first, second, third]) expectValid('result.schema.json', reply.body);
-    expect(first.body.evidence.video.status).toBe('PROCESSING');
+    expect(first.body.evidence.video?.status).toBe('PROCESSING');
     expect(first.body.actionTimings).toEqual([]);
-    expect(second.body.evidence.video.status).toBe('PROCESSING');
-    expect(third.body.evidence.video.status).toBe('AVAILABLE');
+    expect(second.body.evidence.video?.status).toBe('PROCESSING');
+    expect(third.body.evidence.video?.status).toBe('AVAILABLE');
     expect(third.body.actionTimings.some((timing) => timing.kind === 'action')).toBe(true);
+    expect(third.body.proof).toBeNull();
+  });
+
+  it('a published learn has no learning recording: video null, no timings, proof null without a proof hook', async () => {
+    const id = (await start()).body.session.sessionId;
+    await readUntil(id, 'FINALIZING');
+    await call('POST', `/guided-sessions/${id}/finalize`, { key: 'f', body: FINALIZE_BODY });
+    const result = await call<GuidedResult>('GET', `/guided-sessions/${id}/result`);
+    expectValid('result.schema.json', result.body);
+    expect(result.body.publication.status).toBe('PUBLISHED');
+    expect(result.body.evidence.video).toBeNull();
+    expect(result.body.actionTimings).toEqual([]);
+    expect(result.body.proof).toBeNull();
   });
 
   it('publication conflict: finalize answers 409 and the session ends PUBLICATION_CONFLICT', async () => {
@@ -445,7 +459,7 @@ describe('start refusals leave nothing behind', () => {
   });
 
   it('a refusal is not remembered: the same key succeeds once the cause is gone', async () => {
-    setGuidedScenario(refusesStart('POLICY_NOT_APPROVED_PENDING_VERSION'));
+    setGuidedScenario(refusesStart('FIRST_LEARN_STEP_NARROWED'));
     expect((await start('same-key')).status).toBe(409);
     setGuidedScenario(LEARN_SCENARIO);
     expect((await start('same-key')).status).toBe(202);
@@ -579,7 +593,6 @@ async function startContextFor(test: TestDto): Promise<GuidedStartRequest> {
     sourceRevision: String(test.sourceRevision),
     configurationRevision: String(test.configurationRevision),
     environmentId: test.environment,
-    applicationId: test.csiId ?? '',
     versions: { contract: 3 },
   };
 }
@@ -741,5 +754,144 @@ describe('capabilities (P1)', () => {
     expect((await call('GET', `/tests/${UNLEARNED.id}/capabilities`)).status).toBe(503);
     expect((await call('GET', `/tests/${UNLEARNED.id}/capabilities`)).status).toBe(200);
     expect(capabilityRequestCount()).toBe(2);
+  });
+});
+
+/**
+ * STUDIO-UNIFY-001.6 AC-04, AC-10: `readLatestGuidedAttempts`. The mirror answers from its own
+ * simulated sessions plus one seeded failed attempt, the way the backend omits (never refuses) a test
+ * with nothing to show, and a read never moves a session on.
+ */
+describe('GET /guided-sessions/latest (readLatestGuidedAttempts)', () => {
+  const READY_TEST = '11111111-1111-1111-1111-111111111111';
+  const OTHER_CSI_TEST = '33333333-3333-3333-3333-333333333333';
+  const latest = (...ids: string[]) =>
+    call<GuidedLatestAttempts>('GET', `/guided-sessions/latest?${ids.map((id) => `testId=${id}`).join('&')}`);
+
+  it('is registered before /:id: it is not read as a session id', async () => {
+    const reply = await latest(READY_TEST);
+    expect(reply.status).toBe(200);
+    expect(guidedRequestLog().map((entry) => entry.operation)).toEqual(['latest']);
+  });
+
+  it('serves the seeded failed attempt for one UNLEARNED test, valid against the schema', async () => {
+    const reply = await latest(SEEDED_FAILED_ATTEMPT_TEST_ID);
+    expect(reply.status).toBe(200);
+    expectValid('latest-attempts.schema.json', reply.body);
+    expect(reply.body.attempts).toHaveLength(1);
+    const [attempt] = reply.body.attempts;
+    expect(attempt).toMatchObject({
+      testId: SEEDED_FAILED_ATTEMPT_TEST_ID,
+      sessionId: SEEDED_FAILED_ATTEMPT_SESSION_ID,
+      state: 'FAILED',
+    });
+    const test = mockTests.find((candidate) => candidate.id === SEEDED_FAILED_ATTEMPT_TEST_ID)!;
+    expect(test.readiness).toBe('UNLEARNED');
+    // The explanation was produced for the test's current revision, so the page can name the step.
+    expect(attempt.explanation?.sourceRevision).toBe(String(test.sourceRevision));
+    expect(stoppedStepOf({ outcome: attempt.state, explanation: attempt.explanation! })?.number).toBe(1);
+  });
+
+  it('omits, and never refuses, a test with no attempt, an unknown test and an unreadable one', async () => {
+    const reply = await latest(
+      READY_TEST,
+      UNLEARNED.id,
+      'ffffffff-ffff-4fff-8fff-ffffffffffff',
+      OTHER_CSI_TEST,
+      SEEDED_FAILED_ATTEMPT_TEST_ID,
+    );
+    expect(reply.status).toBe(200);
+    expectValid('latest-attempts.schema.json', reply.body);
+    expect(reply.body.attempts.map((attempt) => attempt.testId)).toEqual([SEEDED_FAILED_ATTEMPT_TEST_ID]);
+  });
+
+  it('collapses duplicate ids to one attempt', async () => {
+    const reply = await latest(SEEDED_FAILED_ATTEMPT_TEST_ID, SEEDED_FAILED_ATTEMPT_TEST_ID);
+    expect(reply.body.attempts).toHaveLength(1);
+  });
+
+  it('answers 400 INVALID_QUERY for no testId, more than 50 and a value that is not a UUID', async () => {
+    const none = await call<{ error: string }>('GET', '/guided-sessions/latest');
+    expect(none.status).toBe(400);
+    expect(none.body.error).toBe('INVALID_QUERY');
+    const many = await latest(...Array.from({ length: 51 }, (_, index) => `a0000000-0000-4000-8000-${String(index).padStart(12, '0')}`));
+    expect(many.status).toBe(400);
+    const bad = await latest(READY_TEST, 'not-a-uuid');
+    expect(bad.status).toBe(400);
+    expect(bad.body).toMatchObject({ error: 'INVALID_QUERY' });
+    const fifty = await latest(...Array.from({ length: 50 }, (_, index) => `a0000000-0000-4000-8000-${String(index).padStart(12, '0')}`));
+    expect(fifty.status).toBe(200);
+  });
+
+  it('never shows a live session, and a read does not move the session on', async () => {
+    const started = await start();
+    const id = started.body.session.sessionId;
+    expect((await latest(UNLEARNED.id)).body.attempts).toEqual([]);
+    expect((await latest(UNLEARNED.id)).body.attempts).toEqual([]);
+    expect((await readSession(id)).body.session.state).toBe('OBSERVING');
+  });
+
+  it('reports a failed session as FAILED with its public explanation, and the step it stopped at', async () => {
+    setGuidedScenario(endsIn('FAILED', { failureCode: 'TARGET_MISMATCH', atStepIndex: 1 }));
+    const id = (await start()).body.session.sessionId;
+    await readUntil(id, 'FAILED');
+    const reply = await latest(UNLEARNED.id);
+    expectValid('latest-attempts.schema.json', reply.body);
+    const [attempt] = reply.body.attempts;
+    expect(attempt).toMatchObject({
+      testId: UNLEARNED.id,
+      sessionId: id,
+      state: 'FAILED',
+      errorCode: 'TARGET_MISMATCH',
+    });
+    expect(attempt.explanation?.sourceRevision).toBe(String(UNLEARNED.sourceRevision));
+    expect(stoppedStepOf({ outcome: attempt.state, explanation: attempt.explanation! })?.number).toBe(2);
+  });
+
+  it.each([
+    ['CANCELLED', endsIn('CANCELLED')],
+    ['EXPIRED', endsIn('EXPIRED')],
+  ] as const)('a %s session is a terminal attempt with a null explanation', async (state, scenario) => {
+    setGuidedScenario(scenario);
+    const id = (await start()).body.session.sessionId;
+    await readUntil(id, state);
+    const reply = await latest(UNLEARNED.id);
+    expectValid('latest-attempts.schema.json', reply.body);
+    expect(reply.body.attempts[0]).toMatchObject({ state, explanation: null });
+  });
+
+  it('a later successful learn replaces the seeded failure: the latest attempt is SUCCEEDED', async () => {
+    const seeded = mockTests.find((test) => test.id === SEEDED_FAILED_ATTEMPT_TEST_ID)!;
+    const started = await start('seeded-start', seeded);
+    const id = started.body.session.sessionId;
+    await readUntil(id, 'FINALIZING');
+    // Live, so the seeded failure is still the latest terminal attempt.
+    expect((await latest(seeded.id)).body.attempts[0].state).toBe('FAILED');
+    const body = {
+      schemaVersion: 3,
+      expectedSourceRevision: String(seeded.sourceRevision),
+      expectedConfigurationRevision: String(seeded.configurationRevision),
+    };
+    expect((await call('POST', `/guided-sessions/${id}/finalize`, { key: 'seeded-finalize', body })).status).toBe(200);
+    const reply = await latest(seeded.id);
+    expectValid('latest-attempts.schema.json', reply.body);
+    expect(reply.body.attempts[0]).toMatchObject({ sessionId: id, state: 'SUCCEEDED', explanation: null });
+  });
+
+  it('the newest terminal session of the test wins', async () => {
+    setGuidedScenario(endsIn('FAILED', { failureCode: 'TARGET_MISMATCH' }));
+    const first = (await start('first-start')).body.session.sessionId;
+    await readUntil(first, 'FAILED');
+    setGuidedScenario(endsIn('EXPIRED'));
+    const second = (await start('second-start')).body.session.sessionId;
+    await readUntil(second, 'EXPIRED');
+    expect((await latest(UNLEARNED.id)).body.attempts[0]).toMatchObject({ sessionId: second, state: 'EXPIRED' });
+  });
+
+  it('can fail the next read, and counts reads', async () => {
+    failGuidedRequests('latest', { status: 500, body: { error: { code: 'BOOM', message: 'Boom' } } });
+    expect((await latest(READY_TEST)).status).toBe(500);
+    expect((await latest(READY_TEST)).status).toBe(200);
+    expect(guidedRequestCount('latest')).toBe(2);
   });
 });

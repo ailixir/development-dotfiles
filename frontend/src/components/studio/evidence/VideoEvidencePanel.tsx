@@ -1,7 +1,6 @@
 import { forwardRef, useEffect, useState } from 'react';
 import { Alert, Box, Stack, Typography } from '@mui/material';
 import type { ExecutionErrorCode, ExecutionSnapshot, VideoEvidence, VideoStatus } from '@/types/studio/studioTypes';
-import type { GuidedResult } from '@/types/studio/studioGuidedTypes';
 import { studioGuidedApi } from '@/services/api/studioGuidedApi';
 import {
   NO_RUN_EVIDENCE_MESSAGE,
@@ -41,9 +40,10 @@ import { formatEvidenceInstant } from './formatEvidenceInstant';
  *  - **No `crossOrigin` attribute.** `anonymous` would strip the ambient session §6.3 relies on,
  *    and whether `use-credentials` is needed cross-host is SPK-02's question, not this story's.
  *
- * **Two recordings, one panel** (STUDIO-OBS-008 AC-7). The input is either a replay `snapshot` or
- * a `guided` session result; which one is discriminated by the prop that is present, so the
- * existing replay call sites are unchanged. A guided Run is never dressed up as a replay snapshot:
+ * **Two recordings, one panel** (STUDIO-OBS-008 AC-7). The input is either a replay `snapshot` (the
+ * proof of a learn, and every later Run) or the `guided` recording of a learning attempt that did not
+ * publish; which one is discriminated by the prop that is present, so the existing replay call sites
+ * are unchanged. A guided Run is never dressed up as a replay snapshot:
  *
  *  - its state is `result.evidence.video`, read by the same narratives (PLAYBACK-COPY, neutral
  *    guided wording, is descoped by the user, 2026-10-17, so the existing wording is used as is);
@@ -56,10 +56,17 @@ import { formatEvidenceInstant } from './formatEvidenceInstant';
  * `UNAVAILABLE` narrative (D-10) instead of failing the panel.
  */
 
-/** The guided half of the input: the session and its result (`readResult`). */
+/**
+ * The guided half of the input: the session and the recording of its learning attempt. It exists only
+ * for a learn that did not publish (`result.evidence.video` non-null); a published learn has no
+ * learning recording, and its proof is the replay execution (`result.proof`).
+ */
 export interface GuidedVideoEvidence {
   readonly sessionId: string;
-  readonly result: Pick<GuidedResult, 'executionId' | 'evidence'>;
+  readonly result: {
+    readonly executionId: string;
+    readonly evidence: { readonly video: VideoEvidence };
+  };
 }
 
 export type VideoEvidencePanelProps =

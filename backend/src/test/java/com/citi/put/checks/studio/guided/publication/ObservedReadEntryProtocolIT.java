@@ -115,7 +115,7 @@ class ObservedReadEntryProtocolIT {
         new ObservedReplayAuthorization(
             fixture.jdbc(), new GuidedContracts(), null, null, null, null, null, Clock.systemUTC()),
         new SecretUseAuditRecorder(fixture.jdbc()),
-        new VaultStudioReferenceResolver(provider, (principal, csi, environment, secret) -> true),
+        new VaultStudioReferenceResolver(provider),
         physicalReads);
   }
 

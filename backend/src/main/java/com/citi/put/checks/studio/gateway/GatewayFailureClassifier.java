@@ -106,7 +106,8 @@ final class GatewayFailureClassifier {
               && "timeout".equalsIgnoreCase(current.getMessage()))) {
         return true;
       }
-      if (current instanceof ApiException apiException && apiException.code() == 504) {
+      if (current instanceof ApiException apiException
+          && (apiException.code() == 504 || apiException.code() == 408)) {
         return true;
       }
       String message = current.getMessage();

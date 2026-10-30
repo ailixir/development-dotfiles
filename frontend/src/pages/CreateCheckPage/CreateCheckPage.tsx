@@ -430,17 +430,19 @@ const CreateCheckPage: React.FC = () => {
     <Box>
       <WizardHeader editId={editId} checkName={formData.name} saveHint={saveHint} autosaveEnabled={autosaveEnabled} onAutosaveChange={setAutosaveEnabled} />
 
-      <Alert
-        severity="info"
-        sx={{ mb: 2 }}
-        action={
-          <Button color="inherit" size="small" component={RouterLink} to="/checks/prototype/splunk">
-            Open prototype
-          </Button>
-        }
-      >
-        Splunk Logs / Metrics UX prototype runs fully offline — no backend required.
-      </Alert>
+      {formData.checkType === 'SPLUNK' && (
+        <Alert
+          severity="info"
+          sx={{ mb: 2 }}
+          action={
+            <Button color="inherit" size="small" component={RouterLink} to="/checks/prototype/splunk">
+              Open prototype
+            </Button>
+          }
+        >
+          Splunk Logs / Metrics UX prototype runs fully offline — no backend required.
+        </Alert>
+      )}
 
       {isUiTest ? (
         <Card>

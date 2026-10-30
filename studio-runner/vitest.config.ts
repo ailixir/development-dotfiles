@@ -12,6 +12,10 @@ import { configDefaults, defineConfig } from 'vitest/config';
  * (`npm run test:deployment`) and its own stage (`ci/stages.md` stage 9), and — unlike the version
  * QA reviewed — it **fails** rather than skips when a prerequisite is absent.
  *
+ * `test/fixtures-tier/perception/**` (ADR-SC-007 WI-2) is excluded for the same reason as the rest of that
+ * folder (real Chromium) and has its own dist-free config, `vitest.perception.config.ts`, script
+ * `test:perception` and stage 10 in `ci/stages.md`.
+ *
  * Moving a tier out of the default run is how a tier gets quietly lost, so the move is watched:
  * `test/deployment-tier-wiring.test.ts` runs *here* and reddens if the config, the script, the
  * stage entry or any of the tier's files disappears. The deferral record
@@ -50,11 +54,19 @@ export default defineConfig({
       // Their coverage can only come from real Chromium, which the unit tier's v8 run cannot see.
       // Counting them here made src/run/** pass only while the deleted artifact-1 playwrightAdapter
       // padded the total. Thresholds are unchanged.
+      // ADR-SC-007 WI-2: `src/run/perceptionInPage.ts` holds the programs that run INSIDE the page (they need a DOM),
+      // so only the perception tier (`vitest.perception.config.ts`, script `test:perception`, `ci/stages.md` stage 10)
+      // can execute them. That tier is wired and watched from this default run (`test/run/importBoundary.test.ts`).
+      // ADR-SC-007 WI-4: `src/run/pageStateInPage.ts` is the same kind of program (the password code and the page-level
+      // steps, moved out of the observation collector); the unit tier drives it only through DOM stubs, the perception
+      // tier through real Chromium.
       exclude: [
         '**/*.d.ts',
         '**/*.d.mts',
         'src/run/browser.ts',
         'src/run/child.ts',
+        'src/run/perceptionInPage.ts',
+        'src/run/pageStateInPage.ts',
       ],
       thresholds: {
         lines: 85,

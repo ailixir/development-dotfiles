@@ -147,9 +147,10 @@ class GuidedLoginJourneyJoinedIT {
       page(
           "<h1>Choose workspace</h1><section aria-label=\"Primary workspace\"><h2>Primary"
               + " workspace</h2><form method=\"get\" action=\"/protected/primary\"><button"
-              + " type=\"submit\" data-testid=\"open-primary\">Open</button></form></section><section"
-              + " aria-label=\"Secondary workspace\"><h2>Secondary workspace</h2><form method=\"get\""
-              + " action=\"/protected/secondary\"><button type=\"submit\""
+              + " type=\"submit\""
+              + " data-testid=\"open-primary\">Open</button></form></section><section"
+              + " aria-label=\"Secondary workspace\"><h2>Secondary workspace</h2><form"
+              + " method=\"get\" action=\"/protected/secondary\"><button type=\"submit\""
               + " data-testid=\"open-secondary\">Open</button></form></section>");
 
   /**
@@ -172,6 +173,12 @@ class GuidedLoginJourneyJoinedIT {
 
   /** The scopeIntent the scripted model puts on the step-5 Open obligation (null: unqualified). */
   static volatile String openScope = null;
+
+  static volatile boolean outsideScopeAttack;
+  static final AtomicInteger MALICIOUS_ACTIONS = new AtomicInteger();
+  static final AtomicInteger PREPARE_CALLS = new AtomicInteger();
+  static final AtomicInteger DISPATCH_CALLS = new AtomicInteger();
+  static final List<String> WIRE_DIAGNOSTICS = new CopyOnWriteArrayList<>();
 
   /** The target intents of the NEXT_ACTION requests, in order (one entry per model call). */
   static final List<String> NEXT_ACTION_INTENTS = new CopyOnWriteArrayList<>();
@@ -200,9 +207,6 @@ class GuidedLoginJourneyJoinedIT {
   static volatile String lastFailure = "none";
   static volatile String lastUsage = "-";
 
-  /** Which exported hint the scripted model copies: a correct model may take either. */
-  static volatile String preferredHint = "role";
-
   static {
     try {
       TEMP = Files.createTempDirectory("guided-login-journey-");
@@ -219,7 +223,7 @@ class GuidedLoginJourneyJoinedIT {
               + "\n-----END PUBLIC KEY-----\n");
       RUNNER_PORT = RunnerProcessHarness.exclusivelyFreePort();
       APPLICATION = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-      ORIGIN = "http://127.0.0.1:" + APPLICATION.getAddress().getPort();
+      ORIGIN = "http://localhost:" + APPLICATION.getAddress().getPort();
       APPLICATION.createContext(
           "/",
           exchange -> {
@@ -296,7 +300,7 @@ class GuidedLoginJourneyJoinedIT {
       Flyway.configure()
           .dataSource(DATABASE.getJdbcUrl(), DATABASE.getUsername(), DATABASE.getPassword())
           .locations("classpath:db/migration")
-          .target("23")
+          .target("29")
           .load()
           .migrate();
     } catch (Exception failure) {
@@ -354,14 +358,7 @@ class GuidedLoginJourneyJoinedIT {
     @Bean
     GuidedTranslationProperties properties() {
       return new GuidedTranslationProperties(
-          true,
-          true,
-          List.of("orders"),
-          List.of("fixture"),
-          REAL ? 65536 : 131072,
-          REAL ? 4096 : 2048,
-          REAL ? 150 : 60,
-          "worker-1");
+          true, REAL ? 65536 : 131072, REAL ? 4096 : 2048, REAL ? 150 : 60, "worker-1");
     }
 
     @Bean
@@ -371,36 +368,21 @@ class GuidedLoginJourneyJoinedIT {
 
     @Bean
     GuidedSourceClassifier classifier(GuidedTranslationProperties props) {
-      return new GuidedSourceClassifier(CONTRACTS, props, new CredentialPatternScreen());
+      return new GuidedSourceClassifier(
+          CONTRACTS,
+          new CredentialPatternScreen(),
+          com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     }
 
     @Bean
     GuidedSourceInputResolver inputs() {
-      return new GuidedSourceInputResolver(CONTRACTS);
+      return new GuidedSourceInputResolver(
+          CONTRACTS, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     }
 
     @Bean
     GuidedStepVerifier verifier(GuidedTranslationStore store) {
       return new GuidedStepVerifier(store);
-    }
-
-    private com.citi.put.checks.studio.guided.publication.ObservedReplayPins fixturePins() {
-      var policy =
-          CONTRACTS
-              .object()
-              .put("version", 1)
-              .put("policyId", "fixture-policy")
-              .put("policyVersion", "1")
-              .put("applicationId", "orders")
-              .put("environment", "fixture")
-              .put("entryPolicyId", "blank");
-      policy.putArray("allowedOrigins").add(ORIGIN);
-      policy.putArray("rules");
-      policy.putNull("applicationPolicy");
-      return new com.citi.put.checks.studio.guided.publication.ObservedReplayPins(
-          CONTRACTS,
-          new com.citi.put.checks.studio.guided.publication.ObservedReplayProperties(
-              true, 30000, 1048576, 4194304, 2097152, "[]", "[" + policy + "]", 1280, 720));
     }
 
     @Bean
@@ -417,14 +399,14 @@ class GuidedLoginJourneyJoinedIT {
           store,
           verifier,
           new CsiOwnershipEvaluator(),
-          fixturePins(),
-          new VaultStudioReferenceResolver(VAULT, (principal, csi, env, secret) -> true),
-          (principal, csi, env, secret) -> true);
+          com.citi.put.checks.studio.support.TestDomains.FIXTURES,
+          new VaultStudioReferenceResolver(VAULT));
     }
 
     @Bean
     GuidedMaterializationService materialization(JdbcTemplate jdbc) {
-      return new GuidedMaterializationService(jdbc, CONTRACTS);
+      return new GuidedMaterializationService(
+          jdbc, CONTRACTS, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     }
 
     @Bean
@@ -436,12 +418,44 @@ class GuidedLoginJourneyJoinedIT {
         GuidedTranslationStore store,
         GuidedClarificationContextStore questions) {
       var service =
-          new GuidedSessionService(
-              repository,
-              CONTRACTS,
-              access,
-              new GuidedSessionProperties(true, Map.of()),
-              Clock.systemUTC());
+          org.mockito.Mockito.spy(
+              new GuidedSessionService(
+                  repository,
+                  CONTRACTS,
+                  access,
+                  new GuidedSessionProperties(true, Map.of()),
+                  com.citi.put.checks.studio.support.TestDomains.FIXTURES,
+                  Clock.systemUTC()));
+      org.mockito.Mockito.doAnswer(
+              invocation -> {
+                safeWireSchema("outcome", invocation.getArgument(4));
+                return invocation.callRealMethod();
+              })
+          .when(service)
+          .outcomeV2(
+              org.mockito.ArgumentMatchers.any(),
+              org.mockito.ArgumentMatchers.anyString(),
+              org.mockito.ArgumentMatchers.anyLong(),
+              org.mockito.ArgumentMatchers.anyString(),
+              org.mockito.ArgumentMatchers.any());
+      org.mockito.Mockito.doAnswer(
+              invocation -> {
+                JsonNode body = invocation.getArgument(4);
+                safeWireSchema("observation", body);
+                try {
+                  GuidedOutline.requireConsistent(body.path("observation"));
+                } catch (RuntimeException refused) {
+                  WIRE_DIAGNOSTICS.add("OBSERVATION_REF_ROLE_ORDINAL_REFUSED");
+                }
+                return invocation.callRealMethod();
+              })
+          .when(service)
+          .observeV2(
+              org.mockito.ArgumentMatchers.any(),
+              org.mockito.ArgumentMatchers.anyString(),
+              org.mockito.ArgumentMatchers.anyLong(),
+              org.mockito.ArgumentMatchers.anyString(),
+              org.mockito.ArgumentMatchers.any());
       service.installBridge(
           materialization,
           new GuidedPreparationStore(jdbc, CONTRACTS),
@@ -454,14 +468,7 @@ class GuidedLoginJourneyJoinedIT {
               new com.citi.put.checks.studio.guided.evidence.GuidedRecordingProperties(null),
               false,
               CONTRACTS));
-      com.citi.put.checks.studio.support.ObservedPublicationFixture.installGovernance(
-          service,
-          jdbc,
-          "CSI-123",
-          "orders",
-          "fixture",
-          java.util.List.of(ORIGIN),
-          governedPolicy());
+      com.citi.put.checks.studio.support.ObservedPublicationFixture.installCsiBudget(service, jdbc);
       return service;
     }
 
@@ -471,7 +478,32 @@ class GuidedLoginJourneyJoinedIT {
           URI.create("https://127.0.0.1:" + RUNNER_PORT),
           TLS,
           () -> token("backend-controller", "controller-1", "studio-guided-runner"),
-          CONTRACTS);
+          CONTRACTS) {
+        @Override
+        public JsonNode send(String operation, JsonNode body, String key) {
+          if (operation.equals("prepare")) {
+            PREPARE_CALLS.incrementAndGet();
+          }
+          return super.send(operation, body, key);
+        }
+
+        @Override
+        public JsonNode send(String operation, JsonNode body, String key, Instant deadline) {
+          if (operation.equals("dispatch")) {
+            DISPATCH_CALLS.incrementAndGet();
+          }
+          safeWireSchema(operation, body);
+          try {
+            return super.send(operation, body, key, deadline);
+          } catch (RuntimeException refusal) {
+            for (var frame : java.util.Arrays.stream(refusal.getStackTrace()).limit(8).toList()) {
+              WIRE_DIAGNOSTICS.add(
+                  frame.getClassName() + "." + frame.getMethodName() + ":" + frame.getLineNumber());
+            }
+            throw refusal;
+          }
+        }
+      };
     }
 
     @Bean
@@ -480,8 +512,7 @@ class GuidedLoginJourneyJoinedIT {
         GuidedMaterializationService materialization,
         HttpRunnerDispatchClient runner) {
       var dispatch = new GuidedDispatchService(sessions, materialization, runner);
-      dispatch.installReferences(
-          new VaultStudioReferenceResolver(VAULT, (principal, csi, env, secret) -> true));
+      dispatch.installReferences(new VaultStudioReferenceResolver(VAULT));
       sessions.installStopSender(dispatch::stop);
       return dispatch;
     }
@@ -553,7 +584,8 @@ class GuidedLoginJourneyJoinedIT {
               dispatch,
               gateway,
               CONTRACTS,
-              new GuidedPromptAssembler(CONTRACTS),
+              new GuidedPromptAssembler(
+                  CONTRACTS, com.citi.put.checks.studio.support.TestDomains.FIXTURES),
               inputs,
               new GuidedProposalValidator(CONTRACTS),
               new GuidedDependencyPlanner(sessions),
@@ -577,15 +609,70 @@ class GuidedLoginJourneyJoinedIT {
     }
   }
 
-  /** A structural-only governed observation policy: the login page needs no business read. */
-  static ObjectNode governedPolicy() {
-    ObjectNode policy =
-        CONTRACTS
-            .object()
-            .put("policyRuleId", "structural-policy")
-            .put("allowStructuralDiscovery", true);
-    policy.putArray("readGrants");
-    return policy;
+  static final java.util.Map<String, com.networknt.schema.JsonSchema> WIRE_SCHEMAS =
+      new java.util.concurrent.ConcurrentHashMap<>();
+
+  static void safeWireSchema(String operation, JsonNode body) {
+    try {
+      CONTRACTS.validate("v3/bridge#/definitions/" + operation, body);
+      return;
+    } catch (com.citi.put.checks.studio.guided.session.GuidedSessionException refused) {
+      WIRE_DIAGNOSTICS.add(operation + ":ACTUAL_CONTRACT_REJECTED");
+    }
+    try {
+      var schema = WIRE_SCHEMAS.get(operation);
+      if (schema == null) {
+        JsonNode document =
+            CONTRACTS.parse(
+                Files.readString(
+                    Path.of(
+                        "../docs/specs/studio-observed-authoring/contracts/v3/bridge.schema.json")));
+        JsonNode expanded =
+            expandWireSchema(
+                document.path("definitions").path(operation), document.path("$id").asText());
+        schema =
+            com.networknt.schema.JsonSchemaFactory.getInstance(
+                    com.networknt.schema.SpecVersion.VersionFlag.V7)
+                .getSchema(expanded);
+        WIRE_SCHEMAS.put(operation, schema);
+      }
+      for (var error : schema.validate(body)) {
+        WIRE_DIAGNOSTICS.add(operation + ":" + error.getInstanceLocation() + ":" + error.getType());
+      }
+    } catch (java.io.IOException | RuntimeException unavailable) {
+      WIRE_DIAGNOSTICS.add("SCHEMA_DIAGNOSTIC_UNAVAILABLE");
+    }
+  }
+
+  static JsonNode expandWireSchema(JsonNode schema, String base) throws java.io.IOException {
+    if (schema.isObject() && schema.has("$ref")) {
+      URI uri = URI.create(base).resolve(schema.path("$ref").asText());
+      String file = Path.of(uri.getPath()).getFileName().toString();
+      JsonNode document =
+          CONTRACTS.parse(
+              Files.readString(
+                  Path.of("../docs/specs/studio-observed-authoring/contracts/v3").resolve(file)));
+      JsonNode target = uri.getFragment() == null ? document : document.at(uri.getFragment());
+      return expandWireSchema(target, document.path("$id").asText());
+    }
+    if (schema.isObject()) {
+      ObjectNode expanded = CONTRACTS.object();
+      for (var fields = schema.fields(); fields.hasNext(); ) {
+        var field = fields.next();
+        if (!List.of("$id", "$schema", "definitions").contains(field.getKey())) {
+          expanded.set(field.getKey(), expandWireSchema(field.getValue(), base));
+        }
+      }
+      return expanded;
+    }
+    if (schema.isArray()) {
+      var expanded = CONTRACTS.object().putArray("items");
+      for (JsonNode child : schema) {
+        expanded.add(expandWireSchema(child, base));
+      }
+      return expanded;
+    }
+    return schema.deepCopy();
   }
 
   // ---- the scripted model (it only plans and selects) ----
@@ -664,7 +751,6 @@ class GuidedLoginJourneyJoinedIT {
       }
       obligations.add(choose);
     }
-    plan.putArray("needs");
     return plan;
   }
 
@@ -678,7 +764,7 @@ class GuidedLoginJourneyJoinedIT {
     throw new IllegalStateException("INPUT_MISSING:" + step + ":" + kind);
   }
 
-  /** NEXT_ACTION: the first remaining obligation, with the observation's own node and hint. */
+  /** NEXT_ACTION: the first remaining obligation, naming a ref of the outline the request shows. */
   static ObjectNode nextAction(JsonNode request, ObjectNode response) {
     JsonNode chosen = request.path("context").path("obligations").path(0);
     if (chosen.isMissingNode()) {
@@ -688,10 +774,16 @@ class GuidedLoginJourneyJoinedIT {
     String kind = chosen.path("operationKind").asText();
     String intent = chosen.path("targetIntent").asText();
     NEXT_ACTION_INTENTS.add(intent);
-    if (kind.equals("click") && intent.equals("Open") && !chosen.has("selectedLocator")) {
-      List<JsonNode> matches = openCandidates(request, chosen);
+    if (kind.equals("click")
+        && intent.equals("Open")
+        && !chosen.has("selectedChoice")
+        && !outsideScopeAttack) {
+      List<GuidedOutline.Line> matches = openCandidates(request, chosen);
       if (matches.size() >= 2) {
         return clarification(request, response, chosen, matches);
+      }
+      if (matches.isEmpty()) {
+        return response.put("status", "UNSUPPORTED").put("reasonCode", "INSUFFICIENT_EVIDENCE");
       }
     }
     ObjectNode action = CONTRACTS.object();
@@ -718,22 +810,27 @@ class GuidedLoginJourneyJoinedIT {
         }
       }
       case "click" -> {
-        if (chosen.has("selectedLocator")) {
-          // An accepted choice: re-establish it against the fresh observation, exact locator.
-          selectPinned(request, chosen.path("selectedLocator"), target);
+        if (outsideScopeAttack && intent.equals("Open")) {
+          GuidedOutline.Line malicious =
+              shown(request).stream()
+                  .filter(
+                      line ->
+                          "Open".equals(line.name())
+                              && regionOf(line).equals("Secondary workspace"))
+                  .findFirst()
+                  .orElseThrow(() -> new IllegalStateException("ADVERSARIAL_CURRENT_REF_MISSING"));
+          target.put("kind", "node").put("ref", malicious.ref());
+          MALICIOUS_ACTIONS.incrementAndGet();
+        } else if (chosen.has("selectedChoice")) {
+          // An accepted choice: the backend names the fresh ref of the element the author chose.
+          target.put("kind", "node").put("ref", chosen.path("selectedChoice").path("ref").asText());
         } else if (chosen.path("scopeIntent").isTextual()) {
-          // A qualified step: the one node of that name in that region, by a hint no other node
-          // shares (its testId).
-          List<JsonNode> matches = openCandidates(request, chosen);
+          // A qualified step: the one element of that name in that region.
+          List<GuidedOutline.Line> matches = openCandidates(request, chosen);
           if (matches.size() != 1) {
             throw new IllegalStateException("QUALIFIED_CANDIDATES:" + matches.size());
           }
-          target.put("nodeId", matches.getFirst().path("nodeId").asText());
-          for (JsonNode hint : matches.getFirst().path("locatorHints")) {
-            if (hint.path("kind").asText().equals("testId")) {
-              target.set("locator", hint.deepCopy());
-            }
-          }
+          target.put("kind", "node").put("ref", matches.getFirst().ref());
         } else {
           selectNode(request, intent, target);
         }
@@ -748,88 +845,79 @@ class GuidedLoginJourneyJoinedIT {
     return response;
   }
 
-  /** The nearest enclosing landmark's name, from the observation's own regionId. */
-  static String regionOf(JsonNode request, JsonNode node) {
-    String regionId = node.path("regionId").asText("");
-    for (JsonNode candidate : request.path("context").path("observation").path("nodes")) {
-      if (candidate.path("nodeId").asText().equals(regionId)) {
-        return candidate.path("name").asText();
-      }
-    }
-    return "";
+  /** The shown lines (those with a ref) of the outline the request carries. */
+  static List<GuidedOutline.Line> shown(JsonNode request) {
+    return GuidedOutline.parse(request.path("context").path("observation").asText()).stream()
+        .filter(line -> line.ref() != null)
+        .toList();
   }
 
-  /** The actionable nodes named "Open" (in the named region, when the obligation has one). */
-  static List<JsonNode> openCandidates(JsonNode request, JsonNode obligation) {
-    List<JsonNode> matches = new ArrayList<>();
-    for (JsonNode node : request.path("context").path("observation").path("nodes")) {
-      if (node.path("name").asText().equalsIgnoreCase(obligation.path("targetIntent").asText())
-          && node.path("actionable").asBoolean()
-          && node.path("locatorHints").size() > 0
+  private static final java.util.regex.Pattern IN_HINT =
+      java.util.regex.Pattern.compile("\\{in=(\"(?:[^\"\\\\]|\\\\.)*\")\\}");
+
+  /** The container the element sits in, from the {@code in="..."} hint of its outline line. */
+  static String regionOf(GuidedOutline.Line line) {
+    var match = IN_HINT.matcher(line.rest());
+    if (!match.find()) {
+      return "";
+    }
+    try {
+      String qualified =
+          new com.fasterxml.jackson.databind.ObjectMapper().readValue(match.group(1), String.class);
+      var named =
+          java.util.regex.Pattern.compile("(?:^| > )[a-z][a-z-]* '([^']+)'(?: > |$)")
+              .matcher(qualified);
+      return named.find() ? named.group(1) : "";
+    } catch (java.io.IOException unreadable) {
+      throw new IllegalStateException("UNREADABLE_IN_HINT", unreadable);
+    }
+  }
+
+  /** The shown elements named "Open" (in the named region, when the obligation has one). */
+  static List<GuidedOutline.Line> openCandidates(JsonNode request, JsonNode obligation) {
+    List<GuidedOutline.Line> matches = new ArrayList<>();
+    for (GuidedOutline.Line line : shown(request)) {
+      if (line.name() != null
+          && line.name().equalsIgnoreCase(obligation.path("targetIntent").asText())
           && (!obligation.path("scopeIntent").isTextual()
-              || regionOf(request, node)
-                  .equalsIgnoreCase(obligation.path("scopeIntent").asText()))) {
-        matches.add(node);
+              || regionOf(line).equalsIgnoreCase(obligation.path("scopeIntent").asText()))) {
+        matches.add(line);
       }
     }
     return matches;
   }
 
-  /** Several nodes answer the label: ask, offering exactly those nodes. */
+  /** Several elements answer the label: ask, offering exactly those elements by their refs. */
   static ObjectNode clarification(
-      JsonNode request, ObjectNode response, JsonNode obligation, List<JsonNode> matches) {
+      JsonNode request,
+      ObjectNode response,
+      JsonNode obligation,
+      List<GuidedOutline.Line> matches) {
     response.put("status", "CLARIFICATION").putNull("obligationId").putNull("action");
     var choices =
         response.putObject("question").put("reason", "AMBIGUOUS_TARGET").putArray("choices");
     int index = 0;
-    for (JsonNode node : matches) {
+    for (GuidedOutline.Line line : matches) {
       ObjectNode meaning =
           CONTRACTS
               .object()
               .put("obligationId", obligation.path("obligationId").asText())
-              .put("nodeId", node.path("nodeId").asText())
+              .put("ref", line.ref())
               .putNull("bindingId");
-      for (JsonNode hint : node.path("locatorHints")) {
-        if (hint.path("kind").asText().equals("testId")) {
-          meaning.set("locator", hint.deepCopy());
-        }
-      }
       choices
           .addObject()
           .put("choiceId", "choice-" + index++)
-          .put("safeLabel", node.path("name").asText())
+          .put("safeLabel", line.name())
           .set("meaning", meaning);
     }
     return response;
   }
 
-  static void selectPinned(JsonNode request, JsonNode locator, ObjectNode target) {
-    for (JsonNode node : request.path("context").path("observation").path("nodes")) {
-      for (JsonNode hint : node.path("locatorHints")) {
-        if (hint.equals(locator)) {
-          target.put("nodeId", node.path("nodeId").asText());
-          target.set("locator", hint.deepCopy());
-          return;
-        }
-      }
-    }
-    throw new IllegalStateException("PINNED_LOCATOR_UNAVAILABLE");
-  }
-
-  /** What a correct model does: copy nodeId and one of the node's own exported locator hints. */
+  /** What a correct model does: copy the ref of the outline line whose name is the intent. */
   static void selectNode(JsonNode request, String intent, ObjectNode target) {
-    for (JsonNode node : request.path("context").path("observation").path("nodes")) {
-      if (node.path("name").asText().equalsIgnoreCase(intent)
-          && node.path("actionable").asBoolean()
-          && node.path("locatorHints").size() > 0) {
-        JsonNode chosen = node.path("locatorHints").get(0);
-        for (JsonNode hint : node.path("locatorHints")) {
-          if (hint.path("kind").asText().equals(preferredHint)) {
-            chosen = hint;
-          }
-        }
-        target.put("nodeId", node.path("nodeId").asText());
-        target.set("locator", chosen.deepCopy());
+    for (GuidedOutline.Line line : shown(request)) {
+      if (line.name().equalsIgnoreCase(intent)) {
+        target.put("kind", "node").put("ref", line.ref());
         return;
       }
     }
@@ -906,22 +994,12 @@ class GuidedLoginJourneyJoinedIT {
         + usage.totalTokenCount().map(String::valueOf).orElse("-");
   }
 
-  /**
-   * True when the action's nodeId and locator are, verbatim, one of the request observation's own
-   * hints.
-   */
-  static boolean usedObservationHint(GuidedModelRequest request, JsonNode action) {
+  /** True when the action's ref is, verbatim, one of the refs the request's outline shows. */
+  static boolean usedShownRef(GuidedModelRequest request, JsonNode action) {
     JsonNode target = action.path("target");
-    for (JsonNode node : request.projection().document().path("observation").path("nodes")) {
-      if (node.path("nodeId").asText().equals(target.path("nodeId").asText())) {
-        for (JsonNode hint : node.path("locatorHints")) {
-          if (hint.equals(target.path("locator"))) {
-            return true;
-          }
-        }
-      }
-    }
-    return false;
+    return target.path("kind").asText().equals("node")
+        && GuidedOutline.shownRefs(request.projection().document().path("observation").asText())
+            .contains(target.path("ref").asText());
   }
 
   private static Object invokeReal(Object real, org.mockito.invocation.InvocationOnMock call)
@@ -1015,10 +1093,10 @@ class GuidedLoginJourneyJoinedIT {
         if (action.isObject()) {
           line.append(" operation=" + action.path("operation").path("kind").asText())
               .append(" target=" + action.path("target").path("kind").asText("node"))
-              .append(" locator=" + action.path("target").path("locator").path("kind").asText("-"))
+              .append(" ref=" + action.path("target").path("ref").asText("-"))
               .append(
                   " valueKind=" + action.path("operation").path("value").path("kind").asText("-"))
-              .append(" realObservationHint=" + usedObservationHint(request, action));
+              .append(" realShownRef=" + usedShownRef(request, action));
         }
         if (request.kind() == GuidedModelRequest.Kind.SOURCE_PLAN) {
           line.append(" obligations=" + proposal.path("obligations").size());
@@ -1070,24 +1148,28 @@ class GuidedLoginJourneyJoinedIT {
         .locations("classpath:db/migration")
         .load()
         .migrate();
-    com.citi.put.checks.studio.support.ObservedPublicationFixture.seedPolicy(
-        jdbc, "CSI-123", "orders", "fixture", List.of(ORIGIN), governedPolicy(), "ALLOW");
     PROVIDER_KINDS.clear();
     LOGIN_POSTS.clear();
     LANDINGS.clear();
     NEXT_ACTION_INTENTS.clear();
     chooseVariant = "regions";
     openScope = null;
+    outsideScopeAttack = false;
+    MALICIOUS_ACTIONS.set(0);
+    PREPARE_CALLS.set(0);
+    DISPATCH_CALLS.set(0);
+    WIRE_DIAGNOSTICS.clear();
     REAL_CALLS.clear();
     REAL_COUNT.set(0);
     REAL_ABORTED.set(false);
-    preferredHint = "role";
     jdbc.update(
-        "INSERT INTO users(id,sso_id,name,email,created_at) VALUES (?,'guided-fixture','Guided"
+        "INSERT INTO users(id,sso_id,name,email,created_at) VALUES (?"
+            + ",'guided-fixture','Guided"
             + " Test','user-1',now()) ON CONFLICT DO NOTHING",
         UUID.randomUUID());
     jdbc.update(
-        "INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment) VALUES"
+        "INSERT INTO csi_systems(id,name,business_unit,criticality,ow"
+            + "ner_email,environment) VALUES"
             + " ('CSI-123','Guided fixture','Ops','HIGH','user-1','Production') ON CONFLICT DO"
             + " NOTHING");
     testId = UUID.randomUUID();
@@ -1105,9 +1187,12 @@ class GuidedLoginJourneyJoinedIT {
     var authoring = new AuthoringV2Request(2, null, steps);
     ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
     jdbc.update(
-        "INSERT INTO ui_tests(id, name, csi_id, environment, browser, steps, variables, authoring,"
-            + " authoring_revision_inputs, created_by, created_at, updated_at) VALUES (?, 'Login"
-            + " journey','CSI-123','fixture','chromium',?::jsonb,?::jsonb,?::jsonb,?::jsonb,'user"
+        "INSERT INTO ui_tests(id, name, csi_id, environment, browser,"
+            + " steps, variables, authoring,"
+            + " authoring_revision_inputs, created_by, created_at, updated_"
+            + "at) VALUES (?, 'Login"
+            + " journey','CSI-123','fixture','chromium',?::jsonb,?::jsonb,?"
+            + "::jsonb,?::jsonb,'user"
             + "-1',now(),now())",
         testId,
         mapper.writeValueAsString(stepTexts),
@@ -1165,13 +1250,8 @@ class GuidedLoginJourneyJoinedIT {
   }
 
   @Test
-  void theUsernamePasswordLoginJourneyCompletesStepByStepWithTheRoleHint() throws Exception {
-    journey("role");
-  }
-
-  @Test
-  void theUsernamePasswordLoginJourneyCompletesStepByStepWithTheLabelHint() throws Exception {
-    journey("label");
+  void theUsernamePasswordLoginJourneyCompletesStepByStep() throws Exception {
+    journey();
   }
 
   /**
@@ -1180,10 +1260,9 @@ class GuidedLoginJourneyJoinedIT {
    * retried (the coordinator ignores it and asks the model again, which is how the proposal budget
    * used to burn on step 2).
    */
-  void journey(String hint) throws Exception {
+  void journey() throws Exception {
     Assumptions.assumeFalse(
         REAL, "the scripted model is replaced by the real provider in this run");
-    preferredHint = hint;
     String id = createSession();
     translation.plan(controller, id, 0, "plan-" + id, command(id));
     assertThat(progress(id).path("translationBootstrap").path("phase").asText()).isEqualTo("READY");
@@ -1194,7 +1273,12 @@ class GuidedLoginJourneyJoinedIT {
       try {
         translation.advance(controller, id, 1, "advance-" + turn, command(id));
       } catch (RuntimeException refusal) {
-        failure = refusal.getClass().getSimpleName() + ":" + refusal.getMessage();
+        failure =
+            refusal.getClass().getSimpleName()
+                + ":"
+                + refusal.getMessage()
+                + ":closedWire="
+                + WIRE_DIAGNOSTICS;
       }
       stepIndex = progress(id).path("stepIndex").asInt();
       trace.add(
@@ -1247,7 +1331,8 @@ class GuidedLoginJourneyJoinedIT {
     ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
     jdbc.update("DELETE FROM ui_tests WHERE id=?", testId);
     jdbc.update(
-        "INSERT INTO ui_tests(id, name, csi_id, environment, browser, steps, variables, authoring,"
+        "INSERT INTO ui_tests(id, name, csi_id, environment, browser,"
+            + " steps, variables, authoring,"
             + " authoring_revision_inputs, timeout_seconds, created_by, created_at, updated_at)"
             + " VALUES (?, 'Qualified label journey','CSI-123','fixture','chromium',?::jsonb,"
             + "?::jsonb,?::jsonb,?::jsonb,?,'user-1',now(),now())",
@@ -1281,7 +1366,12 @@ class GuidedLoginJourneyJoinedIT {
       try {
         translation.advance(controller, id, 1, "advance-" + UUID.randomUUID(), command(id));
       } catch (RuntimeException refusal) {
-        failure = refusal.getClass().getSimpleName() + ":" + refusal.getMessage();
+        failure =
+            refusal.getClass().getSimpleName()
+                + ":"
+                + refusal.getMessage()
+                + ":closedWire="
+                + WIRE_DIAGNOSTICS;
       }
       trace.add(
           "turn="
@@ -1362,13 +1452,13 @@ class GuidedLoginJourneyJoinedIT {
     openScope = "Tertiary workspace";
     String id = startAndPlan();
     Turns turns = advanceUntil(id, 5, 80);
-    // The wait ends in the existing acquisition refusal; the model is never asked about step 5.
-    assertThat(turns.failure())
-        .as(turns.trace().toString())
-        .isEqualTo("GuidedSessionException:BUDGET_EXCEEDED");
+    // Semantic stasis ends redundant acquisition; the scripted provider honestly reports no scope.
+    assertThat(turns.failure()).as(turns.trace().toString()).isNull();
     assertThat(session(id).path("state").asText()).isEqualTo("FAILED");
-    assertThat(progress(id).path("errorCode").asText()).isEqualTo("BUDGET_EXCEEDED");
-    assertThat(NEXT_ACTION_INTENTS).containsExactly("page", "Username", "Password", "Sign in");
+    assertThat(progress(id).path("errorCode").asText()).isEqualTo("UNSUPPORTED_STEP");
+    assertThat(NEXT_ACTION_INTENTS)
+        .containsExactly("page", "Username", "Password", "Sign in", "Open");
+    assertThat(PROVIDER_KINDS).isSubsetOf("SOURCE_PLAN", "NEXT_ACTION");
     assertThat(LANDINGS).isEmpty();
     assertThat(clarificationRows(id)).isZero();
   }
@@ -1403,28 +1493,76 @@ class GuidedLoginJourneyJoinedIT {
     assertThat(LANDINGS).containsExactly("/protected/primary");
   }
 
+  /**
+   * ADR-SC-007 D-6: two elements with the same role, name and evidence (here both "Open" in the
+   * same region) cannot be told apart by what the backend keeps, so offering them as the choice
+   * between them is refused every time. Three refusals end the run as a surface Studio cannot work
+   * with, and neither button is clicked.
+   */
   @Test
-  void twoMatchesInTheNamedRegionAreAskedAmongThoseTwoOnly() throws Exception {
+  void twoIdenticalMatchesInTheNamedRegionCannotBeToldApartAndTheRunStopsWithoutClicking()
+      throws Exception {
     Assumptions.assumeFalse(REAL, "the scripted model is replaced by the real provider here");
     chooseVariant = "same";
     useFiveSteps("Click Open in Primary workspace", 30);
     openScope = "Primary workspace";
     String id = startAndPlan();
     Turns turns = advanceUntil(id, 5, 40);
+    // WI6 ordinal disposition: a complete current duplicate class may be clarified, never
+    // auto-selected.
     assertThat(turns.state()).as(turns.trace().toString()).isEqualTo("AWAITING_CLARIFICATION");
     JsonNode question = sessions.read(user, id, "clarification");
     assertThat(question.path("choices")).hasSize(2);
-    String second = null;
+    List<String> labels = new ArrayList<>();
     for (JsonNode choice : question.path("choices")) {
-      assertThat(choice.path("region").asText()).isEqualTo("Primary workspace");
-      second = choice.path("choiceId").asText();
+      labels.add(choice.path("safeLabel").asText());
     }
-    answer(id, question, second);
-    Turns resumed = advanceUntil(id, 5, 40);
-    assertThat(resumed.failure()).as(resumed.trace().toString()).isNull();
-    assertThat(resumed.stepIndex()).isEqualTo(5);
-    assertThat(LANDINGS).hasSize(1);
-    assertThat(LANDINGS.get(0)).startsWith("/protected/");
+    assertThat(labels).containsExactlyInAnyOrder("Open (1 of 2)", "Open (2 of 2)");
+    assertThat(clarificationRows(id)).isEqualTo(1);
+    assertThat(LANDINGS).isEmpty();
+    sessions.cancel(
+        user,
+        id,
+        "cancel-ordinal",
+        CONTRACTS.object().put("schemaVersion", 3).put("reason", "userRequested"));
+    assertThat(session(id).path("state").asText()).isEqualTo("CANCELLED");
+    assertThat(LANDINGS).isEmpty();
+  }
+
+  @Test
+  void aValidOpenRefOutsideTheAuthoredRegionNeverPreparesOrInvokes() throws Exception {
+    Assumptions.assumeFalse(REAL, "scripted adversarial provider is separate from the real opt-in");
+    useFiveSteps("Click Open in Primary workspace", 30);
+    openScope = "Primary workspace";
+    String id = startAndPlan();
+    Turns prefix = advanceUntil(id, 4, 40);
+    assertThat(prefix.failure()).as(prefix.trace().toString()).isNull();
+    assertThat(prefix.stepIndex()).isEqualTo(4);
+    int prepares = PREPARE_CALLS.get(), dispatches = DISPATCH_CALLS.get();
+    outsideScopeAttack = true;
+    Turns refused = advanceUntil(id, 5, 40);
+    assertThat(MALICIOUS_ACTIONS.get()).isPositive();
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM studio_guided_model_attempts WHERE session_id=? AND"
+                    + " kind='NEXT_ACTION' AND status='REJECTED' AND"
+                    + " rejection_gate='NEXT_TARGET_INTENT'",
+                Integer.class,
+                id))
+        .isPositive();
+    assertThat(PROVIDER_KINDS).isSubsetOf("SOURCE_PLAN", "NEXT_ACTION");
+    assertThat(refused.stepIndex()).isEqualTo(4);
+    assertThat(PREPARE_CALLS.get()).isEqualTo(prepares);
+    assertThat(DISPATCH_CALLS.get()).isEqualTo(dispatches);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=?",
+                Integer.class,
+                id,
+                stepIds.get(4).toString()))
+        .isZero();
+    assertThat(LANDINGS).isEmpty();
+    assertThat(clarificationRows(id)).isZero();
   }
 
   void answer(String id, JsonNode question, String choiceId) {
@@ -1463,7 +1601,12 @@ class GuidedLoginJourneyJoinedIT {
       try {
         translation.advance(controller, id, 1, "advance-" + turn, command(id));
       } catch (RuntimeException refusal) {
-        failure = refusal.getClass().getSimpleName() + ":" + refusal.getMessage();
+        failure =
+            refusal.getClass().getSimpleName()
+                + ":"
+                + refusal.getMessage()
+                + ":closedWire="
+                + WIRE_DIAGNOSTICS;
       }
       stepIndex = progress(id).path("stepIndex").asInt();
       trace.add(
@@ -1511,7 +1654,8 @@ class GuidedLoginJourneyJoinedIT {
 
   List<String> actionStates(String id) {
     return jdbc.queryForList(
-        "SELECT document->>'state' FROM studio_guided_actions WHERE session_id=? ORDER BY ordinal",
+        "SELECT document->>'state' FROM studio_guided_actions WHERE s"
+            + "ession_id=? ORDER BY ordinal",
         String.class,
         id);
   }
@@ -1524,8 +1668,7 @@ class GuidedLoginJourneyJoinedIT {
             .put("testId", testId.toString())
             .put("sourceRevision", "1")
             .put("configurationRevision", "1")
-            .put("environmentId", "fixture")
-            .put("applicationId", "orders");
+            .put("environmentId", "fixture");
     start.set("versions", CONTRACTS.parse("{\"contract\":3}"));
     return sessions.start(user, UUID.randomUUID().toString(), start).path("sessionId").asText();
   }

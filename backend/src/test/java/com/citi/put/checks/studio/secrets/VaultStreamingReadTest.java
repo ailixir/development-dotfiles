@@ -126,8 +126,7 @@ class VaultStreamingReadTest {
             matched.set(
                 java.util.Arrays.mismatch(bytes, 0, prefix.length, prefix, 0, prefix.length) == -1);
           });
-      var resolver =
-          new VaultStudioReferenceResolver(provider, (principal, csi, environment, id) -> true);
+      var resolver = new VaultStudioReferenceResolver(provider);
       assertThatThrownBy(
               () ->
                   resolver.resolve(
@@ -151,24 +150,15 @@ class VaultStreamingReadTest {
   }
 
   @Test
-  void namesOnlyAuthorizationAndExistenceDoNotReadSecretAndLongStoredEntriesNeverTruncate() {
+  void namesOnlyExistenceDoesNotReadSecretAndLongStoredEntriesNeverTruncate() {
     UUID test = UUID.randomUUID();
     VaultScope scope = VaultScope.of("CSI", "fixture", test);
     var vault = new FakeStudioVaultProvider(java.util.Map.of());
     vault.rotate(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS", "x".repeat(5000));
-    var allowed = new java.util.concurrent.atomic.AtomicBoolean(false);
-    var resolver =
-        new VaultStudioReferenceResolver(vault, (principal, csi, env, id) -> allowed.get());
+    var resolver = new VaultStudioReferenceResolver(vault);
     var declared =
         new com.citi.put.checks.studio.dispatch.ReferenceDeclarations(
             java.util.List.of(), java.util.List.of("PASS"));
-    assertThatThrownBy(() -> resolver.preflight("CSI", "fixture", test, "user", declared))
-        .isInstanceOf(
-            com.citi.put.checks.studio.dispatch.StudioReferenceResolver
-                .SecretUseNotAuthorizedException.class);
-    assertThat(vault.readCount()).isZero();
-    assertThat(vault.listCount()).isZero();
-    allowed.set(true);
     resolver.preflight("CSI", "fixture", test, "user", declared);
     assertThat(vault.readCount()).isZero();
     assertThatThrownBy(() -> resolver.resolve("CSI", "fixture", test, "user", declared))

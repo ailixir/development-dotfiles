@@ -32,7 +32,7 @@ import { connect } from 'node:tls';
 import { testTls } from './guidedTls.js';
 
 import {publicationFixture as fixture} from './publicationFixture.js';
-import type { BuildIdentity, ObservedJob, TrustedPolicy } from '../../src/executor/observedOperations.js';
+import type { BuildIdentity, ObservedJob } from '../../src/executor/observedOperations.js';
 import type { StepReporter } from '../../src/executor/stepReporter.js';
 import type { ObservedRunnerSupport } from '../../src/server/runCoordinator.js';
 import { OBSERVED_SCHEMA_BUNDLE_HASH } from '../../src/validator/observedReferencePolicy.js';
@@ -475,13 +475,10 @@ export function createFakeScratchStore(log?: EventLog): FakeScratchStore {
 /** The build identity this checkout's observed schema bundle produces. */
 export const OBSERVED_BUILD: BuildIdentity = { ...fixture.build, schemaBundleHash: OBSERVED_SCHEMA_BUNDLE_HASH };
 
-/** The trusted policy the fixture job's scope selects. */
-export const OBSERVED_POLICY = fixture.trustedPolicy as TrustedPolicy;
-
 /** Runner support that validates and replays the fixture job. */
 export const OBSERVED_SUPPORT: ObservedRunnerSupport = {
   build: OBSERVED_BUILD,
-  policies: [OBSERVED_POLICY],
+  
   validationEnabled: true,
   replayEnabled: true,
 };

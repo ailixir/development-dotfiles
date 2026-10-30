@@ -66,12 +66,7 @@ class GuidedRuntimeRolePrivilegeIT {
    */
   static final String PREPARED_GRANT =
       """
-      -- New relations, V19 (governance).
-      GRANT SELECT, INSERT, UPDATE ON studio_guided_policies TO :"runtime_role";
-      GRANT SELECT, INSERT ON studio_guided_policy_versions TO :"runtime_role";
-      GRANT SELECT, INSERT ON studio_guided_policy_approvals TO :"runtime_role";
-      GRANT INSERT ON studio_guided_policy_audit TO :"runtime_role";
-      GRANT SELECT, INSERT ON studio_guided_session_policies TO :"runtime_role";
+      -- New relations, V19 (per-CSI budget).
       GRANT SELECT, INSERT, UPDATE ON studio_guided_csi_guards TO :"runtime_role";
       GRANT SELECT, INSERT, UPDATE ON studio_guided_csi_token_days TO :"runtime_role";
       -- New relations, V20 (recording).
@@ -88,6 +83,9 @@ class GuidedRuntimeRolePrivilegeIT {
       GRANT SELECT, INSERT, UPDATE ON studio_guided_prefix_requests TO :"runtime_role";
       GRANT SELECT, INSERT ON studio_guided_no_invocation_receipts TO :"runtime_role";
       GRANT SELECT, INSERT ON studio_guided_suffix_acceptances TO :"runtime_role";
+      -- New relation, V27 (the proof link of a publication): inserted by the publication commit,
+      -- read by the result projector.
+      GRANT SELECT, INSERT ON studio_learn_proofs TO :"runtime_role";
       -- Pre-V19 relations: what V19..V22 function and trigger bodies newly need on them. A no-op
       -- where the V18 baseline already grants it.
       -- V21 version-history trigger locks the materialization row (FOR UPDATE).
@@ -118,17 +116,16 @@ class GuidedRuntimeRolePrivilegeIT {
        ON ui_test_executions TO :"runtime_role";
       GRANT SELECT (rejection_reason), UPDATE (rejection_reason)
        ON studio_guided_model_attempts TO :"runtime_role";
+      GRANT SELECT (rejection_gate, intent_path, intent_fields),
+       UPDATE (rejection_gate, intent_path, intent_fields)
+       ON studio_guided_model_attempts TO :"runtime_role";
+      GRANT SELECT (ui_test_id), INSERT (ui_test_id), UPDATE (ui_test_id)
+       ON schedules TO :"runtime_role";
       """;
 
   /** Relations V19 through the head create: name to "version kind". */
   private static final Map<String, String> CREATED_RELATIONS =
       Map.ofEntries(
-          Map.entry("studio_guided_policies", "19 r"),
-          Map.entry("studio_guided_policy_versions", "19 r"),
-          Map.entry("studio_guided_policy_approvals", "19 r"),
-          Map.entry("studio_guided_policy_audit", "19 r"),
-          Map.entry("studio_guided_policy_audit_audit_id_seq", "19 S"),
-          Map.entry("studio_guided_session_policies", "19 r"),
           Map.entry("studio_guided_csi_guards", "19 r"),
           Map.entry("studio_guided_csi_token_days", "19 r"),
           Map.entry("studio_guided_session_recordings", "20 r"),
@@ -140,7 +137,8 @@ class GuidedRuntimeRolePrivilegeIT {
           Map.entry("studio_guided_materialization_deliveries", "21 r"),
           Map.entry("studio_guided_prefix_requests", "21 r"),
           Map.entry("studio_guided_no_invocation_receipts", "21 r"),
-          Map.entry("studio_guided_suffix_acceptances", "21 r"));
+          Map.entry("studio_guided_suffix_acceptances", "21 r"),
+          Map.entry("studio_learn_proofs", "27 r"));
 
   /**
    * What application SQL (backend/src/main/java, grep in the DE receipt) does to each new relation.
@@ -148,11 +146,6 @@ class GuidedRuntimeRolePrivilegeIT {
    */
   private static final Map<String, Set<String>> APPLICATION_ACCESS =
       Map.ofEntries(
-          Map.entry("studio_guided_policies", Set.of("SELECT", "INSERT", "UPDATE")),
-          Map.entry("studio_guided_policy_versions", Set.of("SELECT", "INSERT")),
-          Map.entry("studio_guided_policy_approvals", Set.of("SELECT", "INSERT")),
-          Map.entry("studio_guided_policy_audit", Set.of()),
-          Map.entry("studio_guided_session_policies", Set.of("SELECT", "INSERT")),
           Map.entry("studio_guided_csi_guards", Set.of("SELECT", "INSERT", "UPDATE")),
           Map.entry("studio_guided_csi_token_days", Set.of("SELECT", "INSERT", "UPDATE")),
           Map.entry("studio_guided_session_recordings", Set.of("SELECT", "INSERT")),
@@ -164,7 +157,9 @@ class GuidedRuntimeRolePrivilegeIT {
           Map.entry("studio_guided_materialization_deliveries", Set.of("SELECT", "UPDATE")),
           Map.entry("studio_guided_prefix_requests", Set.of("SELECT", "INSERT", "UPDATE")),
           Map.entry("studio_guided_no_invocation_receipts", Set.of("SELECT", "INSERT")),
-          Map.entry("studio_guided_suffix_acceptances", Set.of("SELECT", "INSERT")));
+          Map.entry("studio_guided_suffix_acceptances", Set.of("SELECT", "INSERT")),
+          // V27: the publication commit inserts the link, the result projector reads it.
+          Map.entry("studio_learn_proofs", Set.of("SELECT", "INSERT")));
 
   /** Columns V19 through the head add to pre-V19 relations, with what the runtime does to them. */
   private static final Map<String, Set<String>> ADDED_COLUMNS =
@@ -179,7 +174,14 @@ class GuidedRuntimeRolePrivilegeIT {
           Map.entry(
               "ui_test_executions.replay_failure_login_steps_present", Set.of("SELECT", "UPDATE")),
           // V23 (round 053): the closed rejection reason, read and written by finishAttempt.
-          Map.entry("studio_guided_model_attempts.rejection_reason", Set.of("SELECT", "UPDATE")));
+          Map.entry("studio_guided_model_attempts.rejection_reason", Set.of("SELECT", "UPDATE")),
+          // V29 (ADR-SC-007): the gate that refused a rejected attempt and how the intent gate
+          // admitted an applied one, written by finishAttempt with the rest of the transition.
+          Map.entry("studio_guided_model_attempts.rejection_gate", Set.of("SELECT", "UPDATE")),
+          Map.entry("studio_guided_model_attempts.intent_path", Set.of("SELECT", "UPDATE")),
+          Map.entry("studio_guided_model_attempts.intent_fields", Set.of("SELECT", "UPDATE")),
+          // V24 (STUDIO-GOV-001.2): a shared schedule's UI test target; the schedule API writes it.
+          Map.entry("schedules.ui_test_id", Set.of("SELECT", "INSERT", "UPDATE")));
 
   private final List<String> databases = new ArrayList<>();
   private final List<String> roles = new ArrayList<>();
@@ -252,6 +254,8 @@ class GuidedRuntimeRolePrivilegeIT {
       diff(previous.constraints(), now.constraints(), v, constraints);
       previous = now;
     }
+    // A relation a later migration dropped (V25: the governed policy tables) needs no grant.
+    created.keySet().removeIf(name -> !head.relations().containsKey(name));
     assertThat(created)
         .as("every relation V19..head creates is ruled; a new one needs a grant ruling")
         .isEqualTo(new TreeMap<>(CREATED_RELATIONS));
@@ -444,41 +448,6 @@ class GuidedRuntimeRolePrivilegeIT {
           .as(table)
           .isEqualTo(1);
     }
-  }
-
-  /**
-   * The policy audit is written only by an AFTER trigger with the invoker's rights: the runtime
-   * role needs INSERT on it, and nothing on its identity sequence.
-   */
-  @Test
-  void triggerOnlyPolicyAuditNeedsInsertButNoSequenceGrant() {
-    Fixture f = runtimeFixture();
-    f.owner().execute(grantFor(PREPARED_GRANT, f.role()));
-    f.owner().execute("REVOKE INSERT ON studio_guided_policy_audit FROM " + quoted(f.role()));
-    UUID first = UUID.randomUUID();
-    assertThatThrownBy(() -> policy(f.runtime(), first, "app-1"))
-        .rootCause()
-        .hasMessageContaining("permission denied for table studio_guided_policy_audit");
-
-    f.owner().execute("GRANT INSERT ON studio_guided_policy_audit TO " + quoted(f.role()));
-    UUID second = UUID.randomUUID();
-    policy(f.runtime(), second, "app-2");
-    assertThat(
-            f.owner()
-                .queryForList(
-                    "SELECT event FROM studio_guided_policy_audit WHERE policy_id=?",
-                    String.class,
-                    second))
-        .containsExactly("POLICY_CREATED");
-    assertThat(
-            f.owner()
-                .queryForObject(
-                    "SELECT"
-                        + " has_sequence_privilege(?::name,'studio_guided_policy_audit_audit_id_seq',"
-                        + "'USAGE')",
-                    Boolean.class,
-                    f.role()))
-        .isFalse();
   }
 
   /** Column-by-column baselines: the conditional block covers exactly the added columns. */
@@ -832,15 +801,6 @@ class GuidedRuntimeRolePrivilegeIT {
 
   private static int count(JdbcTemplate jdbc) {
     return jdbc.queryForObject("SELECT count(*) FROM studio_secret_use_audit", Integer.class);
-  }
-
-  private static void policy(JdbcTemplate jdbc, UUID id, String application) {
-    jdbc.update(
-        "INSERT INTO studio_guided_policies(policy_id,csi_id,application_id,environment_id,"
-            + "created_by) VALUES (?,'CSI',?,'Development',?)",
-        id,
-        application,
-        PRINCIPAL);
   }
 
   private static void seedSession(JdbcTemplate jdbc, UUID testId) {

@@ -49,6 +49,18 @@ class ExecutionSnapshotMapperTest {
   }
 
   @Test
+  void anAfterLearnProofCarriesItsTriggerSourceAndNoSchedule() {
+    UITestExecution execution = accepted();
+    execution.setTriggerSource("AFTER_LEARN");
+
+    ExecutionSnapshotDto snapshot = mapper.toSnapshot(execution);
+
+    assertThat(snapshot.triggerSource()).isEqualTo("AFTER_LEARN");
+    assertThat(snapshot.scheduleId()).isNull();
+    assertThat(snapshot.scheduledAt()).isNull();
+  }
+
+  @Test
   void acceptedAtIsThePartitionKeyAndStartedAtIsTheBrowserStart() {
     UITestExecution execution = accepted();
     Instant browserStart = NOW.minusSeconds(50);

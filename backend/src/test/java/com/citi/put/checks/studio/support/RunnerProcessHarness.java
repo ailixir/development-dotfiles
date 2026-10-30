@@ -114,6 +114,12 @@ public final class RunnerProcessHarness implements AutoCloseable {
   public static final String KEY_TLS_CA_FILE = "STUDIO_RUNNER_TLS_CA_FILE";
   public static final String KEY_CONTROLLER_FINGERPRINT =
       "STUDIO_RUNNER_CONTROLLER_CERTIFICATE_FINGERPRINT256";
+
+  /** The navigation allow-list (STUDIO-FLEX-001); the harness sets the fixtures' domains. */
+  public static final String KEY_ALLOWED_DOMAINS = "STUDIO_RUNNER_ALLOWED_DOMAINS";
+
+  public static final String KEY_ALLOW_ALL_DOMAINS = "STUDIO_RUNNER_ALLOW_ALL_DOMAINS";
+
   public static final String KEY_SERVICE_IDENTITY = "STUDIO_RUNNER_SERVICE_IDENTITY";
   public static final String KEY_CALLBACK_IDENTITY = "STUDIO_RUNNER_CALLBACK_IDENTITY";
   public static final String KEY_CALLBACK_BASE_URL = "STUDIO_RUNNER_CALLBACK_BASE_URL";
@@ -122,6 +128,10 @@ public final class RunnerProcessHarness implements AutoCloseable {
 
   public static final String KEY_GUIDED_ENABLED = "STUDIO_RUNNER_GUIDED_ENABLED";
   public static final String KEY_GUIDED_WORKER_ID = "STUDIO_RUNNER_GUIDED_WORKER_ID";
+
+  /** Learning sessions the guided process owns at once (1 to 8, required with guided mode). */
+  public static final String KEY_GUIDED_CAPACITY = "STUDIO_RUNNER_GUIDED_CAPACITY";
+
   public static final String KEY_GUIDED_JOURNAL_DIR = "STUDIO_RUNNER_GUIDED_JOURNAL_DIR";
   public static final String KEY_GUIDED_CONTROLLER_ISSUER =
       "STUDIO_RUNNER_GUIDED_CONTROLLER_ISSUER";
@@ -611,9 +621,15 @@ public final class RunnerProcessHarness implements AutoCloseable {
     // /tmp that another process would share: give the instance its own.
     env.put(KEY_SCRATCH_DIR, workDir.resolve("scratch").toAbsolutePath().toString());
     env.put(KEY_OBJECT_STORE_DIR, workDir.resolve("objects").toAbsolutePath().toString());
+    // The fixtures' pages live on these domains, the same list the backend's test profile uses.
+    env.put(KEY_ALLOWED_DOMAINS, String.join(",", TestDomains.ENTRIES));
+    // Allow-all is ON when unset (the default for now); the suites using this runner are about the
+    // list.
+    env.put(KEY_ALLOW_ALL_DOMAINS, "false");
     if (guided != null) {
       env.put(KEY_GUIDED_ENABLED, "true");
       env.put(KEY_GUIDED_WORKER_ID, guided.workerId());
+      env.put(KEY_GUIDED_CAPACITY, "1");
       env.put(KEY_GUIDED_JOURNAL_DIR, guided.journalDirectory().toAbsolutePath().toString());
       env.put(KEY_GUIDED_CONTROLLER_ISSUER, guided.controllerIssuer());
       env.put(KEY_GUIDED_CONTROLLER_SUBJECT, guided.controllerSubject());

@@ -7,8 +7,8 @@
   "executionStatus": "NOT_RUN",
   "comparisonClaim": "NONE_NO_COMPARISON_TO_20261004",
   "authoredBy": "@dev (Dex) EP lane draft from Quinn t0-qa-20261017 B1/B5/B6; @qa review PENDING",
-  "manifestFrozenAt": "2026-10-21T13:34:23.444Z",
-  "manifestSha256": "ef3cac512987faeece662a0c423c1b943eb742862f4584813c8747dd70e707d6",
+  "manifestFrozenAt": "2026-10-25T20:48:03.772Z",
+  "manifestSha256": "db6db6bf3556d9dcf06869e28f7fc9fdf2acb700b019a0733f12cc54fba50725",
   "freezeNote": "Pending actual source/corpus QA and re-freeze in its own authorized window. Old e4785112 admissions/refusals remain historical and do not admit this candidate. No provider/staging/headroom fact is supplied.",
   "rulings": {
     "B1": {
@@ -100,17 +100,17 @@
     "evaluator": {
       "path": "studio-runner/evaluation/observed-authoring/evaluate.mjs",
       "base": "repo",
-      "sha256": "b9c95ddcee770fe1b88ea56587627f7bb5c6dc461c9687df08229a786244a518"
+      "sha256": "8ee61e9e9cc5730a505a3dcb9bd1a056a55ffb94f394d600aff85dbca86aaa71"
     },
     "evaluationCli": {
       "path": "studio-runner/evaluation/cli.mjs",
       "base": "repo",
-      "sha256": "8a119c26eb16ed19cd5f1a5a46ed07a9d13eeb2f6e2a951dd2dc3d854795bcad"
+      "sha256": "31c2eeed540d9995d49e3f1f6bebc6e83b374e8b00c96af7a0ec89629cf01790"
     },
     "corpusPageServer": {
       "path": "studio-runner/evaluation/observed-authoring/pages/server.mjs",
       "base": "repo",
-      "sha256": "81d1673989f20ba236b5fb6a774ba33da87192983dd87956157227e1b3936d30"
+      "sha256": "1ae71f7ea1735deb580e9e9df895ab2877bfb33d4f30d8480a2776f282e6bb77"
     }
   },
   "cases": [
@@ -161,11 +161,11 @@
             ],
             "generatedCodeShapes": [
               [
-                "await page.goto('http://127.0.0.1:4102/ns/c01/home');",
+                "await page.goto('http://localhost:4102/ns/c01/home');",
                 "await expect(page).toHaveURL(/127\\.0\\.0\\.1/);"
               ]
             ],
-            "fixtureOriginPattern": "http://127.0.0.1:4102/ns/c01/home"
+            "fixtureOriginPattern": "http://localhost:4102/ns/c01/home"
           },
           "intendedClass": "P"
         },
@@ -275,11 +275,11 @@
             ],
             "generatedCodeShapes": [
               [
-                "await page.goto('http://127.0.0.1:4102/ns/c02/wiki');",
+                "await page.goto('http://localhost:4102/ns/c02/wiki');",
                 "await expect(page).toHaveURL(/\\/wiki/);"
               ]
             ],
-            "fixtureOriginPattern": "http://127.0.0.1:4102/ns/c02/wiki"
+            "fixtureOriginPattern": "http://localhost:4102/ns/c02/wiki"
           },
           "intendedClass": "P"
         },
@@ -389,17 +389,17 @@
             ],
             "generatedCodeShapes": [
               [
-                "await page.goto('http://127.0.0.1:4102/ns/c03/wiki');",
+                "await page.goto('http://localhost:4102/ns/c03/wiki');",
                 "await page.getByLabel('Search Wikipedia').fill(vars.get('SEARCH_TERM'));",
                 "await expect(page).toHaveURL(/\\/wiki/);"
               ],
               [
-                "await page.goto('http://127.0.0.1:4102/ns/c03/wiki');",
+                "await page.goto('http://localhost:4102/ns/c03/wiki');",
                 "await page.getByPlaceholder('Search Wikipedia').fill(vars.get('SEARCH_TERM'));",
                 "await expect(page).toHaveURL(/\\/wiki/);"
               ]
             ],
-            "fixtureOriginPattern": "http://127.0.0.1:4102/ns/c03/wiki"
+            "fixtureOriginPattern": "http://localhost:4102/ns/c03/wiki"
           },
           "intendedClass": "P"
         },
@@ -510,19 +510,19 @@
             ],
             "generatedCodeShapes": [
               [
-                "await page.goto('http://127.0.0.1:4100/trials/6f1c2b8e-0000-4000-8000-00000000c004');",
+                "await page.goto('http://localhost:4100/trials/6f1c2b8e-0000-4000-8000-00000000c004');",
                 "await page.getByRole('button', { name: 'Log in' }).click();",
                 "await page.getByRole('button', { name: 'Save target' }).click();",
                 "await expect(page.getByText('Saved target')).toBeVisible();"
               ],
               [
-                "await page.goto('http://127.0.0.1:4100/trials/6f1c2b8e-0000-4000-8000-00000000c004');",
+                "await page.goto('http://localhost:4100/trials/6f1c2b8e-0000-4000-8000-00000000c004');",
                 "await page.getByRole('button', { name: 'Log in' }).click();",
                 "await page.getByText('Save target').click();",
                 "await expect(page.getByText('Saved target')).toBeVisible();"
               ]
             ],
-            "fixtureOriginPattern": "http://127.0.0.1:4100/trials/6f1c2b8e-0000-4000-8000-00000000c004"
+            "fixtureOriginPattern": "http://localhost:4100/trials/6f1c2b8e-0000-4000-8000-00000000c004"
           },
           "intendedClass": "P"
         },
@@ -632,21 +632,21 @@
             ],
             "generatedCodeShapes": [
               [
-                "await page.goto('http://127.0.0.1:4102/ns/c05/login');",
+                "await page.goto('http://localhost:4102/ns/c05/login');",
                 "await page.getByLabel('Username').fill(vars.get('USERNAME'));",
                 "await page.getByLabel('Password').fill(vars.secret('LOGIN_PW'));",
                 "await page.getByRole('button', { name: 'Sign in' }).click();",
-                "await expect(page).toHaveURL('http://127.0.0.1:4102/ns/c05/dashboard');"
+                "await expect(page).toHaveURL('http://localhost:4102/ns/c05/dashboard');"
               ],
               [
-                "await page.goto('http://127.0.0.1:4102/ns/c05/login');",
+                "await page.goto('http://localhost:4102/ns/c05/login');",
                 "await page.getByLabel('Username').fill(vars.get('USERNAME'));",
                 "await page.getByLabel('Password').fill(vars.secret('LOGIN_PW'));",
                 "await page.getByRole('button', { name: 'Sign in' }).click();",
                 "CLARIFICATION: [missing]"
               ]
             ],
-            "fixtureOriginPattern": "http://127.0.0.1:4102/ns/c05/login"
+            "fixtureOriginPattern": "http://localhost:4102/ns/c05/login"
           },
           "intendedClass": "P"
         },
@@ -763,7 +763,7 @@
             ],
             "generatedCodeShapes": [
               [
-                "await page.goto('http://127.0.0.1:4102/ns/c06/forms');",
+                "await page.goto('http://localhost:4102/ns/c06/forms');",
                 "await page.getByLabel('Currency').selectOption('GBP');",
                 "await page.getByLabel('Remember me').check();",
                 "await page.getByLabel('Notes').fill('urgent');",
@@ -771,7 +771,7 @@
                 "await expect(page.getByText('Saved')).toBeVisible();"
               ],
               [
-                "await page.goto('http://127.0.0.1:4102/ns/c06/forms');",
+                "await page.goto('http://localhost:4102/ns/c06/forms');",
                 "await page.getByLabel('Currency').selectOption('GBP');",
                 "await page.getByRole('checkbox', { name: 'Remember me' }).check();",
                 "await page.getByLabel('Notes').fill('urgent');",
@@ -779,7 +779,7 @@
                 "await expect(page.getByText('Saved')).toBeVisible();"
               ]
             ],
-            "fixtureOriginPattern": "http://127.0.0.1:4102/ns/c06/forms"
+            "fixtureOriginPattern": "http://localhost:4102/ns/c06/forms"
           },
           "intendedClass": "P"
         },
@@ -888,15 +888,15 @@
             ],
             "generatedCodeShapes": [
               [
-                "await page.goto('http://127.0.0.1:4102/ns/c07/search');",
+                "await page.goto('http://localhost:4102/ns/c07/search');",
                 "await page.getByRole('searchbox').fill('hosting');\nawait page.getByRole('searchbox').press('Enter');"
               ],
               [
-                "await page.goto('http://127.0.0.1:4102/ns/c07/search');",
+                "await page.goto('http://localhost:4102/ns/c07/search');",
                 "await page.getByRole('searchbox').fill('hosting'); await page.getByRole('searchbox').press('Enter');"
               ]
             ],
-            "fixtureOriginPattern": "http://127.0.0.1:4102/ns/c07/search"
+            "fixtureOriginPattern": "http://localhost:4102/ns/c07/search"
           },
           "intendedClass": "P"
         },
@@ -1000,11 +1000,11 @@
             ],
             "generatedCodeShapes": [
               [
-                "await page.goto('http://127.0.0.1:4102/ns/c08/orders');",
+                "await page.goto('http://localhost:4102/ns/c08/orders');",
                 "await expect(page.getByText('Order rejected')).toBeVisible();"
               ]
             ],
-            "fixtureOriginPattern": "http://127.0.0.1:4102/ns/c08/orders"
+            "fixtureOriginPattern": "http://localhost:4102/ns/c08/orders"
           },
           "intendedClass": "F"
         },
@@ -1116,15 +1116,15 @@
             ],
             "generatedCodeShapes": [
               [
-                "await page.goto('http://127.0.0.1:4102/ns/c09/forms');",
+                "await page.goto('http://localhost:4102/ns/c09/forms');",
                 "UNSUPPORTED: [missing]"
               ],
               [
-                "await page.goto('http://127.0.0.1:4102/ns/c09/forms');",
+                "await page.goto('http://localhost:4102/ns/c09/forms');",
                 "UNSUPPORTED: Negative assertions such as checking that an element is not present or visible are not supported in the syntax reference."
               ]
             ],
-            "fixtureOriginPattern": "http://127.0.0.1:4102/ns/c09/forms"
+            "fixtureOriginPattern": "http://localhost:4102/ns/c09/forms"
           },
           "intendedClass": "N"
         },
@@ -1459,15 +1459,15 @@
             ],
             "generatedCodeShapes": [
               [
-                "await page.goto('http://127.0.0.1:4102/ns/c12/forms');",
+                "await page.goto('http://localhost:4102/ns/c12/forms');",
                 "CLARIFICATION: [missing]"
               ],
               [
-                "await page.goto('http://127.0.0.1:4102/ns/c12/forms');",
+                "await page.goto('http://localhost:4102/ns/c12/forms');",
                 "await page.getByRole('button').click();"
               ]
             ],
-            "fixtureOriginPattern": "http://127.0.0.1:4102/ns/c12/forms"
+            "fixtureOriginPattern": "http://localhost:4102/ns/c12/forms"
           },
           "intendedClass": "N"
         },
@@ -1563,15 +1563,15 @@
             ],
             "generatedCodeShapes": [
               [
-                "await page.goto('http://127.0.0.1:4102/ns/c13/wikimain');",
+                "await page.goto('http://localhost:4102/ns/c13/wikimain');",
                 "await page.getByRole('searchbox').fill('Alan Turing');\nawait page.getByRole('searchbox').press('Enter');"
               ],
               [
-                "await page.goto('http://127.0.0.1:4102/ns/c13/wikimain');",
+                "await page.goto('http://localhost:4102/ns/c13/wikimain');",
                 "await page.getByRole('searchbox', { name: 'Search Wikipedia' }).fill('Alan Turing'); await page.getByRole('searchbox', { name: 'Search Wikipedia' }).press('Enter');"
               ]
             ],
-            "fixtureOriginPattern": "http://127.0.0.1:4102/ns/c13/wikimain"
+            "fixtureOriginPattern": "http://localhost:4102/ns/c13/wikimain"
           },
           "intendedClass": "P"
         },
@@ -1650,7 +1650,7 @@
         "serverPin": {
           "path": "studio-runner/test/fixtures/secret-login/server.ts",
           "base": "repo",
-          "sha256": "4dfdb95e5a57d3ced6122d59fe190dd84ef58f722ce63fc5557785c51bb611f9"
+          "sha256": "57110a73116b8735fadc357e79096830c26c52ebd749025a8f5d20d364fc93a6"
         },
         "host": "in-process under Node 24 type stripping (hostExistingFixture)",
         "receipts": "receipts() -> login.submit {username, accepted}; id and password are dropped by the adapter"
@@ -1754,7 +1754,7 @@
         "serverPin": {
           "path": "studio-runner/test/fixtures/guided-dataflow/server.ts",
           "base": "repo",
-          "sha256": "db44223ecd775115e3f8cd1ee1a87f4877be1d74d6646f24979426638deb3932"
+          "sha256": "033971b472132ced1968f6f41277c2196deb665e9b52fbac8c9f0233171b4313"
         },
         "mode": "mixedVisible",
         "host": "in-process under Node 24 type stripping (hostExistingFixture)",
@@ -1818,7 +1818,7 @@
         "serverPin": {
           "path": "studio-runner/test/fixtures/guided-dataflow/server.ts",
           "base": "repo",
-          "sha256": "db44223ecd775115e3f8cd1ee1a87f4877be1d74d6646f24979426638deb3932"
+          "sha256": "033971b472132ced1968f6f41277c2196deb665e9b52fbac8c9f0233171b4313"
         },
         "mode": "mixedVisible",
         "host": "in-process under Node 24 type stripping (hostExistingFixture)",
@@ -1882,7 +1882,7 @@
         "serverPin": {
           "path": "studio-runner/test/fixtures/guided-dataflow/server.ts",
           "base": "repo",
-          "sha256": "db44223ecd775115e3f8cd1ee1a87f4877be1d74d6646f24979426638deb3932"
+          "sha256": "033971b472132ced1968f6f41277c2196deb665e9b52fbac8c9f0233171b4313"
         },
         "mode": "mixedVisible",
         "host": "in-process under Node 24 type stripping (hostExistingFixture)",

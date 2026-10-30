@@ -59,12 +59,6 @@ class PublicationGrantClockIT {
   @DynamicPropertySource
   static void properties(DynamicPropertyRegistry registry) {
     ObservedPublicationFixture.register(registry);
-    registry.add(
-        "studio.guided-authoring.translation.applications",
-        () -> ObservedPublicationFixture.APPLICATION);
-    registry.add(
-        "studio.guided-authoring.translation.environments",
-        () -> ObservedPublicationFixture.ENVIRONMENTS.getFirst());
   }
 
   static final class OffsetClock extends Clock {
@@ -194,9 +188,7 @@ class PublicationGrantClockIT {
   }
 
   private String finalizingSession() {
-    UUID testId =
-        ObservedPublicationFixture.guidedDraft(
-            jdbc, CSI, ObservedPublicationFixture.ENVIRONMENTS.getFirst(), OWNER);
+    UUID testId = ObservedPublicationFixture.guidedDraft(jdbc, CSI, "Production", OWNER);
     String id = new ObservedPublicationFixture(jdbc).learnWithoutPublishing(testId);
     tx.executeWithoutResult(
         status -> {

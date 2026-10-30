@@ -51,7 +51,7 @@ export async function startFixtureServer({token,targetPort=4100,controlPort=4101
       if(request.url==='/trials'&&request.method==='POST'){
         const body=await json(request);
         if(typeof body.namespace!=='string'||!/^[0-9a-f-]{36}$/.test(body.namespace)||trials.has(body.namespace)||trials.size>=1000){reply(response,400,{});return;}
-        trials.set(body.namespace,empty());reply(response,201,{namespace:body.namespace,targetUrl:`http://127.0.0.1:${boundTargetPort}/trials/${body.namespace}`});return;
+        trials.set(body.namespace,empty());reply(response,201,{namespace:body.namespace,targetUrl:`http://localhost:${boundTargetPort}/trials/${body.namespace}`});return;
       }
       const match=/^\/trials\/([0-9a-f-]{36})(\/reset)?$/.exec(request.url??'');
       if(!match||!trials.has(match[1])){reply(response,404,{});return;}
@@ -63,7 +63,7 @@ export async function startFixtureServer({token,targetPort=4100,controlPort=4101
   boundTargetPort=await listen(target,targetPort);
   const boundControlPort=await listen(control,controlPort);
   const close=()=>Promise.all([target,control].map(server=>new Promise(resolve=>{server.closeAllConnections();server.close(()=>{resolve();});}))).then(()=>undefined);
-  return {fixtureVersion:FIXTURE_VERSION,targetOrigin:`http://127.0.0.1:${boundTargetPort}`,controlUrl:`http://127.0.0.1:${boundControlPort}`,close};
+  return {fixtureVersion:FIXTURE_VERSION,targetOrigin:`http://localhost:${boundTargetPort}`,controlUrl:`http://127.0.0.1:${boundControlPort}`,close};
 }
 
 if (process.argv[1] && import.meta.url===pathToFileURL(process.argv[1]).href) {

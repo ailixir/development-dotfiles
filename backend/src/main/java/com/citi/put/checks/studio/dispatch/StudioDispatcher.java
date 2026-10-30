@@ -280,8 +280,7 @@ public class StudioDispatcher {
     // AC-13a, §5.1.3: every claimed attempt (first dispatch, lease-expiry re-claim, post-outage
     // retry) is rechecked here, before the observed binding lookup, refreshRetry's grant minting,
     // any Vault read and any send. A revoked permission is terminal with an explicit code, never a
-    // retry and never a skip. The returned policy identity is discarded: the observed binding's
-    // currentPolicyHash is the recorded policy identity for this family.
+    // retry and never a skip.
     try {
       authorization.recheck(executionId, testId, csiId, principal);
     } catch (DispatchAuthorization.AuthorizationRevokedException e) {
@@ -363,9 +362,6 @@ public class StudioDispatcher {
       }
     } catch (VaultProviderUnavailableException failure) {
       settleObservedFailure(binding, failure, null, now);
-      return false;
-    } catch (StudioReferenceResolver.SecretUseRevokedException failure) {
-      settleObservedFailure(binding, failure, ExecutionErrorCode.AUTHORIZATION_REVOKED, now);
       return false;
     } catch (SecretTooLongException failure) {
       settleObservedFailure(binding, failure, ExecutionErrorCode.SECRET_TOO_LONG, now);
@@ -473,11 +469,7 @@ public class StudioDispatcher {
     if ("CANCELLED".equals(refusal.getMessage())) {
       return ExecutionErrorCode.CANCELLED;
     }
-    return java.util.Set.of(
-                "AUTHORIZATION_EXPIRED",
-                "FORBIDDEN_SCOPE",
-                "SECRET_USE_REVOKED",
-                "SECRET_USE_NOT_AUTHORIZED")
+    return java.util.Set.of("AUTHORIZATION_EXPIRED", "FORBIDDEN_SCOPE")
             .contains(refusal.getMessage())
         ? ExecutionErrorCode.AUTHORIZATION_REVOKED
         : ExecutionErrorCode.DISPATCH_FAILED;

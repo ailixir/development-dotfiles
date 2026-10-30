@@ -1,3 +1,4 @@
+import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 /**
  * STUDIO-OBS-012A — the observed child's teardown evidence, its tail hold and its stop-frame guard,
  * driven through the production defaults rather than the injected seams.
@@ -20,7 +21,9 @@ import { TAIL_SETTLE_HOLD_MS, attachChildRuntime } from '../../src/run/childRunt
 import type { ObservedChildMessage } from '../../src/run/protocol.js';
 import type { BuildIdentity } from '../../src/executor/observedOperations.js';
 import { OBSERVED_SCHEMA_BUNDLE_HASH, hashObserved } from '../../src/validator/observedReferencePolicy.js';
-import type { Observation, ObservationSession } from '../../src/run/observationTypes.js';
+import type { ObservationSession } from '../../src/run/observationTypes.js';
+import type { Observation } from '../../src/guided/types.js';
+import { resolveFromGuards } from '../helpers/replaySession.js';
 import type { BrowserHandle } from '../../src/run/browserFactory.js';
 import { MIN_PLAYABLE_RECORDING_BYTES, WEBM_MAGIC } from '../../src/run/recording.js';
 import { createFakePage } from '../helpers/child.js';
@@ -57,19 +60,11 @@ function driver(options: DriverOptions) {
   let clock = 0;
   const observation = structuredClone(fixture.basis.observations[0]?.observation) as Observation | undefined;
   if (!observation) throw new Error('OBSERVATION');
-  observation.nodes = (fixture.execute).guards.flatMap((guard) =>
-    guard.target.kind !== 'element' || guard.target.classification === 'withheld'
-      ? []
-      : [{ nodeId: guard.guardId, documentId: observation.documentId, generation: observation.generation, role: guard.target.role, name: '', elementType: guard.target.elementType, controlType: guard.target.controlType, classification: guard.target.classification, policyRuleId: guard.target.readRuleId ?? 'fixture-structural', visible: guard.target.visible, actionable: guard.target.actionable, depth: 0, parentNodeId: null, regionId: null, formId: null, labelNodeIds: [], locatorHints: [guard.target.locator] }],
-  );
   const observations: ObservationSession = {
     observe: () => Promise.resolve({ observation, json: '{}', bytes: 2, observationHash: hashObserved(observation) }),
-    acquire: (request) => {
-      const node = observation.nodes.find((candidate) => candidate.locatorHints.some((hint) => hashObserved(hint) === hashObserved(request.locator)));
-      return Promise.resolve(node ? { kind: 'READY', target: { nodeId: node.nodeId, documentId: observation.documentId, generation: observation.generation } } : { kind: 'REFUSED', code: 'TARGET_DRIFT' });
-    },
-    matches: () => Promise.resolve(true),
-    validateInvocation: () => Promise.resolve(true),
+    resolveTarget: resolveFromGuards(fixture.execute.guards),
+    refForTarget: () => Promise.resolve(null),
+    prepareTarget: () => Promise.reject(new Error('unused')),
     invoke(invocation, control) {
       control?.beginInvocation();
       return Promise.resolve(invocation.operation.kind === 'read' ? { value: 'fresh-value' } : { assertionPassed: true });
@@ -102,6 +97,7 @@ function driver(options: DriverOptions) {
     dispose,
   };
   attachChildRuntime({
+    allowedDomains: TEST_DOMAINS,
     channel: {
       onMessage(fn) { listener = fn; },
       send(message) { messages.push({ at: performance.now(), message }); },

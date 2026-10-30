@@ -49,10 +49,12 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
-              "nodeId": {
+              "kind": {
+                "const": "node"
+              },
+              "ref": {
                 "type": "string",
-                "minLength": 1,
-                "maxLength": 256
+                "pattern": "^e[0-9]{1,6}$"
               },
               "documentId": {
                 "type": "string",
@@ -63,72 +65,13 @@
                 "type": "integer",
                 "minimum": 0,
                 "maximum": 2147483647
-              },
-              "locator": {
-                "oneOf": [
-                  {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                      "kind": {
-                        "const": "role"
-                      },
-                      "role": {
-                        "type": "string",
-                        "minLength": 1,
-                        "maxLength": 256
-                      },
-                      "name": {
-                        "type": "string",
-                        "minLength": 1,
-                        "maxLength": 256
-                      },
-                      "exact": {
-                        "const": true
-                      }
-                    },
-                    "required": [
-                      "kind",
-                      "role",
-                      "name",
-                      "exact"
-                    ]
-                  },
-                  {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                      "kind": {
-                        "enum": [
-                          "label",
-                          "testId",
-                          "text",
-                          "placeholder"
-                        ]
-                      },
-                      "value": {
-                        "type": "string",
-                        "minLength": 1,
-                        "maxLength": 256
-                      },
-                      "exact": {
-                        "const": true
-                      }
-                    },
-                    "required": [
-                      "kind",
-                      "value",
-                      "exact"
-                    ]
-                  }
-                ]
               }
             },
             "required": [
-              "nodeId",
+              "kind",
+              "ref",
               "documentId",
-              "generation",
-              "locator"
+              "generation"
             ]
           },
           {
@@ -1096,13 +1039,15 @@
         "$ref": "https://checks.citi.example/contracts/observed/v3/assignment.schema.json"
       },
       "reason": {
+        "description": "PUBLISHED is the stop of a session whose learn published a revision: the runner discards the session recording before upload (no object, no manifest, no recording-evidence callback). It is emitted only from the publication commit; every other path keeps its reason and keeps the recording.",
         "enum": [
           "CANCELLED",
           "EXPIRED",
           "UNKNOWN_OUTCOME",
           "LEASE_LOST",
           "CONTEXT_LOST",
-          "REVOKED"
+          "REVOKED",
+          "PUBLISHED"
         ]
       }
     },
@@ -1556,6 +1501,29 @@
             "type": "string",
             "format": "date-time",
             "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,9})?Z(?![\\s\\S])"
+          },
+          "target": {
+            "oneOf": [
+              {
+                "$ref": "https://checks.citi.example/contracts/observed/v3/locator.schema.json#/definitions/ResolvedTarget"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pressInheritance": {
+            "oneOf": [
+              {
+                "$ref": "https://checks.citi.example/contracts/observed/v3/bridge.schema.json#/definitions/PressInheritance"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "assertSourceBinding": {
+            "$ref": "#/definitions/AssertSourceBinding"
           }
         },
         "required": [
@@ -1573,7 +1541,9 @@
           "requestDigest",
           "evidenceHash",
           "authoredInputsHash",
-          "expiresAt"
+          "expiresAt",
+          "target",
+          "pressInheritance"
         ]
       },
       "dispatch": {
@@ -1848,13 +1818,15 @@
                 "$ref": "https://checks.citi.example/contracts/observed/v3/versions.schema.json"
               },
               "reason": {
+                "description": "PUBLISHED is the stop of a session whose learn published a revision: the runner discards the session recording before upload (no object, no manifest, no recording-evidence callback). It is emitted only from the publication commit; every other path keeps its reason and keeps the recording.",
                 "enum": [
                   "CANCELLED",
                   "EXPIRED",
                   "UNKNOWN_OUTCOME",
                   "LEASE_LOST",
                   "CONTEXT_LOST",
-                  "REVOKED"
+                  "REVOKED",
+                  "PUBLISHED"
                 ]
               }
             },
@@ -2307,32 +2279,91 @@
               "PASSWORD_TARGET_ABSENT",
               "PASSWORD_TARGET_AMBIGUOUS",
               "PASSWORD_FORM_ACTION_NOT_ALLOWED",
-              "PASSWORD_CONTROL_READ_REFUSED"
+              "PASSWORD_CONTROL_READ_REFUSED",
+              "OPTION_NOT_PRESENT",
+              "NO_DURABLE_LOCATOR",
+              "READ_NOT_ALLOWED",
+              "OBSERVATION_DEADLINE"
             ]
           }
         },
         "required": [
           "code"
         ],
-        "if": {
-          "type": "object",
-          "properties": {
-            "reason": {
-              "type": "string"
+        "allOf": [
+          {
+            "if": {
+              "type": "object",
+              "properties": {
+                "reason": {
+                  "enum": [
+                    "PASSWORD_TARGET_ABSENT",
+                    "PASSWORD_TARGET_AMBIGUOUS",
+                    "PASSWORD_FORM_ACTION_NOT_ALLOWED",
+                    "PASSWORD_CONTROL_READ_REFUSED"
+                  ]
+                }
+              },
+              "required": [
+                "reason"
+              ]
+            },
+            "then": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "const": "POLICY_DENIED"
+                }
+              }
             }
           },
-          "required": [
-            "reason"
-          ]
-        },
-        "then": {
-          "type": "object",
-          "properties": {
-            "code": {
-              "const": "POLICY_DENIED"
+          {
+            "if": {
+              "type": "object",
+              "properties": {
+                "reason": {
+                  "enum": [
+                    "OPTION_NOT_PRESENT",
+                    "NO_DURABLE_LOCATOR",
+                    "READ_NOT_ALLOWED"
+                  ]
+                }
+              },
+              "required": [
+                "reason"
+              ]
+            },
+            "then": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "const": "PREPARATION_DENIED"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "type": "object",
+              "properties": {
+                "reason": {
+                  "const": "OBSERVATION_DEADLINE"
+                }
+              },
+              "required": [
+                "reason"
+              ]
+            },
+            "then": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "const": "BUDGET_EXCEEDED"
+                }
+              }
             }
           }
-        }
+        ]
       },
       "PrefixRequestIdentity": {
         "type": "object",
@@ -2392,6 +2423,19 @@
           "evidenceHash": {
             "type": "string",
             "pattern": "^[a-f0-9]{64}$"
+          },
+          "pressInheritance": {
+            "oneOf": [
+              {
+                "$ref": "https://checks.citi.example/contracts/observed/v3/bridge.schema.json#/definitions/PressInheritance"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "assertSourceBinding": {
+            "$ref": "#/definitions/AssertSourceBinding"
           }
         },
         "required": [
@@ -2407,7 +2451,8 @@
           "configurationRevision",
           "prefixProgramHash",
           "coordinate",
-          "evidenceHash"
+          "evidenceHash",
+          "pressInheritance"
         ]
       },
       "PrefixPrepare": {
@@ -2523,6 +2568,19 @@
           },
           "preparationId": {
             "type": "null"
+          },
+          "pressInheritance": {
+            "oneOf": [
+              {
+                "$ref": "https://checks.citi.example/contracts/observed/v3/bridge.schema.json#/definitions/PressInheritance"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "assertSourceBinding": {
+            "$ref": "#/definitions/AssertSourceBinding"
           }
         },
         "required": [
@@ -2547,7 +2605,8 @@
           "receiptHash",
           "phase",
           "admissionId",
-          "preparationId"
+          "preparationId",
+          "pressInheritance"
         ]
       },
       "AdmittedDrift": {
@@ -2646,6 +2705,19 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 256
+          },
+          "pressInheritance": {
+            "oneOf": [
+              {
+                "$ref": "https://checks.citi.example/contracts/observed/v3/bridge.schema.json#/definitions/PressInheritance"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "assertSourceBinding": {
+            "$ref": "#/definitions/AssertSourceBinding"
           }
         },
         "required": [
@@ -2670,7 +2742,8 @@
           "receiptHash",
           "phase",
           "admissionId",
-          "preparationId"
+          "preparationId",
+          "pressInheritance"
         ]
       },
       "DriftReceipt": {
@@ -3286,6 +3359,19 @@
             "type": "string",
             "format": "date-time",
             "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,9})?Z(?![\\s\\S])"
+          },
+          "pressInheritance": {
+            "oneOf": [
+              {
+                "$ref": "https://checks.citi.example/contracts/observed/v3/bridge.schema.json#/definitions/PressInheritance"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "assertSourceBinding": {
+            "$ref": "#/definitions/AssertSourceBinding"
           }
         },
         "required": [
@@ -3301,7 +3387,8 @@
           "versions",
           "proposal",
           "requestDigest",
-          "expiresAt"
+          "expiresAt",
+          "pressInheritance"
         ]
       },
       "ordinaryOutcome": {
@@ -3472,6 +3559,70 @@
             }
           }
         ]
+      },
+      "PressInheritance": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "same-element-press"
+          },
+          "predecessorAdmissionId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "predecessorRequestDigest": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "predecessorOperationHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "predecessorCoordinate": {
+            "$ref": "https://checks.citi.example/contracts/observed/v3/action.schema.json#/properties/coordinate"
+          },
+          "documentId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          }
+        },
+        "required": [
+          "kind",
+          "predecessorAdmissionId",
+          "predecessorRequestDigest",
+          "predecessorOperationHash",
+          "predecessorCoordinate",
+          "documentId"
+        ]
+      },
+      "AssertSourceBinding": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "bindingId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "producerAdmissionId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "producerPreparationId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          }
+        },
+        "required": [
+          "bindingId",
+          "producerAdmissionId",
+          "producerPreparationId"
+        ]
       }
     }
   },
@@ -3507,11 +3658,6 @@
             "minLength": 1,
             "maxLength": 256
           },
-          "applicationId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
           "versions": {
             "$ref": "https://checks.citi.example/contracts/observed/v3/versions.schema.json"
           },
@@ -3532,7 +3678,6 @@
           "sourceRevision",
           "configurationRevision",
           "environmentId",
-          "applicationId",
           "versions"
         ]
       },
@@ -4058,9 +4203,6 @@
           "origin": {
             "type": "null"
           },
-          "locator": {
-            "type": "null"
-          },
           "operation": {
             "$ref": "https://checks.citi.example/contracts/observed/v3/action.schema.json#/properties/operation/oneOf/4"
           },
@@ -4072,12 +4214,15 @@
           "operationHash": {
             "type": "string",
             "pattern": "^[a-f0-9]{64}$"
+          },
+          "target": {
+            "type": "null"
           }
         },
         "required": [
           "coordinate",
           "origin",
-          "locator",
+          "target",
           "operation",
           "admissionId",
           "operationHash"
@@ -4096,16 +4241,6 @@
             "pattern": "^https?://(?:[a-z0-9.-]+|\\[[0-9a-f:]+\\])(?::[1-9][0-9]{0,4})?$",
             "maxLength": 256
           },
-          "locator": {
-            "oneOf": [
-              {
-                "$ref": "https://checks.citi.example/contracts/observed/v3/action.schema.json#/properties/target/oneOf/0/properties/locator"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "operation": {
             "$ref": "https://checks.citi.example/contracts/observed/v3/action.schema.json#/properties/operation"
           },
@@ -4117,12 +4252,22 @@
           "operationHash": {
             "type": "string",
             "pattern": "^[a-f0-9]{64}$"
+          },
+          "target": {
+            "oneOf": [
+              {
+                "$ref": "https://checks.citi.example/contracts/observed/v3/locator.schema.json#/definitions/ResolvedTarget"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
           "coordinate",
           "origin",
-          "locator",
+          "target",
           "operation",
           "admissionId",
           "operationHash"
@@ -4163,7 +4308,7 @@
             "then": {
               "type": "object",
               "properties": {
-                "locator": {
+                "target": {
                   "type": "null"
                 }
               }
@@ -4538,7 +4683,7 @@
         "type": "integer",
         "minimum": 1,
         "maximum": 1572864,
-        "default": 786432
+        "default": 1572864
       },
       "maxModelOutputTokensTotal": {
         "type": "integer",
@@ -4549,26 +4694,14 @@
       "maxObservationBytes": {
         "type": "integer",
         "minimum": 1,
-        "maximum": 32768,
-        "default": 32768
-      },
-      "maxObservationNodes": {
-        "type": "integer",
-        "minimum": 1,
-        "maximum": 500,
-        "default": 500
-      },
-      "maxObservationDepth": {
-        "type": "integer",
-        "minimum": 1,
-        "maximum": 8,
-        "default": 8
+        "maximum": 524288,
+        "default": 524288
       },
       "maxSanitizedEvidenceBytesTotal": {
         "type": "integer",
         "minimum": 1,
-        "maximum": 1048576,
-        "default": 1048576
+        "maximum": 4194304,
+        "default": 4194304
       },
       "maxRuntimeValues": {
         "type": "integer",
@@ -4599,6 +4732,12 @@
         "minimum": 1,
         "maximum": 8,
         "default": 8
+      },
+      "maxOutlineBytes": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 40000,
+        "default": 40000
       }
     },
     "required": [
@@ -4609,8 +4748,7 @@
       "maxModelInputTokensTotal",
       "maxModelOutputTokensTotal",
       "maxObservationBytes",
-      "maxObservationNodes",
-      "maxObservationDepth",
+      "maxOutlineBytes",
       "maxSanitizedEvidenceBytesTotal",
       "maxRuntimeValues",
       "maxRuntimeValueBytes",
@@ -4618,6 +4756,706 @@
       "maxSourceSteps",
       "maxStatementsPerStep"
     ]
+  },
+  "locator.schema.json": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://checks.citi.example/contracts/observed/v3/locator.schema.json",
+    "title": "Studio observed v3 locator: closed, exact-only grammar, synthesized and verified by the runner",
+    "description": "An array of at most 8 steps applied left to right from the page. Also enforced by the runner validateLocator (not expressible in draft-07): nth only as the last step, filterHas never first, and at most 8 steps counting the steps inside filterHas.",
+    "type": "array",
+    "minItems": 1,
+    "maxItems": 8,
+    "items": {
+      "$ref": "#/definitions/LocatorStep"
+    },
+    "definitions": {
+      "LocatorStep": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "by": {
+                "const": "testId"
+              },
+              "value": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              }
+            },
+            "required": [
+              "by",
+              "value"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "by": {
+                "const": "role"
+              },
+              "role": {
+                "type": "string",
+                "pattern": "^[a-z][a-z-]{0,40}$"
+              }
+            },
+            "required": [
+              "by",
+              "role"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "by": {
+                "const": "role"
+              },
+              "role": {
+                "type": "string",
+                "pattern": "^[a-z][a-z-]{0,40}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "exact": {
+                "const": true
+              }
+            },
+            "required": [
+              "by",
+              "role",
+              "name",
+              "exact"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "by": {
+                "enum": [
+                  "label",
+                  "placeholder",
+                  "text"
+                ]
+              },
+              "value": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "exact": {
+                "const": true
+              }
+            },
+            "required": [
+              "by",
+              "value",
+              "exact"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "by": {
+                "const": "scope"
+              },
+              "role": {
+                "type": "string",
+                "pattern": "^[a-z][a-z-]{0,40}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "exact": {
+                "const": true
+              }
+            },
+            "required": [
+              "by",
+              "role",
+              "name",
+              "exact"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "by": {
+                "const": "tag"
+              },
+              "tag": {
+                "enum": [
+                  "a",
+                  "article",
+                  "aside",
+                  "button",
+                  "dialog",
+                  "details",
+                  "div",
+                  "fieldset",
+                  "footer",
+                  "form",
+                  "h1",
+                  "h2",
+                  "h3",
+                  "h4",
+                  "h5",
+                  "h6",
+                  "header",
+                  "img",
+                  "input",
+                  "label",
+                  "li",
+                  "main",
+                  "nav",
+                  "ol",
+                  "option",
+                  "p",
+                  "section",
+                  "select",
+                  "span",
+                  "summary",
+                  "table",
+                  "tbody",
+                  "td",
+                  "textarea",
+                  "th",
+                  "tr",
+                  "ul"
+                ]
+              }
+            },
+            "required": [
+              "by",
+              "tag"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "by": {
+                "const": "attr"
+              },
+              "tag": {
+                "enum": [
+                  "a",
+                  "article",
+                  "aside",
+                  "button",
+                  "dialog",
+                  "details",
+                  "div",
+                  "fieldset",
+                  "footer",
+                  "form",
+                  "h1",
+                  "h2",
+                  "h3",
+                  "h4",
+                  "h5",
+                  "h6",
+                  "header",
+                  "img",
+                  "input",
+                  "label",
+                  "li",
+                  "main",
+                  "nav",
+                  "ol",
+                  "option",
+                  "p",
+                  "section",
+                  "select",
+                  "span",
+                  "summary",
+                  "table",
+                  "tbody",
+                  "td",
+                  "textarea",
+                  "th",
+                  "tr",
+                  "ul"
+                ]
+              },
+              "attrs": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 2,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "name": {
+                      "enum": [
+                        "name",
+                        "id",
+                        "type",
+                        "aria-label",
+                        "title"
+                      ]
+                    },
+                    "value": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "value"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "by",
+              "tag",
+              "attrs"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "by": {
+                "const": "filterHas"
+              },
+              "has": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 7,
+                "items": {
+                  "$ref": "https://checks.citi.example/contracts/observed/v3/locator.schema.json#/definitions/InnerLocatorStep"
+                }
+              }
+            },
+            "required": [
+              "by",
+              "has"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "by": {
+                "const": "filterHas"
+              },
+              "has": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 1,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "by": {
+                      "const": "role"
+                    },
+                    "role": {
+                      "type": "string",
+                      "pattern": "^[a-z][a-z-]{0,40}$"
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    "exact": {
+                      "const": true
+                    }
+                  },
+                  "required": [
+                    "by",
+                    "role",
+                    "name",
+                    "exact"
+                  ]
+                }
+              },
+              "relation": {
+                "const": "child"
+              }
+            },
+            "required": [
+              "by",
+              "has",
+              "relation"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "by": {
+                "const": "nth"
+              },
+              "index": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 500
+              }
+            },
+            "required": [
+              "by",
+              "index"
+            ]
+          }
+        ]
+      },
+      "InnerLocatorStep": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "by": {
+                "const": "testId"
+              },
+              "value": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              }
+            },
+            "required": [
+              "by",
+              "value"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "by": {
+                "const": "role"
+              },
+              "role": {
+                "type": "string",
+                "pattern": "^[a-z][a-z-]{0,40}$"
+              }
+            },
+            "required": [
+              "by",
+              "role"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "by": {
+                "const": "role"
+              },
+              "role": {
+                "type": "string",
+                "pattern": "^[a-z][a-z-]{0,40}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "exact": {
+                "const": true
+              }
+            },
+            "required": [
+              "by",
+              "role",
+              "name",
+              "exact"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "by": {
+                "enum": [
+                  "label",
+                  "placeholder",
+                  "text"
+                ]
+              },
+              "value": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "exact": {
+                "const": true
+              }
+            },
+            "required": [
+              "by",
+              "value",
+              "exact"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "by": {
+                "const": "scope"
+              },
+              "role": {
+                "type": "string",
+                "pattern": "^[a-z][a-z-]{0,40}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "exact": {
+                "const": true
+              }
+            },
+            "required": [
+              "by",
+              "role",
+              "name",
+              "exact"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "by": {
+                "const": "tag"
+              },
+              "tag": {
+                "enum": [
+                  "a",
+                  "article",
+                  "aside",
+                  "button",
+                  "dialog",
+                  "details",
+                  "div",
+                  "fieldset",
+                  "footer",
+                  "form",
+                  "h1",
+                  "h2",
+                  "h3",
+                  "h4",
+                  "h5",
+                  "h6",
+                  "header",
+                  "img",
+                  "input",
+                  "label",
+                  "li",
+                  "main",
+                  "nav",
+                  "ol",
+                  "option",
+                  "p",
+                  "section",
+                  "select",
+                  "span",
+                  "summary",
+                  "table",
+                  "tbody",
+                  "td",
+                  "textarea",
+                  "th",
+                  "tr",
+                  "ul"
+                ]
+              }
+            },
+            "required": [
+              "by",
+              "tag"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "by": {
+                "const": "attr"
+              },
+              "tag": {
+                "enum": [
+                  "a",
+                  "article",
+                  "aside",
+                  "button",
+                  "dialog",
+                  "details",
+                  "div",
+                  "fieldset",
+                  "footer",
+                  "form",
+                  "h1",
+                  "h2",
+                  "h3",
+                  "h4",
+                  "h5",
+                  "h6",
+                  "header",
+                  "img",
+                  "input",
+                  "label",
+                  "li",
+                  "main",
+                  "nav",
+                  "ol",
+                  "option",
+                  "p",
+                  "section",
+                  "select",
+                  "span",
+                  "summary",
+                  "table",
+                  "tbody",
+                  "td",
+                  "textarea",
+                  "th",
+                  "tr",
+                  "ul"
+                ]
+              },
+              "attrs": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 2,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "name": {
+                      "enum": [
+                        "name",
+                        "id",
+                        "type",
+                        "aria-label",
+                        "title"
+                      ]
+                    },
+                    "value": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "value"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "by",
+              "tag",
+              "attrs"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "by": {
+                "const": "nth"
+              },
+              "index": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 500
+              }
+            },
+            "required": [
+              "by",
+              "index"
+            ]
+          }
+        ]
+      },
+      "LocatorTier": {
+        "enum": [
+          "testId",
+          "role",
+          "label",
+          "placeholder",
+          "text",
+          "scoped",
+          "filterHas",
+          "attribute",
+          "nth"
+        ]
+      },
+      "TargetIdentity": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "role": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "name": {
+            "oneOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "role",
+          "name"
+        ]
+      },
+      "ResolvedTarget": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "locator": {
+            "$ref": "https://checks.citi.example/contracts/observed/v3/locator.schema.json"
+          },
+          "tier": {
+            "$ref": "#/definitions/LocatorTier"
+          },
+          "identity": {
+            "$ref": "#/definitions/TargetIdentity"
+          },
+          "assertTextMode": {
+            "enum": [
+              "DIRECT_PUBLIC",
+              "READ_BINDING_SOURCE"
+            ]
+          }
+        },
+        "required": [
+          "locator",
+          "tier",
+          "identity"
+        ]
+      }
+    }
   },
   "observation.schema.json": {
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -4662,30 +5500,15 @@
         "type": "object",
         "additionalProperties": false,
         "properties": {
-          "mode": {
-            "enum": [
-              "semantic",
-              "boundedDom"
-            ]
-          },
-          "complete": {
-            "type": "boolean"
-          },
-          "truncated": {
-            "type": "boolean"
-          },
           "withheldRegions": {
             "type": "integer",
             "minimum": 0,
             "maximum": 2147483647
           },
-          "reason": {
-            "enum": [
-              "complete",
-              "budget",
-              "sensitivity",
-              "unsupportedSurface"
-            ]
+          "unsupportedRegions": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647
           },
           "passwordControls": {
             "type": "integer",
@@ -4694,209 +5517,87 @@
           }
         },
         "required": [
-          "mode",
-          "complete",
-          "truncated",
           "withheldRegions",
-          "reason",
+          "unsupportedRegions",
           "passwordControls"
         ]
       },
-      "nodes": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "nodeId": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 256
-            },
-            "documentId": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 256
-            },
-            "generation": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 2147483647
-            },
-            "role": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 256
-            },
-            "name": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 256
-            },
-            "elementType": {
-              "enum": [
-                "button",
-                "input",
-                "textarea",
-                "select",
-                "text",
-                "link",
-                "other"
-              ]
-            },
-            "controlType": {
-              "enum": [
-                "none",
-                "text",
-                "search",
-                "email",
-                "tel",
-                "url",
-                "textarea",
-                "password",
-                "hidden",
-                "other"
-              ]
-            },
-            "classification": {
-              "enum": [
-                "structuralOnly",
-                "permittedBusinessData",
-                "nonsecretApproved",
-                "withheld"
-              ]
-            },
-            "policyRuleId": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 256
-            },
-            "visible": {
-              "type": "boolean"
-            },
-            "actionable": {
-              "type": "boolean"
-            },
-            "depth": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 2147483647
-            },
-            "parentNodeId": {
-              "type": [
-                "string",
-                "null"
-              ]
-            },
-            "regionId": {
-              "type": [
-                "string",
-                "null"
-              ]
-            },
-            "formId": {
-              "type": [
-                "string",
-                "null"
-              ]
-            },
-            "labelNodeIds": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 256
-              },
-              "minItems": 0,
-              "maxItems": 20
-            },
-            "locatorHints": {
-              "type": "array",
-              "items": {
-                "oneOf": [
-                  {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                      "kind": {
-                        "const": "role"
-                      },
-                      "role": {
-                        "type": "string",
-                        "minLength": 1,
-                        "maxLength": 256
-                      },
-                      "name": {
-                        "type": "string",
-                        "minLength": 1,
-                        "maxLength": 256
-                      },
-                      "exact": {
-                        "const": true
-                      }
-                    },
-                    "required": [
-                      "kind",
-                      "role",
-                      "name",
-                      "exact"
-                    ]
-                  },
-                  {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                      "kind": {
-                        "enum": [
-                          "label",
-                          "testId",
-                          "text",
-                          "placeholder"
-                        ]
-                      },
-                      "value": {
-                        "type": "string",
-                        "minLength": 1,
-                        "maxLength": 256
-                      },
-                      "exact": {
-                        "const": true
-                      }
-                    },
-                    "required": [
-                      "kind",
-                      "value",
-                      "exact"
-                    ]
-                  }
-                ]
-              },
-              "minItems": 0,
-              "maxItems": 5
-            }
+      "projection": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "projected": {
+            "type": "boolean"
           },
-          "required": [
-            "nodeId",
-            "documentId",
-            "generation",
-            "role",
-            "name",
-            "elementType",
-            "controlType",
-            "classification",
-            "policyRuleId",
-            "visible",
-            "actionable",
-            "depth",
-            "parentNodeId",
-            "regionId",
-            "formId",
-            "labelNodeIds",
-            "locatorHints"
-          ]
+          "tier": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "focus+parent+siblings",
+              "focus+parent",
+              "focus",
+              "truncated",
+              null
+            ]
+          },
+          "totalNodes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647
+          },
+          "shownNodes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647
+          },
+          "notShown": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647
+          },
+          "outlineBytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 40000
+          }
         },
-        "minItems": 0,
-        "maxItems": 500
+        "required": [
+          "projected",
+          "tier",
+          "totalNodes",
+          "shownNodes",
+          "notShown",
+          "outlineBytes"
+        ]
+      },
+      "readRuleId": {
+        "oneOf": [
+          {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "outline": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 40000
+      },
+      "facts": {
+        "type": "object",
+        "propertyNames": {
+          "type": "string",
+          "pattern": "^e[0-9]{1,6}$"
+        },
+        "additionalProperties": {
+          "$ref": "#/definitions/ObservationFact"
+        }
       }
     },
     "required": [
@@ -4908,8 +5609,214 @@
       "scopeHash",
       "observedAt",
       "coverage",
-      "nodes"
-    ]
+      "projection",
+      "readRuleId",
+      "outline",
+      "facts"
+    ],
+    "definitions": {
+      "ObservationFact": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "role": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "name": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 256
+          },
+          "editable": {
+            "type": "boolean"
+          },
+          "evidence": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 256
+          },
+          "evidenceSegments": {
+            "type": "array",
+            "maxItems": 128,
+            "items": {
+              "$ref": "#/definitions/EvidenceSegment"
+            }
+          },
+          "text": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 256
+          },
+          "nameComplete": {
+            "type": "boolean"
+          },
+          "ownTextComplete": {
+            "type": "boolean"
+          },
+          "ordinal": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "index": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              },
+              "count": {
+                "type": "integer",
+                "minimum": 2,
+                "maximum": 2147483647
+              }
+            },
+            "required": [
+              "index",
+              "count"
+            ]
+          },
+          "nearSource": {
+            "const": "WITHHELD_ADJACENT_PUBLIC"
+          },
+          "readScope": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "relation": {
+                "enum": [
+                  "SAME_ROW_LABEL",
+                  "IMMEDIATE_HEADING_SAME_PARENT",
+                  "R7_ADJACENT_PUBLIC"
+                ]
+              },
+              "sourceRefs": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 8,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "pattern": "^e[0-9]{1,6}$"
+                }
+              },
+              "tableTitleRef": {
+                "type": "string",
+                "pattern": "^e[0-9]{1,6}$"
+              }
+            },
+            "required": [
+              "relation",
+              "sourceRefs"
+            ],
+            "allOf": [
+              {
+                "if": {
+                  "required": [
+                    "tableTitleRef"
+                  ]
+                },
+                "then": {
+                  "properties": {
+                    "relation": {
+                      "const": "SAME_ROW_LABEL"
+                    },
+                    "sourceRefs": {
+                      "minItems": 2
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "scopeRefs": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 8,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^e[0-9]{1,6}$"
+            }
+          },
+          "directTextAssertion": {
+            "const": true
+          }
+        },
+        "required": [
+          "role",
+          "name",
+          "editable",
+          "evidence",
+          "evidenceSegments",
+          "nameComplete",
+          "ownTextComplete"
+        ],
+        "allOf": [
+          {
+            "if": {
+              "required": [
+                "directTextAssertion"
+              ]
+            },
+            "then": {
+              "properties": {
+                "role": {
+                  "const": "paragraph"
+                },
+                "name": {
+                  "const": ""
+                },
+                "editable": {
+                  "const": false
+                },
+                "ownTextComplete": {
+                  "const": true
+                }
+              },
+              "required": [
+                "text"
+              ]
+            }
+          }
+        ]
+      },
+      "EvidenceSegment": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "field": {
+            "enum": [
+              "name",
+              "placeholder",
+              "near",
+              "ownText",
+              "text",
+              "group",
+              "header",
+              "sibling"
+            ]
+          },
+          "start": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 512
+          },
+          "end": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 512
+          },
+          "purpose": {
+            "const": "READ_ASSERT_ONLY"
+          }
+        },
+        "required": [
+          "field",
+          "start",
+          "end"
+        ]
+      }
+    }
   },
   "observation-refresh.schema.json": {
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -4968,6 +5875,30 @@
         "type": "integer",
         "minimum": 0,
         "maximum": 2147483646
+      },
+      "focus": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "stepText": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 1024
+          },
+          "targetIntents": {
+            "type": "array",
+            "maxItems": 8,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            }
+          }
+        },
+        "required": [
+          "stepText",
+          "targetIntents"
+        ]
       }
     },
     "required": [
@@ -4981,7 +5912,8 @@
       "sourceRevision",
       "configurationRevision",
       "versions",
-      "expectedGeneration"
+      "expectedGeneration",
+      "focus"
     ]
   },
   "producer.schema.json": {
@@ -5354,54 +6286,13 @@
                     "const": "element"
                   },
                   "locator": {
-                    "$ref": "https://checks.citi.example/contracts/observed/v3/action.schema.json#/properties/target/oneOf/0/properties/locator"
+                    "$ref": "https://checks.citi.example/contracts/observed/v3/locator.schema.json"
                   },
-                  "role": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 256
+                  "tier": {
+                    "$ref": "https://checks.citi.example/contracts/observed/v3/locator.schema.json#/definitions/LocatorTier"
                   },
-                  "elementType": {
-                    "type": "string",
-                    "enum": [
-                      "button",
-                      "input",
-                      "textarea",
-                      "select",
-                      "text",
-                      "link",
-                      "other"
-                    ]
-                  },
-                  "controlType": {
-                    "type": "string",
-                    "enum": [
-                      "none",
-                      "text",
-                      "search",
-                      "email",
-                      "tel",
-                      "url",
-                      "textarea",
-                      "password",
-                      "hidden",
-                      "other"
-                    ]
-                  },
-                  "classification": {
-                    "type": "string",
-                    "enum": [
-                      "structuralOnly",
-                      "permittedBusinessData",
-                      "nonsecretApproved",
-                      "withheld"
-                    ]
-                  },
-                  "visible": {
-                    "type": "boolean"
-                  },
-                  "actionable": {
-                    "type": "boolean"
+                  "identity": {
+                    "$ref": "https://checks.citi.example/contracts/observed/v3/locator.schema.json#/definitions/TargetIdentity"
                   },
                   "readRuleId": {
                     "oneOf": [
@@ -5414,17 +6305,19 @@
                         "type": "null"
                       }
                     ]
+                  },
+                  "assertTextMode": {
+                    "enum": [
+                      "DIRECT_PUBLIC",
+                      "READ_BINDING_SOURCE"
+                    ]
                   }
                 },
                 "required": [
                   "kind",
                   "locator",
-                  "role",
-                  "elementType",
-                  "controlType",
-                  "classification",
-                  "visible",
-                  "actionable",
+                  "tier",
+                  "identity",
                   "readRuleId"
                 ]
               },
@@ -5607,16 +6500,6 @@
         "format": "date-time",
         "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,9})?Z(?![\\s\\S])"
       },
-      "approvedOrigins": {
-        "type": "array",
-        "items": {
-          "type": "string",
-          "pattern": "^https?://(?:[a-z0-9.-]+|\\[[0-9a-f:]+\\])(?::[1-9][0-9]{0,4})?$",
-          "maxLength": 256
-        },
-        "minItems": 1,
-        "maxItems": 10
-      },
       "sourceStepIds": {
         "type": "array",
         "minItems": 1,
@@ -5664,13 +6547,6 @@
       "limits": {
         "$ref": "https://checks.citi.example/contracts/observed/v3/limits.schema.json"
       },
-      "applicationPolicy": {
-        "$ref": "#/definitions/ObservationApplicationPolicy"
-      },
-      "policyHash": {
-        "type": "string",
-        "pattern": "^[a-f0-9]{64}$"
-      },
       "prefixProgram": {
         "$ref": "https://checks.citi.example/contracts/observed/v3/runner-context.schema.json#/definitions/PrefixProgram"
       },
@@ -5692,7 +6568,6 @@
       "versions",
       "expiresAt",
       "leaseExpiresAt",
-      "approvedOrigins",
       "sourceStepIds",
       "authoredInputs",
       "authoredInputsHash",
@@ -5700,170 +6575,9 @@
       "allocations",
       "producers",
       "consumerEdges",
-      "limits",
-      "applicationPolicy",
-      "policyHash"
+      "limits"
     ],
     "definitions": {
-      "ObservationApplicationPolicy": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "policyRuleId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "allowStructuralDiscovery": {
-            "const": true
-          },
-          "readGrants": {
-            "type": "array",
-            "minItems": 0,
-            "maxItems": 32,
-            "items": {
-              "$ref": "#/definitions/ObservationReadGrant"
-            }
-          }
-        },
-        "required": [
-          "policyRuleId",
-          "allowStructuralDiscovery",
-          "readGrants"
-        ]
-      },
-      "ObservationReadGrant": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "policyRuleId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "origin": {
-            "type": "string",
-            "maxLength": 256,
-            "pattern": "^https?://(?:[a-z0-9.-]+|\\[[0-9a-f:]+\\])(?::[1-9][0-9]{0,4})?$"
-          },
-          "region": {
-            "oneOf": [
-              {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "kind": {
-                    "const": "application"
-                  }
-                },
-                "required": [
-                  "kind"
-                ]
-              },
-              {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "kind": {
-                    "const": "role"
-                  },
-                  "role": {
-                    "type": "string",
-                    "enum": [
-                      "main",
-                      "region",
-                      "form"
-                    ]
-                  },
-                  "name": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 256
-                  },
-                  "exact": {
-                    "const": true
-                  }
-                },
-                "required": [
-                  "kind",
-                  "role",
-                  "name",
-                  "exact"
-                ]
-              }
-            ]
-          },
-          "visibleText": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "classification": {
-                "const": "permittedBusinessData"
-              }
-            },
-            "required": [
-              "classification"
-            ]
-          },
-          "controlValue": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "classification": {
-                "const": "nonsecretApproved"
-              },
-              "types": {
-                "type": "array",
-                "minItems": 1,
-                "maxItems": 6,
-                "uniqueItems": true,
-                "items": {
-                  "type": "string",
-                  "enum": [
-                    "text",
-                    "search",
-                    "email",
-                    "tel",
-                    "url",
-                    "textarea"
-                  ]
-                }
-              }
-            },
-            "required": [
-              "classification",
-              "types"
-            ]
-          }
-        },
-        "required": [
-          "policyRuleId",
-          "origin",
-          "region"
-        ],
-        "if": {
-          "type": "object",
-          "properties": {
-            "visibleText": {
-              "type": "object"
-            }
-          },
-          "required": [
-            "visibleText"
-          ]
-        },
-        "else": {
-          "type": "object",
-          "properties": {
-            "controlValue": {
-              "type": "object"
-            }
-          },
-          "required": [
-            "controlValue"
-          ]
-        }
-      },
       "PrefixAction": {
         "type": "object",
         "additionalProperties": false,
@@ -5883,9 +6597,6 @@
               }
             ]
           },
-          "locator": {
-            "$ref": "https://checks.citi.example/contracts/observed/v3/learned-plan.schema.json#/definitions/observedAction/properties/locator"
-          },
           "operation": {
             "$ref": "https://checks.citi.example/contracts/observed/v3/action.schema.json#/properties/operation"
           },
@@ -5895,12 +6606,15 @@
           },
           "guard": {
             "$ref": "https://checks.citi.example/contracts/observed/v3/replay-operation.schema.json#/definitions/Guard"
+          },
+          "target": {
+            "$ref": "https://checks.citi.example/contracts/observed/v3/learned-plan.schema.json#/definitions/observedAction/properties/target"
           }
         },
         "required": [
           "coordinate",
           "origin",
-          "locator",
+          "target",
           "operation",
           "operationHash",
           "guard"
@@ -6215,21 +6929,6 @@
             "minLength": 1,
             "maxLength": 256
           },
-          "applicationId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "approvedOrigins": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "pattern": "^https?://(?:[a-z0-9.-]+|\\[[0-9a-f:]+\\])(?::[1-9][0-9]{0,4})?$",
-              "maxLength": 256
-            },
-            "minItems": 1,
-            "maxItems": 10
-          },
           "sourceRevision": {
             "type": "string",
             "minLength": 1,
@@ -6277,8 +6976,6 @@
           "principalId",
           "csiId",
           "environmentId",
-          "applicationId",
-          "approvedOrigins",
           "sourceRevision",
           "configurationRevision",
           "modelDataPolicyId",

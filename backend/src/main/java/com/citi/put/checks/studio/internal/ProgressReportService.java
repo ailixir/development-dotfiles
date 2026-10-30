@@ -77,14 +77,6 @@ public class ProgressReportService {
     this.secretAudit = audit;
   }
 
-  private com.citi.put.checks.studio.secrets.SecretRevocationSweep secretRevocation;
-
-  @Autowired(required = false)
-  public void installSecretRevocation(
-      com.citi.put.checks.studio.secrets.SecretRevocationSweep sweep) {
-    this.secretRevocation = sweep;
-  }
-
   /**
    * The report is applied by SQL statements, not by JPA. Anything this transaction has already
    * loaded through JPA — the history row read for the revision's ordered source — is therefore
@@ -144,9 +136,6 @@ public class ProgressReportService {
   /** Applies one report. Returns the acknowledgement the route sends after commit. */
   @Transactional
   public ProgressAck apply(UUID pathExecutionId, RunnerReport report) {
-    if (secretRevocation != null) {
-      secretRevocation.executionRevoked(pathExecutionId);
-    }
     registerCommitHooks(pathExecutionId);
     enforceBounds(report);
     requireMatchingIdentity(pathExecutionId, report);
@@ -436,8 +425,7 @@ public class ProgressReportService {
             "revisionDigest",
             "principalId",
             "csiId",
-            "scopeHash",
-            "currentPolicyHash")) {
+            "scopeHash")) {
       if (!grant.path(field).equals(binding.path(field))) {
         throw observedIdentityRefusal();
       }
@@ -474,8 +462,7 @@ public class ProgressReportService {
             "learnedPlanHash",
             "referencePolicyHash",
             "publicationEvidenceHash",
-            "scopeHash",
-            "currentPolicyHash")) {
+            "scopeHash")) {
       if (!request.path(field).equals(binding.path(field))) {
         throw observedIdentityRefusal();
       }

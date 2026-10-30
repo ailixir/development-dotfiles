@@ -17,7 +17,7 @@
  *   request". Start the backend with `CHECKS_CORS_ALLOWED_ORIGINS=http://127.0.0.1:4177`
  *   (property `checks.cors.allowed-origins`, `application.yml:113`; default is localhost 3000, 3002,
  *   5173). The origin is deliberately not rewritten here, so a real CORS regression still fails D5.
- *   Also needed for D5: `CHECKS_SOURCE_UI_TEST=true` and a registered CSI, e.g.
+ *   Also needed for D5: a registered CSI (the UI_TEST source is on by default), e.g.
  *   `FLYWAY_LOCATIONS=classpath:db/migration,classpath:db/seed`.
  *
  * Ports can be moved with `CHECKS_E2E_APP_PORT` and `CHECKS_E2E_API_PORT` (the playwright config reads

@@ -4,15 +4,12 @@ import com.citi.put.checks.security.CsiOwnershipEvaluator;
 import com.citi.put.checks.studio.StudioAccessDeniedException;
 import com.citi.put.checks.studio.StudioRepository;
 import com.citi.put.checks.studio.entity.UITest;
-import com.citi.put.checks.studio.guided.policy.ObservationPolicyRepository;
 import com.citi.put.checks.studio.guided.publication.ObservedReplayPins;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.guided.session.GuidedSessionException;
 import com.citi.put.checks.studio.guided.session.GuidedSessionProperties;
-import com.citi.put.checks.studio.guided.translation.GuidedTranslationProperties;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.Authentication;
@@ -32,12 +29,11 @@ import org.springframework.transaction.annotation.Transactional;
  * but unreachable Vault still reports {@code true} and a later real call may answer 503.
  *
  * <p><b>The guided-start context</b> is the exact closed start body for this saved test, taken from
- * the persisted row and the governed policy scopes. Nothing is chosen by default: exactly one
- * application must be named by a governed policy scope of this CSI and environment, permitted by
- * the administrator's translation scope, and trusted by the deployment's replay policies. Zero,
- * several or a malformed candidate is {@code RUNTIME_INCOMPATIBLE}. This read resolves no
- * reference, approves nothing, reserves no model call and writes no row; the real start revalidates
- * everything.
+ * the persisted row. Guided start is available when the caller may execute in the test's CSI, the
+ * test has at least one step and the deployment has a usable runtime catalog. Nothing else gates
+ * it: which origins the test may open is decided from the test itself when learning starts. This
+ * read resolves no reference, approves nothing, reserves no model call and writes no row; the real
+ * start revalidates everything.
  */
 @Service
 @Profile("!worker")
@@ -51,8 +47,6 @@ public class StudioCapabilitiesService {
   private final StudioRepository studioRepository;
   private final CsiOwnershipEvaluator ownership;
   private final StudioVaultProvider vault;
-  private final ObservationPolicyRepository policies;
-  private final GuidedTranslationProperties translation;
   private final ObservedReplayPins pins;
   private final GuidedSessionProperties guided;
   private final GuidedContracts contracts;
@@ -61,16 +55,12 @@ public class StudioCapabilitiesService {
       StudioRepository studioRepository,
       CsiOwnershipEvaluator ownership,
       StudioVaultProvider vault,
-      ObservationPolicyRepository policies,
-      GuidedTranslationProperties translation,
       ObservedReplayPins pins,
       GuidedSessionProperties guided,
       GuidedContracts contracts) {
     this.studioRepository = studioRepository;
     this.ownership = ownership;
     this.vault = vault;
-    this.policies = policies;
-    this.translation = translation;
     this.pins = pins;
     this.guided = guided;
     this.contracts = contracts;
@@ -94,16 +84,7 @@ public class StudioCapabilitiesService {
       return refusal(FORBIDDEN_SCOPE);
     }
     String environment = test.getEnvironment();
-    if (!guided.enabled() || !wellFormed(environment)) {
-      return refusal(RUNTIME_INCOMPATIBLE);
-    }
-    List<String> candidates = new ArrayList<>();
-    for (String application : policies.applicationIds(test.getCsiId(), environment)) {
-      if (translation.permits(application, environment) && trusted(application, environment)) {
-        candidates.add(application);
-      }
-    }
-    if (candidates.size() != 1 || !wellFormed(candidates.get(0))) {
+    if (!guided.enabled() || !wellFormed(environment) || !hasStep(test) || !catalogUsable()) {
       return refusal(RUNTIME_INCOMPATIBLE);
     }
     ObjectNode available = contracts.object().put("available", true);
@@ -113,19 +94,30 @@ public class StudioCapabilitiesService {
         .put("testId", test.getId().toString())
         .put("sourceRevision", Long.toString(test.getSourceRevision()))
         .put("configurationRevision", Long.toString(test.getConfigurationRevision()))
-        .put("environmentId", environment)
-        .put("applicationId", candidates.get(0));
+        .put("environmentId", environment);
     context.putObject("versions").put("contract", 3);
     return available;
   }
 
-  /** The deployment's trusted replay policy for exactly this application and environment. */
-  private boolean trusted(String application, String environment) {
+  private boolean hasStep(UITest test) {
+    String raw = test.getAuthoring();
+    if (raw == null) {
+      return false;
+    }
     try {
-      pins.policy(
-          contracts.object().put("applicationId", application).put("environmentId", environment));
+      JsonNode authoring = contracts.parse(raw);
+      return authoring.path("steps").isArray() && !authoring.path("steps").isEmpty();
+    } catch (GuidedSessionException unreadable) {
+      return false;
+    }
+  }
+
+  /** The deployment's runtime image and profile pin: the same catalog replay and learning use. */
+  private boolean catalogUsable() {
+    try {
+      pins.selected();
       return true;
-    } catch (GuidedSessionException notTrusted) {
+    } catch (GuidedSessionException unusable) {
       return false;
     }
   }

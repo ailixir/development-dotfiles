@@ -5,6 +5,11 @@ durable route-scoped idempotency responses and scoped evidence references withou
 execute/schedule rows. The Java schema validator packages the frozen OBS-001 schemas directly from
 `docs/specs/studio-observed-authoring/contracts`; it does not maintain another contract copy.
 
+Every start also passes `GuidedCsiBudget.admitStart`: the per-CSI cap, then the deployment-wide cap
+`studio.guided-authoring.max-concurrent-sessions` (a transaction advisory lock, then a count of all live
+sessions; `429 BUDGET_EXCEEDED` with message code `LEARNING_CAPACITY_EXHAUSTED` and a `Retry-After` to the
+earliest live session's hard expiry). A refusal writes no session, command or charge.
+
 `GuidedSessionService` owns transactions. Its repository serializes transitions with a session row
 lock. Start takes a transaction advisory lock over the canonical principal/test identity before
 checking its durable request digest. Admission and budget consumption commit together. Advance
@@ -25,10 +30,12 @@ no public endpoint. Repeated callbacks cannot change admission fields, infer ass
 a non-assertion operation, revive terminal sessions or publish a revision.
 
 The trusted `GuidedSessionAccess` implementation must resolve immutable source/config snapshots,
-normalize/approve configured origins, derive principal/CSI/environment/application/account scope,
+refuse a start whose first authored URL is off the deployment's allowed domains (`AllowedDomains`,
+STUDIO-FLEX-001; the list is read at use and never stored in the session scope), derive
+principal/CSI/environment/application/account scope,
 check current grants and policy on every operation, and actually supply the isolated account
 connection. `checkSourceCurrent` must lock the authoritative test/config row in the calling transaction
-and compare its revisions. Entitlements and source freshness are separate: source changes block new
+and compare its revisions. CSI access and source freshness are separate: source changes block new
 work and publication, while authorized historical evidence stays readable. Production currently uses
 a fail-closed unavailable-account adapter: even enabling the flag cannot fabricate a connection.
 OBS-007 supplies account handoff; OBS-004 supplies current DOM/policy action authorization; OBS-005
@@ -202,7 +209,7 @@ timestamps. Undefined schema pointers fail closed instead of compiling a permiss
 
 `GuidedProductionSessionAccess` now implements current source/revision checks and `StepVerifier` on the same access object. It locks current `ui_tests` through `StudioRepository.findByIdForUpdate`; immutable source/configuration manifests, planning revisions, one-send attempts, obligation associations and question meanings live in additive V32. OBS-006 joins successful original evidence into a deterministic replay artifact and immutable publication receipt under the original scoped Run and fresh Core authority; subsequent explicit Runs obtain fresh grants and recapture runtime values without either model gateway. `GuidedProductionSessionAccess` retains the fail-closed secret-use authorization boundary, so the implemented publication/replay mechanism does not imply production account connectivity or first guided-run recording.
 
-Enable the production composition with `studio.guided-authoring.translation.enabled=true`, approved `allow-authored-nonsecret=true`, explicit `applications`/`environments`, existing runner origin/controller-token configuration and HTTPS `translation.controller-origin`. The `studio.gateway` provider settings select the concrete guided gateway; there is no recorded-fixture production fallback. `translation.verify-steps` defaults false; enabling it adds a budgeted semantic opinion without bypassing deterministic completion. Default input/output ceilings remain unchanged. Missing enabled dependencies fail configuration rather than installing an unavailable translation implementation.
+Enable the production composition with `studio.guided-authoring.translation.enabled=true`, existing runner origin/controller-token configuration and HTTPS `translation.controller-origin`. The `studio.gateway` provider settings select the concrete guided gateway; there is no recorded-fixture production fallback. `translation.verify-steps` defaults false; enabling it adds a budgeted semantic opinion without bypassing deterministic completion. Default input/output ceilings remain unchanged. Missing enabled dependencies fail configuration rather than installing an unavailable translation implementation.
 
 Planning routes under `/internal/v2/studio/guided-sessions/{id}` require the existing controller JWT/mTLS, fence and idempotency headers, strict raw JSON parsing and immutable expected revisions. `/plans` prepares source/materialization, `/proposals` advances remaining obligations, `/dependency-admissions` refines cumulative needs without replay, and `/planning-context` exposes only the safe model projection. The coordinator polls durable continuation and uses its mounted controller identity; workers still acquire/renew with their own credentials. Source and observed questions share the existing public v3 answer DTO and persist semantic choice atomically; resume uses real bootstrap or `/observe` as appropriate.
 

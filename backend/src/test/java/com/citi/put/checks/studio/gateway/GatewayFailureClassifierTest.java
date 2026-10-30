@@ -64,6 +64,17 @@ class GatewayFailureClassifierTest {
     assertThat(GatewayFailureClassifier.isRetryableTransport(apiException(504))).isFalse();
   }
 
+  /** A provider 408 is the provider timing out, an availability matter, not a refusal. */
+  @Test
+  void aProvider408IsATimeoutAndOtherFourXxStayRefusals() {
+    assertThat(GatewayFailureClassifier.outcomeFor(apiException(408)))
+        .isEqualTo(GatewayOutcome.TIMEOUT);
+    assertThat(GatewayFailureClassifier.outcomeFor(apiException(404)))
+        .isEqualTo(GatewayOutcome.TRANSPORT);
+    assertThat(GatewayFailureClassifier.transportFailureFor(apiException(404)))
+        .isEqualTo(GenAiGatewayTransport.TransportFailure.HTTP_4XX);
+  }
+
   @Test
   void ambiguousServerErrorsAreNotRetried() {
     assertThat(GatewayFailureClassifier.isRetryableTransport(apiException(500))).isFalse();

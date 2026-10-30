@@ -220,6 +220,55 @@ class GuidedLifecycleReasonIT {
     assertThat(persistedState(id)).isNotIn("EXPIRED", "FAILED", "UNKNOWN_OUTCOME");
   }
 
+  // ---- the publication commit's stop names PUBLISHED (and nothing else does) ----
+
+  @Test
+  void onlyThePublicationCommitStopCarriesPublishedAndARedrivenStopKeepsIt() throws Exception {
+    var sent = new java.util.concurrent.CopyOnWriteArrayList<String>();
+    service.installStopSender(
+        (target, reason) -> {
+          sent.add(reason);
+          // Never confirmed: the durable request stays PENDING so it can be re-driven.
+          throw new GuidedSessionException("RUNTIME_INCOMPATIBLE", 409);
+        });
+
+    String published = observing();
+    repository.transaction(
+        () -> {
+          var current = repository.lock(published);
+          current.document().put("state", "SUCCEEDED");
+          current.progress().put("publicationRevisionId", UUID.randomUUID().toString());
+          repository.save(current);
+          service.publicationCommitted(published);
+          return null;
+        });
+    assertThat(teardownReason(published)).isEqualTo("PUBLISHED");
+    org.awaitility.Awaitility.await()
+        .atMost(java.time.Duration.ofSeconds(10))
+        .until(() -> sent.contains("PUBLISHED"));
+
+    // A restart re-drives the persisted request: the same reason, read back from the row.
+    sent.clear();
+    var redriven = new java.util.concurrent.CopyOnWriteArrayList<String>();
+    service.installStopSender((target, reason) -> redriven.add(reason));
+    service.redriveTeardowns(java.time.Duration.ofHours(1), 32);
+    org.awaitility.Awaitility.await()
+        .atMost(java.time.Duration.ofSeconds(10))
+        .until(() -> redriven.contains("PUBLISHED"));
+
+    // Every other terminal keeps a recording: a conflict is not a publication.
+    String conflict = observing();
+    repository.transaction(
+        () -> {
+          var current = repository.lock(conflict);
+          current.document().put("state", "PUBLICATION_CONFLICT");
+          repository.save(current);
+          service.publicationConflicted(conflict);
+          return null;
+        });
+    assertThat(teardownReason(conflict)).isEqualTo("UNKNOWN_OUTCOME");
+  }
+
   // ---- helpers ----
 
   private JsonNode lifecycle(String id, String reason, String key) {
@@ -260,9 +309,12 @@ class GuidedLifecycleReasonIT {
             contracts,
             sourceAccess(),
             new GuidedSessionProperties(true, Map.of()),
+            com.citi.put.checks.studio.support.TestDomains.FIXTURES,
             clock);
     installTranslation(result, jdbc, contracts);
-    materialization = new GuidedMaterializationService(jdbc, contracts);
+    materialization =
+        new GuidedMaterializationService(
+            jdbc, contracts, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     result.installBridge(
         materialization,
         new GuidedPreparationStore(jdbc, contracts),
@@ -273,14 +325,7 @@ class GuidedLifecycleReasonIT {
     audit = mock(SecretAuditLifecycle.class);
     result.installSecretAudit(audit);
     // Every start needs an approved governed policy for its scope.
-    com.citi.put.checks.studio.support.ObservedPublicationFixture.installGovernance(
-        result,
-        jdbc,
-        "CSI-123",
-        "orders",
-        List.of("fixture"),
-        List.of("https://orders.example.test"),
-        null);
+    com.citi.put.checks.studio.support.ObservedPublicationFixture.installCsiBudget(result, jdbc);
     result.installEvidence(
         new com.citi.put.checks.studio.guided.evidence.RecordedGuidedEvidenceProjection(
             new com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceRepository(jdbc),
@@ -316,7 +361,6 @@ class GuidedLifecycleReasonIT {
         .put("sourceRevision", "1")
         .put("configurationRevision", "1")
         .put("environmentId", "fixture")
-        .put("applicationId", "orders")
         .set("versions", versions());
   }
 
@@ -364,9 +408,6 @@ class GuidedLifecycleReasonIT {
   private ObjectNode observation(String id, int generation) {
     ObjectNode o = fixture("observation");
     o.put("sessionId", id).put("scopeHash", scope(id)).put("generation", generation);
-    for (JsonNode n : o.path("nodes")) {
-      ((ObjectNode) n).put("generation", generation);
-    }
     return o;
   }
 
@@ -406,6 +447,7 @@ class GuidedLifecycleReasonIT {
     String issuedKey = association.path("admissionKey").asText();
     ObjectNode proof = materialization.identity(context(id));
     proof
+        .putNull("pressInheritance")
         .put("preparationId", UUID.randomUUID().toString())
         .put("requestDigest", GuidedContracts.hash(proposal))
         .put("evidenceHash", proposal.path("evidenceHash").asText())
@@ -413,8 +455,10 @@ class GuidedLifecycleReasonIT {
         .put("expiresAt", clock.now.plusSeconds(20).toString());
     JsonNode existing = service.existingAdmission(controller, id, 1, issuedKey, proposal);
     assertThat(existing).as("a new admission").isNull();
+    proof.set("target", proofTarget(proposal));
     service.storePreparation(controller, id, 1, proposal, proof);
-    JsonNode admission = service.admit(controller, id, 1, issuedKey, proposal);
+    JsonNode admission =
+        service.admit(controller, id, 1, issuedKey, proposal, proof.path("preparationId").asText());
     ObjectNode advance =
         contracts
             .object()
@@ -471,7 +515,7 @@ class GuidedLifecycleReasonIT {
     @Override
     public Snapshot resolve(Authentication principal, JsonNode start) {
       ObjectNode session = fixture("session"), scope = (ObjectNode) session.path("scope");
-      for (String field : List.of("environmentId", "applicationId")) {
+      for (String field : List.of("environmentId")) {
         scope.set(field, start.path(field));
       }
       return new Snapshot(scope, session.path("sourceSteps"));
@@ -481,9 +525,6 @@ class GuidedLifecycleReasonIT {
     public GuidedSourceReferenceValidator.Sources sources(JsonNode session) {
       return new GuidedSourceReferenceValidator.Sources("1", "1", Map.of(), Map.of());
     }
-
-    @Override
-    public void checkCurrent(JsonNode session) {}
 
     @Override
     public void checkSourceCurrent(JsonNode session) {}
@@ -549,10 +590,12 @@ class GuidedLifecycleReasonIT {
       jdbc.update(
           "INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,variables,authoring,"
               + "authoring_revision_inputs,created_by) VALUES (?,'GS-T source','CSI-123','fixture',"
-              + "'chromium',?::jsonb,'[]'::jsonb,?::jsonb,?::jsonb,?)",
+              + "'chromium',?::jsonb,?::jsonb,?::jsonb,?::jsonb,?)",
           SOURCE_TEST,
           mapper.writeValueAsString(
               List.of("Click Order number.", "Assert Order reference is visible.")),
+          // A test may only be learned on the origins it names (STUDIO-GOV-001.4).
+          "[{\"name\":\"appUrl\",\"kind\":\"plain\",\"value\":\"https://orders.example.test\"}]",
           mapper.writeValueAsString(authoring),
           mapper.writeValueAsString(
               com.citi.put.checks.studio.authoring.AuthoringRevisionIdentity.create(
@@ -620,7 +663,8 @@ class GuidedLifecycleReasonIT {
                   jdbc.queryForList(
                       "SELECT csi_id,environment,steps::text,variables::text,authoring::text,"
                           + "authoring_revision_inputs::text,source_revision,configuration_revision"
-                          + " FROM ui_tests WHERE id=? AND deleted_at IS NULL AND quarantined_at IS NULL FOR UPDATE",
+                          + " FROM ui_tests WHERE id=? AND deleted_at IS NULL AND quarantined_at IS"
+                          + " NULL FOR UPDATE",
                       id);
               if (rows.isEmpty()) {
                 return java.util.Optional.empty();
@@ -655,14 +699,7 @@ class GuidedLifecycleReasonIT {
   private static com.citi.put.checks.studio.guided.translation.GuidedTranslationProperties
       planningProperties() {
     return new com.citi.put.checks.studio.guided.translation.GuidedTranslationProperties(
-        true,
-        true,
-        List.of("orders", "other"),
-        List.of("fixture", "other"),
-        131072,
-        2048,
-        60,
-        "worker-1");
+        true, 131072, 2048, 60, "worker-1");
   }
 
   /** The controls can only narrow real current/source/user checks; initialize is never stubbed. */
@@ -674,34 +711,6 @@ class GuidedLifecycleReasonIT {
           String origin) {
     var store =
         new com.citi.put.checks.studio.guided.translation.GuidedTranslationStore(jdbc, contracts);
-    var policy =
-        contracts
-            .object()
-            .put("version", 1)
-            .put("policyId", "gs-t-source-policy")
-            .put("policyVersion", "1")
-            .put("applicationId", "orders")
-            .put("environment", "fixture")
-            .put("entryPolicyId", "blank");
-    policy.putArray("allowedOrigins").add(origin);
-    policy.putArray("rules");
-    policy.putNull("applicationPolicy");
-    var policies = contracts.object().putArray("policies");
-    for (String application : List.of("orders", "other")) {
-      for (String environment : List.of("fixture", "other")) {
-        var configured = policy.deepCopy();
-        configured
-            .put("policyId", "gs-t-" + application + "-" + environment)
-            .put("applicationId", application)
-            .put("environment", environment);
-        policies.add(configured);
-      }
-    }
-    var pins =
-        new com.citi.put.checks.studio.guided.publication.ObservedReplayPins(
-            contracts,
-            new com.citi.put.checks.studio.guided.publication.ObservedReplayProperties(
-                true, 30000, 1048576, 4194304, 2097152, "[]", policies.toString(), 1280, 720));
     var access =
         org.mockito.Mockito.spy(
             new com.citi.put.checks.studio.guided.translation.GuidedProductionSessionAccess(
@@ -709,24 +718,16 @@ class GuidedLifecycleReasonIT {
                     sourceRepository(jdbc, contracts), contracts),
                 new com.citi.put.checks.studio.guided.translation.GuidedSourceClassifier(
                     contracts,
-                    planningProperties(),
-                    new com.citi.put.checks.studio.guided.translation.CredentialPatternScreen()),
+                    new com.citi.put.checks.studio.guided.translation.CredentialPatternScreen(),
+                    com.citi.put.checks.studio.support.TestDomains.FIXTURES),
                 new com.citi.put.checks.studio.guided.translation.GuidedSourceInputResolver(
-                    contracts),
+                    contracts, com.citi.put.checks.studio.support.TestDomains.FIXTURES),
                 store,
                 new com.citi.put.checks.studio.guided.translation.GuidedStepVerifier(store),
                 new CsiOwnershipEvaluator(),
-                pins,
+                com.citi.put.checks.studio.support.TestDomains.FIXTURES,
                 org.mockito.Mockito.mock(
-                    com.citi.put.checks.studio.dispatch.StudioReferenceResolver.class),
-                (principal, csi, environment, secret) -> true));
-    org.mockito.Mockito.doAnswer(
-            call -> {
-              controls.checkCurrent(call.getArgument(0));
-              return call.callRealMethod();
-            })
-        .when(access)
-        .checkCurrent(org.mockito.ArgumentMatchers.any());
+                    com.citi.put.checks.studio.dispatch.StudioReferenceResolver.class)));
     org.mockito.Mockito.doAnswer(
             call -> {
               controls.checkSourceCurrent(call.getArgument(0));
@@ -806,7 +807,8 @@ class GuidedLifecycleReasonIT {
   /** Authenticated worker protocol at the existing trusted transport seam, not browser proof. */
   private static ObjectNode blankBootstrap(GuidedContracts contracts, JsonNode context) {
     var request =
-        new com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService(null, contracts)
+        new com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService(
+                null, contracts, com.citi.put.checks.studio.support.TestDomains.FIXTURES)
             .identity(context);
     var evidence =
         contracts
@@ -877,7 +879,6 @@ class GuidedLifecycleReasonIT {
                     .SOURCE_PLAN) {
               var references = response.putArray("sourceReferences");
               var obligations = response.putArray("obligations");
-              response.putArray("needs");
               for (JsonNode step : context.path("sourceSteps")) {
                 String stepId = step.path("stepId").asText();
                 JsonNode secret = null;
@@ -894,7 +895,7 @@ class GuidedLifecycleReasonIT {
                         .put("stepId", stepId)
                         .put("occurrence", 0)
                         .put("operationKind", kind)
-                        .put("targetIntent", secret == null ? "order-reference" : "Password")
+                        .put("targetIntent", secret == null ? "Order number" : "Password")
                         .putNull("scopeIntent")
                         .putNull("needId");
                 if (secret == null) {
@@ -959,9 +960,10 @@ class GuidedLifecycleReasonIT {
               stopped,
               gateway,
               contracts,
-              new com.citi.put.checks.studio.guided.translation.GuidedPromptAssembler(contracts),
+              new com.citi.put.checks.studio.guided.translation.GuidedPromptAssembler(
+                  contracts, com.citi.put.checks.studio.support.TestDomains.FIXTURES),
               new com.citi.put.checks.studio.guided.translation.GuidedSourceInputResolver(
-                  contracts),
+                  contracts, com.citi.put.checks.studio.support.TestDomains.FIXTURES),
               new com.citi.put.checks.studio.guided.translation.GuidedProposalValidator(contracts),
               new com.citi.put.checks.studio.guided.translation.GuidedDependencyPlanner(sessions),
               planningProperties(),
@@ -1049,5 +1051,17 @@ class GuidedLifecycleReasonIT {
       }
       return association;
     }
+  }
+
+  /**
+   * The ResolvedTarget the runner reports on a preparation proof (ADR-SC-007): for a node action it
+   * is the locator it derived for the picked ref and the {role, name} identity of that element,
+   * which the backend cross-checks against the fact the ref names; null for any other target.
+   */
+  private static JsonNode proofTarget(JsonNode proposal) {
+    return proposal.path("target").path("kind").asText().equals("node")
+        ? com.citi.put.checks.studio.support.ObservationFixtures.resolvedTarget(
+            "order-reference", "text", "Order number")
+        : com.fasterxml.jackson.databind.node.NullNode.instance;
   }
 }

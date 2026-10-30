@@ -1,0 +1,3289 @@
+{
+ "schemaVersion": 1,
+ "note": "Hand-written inputs and expected verdicts (ADR-SC-007 D3, INTERFACES.md). See make-synthetic-vectors.mjs.",
+ "intent": [
+  {
+   "id": "intent-01",
+   "branch": "missing.undefined",
+   "targetIntent": {
+    "omitted": true
+   },
+   "node": {
+    "kind": "node",
+    "rawName": "Search"
+   },
+   "facts": {
+    "name": "Search",
+    "evidence": "Search"
+   },
+   "expected": "INTENT_MISSING"
+  },
+  {
+   "id": "intent-02",
+   "branch": "missing.null",
+   "targetIntent": null,
+   "node": {
+    "kind": "node",
+    "rawName": "Search"
+   },
+   "facts": {
+    "name": "Search",
+    "evidence": "Search"
+   },
+   "expected": "INTENT_MISSING"
+  },
+  {
+   "id": "intent-03",
+   "branch": "missing.empty",
+   "targetIntent": "",
+   "node": {
+    "kind": "node",
+    "rawName": "Search"
+   },
+   "facts": {
+    "name": "Search",
+    "evidence": "Search"
+   },
+   "expected": "INTENT_MISSING"
+  },
+  {
+   "id": "intent-04",
+   "branch": "missing.whitespace",
+   "targetIntent": "   \t ",
+   "node": {
+    "kind": "node",
+    "rawName": "Search"
+   },
+   "facts": {
+    "name": "Search",
+    "evidence": "Search"
+   },
+   "expected": "INTENT_MISSING"
+  },
+  {
+   "id": "intent-05",
+   "branch": "missing.nonString",
+   "targetIntent": 42,
+   "node": {
+    "kind": "node",
+    "rawName": "42"
+   },
+   "facts": {
+    "name": "42",
+    "evidence": "42"
+   },
+   "expected": "INTENT_MISSING"
+  },
+  {
+   "id": "intent-06",
+   "branch": "symbolOnlyIsNotMissing.equalsName",
+   "targetIntent": "+",
+   "node": {
+    "kind": "node",
+    "rawName": "+"
+   },
+   "facts": {
+    "name": "+",
+    "evidence": "+"
+   },
+   "expected": null
+  },
+  {
+   "id": "intent-07",
+   "branch": "symbolOnlyIsNotMissing.wordless",
+   "targetIntent": "+",
+   "node": {
+    "kind": "node",
+    "rawName": "plus",
+    "ownText": "plus sign"
+   },
+   "facts": {
+    "name": "plus",
+    "evidence": "plus plus sign"
+   },
+   "expected": "INTENT_MISMATCH"
+  },
+  {
+   "id": "intent-08",
+   "branch": "name.equal",
+   "targetIntent": "Sign in",
+   "node": {
+    "kind": "node",
+    "rawName": "Sign in"
+   },
+   "facts": {
+    "name": "Sign in",
+    "evidence": "Sign in"
+   },
+   "expected": null
+  },
+  {
+   "id": "intent-09",
+   "branch": "name.case",
+   "targetIntent": "SIGN IN",
+   "node": {
+    "kind": "node",
+    "rawName": "sign in"
+   },
+   "facts": {
+    "name": "sign in",
+    "evidence": "sign in"
+   },
+   "expected": null
+  },
+  {
+   "id": "intent-10",
+   "branch": "name.edgePunctuation",
+   "targetIntent": "Sign in!",
+   "node": {
+    "kind": "node",
+    "rawName": "\"Sign in\""
+   },
+   "facts": {
+    "name": "\"Sign in\"",
+    "evidence": "\"Sign in\""
+   },
+   "expected": null
+  },
+  {
+   "id": "intent-11",
+   "branch": "name.nfkc",
+   "targetIntent": "Ｓｉｇｎ in",
+   "node": {
+    "kind": "node",
+    "rawName": "Sign in"
+   },
+   "facts": {
+    "name": "Sign in",
+    "evidence": "Sign in"
+   },
+   "expected": null
+  },
+  {
+   "id": "intent-12",
+   "branch": "name.whitespace",
+   "targetIntent": "Sign   in",
+   "node": {
+    "kind": "node",
+    "rawName": " Sign in "
+   },
+   "facts": {
+    "name": " Sign in ",
+    "evidence": "Sign in"
+   },
+   "expected": null
+  },
+  {
+   "id": "intent-13",
+   "branch": "wordless.equalToName",
+   "targetIntent": "x",
+   "node": {
+    "kind": "node",
+    "rawName": "x"
+   },
+   "facts": {
+    "name": "x",
+    "evidence": "x"
+   },
+   "expected": null
+  },
+  {
+   "id": "intent-14",
+   "branch": "wordless.notEqual",
+   "targetIntent": "x",
+   "node": {
+    "kind": "node",
+    "rawName": "xy",
+    "ownText": "x marks the spot"
+   },
+   "facts": {
+    "name": "xy",
+    "evidence": "xy x marks the spot"
+   },
+   "expected": "INTENT_MISMATCH"
+  },
+  {
+   "id": "intent-15",
+   "branch": "subset.name",
+   "targetIntent": "search",
+   "node": {
+    "kind": "node",
+    "rawName": "Search the site"
+   },
+   "facts": {
+    "name": "Search the site",
+    "evidence": "Search the site"
+   },
+   "expected": null
+  },
+  {
+   "id": "intent-16",
+   "branch": "subset.placeholder",
+   "targetIntent": "email address",
+   "node": {
+    "kind": "node",
+    "rawName": "",
+    "placeholder": "Enter your email address"
+   },
+   "facts": {
+    "name": "",
+    "evidence": "Enter your email address"
+   },
+   "expected": null
+  },
+  {
+   "id": "intent-17",
+   "branch": "subset.near",
+   "targetIntent": "password",
+   "node": {
+    "kind": "node",
+    "rawName": "",
+    "near": "Password"
+   },
+   "facts": {
+    "name": "",
+    "evidence": "Password"
+   },
+   "expected": null
+  },
+  {
+   "id": "intent-18",
+   "branch": "subset.ownText",
+   "targetIntent": "continue",
+   "node": {
+    "kind": "node",
+    "rawName": "Next",
+    "ownText": "Continue to payment"
+   },
+   "facts": {
+    "name": "Next",
+    "evidence": "Next Continue to payment"
+   },
+   "expected": null
+  },
+  {
+   "id": "intent-19",
+   "branch": "subset.text",
+   "targetIntent": "welcome",
+   "node": {
+    "kind": "text",
+    "text": "Welcome back"
+   },
+   "facts": {
+    "name": "",
+    "evidence": "Welcome back"
+   },
+   "expected": null
+  },
+  {
+   "id": "intent-20",
+   "branch": "subset.groupName",
+   "targetIntent": "small",
+   "node": {
+    "kind": "node",
+    "rawName": "S",
+    "groupName": "Small or large"
+   },
+   "facts": {
+    "name": "S",
+    "evidence": "S Small or large"
+   },
+   "expected": null
+  },
+  {
+   "id": "intent-21",
+   "branch": "subset.headers",
+   "targetIntent": "status",
+   "node": {
+    "kind": "node",
+    "rawName": "(Unused)",
+    "headers": [
+     "Status",
+     "Description"
+    ]
+   },
+   "facts": {
+    "name": "(Unused)",
+    "evidence": "(Unused) Status Description"
+   },
+   "expected": null
+  },
+  {
+   "id": "intent-22",
+   "branch": "subset.severalFields",
+   "targetIntent": "status unused",
+   "node": {
+    "kind": "node",
+    "rawName": "(Unused)",
+    "headers": [
+     "Status"
+    ]
+   },
+   "facts": {
+    "name": "(Unused)",
+    "evidence": "(Unused) Status"
+   },
+   "expected": null
+  },
+  {
+   "id": "intent-23",
+   "branch": "subset.fails",
+   "targetIntent": "delete account",
+   "node": {
+    "kind": "node",
+    "rawName": "Delete",
+    "ownText": "items"
+   },
+   "facts": {
+    "name": "Delete",
+    "evidence": "Delete items"
+   },
+   "expected": "INTENT_MISMATCH"
+  },
+  {
+   "id": "intent-24",
+   "branch": "subset.wordOutsideEvidenceCap",
+   "targetIntent": "zzzlast",
+   "node": {
+    "kind": "node",
+    "rawName": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "ownText": "zzzlast"
+   },
+   "facts": {
+    "name": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "evidence": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa…"
+   },
+   "expected": "INTENT_MISMATCH"
+  },
+  {
+   "id": "intent-25",
+   "branch": "node.undefined",
+   "targetIntent": "Search",
+   "node": null,
+   "facts": {
+    "name": "",
+    "evidence": ""
+   },
+   "expected": "INTENT_MISMATCH"
+  },
+  {
+   "id": "intent-26",
+   "branch": "subset.siblingCells.iana-assert-01",
+   "targetIntent": "418 description",
+   "node": {
+    "kind": "node",
+    "rawName": "(Unused)",
+    "ownText": "",
+    "headers": [
+     "Description"
+    ]
+   },
+   "facts": {
+    "name": "(Unused)",
+    "evidence": "(Unused) Description 418"
+   },
+   "expected": null,
+   "expectedSpike": "INTENT_MISMATCH",
+   "note": "The recorded failure of iana-assert-01: the spike evidence has no sibling cells, so the correct value cell was refused. With the key cell \"418\" in the evidence the intent passes."
+  }
+ ],
+ "operation": [
+  {
+   "id": "operation-01",
+   "branch": "fill.textbox",
+   "kind": "fill",
+   "node": {
+    "kind": "node",
+    "role": "textbox",
+    "states": []
+   },
+   "expected": null
+  },
+  {
+   "id": "operation-02",
+   "branch": "fill.searchbox",
+   "kind": "fill",
+   "node": {
+    "kind": "node",
+    "role": "searchbox",
+    "states": []
+   },
+   "expected": null
+  },
+  {
+   "id": "operation-03",
+   "branch": "fill.spinbutton",
+   "kind": "fill",
+   "node": {
+    "kind": "node",
+    "role": "spinbutton",
+    "states": []
+   },
+   "expected": null
+  },
+  {
+   "id": "operation-04",
+   "branch": "fill.editableRoot",
+   "kind": "fill",
+   "node": {
+    "kind": "node",
+    "role": "generic",
+    "states": [
+     "editable"
+    ]
+   },
+   "expected": null
+  },
+  {
+   "id": "operation-05",
+   "branch": "fill.combobox.input",
+   "kind": "fill",
+   "node": {
+    "kind": "node",
+    "role": "combobox",
+    "states": [],
+    "tag": "input"
+   },
+   "expected": null
+  },
+  {
+   "id": "operation-06",
+   "branch": "fill.combobox.textarea",
+   "kind": "fill",
+   "node": {
+    "kind": "node",
+    "role": "combobox",
+    "states": [],
+    "tag": "textarea"
+   },
+   "expected": null
+  },
+  {
+   "id": "operation-07",
+   "branch": "fill.combobox.select",
+   "kind": "fill",
+   "node": {
+    "kind": "node",
+    "role": "combobox",
+    "states": [],
+    "tag": "select"
+   },
+   "expected": "OPERATION_TARGET_MISMATCH"
+  },
+  {
+   "id": "operation-08",
+   "branch": "fill.combobox.noTag",
+   "kind": "fill",
+   "node": {
+    "kind": "node",
+    "role": "combobox",
+    "states": []
+   },
+   "expected": "OPERATION_TARGET_MISMATCH"
+  },
+  {
+   "id": "operation-09",
+   "branch": "fill.button",
+   "kind": "fill",
+   "node": {
+    "kind": "node",
+    "role": "button",
+    "states": []
+   },
+   "expected": "OPERATION_TARGET_MISMATCH"
+  },
+  {
+   "id": "operation-10",
+   "branch": "fill.link",
+   "kind": "fill",
+   "node": {
+    "kind": "node",
+    "role": "link",
+    "states": []
+   },
+   "expected": "OPERATION_TARGET_MISMATCH"
+  },
+  {
+   "id": "operation-11",
+   "branch": "fill.textNode",
+   "kind": "fill",
+   "node": {
+    "kind": "text",
+    "text": "x"
+   },
+   "expected": "OPERATION_TARGET_MISMATCH"
+  },
+  {
+   "id": "operation-12",
+   "branch": "fill.undefinedNode",
+   "kind": "fill",
+   "node": null,
+   "expected": "OPERATION_TARGET_MISMATCH"
+  },
+  {
+   "id": "operation-13",
+   "branch": "fill.statesMissing",
+   "kind": "fill",
+   "node": {
+    "kind": "node",
+    "role": "generic"
+   },
+   "expected": "OPERATION_TARGET_MISMATCH"
+  },
+  {
+   "id": "operation-14",
+   "branch": "selectOption.combobox",
+   "kind": "selectOption",
+   "node": {
+    "kind": "node",
+    "role": "combobox",
+    "states": []
+   },
+   "expected": null
+  },
+  {
+   "id": "operation-15",
+   "branch": "selectOption.listbox",
+   "kind": "selectOption",
+   "node": {
+    "kind": "node",
+    "role": "listbox",
+    "states": []
+   },
+   "expected": null
+  },
+  {
+   "id": "operation-16",
+   "branch": "selectOption.option",
+   "kind": "selectOption",
+   "node": {
+    "kind": "node",
+    "role": "option",
+    "states": []
+   },
+   "expected": null
+  },
+  {
+   "id": "operation-17",
+   "branch": "selectOption.radio",
+   "kind": "selectOption",
+   "node": {
+    "kind": "node",
+    "role": "radio",
+    "states": []
+   },
+   "expected": null
+  },
+  {
+   "id": "operation-18",
+   "branch": "selectOption.menuitemradio",
+   "kind": "selectOption",
+   "node": {
+    "kind": "node",
+    "role": "menuitemradio",
+    "states": []
+   },
+   "expected": null
+  },
+  {
+   "id": "operation-19",
+   "branch": "selectOption.radiogroup",
+   "kind": "selectOption",
+   "node": {
+    "kind": "node",
+    "role": "radiogroup",
+    "states": []
+   },
+   "expected": "OPERATION_TARGET_MISMATCH"
+  },
+  {
+   "id": "operation-20",
+   "branch": "selectOption.button",
+   "kind": "selectOption",
+   "node": {
+    "kind": "node",
+    "role": "button",
+    "states": []
+   },
+   "expected": "OPERATION_TARGET_MISMATCH"
+  },
+  {
+   "id": "operation-21",
+   "branch": "selectOption.checkbox",
+   "kind": "selectOption",
+   "node": {
+    "kind": "node",
+    "role": "checkbox",
+    "states": []
+   },
+   "expected": "OPERATION_TARGET_MISMATCH"
+  },
+  {
+   "id": "operation-22",
+   "branch": "selectOption.textbox",
+   "kind": "selectOption",
+   "node": {
+    "kind": "node",
+    "role": "textbox",
+    "states": []
+   },
+   "expected": "OPERATION_TARGET_MISMATCH"
+  },
+  {
+   "id": "operation-23",
+   "branch": "selectOption.undefinedNode",
+   "kind": "selectOption",
+   "node": null,
+   "expected": "OPERATION_TARGET_MISMATCH"
+  },
+  {
+   "id": "operation-24",
+   "branch": "check.checkbox",
+   "kind": "check",
+   "node": {
+    "kind": "node",
+    "role": "checkbox",
+    "states": []
+   },
+   "expected": null
+  },
+  {
+   "id": "operation-25",
+   "branch": "check.radio",
+   "kind": "check",
+   "node": {
+    "kind": "node",
+    "role": "radio",
+    "states": []
+   },
+   "expected": null
+  },
+  {
+   "id": "operation-26",
+   "branch": "check.switch",
+   "kind": "check",
+   "node": {
+    "kind": "node",
+    "role": "switch",
+    "states": []
+   },
+   "expected": null
+  },
+  {
+   "id": "operation-27",
+   "branch": "check.menuitemcheckbox",
+   "kind": "check",
+   "node": {
+    "kind": "node",
+    "role": "menuitemcheckbox",
+    "states": []
+   },
+   "expected": null
+  },
+  {
+   "id": "operation-28",
+   "branch": "check.menuitemradio",
+   "kind": "check",
+   "node": {
+    "kind": "node",
+    "role": "menuitemradio",
+    "states": []
+   },
+   "expected": null
+  },
+  {
+   "id": "operation-29",
+   "branch": "check.button",
+   "kind": "check",
+   "node": {
+    "kind": "node",
+    "role": "button",
+    "states": []
+   },
+   "expected": "OPERATION_TARGET_MISMATCH"
+  },
+  {
+   "id": "operation-30",
+   "branch": "check.textbox",
+   "kind": "check",
+   "node": {
+    "kind": "node",
+    "role": "textbox",
+    "states": []
+   },
+   "expected": "OPERATION_TARGET_MISMATCH"
+  },
+  {
+   "id": "operation-31",
+   "branch": "check.link",
+   "kind": "check",
+   "node": {
+    "kind": "node",
+    "role": "link",
+    "states": []
+   },
+   "expected": "OPERATION_TARGET_MISMATCH"
+  },
+  {
+   "id": "operation-32",
+   "branch": "uncheck.checkbox",
+   "kind": "uncheck",
+   "node": {
+    "kind": "node",
+    "role": "checkbox",
+    "states": []
+   },
+   "expected": null
+  },
+  {
+   "id": "operation-33",
+   "branch": "uncheck.radio",
+   "kind": "uncheck",
+   "node": {
+    "kind": "node",
+    "role": "radio",
+    "states": []
+   },
+   "expected": null
+  },
+  {
+   "id": "operation-34",
+   "branch": "uncheck.switch",
+   "kind": "uncheck",
+   "node": {
+    "kind": "node",
+    "role": "switch",
+    "states": []
+   },
+   "expected": null
+  },
+  {
+   "id": "operation-35",
+   "branch": "uncheck.menuitemcheckbox",
+   "kind": "uncheck",
+   "node": {
+    "kind": "node",
+    "role": "menuitemcheckbox",
+    "states": []
+   },
+   "expected": null
+  },
+  {
+   "id": "operation-36",
+   "branch": "uncheck.menuitemradio",
+   "kind": "uncheck",
+   "node": {
+    "kind": "node",
+    "role": "menuitemradio",
+    "states": []
+   },
+   "expected": null
+  },
+  {
+   "id": "operation-37",
+   "branch": "uncheck.button",
+   "kind": "uncheck",
+   "node": {
+    "kind": "node",
+    "role": "button",
+    "states": []
+   },
+   "expected": "OPERATION_TARGET_MISMATCH"
+  },
+  {
+   "id": "operation-38",
+   "branch": "uncheck.textbox",
+   "kind": "uncheck",
+   "node": {
+    "kind": "node",
+    "role": "textbox",
+    "states": []
+   },
+   "expected": "OPERATION_TARGET_MISMATCH"
+  },
+  {
+   "id": "operation-39",
+   "branch": "uncheck.link",
+   "kind": "uncheck",
+   "node": {
+    "kind": "node",
+    "role": "link",
+    "states": []
+   },
+   "expected": "OPERATION_TARGET_MISMATCH"
+  },
+  {
+   "id": "operation-40",
+   "branch": "click.unrestricted.button",
+   "kind": "click",
+   "node": {
+    "kind": "node",
+    "role": "button",
+    "states": []
+   },
+   "expected": null
+  },
+  {
+   "id": "operation-41",
+   "branch": "click.unrestricted.undefinedNode",
+   "kind": "click",
+   "node": null,
+   "expected": null
+  },
+  {
+   "id": "operation-42",
+   "branch": "press.unrestricted.button",
+   "kind": "press",
+   "node": {
+    "kind": "node",
+    "role": "button",
+    "states": []
+   },
+   "expected": null
+  },
+  {
+   "id": "operation-43",
+   "branch": "press.unrestricted.undefinedNode",
+   "kind": "press",
+   "node": null,
+   "expected": null
+  },
+  {
+   "id": "operation-44",
+   "branch": "read.unrestricted.button",
+   "kind": "read",
+   "node": {
+    "kind": "node",
+    "role": "button",
+    "states": []
+   },
+   "expected": null
+  },
+  {
+   "id": "operation-45",
+   "branch": "read.unrestricted.undefinedNode",
+   "kind": "read",
+   "node": null,
+   "expected": null
+  },
+  {
+   "id": "operation-46",
+   "branch": "assert.unrestricted.button",
+   "kind": "assert",
+   "node": {
+    "kind": "node",
+    "role": "button",
+    "states": []
+   },
+   "expected": null
+  },
+  {
+   "id": "operation-47",
+   "branch": "assert.unrestricted.undefinedNode",
+   "kind": "assert",
+   "node": null,
+   "expected": null
+  },
+  {
+   "id": "operation-48",
+   "branch": "unknownKind.unrestricted",
+   "kind": "hover",
+   "node": {
+    "kind": "node",
+    "role": "generic",
+    "states": []
+   },
+   "expected": null
+  },
+  {
+   "id": "operation-49",
+   "branch": "undefinedKind.unrestricted",
+   "node": {
+    "kind": "node",
+    "role": "button",
+    "states": []
+   },
+   "expected": null
+  }
+ ],
+ "g2": [
+  {
+   "id": "g2-01",
+   "branch": "refuse.absent",
+   "predicate": "containsText",
+   "role": "cell",
+   "text": "Order accepted",
+   "literal": "Order rejected",
+   "expected": "refuse"
+  },
+  {
+   "id": "g2-02",
+   "branch": "pass.substring",
+   "predicate": "containsText",
+   "role": "cell",
+   "text": "Order accepted for shipping",
+   "literal": "accepted",
+   "expected": "pass"
+  },
+  {
+   "id": "g2-03",
+   "branch": "pass.caseInsensitive",
+   "predicate": "containsText",
+   "role": "cell",
+   "text": "Order accepted",
+   "literal": "ORDER ACCEPTED",
+   "expected": "pass"
+  },
+  {
+   "id": "g2-04",
+   "branch": "pass.whitespaceCollapse",
+   "predicate": "containsText",
+   "role": "cell",
+   "text": "Order   accepted",
+   "literal": "Order accepted",
+   "expected": "pass"
+  },
+  {
+   "id": "g2-05",
+   "branch": "pass.literalWhitespaceCollapse",
+   "predicate": "containsText",
+   "role": "cell",
+   "text": "Order accepted",
+   "literal": " Order   accepted ",
+   "expected": "pass"
+  },
+  {
+   "id": "g2-06",
+   "branch": "pass.emptyLiteral",
+   "predicate": "containsText",
+   "role": "cell",
+   "text": "anything",
+   "literal": "",
+   "expected": "pass"
+  },
+  {
+   "id": "g2-07",
+   "branch": "refuse.emptyText",
+   "predicate": "containsText",
+   "role": "cell",
+   "text": "",
+   "literal": "x",
+   "expected": "refuse"
+  },
+  {
+   "id": "g2-08",
+   "branch": "pass.nfkc",
+   "predicate": "containsText",
+   "role": "cell",
+   "text": "Order accepted",
+   "literal": "Ｏｒｄｅｒ accepted",
+   "expected": "pass",
+   "spikeDiffers": "The spike G2 compares case-insensitively but not under NFKC; ADR D3 says NFKC and case-insensitive."
+  },
+  {
+   "id": "g2-09",
+   "branch": "refuse.heading",
+   "predicate": "containsText",
+   "role": "heading",
+   "text": "Overview",
+   "literal": "Summary",
+   "expected": "refuse"
+  },
+  {
+   "id": "g2-10",
+   "branch": "notApplicable.targetWithheld",
+   "predicate": "containsText",
+   "role": "cell",
+   "text": "ignored",
+   "withheld": true,
+   "literal": "x",
+   "expected": "notApplicable"
+  },
+  {
+   "id": "g2-11",
+   "branch": "notApplicable.descendantWithheld",
+   "predicate": "containsText",
+   "role": "cell",
+   "text": "Order accepted",
+   "literal": "zzz",
+   "descendant": "withheld",
+   "expected": "notApplicable"
+  },
+  {
+   "id": "g2-12",
+   "branch": "notApplicable.descendantPassword",
+   "predicate": "containsText",
+   "role": "cell",
+   "text": "Order accepted",
+   "literal": "zzz",
+   "descendant": "password",
+   "expected": "notApplicable"
+  },
+  {
+   "id": "g2-13",
+   "branch": "notApplicable.descendantSensitive",
+   "predicate": "containsText",
+   "role": "cell",
+   "text": "Order accepted",
+   "literal": "zzz",
+   "descendant": "sensitive",
+   "expected": "notApplicable"
+  },
+  {
+   "id": "g2-14",
+   "branch": "notApplicable.descendantUnsupported",
+   "predicate": "containsText",
+   "role": "cell",
+   "text": "Order accepted",
+   "literal": "zzz",
+   "descendant": "unsupported",
+   "expected": "notApplicable"
+  },
+  {
+   "id": "g2-15",
+   "branch": "notApplicable.valueRole.combobox",
+   "predicate": "containsText",
+   "role": "combobox",
+   "text": "something",
+   "literal": "zzz",
+   "expected": "notApplicable"
+  },
+  {
+   "id": "g2-16",
+   "branch": "notApplicable.valueRole.textbox",
+   "predicate": "containsText",
+   "role": "textbox",
+   "text": "something",
+   "literal": "zzz",
+   "expected": "notApplicable"
+  },
+  {
+   "id": "g2-17",
+   "branch": "notApplicable.valueRole.searchbox",
+   "predicate": "containsText",
+   "role": "searchbox",
+   "text": "something",
+   "literal": "zzz",
+   "expected": "notApplicable"
+  },
+  {
+   "id": "g2-18",
+   "branch": "notApplicable.valueRole.spinbutton",
+   "predicate": "containsText",
+   "role": "spinbutton",
+   "text": "something",
+   "literal": "zzz",
+   "expected": "notApplicable"
+  },
+  {
+   "id": "g2-19",
+   "branch": "notApplicable.valueRole.slider",
+   "predicate": "containsText",
+   "role": "slider",
+   "text": "something",
+   "literal": "zzz",
+   "expected": "notApplicable"
+  },
+  {
+   "id": "g2-20",
+   "branch": "notApplicable.valueRole.listbox",
+   "predicate": "containsText",
+   "role": "listbox",
+   "text": "something",
+   "literal": "zzz",
+   "expected": "notApplicable"
+  },
+  {
+   "id": "g2-21",
+   "branch": "notApplicable.predicateVisible",
+   "predicate": "visible",
+   "role": "cell",
+   "text": "x",
+   "literal": "zzz",
+   "expected": "notApplicable"
+  },
+  {
+   "id": "g2-22",
+   "branch": "notApplicable.predicateHasValue",
+   "predicate": "hasValue",
+   "role": "cell",
+   "text": "x",
+   "literal": "zzz",
+   "expected": "notApplicable"
+  },
+  {
+   "id": "g2-23",
+   "branch": "notApplicable.truncatedText",
+   "predicate": "containsText",
+   "role": "cell",
+   "text": "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww…",
+   "literal": "beyond the cap",
+   "expected": "notApplicable"
+  },
+  {
+   "id": "g2-24",
+   "branch": "pass.longTextNotTruncated",
+   "predicate": "containsText",
+   "role": "cell",
+   "text": "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww",
+   "literal": "www",
+   "expected": "pass"
+  }
+ ],
+ "g2Outline": [
+  {
+   "id": "g2-outline-01",
+   "branch": "targetNotInOutline",
+   "outline": "- document\n  - button \"Go\" [e1]",
+   "ref": "e9",
+   "literal": "Go",
+   "expected": {
+    "applies": false,
+    "reason": "TARGET_NOT_IN_OUTLINE"
+   }
+  },
+  {
+   "id": "g2-outline-02",
+   "branch": "targetWithheld",
+   "outline": "- cell [e1] {value withheld}",
+   "ref": "e1",
+   "literal": "x",
+   "expected": {
+    "applies": false,
+    "reason": "TARGET_WITHHELD"
+   }
+  },
+  {
+   "id": "g2-outline-03",
+   "branch": "descendantWithheldLine",
+   "outline": "- cell \"a\" [e1]\n  - text \"b\"\n  - generic [e2] {value withheld}",
+   "ref": "e1",
+   "literal": "x",
+   "expected": {
+    "applies": false,
+    "reason": "DESCENDANT_WITHHELD"
+   }
+  },
+  {
+   "id": "g2-outline-04",
+   "branch": "descendantPasswordLine",
+   "outline": "- cell \"a\" [e1]\n  - passwordControl",
+   "ref": "e1",
+   "literal": "x",
+   "expected": {
+    "applies": false,
+    "reason": "DESCENDANT_WITHHELD"
+   }
+  },
+  {
+   "id": "g2-outline-05",
+   "branch": "descendantWithheldSensitive",
+   "outline": "- cell \"a\" [e1]\n  - withheld {sensitive}",
+   "ref": "e1",
+   "literal": "x",
+   "expected": {
+    "applies": false,
+    "reason": "DESCENDANT_WITHHELD"
+   }
+  },
+  {
+   "id": "g2-outline-06",
+   "branch": "descendantUnsupportedSurface",
+   "outline": "- cell \"a\" [e1]\n  - canvas {unsupported surface}",
+   "ref": "e1",
+   "literal": "x",
+   "expected": {
+    "applies": false,
+    "reason": "DESCENDANT_WITHHELD"
+   }
+  },
+  {
+   "id": "g2-outline-07",
+   "branch": "refuse",
+   "outline": "- cell \"Order accepted\" [e1]",
+   "ref": "e1",
+   "literal": "rejected",
+   "expected": {
+    "applies": true,
+    "refuse": true,
+    "refuseCI": true
+   }
+  },
+  {
+   "id": "g2-outline-08",
+   "branch": "caseOnlyDifference",
+   "outline": "- cell \"Order Accepted\" [e1]",
+   "ref": "e1",
+   "literal": "order accepted",
+   "expected": {
+    "applies": true,
+    "refuse": true,
+    "refuseCI": false
+   }
+  },
+  {
+   "id": "g2-outline-09",
+   "branch": "descendantNamesCount",
+   "outline": "- row [e1]\n  - cell \"Language\"\n  - cell \"English\"",
+   "ref": "e1",
+   "literal": "English",
+   "expected": {
+    "applies": true,
+    "refuse": false,
+    "refuseCI": false
+   }
+  },
+  {
+   "id": "g2-outline-10",
+   "branch": "moreOptionsLineIsSkippedNotATerminator",
+   "outline": "- combobox \"A\" [e1]\n  - option \"x\"\n  … 3 more options\n  - option \"after-more\"",
+   "ref": "e1",
+   "literal": "after-more",
+   "expected": {
+    "applies": true,
+    "refuse": false,
+    "refuseCI": false
+   }
+  },
+  {
+   "id": "g2-outline-11",
+   "branch": "moreNodesTailEndsSubtree",
+   "outline": "- cell \"a\" [e1]\n  - text \"b\"\n… 7 more nodes not shown",
+   "ref": "e1",
+   "literal": "b",
+   "expected": {
+    "applies": true,
+    "refuse": false,
+    "refuseCI": false
+   }
+  },
+  {
+   "id": "g2-outline-12",
+   "branch": "unparsedLineEndsSubtree",
+   "outline": "- cell \"a\" [e1]\n  - text \"b\"\nnot a node line\n  - text \"after\"",
+   "ref": "e1",
+   "literal": "after",
+   "expected": {
+    "applies": true,
+    "refuse": true,
+    "refuseCI": true
+   }
+  },
+  {
+   "id": "g2-outline-13",
+   "branch": "truncatedQuote",
+   "outline": "- cell \"wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww…\" [e1]",
+   "ref": "e1",
+   "literal": "beyond",
+   "expected": {
+    "applies": true,
+    "refuse": true,
+    "refuseCI": true,
+    "truncated": true
+   }
+  },
+  {
+   "id": "g2-outline-14",
+   "branch": "invalidJsonEscapeInQuote",
+   "outline": "- cell \"bad \\q escape\" [e1]",
+   "ref": "e1",
+   "literal": "escape",
+   "expected": {
+    "applies": true,
+    "refuse": false,
+    "refuseCI": false
+   }
+  },
+  {
+   "id": "g2-outline-15",
+   "branch": "selectedStateIsParsed",
+   "outline": "- option \"A\" [e1] {selected}",
+   "ref": "e1",
+   "literal": "A",
+   "expected": {
+    "applies": true,
+    "refuse": false,
+    "refuseCI": false
+   }
+  },
+  {
+   "id": "g2-outline-16",
+   "branch": "subtreeEndsAtTheNextSibling",
+   "outline": "- cell \"a\" [e1]\n- cell \"b\" [e2]",
+   "ref": "e1",
+   "literal": "b",
+   "expected": {
+    "applies": true,
+    "refuse": true,
+    "refuseCI": true
+   }
+  },
+  {
+   "id": "g2-outline-17",
+   "branch": "lineWithoutName",
+   "outline": "- cell [e1]\n  - text \"inside\"",
+   "ref": "e1",
+   "literal": "inside",
+   "expected": {
+    "applies": true,
+    "refuse": false,
+    "refuseCI": false
+   }
+  }
+ ],
+ "action": [
+  {
+   "id": "action-01",
+   "branch": "clean.fillLiteral",
+   "reply": {
+    "action": {
+     "target": {
+      "kind": "node",
+      "ref": "e1"
+     },
+     "operation": {
+      "kind": "fill",
+      "value": {
+       "kind": "authoredLiteral",
+       "sourceInputId": "in-1"
+      }
+     }
+    }
+   },
+   "obligation": {
+    "obligationId": "o1",
+    "operationKind": "fill",
+    "referenceIndex": 0,
+    "needId": null,
+    "predicate": null,
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "authoredLiteral",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "fill",
+      "referenceIndex": 0,
+      "needId": null,
+      "predicate": null,
+      "targetIntent": "Email"
+     }
+    ],
+    "needs": [
+     {
+      "needId": "n1",
+      "bindingId": "b1"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "inputId": "in-1"
+    }
+   ],
+   "expected": []
+  },
+  {
+   "id": "action-02",
+   "branch": "clean.click",
+   "reply": {
+    "action": {
+     "target": {
+      "kind": "node",
+      "ref": "e1"
+     },
+     "operation": {
+      "kind": "click"
+     }
+    }
+   },
+   "obligation": {
+    "obligationId": "o1",
+    "operationKind": "click",
+    "referenceIndex": null,
+    "needId": null,
+    "predicate": null,
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "authoredLiteral",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "click",
+      "referenceIndex": null,
+      "needId": null,
+      "predicate": null,
+      "targetIntent": "Email"
+     }
+    ],
+    "needs": [
+     {
+      "needId": "n1",
+      "bindingId": "b1"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "inputId": "in-1"
+    }
+   ],
+   "expected": []
+  },
+  {
+   "id": "action-03",
+   "branch": "operation.missing",
+   "reply": {
+    "action": {
+     "target": {
+      "kind": "node",
+      "ref": "e1"
+     }
+    }
+   },
+   "obligation": {
+    "obligationId": "o1",
+    "operationKind": "click",
+    "referenceIndex": null,
+    "needId": null,
+    "predicate": null,
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "authoredLiteral",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "click",
+      "referenceIndex": null,
+      "needId": null,
+      "predicate": null,
+      "targetIntent": "Email"
+     }
+    ],
+    "needs": [
+     {
+      "needId": "n1",
+      "bindingId": "b1"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "inputId": "in-1"
+    }
+   ],
+   "expected": [
+    "OPERATION_MISMATCH"
+   ]
+  },
+  {
+   "id": "action-04",
+   "branch": "operation.noAction",
+   "reply": {},
+   "obligation": {
+    "obligationId": "o1",
+    "operationKind": "click",
+    "referenceIndex": null,
+    "needId": null,
+    "predicate": null,
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "authoredLiteral",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "click",
+      "referenceIndex": null,
+      "needId": null,
+      "predicate": null,
+      "targetIntent": "Email"
+     }
+    ],
+    "needs": [
+     {
+      "needId": "n1",
+      "bindingId": "b1"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "inputId": "in-1"
+    }
+   ],
+   "expected": [
+    "OPERATION_MISMATCH"
+   ]
+  },
+  {
+   "id": "action-05",
+   "branch": "operation.wrongKind",
+   "reply": {
+    "action": {
+     "target": {
+      "kind": "node",
+      "ref": "e1"
+     },
+     "operation": {
+      "kind": "click"
+     }
+    }
+   },
+   "obligation": {
+    "obligationId": "o1",
+    "operationKind": "fill",
+    "referenceIndex": null,
+    "needId": null,
+    "predicate": null,
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "authoredLiteral",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "fill",
+      "referenceIndex": null,
+      "needId": null,
+      "predicate": null,
+      "targetIntent": "Email"
+     }
+    ],
+    "needs": [
+     {
+      "needId": "n1",
+      "bindingId": "b1"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "inputId": "in-1"
+    }
+   ],
+   "expected": [
+    "OPERATION_MISMATCH"
+   ]
+  },
+  {
+   "id": "action-06",
+   "branch": "reference.wrongSourceInputId",
+   "reply": {
+    "action": {
+     "target": {
+      "kind": "node",
+      "ref": "e1"
+     },
+     "operation": {
+      "kind": "fill",
+      "value": {
+       "kind": "authoredLiteral",
+       "sourceInputId": "in-9"
+      }
+     }
+    }
+   },
+   "obligation": {
+    "obligationId": "o1",
+    "operationKind": "fill",
+    "referenceIndex": 0,
+    "needId": null,
+    "predicate": null,
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "authoredLiteral",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "fill",
+      "referenceIndex": 0,
+      "needId": null,
+      "predicate": null,
+      "targetIntent": "Email"
+     }
+    ],
+    "needs": [
+     {
+      "needId": "n1",
+      "bindingId": "b1"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "inputId": "in-1"
+    }
+   ],
+   "expected": [
+    "VALUE_MISMATCH"
+   ]
+  },
+  {
+   "id": "action-07",
+   "branch": "reference.noInputs",
+   "reply": {
+    "action": {
+     "target": {
+      "kind": "node",
+      "ref": "e1"
+     },
+     "operation": {
+      "kind": "fill",
+      "value": {
+       "kind": "authoredLiteral",
+       "sourceInputId": "in-1"
+      }
+     }
+    }
+   },
+   "obligation": {
+    "obligationId": "o1",
+    "operationKind": "fill",
+    "referenceIndex": 0,
+    "needId": null,
+    "predicate": null,
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "authoredLiteral",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "fill",
+      "referenceIndex": 0,
+      "needId": null,
+      "predicate": null,
+      "targetIntent": "Email"
+     }
+    ],
+    "needs": [
+     {
+      "needId": "n1",
+      "bindingId": "b1"
+     }
+    ]
+   },
+   "inputs": [],
+   "expected": [
+    "VALUE_MISMATCH"
+   ]
+  },
+  {
+   "id": "action-08",
+   "branch": "reference.valueMissing",
+   "reply": {
+    "action": {
+     "target": {
+      "kind": "node",
+      "ref": "e1"
+     },
+     "operation": {
+      "kind": "fill"
+     }
+    }
+   },
+   "obligation": {
+    "obligationId": "o1",
+    "operationKind": "fill",
+    "referenceIndex": 0,
+    "needId": null,
+    "predicate": null,
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "authoredLiteral",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "fill",
+      "referenceIndex": 0,
+      "needId": null,
+      "predicate": null,
+      "targetIntent": "Email"
+     }
+    ],
+    "needs": [
+     {
+      "needId": "n1",
+      "bindingId": "b1"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "inputId": "in-1"
+    }
+   ],
+   "expected": [
+    "VALUE_MISMATCH"
+   ]
+  },
+  {
+   "id": "action-09",
+   "branch": "reference.missingSourceReferencesEntry",
+   "reply": {
+    "action": {
+     "target": {
+      "kind": "node",
+      "ref": "e1"
+     },
+     "operation": {
+      "kind": "fill",
+      "value": {
+       "kind": "authoredLiteral",
+       "sourceInputId": "in-1"
+      }
+     }
+    }
+   },
+   "obligation": {
+    "obligationId": "o1",
+    "operationKind": "fill",
+    "referenceIndex": 3,
+    "needId": null,
+    "predicate": null,
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "authoredLiteral",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "fill",
+      "referenceIndex": 3,
+      "needId": null,
+      "predicate": null,
+      "targetIntent": "Email"
+     }
+    ],
+    "needs": [
+     {
+      "needId": "n1",
+      "bindingId": "b1"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "inputId": "in-1"
+    }
+   ],
+   "expected": [
+    "VALUE_MISMATCH"
+   ]
+  },
+  {
+   "id": "action-10",
+   "branch": "reference.secretRefOk",
+   "reply": {
+    "action": {
+     "target": {
+      "kind": "passwordControl"
+     },
+     "operation": {
+      "kind": "fill",
+      "value": {
+       "kind": "secretRef",
+       "sourceInputId": "in-1"
+      }
+     }
+    }
+   },
+   "obligation": {
+    "obligationId": "o1",
+    "operationKind": "fill",
+    "referenceIndex": 0,
+    "needId": null,
+    "predicate": null,
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "secretRef",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "fill",
+      "referenceIndex": 0,
+      "needId": null,
+      "predicate": null,
+      "targetIntent": "Email"
+     }
+    ],
+    "needs": [
+     {
+      "needId": "n1",
+      "bindingId": "b1"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "inputId": "in-1"
+    }
+   ],
+   "expected": []
+  },
+  {
+   "id": "action-11",
+   "branch": "reference.secretRefExpectedButLiteralGiven",
+   "reply": {
+    "action": {
+     "target": {
+      "kind": "node",
+      "ref": "e1"
+     },
+     "operation": {
+      "kind": "fill",
+      "value": {
+       "kind": "authoredLiteral",
+       "sourceInputId": "in-1"
+      }
+     }
+    }
+   },
+   "obligation": {
+    "obligationId": "o1",
+    "operationKind": "fill",
+    "referenceIndex": 0,
+    "needId": null,
+    "predicate": null,
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "secretRef",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "fill",
+      "referenceIndex": 0,
+      "needId": null,
+      "predicate": null,
+      "targetIntent": "Email"
+     }
+    ],
+    "needs": [
+     {
+      "needId": "n1",
+      "bindingId": "b1"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "inputId": "in-1"
+    }
+   ],
+   "expected": [
+    "VALUE_MISMATCH"
+   ]
+  },
+  {
+   "id": "action-12",
+   "branch": "reference.literalExpectedButSecretGiven",
+   "reply": {
+    "action": {
+     "target": {
+      "kind": "passwordControl"
+     },
+     "operation": {
+      "kind": "fill",
+      "value": {
+       "kind": "secretRef",
+       "sourceInputId": "in-1"
+      }
+     }
+    }
+   },
+   "obligation": {
+    "obligationId": "o1",
+    "operationKind": "fill",
+    "referenceIndex": 0,
+    "needId": null,
+    "predicate": null,
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "authoredLiteral",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "fill",
+      "referenceIndex": 0,
+      "needId": null,
+      "predicate": null,
+      "targetIntent": "Email"
+     }
+    ],
+    "needs": [
+     {
+      "needId": "n1",
+      "bindingId": "b1"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "inputId": "in-1"
+    }
+   ],
+   "expected": [
+    "VALUE_MISMATCH"
+   ]
+  },
+  {
+   "id": "action-13",
+   "branch": "reference.secondUsedReference",
+   "reply": {
+    "action": {
+     "target": {
+      "kind": "node",
+      "ref": "e1"
+     },
+     "operation": {
+      "kind": "fill",
+      "value": {
+       "kind": "authoredLiteral",
+       "sourceInputId": "in-2"
+      }
+     }
+    }
+   },
+   "obligation": {
+    "obligationId": "o2",
+    "operationKind": "fill",
+    "referenceIndex": 1,
+    "needId": null,
+    "predicate": null,
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "authoredLiteral",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     },
+     {
+      "kind": "authoredLiteral",
+      "stepId": "s2",
+      "startUtf16": 0,
+      "endUtf16": 2
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "fill",
+      "referenceIndex": 0,
+      "needId": null,
+      "predicate": null,
+      "targetIntent": "Email"
+     },
+     {
+      "obligationId": "o2",
+      "operationKind": "fill",
+      "referenceIndex": 1,
+      "needId": null,
+      "predicate": null,
+      "targetIntent": "Email"
+     }
+    ],
+    "needs": [
+     {
+      "needId": "n1",
+      "bindingId": "b1"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "inputId": "in-1"
+    },
+    {
+     "inputId": "in-2"
+    }
+   ],
+   "expected": []
+  },
+  {
+   "id": "action-14",
+   "branch": "reference.sameReferenceUsedTwice",
+   "reply": {
+    "action": {
+     "target": {
+      "kind": "node",
+      "ref": "e1"
+     },
+     "operation": {
+      "kind": "fill",
+      "value": {
+       "kind": "authoredLiteral",
+       "sourceInputId": "in-1"
+      }
+     }
+    }
+   },
+   "obligation": {
+    "obligationId": "o1",
+    "operationKind": "fill",
+    "referenceIndex": 0,
+    "needId": null,
+    "predicate": null,
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "authoredLiteral",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "fill",
+      "referenceIndex": 0,
+      "needId": null,
+      "predicate": null,
+      "targetIntent": "Email"
+     },
+     {
+      "obligationId": "o2",
+      "operationKind": "fill",
+      "referenceIndex": 0,
+      "needId": null,
+      "predicate": null,
+      "targetIntent": "Email"
+     }
+    ],
+    "needs": [
+     {
+      "needId": "n1",
+      "bindingId": "b1"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "inputId": "in-1"
+    }
+   ],
+   "expected": []
+  },
+  {
+   "id": "action-15",
+   "branch": "reference.assertExpected",
+   "reply": {
+    "action": {
+     "target": {
+      "kind": "node",
+      "ref": "e1"
+     },
+     "operation": {
+      "kind": "assert",
+      "predicate": "containsText",
+      "expected": {
+       "kind": "authoredLiteral",
+       "sourceInputId": "in-1"
+      }
+     }
+    }
+   },
+   "obligation": {
+    "obligationId": "o1",
+    "operationKind": "assert",
+    "referenceIndex": 0,
+    "needId": null,
+    "predicate": "containsText",
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "authoredLiteral",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "assert",
+      "referenceIndex": 0,
+      "needId": null,
+      "predicate": "containsText",
+      "targetIntent": "Email"
+     }
+    ],
+    "needs": [
+     {
+      "needId": "n1",
+      "bindingId": "b1"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "inputId": "in-1"
+    }
+   ],
+   "expected": []
+  },
+  {
+   "id": "action-16",
+   "branch": "reference.navigateOk",
+   "reply": {
+    "action": {
+     "target": {
+      "kind": "page"
+     },
+     "operation": {
+      "kind": "navigate",
+      "destinationInputId": "in-1"
+     }
+    }
+   },
+   "obligation": {
+    "obligationId": "o1",
+    "operationKind": "navigate",
+    "referenceIndex": 0,
+    "needId": null,
+    "predicate": null,
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "authoredLiteral",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "navigate",
+      "referenceIndex": 0,
+      "needId": null,
+      "predicate": null,
+      "targetIntent": "Email"
+     }
+    ],
+    "needs": [
+     {
+      "needId": "n1",
+      "bindingId": "b1"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "inputId": "in-1"
+    }
+   ],
+   "expected": []
+  },
+  {
+   "id": "action-17",
+   "branch": "reference.navigateWrongDestination",
+   "reply": {
+    "action": {
+     "target": {
+      "kind": "page"
+     },
+     "operation": {
+      "kind": "navigate",
+      "destinationInputId": "in-9"
+     }
+    }
+   },
+   "obligation": {
+    "obligationId": "o1",
+    "operationKind": "navigate",
+    "referenceIndex": 0,
+    "needId": null,
+    "predicate": null,
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "authoredLiteral",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "navigate",
+      "referenceIndex": 0,
+      "needId": null,
+      "predicate": null,
+      "targetIntent": "Email"
+     }
+    ],
+    "needs": [
+     {
+      "needId": "n1",
+      "bindingId": "b1"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "inputId": "in-1"
+    }
+   ],
+   "expected": [
+    "VALUE_MISMATCH"
+   ]
+  },
+  {
+   "id": "action-18",
+   "branch": "need.readBindingOk",
+   "reply": {
+    "action": {
+     "target": {
+      "kind": "node",
+      "ref": "e1"
+     },
+     "operation": {
+      "kind": "read",
+      "bindingId": "b1"
+     }
+    }
+   },
+   "obligation": {
+    "obligationId": "o1",
+    "operationKind": "read",
+    "referenceIndex": null,
+    "needId": "n1",
+    "predicate": null,
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "authoredLiteral",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "read",
+      "referenceIndex": null,
+      "needId": "n1",
+      "predicate": null,
+      "targetIntent": "Email"
+     }
+    ],
+    "needs": [
+     {
+      "needId": "n1",
+      "bindingId": "b1"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "inputId": "in-1"
+    }
+   ],
+   "expected": []
+  },
+  {
+   "id": "action-19",
+   "branch": "need.readBindingWrong",
+   "reply": {
+    "action": {
+     "target": {
+      "kind": "node",
+      "ref": "e1"
+     },
+     "operation": {
+      "kind": "read",
+      "bindingId": "b9"
+     }
+    }
+   },
+   "obligation": {
+    "obligationId": "o1",
+    "operationKind": "read",
+    "referenceIndex": null,
+    "needId": "n1",
+    "predicate": null,
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "authoredLiteral",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "read",
+      "referenceIndex": null,
+      "needId": "n1",
+      "predicate": null,
+      "targetIntent": "Email"
+     }
+    ],
+    "needs": [
+     {
+      "needId": "n1",
+      "bindingId": "b1"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "inputId": "in-1"
+    }
+   ],
+   "expected": [
+    "VALUE_MISMATCH"
+   ]
+  },
+  {
+   "id": "action-20",
+   "branch": "need.bindingValueOk",
+   "reply": {
+    "action": {
+     "target": {
+      "kind": "node",
+      "ref": "e1"
+     },
+     "operation": {
+      "kind": "fill",
+      "value": {
+       "kind": "binding",
+       "bindingId": "b1"
+      }
+     }
+    }
+   },
+   "obligation": {
+    "obligationId": "o1",
+    "operationKind": "fill",
+    "referenceIndex": null,
+    "needId": "n1",
+    "predicate": null,
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "authoredLiteral",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "fill",
+      "referenceIndex": null,
+      "needId": "n1",
+      "predicate": null,
+      "targetIntent": "Email"
+     }
+    ],
+    "needs": [
+     {
+      "needId": "n1",
+      "bindingId": "b1"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "inputId": "in-1"
+    }
+   ],
+   "expected": []
+  },
+  {
+   "id": "action-21",
+   "branch": "need.bindingValueWrongKind",
+   "reply": {
+    "action": {
+     "target": {
+      "kind": "node",
+      "ref": "e1"
+     },
+     "operation": {
+      "kind": "fill",
+      "value": {
+       "kind": "authoredLiteral",
+       "sourceInputId": "in-1"
+      }
+     }
+    }
+   },
+   "obligation": {
+    "obligationId": "o1",
+    "operationKind": "fill",
+    "referenceIndex": null,
+    "needId": "n1",
+    "predicate": null,
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "authoredLiteral",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "fill",
+      "referenceIndex": null,
+      "needId": "n1",
+      "predicate": null,
+      "targetIntent": "Email"
+     }
+    ],
+    "needs": [
+     {
+      "needId": "n1",
+      "bindingId": "b1"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "inputId": "in-1"
+    }
+   ],
+   "expected": [
+    "VALUE_MISMATCH"
+   ]
+  },
+  {
+   "id": "action-22",
+   "branch": "need.bindingValueWrongId",
+   "reply": {
+    "action": {
+     "target": {
+      "kind": "node",
+      "ref": "e1"
+     },
+     "operation": {
+      "kind": "fill",
+      "value": {
+       "kind": "binding",
+       "bindingId": "b9"
+      }
+     }
+    }
+   },
+   "obligation": {
+    "obligationId": "o1",
+    "operationKind": "fill",
+    "referenceIndex": null,
+    "needId": "n1",
+    "predicate": null,
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "authoredLiteral",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "fill",
+      "referenceIndex": null,
+      "needId": "n1",
+      "predicate": null,
+      "targetIntent": "Email"
+     }
+    ],
+    "needs": [
+     {
+      "needId": "n1",
+      "bindingId": "b1"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "inputId": "in-1"
+    }
+   ],
+   "expected": [
+    "VALUE_MISMATCH"
+   ]
+  },
+  {
+   "id": "action-23",
+   "branch": "need.unknownNeed",
+   "reply": {
+    "action": {
+     "target": {
+      "kind": "node",
+      "ref": "e1"
+     },
+     "operation": {
+      "kind": "read",
+      "bindingId": "b1"
+     }
+    }
+   },
+   "obligation": {
+    "obligationId": "o1",
+    "operationKind": "read",
+    "referenceIndex": null,
+    "needId": "n9",
+    "predicate": null,
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "authoredLiteral",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "read",
+      "referenceIndex": null,
+      "needId": "n9",
+      "predicate": null,
+      "targetIntent": "Email"
+     }
+    ],
+    "needs": [
+     {
+      "needId": "n1",
+      "bindingId": "b1"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "inputId": "in-1"
+    }
+   ],
+   "expected": [
+    "VALUE_MISMATCH"
+   ]
+  },
+  {
+   "id": "action-24",
+   "branch": "need.plansWithoutNeeds",
+   "reply": {
+    "action": {
+     "target": {
+      "kind": "node",
+      "ref": "e1"
+     },
+     "operation": {
+      "kind": "read",
+      "bindingId": "b1"
+     }
+    }
+   },
+   "obligation": {
+    "obligationId": "o1",
+    "operationKind": "read",
+    "referenceIndex": null,
+    "needId": "n1",
+    "predicate": null,
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "authoredLiteral",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "read",
+      "referenceIndex": null,
+      "needId": "n1",
+      "predicate": null,
+      "targetIntent": "Email"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "inputId": "in-1"
+    }
+   ],
+   "expected": [
+    "VALUE_MISMATCH"
+   ]
+  },
+  {
+   "id": "action-25",
+   "branch": "dedupe.referenceAndNeedBothMismatch",
+   "reply": {
+    "action": {
+     "target": {
+      "kind": "node",
+      "ref": "e1"
+     },
+     "operation": {
+      "kind": "fill",
+      "value": {
+       "kind": "authoredLiteral",
+       "sourceInputId": "in-9"
+      }
+     }
+    }
+   },
+   "obligation": {
+    "obligationId": "o1",
+    "operationKind": "fill",
+    "referenceIndex": 0,
+    "needId": "n1",
+    "predicate": null,
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "authoredLiteral",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "fill",
+      "referenceIndex": 0,
+      "needId": "n1",
+      "predicate": null,
+      "targetIntent": "Email"
+     }
+    ],
+    "needs": [
+     {
+      "needId": "n1",
+      "bindingId": "b1"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "inputId": "in-1"
+    }
+   ],
+   "expected": [
+    "VALUE_MISMATCH"
+   ]
+  },
+  {
+   "id": "action-26",
+   "branch": "need.mismatchAfterReferenceOk",
+   "reply": {
+    "action": {
+     "target": {
+      "kind": "node",
+      "ref": "e1"
+     },
+     "operation": {
+      "kind": "fill",
+      "value": {
+       "kind": "authoredLiteral",
+       "sourceInputId": "in-1"
+      }
+     }
+    }
+   },
+   "obligation": {
+    "obligationId": "o1",
+    "operationKind": "fill",
+    "referenceIndex": 0,
+    "needId": "n1",
+    "predicate": null,
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "authoredLiteral",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "fill",
+      "referenceIndex": 0,
+      "needId": "n1",
+      "predicate": null,
+      "targetIntent": "Email"
+     }
+    ],
+    "needs": [
+     {
+      "needId": "n1",
+      "bindingId": "b1"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "inputId": "in-1"
+    }
+   ],
+   "expected": [
+    "VALUE_MISMATCH"
+   ]
+  },
+  {
+   "id": "action-27",
+   "branch": "policy.secretRefWithoutPasswordControl",
+   "reply": {
+    "action": {
+     "target": {
+      "kind": "node",
+      "ref": "e1"
+     },
+     "operation": {
+      "kind": "fill",
+      "value": {
+       "kind": "secretRef",
+       "sourceInputId": "in-1"
+      }
+     }
+    }
+   },
+   "obligation": {
+    "obligationId": "o1",
+    "operationKind": "fill",
+    "referenceIndex": 0,
+    "needId": null,
+    "predicate": null,
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "secretRef",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "fill",
+      "referenceIndex": 0,
+      "needId": null,
+      "predicate": null,
+      "targetIntent": "Email"
+     }
+    ],
+    "needs": [
+     {
+      "needId": "n1",
+      "bindingId": "b1"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "inputId": "in-1"
+    }
+   ],
+   "expected": [
+    "POLICY_DENIED"
+   ]
+  },
+  {
+   "id": "action-28",
+   "branch": "policy.secretRefOnNonFill",
+   "reply": {
+    "action": {
+     "target": {
+      "kind": "passwordControl"
+     },
+     "operation": {
+      "kind": "assert",
+      "predicate": "containsText",
+      "expected": {
+       "kind": "secretRef",
+       "sourceInputId": "in-1"
+      }
+     }
+    }
+   },
+   "obligation": {
+    "obligationId": "o1",
+    "operationKind": "assert",
+    "referenceIndex": 0,
+    "needId": null,
+    "predicate": "containsText",
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "secretRef",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "assert",
+      "referenceIndex": 0,
+      "needId": null,
+      "predicate": "containsText",
+      "targetIntent": "Email"
+     }
+    ],
+    "needs": [
+     {
+      "needId": "n1",
+      "bindingId": "b1"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "inputId": "in-1"
+    }
+   ],
+   "expected": [
+    "POLICY_DENIED"
+   ]
+  },
+  {
+   "id": "action-29",
+   "branch": "policy.passwordControlWithoutSecretRef",
+   "reply": {
+    "action": {
+     "target": {
+      "kind": "passwordControl"
+     },
+     "operation": {
+      "kind": "fill",
+      "value": {
+       "kind": "authoredLiteral",
+       "sourceInputId": "in-1"
+      }
+     }
+    }
+   },
+   "obligation": {
+    "obligationId": "o1",
+    "operationKind": "fill",
+    "referenceIndex": 0,
+    "needId": null,
+    "predicate": null,
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "authoredLiteral",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "fill",
+      "referenceIndex": 0,
+      "needId": null,
+      "predicate": null,
+      "targetIntent": "Email"
+     }
+    ],
+    "needs": [
+     {
+      "needId": "n1",
+      "bindingId": "b1"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "inputId": "in-1"
+    }
+   ],
+   "expected": [
+    "POLICY_DENIED"
+   ]
+  },
+  {
+   "id": "action-30",
+   "branch": "predicate.mismatch",
+   "reply": {
+    "action": {
+     "target": {
+      "kind": "node",
+      "ref": "e1"
+     },
+     "operation": {
+      "kind": "assert",
+      "predicate": "visible",
+      "expected": {
+       "kind": "authoredLiteral",
+       "sourceInputId": "in-1"
+      }
+     }
+    }
+   },
+   "obligation": {
+    "obligationId": "o1",
+    "operationKind": "assert",
+    "referenceIndex": 0,
+    "needId": null,
+    "predicate": "containsText",
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "authoredLiteral",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "assert",
+      "referenceIndex": 0,
+      "needId": null,
+      "predicate": "containsText",
+      "targetIntent": "Email"
+     }
+    ],
+    "needs": [
+     {
+      "needId": "n1",
+      "bindingId": "b1"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "inputId": "in-1"
+    }
+   ],
+   "expected": [
+    "PREDICATE_MISMATCH"
+   ]
+  },
+  {
+   "id": "action-31",
+   "branch": "predicate.ok",
+   "reply": {
+    "action": {
+     "target": {
+      "kind": "node",
+      "ref": "e1"
+     },
+     "operation": {
+      "kind": "assert",
+      "predicate": "visible",
+      "expected": {
+       "kind": "authoredLiteral",
+       "sourceInputId": "in-1"
+      }
+     }
+    }
+   },
+   "obligation": {
+    "obligationId": "o1",
+    "operationKind": "assert",
+    "referenceIndex": 0,
+    "needId": null,
+    "predicate": "visible",
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "authoredLiteral",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "assert",
+      "referenceIndex": 0,
+      "needId": null,
+      "predicate": "visible",
+      "targetIntent": "Email"
+     }
+    ],
+    "needs": [
+     {
+      "needId": "n1",
+      "bindingId": "b1"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "inputId": "in-1"
+    }
+   ],
+   "expected": []
+  },
+  {
+   "id": "action-32",
+   "branch": "several.operationAndValueAndPredicate",
+   "reply": {
+    "action": {
+     "target": {
+      "kind": "node",
+      "ref": "e1"
+     },
+     "operation": {
+      "kind": "assert",
+      "predicate": "visible",
+      "expected": {
+       "kind": "authoredLiteral",
+       "sourceInputId": "in-9"
+      }
+     }
+    }
+   },
+   "obligation": {
+    "obligationId": "o1",
+    "operationKind": "assert",
+    "referenceIndex": 0,
+    "needId": null,
+    "predicate": "containsText",
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "authoredLiteral",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "assert",
+      "referenceIndex": 0,
+      "needId": null,
+      "predicate": "containsText",
+      "targetIntent": "Email"
+     }
+    ],
+    "needs": [
+     {
+      "needId": "n1",
+      "bindingId": "b1"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "inputId": "in-1"
+    }
+   ],
+   "expected": [
+    "VALUE_MISMATCH",
+    "PREDICATE_MISMATCH"
+   ]
+  },
+  {
+   "id": "action-33",
+   "branch": "several.operationAndPolicy",
+   "reply": {
+    "action": {
+     "target": {
+      "kind": "passwordControl"
+     },
+     "operation": {
+      "kind": "click"
+     }
+    }
+   },
+   "obligation": {
+    "obligationId": "o1",
+    "operationKind": "fill",
+    "referenceIndex": null,
+    "needId": null,
+    "predicate": null,
+    "targetIntent": "Email"
+   },
+   "plan": {
+    "sourceReferences": [
+     {
+      "kind": "authoredLiteral",
+      "stepId": "s1",
+      "startUtf16": 0,
+      "endUtf16": 3
+     }
+    ],
+    "obligations": [
+     {
+      "obligationId": "o1",
+      "operationKind": "fill",
+      "referenceIndex": null,
+      "needId": null,
+      "predicate": null,
+      "targetIntent": "Email"
+     }
+    ],
+    "needs": [
+     {
+      "needId": "n1",
+      "bindingId": "b1"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "inputId": "in-1"
+    }
+   ],
+   "expected": [
+    "OPERATION_MISMATCH",
+    "POLICY_DENIED"
+   ]
+  }
+ ]
+}

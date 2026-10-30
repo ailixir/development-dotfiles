@@ -1,3 +1,4 @@
+import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 /**
  * STUDIO-OBS-015 REL-001/D4 — a guided start that cannot finish is cut off and leaves nothing behind.
  *
@@ -33,7 +34,7 @@ import { GuidedLaunchFailure } from '../../src/run/guidedBrowser.js';
 import { descendantsOf, isAlive, readProcessTableWithArgs } from '../../src/run/tree.js';
 import type { ObservationConfig } from '../../src/run/observationTypes.js';
 
-const config: ObservationConfig = { sessionId: 'd4', scopeHash: 'a'.repeat(64), approvedOrigins: ['http://127.0.0.1:9'], rules: [], knownSecrets: [] };
+const config: ObservationConfig = { sessionId: 'd4', scopeHash: 'a'.repeat(64), allowedDomains: TEST_DOMAINS, knownSecrets: [] };
 const DEADLINE_MS = 3_000;
 const cleanup: (() => Promise<void>)[] = [];
 afterEach(async () => { vi.restoreAllMocks(); vi.unstubAllEnvs(); for (const fn of cleanup.splice(0)) await fn().catch(() => undefined); });

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
+import com.citi.put.checks.studio.navigation.AllowedDomains;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
 import java.util.Map;
@@ -11,16 +12,17 @@ import org.junit.jupiter.api.Test;
 
 class GuidedSourceReferenceValidatorTest {
   final GuidedContracts contracts = new GuidedContracts();
-  final GuidedSourceReferenceValidator validator = new GuidedSourceReferenceValidator(contracts);
+  final AllowedDomains domains = new AllowedDomains(List.of("example.test"));
+  final GuidedSourceReferenceValidator validator =
+      new GuidedSourceReferenceValidator(contracts, domains);
 
   ObjectNode session() {
     return (ObjectNode)
         contracts.parse(
             "{\"sessionId\":\"s\",\"scopeHash\":\""
                 + "a".repeat(64)
-                + "\",\"scope\":{\"sourceRevision\":\"r1\",\"configurationRevision\":\"c1\",\""
-                + "approvedOrigins\":[\"https://example.test\"]},\"sourceSteps\":[{\"stepId\":"
-                + "\"step\"}]}");
+                + "\",\"scope\":{\"sourceRevision\":\"r1\",\"configurationRevision\":\"c1\"},"
+                + "\"sourceSteps\":[{\"stepId\":\"step\"}]}");
   }
 
   ObjectNode candidate(int start, int end) {
@@ -78,11 +80,15 @@ class GuidedSourceReferenceValidatorTest {
   }
 
   @Test
-  void destinationsRequireApprovedRealOriginAndNoCredentials() {
+  void destinationsRequireAnAllowedDomainAndNoCredentials() {
     for (String destination :
         List.of(
             "https://bad.test/path",
+            "https://evilexample.test/",
+            "https://example.test.evil.org/",
             "https://user:secret@example.test/path",
+            "https://example.test:0/",
+            "http://127.0.0.1:4102/",
             "data:text/plain,hi")) {
       var candidate =
           candidate(0, destination.length())
@@ -94,18 +100,40 @@ class GuidedSourceReferenceValidatorTest {
                       session(), sources(destination, destination.length()), candidate))
           .hasMessage("ORIGIN_NOT_ALLOWED");
     }
-    String destination = "https://example.test/a?b=c";
-    assertThat(
-            validator
-                .resolve(
+    // The allowed domain and any of its subdomains, http or https, any port, whether or not the
+    // test names that exact host.
+    for (String destination :
+        List.of(
+            "https://example.test/a?b=c",
+            "https://www.example.test/",
+            "http://orders.eu.example.test:8080/x")) {
+      assertThat(
+              validator
+                  .resolve(
+                      session(),
+                      sources(destination, destination.length()),
+                      candidate(0, destination.length())
+                          .put("kind", "destination")
+                          .put("intendedSlot", "navigate.destination"))
+                  .path("value")
+                  .asText())
+          .isEqualTo(destination);
+    }
+  }
+
+  @Test
+  void anEmptyListRefusesEveryDestination() {
+    var closed = new GuidedSourceReferenceValidator(contracts, AllowedDomains.none());
+    String destination = "https://example.test/";
+    assertThatThrownBy(
+            () ->
+                closed.resolve(
                     session(),
                     sources(destination, destination.length()),
                     candidate(0, destination.length())
                         .put("kind", "destination")
-                        .put("intendedSlot", "navigate.destination"))
-                .path("value")
-                .asText())
-        .isEqualTo(destination);
+                        .put("intendedSlot", "navigate.destination")))
+        .hasMessage("ORIGIN_NOT_ALLOWED");
   }
 
   @Test

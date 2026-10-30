@@ -86,7 +86,7 @@ class VaultProviderSelectionTest {
   }
 
   private static StudioSecretsProperties properties(String provider) {
-    return new StudioSecretsProperties(new StudioSecretsProperties.Vault(provider, null), Map.of());
+    return new StudioSecretsProperties(new StudioSecretsProperties.Vault(provider, null));
   }
 
   /** The fixture guard: the appender is live before any assertion about output is trusted. */
@@ -164,8 +164,7 @@ class VaultProviderSelectionTest {
             4096);
     StudioVaultProvider provider =
         configuration.studioVaultProvider(
-            new StudioSecretsProperties(
-                new StudioSecretsProperties.Vault("hashicorp", hashicorp), Map.of()));
+            new StudioSecretsProperties(new StudioSecretsProperties.Vault("hashicorp", hashicorp)));
 
     assertThat(provider).isInstanceOf(HashicorpStudioVaultProvider.class);
     assertThat(provider.name()).isEqualTo("hashicorp");
@@ -193,8 +192,7 @@ class VaultProviderSelectionTest {
 
     StudioVaultProvider provider =
         configuration.studioVaultProvider(
-            new StudioSecretsProperties(
-                new StudioSecretsProperties.Vault("hashicorp", hashicorp), Map.of()));
+            new StudioSecretsProperties(new StudioSecretsProperties.Vault("hashicorp", hashicorp)));
 
     assertThat(provider).isInstanceOf(HashicorpStudioVaultProvider.class);
     assertThat(hashicorp.pathTemplateOrDefault())
@@ -232,7 +230,7 @@ class VaultProviderSelectionTest {
               () ->
                   configuration.studioVaultProvider(
                       new StudioSecretsProperties(
-                          new StudioSecretsProperties.Vault("hashicorp", hashicorp), Map.of())))
+                          new StudioSecretsProperties.Vault("hashicorp", hashicorp))))
           .as("template %s must refuse to start", template)
           .isInstanceOf(IllegalStateException.class)
           .hasMessageContaining("path-template");
@@ -264,23 +262,5 @@ class VaultProviderSelectionTest {
             () -> configuration.studioVaultProvider(properties(FakeStudioVaultProvider.NAME)))
         .isInstanceOf(IllegalStateException.class)
         .hasMessageContaining("is not a provider this build knows");
-  }
-
-  @Test
-  void entitlementPolicyIsFailClosedAtEveryGap() {
-    StudioSecretUseAuthorization authorization =
-        configuration.studioSecretUseAuthorization(
-            new StudioSecretsProperties(
-                new StudioSecretsProperties.Vault("none", null),
-                Map.of("owner@citi.com|60406|Production", "LOGIN_PW")));
-
-    assertThat(authorization.mayUse("owner@citi.com", "60406", "Production", "LOGIN_PW")).isTrue();
-    // …and every way of being slightly wrong is false, not true.
-    assertThat(authorization.mayUse("owner@citi.com", "60406", "Production", "OTHER")).isFalse();
-    assertThat(authorization.mayUse("owner@citi.com", "60999", "Production", "LOGIN_PW")).isFalse();
-    assertThat(authorization.mayUse("owner@citi.com", "60406", "dev", "LOGIN_PW")).isFalse();
-    assertThat(authorization.mayUse("stranger@citi.com", "60406", "Production", "LOGIN_PW"))
-        .isFalse();
-    assertThat(authorization.mayUse(null, "60406", "Production", "LOGIN_PW")).isFalse();
   }
 }

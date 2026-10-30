@@ -26,6 +26,8 @@ export interface BrowserLaunchRequest {
   /** The per-run scratch directory. Profile, video and temp output all live under it (AC-22). */
   readonly scratchPath: string;
   readonly observedScope?: Scope;
+  /** The runner's navigation whitelist; author-directed navigation must be on it. */
+  readonly allowedDomains: readonly string[];
   /** Private continuous admission/start bound, never a job/configuration option. */
   readonly startup?:{readonly deadlineEpochMs:number;readonly signal:AbortSignal};
 }

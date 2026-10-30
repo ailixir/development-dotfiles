@@ -5,6 +5,7 @@ import com.citi.put.checks.studio.StudioAccessDeniedException;
 import com.citi.put.checks.studio.StudioRepository;
 import com.citi.put.checks.studio.StudioValidationException;
 import com.citi.put.checks.studio.entity.UITest;
+import com.citi.put.checks.studio.navigation.AllowedDomains;
 import com.fasterxml.jackson.core.StreamReadFeature;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -67,16 +68,19 @@ public class StudioSecretsService {
   private final StudioRepository studioRepository;
   private final CsiOwnershipEvaluator csiOwnershipEvaluator;
   private final StudioVaultProvider vault;
+  private final AllowedDomains domains;
   private final ObjectMapper strict;
 
   public StudioSecretsService(
       StudioRepository studioRepository,
       CsiOwnershipEvaluator csiOwnershipEvaluator,
       StudioVaultProvider vault,
+      AllowedDomains domains,
       ObjectMapper platformMapper) {
     this.studioRepository = studioRepository;
     this.csiOwnershipEvaluator = csiOwnershipEvaluator;
     this.vault = vault;
+    this.domains = domains;
     this.strict = strictCopyOf(platformMapper);
   }
 
@@ -133,6 +137,10 @@ public class StudioSecretsService {
       String name = validName(request.name());
       validateValue(request.value());
       List<String> origins = validOrigins(request.allowedOrigins());
+      // A secret may be filled only where Studio may navigate: refused before anything is written.
+      if (!origins.stream().allMatch(domains::allows)) {
+        throw originsNotAllowed();
+      }
 
       String version = vault.create(scopeOf(test), name, request.value(), origins);
       LOGGER.info("Studio secret created: test={} name={} version={}", testId, name, version);
@@ -211,6 +219,11 @@ public class StudioSecretsService {
     return new StudioValidationException(
         INVALID_REQUEST,
         "The body must be a JSON object with exactly name, value and allowedOrigins");
+  }
+
+  private static StudioValidationException originsNotAllowed() {
+    return new StudioValidationException(
+        INVALID_ORIGINS, "Every allowed origin must be on this environment's allowed domains");
   }
 
   private static StudioValidationException invalidOrigins() {

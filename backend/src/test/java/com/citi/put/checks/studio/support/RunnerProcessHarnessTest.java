@@ -146,7 +146,7 @@ class RunnerProcessHarnessTest {
   }
 
   @Test
-  void guidedModeAddsExactlyTheEightGuidedKeys() throws Exception {
+  void guidedModeAddsExactlyTheNineGuidedKeys() throws Exception {
     var env = new Capture();
     Guided guided =
         new Guided(
@@ -168,6 +168,7 @@ class RunnerProcessHarnessTest {
         .containsExactlyInAnyOrder(
             RunnerProcessHarness.KEY_GUIDED_ENABLED,
             RunnerProcessHarness.KEY_GUIDED_WORKER_ID,
+            RunnerProcessHarness.KEY_GUIDED_CAPACITY,
             RunnerProcessHarness.KEY_GUIDED_JOURNAL_DIR,
             RunnerProcessHarness.KEY_GUIDED_CONTROLLER_ISSUER,
             RunnerProcessHarness.KEY_GUIDED_CONTROLLER_SUBJECT,
@@ -177,6 +178,10 @@ class RunnerProcessHarnessTest {
     assertThat(env.environment)
         .containsEntry(RunnerProcessHarness.KEY_GUIDED_ENABLED, "true")
         .containsEntry(RunnerProcessHarness.KEY_GUIDED_WORKER_ID, "worker-1")
+        .containsEntry(RunnerProcessHarness.KEY_GUIDED_CAPACITY, "1")
+        .containsEntry(
+            RunnerProcessHarness.KEY_ALLOWED_DOMAINS, String.join(",", TestDomains.ENTRIES))
+        .containsEntry(RunnerProcessHarness.KEY_ALLOW_ALL_DOMAINS, "false")
         .containsEntry(
             RunnerProcessHarness.KEY_GUIDED_JOURNAL_DIR,
             temp.resolve("journal").toAbsolutePath().toString())

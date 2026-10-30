@@ -72,7 +72,12 @@ public final class PublicationContracts {
   }
 
   /** Original independent database facts, before any guard/recipe/IR construction. */
-  public record Evidence(JsonNode document) {
+  public record Evidence(
+      JsonNode document, GuidedGuardSourceAuthority.VerifiedSource sourceAuthority) {
+    public Evidence(JsonNode document) {
+      this(document, null);
+    }
+
     public Evidence {
       document = bounded(document, MAX_BASIS_BYTES);
     }

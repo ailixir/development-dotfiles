@@ -1,0 +1,2082 @@
+{
+  "schemaVersion": 1,
+  "description": "Shared vectors for the Studio navigation domain allow-list (STUDIO-FLEX-001). Consumed by the backend AllowedDomains (Java) and by the studio-runner (TypeScript); a reference implementation runs in tools/check-studio-observed-contracts.cjs. Config keys: studio.navigation.allowed-domains / STUDIO_ALLOWED_DOMAINS (backend), STUDIO_RUNNER_ALLOWED_DOMAINS (runner). The allow-all option (STUDIO_ALLOW_ALL_DOMAINS / STUDIO_RUNNER_ALLOW_ALL_DOMAINS) is pinned by allowAllEnvCases and allowAllMatchCases.",
+  "rules": [
+    "Configuration entries. An entry is one host suffix: lowercase ASCII, punycode for internationalised names (xn--...), labels of 1-63 characters from a-z 0-9 and hyphen (no leading or trailing hyphen), 1-253 characters in total, and a last label that starts with a letter (so no IPv4 literal, no numeric host such as 127.1 and no hexadecimal form can be an entry). The regular expression in entryGrammar is normative.",
+    "A configuration is a list of at most 32 entries. It is refused as a whole when any entry violates the grammar (this covers wildcards, IPv4/IPv6 literals, schemes, ports, paths, userinfo, whitespace, empty strings, leading/trailing/double dots, uppercase and non-punycode names) or when two entries overlap. Entries a and b overlap when a == b or a ends with \".\" + b or b ends with \".\" + a, so exactly one entry can match any host. The empty list is valid and denies everything. Entry order is irrelevant.",
+    "Runner environment form (STUDIO_RUNNER_ALLOWED_DOMAINS). Unset or the empty string means the empty list. Any other value is split on \",\" with no trimming; every segment must be a valid entry (so \"a.com,\" and \"a.com, b.com\" are refused) and the resulting list must be valid as a whole.",
+    "Candidate URL to host (hostOf). The result is the lowercase punycode host, or null, and null never matches. Steps in order: (1) null when the string contains a backslash, a space or any control character (U+0000-U+0020, U+007F). (2) The scheme must be http or https, case-insensitive, followed by \"://\"; anything else (about:, data:, javascript:, file:, blob:, ftp:, scheme-relative, \"http:/x\") is null. (3) The authority is the text up to the first \"/\", \"?\" or \"#\"; null when it is empty or contains \"@\" (userinfo), \"%\" or a bracket (IPv6 literal). (4) When the authority has a \":\", the part after the first \":\" must be 1-5 digits with a value from 1 to 65535, otherwise null; any port is accepted otherwise, and the scheme is not tied to a port. (5) The host part is converted with IDNA ToASCII (Java IDN.toASCII, Node domainToASCII) and lowercased; a conversion failure is null. (6) The converted host must satisfy entryGrammar; this makes a trailing dot, an empty label, an underscore, an IP literal and an over-long host null.",
+    "Match. A candidate URL is allowed when hostOf(url) is not null and, for some entry, host == entry or host ends with \".\" + entry. Path, query and fragment are ignored. Matching is on label boundaries only: evilciti.com and citi.com.evil.com never match the entry citi.com.",
+    "Allow-all option (STUDIO_ALLOW_ALL_DOMAINS on the backend, STUDIO_RUNNER_ALLOW_ALL_DOMAINS on the runner; one chart value renders both). ON by default for now (user decision 2026-10-25). Exactly \"true\" means on and exactly \"false\" means off; any other non-empty value (including TRUE, 1, yes and padded forms) is a configuration error that stops startup. Unset (and, on the runner, the empty string) takes the deployment default, which is ON for now; that default lives in a different place on each side (the backend application.yml placeholder, the runner parser) and the chart always renders an explicit value, so it is deliberately not a shared vector. Off changes nothing above. On, the configured list is ignored for matching (it is still validated as above, so a typo is not hidden) and a candidate URL is allowed exactly when hostOf(url) is not null: the same http(s) DNS-name rule, still no userinfo, no IP literal, no other scheme. See allowAllEnvCases and allowAllMatchCases.",
+    "Consumers: backend AllowedDomains (Java) and the runner (TypeScript) both run every case; tools/check-studio-observed-contracts.cjs runs a reference implementation over this file. Cases avoid IDNA 2003/UTS 46 differences (no sharp s, no fullwidth forms, no ideographic full stop)."
+  ],
+  "entryGrammar": "^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)*[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+  "limits": {
+    "maxEntries": 32,
+    "maxEntryLength": 253,
+    "maxLabelLength": 63,
+    "maxPort": 65535
+  },
+  "configCases": [
+    {
+      "name": "empty list denies everything and is valid",
+      "entries": [],
+      "valid": true
+    },
+    {
+      "name": "single label",
+      "entries": [
+        "localhost"
+      ],
+      "valid": true
+    },
+    {
+      "name": "the local deployment list",
+      "entries": [
+        "localhost",
+        "example.com",
+        "practicetestautomation.com"
+      ],
+      "valid": true
+    },
+    {
+      "name": "registrable domain",
+      "entries": [
+        "citi.com"
+      ],
+      "valid": true
+    },
+    {
+      "name": "punycode entry",
+      "entries": [
+        "xn--bcher-kva.example"
+      ],
+      "valid": true
+    },
+    {
+      "name": "deep suffix",
+      "entries": [
+        "a.b.c.d.e.f.example"
+      ],
+      "valid": true
+    },
+    {
+      "name": "hyphen inside a label",
+      "entries": [
+        "my-app.example"
+      ],
+      "valid": true
+    },
+    {
+      "name": "digit-leading label that is not the last",
+      "entries": [
+        "123.example"
+      ],
+      "valid": true
+    },
+    {
+      "name": "single-letter labels",
+      "entries": [
+        "a.b"
+      ],
+      "valid": true
+    },
+    {
+      "name": "lookalike registrable names do not overlap",
+      "entries": [
+        "evilciti.com",
+        "citi.com"
+      ],
+      "valid": true
+    },
+    {
+      "name": "sibling subdomains do not overlap",
+      "entries": [
+        "a.citi.com",
+        "b.citi.com"
+      ],
+      "valid": true
+    },
+    {
+      "name": "a suffix reading that is not on a label boundary does not overlap",
+      "entries": [
+        "citi.com",
+        "citi.com.evil.com"
+      ],
+      "valid": true
+    },
+    {
+      "name": "exactly 32 entries",
+      "entries": [
+        "d01.example",
+        "d02.example",
+        "d03.example",
+        "d04.example",
+        "d05.example",
+        "d06.example",
+        "d07.example",
+        "d08.example",
+        "d09.example",
+        "d10.example",
+        "d11.example",
+        "d12.example",
+        "d13.example",
+        "d14.example",
+        "d15.example",
+        "d16.example",
+        "d17.example",
+        "d18.example",
+        "d19.example",
+        "d20.example",
+        "d21.example",
+        "d22.example",
+        "d23.example",
+        "d24.example",
+        "d25.example",
+        "d26.example",
+        "d27.example",
+        "d28.example",
+        "d29.example",
+        "d30.example",
+        "d31.example",
+        "d32.example"
+      ],
+      "valid": true
+    },
+    {
+      "name": "63-character label",
+      "entries": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.example"
+      ],
+      "valid": true
+    },
+    {
+      "name": "253-character entry",
+      "entries": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "valid": true
+    },
+    {
+      "name": "33 entries",
+      "entries": [
+        "d01.example",
+        "d02.example",
+        "d03.example",
+        "d04.example",
+        "d05.example",
+        "d06.example",
+        "d07.example",
+        "d08.example",
+        "d09.example",
+        "d10.example",
+        "d11.example",
+        "d12.example",
+        "d13.example",
+        "d14.example",
+        "d15.example",
+        "d16.example",
+        "d17.example",
+        "d18.example",
+        "d19.example",
+        "d20.example",
+        "d21.example",
+        "d22.example",
+        "d23.example",
+        "d24.example",
+        "d25.example",
+        "d26.example",
+        "d27.example",
+        "d28.example",
+        "d29.example",
+        "d30.example",
+        "d31.example",
+        "d32.example",
+        "d33.example"
+      ],
+      "valid": false,
+      "reason": "TOO_MANY"
+    },
+    {
+      "name": "empty string entry",
+      "entries": [
+        ""
+      ],
+      "valid": false,
+      "reason": "EMPTY_ENTRY"
+    },
+    {
+      "name": "whitespace-only entry",
+      "entries": [
+        " "
+      ],
+      "valid": false,
+      "reason": "WHITESPACE"
+    },
+    {
+      "name": "leading space",
+      "entries": [
+        " citi.com"
+      ],
+      "valid": false,
+      "reason": "WHITESPACE"
+    },
+    {
+      "name": "trailing space",
+      "entries": [
+        "citi.com "
+      ],
+      "valid": false,
+      "reason": "WHITESPACE"
+    },
+    {
+      "name": "inner space",
+      "entries": [
+        "citi .com"
+      ],
+      "valid": false,
+      "reason": "WHITESPACE"
+    },
+    {
+      "name": "wildcard prefix",
+      "entries": [
+        "*.citi.com"
+      ],
+      "valid": false,
+      "reason": "WILDCARD"
+    },
+    {
+      "name": "bare wildcard",
+      "entries": [
+        "*"
+      ],
+      "valid": false,
+      "reason": "WILDCARD"
+    },
+    {
+      "name": "wildcard inside a label",
+      "entries": [
+        "*citi.com"
+      ],
+      "valid": false,
+      "reason": "WILDCARD"
+    },
+    {
+      "name": "wildcard last label",
+      "entries": [
+        "citi.*"
+      ],
+      "valid": false,
+      "reason": "WILDCARD"
+    },
+    {
+      "name": "IPv4 literal",
+      "entries": [
+        "127.0.0.1"
+      ],
+      "valid": false,
+      "reason": "IP_LITERAL"
+    },
+    {
+      "name": "IPv4 literal, documentation range",
+      "entries": [
+        "192.0.2.1"
+      ],
+      "valid": false,
+      "reason": "IP_LITERAL"
+    },
+    {
+      "name": "short IPv4 form",
+      "entries": [
+        "127.1"
+      ],
+      "valid": false,
+      "reason": "IP_LITERAL"
+    },
+    {
+      "name": "hexadecimal IPv4 form",
+      "entries": [
+        "0x7f.0.0.1"
+      ],
+      "valid": false,
+      "reason": "IP_LITERAL"
+    },
+    {
+      "name": "decimal IPv4 form",
+      "entries": [
+        "2130706433"
+      ],
+      "valid": false,
+      "reason": "IP_LITERAL"
+    },
+    {
+      "name": "bracketed IPv6 literal",
+      "entries": [
+        "[::1]"
+      ],
+      "valid": false,
+      "reason": "IP_LITERAL"
+    },
+    {
+      "name": "bare IPv6 literal",
+      "entries": [
+        "::1"
+      ],
+      "valid": false,
+      "reason": "IP_LITERAL"
+    },
+    {
+      "name": "full IPv6 literal",
+      "entries": [
+        "2001:db8::1"
+      ],
+      "valid": false,
+      "reason": "IP_LITERAL"
+    },
+    {
+      "name": "https scheme",
+      "entries": [
+        "https://citi.com"
+      ],
+      "valid": false,
+      "reason": "SCHEME"
+    },
+    {
+      "name": "http scheme on localhost",
+      "entries": [
+        "http://localhost"
+      ],
+      "valid": false,
+      "reason": "SCHEME"
+    },
+    {
+      "name": "trailing colon",
+      "entries": [
+        "citi.com:"
+      ],
+      "valid": false,
+      "reason": "PORT"
+    },
+    {
+      "name": "ftp scheme",
+      "entries": [
+        "ftp://citi.com"
+      ],
+      "valid": false,
+      "reason": "SCHEME"
+    },
+    {
+      "name": "port",
+      "entries": [
+        "citi.com:8443"
+      ],
+      "valid": false,
+      "reason": "PORT"
+    },
+    {
+      "name": "port on localhost",
+      "entries": [
+        "localhost:4102"
+      ],
+      "valid": false,
+      "reason": "PORT"
+    },
+    {
+      "name": "trailing slash",
+      "entries": [
+        "citi.com/"
+      ],
+      "valid": false,
+      "reason": "PATH"
+    },
+    {
+      "name": "path",
+      "entries": [
+        "citi.com/path"
+      ],
+      "valid": false,
+      "reason": "PATH"
+    },
+    {
+      "name": "query",
+      "entries": [
+        "citi.com?x"
+      ],
+      "valid": false,
+      "reason": "PATH"
+    },
+    {
+      "name": "fragment",
+      "entries": [
+        "citi.com#f"
+      ],
+      "valid": false,
+      "reason": "PATH"
+    },
+    {
+      "name": "userinfo",
+      "entries": [
+        "user@citi.com"
+      ],
+      "valid": false,
+      "reason": "USERINFO"
+    },
+    {
+      "name": "trailing dot",
+      "entries": [
+        "citi.com."
+      ],
+      "valid": false,
+      "reason": "TRAILING_DOT"
+    },
+    {
+      "name": "leading dot",
+      "entries": [
+        ".citi.com"
+      ],
+      "valid": false,
+      "reason": "EMPTY_LABEL"
+    },
+    {
+      "name": "double dot",
+      "entries": [
+        "citi..com"
+      ],
+      "valid": false,
+      "reason": "EMPTY_LABEL"
+    },
+    {
+      "name": "lone dot",
+      "entries": [
+        "."
+      ],
+      "valid": false,
+      "reason": "EMPTY_LABEL"
+    },
+    {
+      "name": "mixed case",
+      "entries": [
+        "Citi.com"
+      ],
+      "valid": false,
+      "reason": "UPPERCASE"
+    },
+    {
+      "name": "all uppercase",
+      "entries": [
+        "CITI.COM"
+      ],
+      "valid": false,
+      "reason": "UPPERCASE"
+    },
+    {
+      "name": "non-punycode Latin name",
+      "entries": [
+        "bücher.example"
+      ],
+      "valid": false,
+      "reason": "NOT_PUNYCODE"
+    },
+    {
+      "name": "non-punycode CJK name",
+      "entries": [
+        "例え.jp"
+      ],
+      "valid": false,
+      "reason": "NOT_PUNYCODE"
+    },
+    {
+      "name": "underscore",
+      "entries": [
+        "a_b.example"
+      ],
+      "valid": false,
+      "reason": "INVALID_LABEL"
+    },
+    {
+      "name": "label with leading hyphen",
+      "entries": [
+        "-a.example"
+      ],
+      "valid": false,
+      "reason": "INVALID_LABEL"
+    },
+    {
+      "name": "label with trailing hyphen",
+      "entries": [
+        "a-.example"
+      ],
+      "valid": false,
+      "reason": "INVALID_LABEL"
+    },
+    {
+      "name": "64-character label",
+      "entries": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.example"
+      ],
+      "valid": false,
+      "reason": "INVALID_LABEL"
+    },
+    {
+      "name": "254-character entry",
+      "entries": [
+        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "valid": false,
+      "reason": "TOO_LONG"
+    },
+    {
+      "name": "numeric last label",
+      "entries": [
+        "citi.com.1"
+      ],
+      "valid": false,
+      "reason": "IP_LITERAL"
+    },
+    {
+      "name": "child of an entry",
+      "entries": [
+        "citi.com",
+        "www.citi.com"
+      ],
+      "valid": false,
+      "reason": "OVERLAP"
+    },
+    {
+      "name": "child of an entry, reversed order",
+      "entries": [
+        "www.citi.com",
+        "citi.com"
+      ],
+      "valid": false,
+      "reason": "OVERLAP"
+    },
+    {
+      "name": "duplicate entry",
+      "entries": [
+        "citi.com",
+        "citi.com"
+      ],
+      "valid": false,
+      "reason": "OVERLAP"
+    },
+    {
+      "name": "deep child of an entry",
+      "entries": [
+        "a.b.citi.com",
+        "citi.com"
+      ],
+      "valid": false,
+      "reason": "OVERLAP"
+    },
+    {
+      "name": "child of localhost",
+      "entries": [
+        "localhost",
+        "sub.localhost"
+      ],
+      "valid": false,
+      "reason": "OVERLAP"
+    },
+    {
+      "name": "overlap in the middle of a valid list",
+      "entries": [
+        "a.example",
+        "b.a.example",
+        "c.example"
+      ],
+      "valid": false,
+      "reason": "OVERLAP"
+    },
+    {
+      "name": "one bad entry refuses the whole list",
+      "entries": [
+        "citi.com",
+        "Example.com"
+      ],
+      "valid": false,
+      "reason": "UPPERCASE"
+    }
+  ],
+  "envCases": [
+    {
+      "name": "unset",
+      "value": null,
+      "valid": true,
+      "entries": []
+    },
+    {
+      "name": "empty string",
+      "value": "",
+      "valid": true,
+      "entries": []
+    },
+    {
+      "name": "one entry",
+      "value": "localhost",
+      "valid": true,
+      "entries": [
+        "localhost"
+      ]
+    },
+    {
+      "name": "several entries",
+      "value": "localhost,example.com,practicetestautomation.com",
+      "valid": true,
+      "entries": [
+        "localhost",
+        "example.com",
+        "practicetestautomation.com"
+      ]
+    },
+    {
+      "name": "trailing comma",
+      "value": "example.com,",
+      "valid": false,
+      "reason": "EMPTY_ENTRY"
+    },
+    {
+      "name": "leading comma",
+      "value": ",example.com",
+      "valid": false,
+      "reason": "EMPTY_ENTRY"
+    },
+    {
+      "name": "double comma",
+      "value": "example.com,,localhost",
+      "valid": false,
+      "reason": "EMPTY_ENTRY"
+    },
+    {
+      "name": "space after a comma",
+      "value": "example.com, localhost",
+      "valid": false,
+      "reason": "WHITESPACE"
+    },
+    {
+      "name": "leading space",
+      "value": " example.com",
+      "valid": false,
+      "reason": "WHITESPACE"
+    },
+    {
+      "name": "whitespace only",
+      "value": " ",
+      "valid": false,
+      "reason": "WHITESPACE"
+    },
+    {
+      "name": "uppercase",
+      "value": "Example.com",
+      "valid": false,
+      "reason": "UPPERCASE"
+    },
+    {
+      "name": "wildcard",
+      "value": "*.example.com",
+      "valid": false,
+      "reason": "WILDCARD"
+    },
+    {
+      "name": "duplicate",
+      "value": "example.com,example.com",
+      "valid": false,
+      "reason": "OVERLAP"
+    },
+    {
+      "name": "overlap",
+      "value": "example.com,www.example.com",
+      "valid": false,
+      "reason": "OVERLAP"
+    },
+    {
+      "name": "IPv4 literal",
+      "value": "127.0.0.1",
+      "valid": false,
+      "reason": "IP_LITERAL"
+    },
+    {
+      "name": "scheme",
+      "value": "https://example.com",
+      "valid": false,
+      "reason": "SCHEME"
+    },
+    {
+      "name": "semicolon separator",
+      "value": "example.com;localhost",
+      "valid": false,
+      "reason": "INVALID_LABEL"
+    }
+  ],
+  "hostCases": [
+    {
+      "name": "plain",
+      "url": "https://citi.com/",
+      "host": "citi.com"
+    },
+    {
+      "name": "http",
+      "url": "http://citi.com",
+      "host": "citi.com"
+    },
+    {
+      "name": "uppercase scheme and host",
+      "url": "HTTPS://CITI.COM:8443/A?B#C",
+      "host": "citi.com"
+    },
+    {
+      "name": "subdomain with path, query and fragment",
+      "url": "https://Www.Citi.com/a/b?c=d#e",
+      "host": "www.citi.com"
+    },
+    {
+      "name": "query directly after the authority",
+      "url": "https://citi.com?x=1",
+      "host": "citi.com"
+    },
+    {
+      "name": "fragment directly after the authority",
+      "url": "https://citi.com#frag",
+      "host": "citi.com"
+    },
+    {
+      "name": "host-like text in the query does not count",
+      "url": "https://evil.com/?u=https://citi.com",
+      "host": "evil.com"
+    },
+    {
+      "name": "userinfo-like text in the fragment does not count",
+      "url": "https://evil.com/#@citi.com",
+      "host": "evil.com"
+    },
+    {
+      "name": "userinfo-like text after a query mark",
+      "url": "https://evil.com?@citi.com/",
+      "host": "evil.com"
+    },
+    {
+      "name": "percent sign in the path is fine",
+      "url": "https://citi.com/a%20b",
+      "host": "citi.com"
+    },
+    {
+      "name": "highest port",
+      "url": "https://citi.com:65535/",
+      "host": "citi.com"
+    },
+    {
+      "name": "port 65536",
+      "url": "https://citi.com:65536/",
+      "host": null
+    },
+    {
+      "name": "port 99999",
+      "url": "https://citi.com:99999/",
+      "host": null
+    },
+    {
+      "name": "port 0",
+      "url": "https://citi.com:0/",
+      "host": null
+    },
+    {
+      "name": "empty port",
+      "url": "https://citi.com:/",
+      "host": null
+    },
+    {
+      "name": "non-numeric port",
+      "url": "https://citi.com:abc/",
+      "host": null
+    },
+    {
+      "name": "two colons",
+      "url": "https://citi.com:80:80/",
+      "host": null
+    },
+    {
+      "name": "userinfo",
+      "url": "https://user@citi.com/",
+      "host": null
+    },
+    {
+      "name": "userinfo with password",
+      "url": "https://user:pw@citi.com/",
+      "host": null
+    },
+    {
+      "name": "empty userinfo",
+      "url": "https://:@citi.com/",
+      "host": null
+    },
+    {
+      "name": "userinfo hiding the real host",
+      "url": "https://citi.com@evil.com/",
+      "host": null
+    },
+    {
+      "name": "userinfo in front of the allowed host",
+      "url": "https://evil.com@citi.com/",
+      "host": null
+    },
+    {
+      "name": "trailing dot",
+      "url": "https://citi.com./",
+      "host": null
+    },
+    {
+      "name": "two trailing dots",
+      "url": "https://citi.com../",
+      "host": null
+    },
+    {
+      "name": "leading dot",
+      "url": "https://.citi.com/",
+      "host": null
+    },
+    {
+      "name": "empty label",
+      "url": "https://a..citi.com/",
+      "host": null
+    },
+    {
+      "name": "IPv4 literal",
+      "url": "http://127.0.0.1/",
+      "host": null
+    },
+    {
+      "name": "IPv4 literal with port",
+      "url": "http://127.0.0.1:4102/x",
+      "host": null
+    },
+    {
+      "name": "decimal IPv4",
+      "url": "http://2130706433/",
+      "host": null
+    },
+    {
+      "name": "hexadecimal IPv4",
+      "url": "http://0x7f.1/",
+      "host": null
+    },
+    {
+      "name": "IPv6 literal",
+      "url": "http://[::1]:8080/",
+      "host": null
+    },
+    {
+      "name": "numeric last label",
+      "url": "https://citi.com.1/",
+      "host": null
+    },
+    {
+      "name": "underscore",
+      "url": "https://a_b.citi.com/",
+      "host": null
+    },
+    {
+      "name": "leading hyphen label",
+      "url": "https://-a.citi.com/",
+      "host": null
+    },
+    {
+      "name": "64-character label",
+      "url": "https://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.citi.com/",
+      "host": null
+    },
+    {
+      "name": "63-character label",
+      "url": "https://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.citi.com/",
+      "host": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.citi.com"
+    },
+    {
+      "name": "empty authority",
+      "url": "https:///x",
+      "host": null
+    },
+    {
+      "name": "no authority",
+      "url": "https://",
+      "host": null
+    },
+    {
+      "name": "percent-encoded dot in the host",
+      "url": "https://citi%2ecom/",
+      "host": null
+    },
+    {
+      "name": "percent sign in the host",
+      "url": "https://citi.com%2eevil.com/",
+      "host": null
+    },
+    {
+      "name": "backslash after the host",
+      "url": "https://citi.com\\.evil.com/",
+      "host": null
+    },
+    {
+      "name": "backslash hiding the real host",
+      "url": "https://evil.com\\@citi.com/",
+      "host": null
+    },
+    {
+      "name": "space in the host",
+      "url": "https://citi.com /",
+      "host": null
+    },
+    {
+      "name": "tab in the host",
+      "url": "https://citi.com\t.evil.com/",
+      "host": null
+    },
+    {
+      "name": "leading space",
+      "url": " https://citi.com/",
+      "host": null
+    },
+    {
+      "name": "trailing newline",
+      "url": "https://citi.com/\n",
+      "host": null
+    },
+    {
+      "name": "empty string",
+      "url": "",
+      "host": null
+    },
+    {
+      "name": "bare host",
+      "url": "citi.com",
+      "host": null
+    },
+    {
+      "name": "scheme-relative",
+      "url": "//citi.com/",
+      "host": null
+    },
+    {
+      "name": "missing slashes",
+      "url": "https:citi.com",
+      "host": null
+    },
+    {
+      "name": "one slash",
+      "url": "http:/citi.com",
+      "host": null
+    },
+    {
+      "name": "ftp",
+      "url": "ftp://citi.com/",
+      "host": null
+    },
+    {
+      "name": "javascript",
+      "url": "javascript:alert(1)",
+      "host": null
+    },
+    {
+      "name": "about:blank",
+      "url": "about:blank",
+      "host": null
+    },
+    {
+      "name": "data",
+      "url": "data:text/html,citi.com",
+      "host": null
+    },
+    {
+      "name": "file",
+      "url": "file:///citi.com",
+      "host": null
+    },
+    {
+      "name": "blob",
+      "url": "blob:https://citi.com/0b0e6a1c",
+      "host": null
+    },
+    {
+      "name": "chrome error page",
+      "url": "chrome-error://chromewebdata/",
+      "host": null
+    },
+    {
+      "name": "Latin IDN, lowercase",
+      "url": "https://bücher.example/",
+      "host": "xn--bcher-kva.example"
+    },
+    {
+      "name": "Latin IDN, uppercase",
+      "url": "https://BÜCHER.example/",
+      "host": "xn--bcher-kva.example"
+    },
+    {
+      "name": "Latin IDN with subdomain",
+      "url": "https://www.bücher.example/",
+      "host": "www.xn--bcher-kva.example"
+    },
+    {
+      "name": "punycode form",
+      "url": "https://xn--bcher-kva.example/",
+      "host": "xn--bcher-kva.example"
+    },
+    {
+      "name": "CJK IDN",
+      "url": "https://例え.jp/",
+      "host": "xn--r8jz45g.jp"
+    },
+    {
+      "name": "Cyrillic IDN with Cyrillic TLD",
+      "url": "https://пример.рф/",
+      "host": "xn--e1afmkfd.xn--p1ai"
+    },
+    {
+      "name": "accented Latin IDN",
+      "url": "https://café.example/",
+      "host": "xn--caf-dma.example"
+    }
+  ],
+  "matchCases": [
+    {
+      "name": "exact host",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://citi.com/",
+      "match": true
+    },
+    {
+      "name": "www subdomain",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://www.citi.com/",
+      "match": true
+    },
+    {
+      "name": "deep subdomain",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://a.b.citi.com/x?y#z",
+      "match": true
+    },
+    {
+      "name": "http scheme",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "http://citi.com/",
+      "match": true
+    },
+    {
+      "name": "evilciti.com is not citi.com",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://evilciti.com/",
+      "match": false
+    },
+    {
+      "name": "citi.com.evil.com is not citi.com",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://citi.com.evil.com/",
+      "match": false
+    },
+    {
+      "name": "citi.com.au is not citi.com",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://citi.com.au/",
+      "match": false
+    },
+    {
+      "name": "prefix without a dot",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://xciti.com/",
+      "match": false
+    },
+    {
+      "name": "the TLD alone",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://com/",
+      "match": false
+    },
+    {
+      "name": "the parent of a subdomain entry",
+      "entries": [
+        "www.citi.com"
+      ],
+      "url": "https://citi.com/",
+      "match": false
+    },
+    {
+      "name": "a sibling of a subdomain entry",
+      "entries": [
+        "www.citi.com"
+      ],
+      "url": "https://api.citi.com/",
+      "match": false
+    },
+    {
+      "name": "a child of a subdomain entry",
+      "entries": [
+        "www.citi.com"
+      ],
+      "url": "https://x.www.citi.com/",
+      "match": true
+    },
+    {
+      "name": "empty list denies",
+      "entries": [],
+      "url": "https://citi.com/",
+      "match": false
+    },
+    {
+      "name": "empty list denies localhost",
+      "entries": [],
+      "url": "http://localhost/",
+      "match": false
+    },
+    {
+      "name": "non-default port",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://citi.com:8443/",
+      "match": true
+    },
+    {
+      "name": "port 80 on https",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://www.citi.com:80/",
+      "match": true
+    },
+    {
+      "name": "highest port",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://citi.com:65535/",
+      "match": true
+    },
+    {
+      "name": "port above 65535",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://citi.com:65536/",
+      "match": false
+    },
+    {
+      "name": "port zero",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://citi.com:0/",
+      "match": false
+    },
+    {
+      "name": "empty port",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://citi.com:/",
+      "match": false
+    },
+    {
+      "name": "non-numeric port",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://citi.com:abc/",
+      "match": false
+    },
+    {
+      "name": "userinfo on an allowed host",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://user@citi.com/",
+      "match": false
+    },
+    {
+      "name": "userinfo with password",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://user:pw@citi.com/",
+      "match": false
+    },
+    {
+      "name": "allowed host as userinfo of another host",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://citi.com@evil.com/",
+      "match": false
+    },
+    {
+      "name": "other host as userinfo of an allowed host",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://evil.com@citi.com/",
+      "match": false
+    },
+    {
+      "name": "uppercase scheme and host",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "HTTPS://CITI.COM/",
+      "match": true
+    },
+    {
+      "name": "mixed-case subdomain",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://WWW.Citi.Com/Path",
+      "match": true
+    },
+    {
+      "name": "trailing dot on the apex",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://citi.com./",
+      "match": false
+    },
+    {
+      "name": "trailing dot on a subdomain",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://www.citi.com./",
+      "match": false
+    },
+    {
+      "name": "two trailing dots",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://citi.com../",
+      "match": false
+    },
+    {
+      "name": "leading dot",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://.citi.com/",
+      "match": false
+    },
+    {
+      "name": "empty label",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://a..citi.com/",
+      "match": false
+    },
+    {
+      "name": "IPv4 literal against localhost",
+      "entries": [
+        "localhost"
+      ],
+      "url": "http://127.0.0.1/",
+      "match": false
+    },
+    {
+      "name": "IPv4 literal with the allowed name in the path",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://127.0.0.1/citi.com",
+      "match": false
+    },
+    {
+      "name": "IPv4 literal in the documentation range",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://192.0.2.1/",
+      "match": false
+    },
+    {
+      "name": "decimal IPv4",
+      "entries": [
+        "localhost"
+      ],
+      "url": "http://2130706433/",
+      "match": false
+    },
+    {
+      "name": "hexadecimal IPv4",
+      "entries": [
+        "localhost"
+      ],
+      "url": "http://0x7f.1/",
+      "match": false
+    },
+    {
+      "name": "IPv6 loopback",
+      "entries": [
+        "localhost"
+      ],
+      "url": "http://[::1]:8080/",
+      "match": false
+    },
+    {
+      "name": "numeric last label",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://citi.com.1/",
+      "match": false
+    },
+    {
+      "name": "localhost itself",
+      "entries": [
+        "localhost"
+      ],
+      "url": "http://localhost:4102/x",
+      "match": true
+    },
+    {
+      "name": "subdomain of localhost",
+      "entries": [
+        "localhost"
+      ],
+      "url": "http://sub.localhost/",
+      "match": true
+    },
+    {
+      "name": "localhost as a prefix of another host",
+      "entries": [
+        "localhost"
+      ],
+      "url": "http://localhost.evil.com/",
+      "match": false
+    },
+    {
+      "name": "localhost as a suffix without a dot",
+      "entries": [
+        "localhost"
+      ],
+      "url": "http://notlocalhost/",
+      "match": false
+    },
+    {
+      "name": "local deployment list, example.com",
+      "entries": [
+        "localhost",
+        "example.com",
+        "practicetestautomation.com"
+      ],
+      "url": "https://example.com/",
+      "match": true
+    },
+    {
+      "name": "local deployment list, subdomain of the practice site",
+      "entries": [
+        "localhost",
+        "example.com",
+        "practicetestautomation.com"
+      ],
+      "url": "https://www.practicetestautomation.com/practice-test-login/",
+      "match": true
+    },
+    {
+      "name": "local deployment list, a host that is on none",
+      "entries": [
+        "localhost",
+        "example.com",
+        "practicetestautomation.com"
+      ],
+      "url": "https://example.org/",
+      "match": false
+    },
+    {
+      "name": "second entry of a list",
+      "entries": [
+        "citi.com",
+        "example.com"
+      ],
+      "url": "https://shop.example.com/",
+      "match": true
+    },
+    {
+      "name": "a host on no entry of a list",
+      "entries": [
+        "citi.com",
+        "example.com"
+      ],
+      "url": "https://example.org/",
+      "match": false
+    },
+    {
+      "name": "lookalike registrable names are separate entries",
+      "entries": [
+        "evilciti.com",
+        "citi.com"
+      ],
+      "url": "https://evilciti.com/",
+      "match": true
+    },
+    {
+      "name": "lookalike registrable name, subdomain",
+      "entries": [
+        "evilciti.com",
+        "citi.com"
+      ],
+      "url": "https://www.evilciti.com/",
+      "match": true
+    },
+    {
+      "name": "Latin IDN, lowercase",
+      "entries": [
+        "xn--bcher-kva.example"
+      ],
+      "url": "https://bücher.example/",
+      "match": true
+    },
+    {
+      "name": "Latin IDN, uppercase",
+      "entries": [
+        "xn--bcher-kva.example"
+      ],
+      "url": "https://BÜCHER.example/",
+      "match": true
+    },
+    {
+      "name": "Latin IDN, subdomain",
+      "entries": [
+        "xn--bcher-kva.example"
+      ],
+      "url": "https://www.bücher.example/",
+      "match": true
+    },
+    {
+      "name": "punycode form",
+      "entries": [
+        "xn--bcher-kva.example"
+      ],
+      "url": "https://xn--bcher-kva.example/",
+      "match": true
+    },
+    {
+      "name": "ASCII lookalike of an IDN",
+      "entries": [
+        "xn--bcher-kva.example"
+      ],
+      "url": "https://bucher.example/",
+      "match": false
+    },
+    {
+      "name": "IDN lookalike of an ASCII name",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://cıti.com/",
+      "match": false
+    },
+    {
+      "name": "CJK IDN",
+      "entries": [
+        "xn--r8jz45g.jp"
+      ],
+      "url": "https://例え.jp/",
+      "match": true
+    },
+    {
+      "name": "CJK IDN, subdomain",
+      "entries": [
+        "xn--r8jz45g.jp"
+      ],
+      "url": "https://shop.例え.jp/",
+      "match": true
+    },
+    {
+      "name": "Cyrillic IDN with Cyrillic TLD",
+      "entries": [
+        "xn--e1afmkfd.xn--p1ai"
+      ],
+      "url": "https://пример.рф/",
+      "match": true
+    },
+    {
+      "name": "ftp scheme",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "ftp://citi.com/",
+      "match": false
+    },
+    {
+      "name": "javascript URL",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "javascript:alert(1)",
+      "match": false
+    },
+    {
+      "name": "about:blank",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "about:blank",
+      "match": false
+    },
+    {
+      "name": "data URL",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "data:text/html,citi.com",
+      "match": false
+    },
+    {
+      "name": "file URL",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "file:///citi.com",
+      "match": false
+    },
+    {
+      "name": "blob URL",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "blob:https://citi.com/0b0e6a1c",
+      "match": false
+    },
+    {
+      "name": "chrome error page",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "chrome-error://chromewebdata/",
+      "match": false
+    },
+    {
+      "name": "scheme-relative",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "//citi.com/",
+      "match": false
+    },
+    {
+      "name": "bare host",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "citi.com",
+      "match": false
+    },
+    {
+      "name": "missing slashes",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https:citi.com",
+      "match": false
+    },
+    {
+      "name": "one slash",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "http:/citi.com",
+      "match": false
+    },
+    {
+      "name": "backslash after the allowed host",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://citi.com\\.evil.com/",
+      "match": false
+    },
+    {
+      "name": "backslash hiding the real host",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://evil.com\\@citi.com/",
+      "match": false
+    },
+    {
+      "name": "percent-encoded dot",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://citi%2ecom/",
+      "match": false
+    },
+    {
+      "name": "percent sign in the host",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://citi.com%2eevil.com/",
+      "match": false
+    },
+    {
+      "name": "percent sign in the path",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://citi.com/a%20b",
+      "match": true
+    },
+    {
+      "name": "space in the URL",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://citi.com /",
+      "match": false
+    },
+    {
+      "name": "tab in the URL",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://citi.com\t.evil.com/",
+      "match": false
+    },
+    {
+      "name": "leading space",
+      "entries": [
+        "citi.com"
+      ],
+      "url": " https://citi.com/",
+      "match": false
+    },
+    {
+      "name": "trailing newline",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://citi.com/\n",
+      "match": false
+    },
+    {
+      "name": "empty string",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "",
+      "match": false
+    },
+    {
+      "name": "empty authority",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https:///x",
+      "match": false
+    },
+    {
+      "name": "no authority",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://",
+      "match": false
+    },
+    {
+      "name": "query directly after the authority",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://citi.com?x=1",
+      "match": true
+    },
+    {
+      "name": "fragment directly after the authority",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://citi.com#frag",
+      "match": true
+    },
+    {
+      "name": "allowed host only in the query",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://evil.com/?u=https://citi.com",
+      "match": false
+    },
+    {
+      "name": "allowed host only in the fragment userinfo",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://evil.com/#@citi.com",
+      "match": false
+    },
+    {
+      "name": "allowed host only after a query mark",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://evil.com?@citi.com/",
+      "match": false
+    },
+    {
+      "name": "underscore in a label",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://a_b.citi.com/",
+      "match": false
+    },
+    {
+      "name": "label with a leading hyphen",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://-a.citi.com/",
+      "match": false
+    },
+    {
+      "name": "64-character label",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.citi.com/",
+      "match": false
+    },
+    {
+      "name": "63-character label",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.citi.com/",
+      "match": true
+    },
+    {
+      "name": "host longer than 253 characters",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.citi.com/",
+      "match": false
+    }
+  ],
+  "allowAllEnvCases": [
+    {
+      "name": "false",
+      "value": "false",
+      "valid": true,
+      "allowAll": false
+    },
+    {
+      "name": "true",
+      "value": "true",
+      "valid": true,
+      "allowAll": true
+    },
+    {
+      "name": "uppercase TRUE",
+      "value": "TRUE",
+      "valid": false
+    },
+    {
+      "name": "capitalised True",
+      "value": "True",
+      "valid": false
+    },
+    {
+      "name": "uppercase FALSE",
+      "value": "FALSE",
+      "valid": false
+    },
+    {
+      "name": "one",
+      "value": "1",
+      "valid": false
+    },
+    {
+      "name": "zero",
+      "value": "0",
+      "valid": false
+    },
+    {
+      "name": "yes",
+      "value": "yes",
+      "valid": false
+    },
+    {
+      "name": "no",
+      "value": "no",
+      "valid": false
+    },
+    {
+      "name": "on",
+      "value": "on",
+      "valid": false
+    },
+    {
+      "name": "off",
+      "value": "off",
+      "valid": false
+    },
+    {
+      "name": "t",
+      "value": "t",
+      "valid": false
+    },
+    {
+      "name": "leading space",
+      "value": " true",
+      "valid": false
+    },
+    {
+      "name": "trailing space",
+      "value": "true ",
+      "valid": false
+    },
+    {
+      "name": "trailing newline",
+      "value": "true\n",
+      "valid": false
+    },
+    {
+      "name": "list of two",
+      "value": "true,false",
+      "valid": false
+    },
+    {
+      "name": "wildcard",
+      "value": "*",
+      "valid": false
+    },
+    {
+      "name": "enabled",
+      "value": "enabled",
+      "valid": false
+    }
+  ],
+  "allowAllMatchCases": [
+    {
+      "name": "empty list still allows a DNS host",
+      "entries": [],
+      "url": "https://citi.com/",
+      "match": true
+    },
+    {
+      "name": "list is ignored: host outside it",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://other.example/",
+      "match": true
+    },
+    {
+      "name": "list is ignored: host inside it",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://www.citi.com/a?b#c",
+      "match": true
+    },
+    {
+      "name": "single-label host",
+      "entries": [],
+      "url": "http://localhost:8080/",
+      "match": true
+    },
+    {
+      "name": "subdomain with port",
+      "entries": [],
+      "url": "https://app.eu.example.org:8443/x",
+      "match": true
+    },
+    {
+      "name": "scheme is case-insensitive",
+      "entries": [],
+      "url": "HTTPS://Citi.COM/",
+      "match": true
+    },
+    {
+      "name": "punycode host",
+      "entries": [],
+      "url": "https://xn--bcher-kva.example/",
+      "match": true
+    },
+    {
+      "name": "hyphen and digits in labels",
+      "entries": [],
+      "url": "http://a-1.b2.example/",
+      "match": true
+    },
+    {
+      "name": "lookalike label is just another host",
+      "entries": [
+        "citi.com"
+      ],
+      "url": "https://evilciti.com/",
+      "match": true
+    },
+    {
+      "name": "IPv4 literal is still refused",
+      "entries": [],
+      "url": "http://10.0.0.1/",
+      "match": false
+    },
+    {
+      "name": "loopback IPv4 literal is still refused",
+      "entries": [],
+      "url": "http://127.0.0.1:3000/",
+      "match": false
+    },
+    {
+      "name": "IPv6 literal is still refused",
+      "entries": [],
+      "url": "http://[::1]/",
+      "match": false
+    },
+    {
+      "name": "userinfo is still refused",
+      "entries": [],
+      "url": "https://user:pw@citi.com/",
+      "match": false
+    },
+    {
+      "name": "empty userinfo is still refused",
+      "entries": [],
+      "url": "https://@citi.com/",
+      "match": false
+    },
+    {
+      "name": "percent in the authority is still refused",
+      "entries": [],
+      "url": "https://ci%74i.com/",
+      "match": false
+    },
+    {
+      "name": "ftp scheme is still refused",
+      "entries": [],
+      "url": "ftp://citi.com/",
+      "match": false
+    },
+    {
+      "name": "about:blank is still refused",
+      "entries": [],
+      "url": "about:blank",
+      "match": false
+    },
+    {
+      "name": "javascript scheme is still refused",
+      "entries": [],
+      "url": "javascript:alert(1)",
+      "match": false
+    },
+    {
+      "name": "file scheme is still refused",
+      "entries": [],
+      "url": "file:///etc/passwd",
+      "match": false
+    },
+    {
+      "name": "scheme-relative is still refused",
+      "entries": [],
+      "url": "//citi.com/",
+      "match": false
+    },
+    {
+      "name": "single slash is still refused",
+      "entries": [],
+      "url": "http:/citi.com",
+      "match": false
+    },
+    {
+      "name": "empty authority is still refused",
+      "entries": [],
+      "url": "https:///path",
+      "match": false
+    },
+    {
+      "name": "backslash is still refused",
+      "entries": [],
+      "url": "https://citi.com\\@evil.example/",
+      "match": false
+    },
+    {
+      "name": "space is still refused",
+      "entries": [],
+      "url": "https://citi.com /",
+      "match": false
+    },
+    {
+      "name": "trailing dot is still refused",
+      "entries": [],
+      "url": "https://citi.com./",
+      "match": false
+    },
+    {
+      "name": "empty label is still refused",
+      "entries": [],
+      "url": "https://a..citi.com/",
+      "match": false
+    },
+    {
+      "name": "underscore is still refused",
+      "entries": [],
+      "url": "https://a_b.citi.com/",
+      "match": false
+    },
+    {
+      "name": "port 0 is still refused",
+      "entries": [],
+      "url": "https://citi.com:0/",
+      "match": false
+    },
+    {
+      "name": "port above 65535 is still refused",
+      "entries": [],
+      "url": "https://citi.com:65536/",
+      "match": false
+    },
+    {
+      "name": "empty port is still refused",
+      "entries": [],
+      "url": "https://citi.com:/",
+      "match": false
+    },
+    {
+      "name": "numeric host is still refused",
+      "entries": [],
+      "url": "http://127.1/",
+      "match": false
+    },
+    {
+      "name": "hexadecimal host is still refused",
+      "entries": [],
+      "url": "http://0x7f000001/",
+      "match": false
+    },
+    {
+      "name": "empty url is refused",
+      "entries": [],
+      "url": "",
+      "match": false
+    }
+  ]
+}

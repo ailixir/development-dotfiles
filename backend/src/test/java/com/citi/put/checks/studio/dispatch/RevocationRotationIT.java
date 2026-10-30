@@ -6,7 +6,6 @@ import com.citi.put.checks.studio.StudioExecutionFixtures;
 import com.citi.put.checks.studio.StudioService;
 import com.citi.put.checks.studio.dto.ExecutionErrorCode;
 import com.citi.put.checks.studio.secrets.FakeStudioVaultProvider;
-import com.citi.put.checks.studio.secrets.StudioSecretFixtures;
 import com.citi.put.checks.studio.secrets.StudioVaultProvider;
 import com.citi.put.checks.studio.secrets.VaultScope;
 import com.citi.put.checks.studio.support.ObservedPublicationFixture;
@@ -31,11 +30,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 /**
  * Story 10.17 AC-7a, AC-8, AC-10 and AC-12's persistence half.
  *
- * <p>Three conditions that can only happen <em>between</em> the acceptance transaction and the
- * dispatcher's claim, which is the window §5.1.3 exists for: an entitlement withdrawn, a reference
- * deleted from the vault, and a value rotated. Each is arranged where it actually lives — the
- * entitlement policy and the vault — rather than by editing the platform {@code secrets} table,
- * which the stub resolver used to read and which this story no longer touches at all.
+ * <p>Two conditions that can only happen <em>between</em> the acceptance transaction and the
+ * dispatcher's claim, which is the window §5.1.3 exists for: a reference deleted from the vault,
+ * and a value rotated. Each is arranged where it actually lives, in the vault, rather than by
+ * editing the platform {@code secrets} table, which the stub resolver used to read and which this
+ * story no longer touches at all.
  *
  * <p>In every refusal case the assertion that matters is the <b>request count on the recording
  * dispatch client</b>, not a log line: the codes both mean <em>the send never happened</em>, and
@@ -73,19 +72,12 @@ class RevocationRotationIT {
     FakeStudioVaultProvider fakeStudioVaultProvider() {
       return new FakeStudioVaultProvider(Map.of());
     }
-
-    @Bean
-    @Primary
-    StudioSecretFixtures.MutableSecretUseAuthorization mutableSecretUseAuthorization() {
-      return new StudioSecretFixtures.MutableSecretUseAuthorization();
-    }
   }
 
   @Autowired private StudioService studioService;
   @Autowired private StudioDispatcher dispatcher;
   @Autowired private RecordingRunnerDispatchClient runner;
   @Autowired private FakeStudioVaultProvider vault;
-  @Autowired private StudioSecretFixtures.MutableSecretUseAuthorization entitlements;
   @Autowired private JdbcTemplate jdbc;
 
   private StudioExecutionFixtures fixtures;
@@ -96,7 +88,6 @@ class RevocationRotationIT {
   void setUp() {
     runner.reset();
     vault.clear();
-    entitlements.clear();
     fixtures = new StudioExecutionFixtures(jdbc);
     fixtures.seedUser(OWNER);
     fixtures.seedCsi(CSI_ID, OWNER);
@@ -109,7 +100,6 @@ class RevocationRotationIT {
         CSI_ID,
         List.of("Go to the home page"),
         StudioExecutionFixtures.references(List.of(), List.of(SECRET_ID)));
-    entitlements.grant(OWNER, CSI_ID, ENVIRONMENT, SECRET_ID);
     vault.rotate(
         StudioVaultProvider.ReferenceKind.SECRET,
         VaultScope.of(CSI_ID, ENVIRONMENT, testId),
@@ -138,20 +128,6 @@ class RevocationRotationIT {
   // ── AC-7a ────────────────────────────────────────────────────────────────────────────────────
 
   @Test
-  void anEntitlementWithdrawnBetweenAcceptanceAndDispatchIsTerminalAndNothingIsSent() {
-    UUID execution = accept();
-
-    entitlements.revoke(OWNER, CSI_ID, ENVIRONMENT, SECRET_ID);
-    dispatcher.dispatch(execution);
-
-    // A fact about the principal (ADR-002 §15.2).
-    assertThat(errorCode(execution)).isEqualTo(ExecutionErrorCode.AUTHORIZATION_REVOKED);
-    assertThat(runner.sendCount())
-        .as("POST /v1/runs was issued for a revoked entitlement")
-        .isZero();
-  }
-
-  @Test
   void aReferenceDeletedFromTheVaultBetweenAcceptanceAndDispatchIsTerminalAndNothingIsSent() {
     UUID execution = accept();
 
@@ -171,7 +147,7 @@ class RevocationRotationIT {
    * refused everything.
    */
   @Test
-  void theSameExecutionWithTheEntitlementAndTheReferenceIntactIsDispatched() {
+  void theSameExecutionWithTheReferenceIntactIsDispatched() {
     UUID execution = accept();
     var received = new java.util.concurrent.atomic.AtomicBoolean();
     runner.onSend(job -> received.set(job.resolvedSecrets().get(SECRET_ID).matches(OLD_VALUE)));
@@ -312,10 +288,10 @@ class RevocationRotationIT {
     assertThat(received).isTrue();
     assertThat(runner.sendCount()).isEqualTo(1);
     RunJob.JobDeadlines deadlines = runner.sent().get(0).deadlines();
-    // §8.5's admitted-start starting value, and the server's total browser runtime (§5.2, 120 s)
+    // §8.5's admitted-start starting value, and the server's total browser runtime (300 s)
     // — NOT the revision's per-step timeoutSeconds (30 s), which stays on the configuration. The
     // clamp is the runner's (10.13 AC-6) and nothing is clamped here.
     assertThat(deadlines.admittedStartMs()).isEqualTo(30_000L);
-    assertThat(deadlines.totalRuntimeMs()).isEqualTo(120_000L);
+    assertThat(deadlines.totalRuntimeMs()).isEqualTo(300_000L);
   }
 }

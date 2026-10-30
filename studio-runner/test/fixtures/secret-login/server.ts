@@ -46,7 +46,7 @@ export async function startSecretLoginFixture(password = 'secret-login-planted-c
   })().catch(() => { response.writeHead(500); response.end('FIXTURE_ERROR'); }); });
   await new Promise<void>((resolve, reject) => { server.once('error', reject); server.listen(0, '127.0.0.1', resolve); });
   const address = server.address(); if (!address || typeof address === 'string') throw new Error('FIXTURE_PORT');
-  return { origin: `http://127.0.0.1:${String(address.port)}`, receipts: () => structuredClone(receipts), reset() { receipts.length = 0; sessions.clear(); }, rotate(value: string) { expected = value; }, expire() { sessions.clear(); }, close: () => new Promise<void>((resolve, reject) => { server.closeAllConnections(); server.close(error => { if (error) reject(error); else resolve(); }); }) };
+  return { origin: `http://localhost:${String(address.port)}`, receipts: () => structuredClone(receipts), reset() { receipts.length = 0; sessions.clear(); }, rotate(value: string) { expected = value; }, expire() { sessions.clear(); }, close: () => new Promise<void>((resolve, reject) => { server.closeAllConnections(); server.close(error => { if (error) reject(error); else resolve(); }); }) };
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {

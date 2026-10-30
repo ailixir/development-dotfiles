@@ -132,7 +132,7 @@ export async function startCorpusPages(options = {}) {
   });
   const address = server.address();
   if (address === null || typeof address === 'string') throw new Error('PAGES_PORT');
-  const origin = `http://127.0.0.1:${String(address.port)}`;
+  const origin = `http://localhost:${String(address.port)}`;
   return {
     pagesVersion: PAGES_VERSION,
     origin,

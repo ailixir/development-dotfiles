@@ -181,7 +181,11 @@ class GuidedBootstrapPlanHistoryIT {
                 GuidedContracts.hash(inputs),
                 inputs.toString());
             var bindings =
-                new GuidedBindingStore(db.jdbc, C, new GuidedMaterializationService(db.jdbc, C));
+                new GuidedBindingStore(
+                    db.jdbc,
+                    C,
+                    new GuidedMaterializationService(
+                        db.jdbc, C, com.citi.put.checks.studio.support.TestDomains.FIXTURES));
             JsonNode need = initial.path("needs").get(0);
             JsonNode actual =
                 bindings.allocate(

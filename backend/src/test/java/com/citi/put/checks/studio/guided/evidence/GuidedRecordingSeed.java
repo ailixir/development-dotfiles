@@ -135,6 +135,59 @@ final class GuidedRecordingSeed {
     return new Seeded(id, scopeHash, fence, contextId);
   }
 
+  /**
+   * Gives the session a publication receipt row, the one fact that makes a learn "published" for
+   * the recording rules. Only the row's own CHECKs are honoured: the surrounding evidence chain
+   * (base, attempt, revision) is what {@code GuidedPublicationProofIT} proves end to end, so the
+   * table's triggers and foreign keys are switched off for this single insert and switched back on.
+   */
+  void markPublished(String sessionId) {
+    String h = "a".repeat(64);
+    ObjectNode document = JSON.createObjectNode();
+    UUID revision = UUID.randomUUID(), test = UUID.randomUUID(), attempt = UUID.randomUUID();
+    UUID claim = UUID.randomUUID();
+    document
+        .put("sessionId", sessionId)
+        .put("revisionId", revision.toString())
+        .put("testId", test.toString())
+        .put("csiId", CSI_ID)
+        .put("originalPrincipalId", "user-1")
+        .put("finalizeKey", "k")
+        .put("finalizeDigest", h)
+        .put("attemptId", attempt.toString())
+        .put("claimId", claim.toString())
+        .put("snapshotHash", h)
+        .put("basisHash", h)
+        .put("learnedPlanHash", h)
+        .put("artifactHash", h)
+        .put("referencePolicyHash", h)
+        .put("operationEquivalenceHash", h)
+        .put("admissionProvenanceHash", h)
+        .put("publicationEvidenceHash", h)
+        .put("revisionDigest", h)
+        .put("profileHash", h)
+        .put("publishedAt", "2026-10-25T00:00:00.000Z")
+        .putObject("publicReceipt");
+    jdbc.execute("ALTER TABLE studio_guided_publications DISABLE TRIGGER ALL");
+    try {
+      jdbc.update(
+          "INSERT INTO studio_guided_publications(session_id,revision_id,test_id,csi_id,"
+              + "attempt_id,claim_id,snapshot_hash,basis_hash,document,learned_plan,published_at)"
+              + " VALUES (?,?,?,?,?,?,?,?,?::jsonb,'{}'::jsonb,'2026-10-25T00:00:00Z')",
+          sessionId,
+          revision,
+          test,
+          CSI_ID,
+          attempt,
+          claim,
+          h,
+          h,
+          document.toString());
+    } finally {
+      jdbc.execute("ALTER TABLE studio_guided_publications ENABLE TRIGGER ALL");
+    }
+  }
+
   /** One ledger action; {@code dispatched} decides SUCCEEDED/1 versus ADMITTED/0. */
   void action(
       String sessionId, String admissionId, String stepId, int ordinal, boolean dispatched) {

@@ -276,8 +276,7 @@ public class ObservedResolverProcessCrashIT {
               URI.create(config.path("provider").asText()),
               Path.of(config.path("stage").asText()),
               cut);
-      var resolver =
-          new VaultStudioReferenceResolver(provider, (principal, csi, environment, id) -> true);
+      var resolver = new VaultStudioReferenceResolver(provider);
       try (var resolved =
           resolver.resolve(
               "CSI",

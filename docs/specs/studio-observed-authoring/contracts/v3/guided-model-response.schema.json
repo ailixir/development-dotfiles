@@ -126,59 +126,6 @@
           },
           "minItems": 1,
           "maxItems": 800
-        },
-        "needs": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "needId": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 256
-              },
-              "producerStepId": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 256
-              },
-              "consumers": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "stepId": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 256
-                    },
-                    "argumentSlot": {
-                      "enum": [
-                        "fill.value",
-                        "selectOption.value",
-                        "assert.expected"
-                      ]
-                    }
-                  },
-                  "required": [
-                    "stepId",
-                    "argumentSlot"
-                  ]
-                },
-                "minItems": 1,
-                "maxItems": 200
-              }
-            },
-            "required": [
-              "needId",
-              "producerStepId",
-              "consumers"
-            ]
-          },
-          "minItems": 0,
-          "maxItems": 32
         }
       },
       "required": [
@@ -186,8 +133,7 @@
         "kind",
         "requestId",
         "sourceReferences",
-        "obligations",
-        "needs"
+        "obligations"
       ]
     },
     {
@@ -236,74 +182,17 @@
                       "type": "object",
                       "additionalProperties": false,
                       "properties": {
-                        "nodeId": {
-                          "type": "string",
-                          "minLength": 1,
-                          "maxLength": 256
+                        "kind": {
+                          "const": "node"
                         },
-                        "locator": {
-                          "oneOf": [
-                            {
-                              "type": "object",
-                              "additionalProperties": false,
-                              "properties": {
-                                "kind": {
-                                  "const": "role"
-                                },
-                                "role": {
-                                  "type": "string",
-                                  "minLength": 1,
-                                  "maxLength": 256
-                                },
-                                "name": {
-                                  "type": "string",
-                                  "minLength": 1,
-                                  "maxLength": 256
-                                },
-                                "exact": {
-                                  "const": true
-                                }
-                              },
-                              "required": [
-                                "kind",
-                                "role",
-                                "name",
-                                "exact"
-                              ]
-                            },
-                            {
-                              "type": "object",
-                              "additionalProperties": false,
-                              "properties": {
-                                "kind": {
-                                  "enum": [
-                                    "label",
-                                    "testId",
-                                    "text",
-                                    "placeholder"
-                                  ]
-                                },
-                                "value": {
-                                  "type": "string",
-                                  "minLength": 1,
-                                  "maxLength": 256
-                                },
-                                "exact": {
-                                  "const": true
-                                }
-                              },
-                              "required": [
-                                "kind",
-                                "value",
-                                "exact"
-                              ]
-                            }
-                          ]
+                        "ref": {
+                          "type": "string",
+                          "pattern": "^e[0-9]{1,6}$"
                         }
                       },
                       "required": [
-                        "nodeId",
-                        "locator"
+                        "kind",
+                        "ref"
                       ]
                     },
                     {
@@ -526,71 +415,11 @@
                           "type": "string",
                           "minLength": 1,
                           "maxLength": 256
-                        },
-                        "recipe": {
-                          "oneOf": [
-                            {
-                              "type": "object",
-                              "additionalProperties": false,
-                              "properties": {
-                                "kind": {
-                                  "const": "visibleText"
-                                },
-                                "classification": {
-                                  "const": "permittedBusinessData"
-                                },
-                                "policyRuleId": {
-                                  "type": "string",
-                                  "minLength": 1,
-                                  "maxLength": 256
-                                }
-                              },
-                              "required": [
-                                "kind",
-                                "classification",
-                                "policyRuleId"
-                              ]
-                            },
-                            {
-                              "type": "object",
-                              "additionalProperties": false,
-                              "properties": {
-                                "kind": {
-                                  "const": "controlValue"
-                                },
-                                "classification": {
-                                  "const": "nonsecretApproved"
-                                },
-                                "controlType": {
-                                  "enum": [
-                                    "text",
-                                    "search",
-                                    "email",
-                                    "tel",
-                                    "url",
-                                    "textarea"
-                                  ]
-                                },
-                                "policyRuleId": {
-                                  "type": "string",
-                                  "minLength": 1,
-                                  "maxLength": 256
-                                }
-                              },
-                              "required": [
-                                "kind",
-                                "classification",
-                                "controlType",
-                                "policyRuleId"
-                              ]
-                            }
-                          ]
                         }
                       },
                       "required": [
                         "kind",
-                        "bindingId",
-                        "recipe"
+                        "bindingId"
                       ]
                     },
                     {
@@ -844,69 +673,9 @@
                             "minLength": 1,
                             "maxLength": 256
                           },
-                          "locator": {
-                            "oneOf": [
-                              {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "properties": {
-                                  "kind": {
-                                    "const": "role"
-                                  },
-                                  "role": {
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "maxLength": 256
-                                  },
-                                  "name": {
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "maxLength": 256
-                                  },
-                                  "exact": {
-                                    "const": true
-                                  }
-                                },
-                                "required": [
-                                  "kind",
-                                  "role",
-                                  "name",
-                                  "exact"
-                                ]
-                              },
-                              {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "properties": {
-                                  "kind": {
-                                    "enum": [
-                                      "label",
-                                      "testId",
-                                      "text",
-                                      "placeholder"
-                                    ]
-                                  },
-                                  "value": {
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "maxLength": 256
-                                  },
-                                  "exact": {
-                                    "const": true
-                                  }
-                                },
-                                "required": [
-                                  "kind",
-                                  "value",
-                                  "exact"
-                                ]
-                              }
-                            ]
-                          },
-                          "nodeId": {
+                          "ref": {
                             "type": "string",
-                            "minLength": 1,
-                            "maxLength": 256
+                            "pattern": "^e[0-9]{1,6}$"
                           },
                           "bindingId": {
                             "oneOf": [
@@ -923,8 +692,7 @@
                         },
                         "required": [
                           "obligationId",
-                          "locator",
-                          "nodeId",
+                          "ref",
                           "bindingId"
                         ]
                       }
@@ -986,74 +754,17 @@
                         "type": "object",
                         "additionalProperties": false,
                         "properties": {
-                          "nodeId": {
-                            "type": "string",
-                            "minLength": 1,
-                            "maxLength": 256
+                          "kind": {
+                            "const": "node"
                           },
-                          "locator": {
-                            "oneOf": [
-                              {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "properties": {
-                                  "kind": {
-                                    "const": "role"
-                                  },
-                                  "role": {
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "maxLength": 256
-                                  },
-                                  "name": {
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "maxLength": 256
-                                  },
-                                  "exact": {
-                                    "const": true
-                                  }
-                                },
-                                "required": [
-                                  "kind",
-                                  "role",
-                                  "name",
-                                  "exact"
-                                ]
-                              },
-                              {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "properties": {
-                                  "kind": {
-                                    "enum": [
-                                      "label",
-                                      "testId",
-                                      "text",
-                                      "placeholder"
-                                    ]
-                                  },
-                                  "value": {
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "maxLength": 256
-                                  },
-                                  "exact": {
-                                    "const": true
-                                  }
-                                },
-                                "required": [
-                                  "kind",
-                                  "value",
-                                  "exact"
-                                ]
-                              }
-                            ]
+                          "ref": {
+                            "type": "string",
+                            "pattern": "^e[0-9]{1,6}$"
                           }
                         },
                         "required": [
-                          "nodeId",
-                          "locator"
+                          "kind",
+                          "ref"
                         ]
                       },
                       {
@@ -1276,71 +987,11 @@
                             "type": "string",
                             "minLength": 1,
                             "maxLength": 256
-                          },
-                          "recipe": {
-                            "oneOf": [
-                              {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "properties": {
-                                  "kind": {
-                                    "const": "visibleText"
-                                  },
-                                  "classification": {
-                                    "const": "permittedBusinessData"
-                                  },
-                                  "policyRuleId": {
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "maxLength": 256
-                                  }
-                                },
-                                "required": [
-                                  "kind",
-                                  "classification",
-                                  "policyRuleId"
-                                ]
-                              },
-                              {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "properties": {
-                                  "kind": {
-                                    "const": "controlValue"
-                                  },
-                                  "classification": {
-                                    "const": "nonsecretApproved"
-                                  },
-                                  "controlType": {
-                                    "enum": [
-                                      "text",
-                                      "search",
-                                      "email",
-                                      "tel",
-                                      "url",
-                                      "textarea"
-                                    ]
-                                  },
-                                  "policyRuleId": {
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "maxLength": 256
-                                  }
-                                },
-                                "required": [
-                                  "kind",
-                                  "classification",
-                                  "controlType",
-                                  "policyRuleId"
-                                ]
-                              }
-                            ]
                           }
                         },
                         "required": [
                           "kind",
-                          "bindingId",
-                          "recipe"
+                          "bindingId"
                         ]
                       },
                       {
@@ -1635,69 +1286,9 @@
                               "minLength": 1,
                               "maxLength": 256
                             },
-                            "locator": {
-                              "oneOf": [
-                                {
-                                  "type": "object",
-                                  "additionalProperties": false,
-                                  "properties": {
-                                    "kind": {
-                                      "const": "role"
-                                    },
-                                    "role": {
-                                      "type": "string",
-                                      "minLength": 1,
-                                      "maxLength": 256
-                                    },
-                                    "name": {
-                                      "type": "string",
-                                      "minLength": 1,
-                                      "maxLength": 256
-                                    },
-                                    "exact": {
-                                      "const": true
-                                    }
-                                  },
-                                  "required": [
-                                    "kind",
-                                    "role",
-                                    "name",
-                                    "exact"
-                                  ]
-                                },
-                                {
-                                  "type": "object",
-                                  "additionalProperties": false,
-                                  "properties": {
-                                    "kind": {
-                                      "enum": [
-                                        "label",
-                                        "testId",
-                                        "text",
-                                        "placeholder"
-                                      ]
-                                    },
-                                    "value": {
-                                      "type": "string",
-                                      "minLength": 1,
-                                      "maxLength": 256
-                                    },
-                                    "exact": {
-                                      "const": true
-                                    }
-                                  },
-                                  "required": [
-                                    "kind",
-                                    "value",
-                                    "exact"
-                                  ]
-                                }
-                              ]
-                            },
-                            "nodeId": {
+                            "ref": {
                               "type": "string",
-                              "minLength": 1,
-                              "maxLength": 256
+                              "pattern": "^e[0-9]{1,6}$"
                             },
                             "bindingId": {
                               "oneOf": [
@@ -1714,8 +1305,7 @@
                           },
                           "required": [
                             "obligationId",
-                            "locator",
-                            "nodeId",
+                            "ref",
                             "bindingId"
                           ]
                         }

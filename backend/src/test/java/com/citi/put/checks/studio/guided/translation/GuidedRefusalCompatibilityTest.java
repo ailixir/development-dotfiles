@@ -299,7 +299,17 @@ class GuidedRefusalCompatibilityTest {
               throw original;
             })
         .when(after.store)
-        .finishAttempt(anyString(), anyString(), eq("APPLIED"), any(), any(), any());
+        .finishAttempt(
+            anyString(),
+            anyString(),
+            eq("APPLIED"),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any(),
+            any());
     assertSame(
         original, assertThrows(GuidedSessionException.class, () -> after.call(() -> C.object())));
     assertEquals(3, after.events.size());
@@ -326,6 +336,18 @@ class GuidedRefusalCompatibilityTest {
           .finishAttempt(anyString(), anyString(), eq("REJECTED"), any(), any(), any());
       verify(late.store, never())
           .finishAttempt(anyString(), anyString(), eq("REJECTED"), any(), any(), any(), any());
+      verify(late.store, never())
+          .finishAttempt(
+              anyString(),
+              anyString(),
+              eq("REJECTED"),
+              any(),
+              any(),
+              any(),
+              any(),
+              any(),
+              any(),
+              any());
     }
     Fixture unsettled = new Fixture(true, GuidedModelResponse.Code.TRANSPORT);
     doThrow(new GuidedSessionException("REVISION_CONFLICT", 409))
@@ -423,11 +445,14 @@ class GuidedRefusalCompatibilityTest {
                     }));
         assertEquals(3, seen.size());
         boolean fine = enabled && kind == GuidedModelRequest.Kind.NEXT_ACTION;
+        // ADR-SC-007: the gate that refused is persisted on the attempt whether or not the private
+        // receipt channel is enabled, so every NEXT_ACTION apply runs under a recording capture.
+        boolean recorded = kind == GuidedModelRequest.Kind.NEXT_ACTION;
         assertTrue(
             seen.stream()
                 .allMatch(
                     capture ->
-                        fine
+                        recorded
                             ? capture != GuidedRefusalDiagnostics.Capture.NONE
                             : capture == GuidedRefusalDiagnostics.Capture.NONE));
         if (enabled) {
@@ -574,7 +599,8 @@ class GuidedRefusalCompatibilityTest {
           .put("stepId", "step")
           .put("requiresAssertion", false);
       current = new GuidedSessionRepository.Session(document, C.object().put("stepIndex", 0));
-      var prompts = new GuidedPromptAssembler(C);
+      var prompts =
+          new GuidedPromptAssembler(C, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
       state =
           C.object()
               .put("planRevision", 0)
@@ -652,6 +678,24 @@ class GuidedRefusalCompatibilityTest {
               })
           .when(store)
           .finishAttempt(anyString(), anyString(), anyString(), any(), any(), any(), any());
+      // ADR-SC-007: an applied or apply-rejected attempt also carries the gate and intent audit.
+      doAnswer(
+              invocation -> {
+                state.putNull("activeAttempt");
+                return null;
+              })
+          .when(store)
+          .finishAttempt(
+              anyString(),
+              anyString(),
+              anyString(),
+              any(),
+              any(),
+              any(),
+              any(),
+              any(),
+              any(),
+              any());
       var response =
           new GuidedModelResponse(
               code,
@@ -687,8 +731,7 @@ class GuidedRefusalCompatibilityTest {
               null,
               null,
               null,
-              new GuidedTranslationProperties(
-                  true, true, List.of(), List.of(), 131072, 4096, 20, "worker"),
+              new GuidedTranslationProperties(true, 131072, 4096, 20, "worker"),
               Clock.systemUTC());
       try {
         var field = GuidedTranslationService.class.getDeclaredField("refusalDiagnostics");

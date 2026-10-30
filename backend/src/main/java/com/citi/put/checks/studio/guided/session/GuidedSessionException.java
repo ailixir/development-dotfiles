@@ -16,7 +16,7 @@ public final class GuidedSessionException extends RuntimeException {
 
   /**
    * A refusal with a closed {@code messageCode} other than the code, and optionally retryable with
-   * a {@code Retry-After} in whole seconds (STUDIO-OBS-014: POLICY_NOT_APPROVED reasons, per-CSI
+   * a {@code Retry-After} in whole seconds (STUDIO-OBS-014: POLICY_DENIED reasons, per-CSI
    * BUDGET_EXCEEDED). Every value is a closed code or an integer; none is caller or page data.
    */
   public GuidedSessionException(

@@ -142,6 +142,10 @@ public class GuidedSessionEvidenceService {
 
           // No state check and no active(): a terminal session is accepted. The window is judged
           // on the database clock only.
+          // A published learn's recording is discarded: the runner is told so by the PUBLISHED stop
+          // and uploads nothing. This is the backstop for a runner that missed that stop. Definite,
+          // never retried, and no row is written.
+          require(!evidence.published(id), "RECORDING_NOT_RETAINED", 409);
           require(
               evidence.withinAcceptanceWindow(id, properties.settleGraceSeconds()), "EXPIRED", 409);
           require(!evidence.recorded(id), "IDEMPOTENCY_CONFLICT", 409);

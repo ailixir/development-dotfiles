@@ -17,10 +17,6 @@
         "principalId": "user-1",
         "csiId": "CSI-123",
         "environmentId": "fixture",
-        "applicationId": "orders",
-        "approvedOrigins": [
-          "https://orders.example.test"
-        ],
         "sourceRevision": "1",
         "configurationRevision": "1",
         "modelDataPolicyId": "labels-only-1",
@@ -34,7 +30,7 @@
           "assert"
         ]
       },
-      "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+      "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
       "configuration": {
         "browser": "chromium",
         "viewport": {
@@ -163,7 +159,7 @@
       "privateSyntheticInputEnvelopeFixtureOnly": {
         "schemaVersion": 3,
         "sessionId": "qa-control-current-01",
-        "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+        "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
         "sourceRevision": "1",
         "configurationRevision": "1",
         "inputs": [
@@ -221,14 +217,14 @@
           {
             "schemaVersion": 3,
             "sessionId": "qa-control-current-01",
-            "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+            "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
             "contextId": "qa-control-context-01",
             "contextRevision": 1,
             "workerId": "qa-control-worker-01",
             "ownerFence": 1,
             "sourceRevision": "1",
             "configurationRevision": "1",
-            "authoredInputsHash": "368d1cc9786781b119b9d2fc869fef4d483ca75ef1637f5ba8517c614e6411d4",
+            "authoredInputsHash": "2d167865c5b862be4f005471a64d63b8c846298a08d606d9ea207079a487ff5d",
             "birthMaterializationRevision": 1,
             "inputCount": 3,
             "previousInputsHash": null
@@ -303,7 +299,7 @@
         "contextRevision": 1,
         "materializationRevision": 1,
         "ownerFence": 1,
-        "inputsHash": "368d1cc9786781b119b9d2fc869fef4d483ca75ef1637f5ba8517c614e6411d4"
+        "inputsHash": "2d167865c5b862be4f005471a64d63b8c846298a08d606d9ea207079a487ff5d"
       },
       "deterministicFixtureIdentities": {
         "preparations": [
@@ -365,10 +361,6 @@
         "principalId": "user-1",
         "csiId": "CSI-123",
         "environmentId": "fixture",
-        "applicationId": "orders",
-        "approvedOrigins": [
-          "https://orders.example.test"
-        ],
         "sourceRevision": "1",
         "configurationRevision": "1",
         "modelDataPolicyId": "labels-only-1",
@@ -382,7 +374,7 @@
           "assert"
         ]
       },
-      "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+      "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
       "configuration": {
         "browser": "chromium",
         "viewport": {
@@ -511,7 +503,7 @@
       "privateSyntheticInputEnvelopeFixtureOnly": {
         "schemaVersion": 3,
         "sessionId": "qa-choice-current-01",
-        "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+        "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
         "sourceRevision": "1",
         "configurationRevision": "1",
         "inputs": [
@@ -569,14 +561,14 @@
           {
             "schemaVersion": 3,
             "sessionId": "qa-choice-current-01",
-            "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+            "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
             "contextId": "qa-choice-context-01",
             "contextRevision": 1,
             "workerId": "qa-choice-worker-01",
             "ownerFence": 1,
             "sourceRevision": "1",
             "configurationRevision": "1",
-            "authoredInputsHash": "cd11c7f1dcf2cf554909fe805ca7ce8687fe2486cd2295a18881d5df34f7e3a0",
+            "authoredInputsHash": "a47c8a1814196ef024c46a123c8adb98a93afd53790b2f7210b1b15d5263710a",
             "birthMaterializationRevision": 1,
             "inputCount": 3,
             "previousInputsHash": null
@@ -651,7 +643,7 @@
         "contextRevision": 1,
         "materializationRevision": 1,
         "ownerFence": 1,
-        "inputsHash": "cd11c7f1dcf2cf554909fe805ca7ce8687fe2486cd2295a18881d5df34f7e3a0"
+        "inputsHash": "a47c8a1814196ef024c46a123c8adb98a93afd53790b2f7210b1b15d5263710a"
       },
       "deterministicFixtureIdentities": {
         "preparations": [
@@ -737,8 +729,8 @@
   "appendedHistoricalFactory": {
     "sourcePointer": "/incrementalContracts/basisCases/5",
     "facts": "Use existing documented privateInputReconstruction envelope and actual entries: version1 takes exactly entry ordinal0; version2 takes ordinals0..2. Keep current session/context/worker identities of that already synthetic world; explicitly rederive both hashes from whole envelopes.",
-    "knownCurrentExpectedVersion1Hash": "935d2b50699a20e72c8fad85bd495e4f292e7cc1ee17e1799c7815afde847d3e",
-    "knownCurrentExpectedVersion2Hash": "9068500e71d5e3f2b22c5dddcb46c22be45d54b0bf7d7dd0baa0aae9f8d86734",
+    "knownCurrentExpectedVersion1Hash": "950ed85f5cbaf1bbe2483f7d93ceffde90a7029e9a30637010449007360688f4",
+    "knownCurrentExpectedVersion2Hash": "4eba427f3e628dd5af1dde33e4f9708b870ffb826b8a9b545dd3d5eba3529ba9",
     "bootstrap": "Bind to actual version1; retain v2.previousInputsHash=v1.hash,birth revisions1and3 and each preparation actual captured version/revision; verify hashes before using quoted values."
   },
   "allValuesQualification": "Synthetic URL/Unicode label/empty saved-label are explicitly supplied test values. Public basis uses metadata-minus-value and hash-only declarations. No Vault material/private historical value is inferred. New preimage hashes here are computations over declared design facts, not expected historical runtime success."

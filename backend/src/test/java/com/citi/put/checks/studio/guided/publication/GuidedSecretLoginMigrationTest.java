@@ -295,10 +295,10 @@ public class GuidedSecretLoginMigrationTest {
       assertThat(
               db.jdbc.queryForObject(
                   "SELECT max(version::int) FROM flyway_schema_history", Integer.class))
-          .isEqualTo(23);
+          .isEqualTo(29);
       assertThat(
               db.jdbc.queryForObject(
-                  "SELECT count(*) FROM flyway_schema_history WHERE version::int > 23",
+                  "SELECT count(*) FROM flyway_schema_history WHERE version::int > 29",
                   Integer.class))
           .isZero();
       assertThat(Files.exists(Path.of("db/cutover"))).isFalse();
@@ -309,11 +309,8 @@ public class GuidedSecretLoginMigrationTest {
           .isTrue();
       assertThat(
               db.jdbc.queryForObject(
-                  ("SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE "
-                      + "conname='ck_studio_schedule_occurrences_code'"),
-                  String.class))
-          .contains("OBSERVED_SCHEDULE_AUTH_REQUIRED", "LEARN_REQUIRED")
-          .doesNotContain("COMPILE_REQUIRED");
+                  "SELECT to_regclass('studio_schedule_occurrences') IS NULL", Boolean.class))
+          .isTrue();
       // Ordinary capability: a plain draft and an unbound execution row are still writable.
       db.execution();
     }
@@ -383,36 +380,26 @@ public class GuidedSecretLoginMigrationTest {
           JSON.createObjectNode()
               .put("principalId", OWNER)
               .put("csiId", "CSI")
-              .put("environment", "Development")
-              .put("applicationId", "app")
-              .put("policyId", "policy")
-              .put("policyVersion", "3")
-              .put("entryPolicyId", "entry");
-      scope.putArray("allowedOrigins").add("https://orders.example.test");
+              .put("environment", "Development");
       scope.putArray("capabilities").add("fill");
       scope.putObject("initialContext").put("kind", "initialBlank");
       assertThat(predicate(db, "studio_publication_scope", scope)).isTrue();
       assertThat(
               predicate(db, "studio_publication_scope", scope.deepCopy().put("accountRef", "old")))
           .isFalse();
+      // ADR-SC-007 (V29): the new shape is an outline plus a facts table keyed by ref.
       ObjectNode observation =
-          JSON.createObjectNode()
-              .put("schemaVersion", 3)
-              .put("sessionId", "session")
-              .put("documentId", "doc")
-              .put("generation", 1)
-              .put("origin", "https://orders.example.test")
-              .put("scopeHash", HASH)
-              .put("observedAt", Instant.now().toString());
-      observation.putArray("nodes");
+          com.citi.put.checks.studio.support.ObservationFixtures.observation()
+              .element("e1", "button", "Continue")
+              .line("  - passwordControl")
+              .coverage(1, 0, 1)
+              .build();
       observation
-          .putObject("coverage")
-          .put("mode", "semantic")
-          .put("complete", true)
-          .put("truncated", false)
-          .put("withheldRegions", 1)
-          .put("reason", "sensitivity")
-          .put("passwordControls", 1);
+          .put("sessionId", "session")
+          .put("documentId", "doc")
+          .put("origin", "https://orders.example.test")
+          .put("scopeHash", HASH)
+          .put("observedAt", Instant.now().toString());
       assertThat(predicate(db, "studio_publication_observation_shape", observation)).isTrue();
       for (int count : List.of(-1, 501)) {
         ObjectNode invalid = observation.deepCopy();
@@ -438,11 +425,7 @@ public class GuidedSecretLoginMigrationTest {
                   "SELECT pg_get_functiondef('studio_observed_execution_guard()'::regprocedure)",
                   String.class))
           .doesNotContain("accountAuthorization", "accountGrantId")
-          .contains(
-              "'schemaVersion'='3'::jsonb",
-              "currentPolicyHash",
-              "ledger.attempt_id",
-              "ledger.admission_id");
+          .contains("'schemaVersion'='3'::jsonb", "ledger.attempt_id", "ledger.admission_id");
     }
   }
 
@@ -1082,7 +1065,6 @@ public class GuidedSecretLoginMigrationTest {
             .put("scopeHash", GuidedContracts.hash(scope))
             .put("profileHash", GuidedContracts.hash(profile))
             .put("buildHash", GuidedContracts.hash(build))
-            .put("currentPolicyHash", "f".repeat(64))
             .put("issuedAt", PublicationContracts.time(started))
             .put("expiresAt", PublicationContracts.time(started.plusSeconds(25)));
     var binding =
@@ -1096,8 +1078,7 @@ public class GuidedSecretLoginMigrationTest {
             .put("csiId", "CSI")
             .put("principalId", OWNER)
             .put("environment", "Development")
-            .put("scopeHash", GuidedContracts.hash(scope))
-            .put("currentPolicyHash", "f".repeat(64));
+            .put("scopeHash", GuidedContracts.hash(scope));
     for (String key :
         List.of(
             "revisionDigest",
@@ -1162,28 +1143,6 @@ public class GuidedSecretLoginMigrationTest {
     var catalog = C.object().putArray("catalog");
     catalog.addObject().set("profile", profile);
     ((ObjectNode) catalog.get(0)).set("build", build);
-    var fixtures =
-        (ObjectNode)
-            JSON.readTree(
-                Files.readString(
-                    Path.of(
-                        "../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json")));
-    var policies = C.object().putArray("policies");
-    policies.add(fixtures.path("trustedPolicy"));
-    var properties =
-        new ObservedReplayProperties(
-            true,
-            30000,
-            1048576,
-            4194304,
-            2097152,
-            catalog.toString(),
-            policies.toString(),
-            1280,
-            720);
-    var policyPins = new ObservedReplayPins(C, properties);
-    String currentPolicyHash =
-        GuidedContracts.hash(policyPins.policy(base.document().path("replayRequirements")));
     var identity =
         PublicationContracts.copy(raw.identity()).put("basisHash", GuidedContracts.hash(basis));
     for (String key :
@@ -1289,7 +1248,6 @@ public class GuidedSecretLoginMigrationTest {
             .put("scopeHash", GuidedContracts.hash(scope))
             .put("profileHash", GuidedContracts.hash(profile))
             .put("buildHash", GuidedContracts.hash(build))
-            .put("currentPolicyHash", currentPolicyHash)
             .put("issuedAt", PublicationContracts.time(started))
             .put("expiresAt", PublicationContracts.time(started.plusSeconds(25)));
     var binding =
@@ -1303,8 +1261,7 @@ public class GuidedSecretLoginMigrationTest {
             .put("csiId", base.document().path("csiId").asText())
             .put("principalId", OWNER)
             .put("environment", scope.path("environment").asText())
-            .put("scopeHash", GuidedContracts.hash(scope))
-            .put("currentPolicyHash", currentPolicyHash);
+            .put("scopeHash", GuidedContracts.hash(scope));
     for (String key :
         List.of(
             "revisionDigest",
@@ -1425,12 +1382,7 @@ public class GuidedSecretLoginMigrationTest {
       var valid = freshRetry(f, f.original);
       assertThatThrownBy(() -> refresh(f, valid, "other-worker")).hasMessageContaining("immutable");
       for (String field :
-          List.of(
-              "scopeHash",
-              "artifactHash",
-              "learnedPlanHash",
-              "publicationEvidenceHash",
-              "currentPolicyHash")) {
+          List.of("scopeHash", "artifactHash", "learnedPlanHash", "publicationEvidenceHash")) {
         var wrong = valid.deepCopy().put(field, "0".repeat(64));
         assertThatThrownBy(() -> refresh(f, wrong, "worker")).hasMessageContaining("immutable");
       }

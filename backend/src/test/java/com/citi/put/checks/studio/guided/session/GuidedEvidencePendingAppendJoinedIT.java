@@ -230,7 +230,7 @@ class GuidedEvidencePendingAppendJoinedIT {
       // AC-12 h: an exclusive bind on both loopback families, outside the database range.
       RUNNER_PORT = RunnerProcessHarness.exclusivelyFreePort();
       APPLICATION = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-      ORIGIN = "http://127.0.0.1:" + APPLICATION.getAddress().getPort();
+      ORIGIN = "http://localhost:" + APPLICATION.getAddress().getPort();
       APPLICATION.createContext(
           "/start",
           exchange -> {
@@ -357,8 +357,7 @@ class GuidedEvidencePendingAppendJoinedIT {
 
     @Bean
     GuidedTranslationProperties properties() {
-      return new GuidedTranslationProperties(
-          true, true, List.of("orders"), List.of("fixture"), 131072, 2048, 60, "worker-1");
+      return new GuidedTranslationProperties(true, 131072, 2048, 60, "worker-1");
     }
 
     @Bean
@@ -368,36 +367,21 @@ class GuidedEvidencePendingAppendJoinedIT {
 
     @Bean
     GuidedSourceClassifier classifier(GuidedTranslationProperties props) {
-      return new GuidedSourceClassifier(CONTRACTS, props, new CredentialPatternScreen());
+      return new GuidedSourceClassifier(
+          CONTRACTS,
+          new CredentialPatternScreen(),
+          com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     }
 
     @Bean
     GuidedSourceInputResolver inputs() {
-      return new GuidedSourceInputResolver(CONTRACTS);
+      return new GuidedSourceInputResolver(
+          CONTRACTS, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     }
 
     @Bean
     GuidedStepVerifier verifier(GuidedTranslationStore store) {
       return new GuidedStepVerifier(store);
-    }
-
-    private com.citi.put.checks.studio.guided.publication.ObservedReplayPins fixturePins() {
-      var policy =
-          CONTRACTS
-              .object()
-              .put("version", 1)
-              .put("policyId", "fixture-policy")
-              .put("policyVersion", "1")
-              .put("applicationId", "orders")
-              .put("environment", "fixture")
-              .put("entryPolicyId", "blank");
-      policy.putArray("allowedOrigins").add(ORIGIN);
-      policy.putArray("rules");
-      policy.putNull("applicationPolicy");
-      return new com.citi.put.checks.studio.guided.publication.ObservedReplayPins(
-          CONTRACTS,
-          new com.citi.put.checks.studio.guided.publication.ObservedReplayProperties(
-              true, 30000, 1048576, 4194304, 2097152, "[]", "[" + policy + "]", 1280, 720));
     }
 
     @Bean
@@ -414,16 +398,15 @@ class GuidedEvidencePendingAppendJoinedIT {
           store,
           verifier,
           new CsiOwnershipEvaluator(),
-          fixturePins(),
+          com.citi.put.checks.studio.support.TestDomains.FIXTURES,
           new com.citi.put.checks.studio.secrets.VaultStudioReferenceResolver(
-              new com.citi.put.checks.studio.secrets.FakeStudioVaultProvider(java.util.Map.of()),
-              (principal, csi, env, secret) -> true),
-          (principal, csi, env, secret) -> true);
+              new com.citi.put.checks.studio.secrets.FakeStudioVaultProvider(java.util.Map.of())));
     }
 
     @Bean
     GuidedMaterializationService materialization(JdbcTemplate jdbc) {
-      return new GuidedMaterializationService(jdbc, CONTRACTS);
+      return new GuidedMaterializationService(
+          jdbc, CONTRACTS, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     }
 
     @Bean
@@ -480,6 +463,7 @@ class GuidedEvidencePendingAppendJoinedIT {
               CONTRACTS,
               access,
               new GuidedSessionProperties(true, Map.of()),
+              com.citi.put.checks.studio.support.TestDomains.FIXTURES,
               Clock.systemUTC());
       service.installBridge(
           materialization,
@@ -489,14 +473,7 @@ class GuidedEvidencePendingAppendJoinedIT {
       service.installTranslation(store, questions);
       service.installEvidence(projection);
       service.installPresentation(new GuidedPublicPresentationProjector(jdbc, CONTRACTS));
-      ObservedPublicationFixture.installGovernance(
-          service,
-          jdbc,
-          "CSI-123",
-          "orders",
-          "fixture",
-          java.util.List.of(ORIGIN),
-          governedPolicy());
+      ObservedPublicationFixture.installCsiBudget(service, jdbc);
       return service;
     }
 
@@ -563,7 +540,8 @@ class GuidedEvidencePendingAppendJoinedIT {
               dispatch,
               gateway,
               CONTRACTS,
-              new GuidedPromptAssembler(CONTRACTS),
+              new GuidedPromptAssembler(
+                  CONTRACTS, com.citi.put.checks.studio.support.TestDomains.FIXTURES),
               inputs,
               new GuidedProposalValidator(CONTRACTS),
               new GuidedDependencyPlanner(sessions),
@@ -572,35 +550,6 @@ class GuidedEvidencePendingAppendJoinedIT {
       service.installDatabase(jdbc);
       return service;
     }
-  }
-
-  /**
-   * The class's governed observation application policy: a structural policy with one business-read
-   * grant on {@code <main aria-label='Operations'>}.
-   */
-  static ObjectNode governedPolicy() {
-    ObjectNode policy =
-        CONTRACTS
-            .object()
-            .put("policyRuleId", "structural-policy")
-            .put("allowStructuralDiscovery", true);
-    ObjectNode grant =
-        CONTRACTS.object().put("policyRuleId", "business-read").put("origin", ORIGIN);
-    grant
-        .putObject("region")
-        .put("kind", "role")
-        .put("role", "main")
-        .put("name", "Operations")
-        .put("exact", true);
-    grant.putObject("visibleText").put("classification", "permittedBusinessData");
-    grant
-        .putObject("controlValue")
-        .put("classification", "nonsecretApproved")
-        .putArray("types")
-        .add("text")
-        .add("textarea");
-    policy.putArray("readGrants").add(grant);
-    return policy;
   }
 
   /**
@@ -715,8 +664,6 @@ class GuidedEvidencePendingAppendJoinedIT {
         .locations("classpath:db/migration")
         .load()
         .migrate();
-    ObservedPublicationFixture.seedPolicy(
-        jdbc, "CSI-123", "orders", "fixture", List.of(ORIGIN), governedPolicy(), "ALLOW");
     PROVIDER_KINDS.clear();
     sourcePlan = null;
     nextSelection = null;
@@ -1187,8 +1134,7 @@ class GuidedEvidencePendingAppendJoinedIT {
             .put("testId", testId.toString())
             .put("sourceRevision", "1")
             .put("configurationRevision", "1")
-            .put("environmentId", "fixture")
-            .put("applicationId", "orders");
+            .put("environmentId", "fixture");
     start.set("versions", CONTRACTS.parse("{\"contract\":3}"));
     return sessions.start(user, UUID.randomUUID().toString(), start).path("sessionId").asText();
   }
@@ -1243,7 +1189,6 @@ class GuidedEvidencePendingAppendJoinedIT {
     plan.putArray("obligations")
         .add(obligation(step.toString(), 0, "navigate", "page", 0))
         .add(obligation(step.toString(), 1, "fill", "destination", 1));
-    plan.putArray("needs");
     return plan;
   }
 
@@ -1316,7 +1261,8 @@ class GuidedEvidencePendingAppendJoinedIT {
             stopped,
             gateway,
             CONTRACTS,
-            new GuidedPromptAssembler(CONTRACTS),
+            new GuidedPromptAssembler(
+                CONTRACTS, com.citi.put.checks.studio.support.TestDomains.FIXTURES),
             inputs,
             new GuidedProposalValidator(CONTRACTS),
             new GuidedDependencyPlanner(sessions),
@@ -1387,18 +1333,13 @@ class GuidedEvidencePendingAppendJoinedIT {
     if (testId == null) {
       target.put("kind", "page");
     } else {
-      JsonNode selected = null;
-      for (JsonNode node : progress(id).path("observation").path("nodes")) {
-        for (JsonNode hint : node.path("locatorHints")) {
-          if (hint.path("kind").asText().equals("testId")
-              && hint.path("value").asText().equals(testId)) {
-            selected = node;
-          }
-        }
-      }
-      assertThat(selected).isNotNull();
-      target.put("nodeId", selected.path("nodeId").asText());
-      target.putObject("locator").put("kind", "testId").put("value", testId).put("exact", true);
+      // ADR-SC-007: the model names a ref of the outline; the runner derives the locator.
+      target
+          .put("kind", "node")
+          .put(
+              "ref",
+              com.citi.put.checks.studio.support.JoinedRefs.refOfTestId(
+                  progress(id).path("observation"), testId));
     }
     return p;
   }

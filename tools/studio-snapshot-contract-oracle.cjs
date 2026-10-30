@@ -79,7 +79,7 @@ module.exports = ({ hash, canonical, check, same, structural }) => {
       check(preparation && ledger.state === 'SUCCEEDED' && ledger.dispatchCount === 1, 'SNAPSHOT_GRAPH');
       const proposal = preparation.proposal;
       const action = { coordinate: clone(ledger.coordinate), origin: proposal.executionEvidence.origin,
-        locator: clone(proposal.target.locator ?? null), operation: clone(proposal.operation) };
+        target: clone(preparation.proof.target ?? null), operation: clone(proposal.operation) };
       check(ledger.operationHash === hash(action), 'SNAPSHOT_GRAPH');
       return { ...action, admissionId: ledger.admission.admissionId, operationHash: hash(action) };
     });

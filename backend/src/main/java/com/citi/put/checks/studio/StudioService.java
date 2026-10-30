@@ -24,7 +24,6 @@ import com.citi.put.checks.studio.entity.UITest;
 import com.citi.put.checks.studio.entity.UITestExecution;
 import com.citi.put.checks.studio.entity.UITestRevision;
 import com.citi.put.checks.studio.readiness.ExecutionReadinessService;
-import com.citi.put.checks.studio.readiness.ReadinessVerdict;
 import com.citi.put.checks.studio.readiness.StudioReadiness;
 import com.citi.put.checks.users.UserProvisioningService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -85,13 +84,15 @@ public class StudioService {
    */
   @PersistenceContext private EntityManager entityManager;
 
-  @org.springframework.beans.factory.annotation.Autowired(required = false)
-  private com.citi.put.checks.studio.scheduling.StudioScheduleInvalidation scheduleInvalidation;
-
-  private void invalidateSchedule(UUID id, String code) {
-    if (scheduleInvalidation != null) {
-      scheduleInvalidation.invalidate(id, code);
-    }
+  /**
+   * A soft-deleted test is never run again, and the soft delete does not fire the schedule's {@code
+   * ON DELETE CASCADE}, so its shared schedule is removed in the same transaction.
+   */
+  private void deleteSchedule(UUID testId) {
+    entityManager
+        .createNativeQuery("DELETE FROM schedules WHERE ui_test_id = :id")
+        .setParameter("id", testId)
+        .executeUpdate();
   }
 
   @SuppressWarnings("checkstyle:ParameterNumber")
@@ -415,11 +416,6 @@ public class StudioService {
     if (change.configurationChanged()) {
       test.setConfigurationRevision(Math.addExact(test.getConfigurationRevision(), 1));
     }
-    if (change.anyChanged()) {
-      // The learned revision is kept for history; the draft is not runnable until a guided run
-      // publishes a new one (readiness enforces it).
-      invalidateSchedule(id, ReadinessVerdict.LEARN_REQUIRED);
-    }
     test.setUpdatedAt(Instant.now());
   }
 
@@ -521,9 +517,6 @@ public class StudioService {
     }
     if (configurationChanged) {
       test.setConfigurationRevision(Math.addExact(test.getConfigurationRevision(), 1));
-    }
-    if (sourceChanged || configurationChanged) {
-      invalidateSchedule(test.getId(), ReadinessVerdict.LEARN_REQUIRED);
     }
     test.setUpdatedAt(Instant.now());
     return authoringResponse(test);
@@ -676,7 +669,7 @@ public class StudioService {
         studioRepository
             .findByIdForUpdate(id)
             .orElseThrow(() -> new IllegalArgumentException("UI Test not found: " + id));
-    invalidateSchedule(id, "TEST_DELETED");
+    deleteSchedule(id);
     test.setDeletedAt(Instant.now());
   }
 
@@ -699,7 +692,7 @@ public class StudioService {
     test = studioRepository.findByIdForUpdate(id).orElseThrow(StudioAccessDeniedException::new);
     entityManager.flush();
     entityManager.refresh(test);
-    invalidateSchedule(id, "TEST_DELETED");
+    deleteSchedule(id);
     test.setDeletedAt(Instant.now());
   }
 
@@ -712,7 +705,7 @@ public class StudioService {
    * 403} as an unknown id, before readiness, quota, idempotency or the race resolution below are
    * reached (Story 10.48, ADR-002 O-22). The check lives here and not in {@link
    * StudioAcceptanceService}: its {@code acceptCore} is shared with scheduled runs, which have no
-   * request {@link Authentication} and are authorized by their background grant instead.
+   * request {@link Authentication} and run as the constant scheduler principal instead.
    *
    * <p>The transaction itself belongs to {@link StudioAcceptanceService}. This method is
    * deliberately <em>not</em> transactional: when the durable idempotency index refuses a second

@@ -116,12 +116,6 @@ tags:
     description: |
       Guided learning sessions (ADR-SC-004, ADR-SC-005): observe, propose, clarify, act and publish
       the exact exercised plan as an immutable revision. Bodies are the closed v3 contracts.
-  - name: guided-policies
-    description: |
-      Governed observation policy per application environment (STUDIO-OBS-014 AC-1): versioned,
-      approved by a configured Security approver who is not the version's author, audited by the
-      database. Guided learning starts only under an approved, current version. Bodies are the closed
-      v3 `guided-policy` contract.
   - name: internal
     description: |
       Service-to-service routes; never exposed through public ingress (architecture §8.4). Every
@@ -887,8 +881,10 @@ paths:
             A malformed test id, a platform `INVALID_IDEMPOTENCY_KEY` (the platform filter's), or a
             refused body: `INVALID_SECRET_REQUEST` (empty, not JSON, over 64 KiB, or a field the
             schema does not name), `INVALID_SECRET_NAME`, `INVALID_SECRET_VALUE` or
-            `INVALID_SECRET_ORIGINS`. `403` is decided before any `400` of this list. No message
-            carries the value or quotes the body.
+            `INVALID_SECRET_ORIGINS` (an origin that is malformed, or whose host is not on this
+            environment's allowed domains: the secret may be filled only where Studio may navigate,
+            so nothing is written to Vault). `403` is decided before any `400` of this list. No
+            message carries the value or quotes the body.
           content:
             application/json:
               schema: { $ref: '#/components/schemas/ErrorResponse' }
@@ -898,6 +894,12 @@ paths:
                     {
                       error: INVALID_SECRET_REQUEST,
                       message: 'The body must be a JSON object with exactly name, value and allowedOrigins'
+                    }
+                originNotAllowed:
+                  value:
+                    {
+                      error: INVALID_SECRET_ORIGINS,
+                      message: "Every allowed origin must be on this environment's allowed domains"
                     }
                 invalidName:
                   value:
@@ -940,7 +942,7 @@ paths:
       description: |
         What this deployment can do for one saved test, read before the Studio shows an affordance
         (STUDIO-OBS-008 P1). There is no global capability route: the answer depends on the test's
-        CSI, environment and governed policy, so the test's persisted id is the only selector. No
+        CSI, environment and the deployment's trusted policy, so the test's persisted id is the only selector. No
         query parameter chooses a CSI, an environment or a provider.
 
         `vaultSecrets` is true exactly when this deployment is configured with a Vault provider.
@@ -951,6 +953,10 @@ paths:
         `guidedStart` says whether a guided learning session may start for the test's current
         persisted source and configuration revisions. When `available` is true, `context` is the
         exact body the start route needs, so a client sends no revision it did not receive here.
+        It is true exactly when the caller may execute in the test's CSI, the test has at least one
+        step and the deployment has a usable runtime catalog. Which domains the test may open is not
+        a capability: it is the deployment's allowed-domains list (`studio.navigation.allowed-domains`),
+        checked when learning starts.
         When it is false, `code` is the only cause the API names (`FORBIDDEN_SCOPE` or
         `RUNTIME_INCOMPATIBLE`); no policy, origin or configuration detail is returned.
 
@@ -981,7 +987,6 @@ paths:
                         sourceRevision: '1'
                         configurationRevision: '1'
                         environmentId: dev
-                        applicationId: app-1
                         versions:
                           contract: 3
                 vaultOffGuidedStartIncompatible:
@@ -1311,7 +1316,6 @@ paths:
               sourceRevision: '1'
               configurationRevision: '1'
               environmentId: dev
-              applicationId: app-1
               versions:
                 contract: 3
       responses:
@@ -1344,36 +1348,39 @@ paths:
                 result: null
         '400': { description: Strict UTF-8/JSON or closed v3 contract refused }
         '401': { $ref: '#/components/responses/SessionUnauthorized' }
-        '403': { description: Current CSI/scope entitlement denied }
+        '403':
+          description: |-
+            Current CSI/scope entitlement denied, or the test's first URL is not allowed.
+
+            A test whose first absolute http(s) URL, in step order, has a host that is not on this
+            environment's allowed-domains list (`studio.navigation.allowed-domains`) is refused with
+            the closed v3 `code: ORIGIN_NOT_ALLOWED` (`retryable: false`). An empty list refuses every
+            start. Refused at start, before the session is created: no session, no publication base,
+            no budget charge. Any later URL a step opens is checked when it is used as a destination,
+            not here. The answer names no host.
+          content:
+            application/json:
+              schema: { $ref: '../studio-observed-authoring/contracts/v3/error.schema.json' }
+              examples:
+                originNotAllowed:
+                  value:
+                    {
+                      schemaVersion: 3,
+                      code: ORIGIN_NOT_ALLOWED,
+                      messageCode: ORIGIN_NOT_ALLOWED,
+                      requestId: sample-request,
+                      retryable: false
+                    }
         '409':
           description: |-
-            Revision, authorization, state, idempotency or policy conflict; closed v3 `{code}`
+            Revision, authorization, state or idempotency conflict; closed v3 `{code}`
             refusal. Nothing is written: no session, no publication base, no budget charge.
-
-            `POLICY_NOT_APPROVED` (STUDIO-OBS-014 AC-1): the application environment has no
-            approved governed observation policy, or its latest version is not yet approved
-            (an edit awaiting approval blocks new learning even while an older version is active).
-            `messageCode` is `GUIDED_POLICY_ABSENT`, `GUIDED_POLICY_UNAPPROVED` or
-            `GUIDED_POLICY_PENDING_VERSION`. Not retryable until the policy is approved.
-
-            `RUNTIME_INCOMPATIBLE` includes a governed policy whose origins are no longer all
-            trusted by the platform policy for this application environment (re-checked at every
-            start; governance can narrow the trusted origins, never widen them).
 
             REVISION_CONFLICT uses FIRST_LEARN_STEP_NARROWED, FIRST_LEARN_STEP_UNKNOWN, BASE_REVISION_MISMATCH or BASE_IDENTITY_INCOMPLETE; all refuse before session/budget/publication writes.
           content:
             application/json:
               schema: { $ref: '../studio-observed-authoring/contracts/v3/error.schema.json' }
               examples:
-                policyNotApproved:
-                  value:
-                    {
-                      schemaVersion: 3,
-                      code: POLICY_NOT_APPROVED,
-                      messageCode: GUIDED_POLICY_PENDING_VERSION,
-                      requestId: sample-request,
-                      retryable: false
-                    }
                 FIRST_LEARN_STEP_NARROWED:
                   summary: The requested boundary skips a changed step
                   value:
@@ -1425,6 +1432,10 @@ paths:
 
             A stored source that cannot be read as a v3 authoring record is refused with the same
             `code` and `messageCode: INVALID_CONTRACT`.
+
+            A test whose steps and non-secret variables name no absolute http(s) URL is refused with
+            `code: NO_APPLICATION_URL` (`retryable: false`, 422). Learning starts on the test's first
+            URL, so a test with no URL has nowhere to start. Add a step that opens the application's URL.
           content:
             application/json:
               schema: { $ref: '../studio-observed-authoring/contracts/v3/error.schema.json' }
@@ -1438,13 +1449,26 @@ paths:
                       requestId: sample-request,
                       retryable: false
                     }
+                noApplicationUrl:
+                  value:
+                    {
+                      schemaVersion: 3,
+                      code: NO_APPLICATION_URL,
+                      messageCode: NO_APPLICATION_URL,
+                      requestId: sample-request,
+                      retryable: false
+                    }
         '429':
           description: |
             Budget refusal. Two producers share this status (same pattern as ADR-002 §31):
 
             - The Studio handler's v3 error `BUDGET_EXCEEDED`. `retryable: true` with messageCode
               `CSI_CONCURRENT_SESSIONS_EXHAUSTED` or `CSI_DAILY_TOKENS_EXHAUSTED` is the per-CSI
-              budget (STUDIO-OBS-014 AC-8) and always carries `Retry-After`. `retryable: false` is a
+              budget (STUDIO-OBS-014 AC-8) and always carries `Retry-After`. `retryable: true` with
+              messageCode `LEARNING_CAPACITY_EXHAUSTED` is the deployment-wide cap on concurrent
+              learning sessions (`studio.guided-authoring.max-concurrent-sessions`, STUDIO-FLEX-001): every
+              learning slot is in use, whichever CSI started the sessions. It always carries
+              `Retry-After`, and no session row and no budget charge is written. `retryable: false` is a
               per-session bound (for example too many source steps) that no wait resolves, and
               carries no `Retry-After`.
             - The platform rate-limit filter's `RATE_LIMITED` (start is metered as `EXECUTE`),
@@ -1454,8 +1478,9 @@ paths:
               description: |
                 Whole seconds, at least 1. Daily token budget: seconds until the next UTC midnight
                 on the database clock. Concurrent sessions: seconds until the earliest live session
-                of the CSI reaches its hard expiry, an upper bound on when a slot frees. Absent on a
-                non-retryable per-session bound.
+                of the CSI reaches its hard expiry, an upper bound on when a slot frees. Learning
+                capacity: seconds until the earliest live learning session of the deployment reaches
+                its hard expiry, with the same meaning. Absent on a non-retryable per-session bound.
               schema: { type: integer, minimum: 1 }
           content:
             application/json:
@@ -1482,6 +1507,15 @@ paths:
                       requestId: sample-request,
                       retryable: true
                     }
+                learningCapacity:
+                  value:
+                    {
+                      schemaVersion: 3,
+                      code: BUDGET_EXCEEDED,
+                      messageCode: LEARNING_CAPACITY_EXHAUSTED,
+                      requestId: sample-request,
+                      retryable: true
+                    }
                 rateLimited:
                   value: { error: { code: RATE_LIMITED, message: Rate limit exceeded } }
         '503': { description: Current authority or Vault unavailable }
@@ -1492,6 +1526,92 @@ paths:
         explicit first step requests full learn. Prefix state is REPLAYING_PREFIX; results report
         relearnedFrom=null until the committed BOUNDARY, DRIFT or EMPTY_PREFIX switch, then the entered
         effective learning boundary even if later learning fails.
+
+  /guided-sessions/latest:
+    get:
+      tags: [ guided-sessions ]
+      operationId: readLatestGuidedAttempts
+      summary: Read the caller's latest learning attempt per test
+      x-implemented-by: STUDIO-UNIFY-001.6
+      description: |
+        Answers, for each requested test, the caller's own most recent guided session whose state is
+        terminal (`SUCCEEDED`, `PUBLICATION_CONFLICT`, `FAILED`, `UNKNOWN_OUTCOME`, `CANCELLED`,
+        `EXPIRED`) and not pruned. `startedAt` is the session's creation time. `errorCode` is the
+        session's `progress.errorCode` or `null`. `explanation` is the public explanation of the
+        session when `state` is `FAILED` and `null` otherwise.
+
+        Only the caller's own sessions are read, and a live session never appears. A test the caller
+        may not read, an unknown id, a deleted or quarantined test, and a test with no terminal
+        session of the caller are **omitted** from `attempts`: there is no `403` and no `404`, so the
+        answer does not reveal whether a test exists. A session whose explanation cannot be projected
+        is omitted and does not fail the others. The route writes nothing and makes no browser,
+        model, Vault, runner or network call.
+
+        Send 1 to 50 `testId` values as a repeated query parameter. No `testId`, more than 50, or a
+        value that is not a UUID is `400` with `error: INVALID_QUERY`. Retention applies: when a
+        session is pruned its attempt is no longer returned.
+      parameters:
+        - name: testId
+          in: query
+          required: true
+          description: Test id; repeat the parameter for more than one test (1 to 50). Duplicates collapse.
+          style: form
+          explode: true
+          schema:
+            type: array
+            minItems: 1
+            maxItems: 50
+            items: { type: string, format: uuid }
+      responses:
+        '200':
+          description: The caller's latest terminal attempt for each requested test that has one
+          content:
+            application/json:
+              schema: { $ref: '../studio-observed-authoring/contracts/v3/latest-attempts.schema.json' }
+              example:
+                schemaVersion: 3
+                attempts:
+                  - testId: 64b94b49-1a2b-4c3d-8e4f-5a6b7c8d9e01
+                    sessionId: sample-session-failed
+                    state: FAILED
+                    startedAt: '2026-10-24T09:30:00Z'
+                    errorCode: BUDGET_EXCEEDED
+                    explanation:
+                      sessionId: sample-session-failed
+                      sourceRevision: '3'
+                      configurationRevision: '1'
+                      steps:
+                        - stepId: 00000000-0000-4000-8000-000000000001
+                          number: 1
+                          completed: true
+                          learnedFromThisRun: true
+                          reusedFrom: null
+                          relearnedAfterDrift: false
+                          actions:
+                            - admissionId: sample-admission-1
+                              ordinal: 0
+                              attemptOrdinal: 0
+                              operationKind: navigate
+                              safeLabel: Open page
+                              outcome: SUCCEEDED
+                              referenceIds: []
+                        - stepId: 00000000-0000-4000-8000-000000000002
+                          number: 2
+                          completed: false
+                          learnedFromThisRun: false
+                          reusedFrom: null
+                          relearnedAfterDrift: false
+                          actions: []
+                      referenceFlows: []
+                  - testId: 0c1d2e3f-4a5b-4c6d-8e7f-8091a2b3c4d5
+                    sessionId: sample-session-succeeded
+                    state: SUCCEEDED
+                    startedAt: '2026-10-23T16:05:12Z'
+                    errorCode: null
+                    explanation: null
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/SessionUnauthorized' }
+        '403': { description: The caller is not a platform user session (`FORBIDDEN_SCOPE`) }
 
   /guided-sessions/{id}:
     parameters:
@@ -1554,6 +1674,17 @@ paths:
         may carry `evidence.video.status` `PROCESSING`, and the client re-polls this route until
         the status is no longer `PROCESSING`.
 
+        The recording is the learning attempt, never the proof. `evidence.video` and
+        `actionTimings` are keyed on the publication: when `publication.status` is `PUBLISHED`,
+        the recording is discarded, `evidence.video` is `null` and `actionTimings` is `[]`;
+        the proof of a published learn is `proof`, `{ executionId }` of the observed replay of
+        the published revision (`triggerSource` `AFTER_LEARN`), read and followed through the
+        execution routes. `proof` is `null` while the replay was refused or has not been
+        accepted, and for every result that is not `PUBLISHED`; it never carries a refusal
+        code. When the learn did not publish (including `outcome` `SUCCEEDED` with `PENDING` or
+        `REFUSED` publication), `evidence.video` is never `null` and the client re-polls until
+        it is no longer `PROCESSING`.
+
         `progress` (P2) is the same projection as on the session view. `explanation` (STUDIO-OBS-008
         P3) is the read-only account of what this session did, step by step, for every result
         including pending, failed and conflicted ones. It is derived from the session itself and
@@ -1565,79 +1696,150 @@ paths:
           content:
             application/json:
               schema: { $ref: '../studio-observed-authoring/contracts/v3/result.schema.json' }
-              example:
-                schemaVersion: 3
-                sessionId: sample-session
-                executionId: sample-session
-                scopeHash: '0000000000000000000000000000000000000000000000000000000000000000'
-                mode: guided
-                outcome: SUCCEEDED
-                assertionsPassed: true
-                learnedFromThisRun: true
-                replayVerified: false
-                scheduleActivated: false
-                publication:
-                  status: PUBLISHED
-                  receipt:
+              examples:
+                published:
+                  summary: Published learn - recording discarded, proof is the replay
+                  value:
                     schemaVersion: 3
                     sessionId: sample-session
-                    revisionId: 11111111-1111-4111-8111-111111111111
-                    revisionDigest: '1111111111111111111111111111111111111111111111111111111111111111'
-                    learnedPlanHash: '2222222222222222222222222222222222222222222222222222222222222222'
-                    artifactHash: '3333333333333333333333333333333333333333333333333333333333333333'
-                    publicationEvidenceHash: '4444444444444444444444444444444444444444444444444444444444444444'
-                    publishedAt: '2026-10-09T12:00:00.000Z'
+                    executionId: sample-session
+                    scopeHash: '0000000000000000000000000000000000000000000000000000000000000000'
+                    mode: guided
+                    outcome: SUCCEEDED
+                    assertionsPassed: true
                     learnedFromThisRun: true
                     replayVerified: false
+                    scheduleActivated: false
+                    publication:
+                      status: PUBLISHED
+                      receipt:
+                        schemaVersion: 3
+                        sessionId: sample-session
+                        revisionId: 11111111-1111-4111-8111-111111111111
+                        revisionDigest: '1111111111111111111111111111111111111111111111111111111111111111'
+                        learnedPlanHash: '2222222222222222222222222222222222222222222222222222222222222222'
+                        artifactHash: '3333333333333333333333333333333333333333333333333333333333333333'
+                        publicationEvidenceHash: '4444444444444444444444444444444444444444444444444444444444444444'
+                        publishedAt: '2026-10-09T12:00:00.000Z'
+                        learnedFromThisRun: true
+                        replayVerified: false
+                        relearnedFrom: null
+                    currentReadiness:
+                      revisionId: 11111111-1111-4111-8111-111111111111
+                      ready: true
+                      code: READY
+                    evidence:
+                      kind: guidedLedger
+                      ref: sample-session
+                      video: null
+                    actionTimings: []
+                    proof: { executionId: 7d2f5c1e-3b4a-4e8d-9f10-2a6b8c9d0e11 }
+                    errorCode: null
                     relearnedFrom: null
-                currentReadiness:
-                  revisionId: 11111111-1111-4111-8111-111111111111
-                  ready: false
-                  code: HEAD_CHANGED
-                evidence:
-                  kind: guidedLedger
-                  ref: sample-session
-                  video: { status: PROCESSING, error: null, expiresAt: null, partial: false }
-                actionTimings: []
-                errorCode: null
-                relearnedFrom: null
-                progress:
-                  stepCount: 2
-                  activeStep: null
-                explanation:
-                  sessionId: sample-session
-                  sourceRevision: '1'
-                  configurationRevision: '1'
-                  steps:
-                    - stepId: 00000000-0000-4000-8000-000000000001
-                      number: 1
-                      completed: true
-                      learnedFromThisRun: true
-                      reusedFrom: null
-                      relearnedAfterDrift: false
-                      actions:
-                        - admissionId: admission-1
-                          ordinal: 0
-                          attemptOrdinal: 0
-                          operationKind: navigate
-                          safeLabel: Open page
-                          outcome: SUCCEEDED
-                          referenceIds: []
-                    - stepId: 00000000-0000-4000-8000-000000000002
-                      number: 2
-                      completed: true
-                      learnedFromThisRun: true
-                      reusedFrom: null
-                      relearnedAfterDrift: false
-                      actions:
-                        - admissionId: admission-2
-                          ordinal: 0
-                          attemptOrdinal: 0
-                          operationKind: fill
-                          safeLabel: Fill field
-                          outcome: SUCCEEDED
-                          referenceIds: [ LOGIN_PASSWORD ]
-                  referenceFlows: []
+                    progress:
+                      stepCount: 2
+                      activeStep: null
+                    explanation:
+                      sessionId: sample-session
+                      sourceRevision: '1'
+                      configurationRevision: '1'
+                      steps:
+                        - stepId: 00000000-0000-4000-8000-000000000001
+                          number: 1
+                          completed: true
+                          learnedFromThisRun: true
+                          reusedFrom: null
+                          relearnedAfterDrift: false
+                          actions:
+                            - admissionId: admission-1
+                              ordinal: 0
+                              attemptOrdinal: 0
+                              operationKind: navigate
+                              safeLabel: Open page
+                              outcome: SUCCEEDED
+                              referenceIds: []
+                        - stepId: 00000000-0000-4000-8000-000000000002
+                          number: 2
+                          completed: true
+                          learnedFromThisRun: true
+                          reusedFrom: null
+                          relearnedAfterDrift: false
+                          actions:
+                            - admissionId: admission-2
+                              ordinal: 0
+                              attemptOrdinal: 0
+                              operationKind: fill
+                              safeLabel: Fill field
+                              outcome: SUCCEEDED
+                              referenceIds: [ LOGIN_PASSWORD ]
+                      referenceFlows: []
+                failedAttempt:
+                  summary: Learn that did not publish - the learning attempt's recording is kept
+                  value:
+                    schemaVersion: 3
+                    sessionId: sample-session
+                    executionId: sample-session
+                    scopeHash: '0000000000000000000000000000000000000000000000000000000000000000'
+                    mode: guided
+                    outcome: FAILED
+                    assertionsPassed: false
+                    learnedFromThisRun: false
+                    replayVerified: false
+                    scheduleActivated: false
+                    publication:
+                      status: REFUSED
+                      receipt: null
+                    currentReadiness:
+                      revisionId: null
+                      ready: false
+                      code: NOT_PUBLISHED
+                    evidence:
+                      kind: guidedLedger
+                      ref: sample-session
+                      video: { status: AVAILABLE, error: null, expiresAt: '2026-10-16T12:00:00Z', partial: false }
+                    actionTimings:
+                      - { kind: step, stepId: 00000000-0000-4000-8000-000000000001, admissionId: null, ordinal: null, startMs: 120, endMs: 860 }
+                      - { kind: action, stepId: 00000000-0000-4000-8000-000000000001, admissionId: admission-1, ordinal: 0, startMs: 120, endMs: 860 }
+                    proof: null
+                    errorCode: ASSERTION_FAILED
+                    relearnedFrom: null
+                    progress:
+                      stepCount: 2
+                      activeStep: null
+                    explanation:
+                      sessionId: sample-session
+                      sourceRevision: '1'
+                      configurationRevision: '1'
+                      steps:
+                        - stepId: 00000000-0000-4000-8000-000000000001
+                          number: 1
+                          completed: true
+                          learnedFromThisRun: true
+                          reusedFrom: null
+                          relearnedAfterDrift: false
+                          actions:
+                            - admissionId: admission-1
+                              ordinal: 0
+                              attemptOrdinal: 0
+                              operationKind: navigate
+                              safeLabel: Open page
+                              outcome: SUCCEEDED
+                              referenceIds: []
+                        - stepId: 00000000-0000-4000-8000-000000000002
+                          number: 2
+                          completed: true
+                          learnedFromThisRun: true
+                          reusedFrom: null
+                          relearnedAfterDrift: false
+                          actions:
+                            - admissionId: admission-2
+                              ordinal: 0
+                              attemptOrdinal: 0
+                              operationKind: fill
+                              safeLabel: Fill field
+                              outcome: SUCCEEDED
+                              referenceIds: [ LOGIN_PASSWORD ]
+                      referenceFlows: []
         '202':
           description: Pending publication, not a success claim
           content:
@@ -1666,6 +1868,7 @@ paths:
                   ref: sample-session
                   video: { status: PROCESSING, error: null, expiresAt: null, partial: false }
                 actionTimings: []
+                proof: null
                 errorCode: null
                 relearnedFrom: null
                 progress:
@@ -1742,7 +1945,6 @@ paths:
                   - choiceId: choice-1
                     safeLabel: 'Use authored text: London'
                     labelSource: AUTHORED
-                    nodeId: null
                     bindingId: null
                 expiresAt: '2026-10-08T03:10:00Z'
         '204':
@@ -1903,10 +2105,16 @@ paths:
       summary: Protected video stream of a guided learning run
       x-implemented-by: STUDIO-OBS-013
       description: |
-        The recording of one guided session (AR-1 for STUDIO-OBS-013). The result's
-        `evidence.video.status` `AVAILABLE` is the render condition; the client builds this path
-        from `sessionId`. Object storage keys are server-derived and never exposed in a body,
-        problem detail or header.
+        The recording of one guided session (AR-1 for STUDIO-OBS-013): the learning attempt of a
+        learn that did not publish. It is never a proof. The result's `evidence.video.status`
+        `AVAILABLE` is the render condition; the client builds this path from `sessionId`.
+        Object storage keys are server-derived and never exposed in a body, problem detail or
+        header.
+
+        A session whose publication is `PUBLISHED` has no recording to serve: it was discarded
+        before upload, and this route answers `404` `VIDEO_UNAVAILABLE` even if an object or row exists.
+        The proof of such a session is the replay execution named by the result's
+        `proof.executionId`, whose video is `getExecutionVideo`.
 
         Refusal order: session authentication, then guided read authorization through the same
         path as `readGuidedSession` (so an unknown session and an unreadable CSI answer the same
@@ -1977,293 +2185,6 @@ paths:
                       code: AUTH_TEMPORARILY_UNAVAILABLE
                       message: Authentication service temporarily unavailable
                       traceId: 4bf92f3577b34da6a3ce929d0e0e4736
-
-  /guided-policies:
-    get:
-      tags: [ guided-policies ]
-      operationId: lookupGuidedPolicy
-      summary: Find the governed observation policy of one application environment
-      x-implemented-by: STUDIO-OBS-014
-      description: |
-        Returns the governed observation policy for `(csiId, applicationId, environmentId)`.
-        Readable by a principal who may read the CSI, or who is in a configured approver group.
-        A caller who may do neither gets `403 STUDIO_FORBIDDEN` before any lookup. `404` is only
-        reachable after authorization and means the caller may read this CSI and no policy exists
-        for this application environment yet (ADR-002 §24.3). It is not an existence oracle.
-      parameters:
-        - { name: csiId, in: query, required: true, schema: { type: string, minLength: 1, maxLength: 20 } }
-        - { name: applicationId, in: query, required: true, schema: { type: string, minLength: 1, maxLength: 256 } }
-        - { name: environmentId, in: query, required: true, schema: { type: string, minLength: 1, maxLength: 256 } }
-      responses:
-        '200':
-          description: The policy, with its active (approved) version and its latest version
-          content:
-            application/json:
-              schema: { $ref: '../studio-observed-authoring/contracts/v3/guided-policy.schema.json#/definitions/policyView' }
-        '400':
-          description: A missing or malformed query parameter (`INVALID_POLICY`).
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/ErrorResponse' }
-        '401': { $ref: '#/components/responses/SessionUnauthorized' }
-        '403': { $ref: '#/components/responses/Forbidden' }
-        '404':
-          description: The caller may read this CSI and no policy exists for this application environment.
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/ErrorResponse' }
-              examples:
-                notFound:
-                  value: { error: GUIDED_POLICY_NOT_FOUND, message: 'No governed policy exists for this application environment' }
-    post:
-      tags: [ guided-policies ]
-      operationId: createGuidedPolicy
-      summary: Create the governed observation policy of one application environment (version 1, unapproved)
-      x-implemented-by: STUDIO-OBS-014
-      description: |
-        Creates the policy and its version 1 in one transaction. Version 1 is not approved, so
-        `startGuidedSession` refuses with `409 POLICY_NOT_APPROVED` until it is approved. The
-        server stores the document normalized (see the contracts README, "Governed observation
-        policy"): an omitted `sideEffectStance` becomes `CLARIFY_FIRST`, an omitted
-        `destructiveVocabulary` becomes the configured baseline, and arrays are sorted.
-
-        The body is read and checked first, because the CSI it names is inside it; that `400`
-        does not depend on stored state. Then the caller must be able to write `csiId`, otherwise
-        `403`. A governed origin outside the platform-trusted origins for this application
-        environment, a read grant whose origin is not in `allowedOrigins`, or two read grants with
-        the same `policyRuleId` is `400 INVALID_POLICY`. Covered by the platform idempotency filter
-        (optional UUID `Idempotency-Key`).
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              {
-                $ref: '../studio-observed-authoring/contracts/v3/guided-policy.schema.json#/definitions/createPolicyRequest'
-              }
-            example:
-              schemaVersion: 3
-              csiId: '170001'
-              applicationId: orders-app
-              environmentId: uat
-              document:
-                schemaVersion: 3
-                allowedOrigins: [ 'https://orders.example.test', 'https://status.example.test:8443' ]
-                applicationPolicy:
-                  policyRuleId: orders-app
-                  allowStructuralDiscovery: true
-                  readGrants:
-                    - policyRuleId: orders-form-values
-                      origin: 'https://orders.example.test'
-                      region: { kind: application }
-                      controlValue: { classification: nonsecretApproved, types: [ text, email ] }
-                    - policyRuleId: status-text
-                      origin: 'https://status.example.test:8443'
-                      region: { kind: role, role: region, name: Order status, exact: true }
-                      visibleText: { classification: permittedBusinessData }
-                      controlValue: { classification: nonsecretApproved, types: [ search ] }
-      responses:
-        '201':
-          description: Created. Version 1 is the latest version and no version is active.
-          content:
-            application/json:
-              schema: { $ref: '../studio-observed-authoring/contracts/v3/guided-policy.schema.json#/definitions/policyView' }
-              example:
-                schemaVersion: 3
-                policyId: 5f0c6a1e-2b7d-4c3a-9e8f-1a2b3c4d5e6f
-                csiId: '170001'
-                applicationId: orders-app
-                environmentId: uat
-                activeVersion: null
-                latestVersion: 1
-                active: null
-                latest:
-                  version: 1
-                  document:
-                    schemaVersion: 3
-                    allowedOrigins: [ 'https://orders.example.test', 'https://status.example.test:8443' ]
-                    applicationPolicy:
-                      policyRuleId: orders-app
-                      allowStructuralDiscovery: true
-                      readGrants:
-                        - policyRuleId: orders-form-values
-                          origin: 'https://orders.example.test'
-                          region: { kind: application }
-                          controlValue: { classification: nonsecretApproved, types: [ text, email ] }
-                        - policyRuleId: status-text
-                          origin: 'https://status.example.test:8443'
-                          region: { kind: role, role: region, name: Order status, exact: true }
-                          visibleText: { classification: permittedBusinessData }
-                          controlValue: { classification: nonsecretApproved, types: [ search ] }
-                    sideEffectStance: CLARIFY_FIRST
-                    destructiveVocabulary:
-                      [
-                        cancel subscription,
-                        close account,
-                        confirm payment,
-                        deactivate,
-                        delete,
-                        destroy,
-                        erase,
-                        pay,
-                        place order,
-                        purge,
-                        remove,
-                        revoke,
-                        send money,
-                        submit order,
-                        transfer
-                      ]
-                  documentHash: a9f1fb8a9652554d36a30128bcfaf542972f700ced7381e5db67ff35b8bdb67b
-                  observationPolicyHash: 8a3b7e830ca20b070b59fcbf05781fe3603cc860d64bbbbff611cf1a25cbf9f9
-                  createdBy: author-1
-                  createdAt: '2026-10-14T09:00:00.000Z'
-                  approval: null
-        '400':
-          description: |
-            A refused body (`INVALID_POLICY`), or the platform filter's `INVALID_IDEMPOTENCY_KEY`.
-            No message quotes the body.
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/ErrorResponse' }
-              examples:
-                invalidPolicy:
-                  value: { error: INVALID_POLICY, message: 'A governed origin is not trusted for this application environment' }
-        '401': { $ref: '#/components/responses/SessionUnauthorized' }
-        '403': { $ref: '#/components/responses/Forbidden' }
-        '409':
-          description: A policy already exists for this application environment. It is left unchanged; create a version
-            instead.
-          x-conflict-codes: [ GUIDED_POLICY_EXISTS ]
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/ErrorResponse' }
-              examples:
-                exists:
-                  value: { error: GUIDED_POLICY_EXISTS, message: 'A governed policy already exists for this application environment' }
-
-  /guided-policies/{id}:
-    parameters:
-      - { $ref: '#/components/parameters/GuidedPolicyId' }
-    get:
-      tags: [ guided-policies ]
-      operationId: readGuidedPolicy
-      summary: Read one governed observation policy
-      x-implemented-by: STUDIO-OBS-014
-      description: |
-        An unknown id, and a policy whose CSI the caller may not read (and the caller is in no
-        approver group), get the same `403 STUDIO_FORBIDDEN` with no resource detail. This route
-        never answers `404` (ADR-002 §27). `400` is a malformed id only.
-      responses:
-        '200':
-          description: The policy, with its active (approved) version and its latest version
-          content:
-            application/json:
-              schema: { $ref: '../studio-observed-authoring/contracts/v3/guided-policy.schema.json#/definitions/policyView' }
-        '400':
-          description: A malformed policy id (`INVALID_POLICY`).
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/ErrorResponse' }
-        '401': { $ref: '#/components/responses/SessionUnauthorized' }
-        '403': { $ref: '#/components/responses/Forbidden' }
-
-  /guided-policies/{id}/versions:
-    parameters:
-      - { $ref: '#/components/parameters/GuidedPolicyId' }
-    post:
-      tags: [ guided-policies ]
-      operationId: createGuidedPolicyVersion
-      summary: Propose a new version of a governed observation policy (unapproved)
-      x-implemented-by: STUDIO-OBS-014
-      description: |
-        Appends version `expectedVersion + 1`. The new version is not approved, and while it is
-        the latest unapproved version `startGuidedSession` refuses with `409 POLICY_NOT_APPROVED`,
-        even if an older version is active. An unknown id and a policy whose CSI the caller may
-        not write get the same `403`. `expectedVersion` other than the latest version is
-        `409 STALE_REVISION` and writes nothing. Body rules and normalization are those of
-        `createGuidedPolicy`.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              {
-                $ref: '../studio-observed-authoring/contracts/v3/guided-policy.schema.json#/definitions/createVersionRequest'
-              }
-      responses:
-        '201':
-          description: Created. The new version is the latest version; the active version is unchanged.
-          content:
-            application/json:
-              schema: { $ref: '../studio-observed-authoring/contracts/v3/guided-policy.schema.json#/definitions/policyView' }
-        '400':
-          description: A malformed id, a refused body (`INVALID_POLICY`), or the platform filter's
-            `INVALID_IDEMPOTENCY_KEY`.
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/ErrorResponse' }
-        '401': { $ref: '#/components/responses/SessionUnauthorized' }
-        '403': { $ref: '#/components/responses/Forbidden' }
-        '409':
-          description: '`expectedVersion` is not the latest version. Nothing is written; reload and retry.'
-          x-conflict-codes: [ STALE_REVISION ]
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/ErrorResponse' }
-              examples:
-                staleRevision:
-                  value: { error: STALE_REVISION, message: 'The policy is at version 2; reload before proposing a new version' }
-
-  /guided-policies/{id}/versions/{version}/approval:
-    parameters:
-      - { $ref: '#/components/parameters/GuidedPolicyId' }
-      - { $ref: '#/components/parameters/GuidedPolicyVersion' }
-    post:
-      tags: [ guided-policies ]
-      operationId: approveGuidedPolicyVersion
-      summary: Record the Security approval of the latest version, which activates it
-      x-implemented-by: STUDIO-OBS-014
-      description: |
-        Only a principal in a configured approver group may approve, and never the principal who
-        created that version. With no approver group configured (the default), every approval is
-        `403`: the route fails closed. A caller who is not an approver, an unknown id, and the
-        version's own author all get the same `403 STUDIO_FORBIDDEN`. Approval and activation are
-        one write: the approved version becomes the active version. Approving a version that is
-        not the latest, or that is already approved, is `409 STALE_REVISION` and writes nothing.
-        The approval record is evidence that a named approver approved in this system; it does not
-        mark the external Security & Compliance release approval (STUDIO-OBS-010) as obtained.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: '../studio-observed-authoring/contracts/v3/guided-policy.schema.json#/definitions/approvalRequest' }
-            example:
-              schemaVersion: 3
-              approvalRef: SEC-2026-0142
-      responses:
-        '200':
-          description: Approved and active.
-          content:
-            application/json:
-              schema: { $ref: '../studio-observed-authoring/contracts/v3/guided-policy.schema.json#/definitions/policyView' }
-        '400':
-          description: A malformed id or version, a refused body (`INVALID_POLICY`), or the platform filter's
-            `INVALID_IDEMPOTENCY_KEY`.
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/ErrorResponse' }
-        '401': { $ref: '#/components/responses/SessionUnauthorized' }
-        '403': { $ref: '#/components/responses/Forbidden' }
-        '409':
-          description: The version is not the latest version, or is already approved. Nothing is written.
-          x-conflict-codes: [ STALE_REVISION ]
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/ErrorResponse' }
-              examples:
-                staleRevision:
-                  value: { error: STALE_REVISION, message: 'Version 1 is not the latest unapproved version of this policy' }
 
   # ────────────────────────────────────────────────────────────────────────────────────────────
   # Internal surface, architecture §8.4, in the order that section tabulates it.
@@ -2608,297 +2529,6 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/ReadinessResponse' }
 
-  /tests/{id}/schedule/capabilities:
-    parameters:
-      - $ref: '#/components/parameters/TestId'
-    get:
-      tags:
-        - studio-scheduling
-      operationId: studioScheduleCapabilities
-      summary: Read test-scoped scheduling capability and approved principal references
-      x-served-by: api
-      x-implemented-by: STUDIO-SCHED-001
-      responses:
-        '200':
-          description: Success.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/StudioScheduleCapabilities'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/SessionUnauthorized'
-        '403':
-          description: CSI permission or current background authorization denied.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-  /tests/{id}/schedule:
-    parameters:
-      - $ref: '#/components/parameters/TestId'
-    get:
-      tags:
-        - studio-scheduling
-      operationId: readStudioSchedule
-      summary: Read schedule; JSON null if absent or removed
-      x-served-by: api
-      x-implemented-by: STUDIO-SCHED-001
-      responses:
-        '200':
-          description: Schedule or JSON null.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/StudioSchedule'
-                nullable: true
-        '401':
-          $ref: '#/components/responses/SessionUnauthorized'
-        '403':
-          description: CSI permission or current background authorization denied.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-    post:
-      tags:
-        - studio-scheduling
-      operationId: createStudioSchedule
-      summary: Create a paused schedule; recreate retains its stable audit anchor
-      x-served-by: api
-      x-implemented-by: STUDIO-SCHED-001
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/StudioScheduleWrite'
-      responses:
-        '201':
-          description: Success.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/StudioSchedule'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/SessionUnauthorized'
-        '403':
-          description: CSI permission or current background authorization denied.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '409':
-          description: Schedule version, lifecycle, readiness or uncertainty conflict.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          x-conflict-codes:
-            - SCHEDULE_EXISTS
-        '503':
-          description: SCHEDULING_DISABLED or background authority unavailable.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-    put:
-      tags:
-        - studio-scheduling
-      operationId: updateStudioSchedule
-      summary: Update versioned schedule; changed settings require explicit Resume
-      x-served-by: api
-      x-implemented-by: STUDIO-SCHED-001
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/StudioScheduleUpdate'
-      responses:
-        '200':
-          description: Success.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/StudioSchedule'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/SessionUnauthorized'
-        '403':
-          description: CSI permission or current background authorization denied.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '409':
-          description: Schedule version, lifecycle, readiness or uncertainty conflict.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          x-conflict-codes:
-            - SCHEDULE_NOT_FOUND
-            - SCHEDULE_VERSION_CONFLICT
-        '503':
-          description: SCHEDULING_DISABLED or background authority unavailable.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-    delete:
-      tags:
-        - studio-scheduling
-      operationId: removeStudioSchedule
-      summary: Remove future scheduling without cancelling accepted work
-      x-served-by: api
-      x-implemented-by: STUDIO-SCHED-001
-      responses:
-        '204':
-          description: Removed; accepted executions remain intact.
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/SessionUnauthorized'
-        '403':
-          description: CSI permission or current background authorization denied.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '409':
-          description: Schedule version, lifecycle, readiness or uncertainty conflict.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          x-conflict-codes:
-            - SCHEDULE_NOT_FOUND
-            - SCHEDULE_VERSION_CONFLICT
-        '503':
-          description: SCHEDULING_DISABLED or background authority unavailable.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-      parameters:
-        - name: expectedVersion
-          in: query
-          required: true
-          schema:
-            type: integer
-            minimum: 1
-  /tests/{id}/schedule/enabled:
-    parameters:
-      - $ref: '#/components/parameters/TestId'
-    patch:
-      tags:
-        - studio-scheduling
-      operationId: enableStudioSchedule
-      summary: Pause or explicitly Resume against exact confirmed revision and uncertainty acknowledgments
-      x-served-by: api
-      x-implemented-by: STUDIO-SCHED-001
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/StudioScheduleEnabled'
-      responses:
-        '200':
-          description: Success.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/StudioSchedule'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/SessionUnauthorized'
-        '403':
-          description: CSI permission or current background authorization denied.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '409':
-          description: Schedule version, lifecycle, readiness or uncertainty conflict.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          x-conflict-codes:
-            - SCHEDULE_NOT_FOUND
-            - SCHEDULE_VERSION_CONFLICT
-            - ACTIVATION_REVISION_MISMATCH
-            - UNCERTAINTY_ACKNOWLEDGEMENT_REQUIRED
-            - LEARN_REQUIRED
-            - RUNTIME_INCOMPATIBLE
-        '503':
-          description: SCHEDULING_DISABLED or background authority unavailable.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-  /schedules/preview:
-    post:
-      tags:
-        - studio-scheduling
-      operationId: previewStudioSchedule
-      summary: Preview next five timezone-aware occurrences using the dispatch recurrence policy
-      x-served-by: api
-      x-implemented-by: STUDIO-SCHED-001
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/StudioSchedulePreviewRequest'
-      responses:
-        '200':
-          description: Success.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/StudioSchedulePreview'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/SessionUnauthorized'
-  /tests/{id}/schedule/occurrences:
-    parameters:
-      - $ref: '#/components/parameters/TestId'
-      - $ref: '#/components/parameters/Page'
-      - $ref: '#/components/parameters/Size'
-    get:
-      tags:
-        - studio-scheduling
-      operationId: listStudioScheduleOccurrences
-      summary: Read bounded occurrence history including refused work and retained removed schedules
-      x-served-by: api
-      x-implemented-by: STUDIO-SCHED-001
-      responses:
-        '200':
-          description: Success.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/StudioScheduleOccurrencePage'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/SessionUnauthorized'
-        '403':
-          description: CSI permission or current background authorization denied.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
 components:
   securitySchemes:
     serviceIdentity:
@@ -2924,18 +2554,6 @@ components:
       in: header
       required: true
       schema: { type: string, minLength: 1, maxLength: 256 }
-    GuidedPolicyId:
-      name: id
-      in: path
-      required: true
-      description: Governed guided policy id (lowercase UUID)
-      schema: { type: string, pattern: '^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$' }
-    GuidedPolicyVersion:
-      name: version
-      in: path
-      required: true
-      description: Policy version number
-      schema: { type: integer, minimum: 1, maximum: 2147483647 }
     TestId:
       name: id
       in: path
@@ -3037,380 +2655,6 @@ components:
               value: { error: RANGE_NOT_SATISFIABLE, message: 'The requested range cannot be served' }
 
   schemas:
-    StudioSchedulePolicy:
-      type: object
-      required:
-        - minIntervalSeconds
-        - misfireGraceSeconds
-        - overlap
-        - dstOverlap
-      properties:
-        minIntervalSeconds:
-          type: integer
-          format: int64
-        misfireGraceSeconds:
-          type: integer
-          format: int64
-        overlap:
-          type: string
-          enum:
-            - SKIP
-        dstOverlap:
-          type: string
-          enum:
-            - EARLIER_OFFSET
-    StudioScheduleOccurrence:
-      type: object
-      required:
-        - id
-        - scheduleId
-        - scheduleVersion
-        - testId
-        - csiId
-        - scheduledAt
-        - localScheduledAt
-        - timeZone
-        - offsetSeconds
-        - decision
-        - code
-        - executionId
-        - acceptedAt
-        - retryAt
-        - graceExpiresAt
-        - createdAt
-        - updatedAt
-        - missedFrom
-        - missedUntil
-        - missedCount
-      properties:
-        environment:
-          type: string
-        executionPrincipal:
-          type: string
-        activationId:
-          type: string
-          format: uuid
-          nullable: true
-        activatedRevisionId:
-          type: string
-          format: uuid
-          nullable: true
-        activatedBy:
-          type: string
-          nullable: true
-        activatedAt:
-          type: string
-          format: date-time
-          nullable: true
-
-        id:
-          type: string
-          format: uuid
-        scheduleId:
-          type: string
-          format: uuid
-        scheduleVersion:
-          type: integer
-          format: int64
-        testId:
-          type: string
-          format: uuid
-        csiId:
-          type: string
-        scheduledAt:
-          type: string
-          format: date-time
-        localScheduledAt:
-          type: string
-        timeZone:
-          type: string
-        offsetSeconds:
-          type: integer
-          format: int64
-        decision:
-          type: string
-          enum:
-            - ACCEPTED
-            - REFUSED
-            - SKIPPED
-            - DEFERRED
-        code:
-          type: string
-        executionId:
-          type: string
-          format: uuid
-          nullable: true
-        acceptedAt:
-          type: string
-          format: date-time
-          nullable: true
-        retryAt:
-          type: string
-          format: date-time
-          nullable: true
-        graceExpiresAt:
-          type: string
-          format: date-time
-          nullable: true
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-        missedFrom:
-          type: string
-          format: date-time
-          nullable: true
-        missedUntil:
-          type: string
-          format: date-time
-          nullable: true
-        missedCount:
-          type: integer
-          format: int64
-          nullable: true
-    StudioSchedule:
-      type: object
-      required:
-        - id
-        - testId
-        - csiId
-        - version
-        - cronExpression
-        - timeZone
-        - executionPrincipal
-        - state
-        - requestedEnabled
-        - blockedCode
-        - activatedRevisionId
-        - nextDueAt
-        - pollAfterAt
-        - deletedAt
-        - createdAt
-        - updatedAt
-        - unacknowledgedUncertaintyExecutionIds
-        - latestOccurrence
-      properties:
-        activationId:
-          type: string
-          format: uuid
-          nullable: true
-        activatedBy:
-          type: string
-          nullable: true
-        activatedAt:
-          type: string
-          format: date-time
-          nullable: true
-
-        id:
-          type: string
-          format: uuid
-        testId:
-          type: string
-          format: uuid
-        csiId:
-          type: string
-        version:
-          type: integer
-          format: int64
-        cronExpression:
-          type: string
-        timeZone:
-          type: string
-        executionPrincipal:
-          type: string
-        state:
-          type: string
-          enum:
-            - PAUSED
-            - ENABLED
-            - BLOCKED
-        requestedEnabled:
-          type: boolean
-        blockedCode:
-          type: string
-          nullable: true
-        activatedRevisionId:
-          type: string
-          format: uuid
-          nullable: true
-        nextDueAt:
-          type: string
-          format: date-time
-          nullable: true
-        pollAfterAt:
-          type: string
-          format: date-time
-          nullable: true
-        deletedAt:
-          type: string
-          format: date-time
-          nullable: true
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-        unacknowledgedUncertaintyExecutionIds:
-          type: array
-          items:
-            type: string
-            format: uuid
-        latestOccurrence:
-          $ref: '#/components/schemas/StudioScheduleOccurrence'
-          nullable: true
-    StudioScheduleWrite:
-      type: object
-      required:
-        - cronExpression
-        - executionPrincipal
-      properties:
-        cronExpression:
-          type: string
-        timeZone:
-          type: string
-          nullable: true
-          default: UTC
-          description: Omitted or null defaults to UTC; responses always persist an explicit validated zone.
-        executionPrincipal:
-          type: string
-
-    StudioScheduleUpdate:
-      type: object
-      required:
-        - expectedVersion
-        - cronExpression
-        - executionPrincipal
-      properties:
-        expectedVersion:
-          type: integer
-          format: int64
-        cronExpression:
-          type: string
-        timeZone:
-          type: string
-          nullable: true
-          default: UTC
-          description: Omitted or null defaults to UTC; responses always persist an explicit validated zone.
-        executionPrincipal:
-          type: string
-
-    StudioScheduleEnabled:
-      type: object
-      required:
-        - expectedVersion
-        - enabled
-      properties:
-        expectedVersion:
-          type: integer
-          format: int64
-        enabled:
-          type: boolean
-        confirmedRevisionId:
-          type: string
-          format: uuid
-          nullable: true
-        acknowledgedUncertaintyExecutionIds:
-          type: array
-          items:
-            type: string
-            format: uuid
-    StudioSchedulePreviewRequest:
-      type: object
-      required:
-        - cronExpression
-      properties:
-        cronExpression:
-          type: string
-        timeZone:
-          type: string
-          nullable: true
-          default: UTC
-          description: Omitted or null defaults to UTC; responses always persist an explicit validated zone.
-
-    StudioSchedulePreview:
-      type: object
-      required:
-        - normalizedCronExpression
-        - timeZone
-        - occurrences
-        - policy
-      properties:
-        normalizedCronExpression:
-          type: string
-        timeZone:
-          type: string
-        occurrences:
-          type: array
-          minItems: 5
-          maxItems: 5
-          items:
-            type: object
-            required:
-              - scheduledAt
-              - localScheduledAt
-              - offsetSeconds
-            properties:
-              scheduledAt:
-                type: string
-                format: date-time
-              localScheduledAt:
-                type: string
-              offsetSeconds:
-                type: integer
-                format: int64
-        policy:
-          $ref: '#/components/schemas/StudioSchedulePolicy'
-    StudioScheduleCapabilities:
-      type: object
-      required:
-        - enabled
-        - canManage
-        - availableExecutionPrincipals
-        - localAuthorizationOnly
-        - policy
-      properties:
-        enabled:
-          type: boolean
-        canManage:
-          type: boolean
-        availableExecutionPrincipals:
-          type: array
-          items:
-            type: string
-        localAuthorizationOnly:
-          type: boolean
-        policy:
-          $ref: '#/components/schemas/StudioSchedulePolicy'
-    StudioScheduleOccurrencePage:
-      type: object
-      required:
-        - data
-        - page
-        - size
-        - totalElements
-        - totalPages
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/StudioScheduleOccurrence'
-        page:
-          type: integer
-          format: int64
-        size:
-          type: integer
-          format: int64
-        totalElements:
-          type: integer
-          format: int64
-        totalPages:
-          type: integer
-          format: int64
-
     ErrorResponse:
       type: object
       required: [ error, message ]
@@ -4231,17 +3475,6 @@ components:
           streamComplete
         ]
       properties:
-        activationId:
-          type: string
-          format: uuid
-          nullable: true
-        activatedBy:
-          type: string
-          nullable: true
-        activatedAt:
-          type: string
-          format: date-time
-          nullable: true
 
         triggerSource:
           type: string
@@ -4249,19 +3482,17 @@ components:
           enum:
             - MANUAL
             - SCHEDULED
-          description: Immutable trigger attribution; null for pre-scheduling legacy history.
+            - AFTER_LEARN
+          description: |
+            Immutable trigger attribution; null for pre-scheduling legacy history. `AFTER_LEARN`
+            (shown as "After learning") is the observed replay of the revision a learn has just
+            published: the proof of that learn. It has no schedule and counts in Recent Runs,
+            Latest run and last-run status like any other run.
         scheduleId:
           type: string
           format: uuid
           nullable: true
-        scheduleVersion:
-          type: integer
-          format: int64
-          nullable: true
-        occurrenceId:
-          type: string
-          format: uuid
-          nullable: true
+          description: The shared `/api/v1/schedules` schedule that produced the run; null for a manual run and once that schedule is removed.
         scheduledAt:
           type: string
           format: date-time
@@ -5002,7 +4233,7 @@ components:
       description: One canonical v2 draft and immutable confirmed revision, read in one transaction. NEEDS_RELEARN
         identifies the first current step changed by semantic identity; firstChangedStepId is non-null only
         for that readiness. BASE_IDENTITY_INCOMPLETE requires an explicit full-learn boundary at the first
-        step. READY may survive unused declaration changes; schedule invalidation remains independent.
+        step. READY may survive unused declaration changes.
       properties:
         id:
           type: string

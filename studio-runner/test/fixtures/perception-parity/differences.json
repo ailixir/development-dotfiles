@@ -1,0 +1,122 @@
+{
+ "schemaVersion": 1,
+ "baseline": "spike at freeze B, harness sha256 c46e72077cae491c919254b961571842919b4bb80b3dcad963b141b34f8b6388",
+ "rule": "A page/pass listed here differs from the spike ONLY in the listed lines and facts; every other line and fact is byte-equal. Facts of refs whose line is unchanged must be equal except where listed. Layer 1 (test/run/perceive.test.ts) and layer 2 (test/fixtures-tier/perception/parity.test.ts) both require the actual differences to EQUAL this document.",
+ "kinds": {
+  "D1": "Values split across pieces, compact (whitespace-removed) matching of single strings, fragment owners stubbed (ADR-SC-007 D6 leak D1). No fixture page triggers it; the canary suites do.",
+  "D2": "Percent-decoded and encoded forms of private values (ADR-SC-007 D6 leak D2). No fixture page triggers it; the canary suites do.",
+  "D1-TAINT": "A node that claims withheld text, and every content-named ancestor above a withheld descendant, renders no name, ownText or near; claims travel through ref-less hits (critique R1b).",
+  "EVIDENCE-SIBLINGS": "Cell evidence gains the row's sibling cells (ADR-SC-007 D3, iana-assert-01); facts only, the outline is unchanged.",
+  "FACTS-NAME-CAP": "facts.name is capped at 256 characters (the spike's rawName is unbounded). No fixture name is longer; covered by a synthetic test."
+ },
+ "outline": {
+  "observed/c05/login.html|private": {
+   "kind": "D1-TAINT",
+   "reason": "A node that renders {value withheld} renders no near text (critique R1b, ADR-SC-007 D6): the spike printed the neighbouring label next to the stub.",
+   "removed": [
+    "    - button [e10] {value withheld} {near=\"Password\"} {in=\"main\"}"
+   ],
+   "added": [
+    "    - button [e10] {value withheld} {in=\"main\"}"
+   ]
+  },
+  "large/large-catalog.html|private": {
+   "kind": "D1-TAINT",
+   "reason": "The option line that hit the private value had no ref, so its claim now goes to the nearest ref-bearing ancestor (the combobox), which renders no name (critique R1b); the spike dropped the option silently and kept the combobox name.",
+   "removed": [
+    "      - combobox \"Country\" [e21]"
+   ],
+   "added": [
+    "      - combobox [e21] {value withheld} {in=\"form 'Filters' > main\"}"
+   ]
+  }
+ },
+ "facts": {
+  "observed/c05/login.html|private": {
+   "e10": {
+    "kind": "D1-TAINT",
+    "fields": [
+     "evidence"
+    ],
+    "reason": "Line changed, see outline: the stub renders no near, so its evidence has no near text."
+   }
+  },
+  "observed/c06/forms.html|private": {
+   "e5": {
+    "kind": "D1-TAINT",
+    "fields": [
+     "evidence"
+    ],
+    "reason": "The generic wrapper claims the withheld label text, so it renders no ownText (the spike evidence kept 'Remember me Notes')."
+   }
+  },
+  "large/large-catalog.html|private": {
+   "e19": {
+    "kind": "D1-TAINT",
+    "fields": [
+     "text"
+    ],
+    "reason": "The text of the form no longer includes the name of the combobox, which now renders no name (see outline)."
+   },
+   "e21": {
+    "kind": "D1-TAINT",
+    "fields": [
+     "name",
+     "evidence"
+    ],
+    "reason": "Line changed, see outline: the combobox renders no name."
+   }
+  }
+ },
+ "siblings": {
+  "observed/c08/orders.html|plain": {
+   "e11": "Order accepted",
+   "e12": "ORD-1001"
+  },
+  "observed/c08/orders.html|private": {
+   "e12": "ORD-1001"
+  },
+  "large/large-catalog.html|private": {
+   "e124": "7.50 7",
+   "e128": "10.50 14",
+   "e132": "13.50 21",
+   "e136": "16.50 28",
+   "e140": "19.50 35",
+   "e144": "22.50 2",
+   "e148": "25.50 9",
+   "e152": "28.50 16",
+   "e156": "31.50 23",
+   "e160": "34.50 30",
+   "e164": "37.50 37",
+   "e168": "40.50 4",
+   "e172": "43.50 11",
+   "e176": "46.50 18",
+   "e180": "49.50 25",
+   "e184": "52.50 32",
+   "e188": "55.50 39",
+   "e192": "58.50 6",
+   "e196": "61.50 13",
+   "e200": "64.50 20",
+   "e204": "67.50 27",
+   "e208": "70.50 34",
+   "e212": "73.50 1",
+   "e216": "76.50 8",
+   "e220": "79.50 15",
+   "e224": "82.50 22",
+   "e228": "85.50 29",
+   "e232": "88.50 36",
+   "e236": "91.50 3",
+   "e240": "94.50 10",
+   "e244": "97.50 17",
+   "e248": "100.50 24",
+   "e252": "103.50 31",
+   "e256": "106.50 38",
+   "e260": "109.50 5",
+   "e264": "112.50 12",
+   "e268": "115.50 19",
+   "e272": "118.50 26",
+   "e276": "121.50 33",
+   "e280": "124.50 0"
+  }
+ }
+}

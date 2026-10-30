@@ -1,0 +1,1194 @@
+{
+  "generatedAt": "2026-10-26T16:08:40.107Z",
+  "viewport": "1280x720",
+  "browser": "playwright 1.63.0 chromium headless",
+  "note": "status: accepted = used by corpus tasks; candidate = probed, not used; rejected = probed and unusable (rejectReason). probeVerdict/pages[].probe are written by probe.mjs.",
+  "sites": [
+    {
+      "id": "arxiv",
+      "name": "arXiv advanced search",
+      "host": "arxiv.org",
+      "category": "search form / academic",
+      "heldOut": true,
+      "status": "accepted",
+      "rejectReason": null,
+      "features": [
+        "labeled text fields",
+        "checkboxes, radios, selects",
+        "two Search buttons"
+      ],
+      "pages": [
+        {
+          "key": "p1",
+          "url": "https://arxiv.org/search/advanced",
+          "probe": {
+            "url": "https://arxiv.org/search/advanced",
+            "probedAt": "2026-10-26T16:08:40.458Z",
+            "status": 200,
+            "finalUrl": "https://arxiv.org/search/advanced",
+            "title": "Advanced Search | arXiv e-print repository",
+            "loadMs": 2821,
+            "bodyTextLength": 3896,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [],
+            "cookieBanner": [],
+            "interactiveRefs": 51,
+            "verdict": "pass"
+          }
+        }
+      ],
+      "probeVerdict": "pass"
+    },
+    {
+      "id": "govuk",
+      "name": "GOV.UK",
+      "host": "gov.uk",
+      "category": "government",
+      "heldOut": false,
+      "status": "accepted",
+      "rejectReason": null,
+      "features": [
+        "cookie banner",
+        "Menu button whose accessible name differs",
+        "disclosure filters",
+        "selects/checkboxes/radios",
+        "repeated footer/main links"
+      ],
+      "pages": [
+        {
+          "key": "p1",
+          "url": "https://www.gov.uk/",
+          "probe": {
+            "url": "https://www.gov.uk/",
+            "probedAt": "2026-10-26T16:08:43.356Z",
+            "status": 200,
+            "finalUrl": "https://www.gov.uk/",
+            "title": "Welcome to GOV.UK",
+            "loadMs": 2579,
+            "bodyTextLength": 4011,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [],
+            "cookieBanner": [
+              {
+                "selector": "[id*=\"cookie\" i]",
+                "text": "Cookies on GOV.UK We use some essential cookies to make this website work. We’d like to set additional cookies to understand how you use GOV",
+                "buttons": [
+                  "Accept additional cookies",
+                  "Reject additional cookies"
+                ]
+              },
+              {
+                "selector": "[class*=\"cookie-banner\" i]",
+                "text": "Cookies on GOV.UK",
+                "buttons": []
+              },
+              {
+                "selector": "[class*=\"cookie-banner\" i]",
+                "text": "We use some essential cookies to make this website work. We’d like to set additional cookies to understand how you use GOV.UK, remember your",
+                "buttons": []
+              }
+            ],
+            "interactiveRefs": 80,
+            "verdict": "pass"
+          }
+        },
+        {
+          "key": "p2",
+          "url": "https://www.gov.uk/search/all?keywords=passport&order=relevance",
+          "probe": {
+            "url": "https://www.gov.uk/search/all?keywords=passport&order=relevance",
+            "probedAt": "2026-10-26T16:08:46.020Z",
+            "status": 200,
+            "finalUrl": "https://www.gov.uk/search/all?keywords=passport&order=relevance",
+            "title": "passport - Search - GOV.UK",
+            "loadMs": 2572,
+            "bodyTextLength": 3703,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [],
+            "cookieBanner": [
+              {
+                "selector": "[id*=\"cookie\" i]",
+                "text": "Cookies on GOV.UK We use some essential cookies to make this website work. We’d like to set additional cookies to understand how you use GOV",
+                "buttons": [
+                  "Accept additional cookies",
+                  "Reject additional cookies"
+                ]
+              },
+              {
+                "selector": "[class*=\"cookie-banner\" i]",
+                "text": "Cookies on GOV.UK",
+                "buttons": []
+              },
+              {
+                "selector": "[class*=\"cookie-banner\" i]",
+                "text": "We use some essential cookies to make this website work. We’d like to set additional cookies to understand how you use GOV.UK, remember your",
+                "buttons": []
+              }
+            ],
+            "interactiveRefs": 66,
+            "verdict": "pass"
+          }
+        }
+      ],
+      "probeVerdict": "pass",
+      "note": "the only real cookie banner in the corpus (Accept additional cookies / Reject additional cookies); tasks run with the banner present unless a chain dismisses it"
+    },
+    {
+      "id": "gutenberg",
+      "name": "Project Gutenberg",
+      "host": "gutenberg.org",
+      "category": "catalog / old table layout",
+      "heldOut": true,
+      "status": "accepted",
+      "rejectReason": null,
+      "features": [
+        "label/value table rows",
+        "duplicated header/footer links",
+        "image-only share icons"
+      ],
+      "pages": [
+        {
+          "key": "p1",
+          "url": "https://www.gutenberg.org/",
+          "probe": {
+            "url": "https://www.gutenberg.org/",
+            "probedAt": "2026-10-26T16:08:48.669Z",
+            "status": 200,
+            "finalUrl": "https://www.gutenberg.org/",
+            "title": "Free eBooks | Project Gutenberg",
+            "loadMs": 2628,
+            "bodyTextLength": 3579,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [],
+            "cookieBanner": [],
+            "interactiveRefs": 82,
+            "verdict": "pass"
+          }
+        },
+        {
+          "key": "p2",
+          "url": "https://www.gutenberg.org/ebooks/1342",
+          "probe": {
+            "url": "https://www.gutenberg.org/ebooks/1342",
+            "probedAt": "2026-10-26T16:08:51.391Z",
+            "status": 200,
+            "finalUrl": "https://www.gutenberg.org/ebooks/1342",
+            "title": "Pride and Prejudice by Jane Austen | Project Gutenberg",
+            "loadMs": 2891,
+            "bodyTextLength": 2280,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [],
+            "cookieBanner": [],
+            "interactiveRefs": 59,
+            "verdict": "pass"
+          }
+        }
+      ],
+      "probeVerdict": "pass"
+    },
+    {
+      "id": "hn",
+      "name": "Hacker News",
+      "host": "news.ycombinator.com",
+      "category": "forum / news (old table layout)",
+      "heldOut": false,
+      "status": "accepted",
+      "rejectReason": null,
+      "features": [
+        "unlabeled fields (login, footer search)",
+        "icon-only vote arrows",
+        "repeated links per story"
+      ],
+      "pages": [
+        {
+          "key": "p1",
+          "url": "https://news.ycombinator.com/",
+          "probe": {
+            "url": "https://news.ycombinator.com/",
+            "probedAt": "2026-10-26T16:10:59.666Z",
+            "status": 200,
+            "finalUrl": "https://news.ycombinator.com/",
+            "title": "Hacker News",
+            "loadMs": 2892,
+            "bodyTextLength": 3970,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [],
+            "cookieBanner": [],
+            "interactiveRefs": 228,
+            "failReasons": [],
+            "verdict": "pass"
+          }
+        },
+        {
+          "key": "p2",
+          "url": "https://news.ycombinator.com/login",
+          "probe": {
+            "url": "https://news.ycombinator.com/login",
+            "probedAt": "2026-10-26T16:11:02.634Z",
+            "status": 200,
+            "finalUrl": "https://news.ycombinator.com/login",
+            "title": "",
+            "loadMs": 2751,
+            "bodyTextLength": 95,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [],
+            "cookieBanner": [],
+            "interactiveRefs": 7,
+            "failReasons": [],
+            "verdict": "pass"
+          }
+        },
+        {
+          "key": "p3",
+          "url": "https://news.ycombinator.com/newest",
+          "probe": {
+            "url": "https://news.ycombinator.com/newest",
+            "probedAt": "2026-10-26T16:11:05.468Z",
+            "status": 200,
+            "finalUrl": "https://news.ycombinator.com/newest",
+            "title": "New Links | Hacker News",
+            "loadMs": 2840,
+            "bodyTextLength": 4553,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [],
+            "cookieBanner": [],
+            "interactiveRefs": 248,
+            "failReasons": [],
+            "verdict": "pass"
+          }
+        }
+      ],
+      "probeVerdict": "pass",
+      "note": "/login page is tiny (95 visible characters, 7 interactive elements) by design"
+    },
+    {
+      "id": "mdn",
+      "name": "MDN Web Docs",
+      "host": "developer.mozilla.org",
+      "category": "documentation",
+      "heldOut": false,
+      "status": "accepted",
+      "rejectReason": null,
+      "features": [
+        "icon-only buttons",
+        "theme menu",
+        "rotating sponsor banner"
+      ],
+      "pages": [
+        {
+          "key": "p1",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/HTML",
+          "probe": {
+            "url": "https://developer.mozilla.org/en-US/docs/Web/HTML",
+            "probedAt": "2026-10-26T16:09:03.147Z",
+            "status": 200,
+            "finalUrl": "https://developer.mozilla.org/en-US/docs/Web/HTML",
+            "title": "HTML: HyperText Markup Language | MDN",
+            "loadMs": 2604,
+            "bodyTextLength": 7872,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [],
+            "cookieBanner": [],
+            "interactiveRefs": 149,
+            "verdict": "pass"
+          }
+        }
+      ],
+      "probeVerdict": "pass"
+    },
+    {
+      "id": "wikipedia",
+      "name": "Wikipedia",
+      "host": "en.wikipedia.org",
+      "category": "encyclopedia",
+      "heldOut": false,
+      "status": "accepted",
+      "rejectReason": null,
+      "features": [
+        "very large DOM (1,500+ interactive refs)",
+        "infobox table",
+        "per-section edit links",
+        "unnamed selects on Special:Search",
+        "appearance radios"
+      ],
+      "pages": [
+        {
+          "key": "p1",
+          "url": "https://en.wikipedia.org/wiki/Python_(programming_language)",
+          "probe": {
+            "url": "https://en.wikipedia.org/wiki/Python_(programming_language)",
+            "probedAt": "2026-10-26T16:09:05.870Z",
+            "status": 200,
+            "finalUrl": "https://en.wikipedia.org/wiki/Python_(programming_language)",
+            "title": "Python (programming language) - Wikipedia",
+            "loadMs": 2732,
+            "bodyTextLength": 84726,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [
+              "/hcaptcha/i"
+            ],
+            "cookieBanner": [
+              {
+                "selector": "[id*=\"cookie\" i]",
+                "text": "Cookie statement",
+                "buttons": []
+              },
+              {
+                "selector": "[data-nosnippet]",
+                "text": "The internet is changing. October 26: An important update for readers in the United States. Thank you for visiting Wikipedia this Monday, Oc",
+                "buttons": [
+                  "$2.75",
+                  "$15",
+                  "$25",
+                  "$50",
+                  "$100",
+                  "$250"
+                ]
+              }
+            ],
+            "interactiveRefs": 1575,
+            "verdict": "pass"
+          }
+        },
+        {
+          "key": "p2",
+          "url": "https://en.wikipedia.org/wiki/Main_Page",
+          "probe": {
+            "url": "https://en.wikipedia.org/wiki/Main_Page",
+            "probedAt": "2026-10-26T16:09:08.937Z",
+            "status": 200,
+            "finalUrl": "https://en.wikipedia.org/wiki/Main_Page",
+            "title": "Wikipedia, the free encyclopedia",
+            "loadMs": 2580,
+            "bodyTextLength": 10847,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [
+              "/hcaptcha/i"
+            ],
+            "cookieBanner": [
+              {
+                "selector": "[id*=\"cookie\" i]",
+                "text": "Cookie statement",
+                "buttons": []
+              },
+              {
+                "selector": "[data-nosnippet]",
+                "text": "The internet is changing. October 26: An important update for readers in the United States. Thank you for visiting Wikipedia this Monday, Oc",
+                "buttons": [
+                  "$2.75",
+                  "$15",
+                  "$25",
+                  "$50",
+                  "$100",
+                  "$250"
+                ]
+              }
+            ],
+            "interactiveRefs": 297,
+            "verdict": "pass"
+          }
+        },
+        {
+          "key": "p3",
+          "url": "https://en.wikipedia.org/w/index.php?search=python&title=Special%3ASearch&profile=advanced&fulltext=1&ns0=1",
+          "probe": {
+            "url": "https://en.wikipedia.org/w/index.php?search=python&title=Special%3ASearch&profile=advanced&fulltext=1&ns0=1",
+            "probedAt": "2026-10-26T16:09:11.683Z",
+            "status": 200,
+            "finalUrl": "https://en.wikipedia.org/w/index.php?search=python&title=Special%3ASearch&profile=advanced&fulltext=1&ns0=1",
+            "title": "python - Search results - Wikipedia",
+            "loadMs": 3128,
+            "bodyTextLength": 6079,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [],
+            "cookieBanner": [
+              {
+                "selector": "[id*=\"cookie\" i]",
+                "text": "Cookie statement",
+                "buttons": []
+              }
+            ],
+            "interactiveRefs": 95,
+            "verdict": "pass"
+          }
+        }
+      ],
+      "probeVerdict": "pass",
+      "note": "the probe flagged a fundraising banner (not a cookie banner) on article pages; the hCaptcha marker is only a script reference for account creation, no challenge is shown"
+    },
+    {
+      "id": "pydocs",
+      "name": "Python documentation",
+      "host": "docs.python.org",
+      "category": "documentation",
+      "heldOut": false,
+      "status": "accepted",
+      "rejectReason": null,
+      "features": [
+        "navigation bar duplicated top/bottom",
+        "version/theme/language selects",
+        "case-only link name differences"
+      ],
+      "pages": [
+        {
+          "key": "p1",
+          "url": "https://docs.python.org/3/builtins/functions.html",
+          "probe": {
+            "url": "https://docs.python.org/3/builtins/functions.html",
+            "probedAt": "2026-10-26T16:09:14.926Z",
+            "status": 200,
+            "finalUrl": "https://docs.python.org/3/builtins/functions.html",
+            "title": "Built-in functions — Python 3.15.2 documentation",
+            "loadMs": 2650,
+            "bodyTextLength": 82216,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [],
+            "cookieBanner": [],
+            "interactiveRefs": 562,
+            "verdict": "pass"
+          }
+        },
+        {
+          "key": "p2",
+          "url": "https://docs.python.org/3/",
+          "probe": {
+            "url": "https://docs.python.org/3/",
+            "probedAt": "2026-10-26T16:09:17.802Z",
+            "status": 200,
+            "finalUrl": "https://docs.python.org/3/",
+            "title": "3.15.2 Documentation",
+            "loadMs": 2631,
+            "bodyTextLength": 3474,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [],
+            "cookieBanner": [],
+            "interactiveRefs": 78,
+            "verdict": "pass"
+          }
+        }
+      ],
+      "probeVerdict": "pass"
+    },
+    {
+      "id": "weather",
+      "name": "National Weather Service",
+      "host": "weather.gov",
+      "category": "government (old table layout)",
+      "heldOut": true,
+      "status": "accepted",
+      "rejectReason": null,
+      "features": [
+        "unnamed location field on forecast page",
+        "label/value table cells",
+        "unnamed map style select"
+      ],
+      "pages": [
+        {
+          "key": "p1",
+          "url": "https://www.weather.gov/",
+          "probe": {
+            "url": "https://www.weather.gov/",
+            "probedAt": "2026-10-26T16:09:20.527Z",
+            "status": 200,
+            "finalUrl": "https://www.weather.gov/",
+            "title": "National Weather Service",
+            "loadMs": 2874,
+            "bodyTextLength": 1683,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [],
+            "cookieBanner": [],
+            "interactiveRefs": 70,
+            "verdict": "pass"
+          }
+        },
+        {
+          "key": "p2",
+          "url": "https://forecast.weather.gov/MapClick.php?lat=40.7146&lon=-74.0071",
+          "probe": {
+            "url": "https://forecast.weather.gov/MapClick.php?lat=40.7146&lon=-74.0071",
+            "probedAt": "2026-10-26T16:09:23.486Z",
+            "status": 200,
+            "finalUrl": "https://forecast.weather.gov/MapClick.php?lat=40.7146&lon=-74.0071",
+            "title": "7-Day Forecast 40.71N 74.01W",
+            "loadMs": 2944,
+            "bodyTextLength": 2939,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [],
+            "cookieBanner": [],
+            "interactiveRefs": 65,
+            "verdict": "pass"
+          }
+        }
+      ],
+      "probeVerdict": "pass"
+    },
+    {
+      "id": "openlibrary",
+      "name": "Open Library",
+      "host": "openlibrary.org",
+      "category": "e-commerce-like catalog (no login)",
+      "heldOut": true,
+      "status": "accepted",
+      "rejectReason": null,
+      "features": [
+        "result cards with repeated buttons",
+        "switch/sort buttons whose names differ from visible text",
+        "slow responses"
+      ],
+      "pages": [
+        {
+          "key": "p1",
+          "url": "https://openlibrary.org/search?q=dune",
+          "probe": {
+            "url": "https://openlibrary.org/search?q=dune",
+            "probedAt": "2026-10-26T16:09:26.524Z",
+            "status": 200,
+            "finalUrl": "https://openlibrary.org/search?q=dune",
+            "title": "search | Open Library",
+            "loadMs": 20455,
+            "bodyTextLength": 5235,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [],
+            "cookieBanner": [],
+            "interactiveRefs": 333,
+            "verdict": "pass"
+          }
+        }
+      ],
+      "probeVerdict": "pass",
+      "note": "slow (3-5 s per load); one transient ERR_CONNECTION_RESET seen during authoring, so verification and runs use low concurrency"
+    },
+    {
+      "id": "steam",
+      "name": "Steam store search",
+      "host": "store.steampowered.com",
+      "category": "e-commerce-like catalog (no login)",
+      "heldOut": true,
+      "status": "accepted",
+      "rejectReason": null,
+      "features": [
+        "div/span \"buttons\"",
+        "unnamed text fields",
+        "two Search buttons"
+      ],
+      "pages": [
+        {
+          "key": "p1",
+          "url": "https://store.steampowered.com/search/?term=portal",
+          "probe": {
+            "url": "https://store.steampowered.com/search/?term=portal",
+            "probedAt": "2026-10-26T16:09:47.120Z",
+            "status": 200,
+            "finalUrl": "https://store.steampowered.com/search/?term=portal",
+            "title": "Steam Search",
+            "loadMs": 3132,
+            "bodyTextLength": 3406,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [],
+            "cookieBanner": [],
+            "interactiveRefs": 134,
+            "verdict": "pass"
+          }
+        }
+      ],
+      "probeVerdict": "pass"
+    },
+    {
+      "id": "pythonorg",
+      "name": "python.org",
+      "host": "python.org",
+      "category": "organisation site",
+      "heldOut": false,
+      "status": "accepted",
+      "rejectReason": null,
+      "features": [
+        "three copies of the main navigation",
+        "generated-content link names (\">>>More\")"
+      ],
+      "pages": [
+        {
+          "key": "p1",
+          "url": "https://www.python.org/",
+          "probe": {
+            "url": "https://www.python.org/",
+            "probedAt": "2026-10-26T16:09:50.445Z",
+            "status": 200,
+            "finalUrl": "https://www.python.org/",
+            "title": "Welcome to Python.org",
+            "loadMs": 2623,
+            "bodyTextLength": 4401,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [],
+            "cookieBanner": [],
+            "interactiveRefs": 146,
+            "verdict": "pass"
+          }
+        }
+      ],
+      "probeVerdict": "pass"
+    },
+    {
+      "id": "usagov",
+      "name": "USAGov",
+      "host": "usa.gov",
+      "category": "government",
+      "heldOut": true,
+      "status": "accepted",
+      "rejectReason": null,
+      "features": [
+        "menu and card links with the same names",
+        "icon-only search button",
+        "disclosure banner"
+      ],
+      "pages": [
+        {
+          "key": "p1",
+          "url": "https://www.usa.gov/",
+          "probe": {
+            "url": "https://www.usa.gov/",
+            "probedAt": "2026-10-26T16:09:53.155Z",
+            "status": 200,
+            "finalUrl": "https://www.usa.gov/",
+            "title": "Making government services easier to find | USAGov",
+            "loadMs": 2705,
+            "bodyTextLength": 4120,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [],
+            "cookieBanner": [],
+            "interactiveRefs": 56,
+            "verdict": "pass"
+          }
+        }
+      ],
+      "probeVerdict": "pass"
+    },
+    {
+      "id": "rfc",
+      "name": "RFC Editor search",
+      "host": "rfc-editor.org",
+      "category": "search page with filters",
+      "heldOut": true,
+      "status": "accepted",
+      "rejectReason": null,
+      "features": [
+        "many checkboxes with counts in names",
+        "selects",
+        "per-result Subscribe / Add to Set buttons"
+      ],
+      "pages": [
+        {
+          "key": "p1",
+          "url": "https://www.rfc-editor.org/search/",
+          "probe": {
+            "url": "https://www.rfc-editor.org/search/",
+            "probedAt": "2026-10-26T16:09:55.932Z",
+            "status": 200,
+            "finalUrl": "https://www.rfc-editor.org/search/",
+            "title": "Search | RFC Editor",
+            "loadMs": 3335,
+            "bodyTextLength": 10267,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [],
+            "cookieBanner": [],
+            "interactiveRefs": 97,
+            "verdict": "pass"
+          }
+        }
+      ],
+      "probeVerdict": "pass"
+    },
+    {
+      "id": "pubmed",
+      "name": "PubMed",
+      "host": "pubmed.ncbi.nlm.nih.gov",
+      "category": "research search",
+      "heldOut": null,
+      "status": "rejected",
+      "rejectReason": "HTTP 403 for headless Chromium on the first request (bot block, no challenge page to pass)",
+      "features": [],
+      "pages": [
+        {
+          "key": "p1",
+          "url": "https://pubmed.ncbi.nlm.nih.gov/",
+          "probe": {
+            "url": "https://pubmed.ncbi.nlm.nih.gov/",
+            "probedAt": "2026-10-26T16:10:42.720Z",
+            "status": 403,
+            "finalUrl": "https://pubmed.ncbi.nlm.nih.gov/",
+            "title": "403",
+            "loadMs": 2662,
+            "bodyTextLength": 13,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [],
+            "cookieBanner": [],
+            "interactiveRefs": 0,
+            "failReasons": [
+              "HTTP 403",
+              "visible text only 13 chars (blank page or JS app that did not render)",
+              "only 0 interactive elements"
+            ],
+            "verdict": "fail"
+          }
+        }
+      ],
+      "probeVerdict": "fail"
+    },
+    {
+      "id": "sec",
+      "name": "SEC EDGAR search",
+      "host": "sec.gov",
+      "category": "government search",
+      "heldOut": null,
+      "status": "rejected",
+      "rejectReason": "HTTP 403 \"Request Rate Threshold Exceeded\" on the first request (SEC fair-access block for automated clients)",
+      "features": [],
+      "pages": [
+        {
+          "key": "p1",
+          "url": "https://www.sec.gov/edgar/search/",
+          "probe": {
+            "url": "https://www.sec.gov/edgar/search/",
+            "probedAt": "2026-10-26T16:10:45.469Z",
+            "status": 403,
+            "finalUrl": "https://www.sec.gov/edgar/search/",
+            "title": "SEC.gov | Request Rate Threshold Exceeded",
+            "loadMs": 2817,
+            "bodyTextLength": 337,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [],
+            "cookieBanner": [],
+            "interactiveRefs": 2,
+            "failReasons": [
+              "HTTP 403",
+              "only 2 interactive elements"
+            ],
+            "verdict": "fail"
+          }
+        }
+      ],
+      "probeVerdict": "fail"
+    },
+    {
+      "id": "archive",
+      "name": "Internet Archive",
+      "host": "archive.org",
+      "category": "library",
+      "heldOut": null,
+      "status": "candidate",
+      "rejectReason": null,
+      "features": [],
+      "pages": [
+        {
+          "key": "p1",
+          "url": "https://archive.org/",
+          "probe": {
+            "url": "https://archive.org/",
+            "probedAt": "2026-10-26T16:11:08.379Z",
+            "status": 200,
+            "finalUrl": "https://archive.org/",
+            "title": "Internet Archive: Digital Library of Free & Borrowable Texts, Movies, Music & Wayback Machine",
+            "loadMs": 3076,
+            "bodyTextLength": 0,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [],
+            "cookieBanner": [],
+            "interactiveRefs": 64,
+            "failReasons": [],
+            "verdict": "pass"
+          }
+        }
+      ],
+      "probeVerdict": "pass",
+      "note": "probe passes (64 interactive refs) but the page is a web-component app with empty innerText; not used"
+    },
+    {
+      "id": "lobsters",
+      "name": "Lobsters",
+      "host": "lobste.rs",
+      "category": "forum / news",
+      "heldOut": null,
+      "status": "rejected",
+      "rejectReason": "front page loads, but /login and /search answered with an \"Oh noes!\" rate-limit page after about six requests in a few minutes; unsuitable for repeated loads",
+      "features": [],
+      "pages": [
+        {
+          "key": "p1",
+          "url": "https://lobste.rs/",
+          "probe": {
+            "url": "https://lobste.rs/",
+            "probedAt": "2026-10-26T16:10:51.661Z",
+            "status": 200,
+            "finalUrl": "https://lobste.rs/",
+            "title": "Lobsters",
+            "loadMs": 2652,
+            "bodyTextLength": 3120,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [],
+            "cookieBanner": [],
+            "interactiveRefs": 178,
+            "failReasons": [],
+            "verdict": "pass"
+          }
+        }
+      ],
+      "probeVerdict": "pass"
+    },
+    {
+      "id": "slashdot",
+      "name": "Slashdot",
+      "host": "slashdot.org",
+      "category": "news",
+      "heldOut": null,
+      "status": "candidate",
+      "rejectReason": null,
+      "features": [],
+      "pages": [
+        {
+          "key": "p1",
+          "url": "https://slashdot.org/",
+          "probe": {
+            "url": "https://slashdot.org/",
+            "probedAt": "2026-10-26T16:10:11.000Z",
+            "status": 200,
+            "finalUrl": "https://slashdot.org/",
+            "title": "Slashdot: News for nerds, stuff that matters, & software",
+            "loadMs": 2870,
+            "bodyTextLength": 34079,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [
+              "/challenge-platform/i"
+            ],
+            "cookieBanner": [],
+            "interactiveRefs": 207,
+            "verdict": "pass"
+          }
+        }
+      ],
+      "probeVerdict": "pass",
+      "note": "probe passes; only a Cloudflare script marker in the HTML (/challenge-platform/), no challenge shown; not used"
+    },
+    {
+      "id": "npr",
+      "name": "NPR text edition",
+      "host": "text.npr.org",
+      "category": "news",
+      "heldOut": null,
+      "status": "candidate",
+      "rejectReason": null,
+      "features": [],
+      "pages": [
+        {
+          "key": "p1",
+          "url": "https://text.npr.org/",
+          "probe": {
+            "url": "https://text.npr.org/",
+            "probedAt": "2026-10-26T16:10:13.985Z",
+            "status": 200,
+            "finalUrl": "https://text.npr.org/",
+            "title": "NPR : National Public Radio",
+            "loadMs": 3654,
+            "bodyTextLength": 1665,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [],
+            "cookieBanner": [],
+            "interactiveRefs": 27,
+            "verdict": "pass"
+          }
+        }
+      ],
+      "probeVerdict": "pass",
+      "note": "probe passes; only 27 interactive elements; not used"
+    },
+    {
+      "id": "bbc",
+      "name": "BBC News",
+      "host": "bbc.com",
+      "category": "news",
+      "heldOut": null,
+      "status": "candidate",
+      "rejectReason": null,
+      "features": [],
+      "pages": [
+        {
+          "key": "p1",
+          "url": "https://www.bbc.com/news",
+          "probe": {
+            "url": "https://www.bbc.com/news",
+            "probedAt": "2026-10-26T16:10:17.705Z",
+            "status": 200,
+            "finalUrl": "https://www.bbc.com/news",
+            "title": "BBC News - Breaking news, video and the latest top stories from the U.S. and around the world",
+            "loadMs": 2896,
+            "bodyTextLength": 8225,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [],
+            "cookieBanner": [],
+            "interactiveRefs": 120,
+            "verdict": "pass"
+          }
+        }
+      ],
+      "probeVerdict": "pass",
+      "note": "probe passes; not used"
+    },
+    {
+      "id": "craigslist",
+      "name": "craigslist",
+      "host": "craigslist.org",
+      "category": "classifieds",
+      "heldOut": null,
+      "status": "candidate",
+      "rejectReason": null,
+      "features": [],
+      "pages": [
+        {
+          "key": "p1",
+          "url": "https://www.craigslist.org/",
+          "probe": {
+            "url": "https://www.craigslist.org/",
+            "probedAt": "2026-10-26T16:10:20.679Z",
+            "status": 200,
+            "finalUrl": "https://www.craigslist.org/area/longisland",
+            "title": "craigslist: long island jobs, apartments, for sale, services, community, and events",
+            "loadMs": 2746,
+            "bodyTextLength": 3019,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [],
+            "cookieBanner": [],
+            "interactiveRefs": 261,
+            "verdict": "pass"
+          }
+        }
+      ],
+      "probeVerdict": "pass",
+      "note": "probe passes, but the home page is geo-targeted from the caller IP (title said \"long island\"), so it is not reproducible across machines; not used"
+    },
+    {
+      "id": "w3c",
+      "name": "W3C",
+      "host": "w3.org",
+      "category": "standards body",
+      "heldOut": null,
+      "status": "candidate",
+      "rejectReason": null,
+      "features": [],
+      "pages": [
+        {
+          "key": "p1",
+          "url": "https://www.w3.org/",
+          "probe": {
+            "url": "https://www.w3.org/",
+            "probedAt": "2026-10-26T16:10:23.528Z",
+            "status": 200,
+            "finalUrl": "https://www.w3.org/",
+            "title": "W3C",
+            "loadMs": 2604,
+            "bodyTextLength": 3736,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [],
+            "cookieBanner": [],
+            "interactiveRefs": 46,
+            "verdict": "pass"
+          }
+        }
+      ],
+      "probeVerdict": "pass",
+      "note": "probe passes; not used"
+    },
+    {
+      "id": "debian",
+      "name": "Debian (packages search and releases)",
+      "host": "debian.org",
+      "category": "distribution project site / forms and tables",
+      "heldOut": true,
+      "wave": 2,
+      "status": "accepted",
+      "rejectReason": null,
+      "features": [
+        "two search forms with identical Keyword/Search/Reset/Distribution controls",
+        "unnamed header search box",
+        "radios and a checkbox with labels",
+        "Index of releases table (value cells, repeated links)",
+        "image-only logo link; breadcrumb with CSS text-transform"
+      ],
+      "pages": [
+        {
+          "key": "p1",
+          "url": "https://www.debian.org/distrib/packages",
+          "probe": {
+            "url": "https://www.debian.org/distrib/packages",
+            "probedAt": "2026-10-27T00:12:26.118Z",
+            "status": 200,
+            "finalUrl": "https://www.debian.org/distrib/packages",
+            "title": "Debian -- Packages",
+            "loadMs": 2584,
+            "bodyTextLength": 5027,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [],
+            "cookieBanner": [],
+            "interactiveRefs": 75,
+            "failReasons": [],
+            "verdict": "pass"
+          }
+        },
+        {
+          "key": "p2",
+          "url": "https://www.debian.org/releases/",
+          "probe": {
+            "url": "https://www.debian.org/releases/",
+            "probedAt": "2026-10-27T00:12:28.771Z",
+            "status": 200,
+            "finalUrl": "https://www.debian.org/releases/",
+            "title": "Debian -- Debian Releases",
+            "loadMs": 2776,
+            "bodyTextLength": 4675,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [],
+            "cookieBanner": [],
+            "interactiveRefs": 76,
+            "failReasons": [],
+            "verdict": "pass"
+          }
+        }
+      ],
+      "probeVerdict": "pass"
+    },
+    {
+      "id": "kernel",
+      "name": "The Linux Kernel Archives",
+      "host": "kernel.org",
+      "category": "static project site / table",
+      "heldOut": true,
+      "wave": 2,
+      "status": "accepted",
+      "rejectReason": null,
+      "features": [
+        "releases table where tarball, pgp, patch, view diff, browse and changelog links repeat per row",
+        "image-only download and sponsor logo links",
+        "protocol/location table"
+      ],
+      "pages": [
+        {
+          "key": "p1",
+          "url": "https://www.kernel.org/",
+          "probe": {
+            "url": "https://www.kernel.org/",
+            "probedAt": "2026-10-27T00:12:31.653Z",
+            "status": 200,
+            "finalUrl": "https://www.kernel.org/",
+            "title": "The Linux Kernel Archives",
+            "loadMs": 2575,
+            "bodyTextLength": 1354,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [],
+            "cookieBanner": [],
+            "interactiveRefs": 89,
+            "failReasons": [],
+            "verdict": "pass"
+          }
+        }
+      ],
+      "probeVerdict": "pass"
+    },
+    {
+      "id": "iana",
+      "name": "IANA (home and HTTP status code registry)",
+      "host": "iana.org",
+      "category": "standards registry / tables",
+      "heldOut": true,
+      "wave": 2,
+      "status": "accepted",
+      "rejectReason": null,
+      "features": [
+        "registry table of 80+ rows (value, description, reference)",
+        "sortable column headers",
+        "menu links repeated in the footer table",
+        "image-only logo link",
+        "no form fields on the registry page"
+      ],
+      "pages": [
+        {
+          "key": "p1",
+          "url": "https://www.iana.org/",
+          "probe": {
+            "url": "https://www.iana.org/",
+            "probedAt": "2026-10-27T00:12:34.320Z",
+            "status": 200,
+            "finalUrl": "https://www.iana.org/",
+            "title": "Internet Assigned Numbers Authority",
+            "loadMs": 2637,
+            "bodyTextLength": 1240,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [],
+            "cookieBanner": [],
+            "interactiveRefs": 37,
+            "failReasons": [],
+            "verdict": "pass"
+          }
+        },
+        {
+          "key": "p2",
+          "url": "https://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml",
+          "probe": {
+            "url": "https://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml",
+            "probedAt": "2026-10-27T00:12:37.033Z",
+            "status": 200,
+            "finalUrl": "https://www.iana.org/assignments/http-status-codes",
+            "title": "Hypertext Transfer Protocol (HTTP) Status Code Registry",
+            "loadMs": 2695,
+            "bodyTextLength": 4143,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [],
+            "cookieBanner": [],
+            "interactiveRefs": 98,
+            "failReasons": [],
+            "verdict": "pass"
+          }
+        }
+      ],
+      "probeVerdict": "pass"
+    },
+    {
+      "id": "datatracker",
+      "name": "IETF Datatracker document search",
+      "host": "datatracker.ietf.org",
+      "category": "search form / disclosure",
+      "heldOut": true,
+      "wave": 2,
+      "status": "accepted",
+      "rejectReason": null,
+      "features": [
+        "Additional search criteria disclosure (setup click)",
+        "radios with no accessible name (label is a sibling text node)",
+        "checkboxes, labeled text fields, two Search buttons when open",
+        "accessible names with icon glyphs; Search disabled until text is typed",
+        "Cloudflare script reference only (soft marker), no challenge shown"
+      ],
+      "pages": [
+        {
+          "key": "p1",
+          "url": "https://datatracker.ietf.org/doc/search/",
+          "probe": {
+            "url": "https://datatracker.ietf.org/doc/search/",
+            "probedAt": "2026-10-27T00:12:39.813Z",
+            "status": 200,
+            "finalUrl": "https://datatracker.ietf.org/doc/search/",
+            "title": "Document Search",
+            "loadMs": 2720,
+            "bodyTextLength": 401,
+            "hardChallengeWords": [],
+            "softChallengeMarkers": [
+              "/challenge-platform/i"
+            ],
+            "cookieBanner": [],
+            "interactiveRefs": 28,
+            "failReasons": [],
+            "verdict": "pass"
+          }
+        }
+      ],
+      "probeVerdict": "pass"
+    }
+  ],
+  "probedAt": "2026-10-27T00:12:42.567Z"
+}

@@ -42,18 +42,24 @@ function canonical(value) {
 }
 const hash = value => crypto.createHash('sha256').update(canonical(value), 'utf8').digest('hex');
 const key = coordinate => `${coordinate.stepId}:${coordinate.ordinal}`;
-const operationIdentity = action => ({ coordinate: action.coordinate, locator: action.locator, operation: action.operation, origin: action.origin });
+// ADR-SC-007: the operation identity hashes the runner-reported ResolvedTarget (locator, tier, identity), never a backend-derived locator.
+const operationIdentity = action => ({ coordinate: action.coordinate, origin: action.origin, target: action.target, operation: action.operation });
 function fail(code) { const error = new Error(code); error.code = code; throw error; }
 function check(condition, code) { if (!condition) fail(code); }
+// The facts table must key exactly the refs the outline shows (WI-2 perceive.ts guarantees it; the backend refuses a mismatch at ingestion),
+// the summary must match the outline bytes, and every fact segment must stay inside its evidence.
 function validateObservationRelations(observation) {
-  const nodes = new Map(observation.nodes.map(node => [node.nodeId, node]));
-  check(nodes.size === observation.nodes.length, 'NODE_ID');
-  for (const node of observation.nodes) {
-    for (const id of [node.parentNodeId, node.regionId, node.formId, ...node.labelNodeIds]) {
-      check(id === null || nodes.has(id), 'NODE_RELATION');
-    }
-    // Strictly decreasing parent depth also excludes self-links and every parent cycle.
-    check(node.parentNodeId === null ? node.depth === 0 : node.depth === nodes.get(node.parentNodeId).depth + 1, 'NODE_RELATION');
+  const shown = [...observation.outline.matchAll(/\[(e[0-9]{1,6})\]/g)].map(match => match[1]);
+  const refs = Object.keys(observation.facts);
+  // The facts table has no schema-level key bound (the runner's schema policy audit caps maxProperties at 100): it is bounded here by the 4,096-ref ceiling and by the outline (40,000 bytes).
+  check(refs.length <= 4096, 'NODE_RELATION');
+  check(new Set(shown).size === shown.length && shown.length === refs.length && refs.every(ref => shown.includes(ref)), 'NODE_ID');
+  check(observation.projection.outlineBytes === Buffer.byteLength(observation.outline, 'utf8')
+    && observation.projection.shownNodes === refs.length && observation.projection.shownNodes <= observation.projection.totalNodes
+    && observation.projection.notShown === observation.projection.totalNodes - observation.projection.shownNodes
+    && (observation.projection.projected || observation.projection.tier === null), 'NODE_RELATION');
+  for (const fact of Object.values(observation.facts)) {
+    check(fact.evidenceSegments.every(segment => segment.start <= segment.end && segment.end <= fact.evidence.length), 'NODE_RELATION');
   }
 }
 function validateRead(value, existingCount, existingBytes, limits) {
@@ -87,8 +93,8 @@ function canonicalOrigin(value) {
   check(parsed.hostname.startsWith('[') || parsed.hostname.split('.').every(
     label => /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(label)), 'ORIGIN');
 }
-const proposalOperationIdentity = proposal => ({ coordinate: proposal.coordinate,
-  origin: proposal.executionEvidence.origin, locator: proposal.target.locator ?? null,
+const proposalOperationIdentity = (proposal, proof) => ({ coordinate: proposal.coordinate,
+  origin: proposal.executionEvidence.origin, target: proof.target ?? null,
   operation: proposal.operation });
 const mutableLedgerFields = new Set(['state', 'dispatchCount', 'outcomeCode', 'assertionPassed']);
 function immutableLedger(ledger) {
@@ -99,7 +105,6 @@ function validateInputs(context, source) {
   structural('runner-context', context);
   check(context.contextRevision >= 1 && context.materializationRevision >= 1, 'CONTEXT_REVISION');
   check(Date.parse(context.leaseExpiresAt) <= Date.parse(context.expiresAt), 'LEASE');
-  context.approvedOrigins.forEach(canonicalOrigin);
   check(table.sessionId === context.sessionId && table.scopeHash === context.scopeHash
     && table.sourceRevision === context.sourceRevision
     && table.configurationRevision === context.configurationRevision, 'INPUT_IDENTITY');
@@ -140,14 +145,14 @@ function validateInputs(context, source) {
     if (input.kind === 'destination') {
       let url;
       try { url = new URL(value); } catch { fail('ORIGIN'); }
-      check(!url.username && !url.password && context.approvedOrigins.includes(url.origin), 'ORIGIN');
+      check(!url.username && !url.password && (url.protocol === 'http:' || url.protocol === 'https:'), 'ORIGIN');
     }
   }
 }
 function validateMaterializations(contexts, source) {
   check(contexts.length > 0, 'MATERIALIZATION');
   const first = contexts[0];
-  const stableFields = [...identityFields, 'expiresAt', 'approvedOrigins', 'sourceStepIds',
+  const stableFields = [...identityFields, 'expiresAt', 'sourceStepIds',
     'authoredInputs', 'authoredInputsHash', 'limits'];
   const frozen = context => Object.fromEntries(stableFields.map(field => [field, context[field]]));
   for (let index = 0; index < contexts.length; index++) {
@@ -169,7 +174,6 @@ function validateMaterializations(contexts, source) {
       const allocation = context.allocations.find(item => item.bindingId === producer.bindingId);
       check(allocation && allocation.producerStepId === producer.coordinate.stepId, 'BINDING_PRODUCER');
       canonicalOrigin(producer.origin);
-      check(context.approvedOrigins.includes(producer.origin), 'ORIGIN');
       same(producer.availability, { bindingId: producer.bindingId,
         producerAdmissionId: producer.producerAdmissionId, contextId: context.contextId,
         workerId: context.workerId, ownerFence: context.ownerFence }, 'AVAILABILITY');
@@ -214,7 +218,7 @@ function validatePlan(plan) {
     if (action.origin === null) check(blank && index === 0
       && action.coordinate.stepId === plan.sourceSteps[0]
       && action.coordinate.ordinal === 0 && action.operation.kind === 'navigate'
-      && action.locator === null, 'BOOTSTRAP');
+      && action.target === null, 'BOOTSTRAP');
     else canonicalOrigin(action.origin);
     if (index === 0) check(blank ? action.origin === null : action.origin === plan.initialContext.origin, 'BOOTSTRAP');
     const stepIndex = plan.sourceSteps.indexOf(action.coordinate.stepId);
@@ -224,7 +228,7 @@ function validatePlan(plan) {
     counts.set(action.coordinate.stepId, action.coordinate.ordinal + 1);
     const page = action.operation.kind === 'navigate' || (action.operation.kind === 'assert'
       && ['url', 'title'].includes(action.operation.predicate));
-    check(page === (action.locator === null), 'TARGET_MISMATCH');
+    check(page === (action.target === null), 'TARGET_MISMATCH');
     check(action.operationHash === hash(operationIdentity(action)), 'OPERATION_HASH');
   }
   check(plan.sourceSteps.every(step => counts.has(step)), 'INCOMPLETE_PLAN');
@@ -277,7 +281,6 @@ function validateFlow(flow) {
     && session.owner.fence === context.ownerFence && session.scope.sourceRevision === context.sourceRevision
     && session.scope.configurationRevision === context.configurationRevision, 'ENVELOPE_IDENTITY');
   same(session.versions, context.versions, 'VERSION');
-  same(session.scope.approvedOrigins, context.approvedOrigins, 'ORIGIN');
   same(session.sourceSteps.map(step => step.stepId), context.sourceStepIds, 'ACTION_ORDER');
   same(plan.versions, context.versions, 'VERSION');
   check(plan.scopeHash === context.scopeHash && plan.sourceRevision === context.sourceRevision
@@ -293,12 +296,9 @@ function validateFlow(flow) {
     structural('observation', observation);
     validateObservationRelations(observation);
     check(Buffer.byteLength(canonical(observation), 'utf8') <= context.limits.maxObservationBytes
-      && observation.nodes.length <= context.limits.maxObservationNodes
-      && observation.nodes.every(node => node.depth <= context.limits.maxObservationDepth), 'BUDGET');
-    check(observation.sessionId === context.sessionId && observation.scopeHash === context.scopeHash
-      && context.approvedOrigins.includes(observation.origin), 'EVIDENCE_IDENTITY');
-    check(observation.nodes.every(node => node.documentId === observation.documentId
-      && node.generation === observation.generation), 'EVIDENCE_IDENTITY');
+      && Buffer.byteLength(observation.outline, 'utf8') <= context.limits.maxOutlineBytes, 'BUDGET');
+    canonicalOrigin(observation.origin);
+    check(observation.sessionId === context.sessionId && observation.scopeHash === context.scopeHash, 'EVIDENCE_IDENTITY');
     observationsByHash.set(hash(observation), observation);
   }
   for (let index = 0; index < count; index++) {
@@ -326,13 +326,14 @@ function validateFlow(flow) {
       check(observation && observation.origin === evidence.origin && observation.documentId === evidence.documentId
         && observation.generation === evidence.generation, 'OBSERVATION_HASH');
       if (proposal.target.kind !== 'page') {
-        const node = observation.nodes.find(item => item.nodeId === proposal.target.nodeId);
-        check(node && node.visible && node.locatorHints.some(locator => canonical(locator) === canonical(proposal.target.locator)), 'TARGET_MISMATCH');
+        // ref is a fact of this observation; the runner-reported target agrees with the gated fact (the D-15 prepare-proof cross-check);
+        // a read needs facts text and the page-level readRuleId (the backend-completed recipe)
+        const fact = observation.facts[proposal.target.ref], proof = preparations[index];
+        check(fact && proof.target !== null && proof.target.identity.role === fact.role
+          && (proof.target.identity.name === null || proof.target.identity.name === fact.name), 'TARGET_MISMATCH');
         if (proposal.operation.kind === 'read') {
           const recipe = proposal.operation.recipe;
-          check(recipe.classification === node.classification && recipe.policyRuleId === node.policyRuleId
-            && !['hidden', 'password'].includes(node.controlType)
-            && (recipe.kind !== 'controlValue' || recipe.controlType === node.controlType), 'SENSITIVE_SOURCE');
+          check(fact.text !== undefined && recipe.policyRuleId === observation.readRuleId && recipe.classification === 'permittedBusinessData', 'SENSITIVE_SOURCE');
         }
       }
     }
@@ -343,7 +344,7 @@ function validateFlow(flow) {
         || evidence.documentId !== previous.executionEvidence.documentId) check(proposal.generation > previous.generation, 'STALE_GENERATION');
     }
     const action = plan.actions[index];
-    same(proposalOperationIdentity(proposal), operationIdentity(action), 'OPERATION_IDENTITY');
+    same(proposalOperationIdentity(proposal, preparations[index]), operationIdentity(action), 'OPERATION_IDENTITY');
     const inputId = proposal.operation.destinationInputId || ((proposal.operation.value || proposal.operation.expected)?.kind === 'authoredLiteral'
       ? (proposal.operation.value || proposal.operation.expected).sourceInputId : null);
     if (inputId) {
@@ -371,7 +372,7 @@ function validateFlow(flow) {
     same(admitted.executionEvidence, evidence, 'EVIDENCE_IDENTITY');
     check(admitted.authoredInputsHash === context.authoredInputsHash, 'INPUT_HASH');
     check(admitted.evidenceHash === proposal.evidenceHash && admitted.requestDigest === hash(proposal)
-      && admitted.operationHash === hash(proposalOperationIdentity(proposal)), 'OPERATION_HASH');
+      && admitted.operationHash === hash(proposalOperationIdentity(proposal, preparations[index])), 'OPERATION_HASH');
     const preparation = preparations[index], dispatch = dispatches[index], outcome = outcomes[index];
     structural('bridge#/definitions/preparation', preparation);
     structural('bridge#/definitions/dispatch', dispatch);
@@ -549,15 +550,12 @@ function validateObservationRefresh(flow) {
     && flow.callbackKey === observationRefreshKey(request, flow.idempotencyKey), 'REFRESH_CORRELATION');
   const observation = callback.observation, bytes = Buffer.byteLength(canonical(observation), 'utf8');
   validateObservationRelations(observation);
-  check(observation.sessionId === request.sessionId && observation.scopeHash === request.scopeHash
-    && observation.nodes.every(node => node.documentId === observation.documentId && node.generation === observation.generation), 'EVIDENCE_IDENTITY');
-  check(context.approvedOrigins.includes(observation.origin), 'ORIGIN');
+  check(observation.sessionId === request.sessionId && observation.scopeHash === request.scopeHash, 'EVIDENCE_IDENTITY');
   canonicalOrigin(observation.origin);
   check(observation.generation > request.expectedGeneration, 'STALE_GENERATION');
   check(bytes <= context.limits.maxObservationBytes
     && before.evidenceBytes + bytes <= context.limits.maxSanitizedEvidenceBytesTotal
-    && observation.nodes.length <= context.limits.maxObservationNodes
-    && observation.nodes.every(node => node.depth <= context.limits.maxObservationDepth), 'BUDGET');
+    && Buffer.byteLength(observation.outline, 'utf8') <= context.limits.maxOutlineBytes, 'BUDGET');
   check(flow.callbackAcknowledgedBeforeResponse && after.state === 'PROPOSING'
     && after.generation === observation.generation && after.observationHash === hash(observation), 'REFRESH_COMMIT');
   check(after.observations === before.observations + 1 && after.evidenceBytes === before.evidenceBytes + bytes
@@ -732,60 +730,13 @@ function runFixtures() {
       checked++;
     }
   }
-  checked += runGovernedPolicy(fixtures);
+  checked += runRefusalCodes();
   return checked;
 }
 
-// STUDIO-OBS-014 C2b (c2b-spec.json): the governed observation policy. Every vector is reproduced
-// by this independent canonicalizer; a vector is never adjusted to match an implementation (SC-3).
-function runGovernedPolicy(fixtures) {
+// The bridge refusal vocabulary is closed and ordered: the runner list (GUIDED_REFUSAL_CODES), then POLICY_DENIED.
+function runRefusalCodes() {
   let checked = 0;
-  const policyNames = new Set();
-  for (const vector of fixtures.observationPolicyHashVectors) {
-    assert(!policyNames.has(vector.name), `duplicate policy vector ${vector.name}`);
-    policyNames.add(vector.name);
-    structural('runner-context#/definitions/ObservationApplicationPolicy', vector.applicationPolicy);
-    assert.equal(hash(vector.applicationPolicy), vector.observationPolicyHash, `${vector.name}: observationPolicyHash`);
-    checked += 2;
-  }
-  const documentVector = fixtures.guidedPolicyDocumentVector;
-  structural('guided-policy#/definitions/policyDocumentInput', documentVector.requestDocument);
-  structural('guided-policy#/definitions/policyDocument', documentVector.document);
-  assert.equal(hash(documentVector.document), documentVector.documentHash, 'guidedPolicyDocumentVector documentHash');
-  assert.equal(hash(documentVector.document.applicationPolicy), documentVector.observationPolicyHash,
-    'guidedPolicyDocumentVector observationPolicyHash');
-  // The case documents are copies of the vector, not a second authority.
-  assert.deepEqual(fixtures.documents.guidedPolicyDocument, documentVector.document, 'guidedPolicyDocument is the vector document');
-  assert.deepEqual(fixtures.documents.guidedPolicyRequestDocument, documentVector.requestDocument, 'guidedPolicyRequestDocument is the vector request');
-  const view = fixtures.documents.guidedPolicyView.latest;
-  assert.deepEqual(view.document, documentVector.document, 'the created view stores the normalized vector document');
-  assert.equal(view.documentHash, documentVector.documentHash, 'created view documentHash');
-  assert.equal(view.observationPolicyHash, documentVector.observationPolicyHash, 'created view observationPolicyHash');
-  checked += 9;
-  // policyHash is the canonical-v1 SHA-256 of applicationPolicy exactly as sent, in every fixture context.
-  let contexts = 0;
-  (function walk(value) {
-    if (Array.isArray(value)) return value.forEach(walk);
-    if (!value || typeof value !== 'object') return;
-    if ('materializationRevision' in value && 'authoredInputsHash' in value && 'limits' in value) {
-      assert.equal(value.policyHash, hash(value.applicationPolicy), 'fixture context policyHash');
-      contexts++;
-    }
-    Object.values(value).forEach(walk);
-  })(fixtures.documents);
-  assert(contexts > 0, 'fixture contexts carry the governed policy');
-  checked += contexts;
-  // The governed ObservationReadGrant is a narrowing copy of replay-ipc ReadGrant, never wider.
-  const governedGrant = ajv.getSchema(base + 'runner-context.schema.json#/definitions/ObservationReadGrant');
-  const replayGrant = ajv.getSchema(base + 'replay-ipc.schema.json#/definitions/ReadGrant');
-  const grants = [fixtures.documents.observationReadGrant,
-    ...fixtures.observationPolicyHashVectors.flatMap(vector => vector.applicationPolicy.readGrants),
-    ...documentVector.document.applicationPolicy.readGrants];
-  for (const grant of grants) {
-    assert(governedGrant(grant), 'governed read grant fixture');
-    assert(replayGrant(grant), `a valid ObservationReadGrant must be a valid replay ReadGrant: ${JSON.stringify(replayGrant.errors)}`);
-    checked += 2;
-  }
   // bridge#/definitions/refusal: the runner list order (GUIDED_REFUSAL_CODES) then POLICY_DENIED.
   const refusal = readJson('bridge.schema.json').definitions.refusal;
   const codes = refusal.properties.code.enum;
@@ -812,7 +763,7 @@ function runPublication() {
   const publication = readJson('publication-fixtures.json');
   snapshotOracle.wireBounds(publication.validationRequest);
   let checked = 0;
-  const types = {basis:'replay-validation#/definitions/ValidationBasis',artifact:'replay-artifact',build:'replay-profile#/definitions/BuildIdentity',trustedPolicy:'replay-ipc#/definitions/TrustedPolicy',job:'replay-job',admissionRequest:'replay-job#/definitions/AdmissionRequest',admissionReceipt:'replay-job#/definitions/AdmissionReceipt',launch:'replay-ipc#/definitions/Launch3',execute:'replay-ipc#/definitions/Execute3',validationRequest:'replay-validation'};
+  const types = {basis:'replay-validation#/definitions/ValidationBasis',artifact:'replay-artifact',build:'replay-profile#/definitions/BuildIdentity',job:'replay-job',admissionRequest:'replay-job#/definitions/AdmissionRequest',admissionReceipt:'replay-job#/definitions/AdmissionReceipt',launch:'replay-ipc#/definitions/Launch3',execute:'replay-ipc#/definitions/Execute3',validationRequest:'replay-validation'};
   for (const [key, type] of Object.entries(types)) {
     const [name, fragment] = type.split('#');
     const validate = ajv.getSchema(base + name + '.schema.json' + (fragment ? '#' + fragment : ''));
@@ -894,7 +845,6 @@ function runPublication() {
   assert.equal(hash(publication.basis.translationPlan), publication.basis.translationHash);
   assert.equal(hash(publication.artifact), publication.job.binding.artifactHash);
   assert.equal(hash(publication.job.configuration), publication.job.binding.configurationHash);
-  assert.equal(hash(publication.trustedPolicy), publication.job.binding.currentPolicyHash);
   assert.equal(publication.job.binding.learnedPlanHash, publication.artifact.learnedPlanHash);
   assert.equal(publication.job.binding.referencePolicyHash, hash(publication.artifact.replayPolicy));
   assert.equal(publication.job.binding.publicationEvidenceHash,
@@ -917,7 +867,12 @@ function runPublication() {
   assert.equal(w.receipt.questionCaptureHash, hash(w.context.questionCapture));
   assert.equal(w.context.questionCapture.modelQuestionHash, hash(w.attempt.modelQuestion));
   assert.equal(w.questionPlan.planHash, hash(w.questionPlan.plan));
-  assert.notEqual(w.receipt.answer.nodeId, prep.proposal.target.nodeId, 'refresh node is independently proved');
+  // The fresh node is independently proved: a later generation, whose runner-reported identity is the accepted choice's stored selection.
+  const accepted = w.meanings.find(meaning => meaning.choiceId === w.receipt.answer.choiceId);
+  assert(accepted, 'the receipt names one of the witness meanings');
+  assert(prep.proposal.target.generation > w.receipt.answer.generation, 'refresh node is independently proved');
+  assert.deepEqual(prep.proof.target.identity, { role: accepted.selection.role, name: accepted.selection.name },
+    'the fresh preparation proves the identity of the accepted selection');
   assert(publication.basis.preparations.every(p => !Object.hasOwn(p, 'observedChoice')), 'zero-choice optional evidence is omitted');
   const singleton = structuredClone(choice.basis), single = singleton.preparations.find(p => p.observedChoice).observedChoice;
   single.meanings.splice(0, 1); single.context.question.choices.splice(0, 1); single.attempt.modelQuestion.choices.splice(0, 1);
@@ -940,7 +895,7 @@ function runPublication() {
 
 // The one public OpenAPI: guided sessions under /api/v1/studio, the observed replay routes, no
 // retired generation or compile route.
-const guidedOperations = ['POST /guided-sessions', 'GET /guided-sessions/{id}', 'GET /guided-sessions/{id}/result',
+const guidedOperations = ['POST /guided-sessions', 'GET /guided-sessions/latest', 'GET /guided-sessions/{id}', 'GET /guided-sessions/{id}/result',
   'GET /guided-sessions/{id}/clarification', 'POST /guided-sessions/{id}/clarify', 'POST /guided-sessions/{id}/cancel',
   'POST /guided-sessions/{id}/finalize', 'GET /guided-sessions/{id}/video'];
 // AR-1 (STUDIO-OBS-013): the recording refusals shared through components.responses.
@@ -960,7 +915,7 @@ function runPublicApi() {
     for (const method of Object.keys(item)) if (['get', 'post', 'put', 'patch', 'delete'].includes(method)) operations.push(`${method.toUpperCase()} ${route}`);
   }
   for (const retired of retiredOperations) assert(!operations.includes(retired), `retired operation still declared: ${retired}`);
-  assert.equal(operations.length, 44, 'OBS-015 changes contracts on existing operations only; OBS-008 C-int W1 adds getStudioTestCapabilities');
+  assert.equal(operations.length, 32, 'OBS-015 changes contracts on existing operations only; OBS-008 C-int W1 adds getStudioTestCapabilities; STUDIO-UNIFY-001.6 adds readLatestGuidedAttempts; STUDIO-GOV-001.3 removes the five guided-policy operations; STUDIO-GOV-001.2 removes the eight Studio schedule operations');
   assert(operations.includes('DELETE /v2/runs/{id}'), 'runner cancellation is DELETE /v2/runs/{id}');
   assert(operations.includes('POST /tests/{id}/validate-variables'), 'validate-variables stays documented (CLN-12)');
   const pointer = (root, fragment) => (fragment || '').replace(/^#?\//, '').split('/').filter(Boolean)
@@ -1003,7 +958,11 @@ function runPublicApi() {
   assert.equal(api.components.securitySchemes.serviceIdentity.type, 'http');
   assert.equal(api.components.securitySchemes.serviceIdentity.scheme, 'bearer');
   const guided = operations.filter(operation => operation.split(' ')[1].startsWith('/guided-sessions'));
-  assert.deepEqual([...guided].sort(), [...guidedOperations].sort(), 'eight guided-session routes');
+  assert.deepEqual([...guided].sort(), [...guidedOperations].sort(), 'nine guided-session routes');
+  // STUDIO-UNIFY-001.6 AC-10: the documented 200 example of the latest-attempts read validates against its schema.
+  const latest = api.paths['/guided-sessions/latest'].get;
+  assert.equal(latest.operationId, 'readLatestGuidedAttempts');
+  content(latest.responses['200'].content);
   // Both recording routes reference the shared refusals (AR-1 addendum E-1, landed in OBS-014 C2a):
   // reference equality, not a literal comparison. Status sets stay pinned.
   const guidedVideo = api.paths['/guided-sessions/{id}/video'].get;
@@ -1042,18 +1001,23 @@ function runPublicApi() {
     }
     assert(!JSON.stringify(op).includes('accountRef') && !JSON.stringify(op).includes('authConnection'));
   }
-  // STUDIO-OBS-014 C2b: startGuidedSession refuses an unapproved policy with the closed v3 error
-  // (409) and a budget with v3 BUDGET_EXCEEDED or the platform RATE_LIMITED (429 + Retry-After).
+  // STUDIO-OBS-014 C2b: startGuidedSession refuses a conflict with the closed v3 error (409) and a
+  // budget with v3 BUDGET_EXCEEDED or the platform RATE_LIMITED (429 + Retry-After).
   const start = api.paths['/guided-sessions'].post;
   assert.deepEqual(Object.keys(start.responses).sort(), ['202', '400', '401', '403', '409', '422', '429', '503']);
   const v3Error = ajv.getSchema(base + 'error.schema.json');
   assert.equal(start.responses['409'].content['application/json'].schema.$ref, '../studio-observed-authoring/contracts/v3/error.schema.json');
   for (const example of Object.values(start.responses['409'].content['application/json'].examples)) {
     assert(v3Error(example.value), JSON.stringify(v3Error.errors));
-    assert(['POLICY_NOT_APPROVED', 'REVISION_CONFLICT'].includes(example.value.code));
-    if (example.value.code === 'REVISION_CONFLICT') assert(['FIRST_LEARN_STEP_NARROWED',
+    assert(example.value.code === 'REVISION_CONFLICT');
+    assert(['FIRST_LEARN_STEP_NARROWED',
       'FIRST_LEARN_STEP_UNKNOWN', 'BASE_REVISION_MISMATCH', 'BASE_IDENTITY_INCOMPLETE']
       .includes(example.value.messageCode));
+    examples++;
+  }
+  for (const example of Object.values(start.responses['403'].content['application/json'].examples)) {
+    assert(v3Error(example.value), JSON.stringify(v3Error.errors));
+    assert(example.value.code === 'ORIGIN_NOT_ALLOWED' && example.value.retryable === false);
     examples++;
   }
   const budget = start.responses['429'];
@@ -1068,36 +1032,9 @@ function runPublicApi() {
     budgetExamples++;
     examples++;
   }
-  assert.equal(budgetExamples, 3);
-  // The five governed policy routes: Studio handlers, closed v3 guided-policy bodies.
-  const policyOperations = operations.filter(operation => operation.split(' ')[1].startsWith('/guided-policies'));
-  const expectedPolicy = { 'GET /guided-policies': 'lookupGuidedPolicy', 'POST /guided-policies': 'createGuidedPolicy',
-    'GET /guided-policies/{id}': 'readGuidedPolicy', 'POST /guided-policies/{id}/versions': 'createGuidedPolicyVersion',
-    'POST /guided-policies/{id}/versions/{version}/approval': 'approveGuidedPolicyVersion' };
-  assert.deepEqual([...policyOperations].sort(), Object.keys(expectedPolicy).sort(), 'five guided-policy routes');
-  assert.deepEqual(api.paths['/guided-policies'].post.responses['201'].content['application/json'].example,
-    readJson('fixtures.json').documents.guidedPolicyView, 'the createGuidedPolicy 201 example is the fixture view');
-  for (const operation of policyOperations) {
-    const [method, route] = operation.split(' ');
-    const op = api.paths[route][method.toLowerCase()];
-    assert.equal(op.operationId, expectedPolicy[operation]);
-    assert.deepEqual(op.tags, ['guided-policies']);
-    assert.equal(op.security, undefined);
-    assert.equal(op['x-internal'], undefined);
-    assert.equal(op.responses['401'].$ref, '#/components/responses/SessionUnauthorized');
-    assert.equal(op.responses['403'].$ref, '#/components/responses/Forbidden');
-    if (op.requestBody) {
-      assert(op.requestBody.required);
-      assert.match(op.requestBody.content['application/json'].schema.$ref, /guided-policy\.schema\.json#\/definitions\//);
-      if (op.requestBody.content['application/json'].example !== undefined) content(op.requestBody.content);
-    }
-    for (const [status, response] of Object.entries(op.responses)) {
-      if (!/^2/.test(status)) continue;
-      assert.equal(response.content['application/json'].schema.$ref,
-        '../studio-observed-authoring/contracts/v3/guided-policy.schema.json#/definitions/policyView', `${operation} ${status} body`);
-      if (response.content['application/json'].example !== undefined) content(response.content);
-    }
-  }
+  assert.equal(budgetExamples, 4);
+  assert(Object.values(budget.content['application/json'].examples).some(example =>
+    example.value.messageCode === 'LEARNING_CAPACITY_EXHAUSTED' && example.value.retryable === true), 'learning capacity example');
   // O-1: canonical authoring is the only create/update/detail path; list stays its own projection.
   assert.equal(api.components.schemas.TestPage.properties.data.items.$ref, '#/components/schemas/TestDto');
   assert.equal(api.paths['/tests/{id}'].get.responses['200'].content['application/json'].schema.$ref,
@@ -1234,7 +1171,7 @@ function validateExtendedBasis(basis, authority) {
     const digest = hash(proposal);
     check(ledger.requestDigest === digest && proof.requestDigest === digest && association.proposalHash === digest,
       'PROPOSAL_DIGEST');
-    check(ledger.operationHash === hash(proposalOperationIdentity(proposal)), 'OPERATION_HASH');
+    check(ledger.operationHash === hash(proposalOperationIdentity(proposal, proof)), 'OPERATION_HASH');
     check(ledger.admission.policyDecisionHash === hash({ scopeHash, preparation: proof, requestDigest: digest }),
       'POLICY_DECISION');
     same(ledger, authority.ledgers.find(l => l.admission.admissionId === ledger.admission.admissionId), 'LEDGER_IMMUTABLE');
@@ -1762,8 +1699,7 @@ function validateRetainedExecute(execute, acceptedLaunch) {
     && execute.configurationHash === launch.configurationHash && request.configurationHash === launch.configurationHash
     && execute.profileHash === hash(launch.profile), 'EXECUTE_LAUNCH_IDENTITY');
   same(launch.profile, request.profile, 'EXECUTE_LAUNCH_PROFILE'); same(launch.build, request.build, 'EXECUTE_LAUNCH_BUILD');
-  check(hash(launch.scope) === launch.scopeHash && launch.scopeHash === request.scopeHash
-    && hash(launch.policy) === request.currentPolicyHash, 'EXECUTE_LAUNCH_SCOPE');
+  check(hash(launch.scope) === launch.scopeHash && launch.scopeHash === request.scopeHash, 'EXECUTE_LAUNCH_SCOPE');
   check(launch.build.profileHash === hash(launch.profile)
     && launch.build.schemaBundleHash === hash(JSON.parse(generator.outputs['studio-runner/src/validator/observedSchemas.json'])), 'EXECUTE_CURRENT_SOURCE_BUILD');
   structural('replay-artifact', artifact); validatePlan(artifact.learnedPlan);
@@ -1814,8 +1750,8 @@ function validateRetainedExecute(execute, acceptedLaunch) {
     same(read.operation.recipe, binding.recipe, 'EXECUTE_RETAINED_RECIPE');
     const operation = operations.find(op => key(op.coordinate) === key(read.coordinate)), guard = guards.get(operation?.guardId);
     check(guard && guard.origin === read.origin && guard.target.kind === 'element'
-      && guard.target.controlType !== 'password' && guard.target.readRuleId === binding.recipe.policyRuleId, 'EXECUTE_RETAINED_GUARD');
-    same(guard.target.locator, read.locator, 'EXECUTE_RETAINED_GUARD');
+      && guard.target.readRuleId === binding.recipe.policyRuleId, 'EXECUTE_RETAINED_GUARD');
+    same(guard.target.locator, read.target.locator, 'EXECUTE_RETAINED_GUARD');
   }
   check(canonical(acceptedLaunch) === launchBefore, 'EXECUTE_LAUNCH_MUTATED');
   return { zeroBindings: zero, proof: true };
@@ -1917,6 +1853,105 @@ function runSnapshotCorrection() {
   return checked;
 }
 
+// STUDIO-FLEX-001 domain allow-list: reference implementation of docs/specs/studio/allowed-domains-vectors.json.
+// The backend (AllowedDomains) and the runner implement the same rules separately and run the same file.
+const allowedDomainsVectorsPath = path.resolve(__dirname, '../docs/specs/studio/allowed-domains-vectors.json');
+const allowedDomains = (() => {
+  const grammar = /^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)*[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
+  const overlap = (a, b) => a === b || a.endsWith('.' + b) || b.endsWith('.' + a);
+  function validEntries(entries) {
+    if (!Array.isArray(entries) || entries.length > 32) return false;
+    if (!entries.every(entry => typeof entry === 'string' && grammar.test(entry))) return false;
+    return entries.every((a, i) => entries.every((b, j) => i === j || !overlap(a, b)));
+  }
+  function fromEnv(value) {
+    if (value === null || value === '') return [];
+    const entries = value.split(',');
+    return validEntries(entries) ? entries : null;
+  }
+  function hostOf(url) {
+    if (typeof url !== 'string' || /[\u0000- \u007f\\]/.test(url)) return null;
+    const parsed = /^https?:\/\/([^/?#]*)/i.exec(url);
+    if (!parsed || parsed[1] === '' || /[@%[\]]/.test(parsed[1])) return null;
+    let host = parsed[1];
+    const colon = host.indexOf(':');
+    if (colon >= 0) {
+      const port = host.slice(colon + 1);
+      if (!/^[0-9]{1,5}$/.test(port) || Number(port) < 1 || Number(port) > 65535) return null;
+      host = host.slice(0, colon);
+    }
+    const ascii = require('node:url').domainToASCII(host);
+    return ascii !== '' && grammar.test(ascii) ? ascii : null;
+  }
+  function matches(entries, url) {
+    const host = hostOf(url);
+    return host !== null && entries.some(entry => host === entry || host.endsWith('.' + entry));
+  }
+  // The allow-all option: exactly 'true' or 'false'; anything else is refused (null). Unset and the empty
+  // string take the deployment default (ON for now), which the vectors deliberately do not pin.
+  function allowAllFromEnv(value) {
+    if (value === 'false') return false;
+    return value === null || value === '' || value === 'true' ? true : null;
+  }
+  // Allow-all: the list is ignored and a URL passes when its host passes hostOf.
+  function matchesAllowAll(url) {
+    return hostOf(url) !== null;
+  }
+  return { grammar, validEntries, fromEnv, hostOf, matches, allowAllFromEnv, matchesAllowAll };
+})();
+function runAllowedDomainVectors() {
+  const vectors = JSON.parse(fs.readFileSync(allowedDomainsVectorsPath, 'utf8'));
+  assert.equal(vectors.schemaVersion, 1);
+  assert.equal(vectors.entryGrammar, allowedDomains.grammar.source, 'entryGrammar is the normative expression');
+  assert.deepEqual(vectors.limits, { maxEntries: 32, maxEntryLength: 253, maxLabelLength: 63, maxPort: 65535 });
+  let checked = 0;
+  const names = new Set();
+  const unique = (group, name) => { assert(!names.has(group + name), `duplicate ${group} case: ${name}`); names.add(group + name); };
+  for (const test of vectors.configCases) {
+    unique('config', test.name);
+    assert.equal(allowedDomains.validEntries(test.entries), test.valid, `config: ${test.name}`);
+    assert.equal(test.valid, test.reason === undefined, `config reason only on refusals: ${test.name}`);
+    checked++;
+  }
+  for (const test of vectors.envCases) {
+    unique('env', test.name);
+    const entries = allowedDomains.fromEnv(test.value);
+    assert.deepEqual(entries, test.valid ? test.entries : null, `env: ${test.name}`);
+    checked++;
+  }
+  for (const test of vectors.hostCases) {
+    unique('host', test.name);
+    assert.equal(allowedDomains.hostOf(test.url), test.host, `host: ${test.name}`);
+    checked++;
+  }
+  for (const test of vectors.matchCases) {
+    unique('match', test.name);
+    assert(allowedDomains.validEntries(test.entries), `match entries are a valid list: ${test.name}`);
+    assert.equal(allowedDomains.matches(test.entries, test.url), test.match, `match: ${test.name}`);
+    checked++;
+  }
+  for (const test of vectors.allowAllEnvCases) {
+    unique('allowAllEnv', test.name);
+    const allowAll = allowedDomains.allowAllFromEnv(test.value);
+    assert.equal(allowAll, test.valid ? test.allowAll : null, `allow-all env: ${test.name}`);
+    assert.equal(test.valid, test.allowAll !== undefined, `allow-all value only on valid cases: ${test.name}`);
+    checked++;
+  }
+  for (const test of vectors.allowAllMatchCases) {
+    unique('allowAllMatch', test.name);
+    assert(allowedDomains.validEntries(test.entries), `allow-all match entries are a valid list: ${test.name}`);
+    assert.equal(allowedDomains.matchesAllowAll(test.url), test.match, `allow-all match: ${test.name}`);
+    checked++;
+  }
+  // The WHATWG parser agrees wherever the vectors treat a candidate as parseable and not pre-refused.
+  for (const test of vectors.hostCases) {
+    if (test.host === null || /%/.test(test.url)) continue;
+    assert.equal(new URL(test.url).hostname, test.host, `WHATWG host: ${test.name}`);
+    checked++;
+  }
+  return checked;
+}
+
 function run() {
   const schemas = runSchemas();
   const fixtures = runFixtures();
@@ -1927,9 +1962,11 @@ function run() {
   const graphTiming = runGraphTimingConformance();
   const retainedExecute = runRetainedExecuteConformance();
   const api = runPublicApi();
+  const domains = runAllowedDomainVectors();
   const generated = generator.check();
   console.log(`PASS v3: ${schemas} schemas with every definition compiled and one actionTiming definition; ${fixtures} fixture/semantic/canonical checks; ${planning} planning fixtures; ${publication} replay/publication checks.`);
-  console.log(`PASS public OpenAPI: ${api.operations} operations, eight guided-session routes, five guided-policy routes, ${api.examples} validated examples; no retired generation or compile route.`);
+  console.log(`PASS public OpenAPI: ${api.operations} operations, nine guided-session routes, ${api.examples} validated examples; no retired generation or compile route.`);
+  console.log(`PASS allowed domains: ${domains} config/env/host/match/allow-all vector checks against the reference implementation (docs/specs/studio/allowed-domains-vectors.json).`);
   console.log(`PASS codegen: ${generated}. No browser, database or publication proof claimed.`);
   console.log(`PASS incremental: ${incremental} schema/vector/basis/chain checks; synthetic transport authority only.`);
   console.log(`PASS snapshot correction: ${correction} authoritative source/base/envelope/counterexample checks; original byte limits retained.`);
@@ -1941,4 +1978,5 @@ module.exports = { hash, canonical, operationIdentity, validateFlow, validatePla
   validateInputs, observationRefreshKey, validateObservationRefresh, runSchemas, runFixtures, runPlanning,
   runPublication, runPublicApi, validateExtendedBasis, runIncremental, runSnapshotCorrection, projectEffectiveGraph,
   validateSnapshotGraph, validateTimingReadings, runGraphTimingConformance, snapshotOracle,
-  retainedExecuteLimits, executeProofBounds, validateRetainedExecute, runRetainedExecuteConformance, run };
+  retainedExecuteLimits, executeProofBounds, validateRetainedExecute, runRetainedExecuteConformance,
+  allowedDomains, runAllowedDomainVectors, run };

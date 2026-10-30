@@ -279,64 +279,57 @@
               }
             ]
           },
-          "selectedLocator": {
-            "oneOf": [
-              {
+          "selectedChoice": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "role": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "name": {
+                "type": "string",
+                "minLength": 0,
+                "maxLength": 160
+              },
+              "ref": {
+                "type": "string",
+                "pattern": "^e[0-9]{1,6}$"
+              },
+              "ordinal": {
                 "type": "object",
                 "additionalProperties": false,
                 "properties": {
-                  "kind": {
-                    "const": "role"
+                  "index": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 2147483647
                   },
-                  "role": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 256
-                  },
-                  "name": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 256
-                  },
-                  "exact": {
-                    "const": true
+                  "count": {
+                    "type": "integer",
+                    "minimum": 2,
+                    "maximum": 2147483647
                   }
                 },
                 "required": [
-                  "kind",
-                  "role",
-                  "name",
-                  "exact"
+                  "index",
+                  "count"
                 ]
               },
-              {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "kind": {
-                    "enum": [
-                      "label",
-                      "testId",
-                      "text",
-                      "placeholder"
-                    ]
-                  },
-                  "value": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 256
-                  },
-                  "exact": {
-                    "const": true
-                  }
-                },
-                "required": [
-                  "kind",
-                  "value",
-                  "exact"
-                ]
+              "scopeHash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
               }
+            },
+            "required": [
+              "role",
+              "name",
+              "ref"
             ]
+          },
+          "reconfirm": {
+            "const": true
           }
         },
         "required": [
@@ -349,6 +342,25 @@
           "referenceIndex",
           "needId",
           "predicate"
+        ],
+        "allOf": [
+          {
+            "not": {
+              "type": "object",
+              "properties": {
+                "selectedChoice": {
+                  "type": "object"
+                },
+                "reconfirm": {
+                  "const": true
+                }
+              },
+              "required": [
+                "selectedChoice",
+                "reconfirm"
+              ]
+            }
+          }
         ]
       },
       "minItems": 0,
@@ -417,7 +429,9 @@
     "observation": {
       "oneOf": [
         {
-          "$ref": "https://checks.citi.example/contracts/observed/v3/observation.schema.json"
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40000
         },
         {
           "type": "null"

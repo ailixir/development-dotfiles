@@ -288,6 +288,14 @@ public final class GuidedPublicationRepository {
         seen.add(ref.path("referenceName").asText());
       }
     }
+    // A template span (text mixed with <var NAME> tokens) declares the variables it names.
+    seen.addAll(
+        com.citi.put.checks.studio.guided.bridge.SourceTemplate.declaredPlainVariables(
+            candidate.artifact().path("inputRecipes"),
+            stepId ->
+                GuidedPlanBuilder.text(
+                    GuidedPlanBuilder.unique(basis.path("sourceSteps"), "stepId", stepId),
+                    "source")));
     seen.forEach(variables::add);
     secretNames.forEach(secrets::add);
     ObjectNode provenance = PublicationContracts.copy(candidate.hashes());

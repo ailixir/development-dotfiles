@@ -34,7 +34,7 @@ export interface GuidedStepSeekTarget {
 export function guidedSeekTargets(
   result: Pick<GuidedResult, 'evidence' | 'actionTimings' | 'explanation'>,
 ): GuidedStepSeekTarget[] {
-  if (result.evidence.video.status !== 'AVAILABLE') {
+  if (result.evidence.video === null || result.evidence.video.status !== 'AVAILABLE') {
     return [];
   }
   const timings = result.actionTimings;

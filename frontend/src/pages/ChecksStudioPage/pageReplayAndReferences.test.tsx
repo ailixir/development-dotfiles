@@ -235,7 +235,6 @@ function storePointer(draft: TestDto, sessionId: string) {
         sourceRevision: String(draft.sourceRevision),
         configurationRevision: String(draft.configurationRevision),
         environmentId: draft.environment,
-        applicationId: draft.csiId,
         versions: { contract: 3 },
       },
     }),
@@ -368,15 +367,15 @@ describe('AC-9 / T0 ruling A1.6 on the page: the replay names its cause', () => 
       sourceRevision: String(readyDraft.sourceRevision),
       configurationRevision: String(readyDraft.configurationRevision),
       environmentId: readyDraft.environment,
-      applicationId: readyDraft.csiId,
       versions: { contract: 3 },
       baseRevisionId: readyDraft.confirmedRevisionId,
       firstLearnStepId: fixtureStepId(1),
     });
     expect(start.key).toBeTruthy();
-    // The guided session it started re-learns from step 2 and ends from the learned receipt.
+    // The guided session it started re-learns from step 2 and ends from the learned receipt, which
+    // stays above the proof replay of the new revision.
     await waitFor(
-      () => expect(screen.getByTestId('guided-completion')).toHaveTextContent('Completed — steps 2–4 learned again.'),
+      () => expect(screen.getByTestId('guided-proof-receipt')).toHaveTextContent('Completed — steps 2–4 learned again.'),
       WAIT,
     );
     // Never repaired automatically: one replay, one explicit learn.

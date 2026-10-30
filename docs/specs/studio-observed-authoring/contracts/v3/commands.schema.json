@@ -30,11 +30,6 @@
           "minLength": 1,
           "maxLength": 256
         },
-        "applicationId": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 256
-        },
         "versions": {
           "$ref": "https://checks.citi.example/contracts/observed/v3/versions.schema.json"
         },
@@ -55,7 +50,6 @@
         "sourceRevision",
         "configurationRevision",
         "environmentId",
-        "applicationId",
         "versions"
       ]
     },

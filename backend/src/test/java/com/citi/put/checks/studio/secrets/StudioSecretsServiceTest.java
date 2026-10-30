@@ -18,6 +18,8 @@ import com.citi.put.checks.studio.StudioExecutionFixtures;
 import com.citi.put.checks.studio.StudioRepository;
 import com.citi.put.checks.studio.StudioValidationException;
 import com.citi.put.checks.studio.entity.UITest;
+import com.citi.put.checks.studio.navigation.AllowedDomains;
+import com.citi.put.checks.studio.support.TestDomains;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -84,8 +86,12 @@ class StudioSecretsServiceTest {
   }
 
   private StudioSecretsService service(StudioVaultProvider provider) {
+    return service(provider, TestDomains.FIXTURES);
+  }
+
+  private StudioSecretsService service(StudioVaultProvider provider, AllowedDomains domains) {
     return new StudioSecretsService(
-        repository, new CsiOwnershipEvaluator(), provider, platformMapper());
+        repository, new CsiOwnershipEvaluator(), provider, domains, platformMapper());
   }
 
   private static ObjectMapper platformMapper() {
@@ -185,7 +191,12 @@ class StudioSecretsServiceTest {
     ObjectMapper strict = spy(StudioSecretsService.strictCopyOf(platformMapper()));
     doReturn(strict).when(platform).copy();
     StudioSecretsService watched =
-        new StudioSecretsService(repository, new CsiOwnershipEvaluator(), vault, platform);
+        new StudioSecretsService(
+            repository,
+            new CsiOwnershipEvaluator(),
+            vault,
+            com.citi.put.checks.studio.support.TestDomains.FIXTURES,
+            platform);
     byte[] malformed = body("{not json " + CANARY);
 
     assertThatThrownBy(() -> watched.create(testId, malformed, stranger))
@@ -282,6 +293,50 @@ class StudioSecretsServiceTest {
                           .doesNotContain("line:");
                     }));
     assertThat(vault.creates()).isEmpty();
+  }
+
+  @Test
+  void everyAllowedOriginMustBeOnTheAllowedDomainsAndNothingIsWrittenToVaultOtherwise() {
+    var domains = new AllowedDomains(List.of("login.app.example"));
+    StudioSecretsService scoped = service(vault, domains);
+    for (String origins :
+        List.of(
+            "[\"https://evil.example\"]",
+            "[\"https://login.app.example\",\"https://evil.example\"]",
+            "[\"https://app.example\"]",
+            "[\"https://login.app.example.evil.org\"]",
+            "[\"http://127.0.0.1:8080\"]")) {
+      String json =
+          "{\"name\":\"LOGIN_PW\",\"value\":\"" + CANARY + "\",\"allowedOrigins\":" + origins + "}";
+      assertThatThrownBy(() -> scoped.create(testId, body(json), owner))
+          .as(origins)
+          .isInstanceOfSatisfying(
+              StudioValidationException.class,
+              e -> {
+                assertThat(e.getCode()).isEqualTo("INVALID_SECRET_ORIGINS");
+                assertThat(e.getMessage())
+                    .isEqualTo("Every allowed origin must be on this environment's allowed domains")
+                    .doesNotContain(CANARY);
+              });
+    }
+    assertThat(vault.creates()).as("nothing was written to Vault").isEmpty();
+
+    // The listed domain and its subdomains are accepted, on http or https and any port.
+    String accepted =
+        "{\"name\":\"LOGIN_PW\",\"value\":\""
+            + CANARY
+            + "\",\"allowedOrigins\":[\"https://login.app.example\",\"http://sso.login.app.example:8443\"]}";
+    assertThat(scoped.create(testId, body(accepted), owner).allowedOrigins())
+        .containsExactly("https://login.app.example", "http://sso.login.app.example:8443");
+    assertThat(vault.creates()).hasSize(1);
+
+    // The shipped empty list refuses every origin.
+    assertThatThrownBy(
+            () -> service(vault, AllowedDomains.none()).create(testId, body(valid("OTHER")), owner))
+        .isInstanceOfSatisfying(
+            StudioValidationException.class,
+            e -> assertThat(e.getCode()).isEqualTo("INVALID_SECRET_ORIGINS"));
+    assertThat(vault.creates()).hasSize(1);
   }
 
   @Test

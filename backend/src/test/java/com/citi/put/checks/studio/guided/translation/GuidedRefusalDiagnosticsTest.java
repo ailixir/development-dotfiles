@@ -77,13 +77,23 @@ class GuidedRefusalDiagnosticsTest {
             "NEXT_ACTION_CONTRACT_CALL",
             "NEXT_ACTION_MEANING",
             "NEXT_ACTION_EVIDENCE",
+            // ADR-SC-007: the grounding gates are appended in the order the validator runs them.
+            "NEXT_TARGET_REF",
             "NEXT_TARGET_INTENT",
+            "NEXT_SELECTED_CHOICE",
+            "NEXT_OPERATION_TARGET",
             "NEXT_AUTHORED_SOURCE",
             "NEXT_SECRET_POLICY",
             "NEXT_BINDING_MEANING",
             "NEXT_ASSERTION_PREDICATE",
+            "NEXT_ASSERT_TEXT_ABSENT",
+            "NEXT_READ_RULE",
             "NEXT_POLICY_CALL",
-            "NEXT_RESERVATION_CALL"),
+            "NEXT_RESERVATION_CALL",
+            // Runner-time refusals: persisted in progress.refusalGate, never receipted.
+            "RUNNER_OPTION_NOT_PRESENT",
+            "RUNNER_NO_DURABLE_LOCATOR",
+            "RUNNER_READ_NOT_ALLOWED"),
         java.util.Arrays.stream(Gate.values()).map(Enum::name).toList());
     for (Gate gate : Gate.values()) {
       assertTrue(receipt(gate).bytes().length <= 256);
@@ -213,6 +223,9 @@ class GuidedRefusalDiagnosticsTest {
     // The exact enum test separately binds these appended23 values to the accepted literal list.
     return java.util.Arrays.stream(Gate.values())
         .skip(11)
+        // The RUNNER_* values are runner-time refusals persisted on the session, never recorded
+        // on a model-reply capture, so they have no receipt phase to filter.
+        .filter(gate -> gate.name().startsWith("NEXT_"))
         .flatMap(
             gate ->
                 java.util.stream.IntStream.range(0, 3)

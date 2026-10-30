@@ -26,7 +26,8 @@ import { expect, test, type APIRequestContext, type Page } from '@playwright/tes
  *
  *   - profile `local` (embedded Postgres; the dev identity is `bb12345` with role `checks-admin`,
  *     which may write on any registered CSI);
- *   - `CHECKS_SOURCE_UI_TEST=true`, otherwise the Studio page renders "not available";
+ *   - the UI_TEST source on (the default of `checks.sources.UI_TEST`), otherwise the Studio page
+ *     renders "not available";
  *   - at least one registered CSI, because a draft's CSI must be registered
  *     (`ck_ui_tests_csi_registered`). The repeatable seed `db/seed/R__sample_data.sql` registers
  *     178672, 285614 and 396705; it is loaded by adding `classpath:db/seed` to `FLYWAY_LOCATIONS`.
@@ -101,7 +102,7 @@ test('preconditions: the backend answers, Studio is on, and a CSI is registered'
   };
   expect(
     body.sources.find((source) => source.type === 'UI_TEST')?.enabled,
-    'UI_TEST source is off; start bootRun with CHECKS_SOURCE_UI_TEST=true',
+    'UI_TEST source is off; it is on by default, so something set checks.sources.UI_TEST=false',
   ).toBe(true);
   const studio = body.features.find((feature) => feature.key === 'STUDIO');
   if (studio) expect(studio.enabled, 'the STUDIO feature is off').toBe(true);
@@ -176,7 +177,8 @@ test('create a draft, then add, edit and reorder steps and save: step IDs stay s
     const stepD = 'Check that the heading "Example Domain" is visible';
     await stepEditor(page, 2).fill(editedB);
     await addStep(page, stepD, 4);
-    await page.getByRole('button', { name: 'Move step 4 up' }).click();
+    await page.getByRole('button', { name: 'Actions for step 4' }).click();
+    await page.getByRole('menuitem', { name: 'Move up' }).click();
     await expect(stepEditor(page, 3)).toHaveValue(stepD);
     await expect(stepEditor(page, 4)).toHaveValue(stepC);
     await save(page);

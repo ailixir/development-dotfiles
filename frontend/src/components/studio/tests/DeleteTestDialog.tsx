@@ -50,7 +50,7 @@ const DeleteTestDialog: React.FC<DeleteTestDialogProps> = ({ test, onClose, onDe
     >
       <DialogTitle id="delete-test-title">Delete UI test?</DialogTitle>
       <DialogContent>
-        <Typography>“{test?.name}” will be removed from your tests list.</Typography>
+        <Typography>“{test?.name}” will be removed from All Checks.</Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
           Future scheduled runs stop. Accepted runs not yet dispatched may be refused. Already admitted runs follow existing stop and recovery controls; run history remains.
         </Typography>

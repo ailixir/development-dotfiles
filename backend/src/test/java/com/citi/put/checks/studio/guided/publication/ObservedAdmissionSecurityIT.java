@@ -114,7 +114,6 @@ class ObservedAdmissionSecurityIT {
           "referencePolicyHash",
           "publicationEvidenceHash",
           "scopeHash",
-          "currentPolicyHash",
           "grantId",
           "profile",
           "build");
@@ -185,15 +184,7 @@ class ObservedAdmissionSecurityIT {
       catalog.set("profile", FIXTURE.path("admissionRequest").path("profile"));
       catalog.set("build", FIXTURE.path("admissionRequest").path("build"));
       return new ObservedReplayProperties(
-          true,
-          30000,
-          1048576,
-          4194304,
-          2097152,
-          "[" + catalog + "]",
-          "[" + FIXTURE.path("trustedPolicy") + "]",
-          1280,
-          720);
+          true, 30000, 1048576, 4194304, 2097152, "[" + catalog + "]", 1280, 720);
     }
 
     @Bean
@@ -453,7 +444,6 @@ class ObservedAdmissionSecurityIT {
         "referencePolicyHash",
         "publicationEvidenceHash",
         "scopeHash",
-        "currentPolicyHash",
         "grantId",
         "startedAt"
       })

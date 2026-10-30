@@ -3,13 +3,12 @@ package com.citi.put.checks.studio.guided.bridge;
 import static com.citi.put.checks.studio.guided.session.GuidedSessionException.require;
 
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
+import com.citi.put.checks.studio.navigation.AllowedDomains;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 /** Trusted immutable provenance validation; deliberately performs no English extraction. */
@@ -19,6 +18,44 @@ public final class GuidedSourceReferenceValidator {
   public record Source(String text, List<ClassifiedRegion> approvedNonsecretRegions) {
     public Source {
       approvedNonsecretRegions = List.copyOf(approvedNonsecretRegions);
+    }
+
+    /**
+     * Whether {@code [start, end)} may be typed: inside one approved region, or a template, meaning
+     * authored text mixed with whole plain {@code <var NAME>} tokens and nothing else. A span that
+     * is only one variable token stays on the whole-variable configuration path, an edge inside a
+     * token would type half of it, and a secret token is never part of a template.
+     */
+    public boolean approves(int start, int end) {
+      if (approvedNonsecretRegions.stream()
+          .anyMatch(region -> region.startUtf16() <= start && region.endUtf16() >= end)) {
+        return true;
+      }
+      if (!SourceTemplate.hasVariable(text, start, end)
+          || SourceTemplate.isWholeVariable(text, start, end)
+          || SourceTemplate.splitsToken(text, start, end)
+          || SourceTemplate.overlapsSecret(text, start, end)) {
+        return false;
+      }
+      List<int[]> cover = new java.util.ArrayList<>();
+      approvedNonsecretRegions.forEach(
+          region -> cover.add(new int[] {region.startUtf16(), region.endUtf16()}));
+      SourceTemplate.variables(text)
+          .forEach(token -> cover.add(new int[] {token.start(), token.end()}));
+      cover.sort(java.util.Comparator.comparingInt(interval -> interval[0]));
+      int from = -1, to = -1;
+      for (int[] interval : cover) {
+        if (interval[0] > to) {
+          if (from <= start && to >= end) {
+            return true;
+          }
+          from = interval[0];
+          to = interval[1];
+        } else {
+          to = Math.max(to, interval[1]);
+        }
+      }
+      return from <= start && to >= end;
     }
   }
 
@@ -53,12 +90,27 @@ public final class GuidedSourceReferenceValidator {
   }
 
   private final GuidedContracts contracts;
+  private final AllowedDomains domains;
 
-  public GuidedSourceReferenceValidator(GuidedContracts contracts) {
+  public GuidedSourceReferenceValidator(GuidedContracts contracts, AllowedDomains domains) {
     this.contracts = contracts;
+    this.domains = domains;
   }
 
   public ObjectNode resolve(JsonNode session, Sources sources, JsonNode candidate) {
+    return resolve(session, sources, candidate, true);
+  }
+
+  /**
+   * The same checks without reading any configuration value: a template's variable tokens stay as
+   * authored. For source-only suggestions, never for an input a run will type.
+   */
+  public ObjectNode resolveSourceOnly(JsonNode session, Sources sources, JsonNode candidate) {
+    return resolve(session, sources, candidate, false);
+  }
+
+  private ObjectNode resolve(
+      JsonNode session, Sources sources, JsonNode candidate, boolean expandVariables) {
     contracts.validate("v3/source-reference", candidate);
     JsonNode scope = session.path("scope");
     require(
@@ -92,12 +144,18 @@ public final class GuidedSourceReferenceValidator {
               && boundary(source.text(), end),
           "INVALID_CONTRACT",
           422);
-      require(
-          source.approvedNonsecretRegions().stream()
-              .anyMatch(region -> region.startUtf16() <= start && region.endUtf16() >= end),
-          "FORBIDDEN_SCOPE",
-          403);
-      value = source.text().substring(start, end);
+      require(source.approves(start, end), "FORBIDDEN_SCOPE", 403);
+      boolean template = SourceTemplate.hasVariable(source.text(), start, end);
+      // A variable inside a navigation URL is not supported: the destination is checked as typed.
+      require(!template || !kind.equals("destination"), "FORBIDDEN_SCOPE", 403);
+      if (template && expandVariables) {
+        value =
+            SourceTemplate.expand(
+                source.text(), start, end, name -> variableValue(sources, step, name));
+        require(value != null, "MISSING_SOURCE", 409);
+      } else {
+        value = source.text().substring(start, end);
+      }
     } else {
       require(
           candidate.path("configurationRevision").asText().equals(sources.configurationRevision()),
@@ -139,12 +197,9 @@ public final class GuidedSourceReferenceValidator {
     // canonical validates complete UTF-16, without normalizing or decoding source bytes.
     GuidedContracts.canonical(contracts.object().put("value", value));
     if (kind.equals("destination")) {
-      String origin = origin(value);
-      boolean allowed = false;
-      for (JsonNode approved : scope.path("approvedOrigins")) {
-        allowed |= approved.asText().equals(origin);
-      }
-      require(allowed && value.length() <= 2048, "ORIGIN_NOT_ALLOWED", 403);
+      // The deployment's allowed domains are the only navigation control: any http(s) page on a
+      // listed domain or its subdomains, whether or not the test names it.
+      require(value.length() <= 2048 && domains.allows(value), "ORIGIN_NOT_ALLOWED", 403);
     }
     ObjectNode input =
         contracts
@@ -158,34 +213,22 @@ public final class GuidedSourceReferenceValidator {
     return input;
   }
 
+  private static String variableValue(Sources sources, String step, String name) {
+    for (ConfigurationValue config : sources.configuration().values()) {
+      if (config.stepId().equals(step)
+          && name.equals(config.referenceName())
+          && config.kind().equals("nonsecretText")
+          && config.approvedNonsecret()) {
+        return config.value();
+      }
+    }
+    return null;
+  }
+
   private static boolean boundary(String text, int offset) {
     return offset == 0
         || offset == text.length()
         || !(Character.isHighSurrogate(text.charAt(offset - 1))
             && Character.isLowSurrogate(text.charAt(offset)));
-  }
-
-  public static String origin(String value) {
-    try {
-      URI uri = URI.create(value);
-      require(
-          Set.of("http", "https").contains(uri.getScheme())
-              && uri.getHost() != null
-              && uri.getRawUserInfo() == null,
-          "ORIGIN_NOT_ALLOWED",
-          403);
-      int port = uri.getPort();
-      return uri.getScheme()
-          + "://"
-          + uri.getHost().toLowerCase(java.util.Locale.ROOT)
-          + (port == -1
-                  || port == 80 && uri.getScheme().equals("http")
-                  || port == 443 && uri.getScheme().equals("https")
-              ? ""
-              : ":" + port);
-    } catch (IllegalArgumentException failure) {
-      throw new com.citi.put.checks.studio.guided.session.GuidedSessionException(
-          "ORIGIN_NOT_ALLOWED", 403);
-    }
   }
 }

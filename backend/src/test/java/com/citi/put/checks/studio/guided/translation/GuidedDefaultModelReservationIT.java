@@ -45,7 +45,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.MapPropertySource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -127,21 +126,10 @@ class GuidedDefaultModelReservationIT {
     Flyway.configure()
         .dataSource(source)
         .locations("classpath:db/migration")
-        .target("23") // STUDIO-OBS-014 S3: governance tables (V19) at head
+        .target("29")
         .load()
         .migrate();
     context = new AnnotationConfigApplicationContext();
-    context
-        .getEnvironment()
-        .getPropertySources()
-        .addFirst(
-            new MapPropertySource(
-                "source-policy-only",
-                Map.of(
-                    "studio.guided-authoring.translation.applications",
-                    "orders",
-                    "studio.guided-authoring.translation.environments",
-                    "fixture")));
     for (String key :
         List.of(
             "studio.guided-authoring.translation.max-output-tokens",
@@ -155,20 +143,31 @@ class GuidedDefaultModelReservationIT {
     translationProperties = context.getBean(GuidedTranslationProperties.class);
     var sessionProperties = context.getBean(GuidedSessionProperties.class);
     assertThat(translationProperties.maxOutputTokens()).isEqualTo(4096);
-    // MODEL-SIZING (ruling 2026-10-18, option A-ii): 24 proposals x 4096 output, 24 x 32,768 input.
+    // MODEL-SIZING (ruling 2026-10-18, option A-ii): 24 proposals x 4096 output. ADR-SC-007 R9
+    // (re-ruled): the input total counts request BYTES, so it is 16 requests of the 98,304-byte
+    // request cap, 1,572,864 bytes. The output ceiling and total are unchanged.
     assertThat(sessionProperties.maxModelOutputTokensTotal()).isEqualTo(98304);
-    assertThat(sessionProperties.maxModelInputTokensTotal()).isEqualTo(786432);
+    assertThat(sessionProperties.maxModelInputTokensTotal()).isEqualTo(1572864);
     assertThat(sessionProperties.maxModelProposals()).isEqualTo(100);
-    assertThat(translationProperties.maxInputBytes()).isEqualTo(65536);
+    assertThat(translationProperties.maxInputBytes()).isEqualTo(98304);
     jdbc = new JdbcTemplate(context.getBean(DataSource.class));
     var tx = new TransactionTemplate(new DataSourceTransactionManager(source));
     repository = new GuidedSessionRepository(jdbc, tx, C);
     store = new GuidedTranslationStore(jdbc, C);
-    prompts = new GuidedPromptAssembler(C);
+    prompts = new GuidedPromptAssembler(C, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     seedSource();
     var access = new PersistedSourceAccess();
-    service = new GuidedSessionService(repository, C, access, sessionProperties, clock);
-    var materialization = new GuidedMaterializationService(jdbc, C);
+    service =
+        new GuidedSessionService(
+            repository,
+            C,
+            access,
+            sessionProperties,
+            com.citi.put.checks.studio.support.TestDomains.FIXTURES,
+            clock);
+    var materialization =
+        new GuidedMaterializationService(
+            jdbc, C, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     service.installBridge(
         materialization,
         new GuidedPreparationStore(jdbc, C),
@@ -176,22 +175,14 @@ class GuidedDefaultModelReservationIT {
         new GuidedAssignmentStore(jdbc, C));
     service.installTranslation(store, new GuidedClarificationContextStore(jdbc, C));
     // STUDIO-OBS-014 S3: every start needs an approved governed policy for its scope.
-    com.citi.put.checks.studio.support.ObservedPublicationFixture.installGovernance(
-        service,
-        jdbc,
-        "CSI-123",
-        "orders",
-        "fixture",
-        List.of("https://orders.example.test"),
-        null);
+    com.citi.put.checks.studio.support.ObservedPublicationFixture.installCsiBudget(service, jdbc);
     ObjectNode start =
         C.object()
             .put("schemaVersion", 3)
             .put("testId", testId.toString())
             .put("sourceRevision", "1")
             .put("configurationRevision", "1")
-            .put("environmentId", "fixture")
-            .put("applicationId", "orders");
+            .put("environmentId", "fixture");
     start.set("versions", versions());
     sessionId = service.start(user, "original-start", start).path("sessionId").asText();
     repository.transaction(
@@ -243,11 +234,41 @@ class GuidedDefaultModelReservationIT {
     var counters = after.path("document").path("counters");
     assertThat(counters.path("modelProposals").asInt()).isEqualTo(13);
     assertThat(counters.path("modelOutputTokens").asInt()).isEqualTo(13 * 4096);
-    assertThat(counters.path("modelInputTokens").asLong()).isLessThanOrEqualTo(786432);
+    assertThat(counters.path("modelInputTokens").asLong()).isLessThanOrEqualTo(1572864);
     assertThat(after.path("document").path("state").asText()).isNotEqualTo("FAILED");
     assertThat(after.path("progress").path("errorCode").asText()).isEmpty();
     assertThat(sends).isEqualTo(13);
     assertThat(attemptCount()).isEqualTo(13);
+  }
+
+  /**
+   * ADR-SC-007 R9: {@code modelInputTokens} is charged in request bytes (the wire body plus its
+   * 2,048-byte allowance), at the ceiling and with no refund. Sixteen requests at the 98,304-byte
+   * request cap fill the 1,572,864-byte total exactly; the seventeenth is refused before any insert
+   * and ends the session BUDGET_EXCEEDED. The output side (16 x 4096) stays far below its own
+   * total, so the refusal is the input byte total and nothing else.
+   */
+  @Test
+  void inputTotalIsChargedInRequestBytesAndSixteenRequestCapsFit() {
+    int cap = translationProperties.maxInputBytes();
+    assertThat(cap).isEqualTo(98304);
+    for (int ordinal = 1; ordinal <= 16; ordinal++) {
+      assertThat(reserveBytes("byte-cap-call-" + ordinal, cap)).isTrue();
+    }
+    var full = snapshot();
+    var counters = full.path("document").path("counters");
+    assertThat(counters.path("modelInputTokens").asLong()).isEqualTo(16L * cap).isEqualTo(1572864);
+    assertThat(counters.path("modelOutputTokens").asInt()).isEqualTo(16 * 4096);
+    assertThat(counters.path("modelProposals").asInt()).isEqualTo(16);
+    assertThat(full.path("document").path("state").asText()).isNotEqualTo("FAILED");
+    assertThat(attemptCount()).isEqualTo(16);
+    assertThat(reserveBytes("byte-cap-call-17", cap)).isFalse();
+    var terminal = snapshot();
+    assertThat(terminal.path("document").path("state").asText()).isEqualTo("FAILED");
+    assertThat(terminal.path("progress").path("errorCode").asText()).isEqualTo("BUDGET_EXCEEDED");
+    assertThat(terminal.path("document").path("counters").path("modelInputTokens").asLong())
+        .isEqualTo(1572864);
+    assertThat(attemptCount()).isEqualTo(16);
   }
 
   @Test
@@ -332,7 +353,7 @@ class GuidedDefaultModelReservationIT {
     assertThat(before.path("document").path("counters").path("modelProposals").asInt())
         .isEqualTo(24);
     assertThat(before.path("document").path("counters").path("modelInputTokens").asLong())
-        .isLessThanOrEqualTo(786432);
+        .isLessThanOrEqualTo(1572864);
     assertThat(sends).isEqualTo(24);
     assertThat(attemptCount()).isEqualTo(24);
     assertThat(
@@ -436,6 +457,57 @@ class GuidedDefaultModelReservationIT {
           }
           return new Reservation(request, attempt, bytes, deadline);
         });
+  }
+
+  /**
+   * Reserves one SOURCE_PLAN call that is charged exactly {@code bytes} of input at the 4096 output
+   * ceiling, through the same store and session methods the translation service uses. Returns false
+   * when the session reservation limits refuse it (the session then ends FAILED).
+   */
+  private boolean reserveBytes(String requestId, int bytes) {
+    Boolean reserved =
+        service.translationTransaction(
+            controller,
+            sessionId,
+            1,
+            current -> {
+              int ceiling = translationProperties.maxOutputTokens();
+              if (!service.modelReservationFitsLocked(current, bytes, ceiling)) {
+                return false;
+              }
+              var attempt =
+                  store.reserveAttempt(
+                      current.document(),
+                      requestId,
+                      1,
+                      GuidedModelRequest.Kind.SOURCE_PLAN.name(),
+                      GuidedContracts.hash(C.object().put("requestId", requestId)),
+                      store.state(sessionId).path("planRevision").asLong(),
+                      bytes,
+                      ceiling,
+                      "budget-translator",
+                      clock.instant().plusSeconds(translationProperties.callSeconds()));
+              assertThat(attempt.send()).isTrue();
+              service.reserveModel(
+                  controller, sessionId, 1, attempt.reservationKey(), bytes, ceiling);
+              // The call ends with no usage report: the ceilings stay charged (no refund) and the
+              // next reservation is not blocked by an open attempt.
+              assertThat(
+                      store.claimSend(
+                          sessionId, attempt.attemptId(), "budget-translator", clock.instant()))
+                  .isTrue();
+              service.settleModel(
+                  controller,
+                  sessionId,
+                  1,
+                  attempt.settlementKey(),
+                  attempt.reservationKey(),
+                  null,
+                  null);
+              store.finishAttempt(sessionId, attempt.attemptId(), "UNKNOWN_CALL", null, null, null);
+              return true;
+            });
+    return Boolean.TRUE.equals(reserved);
   }
 
   private void sendAndSettle(Reservation reserved, boolean unknownUsage) {
@@ -634,7 +706,10 @@ class GuidedDefaultModelReservationIT {
 
   private final class PersistedSourceAccess implements GuidedSessionAccess {
     private final GuidedSourceClassifier classifier =
-        new GuidedSourceClassifier(C, translationProperties, new CredentialPatternScreen());
+        new GuidedSourceClassifier(
+            C,
+            new CredentialPatternScreen(),
+            com.citi.put.checks.studio.support.TestDomains.FIXTURES);
 
     ObjectNode current() {
       var row =
@@ -676,12 +751,10 @@ class GuidedDefaultModelReservationIT {
               .put("principalId", "budget-user")
               .put("csiId", current.path("csiId").asText())
               .put("environmentId", current.path("environment").asText())
-              .put("applicationId", "orders")
               .put("sourceRevision", current.path("sourceRevision").asText())
               .put("configurationRevision", current.path("configurationRevision").asText())
               .put("modelDataPolicyId", "INPUT-POLICY-01-A")
               .putNull("valueTransferPolicyId");
-      scope.putArray("approvedOrigins").add("https://orders.example.test");
       scope.putArray("capabilities").add("observe");
       var approved = classifier.classify(current, scope);
       var steps = JSON.createArrayNode();
@@ -692,19 +765,6 @@ class GuidedDefaultModelReservationIT {
             .put("requiresAssertion", false);
       }
       return new Snapshot(scope, steps);
-    }
-
-    @Override
-    public void checkCurrent(JsonNode session) {
-      classifier.requireCurrentPolicy(session.path("scope"));
-      assertThat(
-              jdbc.queryForObject(
-                  "SELECT count(*) FROM users u JOIN csi_systems c ON c.owner_email=u.email"
-                      + " WHERE u.sso_id=? AND c.id=?",
-                  Integer.class,
-                  session.path("scope").path("principalId").asText(),
-                  session.path("scope").path("csiId").asText()))
-          .isEqualTo(1);
     }
 
     @Override

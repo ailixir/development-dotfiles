@@ -66,10 +66,10 @@ import org.springframework.transaction.support.TransactionTemplate;
  *
  * <h2>Deployment configuration</h2>
  *
- * <p>Observed replay is configured by a trusted catalog and trusted policies ({@code
- * studio.observed-replay.*}). A Spring test class that executes calls {@link
- * #register(DynamicPropertyRegistry)} from its {@code @DynamicPropertySource}; the same values are
- * used here to select the profile the candidate is lowered under.
+ * <p>Observed replay is configured by a trusted catalog ({@code studio.observed-replay.*}). A
+ * Spring test class that executes calls {@link #register(DynamicPropertyRegistry)} from its
+ * {@code @DynamicPropertySource}; the same values are used here to select the profile the candidate
+ * is lowered under.
  *
  * <h2>Fresh Run authority</h2>
  *
@@ -82,13 +82,6 @@ public final class ObservedPublicationFixture {
   /** The single origin the synthetic observed evidence was exercised on. */
   public static final String ORIGIN = "https://studio-fixture.example.test";
 
-  /** The trusted application the fixture's replay requirements and policies name. */
-  public static final String APPLICATION = "studio-fixture";
-
-  /** Environments a trusted policy is configured for (one policy per environment, max 16). */
-  public static final List<String> ENVIRONMENTS =
-      List.of("Production", "Development", "Staging", "UAT", "QA", "Test", "DR", "fixture");
-
   private static final GuidedContracts C = new GuidedContracts();
   private static final ObjectMapper MAPPER =
       new ObjectMapper()
@@ -99,7 +92,6 @@ public final class ObservedPublicationFixture {
                   .ADJUST_DATES_TO_CONTEXT_TIME_ZONE);
 
   private static final String CATALOG_JSON = catalog();
-  private static final String POLICIES_JSON = policies();
 
   private final JdbcTemplate jdbc;
   private final TransactionTemplate tx;
@@ -119,11 +111,10 @@ public final class ObservedPublicationFixture {
 
   // ── deployment configuration ───────────────────────────────────────────────
 
-  /** Registers the trusted observed-replay catalog and policies for a Spring test context. */
+  /** Registers the trusted observed-replay catalog for a Spring test context. */
   public static void register(DynamicPropertyRegistry registry) {
     registry.add("studio.observed-replay.enabled", () -> "true");
     registry.add("studio.observed-replay.catalog-json", () -> CATALOG_JSON);
-    registry.add("studio.observed-replay.policies-json", () -> POLICIES_JSON);
   }
 
   /**
@@ -138,27 +129,17 @@ public final class ObservedPublicationFixture {
     return all.toString();
   }
 
-  /** The trusted policies as JSON, followed by {@code extra} policies. */
-  public static String policiesJsonWith(JsonNode... extra) {
-    ArrayNode all = (ArrayNode) C.parse(POLICIES_JSON);
-    for (JsonNode policy : extra) {
-      all.add(policy.deepCopy());
-    }
-    return all.toString();
-  }
-
   /** The same configuration as command-line arguments, for a second application context. */
   public static List<String> commandLineProperties() {
     return List.of(
         "--studio.observed-replay.enabled=true",
-        "--studio.observed-replay.catalog-json=" + CATALOG_JSON,
-        "--studio.observed-replay.policies-json=" + POLICIES_JSON);
+        "--studio.observed-replay.catalog-json=" + CATALOG_JSON);
   }
 
   /** The same configuration as a properties record, for code that builds its own pins. */
   public static ObservedReplayProperties properties() {
     return new ObservedReplayProperties(
-        true, 30000, 1048576, 4194304, 2097152, CATALOG_JSON, POLICIES_JSON, 1280, 720);
+        true, 30000, 1048576, 4194304, 2097152, CATALOG_JSON, 1280, 720);
   }
 
   // ── draft authoring ────────────────────────────────────────────────────────
@@ -389,12 +370,10 @@ public final class ObservedPublicationFixture {
             .put("principalId", principal)
             .put("csiId", csiId)
             .put("environmentId", environment)
-            .put("applicationId", APPLICATION)
             .put("sourceRevision", current.path("sourceRevision").asText())
             .put("configurationRevision", current.path("configurationRevision").asText())
             .put("modelDataPolicyId", "labels-only-1")
             .putNull("valueTransferPolicyId");
-    scope.putArray("approvedOrigins").add(ORIGIN);
     scope
         .putArray("capabilities")
         .add("observe")
@@ -553,241 +532,36 @@ public final class ObservedPublicationFixture {
     entries.addObject().put("kind", kind).put("referenceId", referenceId);
   }
 
-  // ── governed observation policy (STUDIO-OBS-014 AC-1, RK-2) ─────────────────
-
-  /** The synthetic author of every seeded governed policy version. */
-  public static final String POLICY_AUTHOR = "fixture-policy-author";
-
-  /** The synthetic approver; a different principal from the author, as V19 requires. */
-  public static final String POLICY_APPROVER = "fixture-policy-approver";
+  // ── per-CSI budget (STUDIO-OBS-014 AC-8) ───────────────────────────────────
 
   /**
-   * Seeds an approved, active governed observation policy for the fixture application in every
-   * fixture environment of each CSI, mirroring the trusted policy's origins and application policy
-   * and stating the side-effect stance explicitly ({@code ALLOW}, as the OBS-007 end-to-end
-   * regression requires; AR-2 f). The approval record is synthetic: the external Security approval
-   * is never marked obtained. Idempotent per (CSI, application, environment).
-   *
-   * <p>Guided learning sessions refuse to start without an approved policy once the S3 cutover
-   * lands, so every guided IT seeds its CSIs here.
+   * Installs the per-CSI budget on a hand-built {@code GuidedSessionService} (one that a test
+   * constructs instead of taking the Spring bean). The concurrency limit here is deliberately high
+   * (1000) because these classes test other properties and start several live sessions on one CSI;
+   * the per-CSI limits themselves are proven by {@code GuidedCsiBudgetIT} at the production
+   * defaults. The daily token limits are the production defaults.
    */
-  public static void seedApprovedPolicies(JdbcTemplate jdbc, String... csiIds) {
-    seedPolicies(jdbc, "ALLOW", csiIds);
-  }
-
-  /** As {@link #seedApprovedPolicies}, with an explicit side-effect stance. */
-  public static void seedPolicies(JdbcTemplate jdbc, String stance, String... csiIds) {
-    // The same observation application policy the fixture's trusted (replay) policy names, so
-    // learning and replay see one policy for the fixture application.
-    ObjectNode application =
-        C.object().put("policyRuleId", "app").put("allowStructuralDiscovery", true);
-    application.putArray("readGrants");
-    for (String csiId : csiIds) {
-      for (String environment : ENVIRONMENTS) {
-        ensurePolicy(jdbc, csiId, APPLICATION, environment, List.of(ORIGIN), application, stance);
-      }
-    }
-  }
-
-  /**
-   * Seeds one approved, active governed policy for an arbitrary scope (idempotent). For ITs whose
-   * learning scope is not the fixture application, for example the bridge and planning ITs' {@code
-   * orders}/{@code fixture} scope.
-   *
-   * @param applicationPolicy the closed observation application policy, or null for a structural
-   *     policy with no read grants
-   */
-  public static void seedPolicy(
-      JdbcTemplate jdbc,
-      String csiId,
-      String applicationId,
-      String environmentId,
-      List<String> origins,
-      JsonNode applicationPolicy,
-      String stance) {
-    ensurePolicy(jdbc, csiId, applicationId, environmentId, origins, applicationPolicy, stance);
-  }
-
-  /**
-   * Makes the given document the approved, active governed policy for the scope: creates version 1
-   * when no policy exists, does nothing when the active version already stores this document, and
-   * otherwise appends the next version and approves it (synthetic approval; approver is not the
-   * author). Sessions freeze the version active at their start, so a class can change the policy
-   * between tests. This replaces the mounted worker {@code applicationPolicy} that S3 refuses
-   * (RK-2).
-   */
-  public static void ensurePolicy(
-      JdbcTemplate jdbc,
-      String csiId,
-      String applicationId,
-      String environmentId,
-      List<String> origins,
-      JsonNode applicationPolicy,
-      String stance) {
-    var repository =
-        new com.citi.put.checks.studio.guided.policy.ObservationPolicyRepository(jdbc, C);
-    var tx = new TransactionTemplate(new DataSourceTransactionManager(jdbc.getDataSource()));
-    ObjectNode submitted = C.object().put("schemaVersion", 3);
-    // A null fixture argument exercises the actual governed default by omitting the submitted
-    // optional field, rather than inserting an invalid JSON null or preselecting the default.
-    if (stance != null) {
-      submitted.put("sideEffectStance", stance);
-    }
-    var stored = submitted.putArray("allowedOrigins");
-    origins.forEach(stored::add);
-    if (applicationPolicy == null) {
-      submitted
-          .putObject("applicationPolicy")
-          .put("policyRuleId", "structural-policy")
-          .put("allowStructuralDiscovery", true)
-          .putArray("readGrants");
-    } else {
-      submitted.set("applicationPolicy", applicationPolicy.deepCopy());
-    }
-    ObjectNode document =
-        com.citi.put.checks.studio.guided.policy.ObservationPolicyDocuments.materialize(
-            C, submitted, DEFAULT_DESTRUCTIVE_VOCABULARY);
-    String documentHash =
-        com.citi.put.checks.studio.guided.policy.ObservationPolicyDocuments.documentHash(document);
-    String observationHash =
-        com.citi.put.checks.studio.guided.policy.ObservationPolicyDocuments.observationPolicyHash(
-            document);
-    tx.executeWithoutResult(
-        status -> {
-          var state = repository.state(csiId, applicationId, environmentId);
-          UUID policyId;
-          int next;
-          if (state.isEmpty()) {
-            policyId = UUID.randomUUID();
-            repository.insertPolicy(policyId, csiId, applicationId, environmentId, POLICY_AUTHOR);
-            next = 1;
-          } else {
-            policyId = state.get().policyId();
-            repository.lock(policyId);
-            var active = repository.active(csiId, applicationId, environmentId);
-            if (active.isPresent()
-                && active.get().version() == state.get().latestVersion()
-                && GuidedContracts.hash(active.get().document()).equals(documentHash)) {
-              return;
-            }
-            next = repository.latestVersion(policyId) + 1;
-          }
-          repository.insertVersion(
-              policyId, next, document, documentHash, observationHash, POLICY_AUTHOR);
-          repository.insertApproval(policyId, next, POLICY_APPROVER, "fixture-approval-" + next);
-        });
-  }
-
-  /**
-   * Installs the S3 start-time governance on a hand-built {@code GuidedSessionService} (one that a
-   * test constructs instead of taking the Spring bean): a trusted policy for {@code (application,
-   * environment)} naming {@code origins}, an approved governed policy for {@code csiId}, and a
-   * per-CSI budget. The concurrency limit here is deliberately high (1000) because these classes
-   * test other properties and start several live sessions on one CSI; the per-CSI limits themselves
-   * are proven by {@code GuidedCsiBudgetIT} at the production defaults. The daily token limits are
-   * the production defaults.
-   */
-  public static void installGovernance(
-      com.citi.put.checks.studio.guided.session.GuidedSessionService service,
-      JdbcTemplate jdbc,
-      String csiId,
-      String applicationId,
-      String environmentId,
-      List<String> origins,
-      JsonNode applicationPolicy) {
-    installGovernance(
-        service, jdbc, csiId, applicationId, List.of(environmentId), origins, applicationPolicy);
-  }
-
-  /**
-   * {@link #installGovernance(com.citi.put.checks.studio.guided.session.GuidedSessionService,
-   * JdbcTemplate, String, String, String, List, JsonNode)} for several environments of one
-   * application: each gets a trusted policy and an approved governed policy.
-   */
-  public static void installGovernance(
-      com.citi.put.checks.studio.guided.session.GuidedSessionService service,
-      JdbcTemplate jdbc,
-      String csiId,
-      String applicationId,
-      List<String> environmentIds,
-      List<String> origins,
-      JsonNode applicationPolicy) {
-    installGovernance(
+  public static void installCsiBudget(
+      com.citi.put.checks.studio.guided.session.GuidedSessionService service, JdbcTemplate jdbc) {
+    installCsiBudget(
         service,
         jdbc,
-        csiId,
-        applicationId,
-        environmentIds,
-        origins,
-        applicationPolicy,
         new com.citi.put.checks.studio.guided.session.GuidedCsiBudgetProperties(
             1000, 5242880, 640000));
   }
 
   /**
-   * {@link #installGovernance(com.citi.put.checks.studio.guided.session.GuidedSessionService,
-   * JdbcTemplate, String, String, List, List, JsonNode)} with explicit per-CSI limits, for a class
-   * that shares one CSI across many full-ceiling model reservations and tests nothing about the
-   * daily budget (which {@code GuidedCsiBudgetIT} proves at the production defaults).
+   * {@link #installCsiBudget(com.citi.put.checks.studio.guided.session.GuidedSessionService,
+   * JdbcTemplate)} with explicit per-CSI limits, for a class that shares one CSI across many
+   * full-ceiling model reservations and tests nothing about the daily budget (which {@code
+   * GuidedCsiBudgetIT} proves at the production defaults).
    */
-  public static void installGovernance(
+  public static void installCsiBudget(
       com.citi.put.checks.studio.guided.session.GuidedSessionService service,
       JdbcTemplate jdbc,
-      String csiId,
-      String applicationId,
-      List<String> environmentIds,
-      List<String> origins,
-      JsonNode applicationPolicy,
       com.citi.put.checks.studio.guided.session.GuidedCsiBudgetProperties budgetLimits) {
-    var trustedPolicies = new java.util.ArrayList<JsonNode>();
-    for (String environmentId : environmentIds) {
-      seedPolicy(jdbc, csiId, applicationId, environmentId, origins, applicationPolicy, "ALLOW");
-      ObjectNode trusted =
-          C.object()
-              .put("version", 1)
-              .put(
-                  "policyId",
-                  environmentIds.size() == 1
-                      ? "policy-" + applicationId
-                      : "policy-" + applicationId + "-" + environmentId)
-              .put("policyVersion", "1")
-              .put("applicationId", applicationId)
-              .put("environment", environmentId)
-              .put("entryPolicyId", "entry-" + applicationId);
-      var allowed = trusted.putArray("allowedOrigins");
-      origins.forEach(allowed::add);
-      trusted
-          .putObject("applicationPolicy")
-          .put("policyRuleId", "app")
-          .put("allowStructuralDiscovery", true)
-          .putArray("readGrants");
-      trusted.putArray("rules");
-      trustedPolicies.add(trusted);
-    }
-    var pins =
-        new ObservedReplayPins(
-            C,
-            new ObservedReplayProperties(
-                true,
-                30000,
-                1048576,
-                4194304,
-                2097152,
-                CATALOG_JSON,
-                policiesJsonWith(trustedPolicies.toArray(JsonNode[]::new)),
-                1280,
-                720));
-    var tx = new TransactionTemplate(new DataSourceTransactionManager(jdbc.getDataSource()));
-    service.installGovernance(
-        new com.citi.put.checks.studio.guided.policy.ObservationPolicyService(
-            new com.citi.put.checks.studio.guided.policy.ObservationPolicyRepository(jdbc, C),
-            C,
-            new com.citi.put.checks.security.CsiOwnershipEvaluator(),
-            pins,
-            new com.citi.put.checks.studio.guided.policy.GuidedPolicyProperties(
-                List.of(), DEFAULT_DESTRUCTIVE_VOCABULARY),
-            tx),
-        new com.citi.put.checks.studio.guided.session.GuidedCsiBudget(jdbc, budgetLimits));
+    service.installCsiBudget(
+        new com.citi.put.checks.studio.guided.session.GuidedCsiBudget(jdbc, budgetLimits, 1000));
   }
 
   /**
@@ -831,30 +605,10 @@ public final class ObservedPublicationFixture {
             .put("testId", testId.toString())
             .put("sourceRevision", "1")
             .put("configurationRevision", "1")
-            .put("environmentId", environment)
-            .put("applicationId", APPLICATION);
+            .put("environmentId", environment);
     request.putObject("versions").put("contract", 3);
     return request;
   }
-
-  /** The application.yml baseline destructive vocabulary (AR-2 f), for fixture documents. */
-  public static final List<String> DEFAULT_DESTRUCTIVE_VOCABULARY =
-      List.of(
-          "delete",
-          "remove",
-          "erase",
-          "destroy",
-          "purge",
-          "pay",
-          "transfer",
-          "send money",
-          "submit order",
-          "place order",
-          "confirm payment",
-          "cancel subscription",
-          "close account",
-          "deactivate",
-          "revoke");
 
   // ── ledger housekeeping between tests ──────────────────────────────────────
 
@@ -864,13 +618,19 @@ public final class ObservedPublicationFixture {
    *
    * <p>An observed run that declares a secret writes {@code studio_secret_use_audit} facts keyed by
    * its ledger row (V34); the audit table refuses {@code UPDATE}/{@code DELETE}, so those ledger
-   * rows can never be removed. Test classes that share a CSI with a secret-declaring class (or that
-   * clear the whole ledger) keep their quota headroom by removing everything else.
+   * rows can never be removed. The same holds for the proof execution of a publication, which the
+   * immutable {@code studio_learn_proofs} link (V27) points at. Test classes that share a CSI with
+   * a secret-declaring class (or that clear the whole ledger) keep their quota headroom by removing
+   * everything else.
    */
   public static int clearLedger(JdbcTemplate jdbc, String... csiIds) {
+    // A proof execution is linked from the immutable studio_learn_proofs row of the learn that
+    // published it (V27), so, like an audited run, its ledger row can never be removed.
     String unaudited =
         " NOT EXISTS (SELECT 1 FROM studio_secret_use_audit a"
-            + " WHERE a.execution_id = l.execution_id)";
+            + " WHERE a.execution_id = l.execution_id)"
+            + " AND NOT EXISTS (SELECT 1 FROM studio_learn_proofs p"
+            + " WHERE p.execution_id = l.execution_id)";
     if (csiIds.length == 0) {
       return jdbc.update("DELETE FROM studio_dispatch_ledger l WHERE" + unaudited);
     }
@@ -932,8 +692,7 @@ public final class ObservedPublicationFixture {
             "learnedPlanHash",
             "referencePolicyHash",
             "publicationEvidenceHash",
-            "scopeHash",
-            "currentPolicyHash")) {
+            "scopeHash")) {
       request.set(field, binding.path(field));
     }
     request.set("grantId", binding.path("replayGrant").path("grantId"));
@@ -983,28 +742,6 @@ public final class ObservedPublicationFixture {
     entry.set("profile", profile);
     entry.set("build", build);
     return C.object().arrayNode().add(entry).toString();
-  }
-
-  private static String policies() {
-    ArrayNode all = C.object().arrayNode();
-    for (String environment : ENVIRONMENTS) {
-      ObjectNode policy =
-          all.addObject()
-              .put("version", 1)
-              .put("policyId", "policy-" + APPLICATION)
-              .put("policyVersion", "1")
-              .put("applicationId", APPLICATION)
-              .put("environment", environment)
-              .put("entryPolicyId", "entry-" + APPLICATION);
-      policy.putArray("allowedOrigins").add(ORIGIN);
-      policy
-          .putObject("applicationPolicy")
-          .put("policyRuleId", "app")
-          .put("allowStructuralDiscovery", true)
-          .putArray("readGrants");
-      policy.putArray("rules");
-    }
-    return all.toString();
   }
 
   // ── fresh Run authority (Core identity) ────────────────────────────────────

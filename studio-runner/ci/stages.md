@@ -90,6 +90,8 @@ npm test
   Node image with neither `helm` nor a built container image; both of its suites were `skipIf`-gated
   and therefore reported **green while enforcing nothing**. Stage 9 has both prerequisites and the
   tier now **fails** without them.
+- The **perception tier** (stage 10) is also outside the default run: it needs a real browser. Its wiring guard
+  lives in `test/run/importBoundary.test.ts` and stays in this stage.
 - What *does* stay here: the tier's **wiring guard** (`test/deployment-tier-wiring.test.ts`) and the
   **deferral record** (`test/deferred.test.ts`). Neither needs a prerequisite, and keeping them here
   is deliberate — a tier moved out of the default run is a tier that can be quietly deleted, so this
@@ -125,6 +127,10 @@ npm run test:fixtures
   the pipeline; ADR-001 §8 permits the public image for local development only.
 - The tier itself does not set `passWithNoTests`, so an empty run fails rather than passing
   silently.
+- ADR-SC-007 WI-4 moved the live spike blocks of `test/evaluation` (the `SPIKE_LIVE=1` cases of
+  `grounding-b-*`, `grounding-f-gt`, `grounding-q-*`) into this tier (`test/fixtures-tier/spike-live*.test.ts`), so
+  that no file outside the tier imports Chromium (`test/run/confinement.test.ts`, AC-25). They keep their
+  `SPK07_LIVE=1` gate; the unit-tier halves stay where they were.
 - Story 10.3 wired this tier against the fake adapter (AC-6a). **Story 10.12 supplied the real
   Playwright adapter**: the tier now launches pinned Chromium in a killable child process against
   `fixtures/pages/`, served on loopback by `test/helpers/pageServer.ts` at the paths
@@ -278,6 +284,32 @@ recorded decision — never a green one.
   permits for local development only. Running it against `ED-05`'s internal image, in a pod, is
   story 10.18a's **AC-4b** and is recorded as *skipped, never passed*.
 
+### 10. Perception tier — real Chromium, never touches `dist/`
+
+```bash
+vitest run --config vitest.perception.config.ts        # the package script is `test:perception`
+```
+
+- **Image:** any with the pinned Playwright Chromium build (stage 6's image qualifies). No Helm, no container
+  runtime, no built image.
+- **Needs the pinned image: no.** It needs Chromium at the pinned build because the tier launches it in the test
+  process, and it is machine-bound by design: the layout-dependent parity checks record an environment
+  fingerprint (browser build, platform, a hash of text metrics) and **fail** on a mismatch, never skip.
+- **`dist/` is not touched, and that is the point of this stage being separate from stage 6.** Stage 6 runs
+  `test:fixtures`, whose `globalSetup` re-emits `dist/`; a running runner loads `dist/`. This tier has no
+  `globalSetup`, and every file of it signs the `dist/` tree before and after and fails if it changed.
+- **Covers:** the perception modules of ADR-SC-007 (`src/run/perceive.ts`, `locatorSynth.ts`,
+  `playwrightEngine.ts`, `privateInventory.ts`, and the page programs in `perceptionInPage.ts`, which the unit tier
+  cannot execute and therefore excludes from its coverage): parity with the spike baseline, the D1/D2 leak
+  canaries, engine-versus-public-API locator conformance, and the live option check. Since ADR-SC-007 WI-4 it also
+  covers the cut-over: the page-state program (`src/run/pageStateInPage.ts`, likewise excluded from unit coverage),
+  the observation session's real-page behaviour (`cutover-observe`), the executor's actions and refusals
+  (`cutover-act`, `cutover-read`, `canary-boundary`) and the identity check against recorded aria snapshots
+  (`identity-snapshots`).
+- **Fails closed:** no `skipIf` in the tier, and its wiring is watched from the default run (stage 4,
+  `test/run/importBoundary.test.ts`): deleting the config, the script, the `test:fixtures` exclude, the
+  tier's files or this entry reddens the default test run.
+
 ## Summary
 
 | # | Stage | Command | Needs the pinned image | Artifacts |
@@ -292,6 +324,7 @@ recorded decision — never a green one.
 | 7 | Image build/push | `docker build` / `docker push` | builds it | image tag |
 | 8 | Helm lint/template | `helm lint` / `helm template` | no | rendered manifests |
 | 9 | **Deployment evidence** | `npm run test:deployment` | **yes — and Helm, and `STUDIO_RUNNER_IMAGE`; fails closed without either** | story 10.18a's AC-1 – AC-12 and AC-4a part 3 evidence |
+| 10 | **Perception tier** | `test:perception` (`vitest run --config vitest.perception.config.ts`) | no — needs the pinned Chromium build; no Helm; never touches `dist/` | — |
 
 ## Open items owned outside this package
 

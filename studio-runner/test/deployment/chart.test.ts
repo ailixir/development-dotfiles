@@ -33,6 +33,7 @@ import {
   envNames,
   envValues,
   helmUnavailableReason,
+  mountedSpringProperties,
   named,
   one,
   podSpec,
@@ -556,11 +557,62 @@ describe('AC-6 — drain, readiness and the grace period are one derivation', ()
   it('render mutation M7b: raising the runtime cap carries the grace period with it', () => {
     // The other direction, which is what "one derivation" means. A chart that pinned the grace
     // period to a literal would pass the assertion above and fail here.
-    const base = podSpec(runnerDeployment(render())).terminationGracePeriodSeconds ?? 0;
+    const baseDeployment = runnerDeployment(render());
+    const base = podSpec(baseDeployment).terminationGracePeriodSeconds ?? 0;
+    const baseRuntimeMs = Number(envValues(soleContainer(baseDeployment))['STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS']);
     const raised = render({
       args: ['--set-string', 'studioRunner.runnerEnv.STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS=600000'],
     });
-    expect(podSpec(runnerDeployment(raised)).terminationGracePeriodSeconds ?? 0).toBe(base + 480);
+    expect(podSpec(runnerDeployment(raised)).terminationGracePeriodSeconds ?? 0).toBe(
+      base + (600_000 - baseRuntimeMs) / 1000,
+    );
+  });
+
+  it('STUDIO-FLEX-001 item 4: 300 s runtime, 360 s drain, pool 2 and a 395 s grace period, in every value set', () => {
+    // Literals on purpose: these are the user's capacity decision, and this is the test that fails
+    // when one of them moves without that being a decision. 395 = 300 + 15 (stop) + 30 (delivery)
+    // + 15 (upload) + 5 (preStop) + 30 (headroom), re-derived above from the rendered environment.
+    for (const valuesFile of VALUE_SETS) {
+      const deployment = runnerDeployment(render({ valuesFile }));
+      const env = envValues(soleContainer(deployment));
+      expect(env['STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS'], valueSetName(valuesFile)).toBe('300000');
+      expect(env['STUDIO_RUNNER_DRAIN_TIMEOUT_MS'], valueSetName(valuesFile)).toBe('360000');
+      expect(env['STUDIO_RUNNER_POOL_SIZE'], valueSetName(valuesFile)).toBe('2');
+      expect(podSpec(deployment).terminationGracePeriodSeconds, valueSetName(valuesFile)).toBe(395);
+    }
+  });
+
+  it('STUDIO-FLEX-001 item 4: the backend run deadline is the runner\u2019s value, in the API and worker properties, and follows it', () => {
+    for (const valuesFile of VALUE_SETS) {
+      const outcome = render({ valuesFile });
+      for (const role of ['api', 'worker'] as const) {
+        expect(mountedSpringProperties(outcome, role)['studio.execution.total-runtime'], `${valueSetName(valuesFile)} ${role}`).toBe(
+          '300000ms',
+        );
+      }
+    }
+    const raised = render({
+      args: ['--set-string', 'studioRunner.runnerEnv.STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS=450000'],
+    });
+    for (const role of ['api', 'worker'] as const) {
+      expect(mountedSpringProperties(raised, role)['studio.execution.total-runtime']).toBe('450000ms');
+    }
+  });
+
+  it('STUDIO-FLEX-001 item 4: the backend run deadline has no second source (configOverrides and env refuse it)', () => {
+    for (const set of [
+      'backend.configOverrides.studio\\.execution\\.total-runtime=120s',
+      'worker.configOverrides.studio\\.execution\\.total-runtime=120s',
+    ]) {
+      const outcome = renderOutcome({ args: ['--set-string', set] });
+      expect(outcome.ok, set).toBe(false);
+      expect(outcome.error).toContain('studio.execution.total-runtime is managed by the chart');
+    }
+    for (const set of ['backend.env.STUDIO_TOTAL_RUNTIME=120s', 'worker.env.STUDIO_TOTAL_RUNTIME=120s']) {
+      const outcome = renderOutcome({ args: ['--set-string', set] });
+      expect(outcome.ok, set).toBe(false);
+      expect(outcome.error).toContain('STUDIO_TOTAL_RUNTIME is managed by the chart');
+    }
   });
 });
 
@@ -835,19 +887,26 @@ describe('AC-8a — default-deny egress with exactly the destination classes the
     );
     const egress = (policy.spec as { egress?: readonly Record<string, unknown>[] }).egress ?? [];
 
-    // `target-page` renders one rule per approved target and the approved list is empty until
-    // ED-04 / SPK-05 rules — default-deny for that class, which is the correct failing direction
-    // and is recorded rather than filled in with a guess.
+    // `target-page` is ONE open rule (STUDIO-FLEX-001: all IPs are open, firewalls own
+    // reachability, the domain whitelist is the navigation control): an empty rule, which allows
+    // any destination and port. It is neither a callback, a DNS nor an object-store rule.
+    const open = egress.filter((rule) => Object.keys(rule).length === 0);
     const callback = egress.filter((rule) => JSON.stringify(rule).includes('component":"api'));
     const dns = egress.filter((rule) => JSON.stringify(rule).includes('kube-dns'));
     const store = egress.filter((rule) => JSON.stringify(rule).includes('ipBlock'));
     expect(callback, 'no callback-api egress rule: the terminal report would hang, not fail').toHaveLength(1);
     expect(dns, 'no DNS rule: every destination becomes a silent hang rather than a refusal').toHaveLength(1);
     expect(store.length, 'no object-store egress rule').toBeGreaterThanOrEqual(1);
-    expect(egress.length).toBe(callback.length + dns.length + store.length);
+    expect(open, 'target-page must be exactly one open rule').toHaveLength(1);
+    expect(egress.length).toBe(callback.length + dns.length + store.length + open.length);
+    // The callback, object-store and DNS rules are the ones that were there before: the store rule
+    // still excepts metadata, link-local and private ranges, and the callback still names only the
+    // API pods.
+    expect(JSON.stringify(store[0])).toContain('169.254.0.0/16');
+    expect(JSON.stringify(callback[0])).not.toContain('ipBlock');
   });
 
-  it('render mutation M9: deleting the DNS rule and adding a fourth peer', () => {
+  it('render mutation M9: deleting the policy, and a removed `approvedTargets` value reaching nothing', () => {
     const noPolicy = render({ set: { 'studioRunner.networkPolicy.enabled': 'false' } });
     expect(
       byKind(noPolicy, 'NetworkPolicy').filter((d) =>
@@ -855,20 +914,21 @@ describe('AC-8a — default-deny egress with exactly the destination classes the
       ),
     ).toHaveLength(0);
 
-    const fourthPeer = render({
+    // Removed means removed (STUDIO-FLEX-001 item 3): the value is gone, so setting it narrows and
+    // widens nothing, and the open target rule is unchanged.
+    const egressOf = (outcome: RenderOutcome): readonly unknown[] =>
+      (one(
+        byKind(outcome, 'NetworkPolicy').filter((d) => (d.metadata?.name ?? '').includes(RUNNER_FRAGMENT)),
+        'the runner NetworkPolicy',
+      ).spec as { egress?: readonly unknown[] }).egress ?? [];
+    const stale = render({
       set: {
         'studioRunner.networkPolicy.approvedTargets[0].cidr': '203.0.113.0/24',
         'studioRunner.networkPolicy.approvedTargets[0].port': '443',
       },
     });
-    const policy = one(
-      byKind(fourthPeer, 'NetworkPolicy').filter((d) =>
-        (d.metadata?.name ?? '').includes(RUNNER_FRAGMENT),
-      ),
-      'the runner NetworkPolicy',
-    );
-    const egress = (policy.spec as { egress?: readonly unknown[] }).egress ?? [];
-    expect(JSON.stringify(egress)).toContain('203.0.113.0/24');
+    expect(JSON.stringify(egressOf(stale))).not.toContain('203.0.113.0/24');
+    expect(egressOf(stale)).toEqual(egressOf(render()));
   });
 });
 
@@ -1001,12 +1061,10 @@ describe('AC-9a — ADR-002 O-6 is carried, not absorbed', () => {
     // O-6 is Class B and @architect's: a story may propose but may not land a field on the closed
     // `RunJob`. The deployment could smuggle the same thing in as a policy environment key, so the
     // rendered manifest is checked for it too.
-    // 2026-10-18 (STUDIO-OBS-009 OI-06 B5): this render is observed-replay OFF by design (the chart
-    // default). With observed replay on, exactly one chart-managed file PATH is a policy-named key,
-    // `STUDIO_RUNNER_OBSERVED_POLICY_FILE`, which `runnerEnv` cannot set. That case is the exact-set
-    // assertion in the OI-06 B5 blocks below (every value set, observed on and off). This test and its
-    // regex are deliberately unchanged, and it is not the O-6 proof on its own: the closed `RunJob` is
-    // guarded by the runner's gate-shut tripwire in `test/run/canary.test.ts`.
+    // STUDIO-GOV-001.4: there is no policy file any more, so no render, observed replay on or off,
+    // carries a policy-named key. The OI-06 B5 blocks below assert the same exact set (empty) with
+    // observed replay on. This is not the O-6 proof on its own: the closed `RunJob` is guarded by the
+    // runner's gate-shut tripwire in `test/run/canary.test.ts`.
     const outcome = render();
     const container = soleContainer(runnerDeployment(outcome));
     for (const name of envNames(container)) {
@@ -1222,9 +1280,10 @@ const MODES = VALUE_SETS.flatMap((file) =>
   [false, true].map((guided) => [`${valueSetName(file)} guided=${String(guided)}`, file, guided] as const),
 );
 
-/** The seven guided keys the runner refuses unless the switch is on (the switch itself is the eighth). */
+/** The eight guided keys the runner refuses unless the switch is on (the switch itself is the ninth). */
 const GUIDED_ONLY_KEYS: readonly string[] = [
   'STUDIO_RUNNER_GUIDED_WORKER_ID',
+  'STUDIO_RUNNER_GUIDED_CAPACITY',
   'STUDIO_RUNNER_GUIDED_JOURNAL_DIR',
   'STUDIO_RUNNER_GUIDED_CONTROLLER_ISSUER',
   'STUDIO_RUNNER_GUIDED_CONTROLLER_SUBJECT',
@@ -1292,7 +1351,7 @@ describe('STUDIO-OBS-009 AC-1 — one Deployment, and no guided template', () =>
     expect(templates.filter((file) => /guided/iu.test(file) && file !== 'api-guided-tls-networkpolicy.yaml')).toEqual([]);
   });
 
-  it.each(MODES)('%s renders the switch in both directions and the other seven guided keys only when on', (_label, valuesFile, guided) => {
+  it.each(MODES)('%s renders the switch in both directions and the other eight guided keys only when on', (_label, valuesFile, guided) => {
     const env = envValues(soleContainer(runnerDeployment(render({ valuesFile, guided }))));
     expect(env['STUDIO_RUNNER_GUIDED_ENABLED']).toBe(guided ? 'true' : 'false');
     for (const key of GUIDED_ONLY_KEYS) {
@@ -1304,7 +1363,7 @@ describe('STUDIO-OBS-009 AC-1 — one Deployment, and no guided template', () =>
     }
   });
 
-  it.each(MODES)('%s renders every rendered key as one the runner accepts, and all 12 new keys are accepted', (_label, valuesFile, guided) => {
+  it.each(MODES)('%s renders every rendered key as one the runner accepts, and all 13 new keys are accepted', (_label, valuesFile, guided) => {
     const container = soleContainer(runnerDeployment(render({ valuesFile, guided })));
     expect(envNames(container).filter((name) => !ACCEPTED_KEYS.includes(name))).toEqual([]);
     // The chart's closed list and the loader's are the same set for the new keys, in both
@@ -1462,7 +1521,7 @@ describe('STUDIO-OBS-009 A2.6 — Recreate, one pod, and resources for two brows
   it.each(VALUE_SETS.map((file) => [valueSetName(file), file] as const))(
     '%s sizes a guided pod for a replay browser plus a guided browser, and says so in /dev/shm and limits',
     (_label, valuesFile) => {
-      const off = runnerDeployment(render({ valuesFile }));
+      const off = runnerDeployment(render({ valuesFile, guided: false }));
       const on = runnerDeployment(render({ valuesFile, guided: true }));
       const memory = (deployment: K8sDocument): number => toBytes(soleContainer(deployment).resources?.limits?.['memory'] ?? '0');
       const requested = (deployment: K8sDocument): number => toBytes(soleContainer(deployment).resources?.requests?.['memory'] ?? '0');
@@ -1596,7 +1655,7 @@ describe('STUDIO-OBS-009 Q4 — a writable /tmp, and neither TMPDIR nor NODE_OPT
   it.each(VALUE_SETS.map((file) => [valueSetName(file), file] as const))(
     '%s mounts a disk-backed /tmp and a journal volume only while guided, each its own emptyDir with a size limit',
     (_label, valuesFile) => {
-      const off = runnerDeployment(render({ valuesFile }));
+      const off = runnerDeployment(render({ valuesFile, guided: false }));
       expect((soleContainer(off).volumeMounts ?? []).map((m) => m.mountPath)).not.toContain('/tmp');
       expect(volumeNamed(podSpec(off), 'guided-journal')).toBeUndefined();
 
@@ -1862,10 +1921,10 @@ function springPropertiesOf(outcome: RenderOutcome, role: string): Record<string
 //
 // Before this, `put-checks.studioRunner.acceptedEnvKeys` had no `OBSERVED_*` name and `runnerEnv`
 // failed the render for any key off that list, so a chart-deployed runner answered 503 to
-// `/v2/validate-observed` and `/v2/runs`, and the backend's trusted catalog and policies were empty
+// `/v2/validate-observed` and `/v2/runs`, and the backend's trusted catalog was empty
 // (409 RUNTIME_INCOMPATIBLE on every publication and replay). One top-level `studioObserved` block
-// now feeds both images. Every assertion reads `helm template` output; the fixture catalog and
-// policies are TEST VALUES (`OBSERVED_FIXTURE`), supplied the way a release supplies the real ones.
+// now feeds both images. Every assertion reads `helm template` output; the fixture catalog is a
+// TEST VALUE (`OBSERVED_FIXTURE`), supplied the way a release supplies the real ones.
 // ══════════════════════════════════════════════════════════════════════════════════════════════
 
 const OBSERVED_FLAG_KEYS = [
@@ -1874,32 +1933,27 @@ const OBSERVED_FLAG_KEYS = [
 ] as const;
 const OBSERVED_FILE_KEYS = [
   'STUDIO_RUNNER_OBSERVED_CATALOG_FILE',
-  'STUDIO_RUNNER_OBSERVED_POLICY_FILE',
   'STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST',
 ] as const;
 const OBSERVED_KEYS: readonly string[] = [...OBSERVED_FLAG_KEYS, ...OBSERVED_FILE_KEYS];
 /** The runner volume and mount of the trust ConfigMap; the ConfigMap's name ends with the same words. */
 const OBSERVED_TRUST = 'studio-observed-trust';
 const UAT = 'values-uat.yaml';
-/** The one chart-managed file path that is a policy-named key while observed replay is on (B5 item 2). */
-const POLICY_FILE_KEY = 'STUDIO_RUNNER_OBSERVED_POLICY_FILE';
-
 /** The env names AC-9a treats as policy-named. The same regex as the AC-9a test above, so the two cannot drift. */
 function policyNamed(names: readonly string[]): string[] {
   return names.filter((name) => /POLICY|APPROVED_ORIGINS|DESTINATIONS/u.test(name));
 }
 
-/** Exact set, not a widened regex: observed on carries the one file-path key and nothing else policy-named. */
-function expectOnlyPolicyFile(names: readonly string[], label: string): void {
-  expect(policyNamed(names), label).toEqual([POLICY_FILE_KEY]);
+/** Exact set, not a widened regex: no env key is policy-named, observed replay on or off. */
+function expectNoPolicyNamedKey(names: readonly string[], label: string): void {
+  expect(policyNamed(names), label).toEqual([]);
 }
 
-/** The catalog and policies that reached the runner pod as files, read out of the ConfigMap the render produced. */
-function observedTrustData(outcome: RenderOutcome): { catalog: unknown; policies: unknown } {
+/** The catalog that reached the runner pod as a file, read out of the ConfigMap the render produced. */
+function observedTrustData(outcome: RenderOutcome): { catalog: unknown } {
   const configMap = one(named(outcome, OBSERVED_TRUST).filter((d) => d.kind === 'ConfigMap'), 'observed trust ConfigMap');
   return {
     catalog: JSON.parse(configMap.data?.['catalog.json'] ?? 'null') as unknown,
-    policies: JSON.parse(configMap.data?.['policies.json'] ?? 'null') as unknown,
   };
 }
 
@@ -1910,13 +1964,13 @@ function runnerPodAnnotations(outcome: RenderOutcome): Record<string, string> {
 }
 
 describe('STUDIO-OBS-009 OI-06 B5 — the closed list and the chart-managed rule', () => {
-  it('names the five observed keys: 53 names, each one the runner loader accepts', () => {
+  it('names the four observed keys: 55 names, each one the runner loader accepts', () => {
     // The one source read in this block, because no render exposes the list: it is the vocabulary of
     // `runnerEnv`, and the comparison is against the runner's OWN ACCEPTED_KEYS (never a second copy).
     const helpers = readFileSync(join(CHART_DIR, 'templates', '_helpers.tpl'), 'utf8');
     const block = /define "put-checks\.studioRunner\.acceptedEnvKeys" -\}\}\n([^\n]+)\n/u.exec(helpers);
     const names = (block?.[1] ?? '').trim().split(' ');
-    expect(names, 'the closed list moved or was emptied').toHaveLength(53);
+    expect(names, 'the closed list moved or was emptied').toHaveLength(55);
     expect(new Set(names).size, 'a name is listed twice').toBe(names.length);
     for (const key of OBSERVED_KEYS) expect(names, `${key} is not on the closed list`).toContain(key);
     expect(names.filter((name) => !ACCEPTED_KEYS.includes(name))).toEqual([]);
@@ -1953,7 +2007,7 @@ describe('STUDIO-OBS-009 OI-06 B5 — observed replay OFF (the chart default)', 
       const container = soleContainer(deployment);
       const env = envValues(container);
       for (const key of OBSERVED_FLAG_KEYS) expect(env[key], key).toBe('false');
-      expect(policyNamed(envNames(container)), 'a policy-named key while observed replay is off').toEqual([]);
+      expectNoPolicyNamedKey(envNames(container), 'a policy-named key while observed replay is off');
       for (const key of OBSERVED_FILE_KEYS) {
         expect(env, `${key} rendered while both flags are off: no half configuration`).not.toHaveProperty(key);
       }
@@ -1973,13 +2027,13 @@ describe('STUDIO-OBS-009 OI-06 B5 — observed replay OFF (the chart default)', 
 describe('STUDIO-OBS-009 OI-06 B5 — observed replay ON', () => {
   const EACH = VALUE_SETS.map((file) => [valueSetName(file), file] as const);
 
-  it('is on in values-uat.yaml, with no catalog or policy committed', () => {
+  it('is on in values-uat.yaml, with no catalog committed', () => {
     const env = envValues(soleContainer(runnerDeployment(render({ valuesFile: UAT }))));
     for (const key of OBSERVED_FLAG_KEYS) expect(env[key], key).toBe('true');
   });
 
   it.each(EACH)(
-    '%s: renders the five keys, a digest-pinned image, a read-only ConfigMap mount and one catalog in three places',
+    '%s: renders the four keys, a digest-pinned image, a read-only ConfigMap mount and one catalog in three places',
     (label, valuesFile) => {
       const outcome = render({ valuesFile, observed: true });
       const deployment = runnerDeployment(outcome);
@@ -1988,7 +2042,7 @@ describe('STUDIO-OBS-009 OI-06 B5 — observed replay ON', () => {
       const digest = OBSERVED_FIXTURE.catalog.build.executableImageDigest;
 
       for (const key of OBSERVED_FLAG_KEYS) expect(env[key], key).toBe('true');
-      expectOnlyPolicyFile(envNames(container), `${label}: policy-named env keys with observed replay on`);
+      expectNoPolicyNamedKey(envNames(container), `${label}: policy-named env keys with observed replay on`);
       // The digest is DERIVED from the catalog (no second value), and the image reference names the
       // same digest: both are compared inside one manifest, never to a literal in this test.
       expect(env['STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST']).toBe(digest);
@@ -1996,7 +2050,7 @@ describe('STUDIO-OBS-009 OI-06 B5 — observed replay ON', () => {
       expect(image.endsWith(`@sha256:${env['STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST'] ?? ''}`), image).toBe(true);
       expect(/:[^/@]+@/u.test(image), `${image} still carries a tag in front of the digest`).toBe(false);
 
-      // The two file keys point inside the mount of the volume that carries them.
+      // The catalog file key points inside the mount of the volume that carries them.
       const mount = (container.volumeMounts ?? []).find((entry) => entry.name === OBSERVED_TRUST);
       expect(mount, 'no mount for the trust ConfigMap').toBeDefined();
       expect(mount?.readOnly).toBe(true);
@@ -2010,17 +2064,14 @@ describe('STUDIO-OBS-009 OI-06 B5 — observed replay ON', () => {
       expect(volume?.configMap?.defaultMode, 'same 0440 as every other mounted file').toBe(0o440);
       const projected = (volume?.configMap?.items ?? []).map((item) => `${mount?.mountPath ?? ''}/${item.path ?? ''}`);
       expect(projected).toContain(env['STUDIO_RUNNER_OBSERVED_CATALOG_FILE']);
-      expect(projected).toContain(env['STUDIO_RUNNER_OBSERVED_POLICY_FILE']);
 
       // One catalog entry, in the file the runner reads and in the backend's catalog (runner entry first).
       const files = observedTrustData(outcome);
       expect(files.catalog).toEqual(OBSERVED_FIXTURE.catalog);
-      expect(files.policies).toEqual(OBSERVED_FIXTURE.policies);
       for (const role of ['api', 'worker']) {
         const props = springPropertiesOf(outcome, role);
         const backendCatalog = JSON.parse(String(props['studio.observed-replay.catalog-json'])) as { build: { executableImageDigest: string } }[];
         expect(backendCatalog[0]?.build.executableImageDigest, `${role}: first backend catalog entry`).toBe(digest);
-        expect(JSON.parse(String(props['studio.observed-replay.policies-json']))).toEqual(files.policies);
       }
     },
   );
@@ -2031,7 +2082,6 @@ describe('STUDIO-OBS-009 OI-06 B5 — observed replay ON', () => {
     expect(config.observedValidationEnabled).toBe(true);
     expect(config.observedReplayEnabled).toBe(true);
     expect(config.observedCatalogFile).toBe(env['STUDIO_RUNNER_OBSERVED_CATALOG_FILE']);
-    expect(config.observedPolicyFile).toBe(env['STUDIO_RUNNER_OBSERVED_POLICY_FILE']);
     expect(config.observedImageDigest).toBe(env['STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST']);
   });
 
@@ -2066,9 +2116,9 @@ describe('STUDIO-OBS-009 OI-06 B5 — observed replay ON', () => {
     }
   });
 
-  it('rolls the runner pod when only the policies change (the files are read once at start-up)', () => {
-    const changed = writeValuesOverlay('observed-policies-changed.json', {
-      studioObserved: { policies: [{ ...OBSERVED_FIXTURE.policies[0], policyVersion: '2' }] },
+  it('rolls the runner pod when the catalog changes (the file is read once at start-up)', () => {
+    const changed = writeValuesOverlay('observed-catalog-changed.json', {
+      studioObserved: { catalog: { build: { chromiumBuild: 'TEST-ONLY-chromium-1' } } },
     });
     const before = runnerPodAnnotations(render({ valuesFile: UAT }))['checksum/studio-observed-trust'];
     const after = runnerPodAnnotations(render({ valuesFile: UAT, args: ['-f', changed] }))['checksum/studio-observed-trust'];
@@ -2077,9 +2127,9 @@ describe('STUDIO-OBS-009 OI-06 B5 — observed replay ON', () => {
     expect(after).not.toBe(before);
   });
 
-  it('keeps AC-9a’s no-policy-environment-key rule everywhere except the one chart-managed file path', () => {
+  it('keeps AC-9a’s no-policy-environment-key rule everywhere, observed replay on included', () => {
     const names = envNames(soleContainer(runnerDeployment(render({ valuesFile: UAT }))));
-    expectOnlyPolicyFile(names, 'values-uat.yaml');
+    expectNoPolicyNamedKey(names, 'values-uat.yaml');
   });
 
   it.each(['STUDIO_RUNNER_OBSERVED_POLICY_ORIGINS', 'STUDIO_RUNNER_APPROVED_ORIGINS'])(
@@ -2097,27 +2147,17 @@ describe('STUDIO-OBS-009 OI-06 B5 — observed replay ON', () => {
       expect(mutated.ok, 'the mutated chart did not render, so nothing below is evidence').toBe(true);
       const names = envNames(soleContainer(runnerDeployment(mutated)));
       // The mutation reached the render, and the same read now sees two names ...
-      expect(policyNamed(names)).toEqual([extra, POLICY_FILE_KEY].sort());
+      expect(policyNamed(names)).toEqual([extra]);
       // ... so the exact-set assertion goes red. The real chart passes the same assertion.
       expect(() => {
-        expectOnlyPolicyFile(names, 'mutated');
+        expectNoPolicyNamedKey(names, 'mutated');
       }).toThrow();
-      expectOnlyPolicyFile(envNames(soleContainer(runnerDeployment(render({ valuesFile: UAT })))), 'unmutated');
+      expectNoPolicyNamedKey(envNames(soleContainer(runnerDeployment(render({ valuesFile: UAT })))), 'unmutated');
     },
   );
 });
 
-describe('STUDIO-OBS-009 OI-06 B5 — the four render guards (and the boolean check) fire, each naming the key', () => {
-  const CATALOG = OBSERVED_FIXTURE.catalog;
-  const policy = (index: number, padding = ''): Record<string, unknown> => ({
-    ...OBSERVED_FIXTURE.policies[0],
-    policyId: `test-only-policy-${String(index)}${padding}`,
-    applicationId: `test-only-application-${String(index)}`,
-  });
-  const policiesFile = (name: string, policies: readonly unknown[]): readonly string[] => [
-    '-f',
-    writeValuesOverlay(name, { studioObserved: { policies } }),
-  ];
+describe('STUDIO-OBS-009 OI-06 B5 — the render guards (and the boolean check) fire, each naming the key', () => {
   /** An all-digit hash written without quotes is a YAML number: it loses digits, so the chart refuses it. */
   const unquoted = ((): string => {
     const directory = mkdtempSync(join(tmpdir(), 'studio-chart-observed-yaml-'));
@@ -2145,14 +2185,11 @@ describe('STUDIO-OBS-009 OI-06 B5 — the four render guards (and the boolean ch
     ['G-O2 hash written as a YAML number', { valuesFile: UAT, args: ['-f', unquoted] }, ['studioObserved.catalog.build.profileHash', 'quoted string']],
     ['G-O2 additionalBackendCatalog entry of the wrong shape', { valuesFile: UAT, set: { 'studioObserved.additionalBackendCatalog[0].x': '1' } }, ['studioObserved.additionalBackendCatalog[0]']],
 
-    ['G-O3 no policies (UAT, only the catalog supplied)', { valuesFile: UAT, observedInputs: false, args: ['-f', writeValuesOverlay('observed-catalog-only.json', { studioObserved: { catalog: CATALOG } })] }, ['studioObserved.policies must not be empty']],
-    ['G-O3 17 policies (the backend takes 16)', { valuesFile: UAT, args: policiesFile('observed-policies-17.json', Array.from({ length: 17 }, (_unused, index) => policy(index))) }, ['studioObserved.policies has 17 entries', '16']],
-    ['G-O3 policies over 65,536 bytes', { valuesFile: UAT, args: policiesFile('observed-policies-big.json', Array.from({ length: 16 }, (_unused, index) => policy(index, 'x'.repeat(4200)))) }, ['studioObserved.policies is', '65536']],
 
     ['G-O4 backend.configOverrides catalog-json', { valuesFile: UAT, set: { 'backend.configOverrides.studio\\.observed-replay\\.catalog-json': 'x' } }, ['backend.configOverrides sets studio.observed-replay.catalog-json']],
-    ['G-O4 worker.configOverrides policies-json', { valuesFile: UAT, set: { 'worker.configOverrides.studio\\.observed-replay\\.policies-json': 'x' } }, ['worker.configOverrides sets studio.observed-replay.policies-json']],
     ['G-O4 backend.env STUDIO_OBSERVED_CATALOG_JSON', { valuesFile: UAT, set: { 'backend.env.STUDIO_OBSERVED_CATALOG_JSON': 'x' } }, ['backend.env sets STUDIO_OBSERVED_CATALOG_JSON']],
-    ['G-O4 worker.env STUDIO_OBSERVED_POLICIES_JSON', { valuesFile: UAT, set: { 'worker.env.STUDIO_OBSERVED_POLICIES_JSON': 'x' } }, ['worker.env sets STUDIO_OBSERVED_POLICIES_JSON']],
+    ['G-O4 worker.configOverrides catalog-json', { valuesFile: UAT, set: { 'worker.configOverrides.studio\\.observed-replay\\.catalog-json': 'x' } }, ['worker.configOverrides sets studio.observed-replay.catalog-json']],
+    ['G-O4 worker.env STUDIO_OBSERVED_CATALOG_JSON', { valuesFile: UAT, set: { 'worker.env.STUDIO_OBSERVED_CATALOG_JSON': 'x' } }, ['worker.env sets STUDIO_OBSERVED_CATALOG_JSON']],
     ['G-O4 nested and relaxed spelling in configOverrides', { valuesFile: UAT, args: ['-f', writeValuesOverlay('observed-nested-override.json', { backend: { configOverrides: { studio: { 'observed-replay': { Catalog_JSON: 'x' } } } } })] }, ['backend.configOverrides sets studio.observed-replay.Catalog_JSON']],
   ];
 
@@ -2162,26 +2199,14 @@ describe('STUDIO-OBS-009 OI-06 B5 — the four render guards (and the boolean ch
     for (const fragment of fragments) expect(outcome.error).toContain(fragment);
   });
 
-  it('G-O3 admits 16 policies: the bound is the backend’s, not stricter', () => {
-    const outcome = renderOutcome({ valuesFile: UAT, args: policiesFile('observed-policies-16.json', Array.from({ length: 16 }, (_unused, index) => policy(index))) });
-    expect(outcome.ok, outcome.error).toBe(true);
-  });
-
   it('G-O4 applies only while observed replay is on: the same overrides render with both flags off', () => {
     const outcome = renderOutcome({
       set: {
         'backend.configOverrides.studio\\.observed-replay\\.catalog-json': 'x',
-        'worker.env.STUDIO_OBSERVED_POLICIES_JSON': 'x',
+        'worker.env.STUDIO_OBSERVED_CATALOG_JSON': 'x',
       },
     });
     expect(outcome.ok, outcome.error).toBe(true);
-  });
-
-  it('chart mutation: with the 16-entry comparison removed from a scratch copy, 17 policies render', () => {
-    const chart = mutatedChart('observed-policy-bound', '_helpers.tpl', '{{- if gt (len $o.policies) 16 -}}', '{{- if false -}}');
-    const seventeen = policiesFile('observed-policies-17-mutated.json', Array.from({ length: 17 }, (_unused, index) => policy(index)));
-    expect(renderOutcome({ chartDir: chart, valuesFile: UAT, args: seventeen }).ok, 'the mutation did not remove the guard').toBe(true);
-    expect(renderOutcome({ valuesFile: UAT, args: seventeen }).ok, 'the unmutated chart accepted 17 policies').toBe(false);
   });
 
   it('chart mutation: with the runner-enabled check removed from a scratch copy, the runner-off set renders nothing for the runner', () => {
@@ -2189,6 +2214,332 @@ describe('STUDIO-OBS-009 OI-06 B5 — the four render guards (and the boolean ch
     const mutated = renderOutcome({ chartDir: chart, observed: true, set: { 'studioRunner.enabled': 'false' } });
     expect(mutated.ok, 'the mutation did not remove G-O1').toBe(true);
     expect(named(mutated, RUNNER_FRAGMENT), 'the values were silently ignored').toEqual([]);
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════════════════════════════════
+// STUDIO-FLEX-001 (lane D): the domain whitelist, capacity values and concurrent learning.
+// Literals here are the user's decisions of 2026-10-25, on purpose: a value that moves without a
+// decision turns these red.
+// ══════════════════════════════════════════════════════════════════════════════════════════════
+
+/** The runner's whitelist env value, or `undefined` when the runner does not render it. */
+function runnerAllowedDomains(outcome: RenderOutcome): string | undefined {
+  return envValues(soleContainer(runnerDeployment(outcome)))['STUDIO_RUNNER_ALLOWED_DOMAINS'];
+}
+
+describe('STUDIO-FLEX-001 item 1 — the domain whitelist is one list for the API, the worker and the runner', () => {
+  it.each(VALUE_SETS.map((file) => [valueSetName(file), file] as const))(
+    '%s: the shipped empty placeholder renders to both images (empty means deny all)',
+    (_label, valuesFile) => {
+      const outcome = render({ valuesFile });
+      expect(runnerAllowedDomains(outcome), 'the runner must carry the key even when empty').toBe('');
+      for (const role of ['api', 'worker'] as const) {
+        const properties = mountedSpringProperties(outcome, role);
+        expect(properties, role).toHaveProperty(['studio.navigation.allowed-domains']);
+        expect(properties['studio.navigation.allowed-domains'], role).toBe('');
+      }
+    },
+  );
+
+  it.each(VALUE_SETS.map((file) => [valueSetName(file), file] as const))(
+    '%s: a list renders as the same comma-separated value to the API, the worker and the runner',
+    (_label, valuesFile) => {
+      const outcome = render({
+        valuesFile,
+        set: { 'studioNavigation.allowedDomains': '{citi.com,localhost,xn--bcher-kva.example}' },
+      });
+      const expected = 'citi.com,localhost,xn--bcher-kva.example';
+      expect(runnerAllowedDomains(outcome)).toBe(expected);
+      for (const role of ['api', 'worker'] as const) {
+        expect(mountedSpringProperties(outcome, role)['studio.navigation.allowed-domains'], role).toBe(expected);
+      }
+    },
+  );
+
+  it('renders for the API and worker when no runner renders, and the guard still runs', () => {
+    const off = render({ enableRunner: false, set: { 'studioNavigation.allowedDomains': '{citi.com}' } });
+    expect(mountedSpringProperties(off, 'api')['studio.navigation.allowed-domains']).toBe('citi.com');
+    const refused = renderOutcome({ enableRunner: false, set: { 'studioNavigation.allowedDomains': '{Citi.com}' } });
+    expect(refused.ok, 'a bad list was accepted because no runner rendered').toBe(false);
+  });
+
+  const INVALID: readonly (readonly [string, string])[] = [
+    ['a wildcard', '*.citi.com'],
+    ['a scheme', 'https://citi.com'],
+    ['a port', 'citi.com:443'],
+    ['a path', 'citi.com/login'],
+    ['a trailing dot', 'citi.com.'],
+    ['upper case', 'Citi.com'],
+    ['an IPv4 literal', '10.0.0.1'],
+    ['an IPv6 literal', '[::1]'],
+    ['an empty label', 'a..citi.com'],
+    ['a leading hyphen', '-citi.com'],
+    ['an empty entry', ''],
+  ];
+
+  it.each(INVALID)('refuses %s, naming the entry', (_label, entry) => {
+    const outcome = renderOutcome({ set: { 'studioNavigation.allowedDomains': `{${entry}}` } });
+    expect(outcome.ok, `${JSON.stringify(entry)} rendered`).toBe(false);
+    expect(outcome.error).toContain('studioNavigation.allowedDomains[0]');
+    expect(outcome.error).toContain(JSON.stringify(entry));
+  });
+
+  it('refuses a list that is not a list', () => {
+    const outcome = renderOutcome({ set: { 'studioNavigation.allowedDomains': 'citi.com' } });
+    expect(outcome.ok).toBe(false);
+    expect(outcome.error).toContain('studioNavigation.allowedDomains must be a list');
+  });
+
+  it.each([
+    ['a subdomain of another entry', '{citi.com,www.citi.com}'],
+    ['a subdomain listed first', '{www.citi.com,citi.com}'],
+    ['a duplicate', '{citi.com,citi.com}'],
+  ])('refuses overlapping entries: %s', (_label, list) => {
+    const outcome = renderOutcome({ set: { 'studioNavigation.allowedDomains': list } });
+    expect(outcome.ok, 'overlapping entries rendered').toBe(false);
+    expect(outcome.error).toContain('overlaps');
+  });
+
+  it('matches on label boundaries: evilciti.com does not overlap citi.com, and both render', () => {
+    const outcome = render({ set: { 'studioNavigation.allowedDomains': '{citi.com,evilciti.com}' } });
+    expect(runnerAllowedDomains(outcome)).toBe('citi.com,evilciti.com');
+  });
+
+  it('accepts exactly 32 entries and refuses 33', () => {
+    const list = (count: number): string =>
+      `{${Array.from({ length: count }, (_unused, index) => `d${String(index)}.example`).join(',')}}`;
+    expect(runnerAllowedDomains(render({ set: { 'studioNavigation.allowedDomains': list(32) } }))?.split(',')).toHaveLength(32);
+    const outcome = renderOutcome({ set: { 'studioNavigation.allowedDomains': list(33) } });
+    expect(outcome.ok).toBe(false);
+    expect(outcome.error).toContain('33 entries');
+  });
+
+  it.each([
+    ['backend.configOverrides', 'backend.configOverrides.studio\\.navigation\\.allowed-domains'],
+    ['worker.configOverrides', 'worker.configOverrides.studio\\.navigation\\.allowed-domains'],
+    ['a relaxed spelling in configOverrides', 'backend.configOverrides.STUDIO_NAVIGATION_ALLOWED_DOMAINS'],
+    ['backend.env', 'backend.env.STUDIO_ALLOWED_DOMAINS'],
+    ['worker.env', 'worker.env.STUDIO_ALLOWED_DOMAINS'],
+    ['studioRunner.runnerEnv', 'studioRunner.runnerEnv.STUDIO_RUNNER_ALLOWED_DOMAINS'],
+  ])('has no second source: %s fails the render (divergence guard)', (_label, key) => {
+    const outcome = renderOutcome({ args: ['--set-string', `${key}=citi.com`] });
+    expect(outcome.ok, `${key} rendered, so the two images could disagree`).toBe(false);
+    expect(outcome.error).toMatch(/is managed by the chart/u);
+  });
+
+  it('chart mutation: with the 32-entry bound removed from a scratch copy, 33 entries render (the guard is what refuses)', () => {
+    const chart = mutatedChart('nav-bound', '_helpers.tpl', '{{- if gt (len $domains) 32 -}}', '{{- if gt (len $domains) 3200 -}}');
+    const list = `{${Array.from({ length: 33 }, (_unused, index) => `d${String(index)}.example`).join(',')}}`;
+    const mutated = renderOutcome({ chartDir: chart, set: { 'studioNavigation.allowedDomains': list } });
+    expect(mutated.ok, mutated.error).toBe(true);
+  });
+});
+
+describe('the allow-all option is one switch for the API, the worker and the runner', () => {
+  const runnerAllowAll = (outcome: RenderOutcome): string | undefined =>
+    envValues(soleContainer(runnerDeployment(outcome)))['STUDIO_RUNNER_ALLOW_ALL_DOMAINS'];
+  const runnerPolicies = (outcome: RenderOutcome): unknown[] =>
+    byKind(outcome, 'NetworkPolicy').filter((d) => (d.metadata?.name ?? '').includes(RUNNER_FRAGMENT));
+
+  it.each(VALUE_SETS.map((file) => [valueSetName(file), file] as const))(
+    '%s: ships ON for now (user decision 2026-10-25), and renders true to both images',
+    (_label, valuesFile) => {
+      const outcome = render({ valuesFile });
+      expect(runnerAllowAll(outcome)).toBe('true');
+      for (const role of ['api', 'worker'] as const) {
+        expect(mountedSpringProperties(outcome, role)['studio.navigation.allow-all-domains'], role).toBe('true');
+      }
+    },
+  );
+
+  it.each(VALUE_SETS.map((file) => [valueSetName(file), file] as const))(
+    '%s: false renders false to the API, the worker and the runner (the list is enforced again)',
+    (_label, valuesFile) => {
+      const outcome = render({ valuesFile, set: { 'studioNavigation.allowAllDomains': 'false', 'studioNavigation.allowedDomains': '{citi.com}' } });
+      expect(runnerAllowAll(outcome)).toBe('false');
+      expect(runnerAllowedDomains(outcome)).toBe('citi.com');
+      for (const role of ['api', 'worker'] as const) {
+        expect(mountedSpringProperties(outcome, role)['studio.navigation.allow-all-domains'], role).toBe('false');
+      }
+    },
+  );
+
+  it('treats a removed key (null) as the shipped default, on, for both images', () => {
+    const outcome = render({ set: { 'studioNavigation.allowAllDomains': 'null' } });
+    expect(runnerAllowAll(outcome)).toBe('true');
+    for (const role of ['api', 'worker'] as const) {
+      expect(mountedSpringProperties(outcome, role)['studio.navigation.allow-all-domains'], role).toBe('true');
+    }
+  });
+
+  it.each(VALUE_SETS.map((file) => [valueSetName(file), file] as const))(
+    '%s: true renders true to the API, the worker and the runner, and the list is still rendered',
+    (_label, valuesFile) => {
+      const outcome = render({ valuesFile, set: { 'studioNavigation.allowAllDomains': 'true', 'studioNavigation.allowedDomains': '{citi.com}' } });
+      expect(runnerAllowAll(outcome)).toBe('true');
+      expect(runnerAllowedDomains(outcome)).toBe('citi.com');
+      for (const role of ['api', 'worker'] as const) {
+        const properties = mountedSpringProperties(outcome, role);
+        expect(properties['studio.navigation.allow-all-domains'], role).toBe('true');
+        expect(properties['studio.navigation.allowed-domains'], role).toBe('citi.com');
+      }
+    },
+  );
+
+  it('renders for the API and worker when no runner renders, and the guard still runs', () => {
+    const off = render({ enableRunner: false, set: { 'studioNavigation.allowAllDomains': 'true' } });
+    expect(mountedSpringProperties(off, 'api')['studio.navigation.allow-all-domains']).toBe('true');
+    const refused = renderOutcome({ enableRunner: false, set: { 'studioNavigation.allowAllDomains': 'maybe' } });
+    expect(refused.ok).toBe(false);
+  });
+
+  it.each([
+    ['a quoted true', 'true'],
+    ['a quoted false', 'false'],
+    ['yes', 'yes'],
+    ['one', '1'],
+    ['upper case', 'TRUE'],
+  ])('accepts only a boolean: %s as a string fails the render', (_label, value) => {
+    const outcome = renderOutcome({ args: ['--set-string', `studioNavigation.allowAllDomains=${value}`] });
+    expect(outcome.ok, `${value} rendered`).toBe(false);
+    expect(outcome.error).toContain('studioNavigation.allowAllDomains must be the boolean true or false');
+  });
+
+  it('leaves the runner NetworkPolicy exactly as it is: its page egress is already open and does not derive from the list', () => {
+    const off = render({ set: { 'studioNavigation.allowedDomains': '{citi.com}', 'studioNavigation.allowAllDomains': 'false' } });
+    const on = render({ set: { 'studioNavigation.allowedDomains': '{citi.com}', 'studioNavigation.allowAllDomains': 'true' } });
+    expect(runnerPolicies(on)).toEqual(runnerPolicies(off));
+    expect(runnerPolicies(on).length).toBeGreaterThan(0);
+  });
+
+  it.each([
+    ['backend.configOverrides', 'backend.configOverrides.studio\\.navigation\\.allow-all-domains'],
+    ['worker.configOverrides', 'worker.configOverrides.studio\\.navigation\\.allow-all-domains'],
+    ['a relaxed spelling in configOverrides', 'backend.configOverrides.STUDIO_NAVIGATION_ALLOW_ALL_DOMAINS'],
+    ['backend.env', 'backend.env.STUDIO_ALLOW_ALL_DOMAINS'],
+    ['worker.env', 'worker.env.STUDIO_ALLOW_ALL_DOMAINS'],
+    ['studioRunner.runnerEnv', 'studioRunner.runnerEnv.STUDIO_RUNNER_ALLOW_ALL_DOMAINS'],
+  ])('has no second source: %s fails the render (divergence guard)', (_label, key) => {
+    const outcome = renderOutcome({ args: ['--set-string', `${key}=true`] });
+    expect(outcome.ok, `${key} rendered, so the two images could disagree`).toBe(false);
+    expect(outcome.error).toMatch(/is managed by the chart/u);
+  });
+});
+
+describe('STUDIO-FLEX-001 item 4 — runner capacity values and sizes', () => {
+  it.each(VALUE_SETS.map((file) => [valueSetName(file), file] as const))(
+    '%s: a replay pod is sized 1 CPU / 2Gi requested, 4 CPU / 4Gi limit, 2Gi /dev/shm, 8Gi scratch',
+    (_label, valuesFile) => {
+      const deployment = runnerDeployment(render({ valuesFile, guided: false }));
+      const container = soleContainer(deployment);
+      expect(container.resources?.requests).toEqual({ cpu: '1', memory: '2Gi' });
+      expect(container.resources?.limits).toEqual({ cpu: '4', memory: '4Gi' });
+      expect(volumeNamed(podSpec(deployment), 'dev-shm')?.emptyDir?.sizeLimit).toBe('2Gi');
+      expect(volumeNamed(podSpec(deployment), 'scratch')?.emptyDir?.sizeLimit).toBe('8Gi');
+    },
+  );
+});
+
+describe('STUDIO-FLEX-001 item 5 — concurrent learning sessions on the one guided pod', () => {
+  const GUIDED_SETS = VALUE_SETS.map((file) => [valueSetName(file), file] as const);
+
+  it.each(GUIDED_SETS)('%s: a guided pod is sized 2 CPU / 4Gi requested, 6 CPU / 10Gi limit, 4Gi /dev/shm, 3Gi /tmp', (_label, valuesFile) => {
+    const deployment = runnerDeployment(render({ valuesFile, guided: true }));
+    const container = soleContainer(deployment);
+    expect(container.resources?.requests).toEqual({ cpu: '2', memory: '4Gi' });
+    expect(container.resources?.limits).toEqual({ cpu: '6', memory: '10Gi' });
+    expect(volumeNamed(podSpec(deployment), 'dev-shm')?.emptyDir?.sizeLimit).toBe('4Gi');
+    expect(volumeNamed(podSpec(deployment), 'guided-tmp')?.emptyDir?.sizeLimit).toBe('3Gi');
+  });
+
+  it.each(GUIDED_SETS)('%s: guided.capacity renders to the runner and to both backend pods, from the one key', (_label, valuesFile) => {
+    const outcome = render({ valuesFile, guided: true, set: { 'studioRunner.guided.capacity': '5' } });
+    expect(envValues(soleContainer(runnerDeployment(outcome)))['STUDIO_RUNNER_GUIDED_CAPACITY']).toBe('5');
+    for (const role of ['api', 'worker'] as const) {
+      expect(mountedSpringProperties(outcome, role)['studio.guided-authoring.max-concurrent-sessions'], role).toBe(5);
+    }
+  });
+
+  it('the shipped capacity is 1 and is rendered nowhere while guided mode is off', () => {
+    const on = render({ guided: true });
+    expect(envValues(soleContainer(runnerDeployment(on)))['STUDIO_RUNNER_GUIDED_CAPACITY']).toBe('1');
+    expect(mountedSpringProperties(on, 'api')['studio.guided-authoring.max-concurrent-sessions']).toBe(1);
+
+    const off = render({ guided: false, set: { 'studioRunner.guided.capacity': '5' } });
+    expect(envNames(soleContainer(runnerDeployment(off)))).not.toContain('STUDIO_RUNNER_GUIDED_CAPACITY');
+    for (const role of ['api', 'worker'] as const) {
+      expect(mountedSpringProperties(off, role)).not.toHaveProperty(['studio.guided-authoring.max-concurrent-sessions']);
+    }
+  });
+
+  it.each(['0', '9', '2.5', 'many'])('refuses capacity %s: one to eight, whole numbers', (capacity) => {
+    const outcome = renderOutcome({ guided: true, args: ['--set-string', `studioRunner.guided.capacity=${capacity}`] });
+    expect(outcome.ok, `capacity ${capacity} rendered`).toBe(false);
+    expect(outcome.error).toContain('studioRunner.guided.capacity must be a whole number from 1 to 8');
+  });
+
+  it.each([
+    ['backend.configOverrides', 'backend.configOverrides.studio\\.guided-authoring\\.max-concurrent-sessions'],
+    ['worker.configOverrides', 'worker.configOverrides.studio\\.guided-authoring\\.max-concurrent-sessions'],
+    ['studioRunner.runnerEnv', 'studioRunner.runnerEnv.STUDIO_RUNNER_GUIDED_CAPACITY'],
+  ])('has no second source: %s fails the render', (_label, key) => {
+    const outcome = renderOutcome({ guided: true, args: ['--set-string', `${key}=3`] });
+    expect(outcome.ok, `${key} rendered, so the runner and the backend could disagree`).toBe(false);
+    expect(outcome.error).toMatch(/is managed by the chart/u);
+  });
+
+  it('the one-replica guard stays: capacity above 1 does not allow a second pod', () => {
+    const outcome = renderOutcome({
+      guided: true,
+      set: { 'studioRunner.guided.capacity': '3', 'studioRunner.replicaCount': '2' },
+    });
+    expect(outcome.ok).toBe(false);
+    expect(outcome.error).toContain('studioRunner.replicaCount: 1');
+  });
+
+  it('values-uat.yaml ships guided learning on: one replica, capacity 3, a replay pool of 2', () => {
+    const outcome = render({ valuesFile: UAT });
+    const deployment = runnerDeployment(outcome);
+    const env = envValues(soleContainer(deployment));
+    expect(env['STUDIO_RUNNER_GUIDED_ENABLED']).toBe('true');
+    expect(env['STUDIO_RUNNER_GUIDED_CAPACITY']).toBe('3');
+    expect(env['STUDIO_RUNNER_POOL_SIZE']).toBe('2');
+    expect((deployment.spec as { replicas?: number; strategy?: { type?: string } }).replicas).toBe(1);
+    expect((deployment.spec as { strategy?: { type?: string } }).strategy?.type).toBe('Recreate');
+    for (const role of ['api', 'worker'] as const) {
+      expect(mountedSpringProperties(outcome, role)['studio.guided-authoring.max-concurrent-sessions'], role).toBe(3);
+    }
+  });
+
+  it('values-uat.yaml commits no token input: the render fails without them, naming each, and invents none', () => {
+    const none = renderOutcome({ valuesFile: UAT, guidedInputs: false });
+    expect(none.ok, 'UAT rendered guided mode with no issuer, subject or public key').toBe(false);
+    expect(none.error).toContain('studioRunner.guided.token.issuer is required');
+
+    const issuerOnly = renderOutcome({
+      valuesFile: UAT,
+      guidedInputs: false,
+      args: ['--set-string', 'studioRunner.guided.token.issuer=https://issuer.example.test'],
+    });
+    expect(issuerOnly.ok).toBe(false);
+    expect(issuerOnly.error).toContain('studioRunner.guided.token.controllerSubject is required');
+
+    const noKey = renderOutcome({
+      valuesFile: UAT,
+      guidedInputs: false,
+      args: [
+        '--set-string',
+        'studioRunner.guided.token.issuer=https://issuer.example.test',
+        '--set-string',
+        'studioRunner.guided.token.controllerSubject=checks-backend-controller',
+      ],
+    });
+    expect(noKey.ok).toBe(false);
+    expect(noKey.error).toContain('studioRunner.guided.token.publicKey is required');
+
+    const committed = readFileSync(join(CHART_DIR, 'values-uat.yaml'), 'utf8');
+    expect(committed, 'a token input is committed in values-uat.yaml').not.toMatch(/\n\s+(issuer|controllerSubject|publicKey):\s*\S/u);
   });
 });
 

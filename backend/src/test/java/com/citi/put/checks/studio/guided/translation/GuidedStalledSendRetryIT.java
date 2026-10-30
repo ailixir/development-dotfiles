@@ -151,7 +151,7 @@ class GuidedStalledSendRetryIT {
     Flyway.configure()
         .dataSource(source)
         .locations("classpath:db/migration")
-        .target("23")
+        .target("29")
         .load()
         .migrate();
     jdbc = new JdbcTemplate(source);
@@ -161,9 +161,6 @@ class GuidedStalledSendRetryIT {
     translationProperties =
         new GuidedTranslationProperties(
             true,
-            true,
-            List.of("orders"),
-            List.of("fixture"),
             65536,
             4096,
             callSeconds,
@@ -171,13 +168,21 @@ class GuidedStalledSendRetryIT {
             false,
             (int) BASE_MILLIS,
             sendTimeoutSeconds);
-    var prompts = new GuidedPromptAssembler(C);
+    var prompts =
+        new GuidedPromptAssembler(C, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     seedSource();
     var access = new PersistedSourceAccess();
     service =
         new GuidedSessionService(
-            repository, C, access, new GuidedSessionProperties(true, limits), clock);
-    var materialization = new GuidedMaterializationService(jdbc, C);
+            repository,
+            C,
+            access,
+            new GuidedSessionProperties(true, limits),
+            com.citi.put.checks.studio.support.TestDomains.FIXTURES,
+            clock);
+    var materialization =
+        new GuidedMaterializationService(
+            jdbc, C, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     service.installBridge(
         materialization,
         new GuidedPreparationStore(jdbc, C),
@@ -192,22 +197,14 @@ class GuidedStalledSendRetryIT {
             false,
             C));
     service.installPresentation(new GuidedPublicPresentationProjector(jdbc, C));
-    com.citi.put.checks.studio.support.ObservedPublicationFixture.installGovernance(
-        service,
-        jdbc,
-        "CSI-123",
-        "orders",
-        "fixture",
-        List.of("https://orders.example.test"),
-        null);
+    com.citi.put.checks.studio.support.ObservedPublicationFixture.installCsiBudget(service, jdbc);
     ObjectNode start =
         C.object()
             .put("schemaVersion", 3)
             .put("testId", testId.toString())
             .put("sourceRevision", "1")
             .put("configurationRevision", "1")
-            .put("environmentId", "fixture")
-            .put("applicationId", "orders");
+            .put("environmentId", "fixture");
     start.set("versions", C.parse("{\"contract\":3}"));
     sessionId = service.start(user, "retry-start", start).path("sessionId").asText();
     repository.transaction(
@@ -237,7 +234,8 @@ class GuidedStalledSendRetryIT {
             gateway,
             C,
             prompts,
-            new GuidedSourceInputResolver(C),
+            new GuidedSourceInputResolver(
+                C, com.citi.put.checks.studio.support.TestDomains.FIXTURES),
             new GuidedProposalValidator(C),
             new GuidedDependencyPlanner(service),
             translationProperties,
@@ -509,7 +507,9 @@ class GuidedStalledSendRetryIT {
     startWire(silent(), silent(), silent(), silent());
     script(wire(), wire(), wire(), wire());
     var refused = refusal();
-    assertThat(refused.getMessage()).isEqualTo("INVALID_CONTRACT");
+    assertThat(refused.getMessage()).isEqualTo("MODEL_UNAVAILABLE");
+    assertThat(refused.status()).isEqualTo(503);
+    assertThat(errorCode()).isEqualTo("MODEL_UNAVAILABLE");
     assertThat(document().path("state").asText()).isEqualTo("FAILED");
     assertThat(rows())
         .containsExactly(
@@ -555,7 +555,7 @@ class GuidedStalledSendRetryIT {
     fixture(Map.of());
     startWire(silent(), status(429), silent(), silent());
     script(wire(), wire(), wire(), wire());
-    assertThat(refusal().getMessage()).isEqualTo("INVALID_CONTRACT");
+    assertThat(refusal().getMessage()).isEqualTo("MODEL_UNAVAILABLE");
     assertThat(rows())
         .containsExactly(
             "1:REJECTED:TRANSPORT_STALL",
@@ -570,7 +570,7 @@ class GuidedStalledSendRetryIT {
     fixture(Map.of());
     startWire(silent(), silent(), silent());
     script(scripted(applyRefusal()), wire(), wire(), wire());
-    assertThat(refusal().getMessage()).isEqualTo("INVALID_CONTRACT");
+    assertThat(refusal().getMessage()).isEqualTo("MODEL_UNAVAILABLE");
     assertThat(rows())
         .containsExactly(
             "1:REJECTED:INVALID_CONTRACT",
@@ -597,7 +597,7 @@ class GuidedStalledSendRetryIT {
     fixture(Map.of());
     startWire(silent(), silent());
     script(wire(), wire());
-    assertThat(refusal().getMessage()).isEqualTo("INVALID_CONTRACT");
+    assertThat(refusal().getMessage()).isEqualTo("MODEL_UNAVAILABLE");
     assertThat(rows()).containsExactly("1:REJECTED:TIMEOUT");
     assertThat(httpRequests()).isEqualTo(1);
     assertThat(sleeps).isEmpty();
@@ -615,7 +615,7 @@ class GuidedStalledSendRetryIT {
             .withChunkedDribbleDelay(10, 5000),
         silent());
     script(wire(), wire());
-    assertThat(refusal().getMessage()).isEqualTo("INVALID_CONTRACT");
+    assertThat(refusal().getMessage()).isEqualTo("MODEL_UNAVAILABLE");
     assertThat(rows()).containsExactly("1:REJECTED:TIMEOUT");
     assertThat(httpRequests()).isEqualTo(1);
     assertThat(sleeps).isEmpty();
@@ -627,9 +627,65 @@ class GuidedStalledSendRetryIT {
     fixture(Map.of());
     startWire(status(504), silent());
     script(wire(), wire());
-    assertThat(refusal().getMessage()).isEqualTo("INVALID_CONTRACT");
+    assertThat(refusal().getMessage()).isEqualTo("MODEL_UNAVAILABLE");
     assertThat(rows()).containsExactly("1:REJECTED:TIMEOUT");
     assertThat(httpRequests()).isEqualTo(1);
+  }
+
+  /**
+   * With every permit held, a call waits for one for its own budget (2 s here) and only then ends
+   * BUSY: one rejected attempt, no send on the wire, and MODEL_UNAVAILABLE, not a contract defect.
+   */
+  @Test
+  void aSaturatedGatewayWaitsOutTheCallBudgetThenEndsModelUnavailableWithoutASend()
+      throws Exception {
+    realClock();
+    callSeconds = 2;
+    fixture(Map.of());
+    startWire(status(500));
+    script(wire());
+    GenAiGatewayTransport.Budget open =
+        new GenAiGatewayTransport.Budget() {
+          @Override
+          public Duration remaining() {
+            return Duration.ofSeconds(30);
+          }
+
+          @Override
+          public AutoCloseable onCancel(Runnable action) {
+            return GuidedStalledSendRetryIT::nothingRegistered;
+          }
+        };
+    GuidedSessionException refused;
+    long started = System.nanoTime();
+    try (var held = transport.tryAcquire(open)) {
+      assertThat(held).isNotNull();
+      refused = refusal();
+    }
+    long millis = Duration.ofNanos(System.nanoTime() - started).toMillis();
+    assertThat(refused.getMessage()).isEqualTo("MODEL_UNAVAILABLE");
+    assertThat(refused.status()).isEqualTo(503);
+    assertThat(rows()).containsExactly("1:REJECTED:BUSY");
+    assertThat(httpRequests()).isZero();
+    assertThat(sleeps).isEmpty();
+    assertThat(millis).isBetween(1500L, 6000L);
+    assertThat(errorCode()).isEqualTo("MODEL_UNAVAILABLE");
+  }
+
+  /** The provider's own HTTP 403 reaches the session as MODEL_REFUSED, once, with no retry. */
+  @Test
+  void aProvider403IsRefusedNotAContractDefectAndNotRetried() throws Exception {
+    realClock();
+    fixture(Map.of());
+    startWire(status(403), silent());
+    script(wire(), wire());
+    var refused = refusal();
+    assertThat(refused.getMessage()).isEqualTo("MODEL_REFUSED");
+    assertThat(refused.status()).isEqualTo(422);
+    assertThat(rows()).containsExactly("1:REJECTED:TRANSPORT_HTTP_401_403");
+    assertThat(httpRequests()).isEqualTo(1);
+    assertThat(sleeps).isEmpty();
+    assertThat(errorCode()).isEqualTo("MODEL_REFUSED");
   }
 
   // ── test 6 ─────────────────────────────────────────────────────────────────────────────────
@@ -668,7 +724,7 @@ class GuidedStalledSendRetryIT {
           clockWithCancel.budget = own;
           return adapter.propose(request, own);
         });
-    assertThat(refusal().getMessage()).isEqualTo("INVALID_CONTRACT");
+    assertThat(refusal().getMessage()).isEqualTo("MODEL_UNAVAILABLE");
     assertThat(rows()).containsExactly("1:REJECTED:TIMEOUT");
     assertThat(httpRequests()).isZero();
     assertThat(sleeps).isEmpty();
@@ -877,7 +933,10 @@ class GuidedStalledSendRetryIT {
 
   private final class PersistedSourceAccess implements GuidedSessionAccess {
     private final GuidedSourceClassifier classifier =
-        new GuidedSourceClassifier(C, translationProperties, new CredentialPatternScreen());
+        new GuidedSourceClassifier(
+            C,
+            new CredentialPatternScreen(),
+            com.citi.put.checks.studio.support.TestDomains.FIXTURES);
 
     ObjectNode current() {
       var row =
@@ -918,12 +977,10 @@ class GuidedStalledSendRetryIT {
               .put("principalId", "retry-user")
               .put("csiId", current.path("csiId").asText())
               .put("environmentId", current.path("environment").asText())
-              .put("applicationId", "orders")
               .put("sourceRevision", current.path("sourceRevision").asText())
               .put("configurationRevision", current.path("configurationRevision").asText())
               .put("modelDataPolicyId", "INPUT-POLICY-01-A")
               .putNull("valueTransferPolicyId");
-      scope.putArray("approvedOrigins").add("https://orders.example.test");
       scope.putArray("capabilities").add("observe");
       var approved = classifier.classify(current, scope);
       var steps = JSON.createArrayNode();
@@ -934,11 +991,6 @@ class GuidedStalledSendRetryIT {
             .put("requiresAssertion", false);
       }
       return new Snapshot(scope, steps);
-    }
-
-    @Override
-    public void checkCurrent(JsonNode session) {
-      classifier.requireCurrentPolicy(session.path("scope"));
     }
 
     @Override

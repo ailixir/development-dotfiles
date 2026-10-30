@@ -3,6 +3,7 @@ package com.citi.put.checks.studio.guided.session;
 import com.citi.put.checks.security.CsiOwnershipEvaluator;
 import com.citi.put.checks.studio.dispatch.StudioRunnerProperties;
 import com.citi.put.checks.studio.dispatch.StudioRunnerTls;
+import com.citi.put.checks.studio.navigation.AllowedDomains;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,7 +36,11 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Configuration
-@EnableConfigurationProperties({GuidedSessionProperties.class, GuidedCsiBudgetProperties.class})
+@EnableConfigurationProperties({
+  GuidedSessionProperties.class,
+  GuidedCsiBudgetProperties.class,
+  GuidedCapacityProperties.class
+})
 public class GuidedSessionConfiguration {
   @Bean
   GuidedContracts guidedContracts() {
@@ -49,6 +54,17 @@ public class GuidedSessionConfiguration {
     return new GuidedPublicPresentationProjector(jdbc, contracts);
   }
 
+  /** The caller's latest terminal learning attempt per test (STUDIO-UNIFY-001.6 AC-09). */
+  @Bean
+  GuidedLatestAttemptReader guidedLatestAttemptReader(
+      GuidedSessionRepository repository,
+      GuidedPublicPresentationProjector presentation,
+      GuidedContracts contracts,
+      com.citi.put.checks.studio.StudioRepository tests,
+      CsiOwnershipEvaluator ownership) {
+    return new GuidedLatestAttemptReader(repository, presentation, contracts, tests, ownership);
+  }
+
   @Bean
   GuidedSessionRepository guidedSessionRepository(
       JdbcTemplate jdbc, PlatformTransactionManager manager, GuidedContracts contracts) {
@@ -57,9 +73,12 @@ public class GuidedSessionConfiguration {
 
   @Bean
   GuidedCsiBudget guidedCsiBudget(
-      JdbcTemplate jdbc, GuidedCsiBudgetProperties budget, GuidedSessionProperties session) {
+      JdbcTemplate jdbc,
+      GuidedCsiBudgetProperties budget,
+      GuidedCapacityProperties capacity,
+      GuidedSessionProperties session) {
     budget.requireFits(session);
-    return new GuidedCsiBudget(jdbc, budget);
+    return new GuidedCsiBudget(jdbc, budget, capacity.maxConcurrentSessions());
   }
 
   @Bean
@@ -68,22 +87,23 @@ public class GuidedSessionConfiguration {
       GuidedContracts contracts,
       GuidedSessionAccess access,
       GuidedSessionProperties properties,
+      AllowedDomains domains,
       JdbcTemplate jdbc,
       com.citi.put.checks.studio.guided.translation.GuidedTranslationStore translation,
       com.citi.put.checks.studio.guided.translation.GuidedClarificationContextStore questions,
-      com.citi.put.checks.studio.secrets.SecretRevocationSweep revocation,
       com.citi.put.checks.studio.secrets.SecretAuditLifecycle audit,
       com.citi.put.checks.studio.StudioExecutionProperties execution,
-      com.citi.put.checks.studio.guided.policy.ObservationPolicyService policies,
       GuidedCsiBudget csiBudget,
       GuidedPublicPresentationProjector presentation,
       org.springframework.beans.factory.ObjectProvider<
               com.citi.put.checks.studio.guided.publication.ObservedRevisionVerifier>
           verifier) {
     var service =
-        new GuidedSessionService(repository, contracts, access, properties, Clock.systemUTC());
+        new GuidedSessionService(
+            repository, contracts, access, properties, domains, Clock.systemUTC());
     var materialization =
-        new com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService(jdbc, contracts);
+        new com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService(
+            jdbc, contracts, domains);
     service.installBridge(
         materialization,
         new com.citi.put.checks.studio.guided.bridge.GuidedPreparationStore(jdbc, contracts),
@@ -91,13 +111,11 @@ public class GuidedSessionConfiguration {
             jdbc, contracts, materialization),
         new com.citi.put.checks.studio.guided.bridge.GuidedAssignmentStore(jdbc, contracts));
     service.installTranslation(translation, questions);
-    service.installSecretRevocation(revocation);
     service.installSecretAudit(audit);
     service.installExecutionEnabled(execution::enabledOrDefault);
-    service.installGovernance(policies, csiBudget);
+    service.installCsiBudget(csiBudget);
     service.installPresentation(presentation);
     service.installIncrementalVerifier(revision -> verifier.getObject().verify(revision));
-    revocation.installGuidedStop(service::secretRevoked);
     return service;
   }
 
@@ -107,12 +125,13 @@ public class GuidedSessionConfiguration {
       com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient runner,
       JdbcTemplate jdbc,
       GuidedContracts contracts,
+      AllowedDomains domains,
       com.citi.put.checks.studio.dispatch.StudioReferenceResolver references) {
     var dispatch =
         new com.citi.put.checks.studio.guided.bridge.GuidedDispatchService(
             sessions,
             new com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService(
-                jdbc, contracts),
+                jdbc, contracts, domains),
             runner);
     dispatch.installReferences(references);
     sessions.installStopSender(dispatch::stop);
@@ -128,11 +147,10 @@ public class GuidedSessionConfiguration {
       com.citi.put.checks.studio.guided.translation.GuidedTranslationStore store,
       com.citi.put.checks.studio.guided.translation.GuidedStepVerifier verifier,
       CsiOwnershipEvaluator ownership,
-      com.citi.put.checks.studio.guided.publication.ObservedReplayPins pins,
-      com.citi.put.checks.studio.dispatch.StudioReferenceResolver references,
-      com.citi.put.checks.studio.secrets.StudioSecretUseAuthorization secretUse) {
+      AllowedDomains domains,
+      com.citi.put.checks.studio.dispatch.StudioReferenceResolver references) {
     return new com.citi.put.checks.studio.guided.translation.GuidedProductionSessionAccess(
-        snapshots, classifier, resolver, store, verifier, ownership, pins, references, secretUse);
+        snapshots, classifier, resolver, store, verifier, ownership, domains, references);
   }
 
   /**

@@ -499,4 +499,207 @@ class HttpRunnerDispatchClientTest {
                 dispatch.followRedirects(), validation.followRedirects(), guided.followRedirects()))
         .containsOnly(HttpClient.Redirect.NEVER);
   }
+
+  // ---- ADR-SC-007 D8: the closed refusals of an ORDINARY prepare ----
+
+  private static final String PREPARE_PATH =
+      "/internal/v2/studio/guided-sessions/session-1/prepare";
+  private static final String OBSERVE_PATH =
+      "/internal/v2/studio/guided-sessions/session-1/observe";
+
+  /**
+   * A TLS peer that looks like the runner's guided endpoint: one fixed answer, and a count of the
+   * requests that reached it. The guided client only speaks HTTPS, to a pinned issuer.
+   */
+  private static final class RunnerDouble implements AutoCloseable {
+    private final com.sun.net.httpserver.HttpsServer server;
+    private final java.util.concurrent.atomic.AtomicInteger requests =
+        new java.util.concurrent.atomic.AtomicInteger();
+    private volatile int status = 200;
+    private volatile byte[] body = new byte[0];
+
+    RunnerDouble() throws Exception {
+      var ca = com.citi.put.checks.studio.support.RunnerTestTls.shared();
+      var context =
+          ca.serverContext(
+              com.citi.put.checks.studio.support.RunnerTestTls.Identity.RUNNER,
+              ca.trustStore(),
+              ca.trustStorePasswordFile());
+      server =
+          com.sun.net.httpserver.HttpsServer.create(
+              new java.net.InetSocketAddress("localhost", 0), 0);
+      server.setHttpsConfigurator(new com.sun.net.httpserver.HttpsConfigurator(context));
+      server.createContext(
+          "/",
+          exchange -> {
+            requests.incrementAndGet();
+            exchange.getRequestBody().readAllBytes();
+            byte[] answer = body;
+            exchange.sendResponseHeaders(status, answer.length == 0 ? -1 : answer.length);
+            if (answer.length > 0) {
+              exchange.getResponseBody().write(answer);
+            }
+            exchange.close();
+          });
+      server.start();
+    }
+
+    void answers(int status, String body) {
+      this.status = status;
+      this.body = body.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+    }
+
+    int requests() {
+      return requests.get();
+    }
+
+    HttpRunnerDispatchClient client() {
+      var tls = com.citi.put.checks.studio.support.RunnerTestTls.shared().backendTls();
+      return new HttpRunnerDispatchClient(
+          java.net.URI.create("https://localhost:" + server.getAddress().getPort()),
+          tls.sslContext(),
+          () -> "guided-token",
+          new com.citi.put.checks.studio.guided.session.GuidedContracts());
+    }
+
+    @Override
+    public void close() {
+      server.stop(0);
+    }
+  }
+
+  private static com.fasterxml.jackson.databind.node.ObjectNode ordinaryPrepare() {
+    return new ObjectMapper()
+        .createObjectNode()
+        .put("sessionId", "session-1")
+        .put("ownerFence", 1)
+        .put("requestDigest", "d".repeat(64));
+  }
+
+  private static com.fasterxml.jackson.databind.node.ObjectNode prefixPrepare() {
+    var body = new ObjectMapper().createObjectNode().put("kind", "prefix");
+    body.set("request", ordinaryPrepare());
+    return body;
+  }
+
+  private static String refusal(String code, String reason) {
+    return "{\"code\":\""
+        + code
+        + "\""
+        + (reason == null ? "" : ",\"reason\":\"" + reason + "\"")
+        + "}";
+  }
+
+  private static void assertUnknownOutcome(
+      RunnerDouble runner,
+      String operation,
+      com.fasterxml.jackson.databind.JsonNode body,
+      String label) {
+    org.assertj.core.api.Assertions.assertThatThrownBy(() -> runner.client().send(operation, body))
+        .as(label)
+        .isInstanceOfSatisfying(
+            com.citi.put.checks.studio.guided.session.GuidedSessionException.class,
+            failure -> {
+              assertThat(failure.getMessage()).isEqualTo("UNKNOWN_OUTCOME");
+              assertThat(failure.status()).isEqualTo(409);
+            });
+  }
+
+  /**
+   * A runner that says, in a body that validates against the closed refusal, that it cannot prepare
+   * this proposal and why, has done nothing: the session ends with a public code that already
+   * exists, the reason is the message code, and the client sent exactly one request.
+   */
+  @Test
+  void closedPrepareRefusalsAreDefinite() throws Exception {
+    var cases =
+        java.util.Map.of(
+            "OPTION_NOT_PRESENT", "TARGET_MISMATCH",
+            "NO_DURABLE_LOCATOR", "UNSUPPORTED_SURFACE",
+            "READ_NOT_ALLOWED", "UNSUPPORTED_SURFACE");
+    for (var entry : cases.entrySet()) {
+      try (var runner = new RunnerDouble()) {
+        runner.answers(409, refusal("PREPARATION_DENIED", entry.getKey()));
+        org.assertj.core.api.Assertions.assertThatThrownBy(
+                () -> runner.client().send("prepare", ordinaryPrepare()))
+            .as(entry.getKey())
+            .isInstanceOfSatisfying(
+                com.citi.put.checks.studio.guided.session.GuidedSessionException.class,
+                failure -> {
+                  assertThat(failure.getMessage()).isEqualTo(entry.getValue());
+                  assertThat(failure.status()).isEqualTo(422);
+                  assertThat(failure.messageCode()).isEqualTo(entry.getKey());
+                });
+        assertThat(runner.requests()).isEqualTo(1);
+      }
+    }
+  }
+
+  /**
+   * Anything else a runner answers an ordinary prepare with 409 stays transport uncertainty: an
+   * unknown reason, another code, a reason under the wrong code, a body that is not a refusal, an
+   * empty body, one over 4 KiB, or another status altogether.
+   */
+  @Test
+  void otherPrepare409StaysUnknownOutcome() throws Exception {
+    String oversize =
+        "{\"code\":\"PREPARATION_DENIED\",\"reason\":\"OPTION_NOT_PRESENT\",\"x\":\""
+            + "a".repeat(5000)
+            + "\"}";
+    var bodies = new java.util.LinkedHashMap<String, String>();
+    bodies.put("unknown reason", refusal("PREPARATION_DENIED", "SOMETHING_NEW"));
+    bodies.put("another code", refusal("BUSY", null));
+    bodies.put("reason under the wrong code", refusal("BUSY", "OPTION_NOT_PRESENT"));
+    bodies.put("no reason", refusal("PREPARATION_DENIED", null));
+    bodies.put("not json", "plain text");
+    bodies.put("empty", "");
+    bodies.put("oversize", oversize);
+    bodies.put("observation reason", refusal("BUDGET_EXCEEDED", "OBSERVATION_DEADLINE"));
+    try (var runner = new RunnerDouble()) {
+      for (var entry : bodies.entrySet()) {
+        int before = runner.requests();
+        runner.answers(409, entry.getValue());
+        assertUnknownOutcome(runner, "prepare", ordinaryPrepare(), entry.getKey());
+        assertThat(runner.requests()).as(entry.getKey()).isEqualTo(before + 1);
+      }
+      for (int status : List.of(400, 403, 422, 500, 503)) {
+        runner.answers(status, refusal("PREPARATION_DENIED", "OPTION_NOT_PRESENT"));
+        assertUnknownOutcome(runner, "prepare", ordinaryPrepare(), "status " + status);
+      }
+    }
+  }
+
+  /** The prefix prepare has its own WAIT and DRIFT protocol and is never classified here. */
+  @Test
+  void closedRefusalOnAPrefixPrepareStaysUnknownOutcome() throws Exception {
+    try (var runner = new RunnerDouble()) {
+      for (String reason :
+          List.of("OPTION_NOT_PRESENT", "NO_DURABLE_LOCATOR", "READ_NOT_ALLOWED")) {
+        int before = runner.requests();
+        runner.answers(409, refusal("PREPARATION_DENIED", reason));
+        assertUnknownOutcome(runner, "prepare", prefixPrepare(), reason);
+        assertThat(runner.requests()).as(reason).isEqualTo(before + 1);
+      }
+    }
+  }
+
+  /**
+   * The runner stopped collecting at its deadline: a page this surface cannot give, not a retry.
+   */
+  @Test
+  void anObservationDeadlineRefusalEndsAsAnUnsupportedSurface() throws Exception {
+    try (var runner = new RunnerDouble()) {
+      runner.answers(409, refusal("BUDGET_EXCEEDED", "OBSERVATION_DEADLINE"));
+      org.assertj.core.api.Assertions.assertThatThrownBy(
+              () -> runner.client().send("observe", ordinaryPrepare()))
+          .isInstanceOfSatisfying(
+              com.citi.put.checks.studio.guided.session.GuidedSessionException.class,
+              failure -> {
+                assertThat(failure.getMessage()).isEqualTo("UNSUPPORTED_SURFACE");
+                assertThat(failure.status()).isEqualTo(422);
+                assertThat(failure.messageCode()).isEqualTo("OBSERVATION_DEADLINE");
+              });
+      assertThat(runner.requests()).isEqualTo(1);
+    }
+  }
 }

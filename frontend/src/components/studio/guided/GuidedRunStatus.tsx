@@ -1,4 +1,4 @@
-import { Box, LinearProgress, Stack, Typography } from '@mui/material';
+import { LinearProgress, Paper, Stack, Typography } from '@mui/material';
 import type { GuidedSessionState, PublicSession } from '@/types/studio/studioGuidedTypes';
 import { guidedCopy, stepNumberIn } from './guidedNarratives';
 
@@ -93,7 +93,8 @@ export function GuidedRunStatus({ session, draftStepIds }: GuidedRunStatusProps)
   const determinate = active !== null && stepCount > 0;
 
   return (
-    <Box data-testid="guided-run-status" data-state={session.state} sx={{ minWidth: 0 }}>
+    // An outlined card, like the "Run your test" block before a run and the plan after it.
+    <Paper variant="outlined" data-testid="guided-run-status" data-state={session.state} sx={{ p: 2, minWidth: 0 }}>
       <Stack spacing={0.5}>
         {primary !== null && (
           <Typography variant="body2" data-testid="guided-run-status-line" sx={{ overflowWrap: 'anywhere' }}>
@@ -115,7 +116,7 @@ export function GuidedRunStatus({ session, draftStepIds }: GuidedRunStatusProps)
           sx={{ width: '100%' }}
         />
       </Stack>
-    </Box>
+    </Paper>
   );
 }
 

@@ -98,6 +98,7 @@ class GuidedTeardownShedTest {
             contracts,
             mock(GuidedSessionAccess.class),
             new GuidedSessionProperties(true, Map.of()),
+            com.citi.put.checks.studio.support.TestDomains.FIXTURES,
             clock);
     service.installStopSender((target, reason) -> sends.incrementAndGet());
     // A small injected executor makes saturation deterministic; production remains 2 / 64.

@@ -1066,8 +1066,8 @@ const publicErrorCodes = new Map([
   'TARGET_MISMATCH', 'AMBIGUOUS_TARGET', 'MISSING_SOURCE', 'BINDING_ORDER', 'SENSITIVE_SOURCE',
   'ORIGIN_NOT_ALLOWED', 'UNSUPPORTED_SURFACE', 'BUDGET_EXCEEDED', 'STALE_FENCE', 'IDEMPOTENCY_CONFLICT',
   'UNKNOWN_OUTCOME', 'PUBLICATION_CONFLICT', 'RUNTIME_INCOMPATIBLE', 'ASSERTION_FAILED', 'CANCELLED',
-  'EXPIRED', 'SECRET_UNAVAILABLE', 'SECRET_USE_NOT_AUTHORIZED', 'SECRET_USE_REVOKED', 'VAULT_UNAVAILABLE',
-  'LOGIN_REQUIRED', 'SECRET_TOO_LONG', 'POLICY_NOT_APPROVED', 'STALE_REVISION', 'CSI_IMMUTABLE',
+  'EXPIRED', 'SECRET_UNAVAILABLE', 'VAULT_UNAVAILABLE',
+  'LOGIN_REQUIRED', 'SECRET_TOO_LONG', 'STALE_REVISION', 'CSI_IMMUTABLE',
   'LEARN_REQUIRED', 'TEST_DELETED', 'TEST_QUARANTINED', 'INVALID_AUTHORING', 'INVALID_STEPS',
   'INVALID_CONFIGURATION', 'SOURCE_TOO_MANY_STEPS', 'SOURCE_LINE_TOO_LONG', 'STUDIO_FORBIDDEN',
   'IDEMPOTENCY_KEY_REQUIRED', 'INVALID_IDEMPOTENCY_KEY', 'IDEMPOTENCY_KEY_REUSED',
@@ -1085,7 +1085,7 @@ const publicErrorCode = (body) => {
  */
 export function createPublicApiClient(options) { return boundPublicApiClient(options, null); }
 
-function boundPublicApiClient({ baseUrl, token, transport = fetch, csiId, environmentId, applicationId }, observation) {
+function boundPublicApiClient({ baseUrl, token, transport = fetch, csiId, environmentId }, observation) {
   const root = new URL(baseUrl);
   if (root.username || root.password || root.search || root.hash || (root.protocol !== 'https:' && !['127.0.0.1', 'localhost', '[::1]'].includes(root.hostname))) throw new Error('Invalid API base URL');
   const call = async (method, path, body, extra = {}) => {
@@ -1117,7 +1117,7 @@ function boundPublicApiClient({ baseUrl, token, transport = fetch, csiId, enviro
     updateDraft: async (id, name, authoring, revisions) => (await call('PUT', `/tests/${id}`, { name, csiId, environment: environmentId, ...authoring.request, ...checkedDraftRevisions(revisions) })).body,
     startSession: async (draft, extra = {}) => (await call('POST', '/guided-sessions', {
       schemaVersion: 3, testId: draft.id, sourceRevision: String(draft.sourceRevision), configurationRevision: String(draft.configurationRevision),
-      environmentId, applicationId, versions: { contract: 3 }, ...extra,
+      environmentId, versions: { contract: 3 }, ...extra,
     }, idem())).body,
     readSession: async (id) => (await call('GET', `/guided-sessions/${id}`)).body,
     readClarification: async (id) => { const r = await call('GET', `/guided-sessions/${id}/clarification`); return r.status === 204 ? null : r.body; },
@@ -1130,7 +1130,7 @@ function boundPublicApiClient({ baseUrl, token, transport = fetch, csiId, enviro
   };
   publicClientFactories.set(client, {
     methods: Object.getOwnPropertyDescriptors(client),
-    bind: (observer) => boundPublicApiClient({ baseUrl, token, transport, csiId, environmentId, applicationId }, observer),
+    bind: (observer) => boundPublicApiClient({ baseUrl, token, transport, csiId, environmentId }, observer),
   });
   return client;
 }

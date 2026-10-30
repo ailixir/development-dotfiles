@@ -1,0 +1,350 @@
+{
+  "version": 1,
+  "csiId": "178672",
+  "tests": [
+    {
+      "key": "wikipedia",
+      "kind": "positive",
+      "site": "en.wikipedia.org",
+      "covers": [
+        "navigation",
+        "field",
+        "search",
+        "context reuse: table cell -> field",
+        "context reuse: captured value in assertion"
+      ],
+      "corpusTasks": [],
+      "steps": [
+        "Go to \"https://en.wikipedia.org/wiki/Python_(programming_language)\"",
+        "Copy the \"Designed by\" value from the infobox",
+        "Type the copied value in the \"Search Wikipedia\" field",
+        "Press Enter",
+        "Check that the page shows the heading \"Guido van Rossum\"",
+        "Check that the main heading contains the copied value"
+      ]
+    },
+    {
+      "key": "govuk",
+      "kind": "positive",
+      "site": "www.gov.uk",
+      "covers": [
+        "navigation",
+        "cookie banner",
+        "menu"
+      ],
+      "corpusTasks": [],
+      "steps": [
+        "Go to \"https://www.gov.uk/\"",
+        "Click the \"Reject additional cookies\" button",
+        "Click the \"Menu\" button",
+        "Click the \"Benefits\" link",
+        "Check that the page shows the heading \"Benefits\""
+      ]
+    },
+    {
+      "key": "hackernews",
+      "kind": "positive",
+      "site": "news.ycombinator.com",
+      "covers": [
+        "navigation",
+        "exact page title",
+        "context reuse: list item -> next page assertion",
+        "scoped click"
+      ],
+      "corpusTasks": [],
+      "steps": [
+        "Go to \"https://news.ycombinator.com/\"",
+        "Click the \"show\" link",
+        "Check that the page title is \"Show | Hacker News\"",
+        "Copy the title of the first story",
+        "Click the comments link of the first story",
+        "Check that the story title on the page contains the copied title"
+      ]
+    },
+    {
+      "key": "pythondocs",
+      "kind": "positive",
+      "site": "docs.python.org",
+      "covers": [
+        "navigation",
+        "dropdown select",
+        "field",
+        "search",
+        "button"
+      ],
+      "corpusTasks": [],
+      "steps": [
+        "Go to \"https://docs.python.org/3/\"",
+        "Select \"3.13\" in the \"Python version\" dropdown at the top of the page",
+        "Type \"asyncio\" in the \"Quick search\" field",
+        "Click the \"Go\" button",
+        "Check that the page shows the heading \"Search Results\"",
+        "Check that the page shows the link \"asyncio — Asynchronous I/O\""
+      ],
+      "amendments": [
+        {
+          "step": 2,
+          "original": "Select \"3.13\" in the \"Python version\" dropdown",
+          "reason": "Architect R4: page has two identical dropdowns; authorized top-of-page location clarification."
+        }
+      ]
+    },
+    {
+      "key": "mdn",
+      "kind": "positive",
+      "site": "developer.mozilla.org",
+      "covers": [
+        "navigation",
+        "mega menu"
+      ],
+      "corpusTasks": [],
+      "steps": [
+        "Go to \"https://developer.mozilla.org/en-US/\"",
+        "Click the \"HTML\" menu in the top navigation",
+        "Click the \"Elements\" link",
+        "Check that the page shows the heading \"HTML elements reference\"",
+        "Check that the page shows the heading \"Content sectioning\""
+      ]
+    },
+    {
+      "key": "github",
+      "kind": "positive",
+      "site": "github.com",
+      "covers": [
+        "navigation",
+        "search dialog",
+        "field",
+        "search",
+        "context reuse: paragraph -> field"
+      ],
+      "corpusTasks": [],
+      "steps": [
+        "Go to \"https://github.com/microsoft/playwright\"",
+        "Copy the repository description from the About section",
+        "Click the \"Search or jump to\" button",
+        "Type the copied description in the \"Search or jump to\" field",
+        "Press Enter",
+        "Check that the page shows the link \"microsoft/playwright\""
+      ]
+    },
+    {
+      "key": "debian-form",
+      "kind": "positive",
+      "site": "www.debian.org",
+      "covers": [
+        "select",
+        "radio as check",
+        "checkbox",
+        "scoped field",
+        "visible assertion"
+      ],
+      "corpusTasks": [
+        "deb-sel-01",
+        "deb-sel-02",
+        "deb-sel-03",
+        "deb-dup-01",
+        "deb-nav-01"
+      ],
+      "steps": [
+        "Go to \"https://www.debian.org/distrib/packages\"",
+        "Select \"64-bit ARM (AArch64)\" in the \"Architecture:\" menu",
+        "Choose \"Descriptions\" next to \"Search on:\"",
+        "Tick the \"Only show exact matches:\" box",
+        "Type \"nginx\" in the \"Keyword:\" box under the \"Search package directories\" heading",
+        "Check that the page shows the link \"Debian Free Software Guidelines\""
+      ]
+    },
+    {
+      "key": "debian-reuse",
+      "kind": "positive",
+      "site": "www.debian.org",
+      "covers": [
+        "read",
+        "table assertion",
+        "cross-page context reuse into a field",
+        "menu whose name differs from its text"
+      ],
+      "corpusTasks": [
+        "deb-chain-01",
+        "deb-assert-01",
+        "deb-dup-01",
+        "deb-menu-01"
+      ],
+      "steps": [
+        "Go to \"https://www.debian.org/releases/\"",
+        "Copy the \"Code Name\" of Debian 13 from the \"Index of releases\" table",
+        "Check that the \"Code Name\" of Debian 13 in the \"Index of releases\" table is \"Trixie\"",
+        "Go to \"https://www.debian.org/distrib/packages\"",
+        "Type the copied code name in the \"Keyword:\" box under the \"Search package directories\" heading",
+        "Click the \"download debian\" link in the breadcrumb at the top of the page"
+      ]
+    },
+    {
+      "key": "kernel-table",
+      "kind": "positive",
+      "site": "www.kernel.org",
+      "covers": [
+        "table assertion",
+        "navigation"
+      ],
+      "corpusTasks": [
+        "kern-assert-01",
+        "kern-nav-01"
+      ],
+      "steps": [
+        "Go to \"https://www.kernel.org/\"",
+        "Check that the RSYNC row of the protocol and location table shows \"rsync://rsync.kernel.org/pub/\"",
+        "Click the \"FAQ\" link in the top menu"
+      ]
+    },
+    {
+      "key": "kernel-releases",
+      "kind": "positive",
+      "site": "www.kernel.org",
+      "covers": [
+        "read",
+        "assertion",
+        "reuse in an assertion",
+        "row-scoped click"
+      ],
+      "corpusTasks": [
+        "kern-read-01",
+        "kern-assert-02",
+        "kern-dup-03"
+      ],
+      "steps": [
+        "Go to \"https://www.kernel.org/\"",
+        "Copy the version number in the \"stable:\" row of the releases table",
+        "Check that the version in the \"linux-next:\" row of the releases table starts with \"next-\"",
+        "Check that the version in the \"stable:\" row of the releases table contains the copied version number",
+        "Click the \"browse\" link in the \"linux-next:\" row of the releases table"
+      ]
+    },
+    {
+      "key": "iana-registry",
+      "kind": "positive",
+      "site": "www.iana.org",
+      "covers": [
+        "table assertions with sibling evidence",
+        "banner-scoped navigation"
+      ],
+      "corpusTasks": [
+        "iana-assert-01",
+        "iana-assert-02",
+        "iana-dup-03"
+      ],
+      "steps": [
+        "Go to \"https://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml\"",
+        "Check that status code 418 has the description \"(Unused)\" in the registry table",
+        "Check that status code 200 has the description \"OK\" in the registry table",
+        "Click the \"Protocols\" link in the top menu"
+      ]
+    },
+    {
+      "key": "iana-home",
+      "kind": "positive",
+      "site": "www.iana.org",
+      "covers": [
+        "navigation"
+      ],
+      "corpusTasks": [
+        "iana-nav-01"
+      ],
+      "steps": [
+        "Go to \"https://www.iana.org/\"",
+        "Click the \"Database of Top Level Domains\" link"
+      ]
+    },
+    {
+      "key": "datatracker-reuse",
+      "kind": "positive",
+      "site": "datatracker.ietf.org",
+      "covers": [
+        "read",
+        "context reuse into a field",
+        "search"
+      ],
+      "corpusTasks": [
+        "dt-chain-02"
+      ],
+      "steps": [
+        "Go to \"https://datatracker.ietf.org/doc/search/\"",
+        "Copy the text of the page heading \"Document Search\"",
+        "Type the copied text in the \"Document name/title/RFC number\" box",
+        "Click the \"Search\" button next to that box"
+      ]
+    },
+    {
+      "key": "datatracker-filters",
+      "kind": "positive",
+      "site": "datatracker.ietf.org",
+      "covers": [
+        "disclosure",
+        "checkbox",
+        "fields",
+        "scoped search"
+      ],
+      "corpusTasks": [
+        "dt-chain-01",
+        "dt-field-03",
+        "dt-dup-01"
+      ],
+      "steps": [
+        "Go to \"https://datatracker.ietf.org/doc/search/\"",
+        "Click the \"Additional search criteria\" bar",
+        "Tick the \"Slides\" box under \"Document Type\"",
+        "Type \"bgp\" in the \"Document name/title/RFC number\" box",
+        "Type \"httpbis\" in the \"WG\" box",
+        "Click the \"Search\" button at the bottom of the \"Additional search criteria\" panel"
+      ]
+    },
+    {
+      "key": "N1",
+      "kind": "control",
+      "site": "docs.python.org",
+      "covers": [
+        "wrong option"
+      ],
+      "corpusTasks": [
+        "neg-pydocs-01"
+      ],
+      "expect": "TARGET_MISMATCH and no dispatched selectOption",
+      "steps": [
+        "Go to \"https://docs.python.org/3/builtins/functions.html\"",
+        "Select \"3.99\" in the Python version menu at the top"
+      ]
+    },
+    {
+      "key": "N2",
+      "kind": "control",
+      "site": "www.kernel.org",
+      "covers": [
+        "wrong expectation"
+      ],
+      "corpusTasks": [
+        "kern-assert-01"
+      ],
+      "expect": "ASSERTION_FAILED or UNSUPPORTED_SURFACE, never a pass",
+      "steps": [
+        "Go to \"https://www.kernel.org/\"",
+        "Check that the RSYNC row of the protocol and location table shows \"rsync://wrong.kernel.org/pub/\""
+      ]
+    },
+    {
+      "key": "N3",
+      "kind": "control",
+      "site": "www.debian.org",
+      "covers": [
+        "absent target"
+      ],
+      "corpusTasks": [
+        "deb-neg-01"
+      ],
+      "expect": "clarification or refusal and no dispatched click",
+      "steps": [
+        "Go to \"https://www.debian.org/distrib/packages\"",
+        "Click the \"Install\" button next to the \"stable\" distribution"
+      ]
+    }
+  ]
+}

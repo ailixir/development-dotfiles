@@ -2,6 +2,7 @@ package com.citi.put.checks.studio.guided.audit;
 
 import static net.logstash.logback.argument.StructuredArguments.kv;
 
+import com.citi.put.checks.studio.navigation.AllowedDomains;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -27,8 +28,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * URL path or query, a secret id or value, or an exception message. The one page-derived input, the
  * target's safe label, leaves only as {@code targetLabelHash} (first 32 hex of {@code
  * sha256(scopeHash + ':' + label)}); low-entropy labels are dictionary-reversible within one scope,
- * which the AC-2 document discloses (no keyed HMAC this wave). The origin is emitted only after it
- * is verified to be one of the session's approved origins; otherwise {@code UNAPPROVED}.
+ * which the AC-2 document discloses (no keyed HMAC this wave). The origin is emitted only when it
+ * is a bare http(s) origin (an action ran on it only after the allowed-domains check); otherwise
+ * {@code UNAPPROVED}.
  *
  * <p>An admission is emitted after the surrounding transaction commits, so a rolled-back admission
  * is never audited as admitted. A refusal is emitted at the decision: the rejected proposal's
@@ -194,8 +196,11 @@ public final class StudioActionAudit {
    * @param session the session document (scope, scopeHash, testId)
    * @param admissionId the committed admission id
    * @param proposal the admitted proposal
+   * @param identity the {@code {role, name}} identity of the target the runner reported for it, or
+   *     a missing/null node for a target that has none (page, password control)
    */
-  public static void guidedActionAdmitted(JsonNode session, String admissionId, JsonNode proposal) {
+  public static void guidedActionAdmitted(
+      JsonNode session, String admissionId, JsonNode proposal, JsonNode identity) {
     guided(
         EventType.GUIDED_ACTION_ADMITTED,
         Outcome.ADMITTED,
@@ -203,6 +208,7 @@ public final class StudioActionAudit {
         admissionId,
         null,
         proposal,
+        identity,
         null,
         true);
   }
@@ -211,10 +217,12 @@ public final class StudioActionAudit {
    * A guided proposal the validator refused.
    *
    * @param attemptId the model attempt that proposed it
+   * @param identity the {@code {role, name}} of the observed fact the proposal named, or a
+   *     missing/null node for a target with none
    * @param reasonCode a closed reason ({@code GuidedPolicyReason}) or an existing closed code
    */
   public static void guidedActionRefused(
-      JsonNode session, String attemptId, JsonNode proposal, String reasonCode) {
+      JsonNode session, String attemptId, JsonNode proposal, JsonNode identity, String reasonCode) {
     guided(
         EventType.GUIDED_ACTION_REFUSED,
         Outcome.REFUSED,
@@ -222,6 +230,7 @@ public final class StudioActionAudit {
         null,
         attemptId,
         proposal,
+        identity,
         reasonCode,
         false);
   }
@@ -259,15 +268,13 @@ public final class StudioActionAudit {
       String admissionId,
       String attemptId,
       JsonNode proposal,
+      JsonNode identity,
       String reasonCode,
       boolean afterCommit) {
     JsonNode scope = session.path("scope");
     JsonNode target = proposal.path("target");
-    JsonNode locator = target.path("locator");
-    String label =
-        locator.path("kind").asText().equals("role")
-            ? locator.path("name").asText(null)
-            : locator.path("value").asText(null);
+    // ADR-SC-007: role and label come from the identity of the element, not from a locator.
+    String label = identity.path("name").isTextual() ? identity.path("name").asText() : null;
     String kind = proposal.path("operation").path("kind").asText();
     List<Object> fields = new ArrayList<>();
     fields.add(SCHEMA_VERSION);
@@ -280,29 +287,34 @@ public final class StudioActionAudit {
     fields.add(null);
     fields.add(admissionId);
     fields.add(attemptId);
-    fields.add(approvedOrigin(scope, proposal.path("executionEvidence").path("origin").asText()));
+    fields.add(approvedOrigin(proposal.path("executionEvidence").path("origin").asText()));
     fields.add(OPERATION_KINDS.contains(kind) ? kind : "unknown");
-    fields.add(targetRole(target));
+    fields.add(targetRole(target, identity));
     fields.add(label == null ? null : labelHash(session.path("scopeHash").asText(), label));
     fields.add(outcome.name());
     fields.add(reasonCode);
     emit(type, fields, afterCommit);
   }
 
-  static String approvedOrigin(JsonNode scope, String origin) {
-    for (JsonNode approved : scope.path("approvedOrigins")) {
-      if (approved.asText().equals(origin)) {
-        return approved.asText();
-      }
-    }
-    return "UNAPPROVED";
+  /**
+   * The origin an action ran on. It was admitted against the deployment's allowed domains when the
+   * observation arrived, so the audit only keeps a bare http(s) origin (no path, query or user
+   * info), never a free string.
+   */
+  static String approvedOrigin(String origin) {
+    return AllowedDomains.hostOf(origin) != null
+            && origin.indexOf('/', origin.indexOf("//") + 2) < 0
+            && origin.indexOf('?') < 0
+            && origin.indexOf('#') < 0
+        ? origin
+        : "UNAPPROVED";
   }
 
-  static String targetRole(JsonNode target) {
+  static String targetRole(JsonNode target, JsonNode identity) {
     if (target.path("kind").asText().equals("page")) {
       return "page";
     }
-    String role = target.path("locator").path("role").asText();
+    String role = identity.path("role").asText();
     return ARIA_ROLES.contains(role) ? role : "none";
   }
 

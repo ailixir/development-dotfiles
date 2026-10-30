@@ -15,7 +15,7 @@ public enum GatewayOutcome {
   TIMEOUT,
   /** A definite transport failure that survived the bounded transport retry. */
   TRANSPORT,
-  /** The bounded-concurrency semaphore was saturated; the call was rejected without queueing. */
+  /** The bounded-concurrency semaphore stayed saturated for the call's whole remaining budget. */
   BUSY,
   /** Input exceeded {@code maxInputBytes} or the response exceeded {@code maxOutputBytes}. */
   TOO_LARGE,

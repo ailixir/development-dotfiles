@@ -612,16 +612,13 @@ class GuidedReplayingPrefixMigrationIT {
               .put("expiresAt", expiry)
               .put("leaseExpiresAt", expiry)
               .put("authoredInputsHash", m.path("authored_inputs_hash").asText())
-              .put("materializationRevision", m.path("materialization_revision").asInt())
-              .put("policyHash", H);
+              .put("materializationRevision", m.path("materialization_revision").asInt());
       r.putObject("versions").put("contract", 3);
-      r.putArray("approvedOrigins");
       r.set("sourceStepIds", C.parse("[\"" + STEP1 + "\",\"" + STEP2 + "\"]"));
       r.putArray("allocations");
       r.putArray("producers");
       r.putArray("consumerEdges");
       r.set("limits", doc.path("limits"));
-      r.putObject("applicationPolicy");
       if (incremental) {
         r.set("prefixProgram", program);
         r.put("prefixProgramHash", hash(program));
@@ -959,14 +956,14 @@ class GuidedReplayingPrefixMigrationIT {
   void freshV1ToV21HasExpectedHeadDescriptionAndNoPendingMigrations() throws Exception {
     assertThat(flyway(PG.getJdbcUrl(), null).info().pending()).isEmpty();
     try (Connection c = connect()) {
-      assertThat(scalar(c, "SELECT max(version::int) FROM flyway_schema_history")).isEqualTo("23");
+      assertThat(scalar(c, "SELECT max(version::int) FROM flyway_schema_history")).isEqualTo("29");
       assertThat(scalar(c, "SELECT description FROM flyway_schema_history WHERE version='21'"))
           .isEqualTo("guided session replaying prefix");
       assertThat(
               scalar(
                   c,
                   "SELECT count(*) FROM flyway_schema_history WHERE success AND version IS NOT NULL"))
-          .isEqualTo("23");
+          .isEqualTo("29");
     }
   }
 
@@ -1001,7 +998,7 @@ class GuidedReplayingPrefixMigrationIT {
                   + q(revision.toString())
                   + " WHERE id="
                   + q(f.test.toString()));
-          UUID policy = installPolicyAndRecording(f);
+          installRecording(f);
           java.util.Map<String, String> predicates = new java.util.LinkedHashMap<>();
           predicates.put("studio_guided_sessions", "session_id=" + q(f.id));
           predicates.put("studio_guided_materializations", "session_id=" + q(f.id));
@@ -1009,10 +1006,6 @@ class GuidedReplayingPrefixMigrationIT {
           predicates.put("ui_tests", "id=" + q(f.test.toString()));
           predicates.put("studio_guided_publications", "session_id=" + q(f.id));
           predicates.put("studio_guided_publication_attempts", "session_id=" + q(f.id));
-          predicates.put("studio_guided_policies", "policy_id=" + q(policy.toString()));
-          predicates.put("studio_guided_policy_versions", "policy_id=" + q(policy.toString()));
-          predicates.put("studio_guided_policy_approvals", "policy_id=" + q(policy.toString()));
-          predicates.put("studio_guided_session_policies", "session_id=" + q(f.id));
           predicates.put("studio_guided_session_recordings", "session_id=" + q(f.id));
           java.util.Map<String, String> before = new java.util.LinkedHashMap<>();
           for (var entry : predicates.entrySet()) {
@@ -1030,7 +1023,7 @@ class GuidedReplayingPrefixMigrationIT {
                   c,
                   "SELECT jsonb_agg(to_jsonb(a) ORDER BY admission_id)::text FROM studio_guided_actions a"
                       + f.where());
-          assertThat(before).hasSize(11);
+          assertThat(before).hasSize(7);
           c.commit();
           flyway(url, null).migrate();
           flyway(url, null).validate();
@@ -2072,6 +2065,8 @@ class GuidedReplayingPrefixMigrationIT {
               .put("authoredInputsHash", hash(f.material))
               .put("expiresAt", f.expiry);
       proof.putObject("versions").put("contract", 3);
+      // ADR-SC-007: a page action reports no element target.
+      proof.putNull("target");
       exec(
           f.c,
           "INSERT INTO studio_guided_preparations(session_id,preparation_id,context_id,owner_fence,request_digest,"
@@ -2816,7 +2811,8 @@ class GuidedReplayingPrefixMigrationIT {
     manifest.set("authoredDeclarations", alternate.declarations().path("authoredDeclarations"));
     manifest.set(
         "schemaPins",
-        new com.citi.put.checks.studio.guided.translation.GuidedPromptAssembler(C)
+        new com.citi.put.checks.studio.guided.translation.GuidedPromptAssembler(
+                C, com.citi.put.checks.studio.support.TestDomains.FIXTURES)
             .schemaProvenance());
     ArrayNode steps = manifest.putArray("sourceSteps");
     for (JsonNode step : alternate.authoredSnapshot.path("steps")) {
@@ -3169,50 +3165,7 @@ class GuidedReplayingPrefixMigrationIT {
     }
   }
 
-  private static UUID installPolicyAndRecording(Fixture f) throws SQLException {
-    return installPolicyAndRecording(f, "ALLOW");
-  }
-
-  private static UUID installPolicyAndRecording(Fixture f, String stance) throws SQLException {
-    UUID policy = UUID.randomUUID();
-    ObjectNode document =
-        obj(
-            "{\"schemaVersion\":3,\"allowedOrigins\":[\"https://a.test\"],\"applicationPolicy\":{\"policyRuleId\":\"app\",\"allowStructuralDiscovery\":true,\"readGrants\":[]},\"sideEffectStance\":\"ALLOW\",\"destructiveVocabulary\":[\"delete\"]}");
-    document.put("sideEffectStance", stance);
-    exec(
-        f.c,
-        "INSERT INTO studio_guided_policies(policy_id,csi_id,application_id,environment_id,created_by) VALUES ("
-            + q(policy.toString())
-            + ",'D015',"
-            + q(f.id)
-            + ",'Development','author')");
-    exec(
-        f.c,
-        "INSERT INTO studio_guided_policy_versions(policy_id,version,document,document_hash,observation_policy_hash,"
-            + "created_by) VALUES ("
-            + q(policy.toString())
-            + ",1,"
-            + j(document)
-            + ","
-            + q(hash(document))
-            + ","
-            + q(hash(document.path("applicationPolicy")))
-            + ",'author')");
-    exec(
-        f.c,
-        "INSERT INTO studio_guided_policy_approvals(policy_id,version,approved_by,approval_ref) VALUES ("
-            + q(policy.toString())
-            + ",1,'approver','review')");
-    exec(
-        f.c,
-        "INSERT INTO studio_guided_session_policies(session_id,policy_id,policy_version,observation_policy_hash) "
-            + "VALUES ("
-            + q(f.id)
-            + ","
-            + q(policy.toString())
-            + ",1,"
-            + q(hash(document.path("applicationPolicy")))
-            + ")");
+  private static void installRecording(Fixture f) throws SQLException {
     exec(
         f.c,
         "INSERT INTO studio_guided_session_recordings(session_id,scope_hash,recording_id,worker_id,owner_fence,state,"
@@ -3223,442 +3176,30 @@ class GuidedReplayingPrefixMigrationIT {
             + ","
             + q(f.id)
             + ",'worker',1,'UNAVAILABLE',false,'video','manifest','[]')");
-    return policy;
   }
 
   @Test
-  void recordingFactAndGovernedPolicyRemainUnchangedAcrossPrefixSuffix() throws Exception {
+  void recordingFactRemainsUnchangedAcrossPrefixSuffix() throws Exception {
     try (Fixture f = new Fixture(true)) {
-      installPolicyAndRecording(f);
+      installRecording(f);
       String before =
           scalar(
-              f.c,
-              "SELECT jsonb_build_array((SELECT to_jsonb(r) FROM studio_guided_session_recordings r"
-                  + f.where()
-                  + "),(SELECT to_jsonb(p) FROM studio_guided_session_policies p"
-                  + f.where()
-                  + "))::text");
+              f.c, "SELECT to_jsonb(r)::text FROM studio_guided_session_recordings r" + f.where());
       boundary(f);
       assertThat(
               scalar(
                   f.c,
-                  "SELECT jsonb_build_array((SELECT to_jsonb(r) FROM studio_guided_session_recordings r"
-                      + f.where()
-                      + "),(SELECT to_jsonb(p) FROM studio_guided_session_policies p"
-                      + f.where()
-                      + "))::text"))
+                  "SELECT to_jsonb(r)::text FROM studio_guided_session_recordings r" + f.where()))
           .isEqualTo(before);
       reject(
           f.c,
           "UPDATE studio_guided_session_recordings SET worker_id='other'" + f.where(),
           "guided session recording is immutable");
-      reject(
-          f.c,
-          "UPDATE studio_guided_session_policies SET policy_version=2" + f.where(),
-          "guided session policy is immutable");
-    }
-  }
-
-  private static ObjectNode confirmationProof(Fixture f, String stance) throws SQLException {
-    return confirmationProof(f, stance, true);
-  }
-
-  private static ObjectNode confirmationProof(Fixture f, String stance, boolean prepared)
-      throws SQLException {
-    installPolicyAndRecording(f, stance);
-    ObjectNode observation =
-        C.object()
-            .put("schemaVersion", 3)
-            .put("sessionId", f.id)
-            .put("documentId", f.id + "-document")
-            .put("generation", 1)
-            .put("origin", "https://a.test")
-            .put("scopeHash", H)
-            .put("observedAt", Instant.now().toString());
-    observation
-        .putObject("coverage")
-        .put("mode", "semantic")
-        .put("complete", true)
-        .put("truncated", false)
-        .put("withheldRegions", 0)
-        .put("reason", "complete")
-        .put("passwordControls", 0);
-    observation.putArray("nodes");
-    ObjectNode evidence =
-        C.object()
-            .put("kind", "observedDocument")
-            .put("sessionId", f.id)
-            .put("contextId", f.id + "-context")
-            .put("documentId", f.id + "-document")
-            .put("generation", 1)
-            .put("origin", "https://a.test")
-            .put("observationHash", hash(observation));
-    ObjectNode progress =
-        C.object()
-            .put("documentId", f.id + "-document")
-            .put("generation", 1)
-            .put("stepIndex", 0)
-            .put("evidenceHash", hash(evidence));
-    progress.set("executionEvidence", evidence);
-    progress.set("observation", observation);
-    exec(f.c, "UPDATE studio_guided_sessions SET progress=" + j(progress) + f.where());
-    exec(
-        f.c,
-        "INSERT INTO studio_guided_publication_observations(session_id,observation_hash,context_id,owner_fence,"
-            + "document_id,generation,observation,captured_at) VALUES ("
-            + q(f.id)
-            + ","
-            + q(hash(observation))
-            + ","
-            + q(f.id + "-context")
-            + ",1,"
-            + q(f.id + "-document")
-            + ",1,"
-            + j(observation)
-            + ",clock_timestamp())");
-    f.request(hash(evidence));
-    if (prepared) {
-      exec(f.c, "UPDATE studio_guided_prefix_requests SET status='PREPARED'" + f.where());
-    }
-    ObjectNode question =
-        progress
-            .putObject("clarification")
-            .put("schemaVersion", 3)
-            .put("clarificationId", f.id + "-question")
-            .put("sessionId", f.id)
-            .put("scopeHash", H)
-            .put("documentId", f.id + "-document")
-            .put("generation", 1)
-            .put("reason", "SIDE_EFFECT_CONFIRMATION")
-            .put("promptCode", "CONFIRM_ACTION")
-            .put("expiresAt", f.expiry)
-            .put("phase", "observed");
-    question.putObject("coordinate").put("stepId", STEP1).put("ordinal", 0);
-    question
-        .putArray("choices")
-        .addObject()
-        .put("choiceId", f.id + "-choice")
-        .put("safeLabel", "Confirm the authored action")
-        .put("labelSource", "AUTHORED")
-        .putNull("nodeId")
-        .putNull("bindingId");
-    progress
-        .putObject("sideEffectConfirmation")
-        .put("clarificationId", f.id + "-question")
-        .put("status", "PENDING")
-        .put("prefixRequestDigest", hash(f.request));
-    return progress;
-  }
-
-  private static String confirmationStateSql(Fixture f, ObjectNode progress, String state) {
-    return "UPDATE studio_guided_sessions SET state="
-        + q(state)
-        + ",document=jsonb_set(document,'{state}',to_jsonb("
-        + q(state)
-        + "::text)),progress="
-        + j(progress)
-        + f.where();
-  }
-
-  private static String confirmationStateSql(Fixture f, ObjectNode progress, ObjectNode document) {
-    return "UPDATE studio_guided_sessions SET state="
-        + q(document.path("state").asText())
-        + ",document="
-        + j(document)
-        + ",progress="
-        + j(progress)
-        + f.where();
-  }
-
-  private static void enterConfirmation(Fixture f, ObjectNode progress) throws SQLException {
-    exec(f.c, confirmationStateSql(f, progress, "AWAITING_CLARIFICATION"));
-    f.immediate();
-  }
-
-  private static ObjectNode confirmed(ObjectNode progress) {
-    ObjectNode result = progress.deepCopy();
-    result.remove("clarification");
-    ((ObjectNode) result.path("sideEffectConfirmation")).put("status", "CONFIRMED");
-    return result;
-  }
-
-  @Test
-  void pendingPrefixAllowsOnlyExactServerSideEffectQuestion() throws Exception {
-    try (Fixture f = new Fixture(true)) {
-      ObjectNode proof = confirmationProof(f, "CLARIFY_FIRST");
-      // Expired, unconsumed historical preparation is not an actionable admission or wait clock.
-      exec(f.c, f.preparation("old-expired-preparation", f.proposal(STEP1, 0), true));
-      enterConfirmation(f, proof);
-      assertThat(scalar(f.c, "SELECT state FROM studio_guided_sessions" + f.where()))
-          .isEqualTo("AWAITING_CLARIFICATION");
-      assertThat(
-              scalar(f.c, "SELECT continuation FROM studio_guided_translation_state" + f.where()))
-          .isEqualTo("REPLAYING_PREFIX");
-      String before = scalar(f.c, "SELECT progress::text FROM studio_guided_sessions" + f.where());
-      exec(
-          f.c,
-          "UPDATE studio_guided_sessions SET document=jsonb_set(document,'{owner,leaseExpiresAt}',to_jsonb(("
-              + "clock_timestamp()+interval '1 hour')::text))"
-              + f.where());
-      f.immediate();
-      assertThat(scalar(f.c, "SELECT progress::text FROM studio_guided_sessions" + f.where()))
-          .isEqualTo(before);
-      assertThat(f.count("studio_guided_actions")).isEqualTo("0");
-      assertThat(f.count("studio_guided_model_attempts")).isEqualTo("0");
     }
   }
 
   @Test
-  void pendingPrefixRejectsGenericStaleOrForgedWaitProof() throws Exception {
-    try (Fixture f = new Fixture(true)) {
-      ObjectNode valid = confirmationProof(f, "CLARIFY_FIRST");
-      List<ObjectNode> invalid = new java.util.ArrayList<>();
-      ObjectNode bad = valid.deepCopy();
-      ((ObjectNode) bad.path("sideEffectConfirmation")).put("extra", true);
-      invalid.add(bad);
-      bad = valid.deepCopy();
-      ((ObjectNode) bad.path("sideEffectConfirmation")).put("status", "CONFIRMED");
-      invalid.add(bad);
-      bad = valid.deepCopy();
-      ((ObjectNode) bad.path("sideEffectConfirmation")).put("prefixRequestDigest", "b".repeat(64));
-      invalid.add(bad);
-      for (String field : List.of("reason", "promptCode", "scopeHash", "documentId", "phase")) {
-        bad = valid.deepCopy();
-        ((ObjectNode) bad.path("clarification")).put(field, "forged");
-        invalid.add(bad);
-      }
-      bad = valid.deepCopy();
-      ((ObjectNode) bad.path("clarification").path("coordinate")).put("stepId", STEP2);
-      invalid.add(bad);
-      bad = valid.deepCopy();
-      ((ObjectNode) bad.path("clarification")).put("generation", 99);
-      invalid.add(bad);
-      bad = valid.deepCopy();
-      ((ObjectNode) bad.path("clarification"))
-          .put("expiresAt", Instant.now().minusSeconds(1).toString());
-      invalid.add(bad);
-      bad = valid.deepCopy();
-      ((ObjectNode) bad.path("clarification"))
-          .put("expiresAt", Instant.now().plusSeconds(86400).toString());
-      invalid.add(bad);
-      bad = valid.deepCopy();
-      ((ObjectNode) bad.path("clarification").path("choices").get(0))
-          .put("labelSource", "PAGE")
-          .put("role", "button")
-          .putNull("region");
-      invalid.add(bad);
-      bad = valid.deepCopy();
-      ((ObjectNode) bad.path("clarification").path("choices").get(0))
-          .put("bindingId", "foreign-binding");
-      invalid.add(bad);
-      bad = valid.deepCopy();
-      bad.putObject("observationRefresh").put("callbackKey", "pending");
-      invalid.add(bad);
-      bad = valid.deepCopy();
-      bad.put("evidenceHash", "b".repeat(64));
-      invalid.add(bad);
-      for (ObjectNode forged : invalid) {
-        reject(
-            f.c, confirmationStateSql(f, forged, "AWAITING_CLARIFICATION"), "prefix confirmation");
-      }
-      ObjectNode original =
-          obj(scalar(f.c, "SELECT document::text FROM studio_guided_sessions" + f.where()));
-      for (String field : List.of("workerId", "fence")) {
-        ObjectNode document = original.deepCopy().put("state", "AWAITING_CLARIFICATION");
-        if (field.equals("fence")) {
-          ((ObjectNode) document.path("owner")).put(field, 2);
-        } else {
-          ((ObjectNode) document.path("owner")).put(field, "foreign-worker");
-        }
-        reject(f.c, confirmationStateSql(f, valid, document), "prefix confirmation wait invalid");
-      }
-      for (String field : List.of("sourceRevision", "configurationRevision")) {
-        ObjectNode document = original.deepCopy().put("state", "AWAITING_CLARIFICATION");
-        ((ObjectNode) document.path("scope")).put(field, "2");
-        reject(f.c, confirmationStateSql(f, valid, document), "prefix confirmation wait invalid");
-      }
-      assertThat(f.count("studio_guided_actions")).isEqualTo("0");
-    }
-    for (String stance : List.of("ALLOW", "DENY")) {
-      try (Fixture f = new Fixture(true)) {
-        ObjectNode proof = confirmationProof(f, stance);
-        reject(
-            f.c,
-            confirmationStateSql(f, proof, "AWAITING_CLARIFICATION"),
-            "prefix confirmation wait invalid");
-      }
-    }
-    try (Fixture f = new Fixture(true)) {
-      ObjectNode proof = confirmationProof(f, "CLARIFY_FIRST", false);
-      reject(
-          f.c,
-          confirmationStateSql(f, proof, "AWAITING_CLARIFICATION"),
-          "prefix confirmation wait invalid");
-    }
-  }
-
-  @Test
-  void pendingPrefixWaitFencesBothGatewaysAttemptInsertAndModelCounters() throws Exception {
-    try (Fixture f = new Fixture(true)) {
-      enterConfirmation(f, confirmationProof(f, "CLARIFY_FIRST"));
-      reject(f.c, modelReservation(f.id), "model reservation refused");
-      for (String counter : List.of("modelProposals", "modelInputTokens", "modelOutputTokens")) {
-        reject(
-            f.c,
-            "UPDATE studio_guided_sessions SET document=jsonb_set(document,'{counters,"
-                + counter
-                + "}','1')"
-                + f.where(),
-            "model counters frozen during prefix");
-      }
-      assertThat(f.count("studio_guided_model_attempts")).isEqualTo("0");
-      assertThat(scalar(f.c, "SELECT document->'counters' FROM studio_guided_sessions" + f.where()))
-          .isEqualTo(scalar(f.c, "SELECT " + j(f.doc.path("counters"))));
-      // Both Java gateways and browser effects are proved by linked IncrementalPolicyIT cases,
-      // never inferred from these direct SQL fences.
-    }
-  }
-
-  @Test
-  void pendingPrefixWaitCannotAdmitConsumeOrSwitch() throws Exception {
-    try (Fixture f = new Fixture(true)) {
-      enterConfirmation(f, confirmationProof(f, "CLARIFY_FIRST"));
-      ObjectNode proposal = f.proposal(STEP1, 0);
-      for (String state : List.of("ADMITTED", "DISPATCHING")) {
-        reject(
-            f.c,
-            f.actionSql(f.action("blocked", STEP1, 0, 0, state, proposal), proposal),
-            "prefix action requires replay state");
-      }
-      for (String state : List.of("PROPOSING", "OBSERVING", "ACTING", "FINALIZING")) {
-        reject(
-            f.c,
-            "UPDATE studio_guided_sessions SET state="
-                + q(state)
-                + ",document=jsonb_set(document,'{state}',to_jsonb("
-                + q(state)
-                + "::text))"
-                + f.where(),
-            "prefix callback cannot escape mode");
-      }
-      for (String continuation : List.of("AWAITING_CLARIFICATION", "REFRESH", "SOURCE_PLAN")) {
-        reject(
-            f.c,
-            "UPDATE studio_guided_translation_state SET continuation="
-                + q(continuation)
-                + f.where(),
-            "prefix continuation requires atomic switch");
-      }
-      reject(
-          f.c,
-          "INSERT INTO studio_guided_relearn_switches(session_id,reason,effective_step_id,effective_step_index,"
-              + "next_ordinal,completed_prefix_count,completed_admissions) VALUES ("
-              + q(f.id)
-              + ",'BOUNDARY',"
-              + q(STEP2)
-              + ",1,0,1,'[]')",
-          "learning switch identity invalid");
-      reject(f.c, f.receiptSql(f.receipt(null)), "no-invocation receipt identity invalid");
-      assertThat(f.count("studio_guided_actions")).isEqualTo("0");
-      assertThat(f.count("studio_guided_relearn_switches")).isEqualTo("0");
-    }
-  }
-
-  @Test
-  void currentAnswerResumesOnlySamePrefixIdentity() throws Exception {
-    try (Fixture f = new Fixture(true)) {
-      ObjectNode pending = confirmationProof(f, "CLARIFY_FIRST");
-      enterConfirmation(f, pending);
-      ObjectNode answer = confirmed(pending);
-      for (String field : List.of("clarificationId", "prefixRequestDigest")) {
-        ObjectNode forged = answer.deepCopy();
-        ((ObjectNode) forged.path("sideEffectConfirmation")).put(field, "forged");
-        reject(
-            f.c,
-            confirmationStateSql(f, forged, "REPLAYING_PREFIX"),
-            "prefix confirmation answer invalid");
-      }
-      ObjectNode document =
-          obj(scalar(f.c, "SELECT document::text FROM studio_guided_sessions" + f.where()))
-              .put("state", "REPLAYING_PREFIX");
-      ((ObjectNode) document.path("owner")).put("fence", 2);
-      reject(f.c, confirmationStateSql(f, answer, document), "prefix confirmation answer invalid");
-      ObjectNode stale = answer.deepCopy().put("generation", 2);
-      reject(
-          f.c,
-          confirmationStateSql(f, stale, "REPLAYING_PREFIX"),
-          "prefix confirmation answer invalid");
-      exec(f.c, confirmationStateSql(f, answer, "REPLAYING_PREFIX"));
-      f.immediate();
-      assertThat(
-              scalar(
-                  f.c,
-                  "SELECT state||':'||(progress->'sideEffectConfirmation'->>'status') FROM studio_guided_sessions"
-                      + f.where()))
-          .isEqualTo("REPLAYING_PREFIX:CONFIRMED");
-      assertThat(
-              scalar(f.c, "SELECT continuation FROM studio_guided_translation_state" + f.where()))
-          .isEqualTo("REPLAYING_PREFIX");
-      assertThat(f.count("studio_guided_actions")).isEqualTo("0");
-    }
-    try (Fixture f = new Fixture(true)) {
-      ObjectNode pending = confirmationProof(f, "CLARIFY_FIRST");
-      reject(
-          f.c,
-          confirmationStateSql(f, confirmed(pending), "REPLAYING_PREFIX"),
-          "prefix confirmation answer invalid");
-    }
-  }
-
-  @Test
-  void prefixWaitCancellationExpiryAndOwnerLossNeverResurrect() throws Exception {
-    for (String terminal : List.of("CANCELLED", "EXPIRED", "UNKNOWN_OUTCOME")) {
-      try (Fixture f = new Fixture(true)) {
-        ObjectNode pending = confirmationProof(f, "CLARIFY_FIRST");
-        enterConfirmation(f, pending);
-        f.state(terminal);
-        exec(f.c, "UPDATE studio_guided_translation_state SET continuation='STOPPED'" + f.where());
-        f.immediate();
-        reject(
-            f.c,
-            confirmationStateSql(f, confirmed(pending), "REPLAYING_PREFIX"),
-            "guided terminal state is immutable");
-        assertThat(f.count("studio_guided_actions")).isEqualTo("0");
-      }
-    }
-    try (Fixture f = new Fixture(true)) {
-      ObjectNode pending = confirmationProof(f, "CLARIFY_FIRST");
-      enterConfirmation(f, pending);
-      reject(
-          f.c,
-          "UPDATE studio_guided_sessions SET document=jsonb_set(document,'{owner,workerId}','\"other-worker\"')"
-              + f.where(),
-          "prefix confirmation renewal invalid");
-      reject(
-          f.c,
-          "UPDATE studio_guided_materializations SET context_id='other-context'" + f.where(),
-          "guided materialization identity is immutable");
-    }
-    try (Fixture f = new Fixture(true)) {
-      ObjectNode pending = confirmationProof(f, "CLARIFY_FIRST");
-      ((ObjectNode) pending.path("clarification"))
-          .put("expiresAt", Instant.now().plusSeconds(2).toString());
-      enterConfirmation(f, pending);
-      Thread.sleep(2100);
-      reject(
-          f.c,
-          confirmationStateSql(f, confirmed(pending), "REPLAYING_PREFIX"),
-          "prefix confirmation answer invalid");
-      f.state("EXPIRED");
-      exec(f.c, "UPDATE studio_guided_translation_state SET continuation='STOPPED'" + f.where());
-      f.immediate();
-    }
-  }
-
-  @Test
-  void prefixConfirmationAmendmentPreservesPopulatedV20AndAllExistingGuards() throws Exception {
-    // Actual populated upgrade and20frozen-resource assertions remain separately executed original
-    // methods in this same55-case suite; this delta additionally proves the original receipt FK.
+  void aRevisionWithoutItsPublicationReceiptIsRefusedByTheReceiptForeignKey() throws Exception {
     try (Fixture f = new Fixture(false)) {
       f.insertAction(STEP1, 0, 0, "SUCCEEDED");
       f.insertAction(STEP2, 0, 0, "SUCCEEDED");
@@ -3676,19 +3217,61 @@ class GuidedReplayingPrefixMigrationIT {
                       + q(f.id)))
           .isEqualTo("1");
     }
+  }
+
+  /**
+   * STUDIO-GOV-001.3: a session whose prefix program is pending can no longer wait for a question
+   * (the side-effect confirmation was the only one it could raise).
+   */
+  @Test
+  void aReplayingPrefixCannotAwaitAQuestion() throws Exception {
     try (Fixture f = new Fixture(true)) {
-      enterConfirmation(f, confirmationProof(f, "CLARIFY_FIRST"));
       reject(
           f.c,
-          "UPDATE studio_guided_relearn_plans SET initial_step_index=0" + f.where(),
-          "incremental history is immutable");
-      reject(
-          f.c,
-          "UPDATE studio_guided_session_policies SET policy_version=2" + f.where(),
-          "guided session policy is immutable");
+          "UPDATE studio_guided_sessions SET state='AWAITING_CLARIFICATION',"
+              + "document=jsonb_set(document,'{state}',to_jsonb('AWAITING_CLARIFICATION'::text))"
+              + f.where(),
+          "prefix callback cannot escape mode");
+      assertThat(scalar(f.c, "SELECT state FROM studio_guided_sessions" + f.where()))
+          .isEqualTo("REPLAYING_PREFIX");
       assertThat(
               scalar(f.c, "SELECT continuation FROM studio_guided_translation_state" + f.where()))
           .isEqualTo("REPLAYING_PREFIX");
+    }
+  }
+
+  @Test
+  void theGovernedPolicyTablesAndTheConfirmationWaitAreGoneAtHead() throws Exception {
+    try (Connection c = connect()) {
+      for (String table :
+          List.of(
+              "studio_guided_policies",
+              "studio_guided_policy_versions",
+              "studio_guided_policy_approvals",
+              "studio_guided_policy_audit",
+              "studio_guided_session_policies")) {
+        assertThat(scalar(c, "SELECT to_regclass('" + table + "') IS NULL"))
+            .as(table)
+            .isEqualTo("t");
+      }
+      for (String function :
+          List.of(
+              "studio_guided_policy_document(jsonb)",
+              "studio_guided_policy_guard()",
+              "studio_guided_session_policy_guard()",
+              "studio_015_prefix_confirmation_wait(text,jsonb,jsonb)")) {
+        assertThat(scalar(c, "SELECT to_regprocedure('" + function + "') IS NULL"))
+            .as(function)
+            .isEqualTo("t");
+      }
+      assertThat(scalar(c, "SELECT to_regprocedure('studio_015_session_guard()') IS NOT NULL"))
+          .isEqualTo("t");
+      assertThat(
+              scalar(
+                  c,
+                  "SELECT count(*) FROM pg_proc WHERE prosrc LIKE '%sideEffectConfirmation%' OR"
+                      + " prosrc LIKE '%studio_guided_session_policies%'"))
+          .isEqualTo("0");
     }
   }
 }

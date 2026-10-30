@@ -21,7 +21,7 @@ export function retainedSecretReplay():ReturnType<typeof retainedReplay> {
   const h=retainedReplay(),action=h.artifact.learnedPlan.actions[2],step=h.artifact.steps[2],input=h.artifact.inputRecipes[1];
   if(!action||!step?.operations[0]||!input)throw new Error('SECRET_PROJECTION');
   const operation={kind:'fill' as const,value:{kind:'secretRef' as const,sourceInputId:'password-input'}};
-  action.operation=operation;action.locator=null;action.operationHash=hashObserved({coordinate:action.coordinate,origin:action.origin,locator:null,operation});step.operations[0].operation=operation;h.artifact.guards[2]={guardId:'g2',origin:action.origin,target:{kind:'passwordControl'}};
+  action.operation=operation;action.target=null;action.operationHash=hashObserved({coordinate:action.coordinate,origin:action.origin,target:null,operation});step.operations[0].operation=operation;h.artifact.guards[2]={guardId:'g2',origin:action.origin,target:{kind:'passwordControl'}};
   h.artifact.inputRecipes[1]={inputId:'password-input',stepId:input.stepId,kind:'secretRef',intendedSlot:'fill.value',provenance:{kind:'configuration',referenceId:'password-reference',referenceName:'PASS'}};h.artifact.replayPolicy.inputs=h.artifact.inputRecipes;
   h.artifact.learnedPlanHash=hashObserved(h.artifact.learnedPlan);h.artifact.replayPolicy.learnedPlanHash=h.artifact.learnedPlanHash;
   Object.assign(h.launch.admission.request,{artifactHash:hashObserved(h.artifact),learnedPlanHash:h.artifact.learnedPlanHash,referencePolicyHash:hashObserved(h.artifact.replayPolicy)});

@@ -1,3 +1,4 @@
+import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 /**
  * STUDIO-OBS-015 H6 — `containsText` parity with the pinned Playwright 1.63.0 `toContainText` (F4,
  * `docs/architecture/studio-inference-contract-v1.md` §6), in real Chromium.
@@ -23,7 +24,7 @@ import { tmpdir } from 'node:os';
 
 import { playwrightBrowserFactory } from './preparedBrowser.js';
 import type { BrowserHandle } from '../../src/run/browserFactory.js';
-import type { GuidedInvocation, ObservationSession } from '../../src/run/observationTypes.js';
+import type { ObservationSession, TargetInvocation } from '../../src/run/observationTypes.js';
 import { startPageServer } from '../helpers/pageServer.js';
 import type { PageServer } from '../helpers/pageServer.js';
 
@@ -32,7 +33,7 @@ const sessions: ObservationSession[] = [];
 beforeAll(async () => {
   server = await startPageServer();
   scratch = await mkdtemp(join(tmpdir(), 'contains-text-parity-'));
-  browser = await playwrightBrowserFactory.launch({ browser: 'chromium', scratchPath: scratch, viewport: { width: 800, height: 600 }, recording: { width: 800, height: 600 } });
+  browser = await playwrightBrowserFactory.launch({ allowedDomains: TEST_DOMAINS, browser: 'chromium', scratchPath: scratch, viewport: { width: 800, height: 600 }, recording: { width: 800, height: 600 } });
   page = browser.page as unknown as Page;
   await page.goto(server.baseUrl);
 });
@@ -43,7 +44,7 @@ afterAll(async () => { await browser.dispose(); await server.close(); await rm(s
 const fresh = '  fresh-1-3f2c1a9e-7b4d-4e7a-9c1d-2a6b8e0f4d11-é\u{1F600}  ';
 
 const rows: [label: string, markup: string, expected: string, passes: boolean][] = [
-  ['the H6 regression: padded read value against its padded dd', `<dl><dt>Reference</dt><dd data-testid="target">${fresh}</dd></dl>`, fresh, true],
+  ['the H6 regression: padded read value against its padded dd', `<dl><dt>Reference</dt><dd><output data-testid="target" aria-label="Reference">${fresh}</output></dd></dl>`, fresh, true],
   ['preserved tabs and newlines against collapsed spacing', '<output data-testid="target" aria-label="Target" style="white-space: pre">Order\t42\n\nconfirmed</output>', 'Order 42  confirmed', true],
   ['inline children separated by source whitespace', '<output data-testid="target" aria-label="Target"><span>Order 42</span>\n   <span>confirmed</span></output>', 'Order\t42\nconfirmed', true],
   ['an exact match', '<output data-testid="target" aria-label="Target">Order 42</output>', 'Order 42', true],
@@ -57,19 +58,20 @@ const rows: [label: string, markup: string, expected: string, passes: boolean][]
 
 async function runnerContainsText(markup: string, expected: string): Promise<boolean | undefined> {
   await page.setContent(markup);
-  const session = browser.createObservationSession?.({ sessionId: 'parity-session', scopeHash: 'a'.repeat(64), approvedOrigins: [server.baseUrl], rules: [], knownSecrets: [], applicationPolicy: { policyRuleId: 'structural', allowStructuralDiscovery: true, readGrants: [] } });
+  const session = browser.createObservationSession?.({ sessionId: 'parity-session', scopeHash: 'a'.repeat(64), allowedDomains: TEST_DOMAINS, knownSecrets: [], readProfile: { policyRuleId: 'structural', allowStructuralDiscovery: true, readGrants: [] } });
   if (!session) throw new Error('SESSION');
   sessions.push(session);
   const observation = (await session.observe()).observation;
-  // The dd row is named by its adjacent term (DOM fallback, elementType `text`), as in ReplayIT.
-  const node = observation.nodes.find((candidate) => candidate.locatorHints.length > 0 && (candidate.name === 'Target' || (candidate.name === 'Reference' && candidate.elementType === 'text')));
-  if (!node?.locatorHints[0]) throw new Error(`NODE: ${JSON.stringify(observation.nodes.map((candidate) => candidate.name))}`);
-  const invocation: GuidedInvocation = {
-    target: { nodeId: node.nodeId, documentId: node.documentId, generation: node.generation, locator: node.locatorHints[0] },
-    operation: { kind: 'assert', predicate: 'containsText', expected: { kind: 'authoredLiteral', sourceInputId: 'expected' } },
-    resolvedValue: expected, origin: server.baseUrl, maxValueBytes: 4096,
+  // The dd row is named by its adjacent term, as in ReplayIT: the output inside it carries the term's name.
+  const found = Object.entries(observation.facts).find(([, fact]) => fact.name === 'Target' || fact.name === 'Reference');
+  if (!found) throw new Error(`NODE: ${JSON.stringify(Object.values(observation.facts).map((fact) => fact.name))}`);
+  const operation = { kind: 'assert', predicate: 'containsText', expected: { kind: 'authoredLiteral', sourceInputId: 'expected' } } as const;
+  const resolved = await session.prepareTarget({ ref: found[0], documentId: observation.documentId, generation: observation.generation, origin: observation.origin, operation, authoredLiteral: null });
+  const invocation: TargetInvocation = {
+    resolved, operation, resolvedValue: expected, origin: server.baseUrl, maxValueBytes: 4096, readRuleId: null, profile: 'learn',
+    expect: { documentId: observation.documentId, generation: observation.generation },
   };
-  return (await session.invoke?.(invocation))?.assertionPassed;
+  return (await session.invoke(invocation)).assertionPassed;
 }
 
 async function playwrightContainsText(expected: string): Promise<boolean> {

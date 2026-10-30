@@ -53,6 +53,8 @@ export const COPY_SOURCE_FILES = {
   architectRulings: 'docs/qa/evidence/STUDIO-OBS-008/execution-20261015/architect-rulings.json',
   consensusPlan: 'docs/specs/studio-observed-authoring/consensus-plan.md',
   openapi: 'docs/specs/studio/openapi.yaml',
+  studioExecution: 'docs/architecture/studio-execution.md',
+  prd: 'PRD.md',
   executeRefusals: 'frontend/src/components/studio/run/executeRefusals.ts',
   executionProgressView: 'frontend/src/components/studio/run/ExecutionProgressView.tsx',
   adrSc006: 'docs/architecture/ADR-SC-006-accessibility-scope-functional-only.md',
@@ -61,6 +63,10 @@ export const COPY_SOURCE_FILES = {
   w5Ruling: 'docs/qa/evidence/STUDIO-OBS-008/execution-20261017/rulings/w5-unreadable-and-alias.md',
   uxFix067: 'docs/qa/evidence/STUDIO-OBS-009/ux-fix-067/copy.md',
   storyUnify0015: 'docs/stories/STUDIO-UNIFY-001-ui-tests-as-checks/STUDIO-UNIFY-001.5.story.md',
+  storyUnify0016: 'docs/stories/STUDIO-UNIFY-001-ui-tests-as-checks/STUDIO-UNIFY-001.6.story.md',
+  errorSchema: 'docs/specs/studio-observed-authoring/contracts/v3/error.schema.json',
+  adr002: 'docs/architecture/ADR-002-internal-contract-surface.md',
+  adr007: 'docs/architecture/ADR-SC-007-snapshot-ref-grounding.md',
 } as const;
 
 export type CopySourceFile = (typeof COPY_SOURCE_FILES)[keyof typeof COPY_SOURCE_FILES];
@@ -138,9 +144,45 @@ export const GUIDED_COPY = {
     basis: 'verbatim',
     source: { file: S.story, quote: 'Saving what this run learned…' },
   },
+  proofWillReplay: {
+    template:
+      'When learning ends, Studio replays the learned steps once to record proof, so your steps run twice.',
+    basis: 'delegated',
+    source: { file: S.prd, quote: 'The steps therefore run twice for a learn, once to learn and once as the proof, and Studio says so.' },
+    note: 'Said while a learn is running: the proof is a replay of the published revision, after the learn (proof = replay, 2026-10-25). Names no video, because a learn shows none.',
+    facts: { file: S.prd, quote: 'Studio replays the learned steps of the revision it just published' },
+  },
+  proofReplaying: {
+    template: 'Replaying the saved steps to record proof…',
+    basis: 'delegated',
+    source: { file: S.prd, quote: 'The steps therefore run twice for a learn, once to learn and once as the proof, and Studio says so.' },
+    note: 'Appended to the learned receipt while the result names the proof replay (result.proof).',
+    facts: { file: S.prd, quote: 'Studio replays the learned steps of the revision it just published' },
+  },
+  proofNotStarted: {
+    template: 'Studio could not start the proof replay. Run the test to record proof.',
+    basis: 'delegated',
+    source: { file: S.prd, quote: 'The steps therefore run twice for a learn, once to learn and once as the proof, and Studio says so.' },
+    note: 'A published learn whose result has proof: null. The refusal code is never public (the contract carries none); Run, a replay, is the action. Nothing retries on its own.',
+    facts: { file: S.openapi, quote: '`proof` is `null` while the replay was refused or has not been' },
+  },
+  learningAttemptTitle: {
+    template: 'Learning attempt',
+    basis: 'delegated',
+    source: { file: S.prd, quote: 'labelled as an attempt and never as a proof' },
+    note: 'Heading of the recording kept for a learn that did not publish.',
+    facts: { file: S.prd, quote: 'the player shows the **learning attempt**' },
+  },
+  learningAttemptNote: {
+    template: 'Recording of the learning attempt. It is not a proof: a proof is a replay of the saved steps.',
+    basis: 'delegated',
+    source: { file: S.prd, quote: 'labelled as an attempt and never as a proof' },
+    note: 'Beside the kept recording of a learn that did not publish (FAILED, CANCELLED, EXPIRED, UNKNOWN_OUTCOME, PUBLICATION_CONFLICT, or SUCCEEDED with publication PENDING or REFUSED).',
+    facts: { file: S.prd, quote: 'After a learn that did not publish, the player shows the **learning attempt**' },
+  },
 
   // -------------------------------------------------------------------------------------------
-  // Clarification (GuidedClarification), AC-3 and inherited OBS-014 item b
+  // Clarification (GuidedClarification), AC-3
   // -------------------------------------------------------------------------------------------
   clarificationQuestion: {
     template: "Step {N} says: '{<step text>}'. Which one did you mean?",
@@ -151,13 +193,13 @@ export const GUIDED_COPY = {
     template: "None of these — I'll edit step {N}",
     basis: 'verbatim',
     source: { file: S.story, quote: "None of these — I'll edit step N" },
-    note: 'Ruling A3: cancels the session, then the page moves focus to step N. Also the decline of a side-effect confirmation (UX plan sideEffectConfirmation.decline).',
+    note: 'Ruling A3: cancels the session, then the page moves focus to step N.',
   },
   continue: {
     template: 'Continue',
     basis: 'verbatim',
     source: { file: S.uxPlan, quote: 'Continue' },
-    note: 'UX plan sideEffectConfirmation.submit. Also the submit of a disambiguation question, which AC-3 gives no button wording for.',
+    note: 'The submit of a disambiguation question, which AC-3 gives no button wording for.',
   },
   pageDerived: {
     template: 'Page-derived',
@@ -196,17 +238,6 @@ export const GUIDED_COPY = {
         'This question expires in 20 seconds. If it expires, this run will stop and you will need to Run again.',
     },
     note: "'in' → 'within': shown while 0 < remaining ≤ 20 s (W5 UX-06).",
-  },
-  confirmTitle: {
-    template: 'Confirm this action before it runs.',
-    basis: 'verbatim',
-    source: { file: S.uxPlan, quote: 'Confirm this action before it runs.' },
-  },
-  confirmBody: {
-    template: "Step {N} says: '{<authored step text>}'. Continue with this action?",
-    basis: 'adapted',
-    source: { file: S.uxPlan, quote: 'Step N says: ‘<authored step text>’. Continue with this action?' },
-    note: "Curly quote marks replaced by the straight ones AC-3's question uses, so both prompts read alike.",
   },
 
   // -------------------------------------------------------------------------------------------
@@ -291,6 +322,27 @@ export const GUIDED_COPY = {
     note: 'AC-3 names UNSUPPORTED_SURFACE without a sentence.',
     facts: { file: S.story, quote: '`LOGIN_REQUIRED` (AC-4) · `ASSERTION_FAILED` · `UNSUPPORTED_SURFACE` · `BUDGET_EXCEEDED`' },
   },
+  unsupportedSurfaceRemedy: {
+    template: "If the step names a control, use the control's visible text (the label or button text shown on the page).",
+    basis: 'delegated',
+    source: { file: S.adr007, quote: "tell the author to use the control's visible name (copy)" },
+    note: 'Said after `unsupportedSurface` and the step line: Studio refuses an element it cannot tell apart or match to the step, and the author can name the control by what the page shows. The first sentence is unchanged because UNSUPPORTED_SURFACE is also the code for an observation deadline and for regions Studio cannot represent. No public code is added.',
+    facts: { file: S.adr007, quote: "tell the author to use the control's visible name (copy)" },
+  },
+  unsupportedStep: {
+    template: "Studio can't do this step yet, so this run stopped.",
+    basis: 'delegated',
+    source: { file: S.adr002, quote: 'UNSUPPORTED_STEP' },
+    note: 'A learn that ended FAILED with UNSUPPORTED_STEP (user decision 2026-10-26): the model answered UNSUPPORTED to the step (a capability Studio does not have, or not enough to plan it). It replaces the RUNTIME_INCOMPATIBLE that named no cause. The page adds "Studio stopped at step N" from the explanation. The model names no further reason, so none is invented here.',
+    facts: { file: S.adr002, quote: 'UNSUPPORTED_STEP' },
+  },
+  unsupportedStepRemedy: {
+    template: 'Try rewording the step, or split it into smaller steps.',
+    basis: 'delegated',
+    source: { file: S.adr002, quote: 'UNSUPPORTED_STEP' },
+    note: 'Said after `unsupportedStep`: the author can change the step; Studio has nothing to retry.',
+    facts: { file: S.adr002, quote: 'UNSUPPORTED_STEP' },
+  },
   budgetExceeded: {
     template: 'This run reached its learning budget, so Studio stopped it.',
     basis: 'delegated',
@@ -301,12 +353,82 @@ export const GUIDED_COPY = {
       quote: 'daily budget exhausted ⇒ next model call refused and the session ends `BUDGET_EXCEEDED`',
     },
   },
+  originLeft: {
+    template: "The page moved to a domain that is not in this environment's allowed domains, so Studio stopped this run.",
+    basis: 'delegated',
+    source: AC3_COPY_BY_UMA,
+    note: 'A learn that ended FAILED with ORIGIN_NOT_ALLOWED (STUDIO-FLEX-001): the learning page stayed on a host outside the allowed domains past the return window, or a secret fill was refused there. Plain text: it names no host and no list, and offers no action.',
+    facts: { file: S.studioExecution, quote: "the page is not in this environment's allowed domains" },
+  },
+  modelUnavailable: {
+    template: 'The model service did not answer in time or is busy, so Studio stopped learning.',
+    basis: 'delegated',
+    source: { file: S.errorSchema, quote: 'MODEL_UNAVAILABLE' },
+    note: 'A learn that ended FAILED with MODEL_UNAVAILABLE (compliance-model latency hardening): the model did not answer usably for availability reasons (timeout or stall after retries, gateway busy, rate limit, provider 5xx). Transient. Plain text: it offers no action of its own; `modelUnavailableRetry` follows.',
+    facts: { file: S.errorSchema, quote: 'MODEL_UNAVAILABLE' },
+  },
+  modelUnavailableRetry: {
+    template: 'Trying again in a few minutes can help.',
+    basis: 'delegated',
+    source: { file: S.errorSchema, quote: 'MODEL_UNAVAILABLE' },
+    note: 'Said after `modelUnavailable`: the cause is transient, so Run again later can work. No wait is stated because the page does not know it.',
+    facts: { file: S.errorSchema, quote: 'MODEL_UNAVAILABLE' },
+  },
+  modelRefused: {
+    template: 'The model service refused the request, so Studio stopped learning.',
+    basis: 'delegated',
+    source: { file: S.errorSchema, quote: 'MODEL_REFUSED' },
+    note: 'A learn that ended FAILED with MODEL_REFUSED (compliance-model latency hardening): the model provider or a compliance layer refused the request with an HTTP 4xx (400, 401/403 or another 4xx, but not 408/429). Not transient: the same request is likely to be refused again.',
+    facts: { file: S.errorSchema, quote: 'MODEL_REFUSED' },
+  },
+  modelRefusedRemedy: {
+    template: 'Trying again unchanged is unlikely to help. Contact the Studio team.',
+    basis: 'delegated',
+    source: { file: S.errorSchema, quote: 'MODEL_REFUSED' },
+    note: 'Said after `modelRefused`: the cause is most often our own request or deployment configuration, not the author\'s step text, so the sentence blames no one, says a retry will likely fail again, and names the Studio team as the escalation.',
+    facts: { file: S.errorSchema, quote: 'MODEL_REFUSED' },
+  },
   nothingStartsOnItsOwn: {
     template: 'Nothing starts again on its own.',
     basis: 'delegated',
     source: AC3_COPY_BY_UMA,
     note: 'Said with every budget refusal and stop.',
     facts: { file: S.architectRulings, quote: 'no automatic start when timerends' },
+  },
+  stoppedAtStep: {
+    template: 'Studio stopped at step {N}.',
+    basis: 'delegated',
+    source: { file: S.storyUnify0016, quote: 'wording is `delegated` to @ux (D1)' },
+    note: 'STUDIO-UNIFY-001.6 AC-01 / D1 (N1). Says where a failed learn stopped, read from the result explanation (the first step that is not completed, only when some step has an action; guidedStoppedStep.ts). "Stopped at", not "failed because": the contract proves no cause. Used when the authored sentence is not provably the one the run used.',
+    facts: { file: S.storyUnify0016, quote: 'Studio stopped at step {N}' },
+  },
+  stoppedAtStepWithText: {
+    template: 'Studio stopped at step {N}: "{text}"',
+    basis: 'delegated',
+    source: { file: S.storyUnify0016, quote: 'wording is `delegated` to @ux (D1)' },
+    note: 'STUDIO-UNIFY-001.6 AC-01 / D1 (N1). The same statement followed by the authored sentence, only where planStepTexts proves it equals what the run used (never otherwise). The sentence is shown as text.',
+    facts: {
+      file: S.storyUnify0016,
+      quote: 'followed by the authored sentence when `planStepTexts` provides it',
+    },
+  },
+  budgetNextStep: {
+    template:
+      'Studio most likely could not find what step {N} describes. Check the page or reword the step, then press Run again.',
+    basis: 'delegated',
+    source: { file: S.storyUnify0016, quote: 'wording is `delegated` to @ux (D1)' },
+    note: 'STUDIO-UNIFY-001.6 AC-01 / D1 (N1). The next-step sentence for BUDGET_EXCEEDED only. Hedged ("most likely") because the code also covers the daily budget, which the page cannot tell apart from the per-session bound; @ux and @po confirm or drop it (D1, risk R2).',
+    facts: {
+      file: S.storyUnify0016,
+      quote: 'that Studio most likely could not find what step {N} describes and that the author can check the page or reword the step and press Run again',
+    },
+  },
+  stoppedHere: {
+    template: 'Stopped here',
+    basis: 'delegated',
+    source: { file: S.storyUnify0016, quote: 'wording is `delegated` to @ux (D1)' },
+    note: 'STUDIO-UNIFY-001.6 AC-02 / D1 (N1). Error-coloured chip on the plan step where a failed learn stopped; it replaces "Learned in this run" on that step.',
+    facts: { file: S.storyUnify0016, quote: 'carries a "Stopped here" chip (error colour)' },
   },
   failedUnnamed: {
     template:
@@ -324,23 +446,19 @@ export const GUIDED_COPY = {
     source: { file: S.executionProgressView, quote: 'so there is nothing here to explain it.' },
     note: "UNNAMED_ERROR_STATEMENT's clause for a guided FAILED result whose failure and errorCode are both null; its browser clause is dropped (a guided result makes no browser claim). W5 UX-12: failedUnnamed pointed 'below' at nothing.",
   },
-  governedPolicyDeniedTitle: {
+  guardDeniedTitle: {
     template: 'This action could not be run.',
     basis: 'verbatim',
     source: { file: S.uxPlan, quote: 'This action could not be run.' },
     note: 'Inherited OBS-014 item a (copy by @ux-design-expert, item c). Names no cause and is not the secret-fill copy.',
   },
-  governedPolicyDeniedBody: {
-    template:
-      'Studio stopped this run under the action safety settings. Check the step wording and ask the CSI owner to review the side-effect setting.',
-    basis: 'verbatim',
-    source: {
-      file: S.uxPlan,
-      quote:
-        'Studio stopped this run under the action safety settings. Check the step wording and ask the CSI owner to review the side-effect setting.',
-    },
+  guardDeniedBody: {
+    template: 'Studio stopped this run because an action did not match the step wording. Check the step wording.',
+    basis: 'adapted',
+    source: { file: S.uxPlan, quote: 'Check the step wording' },
+    note: 'STUDIO-GOV-001.3: the CSI-owner side-effect setting is gone, so the second sentence of the inherited text ("ask the CSI owner to review the side-effect setting") is dropped.',
   },
-  governedPolicyDeniedRemedy: {
+  guardDeniedRemedy: {
     template: 'For a checkbox or switch, say “check” or “uncheck” explicitly.',
     basis: 'verbatim',
     source: { file: S.uxPlan, quote: 'For a checkbox or switch, say “check” or “uncheck” explicitly.' },
@@ -558,35 +676,6 @@ export const GUIDED_COPY = {
   // -------------------------------------------------------------------------------------------
   // Start feedback (GuidedStartFeedback): inline, no session, no poll (architect P4)
   // -------------------------------------------------------------------------------------------
-  policyNotApproved: {
-    template:
-      'Learning cannot start until the policy for this application and environment is approved. Ask the CSI owner to approve it.',
-    basis: 'delegated',
-    source: { file: S.story, quote: '@ux-design-expert owns the exact source-cited wording' },
-    note: 'Inherited POLICY_NOT_APPROVED item a. Not action-level POLICY_DENIED, secret copy, entitlement or platform mismatch.',
-    facts: { file: S.architectRulings, quote: 'ask CSIowner for application/environment policy approval' },
-  },
-  policyAbsent: {
-    template: 'There is no policy for this application and environment yet.',
-    basis: 'delegated',
-    source: { file: S.story, quote: '@ux-design-expert owns the exact source-cited wording' },
-    note: 'messageCode GUIDED_POLICY_ABSENT.',
-    facts: { file: S.openapi, quote: 'approved governed observation policy, or its latest version is not yet approved' },
-  },
-  policyUnapproved: {
-    template: 'The policy for this application and environment has not been approved.',
-    basis: 'delegated',
-    source: { file: S.story, quote: '@ux-design-expert owns the exact source-cited wording' },
-    note: 'messageCode GUIDED_POLICY_UNAPPROVED.',
-    facts: { file: S.openapi, quote: 'approved governed observation policy, or its latest version is not yet approved' },
-  },
-  policyPendingVersion: {
-    template: 'A newer version of the policy is waiting for approval, and it blocks new learning until it is approved.',
-    basis: 'delegated',
-    source: { file: S.story, quote: '@ux-design-expert owns the exact source-cited wording' },
-    note: 'messageCode GUIDED_POLICY_PENDING_VERSION.',
-    facts: { file: S.openapi, quote: 'an edit awaiting approval blocks new learning even while an older version is active' },
-  },
   baseIdentityIncompleteStart: {
     template: 'Saved learning cannot be reused, so this Run has to learn from step 1. Nothing was started.',
     basis: 'delegated',
@@ -609,11 +698,24 @@ export const GUIDED_COPY = {
     facts: { file: S.architectRulings, quote: '409 AUTHORING_REFERENCE_MISSING: focus declared reference/step editor' },
   },
   originNotAllowed: {
-    template: 'Studio does not have approved access to this application, so nothing was started.',
+    template: "This test's page is not in this environment's allowed domains, so nothing was started.",
     basis: 'delegated',
     source: AC3_COPY_BY_UMA,
-    note: 'Start refusal ORIGIN_NOT_ALLOWED. No login guess and no automatic switch.',
-    facts: { file: S.architectRulings, quote: 'explain approved application access is unavailable' },
+    note: 'Start refusal 403 ORIGIN_NOT_ALLOWED (STUDIO-FLEX-001: the first authored URL is not on the environment\'s domain whitelist). Plain text: it names no origin and no list, offers no action, and makes no login guess or automatic switch.',
+    facts: { file: S.studioExecution, quote: "the page is not in this environment's allowed domains" },
+  },
+  secretInText: {
+    template:
+      "A secret can only be the whole value of a step. Studio can't mix a secret with other text, so nothing was started. Put the secret on its own, for example `Type \"<secret NAME>\" in the Password field`.",
+    basis: 'delegated',
+    source: { file: S.adr002, quote: 'SECRET_IN_TEXT' },
+    note: 'Start refusal 422 INVALID_CONTRACT, messageCode SECRET_IN_TEXT (user decision 2026-10-26): a `<secret ID>` inside a quoted value that holds other text. Secrets stay whole-value only (secret-login design); variables (`<var NAME>`) may be mixed with text.',
+    facts: { file: S.adr002, quote: 'SECRET_IN_TEXT' },
+  },
+  applicationUrlMissing: {
+    template: "Add a step that opens the application's URL.",
+    basis: 'verbatim',
+    source: { file: S.openapi, quote: "Add a step that opens the application's URL." },
   },
   budgetCsi: {
     template: 'The learning budget for this CSI is used up for now, so nothing was started.',
@@ -621,6 +723,26 @@ export const GUIDED_COPY = {
     source: AC3_COPY_BY_UMA,
     note: 'Start refusal 429 BUDGET_EXCEEDED with retryable true (per-CSI budget).',
     facts: { file: S.openapi, quote: 'budget (STUDIO-OBS-014 AC-8) and always carries `Retry-After`' },
+  },
+  learningCapacityBusy: {
+    template: 'All learning slots are busy right now, so nothing was started.',
+    basis: 'delegated',
+    source: AC3_COPY_BY_UMA,
+    note: 'Start refusal 429 BUDGET_EXCEEDED, message code LEARNING_CAPACITY_EXHAUSTED, retryable (STUDIO-FLEX-001 item 5: the deployment-wide cap on concurrent learning sessions). Same tone and shape as the per-CSI budget sentence.',
+    facts: {
+      file: S.studioExecution,
+      quote: 'refused with 429 `BUDGET_EXCEEDED`, message code `LEARNING_CAPACITY_EXHAUSTED`',
+    },
+  },
+  learningCapacityTryAgain: {
+    template: 'Try again in a moment.',
+    basis: 'delegated',
+    source: AC3_COPY_BY_UMA,
+    note: 'Shown instead of the Retry-After sentence when the header was not sent: a slot frees when any learning session ends, so the wait is short and cannot be stated.',
+    facts: {
+      file: S.studioExecution,
+      quote: 'refused with 429 `BUDGET_EXCEEDED`, message code `LEARNING_CAPACITY_EXHAUSTED`',
+    },
   },
   budgetRetryAfter: {
     template: 'You can Run again in {duration}.',
@@ -658,6 +780,32 @@ export const GUIDED_COPY = {
     facts: {
       file: S.guidedHook,
       quote: 'once a `sessionId` is known nothing ever re-POSTs start: reload and reconnect only GET',
+    },
+  },
+
+  // -------------------------------------------------------------------------------------------
+  // Finalize held (ChecksStudioPage guided-pending)
+  // -------------------------------------------------------------------------------------------
+  signInToFinish: {
+    template:
+      'Studio could not finish saving this learning Run because your sign-in has ended. Sign in again, then press Try again.',
+    basis: 'delegated',
+    source: { file: S.adrSc006, quote: 'State and consequence stated in visible text' },
+    note:
+      'E2E-012. Shown instead of notReadyNow when the finalize call answered 401 (pending REAUTHENTICATION_REQUIRED): the state, its cause and what to do next. The 401 stopped the poll, so without this the Run looked stuck until the session expired.',
+    facts: {
+      file: S.guidedHook,
+      quote: '`401` (on a read or on finalize): `pending = REAUTHENTICATION_REQUIRED`',
+    },
+  },
+  tryAgain: {
+    template: 'Try again',
+    basis: 'delegated',
+    source: { file: S.adrSc006, quote: 'Visible text labels on controls' },
+    note: 'E2E-012. Label of the control that sends the held finalize once more under the same key.',
+    facts: {
+      file: S.guidedHook,
+      quote: 'finalize is not resent by the poll',
     },
   },
 

@@ -65,16 +65,14 @@
         "AMBIGUOUS_BINDING",
         "MISSING_SOURCE",
         "INSUFFICIENT_EVIDENCE",
-        "UNSUPPORTED_SURFACE",
-        "SIDE_EFFECT_CONFIRMATION"
+        "UNSUPPORTED_SURFACE"
       ]
     },
     "promptCode": {
       "enum": [
         "CHOOSE_FIELD",
         "CHOOSE_SOURCE",
-        "REVISE_STEP",
-        "CONFIRM_ACTION"
+        "REVISE_STEP"
       ]
     },
     "choices": {
@@ -111,12 +109,6 @@
               "null"
             ]
           },
-          "nodeId": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
           "bindingId": {
             "type": [
               "string",
@@ -128,7 +120,6 @@
           "choiceId",
           "safeLabel",
           "labelSource",
-          "nodeId",
           "bindingId"
         ],
         "allOf": [
@@ -228,9 +219,6 @@
           "choices": {
             "items": {
               "properties": {
-                "nodeId": {
-                  "type": "null"
-                },
                 "bindingId": {
                   "type": "null"
                 }

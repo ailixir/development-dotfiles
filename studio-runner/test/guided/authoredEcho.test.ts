@@ -1,3 +1,4 @@
+import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 import { afterEach, expect, it, vi } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import { mkdtemp, rm } from 'node:fs/promises';
@@ -6,7 +7,7 @@ import { join } from 'node:path';
 import { GuidedRuntime } from '../../src/guided/runtime.js';
 import { hash } from '../../src/guided/contracts.js';
 import type { GuidedBrowser } from '../../src/run/guidedBrowser.js';
-import { guidedContext } from '../helpers/guided.js';
+import { guidedContext, sessionStub } from '../helpers/guided.js';
 
 const cleanups: (() => Promise<void>)[] = [];
 afterEach(async () => { for (const clean of cleanups.reverse()) await clean(); cleanups.length = 0; });
@@ -36,9 +37,9 @@ it('AUTHORED-ECHO-01 installs strict configuration values before the first possi
   const browser: GuidedBrowser = {
     evidence: { kind: 'initialBlank', sessionId: context.sessionId, contextId: context.contextId, creationId: randomUUID(), documentId: randomUUID(), bootstrapId: randomUUID(), url: 'about:blank', origin: null, generation: 0 },
     blankMatches, navigateBlank: () => Promise.resolve(), close: () => Promise.resolve(), terminate: () => Promise.resolve(), orderlyClosed: () => true,
-    observations: { withhold, dispose: () => Promise.resolve(), matches: () => Promise.resolve(false), observe: () => Promise.reject(new Error('unused')) },
+    observations: sessionStub({ withhold, dispose: () => Promise.resolve(), observe: () => Promise.reject(new Error('unused')) }),
   };
-  const runtime = new GuidedRuntime(context, { workerId: context.workerId, journalDirectory: directory, launch: () => Promise.resolve(browser), callback });
+  const runtime = new GuidedRuntime(context, { workerId: context.workerId, allowedDomains: TEST_DOMAINS, journalDirectory: directory, launch: () => Promise.resolve(browser), callback });
   cleanups.push(() => runtime.stop('CANCELLED'));
   const starting = runtime.start();
   await expect.poll(() => withhold.mock.calls.length).toBe(1);

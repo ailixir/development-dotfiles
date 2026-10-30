@@ -24,7 +24,8 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
  * @param model Gemini model identifier
  * @param credentials how to obtain the Studio workload's service credentials
  * @param requestTimeout total deadline for one gateway call
- * @param maxConcurrency size of the bounded-concurrency semaphore
+ * @param maxConcurrency size of the bounded-concurrency semaphore; a call waits for a permit,
+ *     within its own budget. Matches the runner's guided capacity bound of 8
  * @param maxInputBytes pre-flight limit on the UTF-8 transport payload
  * @param maxOutputBytes post-flight limit on the UTF-8 response text
  * @param maxOutputTokens ceiling on model output tokens, sent explicitly so a silently truncated
@@ -42,7 +43,7 @@ public record StudioGatewayProperties(
     String model,
     @DefaultValue Credentials credentials,
     @DefaultValue("150s") Duration requestTimeout,
-    @DefaultValue("4") int maxConcurrency,
+    @DefaultValue("8") int maxConcurrency,
     @DefaultValue("262144") int maxInputBytes,
     @DefaultValue("65536") int maxOutputBytes,
     @DefaultValue("32768") int maxOutputTokens,

@@ -52,7 +52,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -140,7 +140,7 @@ class GuidedTransientRetryIT {
     Flyway.configure()
         .dataSource(source)
         .locations("classpath:db/migration")
-        .target("23")
+        .target("29")
         .load()
         .migrate();
     jdbc = new JdbcTemplate(source);
@@ -149,23 +149,22 @@ class GuidedTransientRetryIT {
     store = new GuidedTranslationStore(jdbc, C);
     translationProperties =
         new GuidedTranslationProperties(
-            true,
-            true,
-            List.of("orders"),
-            List.of("fixture"),
-            65536,
-            4096,
-            60,
-            "worker-1",
-            false,
-            (int) BASE_MILLIS);
-    var prompts = new GuidedPromptAssembler(C);
+            true, 65536, 4096, 60, "worker-1", false, (int) BASE_MILLIS);
+    var prompts =
+        new GuidedPromptAssembler(C, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     seedSource();
     var access = new PersistedSourceAccess();
     service =
         new GuidedSessionService(
-            repository, C, access, new GuidedSessionProperties(true, limits), clock);
-    var materialization = new GuidedMaterializationService(jdbc, C);
+            repository,
+            C,
+            access,
+            new GuidedSessionProperties(true, limits),
+            com.citi.put.checks.studio.support.TestDomains.FIXTURES,
+            clock);
+    var materialization =
+        new GuidedMaterializationService(
+            jdbc, C, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     service.installBridge(
         materialization,
         new GuidedPreparationStore(jdbc, C),
@@ -180,22 +179,14 @@ class GuidedTransientRetryIT {
             false,
             C));
     service.installPresentation(new GuidedPublicPresentationProjector(jdbc, C));
-    com.citi.put.checks.studio.support.ObservedPublicationFixture.installGovernance(
-        service,
-        jdbc,
-        "CSI-123",
-        "orders",
-        "fixture",
-        List.of("https://orders.example.test"),
-        null);
+    com.citi.put.checks.studio.support.ObservedPublicationFixture.installCsiBudget(service, jdbc);
     ObjectNode start =
         C.object()
             .put("schemaVersion", 3)
             .put("testId", testId.toString())
             .put("sourceRevision", "1")
             .put("configurationRevision", "1")
-            .put("environmentId", "fixture")
-            .put("applicationId", "orders");
+            .put("environmentId", "fixture");
     start.set("versions", C.parse("{\"contract\":3}"));
     sessionId = service.start(user, "retry-start", start).path("sessionId").asText();
     repository.transaction(
@@ -225,7 +216,8 @@ class GuidedTransientRetryIT {
             gateway,
             C,
             prompts,
-            new GuidedSourceInputResolver(C),
+            new GuidedSourceInputResolver(
+                C, com.citi.put.checks.studio.support.TestDomains.FIXTURES),
             new GuidedProposalValidator(C),
             new GuidedDependencyPlanner(service),
             translationProperties,
@@ -353,15 +345,16 @@ class GuidedTransientRetryIT {
   // ── obligation 5 ───────────────────────────────────────────────────────────────────────────
 
   @Test
-  void threeTransientFailuresEndInTheUnchangedTerminalCodeWithExactlyThreeCalls() throws Exception {
+  void threeTransientFailuresEndInModelUnavailableWithExactlyThreeCalls() throws Exception {
     fixture(Map.of());
     script(
         fail(GuidedModelResponse.Reason.TRANSPORT_HTTP_503),
         fail(GuidedModelResponse.Reason.TRANSPORT_CONNECT),
         fail(GuidedModelResponse.Reason.TRANSPORT_HTTP_429));
     var refused = refusal();
-    assertThat(refused.getMessage()).isEqualTo("INVALID_CONTRACT");
-    assertThat(refused.status()).isEqualTo(422);
+    assertThat(refused.getMessage()).isEqualTo("MODEL_UNAVAILABLE");
+    assertThat(refused.status()).isEqualTo(503);
+    assertThat(refused.retryable()).isTrue();
     assertThat(gateway.requests).hasSize(3);
     assertThat(gateway.script).isEmpty();
     assertThat(rows())
@@ -372,40 +365,38 @@ class GuidedTransientRetryIT {
     // The delay before attempt n is base << (n - 2); there is no wait after the last attempt.
     assertThat(sleeps).containsExactly(BASE_MILLIS, BASE_MILLIS * 2);
     assertThat(document().path("state").asText()).isEqualTo("FAILED");
-    assertThat(errorCode()).isEqualTo("INVALID_CONTRACT");
+    assertThat(errorCode()).isEqualTo("MODEL_UNAVAILABLE");
     assertThat(document().path("counters").path("modelProposals").asInt()).isEqualTo(3);
   }
 
   // ── obligation 6 ───────────────────────────────────────────────────────────────────────────
 
   @ParameterizedTest
-  @EnumSource(
-      value = GuidedModelResponse.Reason.class,
-      names = {
-        "TRANSPORT_HTTP_400",
-        "TRANSPORT_HTTP_401_403",
-        "TRANSPORT_HTTP_4XX",
-        "TRANSPORT_HTTP_5XX",
-        "TRANSPORT_CREDENTIAL",
-        "TRANSPORT_USAGE",
-        "TRANSPORT_OTHER",
-        "TIMEOUT",
-        "BUSY",
-        "TOO_LARGE",
-        "DISABLED"
-      })
-  void everyNonRetryableReasonMakesExactlyOneCallAndTheTodayTerminal(
-      GuidedModelResponse.Reason reason) throws Exception {
+  @CsvSource({
+    "TRANSPORT_HTTP_400,MODEL_REFUSED,422",
+    "TRANSPORT_HTTP_401_403,MODEL_REFUSED,422",
+    "TRANSPORT_HTTP_4XX,MODEL_REFUSED,422",
+    "TRANSPORT_HTTP_5XX,MODEL_UNAVAILABLE,503",
+    "TRANSPORT_CREDENTIAL,MODEL_UNAVAILABLE,503",
+    "TRANSPORT_OTHER,MODEL_UNAVAILABLE,503",
+    "TIMEOUT,MODEL_UNAVAILABLE,503",
+    "BUSY,MODEL_UNAVAILABLE,503",
+    "DISABLED,MODEL_UNAVAILABLE,503",
+    "TRANSPORT_USAGE,INVALID_CONTRACT,422",
+    "TOO_LARGE,INVALID_CONTRACT,422"
+  })
+  void everyNonRetryableReasonMakesExactlyOneCallAndItsOwnTerminalCode(
+      GuidedModelResponse.Reason reason, String code, int status) throws Exception {
     fixture(Map.of());
     assertThat(reason.definiteTransient()).isFalse();
     script(fail(reason));
     var refused = refusal();
-    assertThat(refused.getMessage()).isEqualTo("INVALID_CONTRACT");
-    assertThat(refused.status()).isEqualTo(422);
+    assertThat(refused.getMessage()).isEqualTo(code);
+    assertThat(refused.status()).isEqualTo(status);
     assertThat(gateway.requests).hasSize(1);
     assertThat(sleeps).isEmpty();
     assertThat(rows()).containsExactly("1:REJECTED:" + reason.name());
-    assertThat(errorCode()).isEqualTo("INVALID_CONTRACT");
+    assertThat(errorCode()).isEqualTo(code);
   }
 
   @Test
@@ -429,6 +420,22 @@ class GuidedTransientRetryIT {
     assertThat(sleeps).isEmpty();
     assertThat(gateway.requests.get(1).projection().document().path("repairCodes").toString())
         .contains("INVALID_RESPONSE");
+  }
+
+  /** A genuinely unusable answer, still unusable after the repairs, stays INVALID_CONTRACT. */
+  @Test
+  void anInvalidResponseAfterTheRepairsStaysInvalidContract() throws Exception {
+    fixture(Map.of());
+    script(
+        fail(GuidedModelResponse.Reason.INVALID_RESPONSE),
+        fail(GuidedModelResponse.Reason.INVALID_RESPONSE),
+        fail(GuidedModelResponse.Reason.INVALID_RESPONSE));
+    var refused = refusal();
+    assertThat(refused.getMessage()).isEqualTo("INVALID_CONTRACT");
+    assertThat(refused.status()).isEqualTo(422);
+    assertThat(gateway.requests).hasSize(3);
+    assertThat(sleeps).isEmpty();
+    assertThat(errorCode()).isEqualTo("INVALID_CONTRACT");
   }
 
   // ── obligation 7 ───────────────────────────────────────────────────────────────────────────
@@ -458,7 +465,7 @@ class GuidedTransientRetryIT {
     fixture(Map.of());
     script(applyRefusal(), applyRefusal(), fail(GuidedModelResponse.Reason.TRANSPORT_HTTP_503));
     var refused = refusal();
-    assertThat(refused.getMessage()).isEqualTo("INVALID_CONTRACT");
+    assertThat(refused.getMessage()).isEqualTo("MODEL_UNAVAILABLE");
     assertThat(gateway.requests).hasSize(3);
     assertThat(sleeps).isEmpty();
     assertThat(rows())
@@ -533,7 +540,7 @@ class GuidedTransientRetryIT {
         });
     script(fail(GuidedModelResponse.Reason.TRANSPORT_HTTP_503), unsupported(null, null));
     var refused = refusal();
-    assertThat(refused.getMessage()).isEqualTo("INVALID_CONTRACT");
+    assertThat(refused.getMessage()).isEqualTo("MODEL_UNAVAILABLE");
     assertThat(Thread.currentThread().isInterrupted()).isTrue();
     assertThat(gateway.requests).hasSize(1);
     assertThat(rows()).containsExactly("1:REJECTED:TRANSPORT_HTTP_503");
@@ -706,7 +713,10 @@ class GuidedTransientRetryIT {
 
   private final class PersistedSourceAccess implements GuidedSessionAccess {
     private final GuidedSourceClassifier classifier =
-        new GuidedSourceClassifier(C, translationProperties, new CredentialPatternScreen());
+        new GuidedSourceClassifier(
+            C,
+            new CredentialPatternScreen(),
+            com.citi.put.checks.studio.support.TestDomains.FIXTURES);
 
     ObjectNode current() {
       var row =
@@ -747,12 +757,10 @@ class GuidedTransientRetryIT {
               .put("principalId", "retry-user")
               .put("csiId", current.path("csiId").asText())
               .put("environmentId", current.path("environment").asText())
-              .put("applicationId", "orders")
               .put("sourceRevision", current.path("sourceRevision").asText())
               .put("configurationRevision", current.path("configurationRevision").asText())
               .put("modelDataPolicyId", "INPUT-POLICY-01-A")
               .putNull("valueTransferPolicyId");
-      scope.putArray("approvedOrigins").add("https://orders.example.test");
       scope.putArray("capabilities").add("observe");
       var approved = classifier.classify(current, scope);
       var steps = JSON.createArrayNode();
@@ -763,11 +771,6 @@ class GuidedTransientRetryIT {
             .put("requiresAssertion", false);
       }
       return new Snapshot(scope, steps);
-    }
-
-    @Override
-    public void checkCurrent(JsonNode session) {
-      classifier.requireCurrentPolicy(session.path("scope"));
     }
 
     @Override

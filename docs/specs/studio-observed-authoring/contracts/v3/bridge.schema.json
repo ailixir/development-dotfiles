@@ -145,6 +145,29 @@
           "type": "string",
           "format": "date-time",
           "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,9})?Z(?![\\s\\S])"
+        },
+        "target": {
+          "oneOf": [
+            {
+              "$ref": "https://checks.citi.example/contracts/observed/v3/locator.schema.json#/definitions/ResolvedTarget"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pressInheritance": {
+          "oneOf": [
+            {
+              "$ref": "https://checks.citi.example/contracts/observed/v3/bridge.schema.json#/definitions/PressInheritance"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "assertSourceBinding": {
+          "$ref": "#/definitions/AssertSourceBinding"
         }
       },
       "required": [
@@ -162,7 +185,9 @@
         "requestDigest",
         "evidenceHash",
         "authoredInputsHash",
-        "expiresAt"
+        "expiresAt",
+        "target",
+        "pressInheritance"
       ]
     },
     "dispatch": {
@@ -437,13 +462,15 @@
               "$ref": "https://checks.citi.example/contracts/observed/v3/versions.schema.json"
             },
             "reason": {
+              "description": "PUBLISHED is the stop of a session whose learn published a revision: the runner discards the session recording before upload (no object, no manifest, no recording-evidence callback). It is emitted only from the publication commit; every other path keeps its reason and keeps the recording.",
               "enum": [
                 "CANCELLED",
                 "EXPIRED",
                 "UNKNOWN_OUTCOME",
                 "LEASE_LOST",
                 "CONTEXT_LOST",
-                "REVOKED"
+                "REVOKED",
+                "PUBLISHED"
               ]
             }
           },
@@ -896,32 +923,91 @@
             "PASSWORD_TARGET_ABSENT",
             "PASSWORD_TARGET_AMBIGUOUS",
             "PASSWORD_FORM_ACTION_NOT_ALLOWED",
-            "PASSWORD_CONTROL_READ_REFUSED"
+            "PASSWORD_CONTROL_READ_REFUSED",
+            "OPTION_NOT_PRESENT",
+            "NO_DURABLE_LOCATOR",
+            "READ_NOT_ALLOWED",
+            "OBSERVATION_DEADLINE"
           ]
         }
       },
       "required": [
         "code"
       ],
-      "if": {
-        "type": "object",
-        "properties": {
-          "reason": {
-            "type": "string"
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "reason": {
+                "enum": [
+                  "PASSWORD_TARGET_ABSENT",
+                  "PASSWORD_TARGET_AMBIGUOUS",
+                  "PASSWORD_FORM_ACTION_NOT_ALLOWED",
+                  "PASSWORD_CONTROL_READ_REFUSED"
+                ]
+              }
+            },
+            "required": [
+              "reason"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "const": "POLICY_DENIED"
+              }
+            }
           }
         },
-        "required": [
-          "reason"
-        ]
-      },
-      "then": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "const": "POLICY_DENIED"
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "reason": {
+                "enum": [
+                  "OPTION_NOT_PRESENT",
+                  "NO_DURABLE_LOCATOR",
+                  "READ_NOT_ALLOWED"
+                ]
+              }
+            },
+            "required": [
+              "reason"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "const": "PREPARATION_DENIED"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "properties": {
+              "reason": {
+                "const": "OBSERVATION_DEADLINE"
+              }
+            },
+            "required": [
+              "reason"
+            ]
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "const": "BUDGET_EXCEEDED"
+              }
+            }
           }
         }
-      }
+      ]
     },
     "PrefixRequestIdentity": {
       "type": "object",
@@ -981,6 +1067,19 @@
         "evidenceHash": {
           "type": "string",
           "pattern": "^[a-f0-9]{64}$"
+        },
+        "pressInheritance": {
+          "oneOf": [
+            {
+              "$ref": "https://checks.citi.example/contracts/observed/v3/bridge.schema.json#/definitions/PressInheritance"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "assertSourceBinding": {
+          "$ref": "#/definitions/AssertSourceBinding"
         }
       },
       "required": [
@@ -996,7 +1095,8 @@
         "configurationRevision",
         "prefixProgramHash",
         "coordinate",
-        "evidenceHash"
+        "evidenceHash",
+        "pressInheritance"
       ]
     },
     "PrefixPrepare": {
@@ -1112,6 +1212,19 @@
         },
         "preparationId": {
           "type": "null"
+        },
+        "pressInheritance": {
+          "oneOf": [
+            {
+              "$ref": "https://checks.citi.example/contracts/observed/v3/bridge.schema.json#/definitions/PressInheritance"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "assertSourceBinding": {
+          "$ref": "#/definitions/AssertSourceBinding"
         }
       },
       "required": [
@@ -1136,7 +1249,8 @@
         "receiptHash",
         "phase",
         "admissionId",
-        "preparationId"
+        "preparationId",
+        "pressInheritance"
       ]
     },
     "AdmittedDrift": {
@@ -1235,6 +1349,19 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 256
+        },
+        "pressInheritance": {
+          "oneOf": [
+            {
+              "$ref": "https://checks.citi.example/contracts/observed/v3/bridge.schema.json#/definitions/PressInheritance"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "assertSourceBinding": {
+          "$ref": "#/definitions/AssertSourceBinding"
         }
       },
       "required": [
@@ -1259,7 +1386,8 @@
         "receiptHash",
         "phase",
         "admissionId",
-        "preparationId"
+        "preparationId",
+        "pressInheritance"
       ]
     },
     "DriftReceipt": {
@@ -1875,6 +2003,19 @@
           "type": "string",
           "format": "date-time",
           "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,9})?Z(?![\\s\\S])"
+        },
+        "pressInheritance": {
+          "oneOf": [
+            {
+              "$ref": "https://checks.citi.example/contracts/observed/v3/bridge.schema.json#/definitions/PressInheritance"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "assertSourceBinding": {
+          "$ref": "#/definitions/AssertSourceBinding"
         }
       },
       "required": [
@@ -1890,7 +2031,8 @@
         "versions",
         "proposal",
         "requestDigest",
-        "expiresAt"
+        "expiresAt",
+        "pressInheritance"
       ]
     },
     "ordinaryOutcome": {
@@ -2060,6 +2202,70 @@
             "type": "object"
           }
         }
+      ]
+    },
+    "PressInheritance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "same-element-press"
+        },
+        "predecessorAdmissionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "predecessorRequestDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "predecessorOperationHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "predecessorCoordinate": {
+          "$ref": "https://checks.citi.example/contracts/observed/v3/action.schema.json#/properties/coordinate"
+        },
+        "documentId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      },
+      "required": [
+        "kind",
+        "predecessorAdmissionId",
+        "predecessorRequestDigest",
+        "predecessorOperationHash",
+        "predecessorCoordinate",
+        "documentId"
+      ]
+    },
+    "AssertSourceBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "bindingId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "producerAdmissionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "producerPreparationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      },
+      "required": [
+        "bindingId",
+        "producerAdmissionId",
+        "producerPreparationId"
       ]
     }
   }

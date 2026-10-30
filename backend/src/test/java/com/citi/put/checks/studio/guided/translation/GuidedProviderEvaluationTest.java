@@ -205,7 +205,6 @@ class GuidedProviderEvaluationTest {
   void independentOracleRejectsPermittedButWrongActionAndOmittedDataflow() {
     Case fixture = CASES.get(1);
     ObjectNode wrong = GuidedGatewayPrivacyTest.JSON.createObjectNode();
-    wrong.putArray("needs");
     wrong
         .putArray("obligations")
         .addObject()
@@ -214,7 +213,6 @@ class GuidedProviderEvaluationTest {
     assertThat(correct(fixture, wrong)).isFalse();
     Case dependency = CASES.get(2);
     ObjectNode omitted = GuidedGatewayPrivacyTest.JSON.createObjectNode();
-    omitted.putArray("needs");
     var obligations = omitted.putArray("obligations");
     for (int index = 0; index < dependency.steps().size(); index++) {
       obligations
@@ -272,7 +270,9 @@ class GuidedProviderEvaluationTest {
                 runtime.path("plan"),
                 runtime.path("obligation"),
                 action,
-                runtime.path("context"));
+                runtime.path("context"),
+                null,
+                GuidedRefusalDiagnostics.Capture.NONE);
           };
       validate.accept(expected);
       org.assertj.core.api.Assertions.assertThatThrownBy(() -> validate.accept(malicious))
@@ -295,7 +295,9 @@ class GuidedProviderEvaluationTest {
 
   private static GuidedModelRequest hostileRequest(JsonNode fixture) {
     var contracts = new GuidedContracts();
-    var assembler = new GuidedPromptAssembler(contracts);
+    var assembler =
+        new GuidedPromptAssembler(
+            contracts, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     return new GuidedModelRequest(
         fixture.path("expected").path("requestId").asText(),
         1,
@@ -335,7 +337,10 @@ class GuidedProviderEvaluationTest {
   }
 
   private static boolean correct(Case fixture, JsonNode reply) {
-    if (reply.path("needs").size() != fixture.needs()) {
+    // ADR-SC-007: needs are derived on the server from the needIds the reply puts on its
+    // obligations; a reply carries no needs of its own.
+    JsonNode needs = GuidedProposalValidator.deriveNeeds(reply.path("obligations"), null);
+    if (needs.size() != fixture.needs()) {
       return false;
     }
     int expectedCount = fixture.operations().stream().mapToInt(List::size).sum();
@@ -381,7 +386,7 @@ class GuidedProviderEvaluationTest {
       }
     }
     if (fixture.needs() > 0) {
-      JsonNode need = reply.path("needs").get(0);
+      JsonNode need = needs.get(0);
       if (!need.path("producerStepId").asText().equals(id(fixture, 0))
           || need.path("consumers").size() != 1
           || !need.path("consumers").get(0).path("stepId").asText().equals(id(fixture, 1))

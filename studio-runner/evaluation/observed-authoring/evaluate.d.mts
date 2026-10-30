@@ -178,7 +178,7 @@ export interface StudioApiClient {
   execute(testId: string): Promise<{ executionId: string }>;
   readExecution(id: string): Promise<{ status: string }>;
 }
-export declare function createPublicApiClient(input: { baseUrl: string; token: string; transport?: (url: URL, init: RequestInit) => Promise<Response>; csiId: string; environmentId: string; applicationId: string }): StudioApiClient;
+export declare function createPublicApiClient(input: { baseUrl: string; token: string; transport?: (url: URL, init: RequestInit) => Promise<Response>; csiId: string; environmentId: string }): StudioApiClient;
 export declare function buildAuthoringRequest(stepText: JsonObject, vars: Record<string, string>): { request: JsonObject };
 
 export interface ReceiptsChannel { mark(): number; since(cursor: number): PhaseReceipts }

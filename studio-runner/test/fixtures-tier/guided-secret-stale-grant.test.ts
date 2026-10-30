@@ -1,3 +1,4 @@
+import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 // eslint-disable-next-line no-restricted-imports -- Test-local original fixed SDK delegation; no alternate browser/password primitive.
 import {chromium, type BrowserContext} from 'playwright';
 import {createServer} from 'node:https';
@@ -13,7 +14,7 @@ import {GuidedRuntime} from '../../src/guided/runtime.js';
 import {canonical, hash, identity, validate} from '../../src/guided/contracts.js';
 import {launchGuidedBrowser} from '../../src/run/browser.js';
 import {GuidedLaunchFailure} from '../../src/run/guidedBrowser.js';
-import {PrivateObservationInventory} from '../../src/run/observationInventory.js';
+import {PrivateInventory} from '../../src/run/privateInventory.js';
 import {descendantsOf, isAlive} from '../../src/run/tree.js';
 import type {BrowserPreferenceEvidence} from '../../src/run/scratchLayout.js';
 import type {Action, BridgeBootstrap, BridgeObservation, BridgeOrdinaryOutcome as BridgeOutcome, BridgePreparation, CommandsClaim, ExecutionEvidence, Session} from '../../src/guided/types.js';
@@ -186,10 +187,13 @@ it('rejects the genuine retired CSI-A grant for a fresh CSI-B assignment before 
       const runtime = receiver as GuidedRuntime, client = requireClient(runtime.currentIdentity.sessionId); if (method === 'start') client.starts++; else client.dispatches++;
       facts.push({kind: 'runtime-entry', label: client.label, method, at: performance.now()}); return invoke();
     }));
-    for (const method of ['merge', 'snapshot', 'dispose']) restorers.push(patch(PrivateObservationInventory.prototype, method, (receiver, _args, invoke) => {
-      const view = receiver as InventoryView; let tag = inventoryTags.get(receiver); if (tag === undefined) {tag = ++nextInventory; inventoryTags.set(receiver, tag); inventoryOwners.set(receiver, launching);}
+    const originalSnapshot = Object.getOwnPropertyDescriptor(PrivateInventory.prototype, 'snapshot')?.value as (...args: unknown[]) => unknown; if (typeof originalSnapshot !== 'function') throw Error('SNAPSHOT_METHOD');
+    // The WI-2 inventory keeps its state private: its entries and byte count are read through the public snapshot(), a latched inventory (failed or disposed) reads as empty and disposed.
+    const inventoryView = (receiver: object): InventoryView => {try {const entries = Reflect.apply(originalSnapshot, receiver, []) as [string, boolean][]; return {values: new Map(entries), bytes: entries.reduce((sum, [value]) => sum + Buffer.byteLength(value), 0), disposed: false, failed: false};} catch {return {values: new Map(), bytes: 0, disposed: true, failed: false};}};
+    for (const method of ['merge', 'withhold', 'snapshot', 'dispose']) restorers.push(patch(PrivateInventory.prototype, method, (receiver, _args, invoke) => {
+      let tag = inventoryTags.get(receiver); if (tag === undefined) {tag = ++nextInventory; inventoryTags.set(receiver, tag); inventoryOwners.set(receiver, launching);}
       const observedTag = tag;
-      const record = (phase: string): void => {facts.push({kind: 'inventory', label: inventoryOwners.get(receiver) ?? 'UNKNOWN', tag: observedTag, method, phase, size: view.values.size, bytes: view.bytes, containsA: view.values.has(CANARY), disposed: view.disposed, failed: view.failed});};
+      const record = (phase: string): void => {const view = inventoryView(receiver); facts.push({kind: 'inventory', label: inventoryOwners.get(receiver) ?? 'UNKNOWN', tag: observedTag, method, phase, size: view.values.size, bytes: view.bytes, containsA: view.values.has(CANARY), disposed: view.disposed, failed: view.failed});};
       record('before'); const returned = invoke(); record('after'); return returned;
     }));
     restorers.push(patch(chromium, 'launchPersistentContext', (_receiver, args, invoke) => {
@@ -253,7 +257,7 @@ it('rejects the genuine retired CSI-A grant for a fresh CSI-B assignment before 
     const controller = {baseUrl: 'https://127.0.0.1:' + String(at.port), tls: testTls, controllerCertificateFingerprint256: testFingerprint, token: () => Promise.resolve(jwt({aud: 'studio-guided-controller', role: 'owning-worker', sub: 'worker-one'}))};
     const originalClaim = guidedClaimClient(controller);
     const options: Parameters<typeof createGuidedServer>[0] = {
-      workerId: 'worker-one', capacity: 1, journalDirectory: journal, tls: testTls, controllerJwt: jwtPolicy, controllerCertificateFingerprint256: testFingerprint, callback: guidedCallback(controller),
+      workerId: 'worker-one', capacity: 1, allowedDomains: TEST_DOMAINS, journalDirectory: journal, tls: testTls, controllerJwt: jwtPolicy, controllerCertificateFingerprint256: testFingerprint, callback: guidedCallback(controller),
       diagnosticStderr: text => {output.observe('diagnostic', text); process.stderr.write(text);},
       claim: (command, key, timeout, signal) => {
         const original = originalClaim(command, key, timeout, signal); void original.then(received => {
@@ -277,8 +281,8 @@ it('rejects the genuine retired CSI-A grant for a fresh CSI-B assignment before 
     status(await post(workerPort, route(a) + '/assign', a.assignment, {fence: null, key: 'A-assign'}), 200); status(await post(workerPort, route(a) + '/context', a.context, {key: 'A-context'}), 200);
     await action(a, 'nav', {kind: 'navigate', destinationInputId: 'input-nav'}); const observation = a.observation; if (!observation) throw Error('OBSERVATION'); expect(observation.coverage.passwordControls).toBe(1);
     await action(a, 'fill', {kind: 'fill', value: {kind: 'secretRef', sourceInputId: 'input-pass'}}, {kind: 'passwordControl', documentId: observation.documentId, generation: observation.generation}, CANARY);
-    const signIn = a.observation?.nodes.find(node => node.name === 'Sign in' && node.locatorHints.length > 0), locator = signIn?.locatorHints[0]; if (!signIn || !locator) throw Error('SIGN_IN');
-    await action(a, 'submit', {kind: 'click'}, {nodeId: signIn.nodeId, documentId: signIn.documentId, generation: signIn.generation, locator});
+    const seen = a.observation, signIn = seen && Object.entries(seen.facts).find(([, fact]) => fact.name === 'Sign in'); if (!seen || !signIn) throw Error('SIGN_IN');
+    await action(a, 'submit', {kind: 'click'}, {kind: 'node', ref: signIn[0], documentId: seen.documentId, generation: seen.generation});
     expect(fixture.receipts().length).toBe(1); expect(fixture.receipts()[0]?.accepted === true && fixture.receipts()[0]?.password === CANARY).toBe(true);
     expect(a.launchAttempts).toBe(1); expect(a.launches).toBe(1); expect(a.nativeEntries).toBe(1); expect(a.nativePending).toBe(0); expect(pids.some(pid => pid.label === 'A' && isAlive(pid.pid))).toBe(true);
     const withhold = facts.filter(fact => fact.kind === 'inventory' && fact.label === 'A' && fact.phase === 'after' && fact.containsA === true).at(-1); expect(withhold !== undefined).toBe(true); expect(Number(withhold?.size)).toBeGreaterThan(0); expect(Number(withhold?.bytes)).toBeGreaterThan(0);

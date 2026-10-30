@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Supplier;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -51,6 +52,32 @@ public final class GuidedSessionRepository {
       throw new GuidedSessionException("FORBIDDEN_SCOPE", 403);
     }
     return rows.getFirst();
+  }
+
+  /**
+   * The newest terminal, unpruned session of {@code principalId} for each of {@code testIds}
+   * (STUDIO-UNIFY-001.6 AC-09). One read-only statement: no row lock, and a test with no such
+   * session is absent from the result.
+   */
+  public List<Session> latestTerminal(Collection<String> testIds, String principalId) {
+    if (testIds.isEmpty()) {
+      return List.of();
+    }
+    return jdbc.query(
+        "SELECT DISTINCT ON (test_id) document::text,progress::text FROM studio_guided_sessions"
+            + " WHERE test_id = ANY (?) AND principal_id=? AND state IN "
+            + TERMINAL_STATES
+            + " AND pruned_at IS NULL ORDER BY test_id,"
+            + " (document->>'createdAt')::timestamptz DESC, session_id DESC",
+        statement -> {
+          statement.setArray(
+              1, statement.getConnection().createArrayOf("varchar", testIds.toArray()));
+          statement.setString(2, principalId);
+        },
+        (rs, n) ->
+            new Session(
+                (ObjectNode) contracts.parse(rs.getString(1)),
+                (ObjectNode) contracts.parse(rs.getString(2))));
   }
 
   public void insert(ObjectNode doc) {

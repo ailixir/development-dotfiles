@@ -138,7 +138,7 @@ class ExecutionReplayFailureMigrationIT {
     for (String url : List.of(headUrl, upgradeUrl)) {
       assertThat(flyway(url, null).info().pending()).isEmpty();
       assertThat(scalar(url, "SELECT max(version::int) FROM flyway_schema_history"))
-          .isEqualTo("23");
+          .isEqualTo("28");
       assertThat(scalar(url, "SELECT description FROM flyway_schema_history WHERE version='22'"))
           .isEqualTo("execution replay failure");
       assertThat(scalar(url, "SELECT count(*) FROM flyway_schema_history WHERE NOT success"))

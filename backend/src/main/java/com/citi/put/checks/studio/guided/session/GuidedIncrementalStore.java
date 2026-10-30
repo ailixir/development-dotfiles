@@ -3,6 +3,7 @@ package com.citi.put.checks.studio.guided.session;
 import static com.citi.put.checks.studio.guided.session.GuidedSessionException.require;
 
 import com.citi.put.checks.studio.authoring.IncrementalChangeService;
+import com.citi.put.checks.studio.navigation.AllowedDomains;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -22,7 +23,7 @@ public final class GuidedIncrementalStore {
 
   public record Selection(IncrementalChangeService.Change change, int index, ObjectNode program) {}
 
-  public Selection select(JsonNode request, JsonNode allowedOrigins) {
+  public Selection select(JsonNode request, AllowedDomains domains) {
     var change =
         new IncrementalChangeService(jdbc)
             .inspect(UUID.fromString(request.path("testId").asText()));
@@ -112,21 +113,13 @@ public final class GuidedIncrementalStore {
           }
         }
         require(destination != null, "MISSING_SOURCE", 409);
-        requireGovernedOrigin(
-            com.citi.put.checks.studio.guided.bridge.GuidedSourceReferenceValidator.origin(
-                destination),
-            allowedOrigins);
+        requireAllowed(destination, domains);
       }
+      // The reused prefix replays on the origin each step learned on, which must be on the
+      // deployment's list as it stands now.
       JsonNode origin = action.path("origin");
       if (!origin.isNull() && !origin.isMissingNode()) {
-        boolean governed = false;
-        for (JsonNode allowed : allowedOrigins) {
-          governed |= origin.equals(allowed);
-        }
-        if (!governed) {
-          throw new GuidedSessionException(
-              "ORIGIN_NOT_ALLOWED", 403, "PREFIX_ORIGIN_NOT_GOVERNED", false, null);
-        }
+        requireAllowed(origin.asText(), domains);
       }
     }
     return new Selection(change, index, program);
@@ -138,8 +131,10 @@ public final class GuidedIncrementalStore {
     }
     String id = session.path("sessionId").asText();
     jdbc.update(
-        "INSERT INTO studio_guided_relearn_plans(session_id,base_revision_id,initial_step_id,"
-            + "initial_step_index,prefix_program,prefix_program_hash) VALUES (?,?,?, ?,?::jsonb,?)",
+        "INSERT INTO studio_guided_relearn_plans(session_id,base_revi"
+            + "sion_id,initial_step_id,"
+            + "initial_step_index,prefix_program,prefix_program_hash) VALUE"
+            + "S (?,?,?, ?,?::jsonb,?)",
         id,
         selection.change().baseRevisionId(),
         selection.change().authoring().steps().get(selection.index()).id().toString(),
@@ -150,7 +145,8 @@ public final class GuidedIncrementalStore {
       switchToLearning(session, "EMPTY_PREFIX", 0, 0, null);
     } else {
       jdbc.update(
-          "UPDATE studio_guided_translation_state SET continuation='REPLAYING_PREFIX' WHERE session_id=?",
+          "UPDATE studio_guided_translation_state SET continuation='REPLAYING_PREFIX' WHERE"
+              + " session_id=?",
           id);
     }
   }
@@ -182,9 +178,9 @@ public final class GuidedIncrementalStore {
     return (ObjectNode)
         contracts.parse(
             jdbc.queryForObject(
-                "SELECT r.artifact::text FROM"
-                    + " studio_guided_relearn_plans p JOIN ui_test_revisions r ON r.id=p.base_revision_id"
-                    + " WHERE p.session_id=?",
+                "SELECT r.artifact::text FROM studio_guided_relearn_plans p J"
+                    + "OIN ui_test_revisions"
+                    + " r ON r.id=p.base_revision_id WHERE p.session_id=?",
                 String.class,
                 id));
   }
@@ -254,12 +250,12 @@ public final class GuidedIncrementalStore {
     JsonNode old =
         contracts.parse(
             jdbc.queryForObject(
-                "SELECT t.plan::text FROM"
-                    + " studio_guided_relearn_plans p JOIN ui_test_revisions r ON r.id=p.base_revision_id"
-                    + " JOIN studio_guided_translation_state h ON h.session_id=r.guided_session_id"
-                    + " JOIN studio_guided_translation_plans t ON t.session_id=h.session_id AND"
-                    + " t.plan_revision=h.plan_revision"
-                    + " WHERE p.session_id=?",
+                "SELECT t.plan::text FROM studio_guided_relearn_plans p JOIN "
+                    + "ui_test_revisions r ON"
+                    + " r.id=p.base_revision_id JOIN studio_guided_translation_state h ON"
+                    + " h.session_id=r.guided_session_id JOIN studio_guided_translation_plans t ON"
+                    + " t.session_id=h.session_id AND t.plan_revision=h.plan_revision WHERE"
+                    + " p.session_id=?",
                 String.class,
                 id));
     PrefixInputs inputs = prefixInputs(session);
@@ -355,7 +351,21 @@ public final class GuidedIncrementalStore {
   }
 
   public ObjectNode issue(
-      JsonNode session, JsonNode context, JsonNode coordinate, JsonNode evidenceHash) {
+      JsonNode session,
+      JsonNode context,
+      JsonNode coordinate,
+      JsonNode evidenceHash,
+      JsonNode pressInheritance) {
+    return issue(session, context, coordinate, evidenceHash, pressInheritance, null);
+  }
+
+  public ObjectNode issue(
+      JsonNode session,
+      JsonNode context,
+      JsonNode coordinate,
+      JsonNode evidenceHash,
+      JsonNode pressInheritance,
+      JsonNode assertSourceBinding) {
     String id = session.path("sessionId").asText();
     require(pending(id), "REVISION_CONFLICT", 409);
     ObjectNode request = contracts.object();
@@ -376,6 +386,10 @@ public final class GuidedIncrementalStore {
     request.put("prefixProgramHash", GuidedContracts.hash(program(id)));
     request.set("coordinate", coordinate);
     request.set("evidenceHash", evidenceHash);
+    request.set("pressInheritance", pressInheritance);
+    if (assertSourceBinding != null && !assertSourceBinding.isNull()) {
+      request.set("assertSourceBinding", assertSourceBinding);
+    }
     contracts.validate("v3/bridge#/definitions/PrefixRequestIdentity", request);
     String digest = GuidedContracts.hash(request);
     var old =
@@ -387,7 +401,9 @@ public final class GuidedIncrementalStore {
             digest);
     if (old.isEmpty()) {
       jdbc.update(
-          "INSERT INTO studio_guided_prefix_requests(session_id,request_digest,step_id,ordinal,evidence_hash,document)"
+          "INSERT INTO"
+              + " studio_guided_prefix_requests(session_id,request_digest,ste"
+              + "p_id,ordinal,evidence_hash,document)"
               + " VALUES (?,?,?,?,?,?::jsonb)",
           id,
           digest,
@@ -406,7 +422,8 @@ public final class GuidedIncrementalStore {
   public void settle(String id, String digest, String status) {
     var rows =
         jdbc.queryForList(
-            "SELECT status FROM studio_guided_prefix_requests WHERE session_id=? AND request_digest=?",
+            "SELECT status FROM studio_guided_prefix_requests WHERE session_id=? AND"
+                + " request_digest=?",
             String.class,
             id,
             digest);
@@ -414,7 +431,8 @@ public final class GuidedIncrementalStore {
     if (!rows.getFirst().equals(status)) {
       require(rows.getFirst().equals("ISSUED"), "IDEMPOTENCY_CONFLICT", 409);
       jdbc.update(
-          "UPDATE studio_guided_prefix_requests SET status=? WHERE session_id=? AND request_digest=?",
+          "UPDATE studio_guided_prefix_requests SET status=? WHERE session_id=? AND"
+              + " request_digest=?",
           status,
           id,
           digest);
@@ -423,6 +441,16 @@ public final class GuidedIncrementalStore {
 
   public void verifyPrepared(String id, JsonNode request, JsonNode response) {
     contracts.validate("v3/bridge#/definitions/PrefixPrepareResult", response);
+    verifyPrepared(program(id), request, response);
+  }
+
+  /**
+   * The pure check of a prefix preparation against the verified learned program. The identity is
+   * the single operation identity: coordinate, origin, the target the runner reported for this
+   * preparation, and the operation. The proposal's ref, document and generation are not hashed, so
+   * a replay on a later generation resolves a fresh ref to the same learned operation.
+   */
+  public static void verifyPrepared(JsonNode program, JsonNode request, JsonNode response) {
     require(
         response.path("requestDigest").equals(request.path("requestDigest")),
         "EVIDENCE_MISMATCH",
@@ -430,9 +458,26 @@ public final class GuidedIncrementalStore {
     if (!response.path("kind").asText().equals("PREPARED")) {
       return;
     }
+    require(
+        GuidedContracts.same(
+            response.path("preparation").path("pressInheritance"),
+            request.path("request").path("pressInheritance")),
+        "EVIDENCE_MISMATCH",
+        409);
+    JsonNode issued = request.path("request"), prepared = response.path("preparation");
+    boolean sourceBinding = issued.has("assertSourceBinding");
+    require(
+        sourceBinding == prepared.has("assertSourceBinding")
+            && (!sourceBinding
+                || issued.path("assertSourceBinding").isObject()
+                    && prepared.path("assertSourceBinding").isObject()
+                    && GuidedContracts.same(
+                        prepared.path("assertSourceBinding"), issued.path("assertSourceBinding"))),
+        "EVIDENCE_MISMATCH",
+        409);
     JsonNode proposal = response.path("proposal");
     JsonNode expected = null;
-    for (JsonNode action : program(id).path("actions")) {
+    for (JsonNode action : program.path("actions")) {
       if (action.path("coordinate").equals(proposal.path("coordinate"))) {
         require(expected == null, "OPERATION_MISMATCH", 409);
         expected = action;
@@ -444,17 +489,9 @@ public final class GuidedIncrementalStore {
             && proposal.path("operation").equals(expected.path("operation")),
         "OPERATION_MISMATCH",
         409);
-    ObjectNode semantic = contracts.object();
-    semantic.set("coordinate", proposal.path("coordinate"));
-    semantic.set("origin", proposal.path("executionEvidence").path("origin"));
-    semantic.set(
-        "locator",
-        proposal.path("target").has("locator")
-            ? proposal.path("target").path("locator")
-            : contracts.object().nullNode());
-    semantic.set("operation", proposal.path("operation"));
     require(
-        GuidedContracts.hash(semantic).equals(expected.path("operationHash").asText()),
+        GuidedOperationIdentity.of(proposal, response.path("preparation").path("target"))
+            .equals(expected.path("operationHash").asText()),
         "OPERATION_MISMATCH",
         409);
     require(
@@ -469,7 +506,8 @@ public final class GuidedIncrementalStore {
   public boolean duplicateReceipt(String id, JsonNode receipt) {
     var old =
         jdbc.queryForList(
-            "SELECT document::text FROM studio_guided_no_invocation_receipts WHERE session_id=?",
+            "SELECT document::text FROM studio_guided_no_invocation_recei"
+                + "pts WHERE session_id=?",
             String.class,
             id);
     if (old.isEmpty()) {
@@ -489,8 +527,8 @@ public final class GuidedIncrementalStore {
         409);
     jdbc.update(
         "INSERT INTO"
-            + " studio_guided_no_invocation_receipts(session_id,request_digest,admission_id,preparation_id,"
-            + "receipt_hash,document)"
+            + " studio_guided_no_invocation_receipts(session_id,request_dig"
+            + "est,admission_id,preparation_id,receipt_hash,document)"
             + " VALUES (?,?,?,?,?,?::jsonb)",
         session.path("sessionId").asText(),
         receipt.path("requestDigest").asText(),
@@ -513,8 +551,8 @@ public final class GuidedIncrementalStore {
                 && action.path("coordinate").path("ordinal").asInt() < ordinal) {
           String admission =
               jdbc.queryForObject(
-                  "SELECT admission_id FROM studio_guided_actions WHERE session_id=?"
-                      + " AND step_id=? AND ordinal=? AND attempt_ordinal=0 AND document->>'state'='SUCCEEDED'",
+                  "SELECT admission_id FROM studio_guided_actions WHERE session_id=? AND step_id=?"
+                      + " AND ordinal=? AND attempt_ordinal=0 AND document->>'state'='SUCCEEDED'",
                   String.class,
                   id,
                   step,
@@ -524,9 +562,11 @@ public final class GuidedIncrementalStore {
       }
     }
     jdbc.update(
-        "INSERT INTO studio_guided_relearn_switches(session_id,reason,effective_step_id,effective_step_index,"
-            + "next_ordinal,completed_prefix_count,drift_receipt_hash,completed_admissions) VALUES"
-            + " (?,?,?,?,?,?,?,?::jsonb)",
+        "INSERT INTO"
+            + " studio_guided_relearn_switches(session_id,reason,effective_"
+            + "step_id,effective_step_index,next_ordinal,completed_prefix_c"
+            + "ount,drift_receipt_hash,completed_admissions)"
+            + " VALUES (?,?,?,?,?,?,?,?::jsonb)",
         id,
         reason,
         session.path("sourceSteps").get(index).path("stepId").asText(),
@@ -536,7 +576,8 @@ public final class GuidedIncrementalStore {
         receiptHash,
         admissions.toString());
     jdbc.update(
-        "UPDATE studio_guided_translation_state SET continuation='SOURCE_PLAN' WHERE session_id=?",
+        "UPDATE studio_guided_translation_state SET continuation='SOU"
+            + "RCE_PLAN' WHERE session_id=?",
         id);
   }
 
@@ -589,7 +630,8 @@ public final class GuidedIncrementalStore {
     ArrayNode requests = evidence.putArray("prefixRequests");
     var ordered = new java.util.ArrayList<JsonNode>();
     jdbc.queryForList(
-            "SELECT document::text FROM studio_guided_prefix_requests WHERE session_id=? ORDER BY"
+            "SELECT document::text FROM studio_guided_prefix_requests WHE"
+                + "RE session_id=? ORDER BY"
                 + " created_at,request_digest",
             String.class,
             id)
@@ -597,7 +639,9 @@ public final class GuidedIncrementalStore {
     var generations = new java.util.HashMap<String, Integer>();
     for (var observed :
         jdbc.queryForList(
-            "SELECT observation_hash,observation::text FROM studio_guided_publication_observations WHERE session_id=?",
+            "SELECT observation_hash,observation::text FROM studio_guided"
+                + "_publication_observations"
+                + " WHERE session_id=?",
             id)) {
       JsonNode snapshot = contracts.parse((String) observed.get("observation"));
       for (JsonNode request : ordered) {
@@ -622,8 +666,9 @@ public final class GuidedIncrementalStore {
         JsonNode initial =
             contracts.parse(
                 jdbc.queryForObject(
-                    "SELECT execution_evidence::text FROM studio_guided_publication_preparations WHERE session_id=?"
-                        + " AND execution_evidence->>'kind'='initialBlank' ORDER BY preparation_id LIMIT 1",
+                    "SELECT execution_evidence::text FROM studio_guided_publication_preparations"
+                        + " WHERE session_id=? AND execution_evidence->>'kind'='initialBlank' ORDER"
+                        + " BY preparation_id LIMIT 1",
                     String.class,
                     id));
         require(
@@ -644,7 +689,8 @@ public final class GuidedIncrementalStore {
     ordered.forEach(requests::add);
     var receipts =
         jdbc.queryForList(
-            "SELECT document::text FROM studio_guided_no_invocation_receipts WHERE session_id=?",
+            "SELECT document::text FROM studio_guided_no_invocation_recei"
+                + "pts WHERE session_id=?",
             String.class,
             id);
     if (receipts.isEmpty()) {
@@ -673,81 +719,6 @@ public final class GuidedIncrementalStore {
         "EVIDENCE_MISMATCH",
         422);
     return evidence;
-  }
-
-  /** Current-session proof link for the existing prefix-only private confirmation marker. */
-  public ObjectNode confirmationRequest(
-      JsonNode session, JsonNode progress, boolean currentEvidence) {
-    String id = session.path("sessionId").asText();
-    JsonNode marker = progress.path("sideEffectConfirmation");
-    require(
-        pending(id)
-            && marker.isObject()
-            && marker.size() == 3
-            && marker.path("clarificationId").isTextual()
-            && marker.path("prefixRequestDigest").asText().matches("[a-f0-9]{64}")
-            && java.util.Set.of("PENDING", "CONFIRMED").contains(marker.path("status").asText()),
-        "STALE_GENERATION",
-        409);
-    var rows =
-        jdbc.queryForList(
-            "SELECT document::text,status FROM studio_guided_prefix_requests"
-                + " WHERE session_id=? AND request_digest=?",
-            id,
-            marker.path("prefixRequestDigest").asText());
-    require(
-        rows.size() == 1 && rows.getFirst().get("status").equals("PREPARED"),
-        "STALE_GENERATION",
-        409);
-    ObjectNode request = (ObjectNode) contracts.parse((String) rows.getFirst().get("document"));
-    require(
-        GuidedContracts.hash(request).equals(marker.path("prefixRequestDigest").asText())
-            && request.path("sessionId").equals(session.path("sessionId"))
-            && request.path("scopeHash").equals(session.path("scopeHash"))
-            && request.path("workerId").equals(session.path("owner").path("workerId"))
-            && request.path("ownerFence").equals(session.path("owner").path("fence"))
-            && request.path("sourceRevision").equals(session.path("scope").path("sourceRevision"))
-            && request
-                .path("configurationRevision")
-                .equals(session.path("scope").path("configurationRevision"))
-            && request.path("prefixProgramHash").asText().equals(GuidedContracts.hash(program(id))),
-        "STALE_FENCE",
-        409);
-    JsonNode context =
-        new com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService(jdbc, contracts)
-            .context(session);
-    for (String field : List.of("contextId", "contextRevision", "authoredInputsHash")) {
-      require(request.path(field).equals(context.path(field)), "STALE_FENCE", 409);
-    }
-    require(
-        !Boolean.TRUE.equals(
-            jdbc.queryForObject("SELECT studio_015_delivery_pending(?)", Boolean.class, id)),
-        "STALE_GENERATION",
-        409);
-    if (currentEvidence) {
-      JsonNode question = progress.path("clarification"), next = nextAction(id);
-      require(
-          next != null
-              && request.path("coordinate").equals(next.path("coordinate"))
-              && request.path("evidenceHash").equals(progress.path("evidenceHash"))
-              && question.path("clarificationId").equals(marker.path("clarificationId"))
-              && question.path("coordinate").equals(request.path("coordinate"))
-              && question.path("documentId").equals(progress.path("documentId"))
-              && question.path("generation").equals(progress.path("generation"))
-              && question.path("expiresAt").equals(session.path("expiresAt"))
-              && question.path("sessionId").equals(session.path("sessionId"))
-              && question.path("scopeHash").equals(session.path("scopeHash"))
-              && !progress.has("observationRefresh")
-              && jdbc.queryForObject(
-                      "SELECT count(*) FROM studio_guided_actions WHERE session_id=?"
-                          + " AND document->>'state' IN ('ADMITTED','DISPATCHING')",
-                      Integer.class,
-                      id)
-                  == 0,
-          "STALE_GENERATION",
-          409);
-    }
-    return request;
   }
 
   public boolean firstSuffixPending(String id) {
@@ -793,7 +764,8 @@ public final class GuidedIncrementalStore {
     var available = window.putArray("availableBindingIds");
     for (JsonNode step : session.path("sourceSteps")) {
       jdbc.queryForList(
-              "SELECT document::text FROM studio_guided_actions WHERE session_id=? AND step_id=?"
+              "SELECT document::text FROM studio_guided_actions WHERE sessi"
+                  + "on_id=? AND step_id=?"
                   + " AND document->>'state'='SUCCEEDED' ORDER BY ordinal",
               String.class,
               id,
@@ -801,7 +773,8 @@ public final class GuidedIncrementalStore {
           .forEach(value -> completed.add(contracts.parse(value).path("coordinate")));
     }
     jdbc.queryForList(
-            "SELECT binding_id FROM studio_guided_producers WHERE session_id=? ORDER BY convert_to(binding_id,'UTF8')",
+            "SELECT binding_id FROM studio_guided_producers WHERE session_id=? ORDER BY"
+                + " convert_to(binding_id,'UTF8')",
             String.class,
             id)
         .forEach(available::add);
@@ -823,10 +796,10 @@ public final class GuidedIncrementalStore {
       return false;
     }
     return jdbc.queryForObject(
-            "SELECT count(*) FROM studio_guided_no_invocation_receipts r"
-                + " JOIN studio_guided_relearn_switches s ON s.session_id=r.session_id AND"
-                + " s.drift_receipt_hash=r.receipt_hash"
-                + " WHERE r.session_id=? AND r.admission_id=? AND r.document->>'phase'='ADMITTED_PRE_INVOCATION'",
+            "SELECT count(*) FROM studio_guided_no_invocation_receipts r JOIN"
+                + " studio_guided_relearn_switches s ON s.session_id=r.session_id AND"
+                + " s.drift_receipt_hash=r.receipt_hash WHERE r.session_id=? AND r.admission_id=?"
+                + " AND r.document->>'phase'='ADMITTED_PRE_INVOCATION'",
             Integer.class,
             id,
             action.path("admission").path("admissionId").asText())
@@ -853,14 +826,11 @@ public final class GuidedIncrementalStore {
     throw new GuidedSessionException("BINDING_ORDER", 422);
   }
 
-  private static void requireGovernedOrigin(String origin, JsonNode allowedOrigins) {
-    for (JsonNode allowed : allowedOrigins) {
-      if (origin.equals(allowed.asText())) {
-        return;
-      }
+  private static void requireAllowed(String url, AllowedDomains domains) {
+    if (!domains.allows(url)) {
+      throw new GuidedSessionException(
+          "ORIGIN_NOT_ALLOWED", 403, "PREFIX_ORIGIN_NOT_ALLOWED", false, null);
     }
-    throw new GuidedSessionException(
-        "ORIGIN_NOT_ALLOWED", 403, "PREFIX_ORIGIN_NOT_GOVERNED", false, null);
   }
 
   private static GuidedSessionException conflict(String reason) {

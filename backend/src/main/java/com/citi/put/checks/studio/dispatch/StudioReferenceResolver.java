@@ -26,14 +26,13 @@ import java.util.UUID;
  * </ul>
  *
  * <p><b>Typed, since story 10.17.</b> Both operations take the revision's {@link
- * ReferenceDeclarations} rather than a flat list, because a secret and a variable are different
- * decisions: a secret's use is authorized separately (§9.2, <em>"Secret reference names alone grant
- * no permission"</em>) and the two resolved maps the contract declares cannot be filled from one
- * undifferentiated set.
+ * ReferenceDeclarations} rather than a flat list, because the two resolved maps the contract
+ * declares cannot be filled from one undifferentiated set.
  *
- * <p>Real vault integration and real per-principal entitlement are {@code ED-02} and story 10.18.
- * What ships here is the seam and the real provider integration; test doubles and canaries prove
- * values do not leak.
+ * <p>A reference resolves only under the scope of the test that declared it, so a name saved for
+ * another test, CSI or environment is unknown. There is no per-principal secret entitlement; the
+ * {@code principal} argument is not consulted. What ships here is the seam and the real provider
+ * integration; test doubles and canaries prove values do not leak.
  */
 public interface StudioReferenceResolver {
 
@@ -44,7 +43,6 @@ public interface StudioReferenceResolver {
    * @param environment the test's environment, which the execution snapshots
    * @param testId the test the references were declared by; references are scoped to it
    * @throws UnknownReferenceException when a name is unknown to this CSI/environment/test
-   * @throws SecretUseNotAuthorizedException when the principal may not use a declared secret
    */
   void preflight(
       String csiId,
@@ -60,7 +58,6 @@ public interface StudioReferenceResolver {
    * @param environment the environment snapshotted at acceptance
    * @param testId the execution row's {@code test_id}
    * @throws ReferenceUnavailableException for a reference that has vanished since acceptance
-   * @throws SecretUseRevokedException when entitlement was withdrawn since acceptance
    */
   Resolved resolve(
       String csiId,
@@ -87,8 +84,6 @@ public interface StudioReferenceResolver {
 
   enum DecisionOutcome {
     RESOLVED,
-    NOT_AUTHORIZED,
-    REVOKED,
     UNAVAILABLE,
     VAULT_UNAVAILABLE
   }
@@ -170,54 +165,6 @@ public interface StudioReferenceResolver {
 
     public UnknownReferenceException(String referenceName) {
       super("Reference '" + referenceName + "' is not a reference this CSI may use");
-      this.referenceName = referenceName;
-    }
-
-    public String getReferenceName() {
-      return referenceName;
-    }
-  }
-
-  /**
-   * The principal is not entitled to use this secret, observed at <b>acceptance</b> (AC-4).
-   *
-   * <p>Separate from {@link UnknownReferenceException} because the two are different facts and a
-   * refusal that conflated them would tell an unentitled caller whether the secret exists.
-   * Deliberately carries the same wording for that reason; only the type differs, and the type is
-   * not on the wire.
-   */
-  class SecretUseNotAuthorizedException extends RuntimeException {
-
-    private static final long serialVersionUID = 1L;
-
-    private final String referenceName;
-
-    public SecretUseNotAuthorizedException(String referenceName) {
-      super("Reference '" + referenceName + "' is not a reference this CSI may use");
-      this.referenceName = referenceName;
-    }
-
-    public String getReferenceName() {
-      return referenceName;
-    }
-  }
-
-  /**
-   * Entitlement to a declared secret was withdrawn between acceptance and <b>dispatch</b> (AC-7a).
-   *
-   * <p>ADR-002 §15.2's axis: this is <em>a fact about the principal</em>, so the dispatcher closes
-   * it {@code AUTHORIZATION_REVOKED}. A vanished reference is a fact about the draft and its
-   * environment and is {@link ReferenceUnavailableException} instead. Both mean the send never
-   * happened.
-   */
-  class SecretUseRevokedException extends RuntimeException {
-
-    private static final long serialVersionUID = 1L;
-
-    private final String referenceName;
-
-    public SecretUseRevokedException(String referenceName) {
-      super("Use of reference '" + referenceName + "' is no longer authorized at dispatch");
       this.referenceName = referenceName;
     }
 

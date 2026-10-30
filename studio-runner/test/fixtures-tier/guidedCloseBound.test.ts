@@ -1,3 +1,4 @@
+import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 /**
  * STUDIO-OBS-009 AC-11 D5 d (KL-015-D5, lane R2): the close of a guided browser is bounded, on real Chromium. This file
  * REPLACES `guidedCloseProbe.test.ts` (the PR-RT probe, about four minutes a run). The probe found that a close of a
@@ -187,7 +188,7 @@ describe('KL-015-D5 H: a healthy recorded close finishes far inside the grace', 
     const orderly: boolean[] = [];
     for (let iteration = 0; iteration < 5; iteration++) {
       const dir = trackScratch(await mkdtemp(join(tmpdir(), 'guided-d5-healthy-')));
-      const guided = await launchGuidedBrowser({ sessionId: `healthy-${String(iteration)}`, scopeHash: 'a'.repeat(64), approvedOrigins: [fixture.origin], rules: [], knownSecrets: [] }, `healthy-context-${String(iteration)}`, () => undefined, { dir, size: { width: 640, height: 360 }, ready: () => undefined });
+      const guided = await launchGuidedBrowser({ sessionId: `healthy-${String(iteration)}`, scopeHash: 'a'.repeat(64), allowedDomains: TEST_DOMAINS, knownSecrets: [] }, `healthy-context-${String(iteration)}`, () => undefined, { dir, size: { width: 640, height: 360 }, ready: () => undefined });
       await guided.navigateBlank(`${fixture.origin}/login`);
       await sleep(500);
       const began = performance.now();

@@ -39,9 +39,9 @@ describe('quick start templates', () => {
     }
   });
 
-  it('offers three distinct templates', () => {
-    expect(QUICK_START_TEMPLATES).toHaveLength(3);
-    expect(new Set(QUICK_START_TEMPLATES.map((t) => t.id)).size).toBe(3);
+  it('offers six distinct templates', () => {
+    expect(QUICK_START_TEMPLATES).toHaveLength(6);
+    expect(new Set(QUICK_START_TEMPLATES.map((t) => t.id)).size).toBe(6);
   });
 
   it.each(QUICK_START_TEMPLATES.map((t) => [t.title, t] as const))(

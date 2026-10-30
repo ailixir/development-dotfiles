@@ -165,11 +165,4 @@ public class StudioVaultConfiguration {
       throw new IllegalStateException("studio.secrets.vault.hashicorp." + field + " is required");
     }
   }
-
-  @Bean
-  public StudioSecretUseAuthorization studioSecretUseAuthorization(
-      StudioSecretsProperties properties) {
-    return new ConfiguredSecretUseAuthorization(
-        ConfiguredSecretUseAuthorization.parse(properties.entitlementsOrEmpty()));
-  }
 }

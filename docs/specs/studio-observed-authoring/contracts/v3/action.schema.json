@@ -48,10 +48,12 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "nodeId": {
+            "kind": {
+              "const": "node"
+            },
+            "ref": {
               "type": "string",
-              "minLength": 1,
-              "maxLength": 256
+              "pattern": "^e[0-9]{1,6}$"
             },
             "documentId": {
               "type": "string",
@@ -62,72 +64,13 @@
               "type": "integer",
               "minimum": 0,
               "maximum": 2147483647
-            },
-            "locator": {
-              "oneOf": [
-                {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "kind": {
-                      "const": "role"
-                    },
-                    "role": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 256
-                    },
-                    "name": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 256
-                    },
-                    "exact": {
-                      "const": true
-                    }
-                  },
-                  "required": [
-                    "kind",
-                    "role",
-                    "name",
-                    "exact"
-                  ]
-                },
-                {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "kind": {
-                      "enum": [
-                        "label",
-                        "testId",
-                        "text",
-                        "placeholder"
-                      ]
-                    },
-                    "value": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 256
-                    },
-                    "exact": {
-                      "const": true
-                    }
-                  },
-                  "required": [
-                    "kind",
-                    "value",
-                    "exact"
-                  ]
-                }
-              ]
             }
           },
           "required": [
-            "nodeId",
+            "kind",
+            "ref",
             "documentId",
-            "generation",
-            "locator"
+            "generation"
           ]
         },
         {

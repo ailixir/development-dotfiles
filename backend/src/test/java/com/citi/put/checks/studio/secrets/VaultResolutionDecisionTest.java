@@ -74,8 +74,7 @@ class VaultResolutionDecisionTest {
   void partialOutageRetainsOnlyActualSafeDecisionsAndErasesPreviouslyReadArray() {
     var provider = new Provider();
     provider.outage = true;
-    var resolver =
-        new VaultStudioReferenceResolver(provider, (principal, csi, environment, id) -> true);
+    var resolver = new VaultStudioReferenceResolver(provider);
     Throwable failure =
         catchThrowable(() -> resolver.resolve("CSI", "Development", testId, "owner", names));
     assertThat(failure).isInstanceOf(VaultProviderUnavailableException.class);
@@ -94,29 +93,10 @@ class VaultResolutionDecisionTest {
   }
 
   @Test
-  void deniedSecondReferenceNeverReadsItOrTheRemainingReference() {
-    var provider = new Provider();
-    var resolver =
-        new VaultStudioReferenceResolver(
-            provider, (principal, csi, environment, id) -> !id.equals("SECOND"));
-    Throwable failure =
-        catchThrowable(() -> resolver.resolve("CSI", "Development", testId, "owner", names));
-    assertThat(failure).isInstanceOf(StudioReferenceResolver.SecretUseRevokedException.class);
-    var facts = facts(failure);
-    assertThat(facts.keySet()).containsExactlyInAnyOrder("FIRST", "SECOND");
-    assertThat(facts.get("SECOND").outcome())
-        .isEqualTo(StudioReferenceResolver.DecisionOutcome.REVOKED);
-    assertThat(StudioReferenceResolver.positivelyNotEntered(failure)).containsExactly("UNREACHED");
-    assertThat(provider.reads).containsExactly("FIRST");
-    assertThat(provider.delivered.getFirst()).containsOnly('\0');
-  }
-
-  @Test
   void oversizedSecondValueErasesBothArraysWithoutAReadForUnreachedReference() {
     var provider = new Provider();
     provider.longValue = true;
-    var resolver =
-        new VaultStudioReferenceResolver(provider, (principal, csi, environment, id) -> true);
+    var resolver = new VaultStudioReferenceResolver(provider);
     Throwable failure =
         catchThrowable(() -> resolver.resolve("CSI", "Development", testId, "owner", names));
     assertThat(failure).isInstanceOf(VaultStudioReferenceResolver.SecretTooLongException.class);
@@ -131,30 +111,9 @@ class VaultResolutionDecisionTest {
   }
 
   @Test
-  void revocationAfterActualReadKeepsSafeVersionAndErasesAllDeliveredArrays() {
-    var provider = new Provider();
-    var checks = new java.util.concurrent.atomic.AtomicInteger();
-    var resolver =
-        new VaultStudioReferenceResolver(
-            provider, (principal, csi, environment, id) -> checks.incrementAndGet() <= 3);
-    Throwable failure =
-        catchThrowable(() -> resolver.resolve("CSI", "Development", testId, "owner", names));
-    assertThat(failure).isInstanceOf(StudioReferenceResolver.SecretUseRevokedException.class);
-    var facts = facts(failure);
-    assertThat(facts.keySet()).containsExactlyInAnyOrder("FIRST", "SECOND", "UNREACHED");
-    assertThat(facts.get("FIRST").outcome())
-        .isEqualTo(StudioReferenceResolver.DecisionOutcome.REVOKED);
-    assertThat(StudioReferenceResolver.positivelyNotEntered(failure)).isEmpty();
-    assertThat(facts.get("FIRST").version()).isNotBlank();
-    assertThat(provider.reads).containsExactly("FIRST", "SECOND", "UNREACHED");
-    provider.delivered.forEach(chars -> assertThat(chars).containsOnly('\0'));
-  }
-
-  @Test
   void durableEntryCallbackRunsBeforeActualReadAndItsFailureDoesNotInventResolution() {
     var provider = new Provider();
-    var resolver =
-        new VaultStudioReferenceResolver(provider, (principal, csi, environment, id) -> true);
+    var resolver = new VaultStudioReferenceResolver(provider);
     var markers = new ArrayList<String>();
     Throwable failure =
         catchThrowable(

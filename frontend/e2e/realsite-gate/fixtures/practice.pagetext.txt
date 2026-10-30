@@ -1,0 +1,34 @@
+Press "Enter" to skip to content
+HOME PRACTICE COURSES AI WORKSHOP BLOG CONTACT
+Test login
+This is a simple Login page. Students can use this page to practice writing simple positive and negative LogIn tests. Login functionality is something that most of the test automation engineers need to automate.
+Use next credentials to execute Login:
+Username: student
+Password: Password123
+Username 
+Password 
+Submit
+Your username is invalid!
+Test case 1: Positive LogIn test
+Open page
+Type username student into Username field
+Type password Password123 into Password field
+Push Submit button
+Verify new page URL contains practicetestautomation.com/logged-in-successfully/
+Verify new page contains expected text ('Congratulations' or 'successfully logged in')
+Verify button Log out is displayed on the new page
+Test case 2: Negative username test
+Open page
+Type username incorrectUser into Username field
+Type password Password123 into Password field
+Push Submit button
+Verify error message is displayed
+Verify error message text is Your username is invalid!
+Test case 3: Negative password test
+Open page
+Type username student into Username field
+Type password incorrectPassword into Password field
+Push Submit button
+Verify error message is displayed
+Verify error message text is Your password is invalid!
+© Copyright 2020 Practice Test Automation. All rights reserved | Privacy Policy

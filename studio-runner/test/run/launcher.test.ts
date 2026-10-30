@@ -1,3 +1,4 @@
+import { FIXTURE_ORIGIN, TEST_DOMAINS } from '../helpers/allowedDomains.js';
 /**
  * AC-1, AC-5, AC-16, AC-21 — the parent half of the killable child.
  *
@@ -32,6 +33,7 @@ import {
   createChildBrowserLauncher,
   isCodeLoadingEnvKey,
 } from '../../src/run/launcher.js';
+import { ALL_DOMAINS, ALLOW_ALL_DOMAINS_ENV_KEY, ALLOWED_DOMAINS_ENV_KEY, resolveAllowedDomains } from '../../src/allowedDomains.js';
 import { SCRATCH_SUBDIRECTORIES } from '../../src/run/scratchLayout.js';
 import type { BrowserSession, LaunchOptions } from '../../src/server/adapters.js';
 import { hashObserved, OBSERVED_LIMITS, validateObserved } from '../../src/validator/observedReferencePolicy.js';
@@ -58,7 +60,7 @@ afterEach(() => {
 function launcherWith(spawner: FakeSpawner, overrides: Record<string, unknown> = {}) {
   return createChildBrowserLauncher({
     recording: { width: 1280, height: 720 },
-    seekOriginCalibrationMs: 0,
+    seekOriginCalibrationMs: 0, allowedDomains: TEST_DOMAINS,
     stepTimeoutMs: 30_000,
     launchTimeoutMs: 50,
     maxFailureMessageLength: 400,
@@ -92,7 +94,7 @@ function options(path: string, job: ObservedJob = wire.job): LaunchOptions {
     viewport: { width: 1280, height: 720 },
     totalRuntimeMs: 120_000,
     scratchPath: path,
-    observed: { job, admission: admission(), policy: wire.trustedPolicy },
+    observed: { job, admission: admission()},
   };
 }
 
@@ -169,16 +171,69 @@ describe('AC-21 — nothing job-shaped reaches the command line or the environme
     expect(env.PATH).toBe('/usr/bin');
     expect(env.PLAYWRIGHT_BROWSERS_PATH).toBe('/ms-playwright');
     // The browser process holds no runner configuration and no service identity, which is the
-    // same posture §9.2 takes toward credentials.
-    expect(Object.keys(env).some((key) => key.startsWith('STUDIO_RUNNER_'))).toBe(false);
+    // same posture §9.2 takes toward credentials. The exception is the navigation whitelist and its allow-all option.
+    expect(Object.keys(env).filter((key) => key.startsWith('STUDIO_RUNNER_')).sort()).toEqual([ALLOW_ALL_DOMAINS_ENV_KEY, ALLOWED_DOMAINS_ENV_KEY].sort());
     expect(JSON.stringify(env)).not.toContain(CANARY);
     expect(Object.keys(env).sort()).toEqual(
       [
         ...INHERITED_ENV_KEYS.filter((key) => key in (spawner.requests[0]?.env ?? {})),
+        ALLOWED_DOMAINS_ENV_KEY,
+        ALLOW_ALL_DOMAINS_ENV_KEY,
         'PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD',
         'TMPDIR',
       ].sort(),
     );
+  });
+
+  describe('the navigation whitelist handed to the child', () => {
+    const childValue = async (allowedDomains: readonly string[], parentEnv: Record<string, string> = {}): Promise<string | undefined> => {
+      const spawner = createFakeSpawner();
+      const launcher = launcherWith(spawner, { allowedDomains, parentEnv: { PATH: '/usr/bin', HOME: '/home/pwuser', PLAYWRIGHT_BROWSERS_PATH: '/ms-playwright', ...parentEnv } });
+      const pending = launcher.launch(options(scratchPath()));
+      const child = spawner.children[0];
+      if (child === undefined) throw new Error('the launcher spawned nothing');
+      answerReady(child);
+      await pending;
+      return spawner.requests[0]?.env[ALLOWED_DOMAINS_ENV_KEY];
+    };
+
+    it('is the runner list, comma-joined', async () => {
+      expect(await childValue(['localhost', 'example.test'])).toBe('localhost,example.test');
+    });
+
+    it('is never inherited: a value in the runner environment does not reach the child', async () => {
+      expect(await childValue(['example.test'], { [ALLOWED_DOMAINS_ENV_KEY]: 'evil.example' })).toBe('example.test');
+    });
+
+    it('hands allow-all to the child as its own key (the `*` list is no valid entry), written in both directions and never inherited', async () => {
+      const envOf = async (allowedDomains: readonly string[], parentEnv: Record<string, string> = {}): Promise<Record<string, string>> => {
+        const spawner = createFakeSpawner();
+        const launcher = launcherWith(spawner, { allowedDomains, parentEnv: { PATH: '/usr/bin', HOME: '/home/pwuser', PLAYWRIGHT_BROWSERS_PATH: '/ms-playwright', ...parentEnv } });
+        const pending = launcher.launch(options(scratchPath()));
+        const child = spawner.children[0];
+        if (child === undefined) throw new Error('the launcher spawned nothing');
+        answerReady(child);
+        await pending;
+        return spawner.requests[0]?.env ?? {};
+      };
+      const on = await envOf(ALL_DOMAINS);
+      expect(on[ALLOWED_DOMAINS_ENV_KEY]).toBe('');
+      expect(on[ALLOW_ALL_DOMAINS_ENV_KEY]).toBe('true');
+      // The child decodes it with the same function the runner's config uses: back to the allow-all list.
+      expect(resolveAllowedDomains(on[ALLOWED_DOMAINS_ENV_KEY], on[ALLOW_ALL_DOMAINS_ENV_KEY])).toEqual({ entries: ALL_DOMAINS });
+      // A list-mode runner tells its child `false` explicitly: an unset key would mean ON (the default for now).
+      const off = await envOf(['example.test'], { [ALLOW_ALL_DOMAINS_ENV_KEY]: 'true' });
+      expect(off[ALLOW_ALL_DOMAINS_ENV_KEY]).toBe('false');
+      expect(resolveAllowedDomains(off[ALLOWED_DOMAINS_ENV_KEY], off[ALLOW_ALL_DOMAINS_ENV_KEY])).toEqual({ entries: ['example.test'] });
+    });
+
+    it('refuses the job before any child exists when the list does not hold the job\'s origins (an empty list denies everything)', async () => {
+      for (const list of [[], ['other.example']] as const) {
+        const spawner = createFakeSpawner();
+        await expect(launcherWith(spawner, { allowedDomains: list }).launch(options(scratchPath()))).rejects.toThrow('POLICY_REFUSED');
+        expect(spawner.requests).toEqual([]);
+      }
+    });
   });
 
   /**
@@ -519,7 +574,7 @@ function secretBearingJob(value: string): ObservedJob {
   (job.artifact.replayPolicy as { transfers: unknown }).transfers = [];
   (job.artifact.inputRecipes as unknown[]).push({ inputId: 'pass', stepId: step.stepId, kind: 'secretRef', intendedSlot: 'fill.value', provenance: { kind: 'configuration', referenceId: 'pass-ref', referenceName: 'PASS' } });
   (job as { secrets: unknown }).secrets = { PASS: value };
-  (job as { secretOrigins: unknown }).secretOrigins = { PASS: [job.binding.scope.allowedOrigins[0]] };
+  (job as { secretOrigins: unknown }).secretOrigins = { PASS: [FIXTURE_ORIGIN] };
   return job;
 }
 
@@ -548,14 +603,14 @@ describe('AC-19 — this story left the production seams no wider than it found 
     expect(INHERITED_ENV_KEYS).toHaveLength(7);
   });
 
-  it('hands the operating system exactly the allowlist plus the two literals, and nothing else', async () => {
+  it('hands the operating system exactly the allowlist plus the two literals and the whitelist, and nothing else', async () => {
     const spawner = createFakeSpawner();
     await launched(spawner, scratchPath());
     // The whole constructed environment, key for key. **Nothing in this story required a new
     // environment variable**; if an implementation had found it needed one, AC-19's instruction
     // was to stop and say so rather than to append here.
     expect(Object.keys(spawner.requests[0]?.env ?? {}).sort()).toEqual(
-      ['HOME', 'PATH', 'PLAYWRIGHT_BROWSERS_PATH', 'PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD', 'TMPDIR'].sort(),
+      ['HOME', 'PATH', 'PLAYWRIGHT_BROWSERS_PATH', 'PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD', 'STUDIO_RUNNER_ALLOWED_DOMAINS', 'STUDIO_RUNNER_ALLOW_ALL_DOMAINS', 'TMPDIR'].sort(),
     );
   });
 

@@ -244,8 +244,10 @@ describe('item a: step IDs survive edit and reorder, and are minted on insert an
     const user = userEvent.setup({ delay: null });
 
     await user.type(screen.getByRole('textbox', { name: 'Step 2' }), ' edited');
-    await user.click(screen.getByRole('button', { name: 'Move step 1 down' }));
-    await user.click(screen.getByRole('button', { name: 'Remove step 4' }));
+    await user.click(screen.getByRole('button', { name: 'Actions for step 1' }));
+    await user.click(await screen.findByRole('menuitem', { name: 'Move down' }));
+    await user.click(screen.getByRole('button', { name: 'Actions for step 4' }));
+    await user.click(await screen.findByRole('menuitem', { name: 'Delete step' }));
     await user.type(screen.getByRole('textbox', { name: 'Add a test step' }), 'Click "Done"{Enter}');
     await user.click(screen.getByRole('button', { name: 'Save' }));
     await waitFor(() => expect(saved).toHaveLength(1), pageWait);

@@ -31,7 +31,7 @@ import { SecretUseEvidence } from './secretUse.js';
 
 import type { Launch3, Execute3, BuildIdentity } from '../executor/observedOperations.js';
 import type { ObservedChildMessage } from './protocol.js';
-import { assertBuild, assertProfile, demand, equalObserved, hashObserved, OBSERVED_LIMITS, validateObserved, validateTrustedPolicy } from '../validator/observedReferencePolicy.js';
+import { assertBuild, assertProfile, demand, equalObserved, hashObserved, OBSERVED_LIMITS, validateObserved } from '../validator/observedReferencePolicy.js';
 import { executeObservedReplay, replayError, validateObservedExecute } from '../executor/observedReplay.js';
 import type { ReplayError } from '../executor/observedReplay.js';
 import { createObservedReplayAdapter } from './observedReplayAdapter.js';
@@ -57,6 +57,8 @@ export interface ChildChannel {
 export interface ChildRuntimeDependencies {
   readonly channel: ChildChannel;
   readonly browsers: BrowserFactory;
+  /** The runner's navigation whitelist, handed to the child in its environment by the launcher. */
+  readonly allowedDomains: readonly string[];
   readonly observedBuild?: BuildIdentity;
   /** Unit lifecycle seam; the actual child always uses closed native ownership publication. */
   readonly publishAppVideoOwner?:typeof publishAppVideoOwner;
@@ -170,14 +172,13 @@ function attachObservedChildRuntime(dependencies: ChildRuntimeDependencies): voi
                 const r = m.admission.request;
                 demand(m.admission.admissionId === r.admissionId && m.runId === r.executionId && m.attemptId === r.attemptId && m.scopeHash === r.scopeHash && m.configurationHash === r.configurationHash && equalObserved(m.profile, r.profile) && equalObserved(m.build, r.build), 'INVALID_CONTRACT');
                 const scope = m.scope;
-                demand(equalObserved(validateTrustedPolicy(m.policy, scope), m.policy), 'POLICY_REFUSED');
-                demand(hashObserved(m.policy) === r.currentPolicyHash && hashObserved(scope) === m.scopeHash, 'POLICY_REFUSED');
+                demand(hashObserved(scope) === m.scopeHash, 'POLICY_REFUSED');
                 demand(Date.parse(m.admission.startDeadlineAt) > Date.now() && Date.parse(m.admission.runDeadlineAt) > Date.now(), 'AUTHORIZATION_EXPIRED');
                 admittedRuntimeDeadlineEpochMs=Math.min(Date.now()+m.totalRuntimeMs,Date.parse(m.admission.runDeadlineAt));
                 const startupDeadline=Math.min(Date.parse(m.admission.startDeadlineAt),admittedRuntimeDeadlineEpochMs);
                 deadline = setTimeout(() => { stop('TIMEOUT'); }, Math.max(1,startupDeadline-Date.now()));
                 live();
-                opening=launchRecordedBrowser(dependencies.browsers, { browser: m.browser, viewport: m.viewport, recording: m.recording, scratchPath: m.scratchPath, observedScope: scope,startup:{signal:abort.signal,deadlineEpochMs:startupDeadline} });
+                opening=launchRecordedBrowser(dependencies.browsers, { browser: m.browser, viewport: m.viewport, recording: m.recording, scratchPath: m.scratchPath, observedScope: scope,allowedDomains: dependencies.allowedDomains,startup:{signal:abort.signal,deadlineEpochMs:startupDeadline} });
                 const opened = await opening;
                 if (abort.signal.aborted) {
                     await opened.dispose();
@@ -205,7 +206,7 @@ function attachObservedChildRuntime(dependencies: ChildRuntimeDependencies): voi
                 return;
             }
             demand(phase === 'READY' && launch && handle && clock, 'INVALID_CONTRACT');
-            const m: Execute3 = validateObservedExecute(value, launch.scope, launch);
+            const m: Execute3 = validateObservedExecute(value, launch.scope, dependencies.allowedDomains, launch);
             demand(m.runId === launch.runId && m.attemptId === launch.attemptId && m.configurationHash === launch.configurationHash && m.profileHash === hashObserved(launch.profile), 'INVALID_CONTRACT');
             demand(hashObserved({ browser: launch.browser, viewport: launch.viewport, timeoutSeconds: m.stepTimeoutMs / 1000, waitStrategy: m.waitStrategy, environment: launch.scope.environment }) === launch.configurationHash, 'INVALID_CONTRACT');
             phase = 'EXECUTING';
@@ -217,8 +218,8 @@ function attachObservedChildRuntime(dependencies: ChildRuntimeDependencies): voi
             const reporter: StepReporter = { stepStarted(e) { if (finished)
                     return; startedSteps.set(e.stepIndex, e.startedAtMs); const step = steps[e.stepIndex]; demand(step); channel.send({ kind: 'step-started', protocolVersion: 3, mode: 'observed', runId: fixed.runId, attemptId: fixed.attemptId, stepIndex: e.stepIndex, stepId: step.stepId, startedAtMs: e.startedAtMs }); }, stepFinished(e) { if (finished)
                     return; completedSteps.add(e.stepIndex); const step = steps[e.stepIndex]; demand(step); channel.send({ kind: 'step-finished', protocolVersion: 3, mode: 'observed', runId: fixed.runId, attemptId: fixed.attemptId, stepIndex: e.stepIndex, stepId: step.stepId, status: e.status, startedAtMs: e.startedAtMs, finishedAtMs: e.finishedAtMs, durationMs: e.durationMs, errorCode: e.failure as ReplayError | null, ...(e.detail ? {detail: e.detail} : {}) }); } };
-            const adapter = createObservedReplayAdapter(handle, launch.scope, launch.policy, launch.runId, live, m.waitStrategy, m.stepTimeoutMs);
-            const result = await executeObservedReplay(m, adapter, launch.scope, clock, reporter, abort.signal,runDeadlineMs,usageEvidence,fixed);
+            const adapter = createObservedReplayAdapter(handle, launch.scope, dependencies.allowedDomains, launch.runId, live, m.waitStrategy, m.stepTimeoutMs);
+            const result = await executeObservedReplay(m, adapter, launch.scope, dependencies.allowedDomains, clock, reporter, abort.signal,runDeadlineMs,usageEvidence,fixed);
             detail = result.detail;
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Stop can finish the run while execution awaits native browser input.
             if (!finished) {

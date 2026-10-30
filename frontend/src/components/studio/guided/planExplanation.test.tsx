@@ -82,7 +82,10 @@ describe('AC-6: per step, what Studio did and where it came from', () => {
     render(<PlanExplanation result={result} />);
     const step4 = screen.getByTestId('plan-step-4');
     expect(within(step4).queryByTestId('plan-action')).toBeNull();
-    expect(step4).toHaveTextContent(/^Step 4$/u);
+    // The fixture is a FAILED run whose last step has no retained action, so it is the stopped step
+    // (STUDIO-UNIFY-001.6 AC-02). Nothing else is claimed for it: no provenance chip, no action.
+    expect(step4).toHaveTextContent(/^Step 4Stopped here$/u);
+    expect(step4).not.toHaveTextContent(/Learned in this run|Reused from|Re-learned/u);
   });
 });
 
@@ -249,5 +252,83 @@ describe('round 067 D3: the plan follows the server readiness after an edit', ()
       />,
     );
     expect(screen.queryByTestId('plan-step-changed')).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+// STUDIO-UNIFY-001.6 AC-02: the step a failed learn stopped at is marked
+// ---------------------------------------------------------------------------------------------
+
+describe('STUDIO-UNIFY-001.6 AC-02: "Stopped here" on the step a failed learn stopped at', () => {
+  /** A failed result over richExplanation(): steps 1-3 completed, step 4 has no actions and is not completed. */
+  function failedRich(): GuidedResult {
+    const result = recordingResult();
+    result.outcome = 'FAILED';
+    result.explanation = richExplanation();
+    return result;
+  }
+
+  it('marks step 4 with an error chip, and only step 4', () => {
+    render(<PlanExplanation result={failedRich()} />);
+    const chip = within(screen.getByTestId('plan-step-4')).getByTestId('plan-step-stopped');
+    expect(chip).toHaveTextContent('Stopped here');
+    expect(chip.className).toMatch(/colorError/u);
+    expect(screen.getAllByTestId('plan-step-stopped')).toHaveLength(1);
+  });
+
+  it('a stopped step does not also say "Learned in this run"; the steps before it still do', () => {
+    const result = failedRich();
+    // Step 3 stopped: not completed, one failed action, and flagged as learned by the projector.
+    result.explanation.steps[2].completed = false;
+    result.explanation.steps[2].actions[0].outcome = 'FAILED';
+    result.explanation.steps[3].actions = [];
+    render(<PlanExplanation result={result} />);
+    const step3 = screen.getByTestId('plan-step-3');
+    expect(result.explanation.steps[2].learnedFromThisRun).toBe(true);
+    expect(within(step3).getByTestId('plan-step-stopped')).toBeInTheDocument();
+    expect(step3).not.toHaveTextContent('Learned in this run');
+    expect(screen.getByTestId('plan-step-2')).toHaveTextContent('Learned in this run');
+    expect(within(screen.getByTestId('plan-step-2')).queryByTestId('plan-step-stopped')).toBeNull();
+  });
+
+  it('a completed step that holds an excluded FAILED attempt is not marked', () => {
+    const result = failedRich();
+    result.explanation.steps[1].actions.unshift({ ...result.explanation.steps[1].actions[0], attemptOrdinal: 0, outcome: 'FAILED' });
+    result.explanation.steps[1].actions[1].attemptOrdinal = 1;
+    render(<PlanExplanation result={result} />);
+    expect(within(screen.getByTestId('plan-step-2')).queryByTestId('plan-step-stopped')).toBeNull();
+    expect(within(screen.getByTestId('plan-step-4')).getByTestId('plan-step-stopped')).toBeInTheDocument();
+  });
+
+  it('marks no step when the explanation proves nothing (no step has actions)', () => {
+    const result = failedRich();
+    for (const step of result.explanation.steps) {
+      step.completed = false;
+      step.actions = [];
+    }
+    render(<PlanExplanation result={result} />);
+    expect(screen.queryByTestId('plan-step-stopped')).toBeNull();
+  });
+
+  it('marks no step when every step is completed', () => {
+    const result = failedRich();
+    result.explanation.steps[3].completed = true;
+    render(<PlanExplanation result={result} />);
+    expect(screen.queryByTestId('plan-step-stopped')).toBeNull();
+  });
+
+  it.each(['SUCCEEDED', 'CANCELLED', 'EXPIRED', 'UNKNOWN_OUTCOME', 'PUBLICATION_CONFLICT'] as const)(
+    'marks no step for a %s outcome',
+    (outcome) => {
+      const result = failedRich();
+      result.outcome = outcome;
+      render(<PlanExplanation result={result} />);
+      expect(screen.queryByTestId('plan-step-stopped')).toBeNull();
+    },
+  );
+
+  it('a published (SUCCEEDED) plan is unchanged: no stopped chip anywhere', () => {
+    render(<PlanExplanation result={publishedRich()} test={serverDraft()} />);
+    expect(screen.queryByTestId('plan-step-stopped')).toBeNull();
   });
 });

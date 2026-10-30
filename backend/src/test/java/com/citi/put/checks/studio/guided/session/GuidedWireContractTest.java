@@ -120,8 +120,9 @@ class GuidedWireContractTest {
     org.assertj.core.api.Assertions.assertThat(ADDED_SESSION_PROPERTIES.size()).isEqualTo(2);
     org.assertj.core.api.Assertions.assertThat(ADDED_LEDGER_PROPERTIES.size()).isEqualTo(1);
     org.assertj.core.api.Assertions.assertThat(ADDED_BASIS_PROPERTIES.size()).isEqualTo(3);
-    for (String name :
-        List.of("v3/session", "v3/ledger", "v3/replay-validation", "v3/observation")) {
+    // ADR-SC-007: an observation is validated natively (no expanded root oracle), so only these
+    // three roots keep a compiled plan.
+    for (String name : List.of("v3/session", "v3/ledger", "v3/replay-validation")) {
       JsonSchema original = originalSchema(name);
       Object plan = compiledSchema(name, original);
       assertFinitePlan(name, plan);
@@ -162,16 +163,12 @@ class GuidedWireContractTest {
         org.assertj.core.api.Assertions.assertThat(item.getSchemaNode().path("properties").size())
             .isEqualTo(7);
         org.assertj.core.api.Assertions.assertThat(compiledItemObject(preparations)).isNull();
-        Object nodes =
-            compiledNodes(
-                compiledObjects(compiledItemObject(compiledArrays(basis).get("observations")))
-                    .get("observation"));
-        org.assertj.core.api.Assertions.assertThat(
-                ((JsonSchema) currentRecordField(nodes, "item"))
-                    .getSchemaNode()
-                    .path("properties")
-                    .size())
-            .isEqualTo(17);
+        // The observation inside the basis is a finite plan of its 12 properties; its facts are
+        // one property, not a compiled array.
+        assertFinitePlan(
+            "v3/observation",
+            compiledObjects(compiledItemObject(compiledArrays(basis).get("observations")))
+                .get("observation"));
       }
       JsonSchema unavailable = org.mockito.Mockito.spy(original);
       org.mockito.Mockito.doReturn(List.of()).when(unavailable).getValidators();
@@ -666,8 +663,8 @@ class GuidedWireContractTest {
             config.addItemWalkListener(
                 org.mockito.Mockito.mock(com.networknt.schema.walk.JsonSchemaWalkListener.class)));
     settings.put("OpenAPIDiscriminator", config -> config.setOpenAPI3StyleDiscriminators(true));
-    for (String name :
-        List.of("v3/session", "v3/ledger", "v3/replay-validation", "v3/observation")) {
+    // ADR-SC-007: an observation has no root plan of its own (it is native), so three roots remain.
+    for (String name : List.of("v3/session", "v3/ledger", "v3/replay-validation")) {
       JsonNode root = originalSchema(name).getSchemaNode();
       for (var setting : settings.entrySet()) {
         var config = new com.networknt.schema.SchemaValidatorsConfig();
@@ -1784,7 +1781,8 @@ class GuidedWireContractTest {
     String inputBefore = GuidedContracts.canonical(fixture);
     String fixtureHash = GuidedContracts.hash(fixture);
     org.assertj.core.api.Assertions.assertThat(fixtureHash)
-        .isEqualTo("6dd0ed43b9b77aba88c075c8a5b84064510baa3d330601f62c03b537d0c71d5b");
+        // ADR-SC-007: the ledger operationHash of this fixture is over the reported target.
+        .isEqualTo("d255a81445bb0af6d93f64970227f34e2186d0abf27ae1438ff1f9538753ddbd");
     org.assertj.core.api.Assertions.assertThat(fixture.path("ledger").path("state").asText())
         .isEqualTo("SUCCEEDED");
     org.assertj.core.api.Assertions.assertThat(fixture.path("ledger").path("outcomeCode").asText())
@@ -1985,8 +1983,7 @@ class GuidedWireContractTest {
 
   @Test
   void rootValidationMatchesOriginalNativeSchemaWithoutApplyingDefaults() throws Exception {
-    for (String name :
-        List.of("v3/session", "v3/replay-validation", "v3/ledger", "v3/observation")) {
+    for (String name : List.of("v3/session", "v3/replay-validation", "v3/ledger")) {
       boolean replay = name.equals("v3/replay-validation");
       ObjectNode document = fixtureRoot(name);
       JsonSchema original = originalSchema(name);
@@ -2038,8 +2035,6 @@ class GuidedWireContractTest {
         ObjectNode malformedDate = document.deepCopy();
         malformedDate.withObject("/owner").put("leaseExpiresAt", "not-a-date");
         cases.add(malformedDate);
-      } else if (name.equals("v3/observation")) {
-        observationCases(document, original, cases);
       } else {
         ObjectNode malformedDate = document.deepCopy();
         malformedDate.withObject("/admission").put("admittedAt", "not-a-date");
@@ -2157,18 +2152,24 @@ class GuidedWireContractTest {
       }
     }
     assertNativePlan(compiledSchema("v3/publication", originalSchema("v3/publication")));
-    ObjectNode uniqueRoot = originalSchema("v3/observation").getSchemaNode().deepCopy();
-    uniqueRoot.withObject("/properties/nodes").put("uniqueItems", true);
-    JsonSchema unique =
-        JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7).getSchema(uniqueRoot);
-    assertNativePlan(compiledSchema("v3/observation", unique));
-    ObjectNode distinct = fixtureRoot("v3/observation");
-    org.assertj.core.api.Assertions.assertThat(originalAccepts(unique, distinct)).isTrue();
-    org.assertj.core.api.Assertions.assertThat(compiledAccepts("v3/observation", unique, distinct))
+    // An observation root with a changed outline bound is an unknown epoch: native validation.
+    ObjectNode narrowedRoot = originalSchema("v3/observation").getSchemaNode().deepCopy();
+    narrowedRoot.withObject("/properties/outline").put("maxLength", 40);
+    JsonSchema narrowed =
+        JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7).getSchema(narrowedRoot);
+    assertNativePlan(compiledSchema("v3/observation", narrowed));
+    ObjectNode shortOutline = fixtureRoot("v3/observation");
+    shortOutline.put("outline", "- document");
+    org.assertj.core.api.Assertions.assertThat(originalAccepts(narrowed, shortOutline)).isTrue();
+    org.assertj.core.api.Assertions.assertThat(
+            compiledAccepts("v3/observation", narrowed, shortOutline))
         .isTrue();
-    distinct.withArray("/nodes").add(distinct.at("/nodes/0").deepCopy());
-    org.assertj.core.api.Assertions.assertThat(originalAccepts(unique, distinct)).isFalse();
-    org.assertj.core.api.Assertions.assertThat(compiledAccepts("v3/observation", unique, distinct))
+    ObjectNode longOutline = fixtureRoot("v3/observation");
+    org.assertj.core.api.Assertions.assertThat(longOutline.path("outline").asText().length())
+        .isGreaterThan(40);
+    org.assertj.core.api.Assertions.assertThat(originalAccepts(narrowed, longOutline)).isFalse();
+    org.assertj.core.api.Assertions.assertThat(
+            compiledAccepts("v3/observation", narrowed, longOutline))
         .isFalse();
     String fragment = "v3/replay-validation#/definitions/ValidationBasis";
     JsonSchema original = originalSchema(fragment);
@@ -2191,7 +2192,11 @@ class GuidedWireContractTest {
 
   private void assertFinitePlan(String name, Object plan) throws Exception {
     org.assertj.core.api.Assertions.assertThat(compiledAlternatives(plan)).isEmpty();
-    int expected = name.equals("v3/session") ? 16 : name.equals("v3/ledger") ? 21 : 9;
+    // ADR-SC-007: an observation has 12 properties (the node array became outline + facts).
+    int expected =
+        name.equals("v3/session")
+            ? 16
+            : name.equals("v3/ledger") ? 21 : name.equals("v3/observation") ? 12 : 9;
     org.assertj.core.api.Assertions.assertThat(compiledPropertyCount(plan)).isEqualTo(expected);
     var objects = compiledObjects(plan);
     if (name.equals("v3/replay-validation")) {
@@ -2230,16 +2235,8 @@ class GuidedWireContractTest {
     } else {
       org.assertj.core.api.Assertions.assertThat(objects).isEmpty();
     }
-    if (name.equals("v3/observation")) {
-      org.assertj.core.api.Assertions.assertThat(
-              compiledArrays(plan).keySet().equals(java.util.Set.of("nodes")))
-          .isTrue();
-      org.assertj.core.api.Assertions.assertThat(compiledNodes(plan)).isNotNull();
-      org.assertj.core.api.Assertions.assertThat(compiledItemObject(compiledNodes(plan))).isNull();
-    } else {
-      org.assertj.core.api.Assertions.assertThat(compiledArrays(plan)).isEmpty();
-      org.assertj.core.api.Assertions.assertThat(compiledNodes(plan)).isNull();
-    }
+    org.assertj.core.api.Assertions.assertThat(compiledArrays(plan)).isEmpty();
+    org.assertj.core.api.Assertions.assertThat(compiledNodes(plan)).isNull();
   }
 
   private java.util.Map<?, ?> compiledObjects(Object compiled) throws Exception {
@@ -2326,9 +2323,6 @@ class GuidedWireContractTest {
         .withObject("/validationBasis/observations/0/observation")
         .put("observedAt", "not-a-date");
     addNativeCase(original, cases, badObservation, false);
-    ObjectNode badNode = document.deepCopy();
-    badNode.withObject("/validationBasis/observations/0/observation/nodes/0").remove("nodeId");
-    addNativeCase(original, cases, badNode, false);
     ObjectNode badLedger = document.deepCopy();
     badLedger.withObject("/validationBasis/actions/0/ledger").put("dispatchCount", -1);
     addNativeCase(original, cases, badLedger, false);
@@ -2340,55 +2334,6 @@ class GuidedWireContractTest {
         .withObject("/validationBasis/preparations/0/proposal/operation")
         .put("kind", "unsupported-operation");
     addNativeCase(original, cases, badProposal, false);
-  }
-
-  private void observationCases(ObjectNode document, JsonSchema original, List<JsonNode> cases) {
-    for (int size : new int[] {0, 500, 501}) {
-      ObjectNode changed = document.deepCopy();
-      var nodes = changed.putArray("nodes");
-      for (int i = 0; i < size; i++) {
-        nodes.add(document.at("/nodes/0").deepCopy());
-      }
-      addNativeCase(original, cases, changed, size <= 500);
-    }
-    ObjectNode nullNodes = document.deepCopy().putNull("nodes");
-    addNativeCase(original, cases, nullNodes, false);
-    ObjectNode scalarNodes = document.deepCopy().put("nodes", "invalid-array");
-    addNativeCase(original, cases, scalarNodes, false);
-    ObjectNode nullItem = document.deepCopy();
-    nullItem.withArray("/nodes").set(0, com.fasterxml.jackson.databind.node.NullNode.instance);
-    addNativeCase(original, cases, nullItem, false);
-    ObjectNode scalarItem = document.deepCopy();
-    scalarItem.withArray("/nodes").set(0, contracts.parse("1"));
-    addNativeCase(original, cases, scalarItem, false);
-    ObjectNode missingItemField = document.deepCopy();
-    missingItemField.withObject("/nodes/0").remove("nodeId");
-    addNativeCase(original, cases, missingItemField, false);
-    ObjectNode role = document.deepCopy();
-    role.withArray("/nodes/0/locatorHints")
-        .removeAll()
-        .add(
-            contracts
-                .object()
-                .put("kind", "role")
-                .put("role", "button")
-                .put("name", "control")
-                .put("exact", true));
-    addNativeCase(original, cases, role, true);
-    ObjectNode label = document.deepCopy();
-    label
-        .withArray("/nodes/0/locatorHints")
-        .removeAll()
-        .add(contracts.object().put("kind", "label").put("value", "control").put("exact", true));
-    addNativeCase(original, cases, label, true);
-    ObjectNode invalidLocator = label.deepCopy();
-    invalidLocator.withObject("/nodes/0/locatorHints/0").put("exact", false);
-    addNativeCase(original, cases, invalidLocator, false);
-    ObjectNode invalidDate = document.deepCopy().put("observedAt", "not-a-date");
-    addNativeCase(original, cases, invalidDate, false);
-    ObjectNode invalidCoverage = document.deepCopy();
-    invalidCoverage.withObject("/coverage").put("passwordControls", 501);
-    addNativeCase(original, cases, invalidCoverage, false);
   }
 
   private ObjectNode fixtureValidationRequest() throws Exception {

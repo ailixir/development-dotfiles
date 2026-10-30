@@ -132,6 +132,32 @@ class GuidedRunnerContextRefusalTest {
   }
 
   @Test
+  void anObservePolicyDeniedIsTheOffDomainRefusalAndNothingElseIsWidened() {
+    // STUDIO-FLEX-001: the runner answers an observe of a page that stayed off the allowed domains
+    // with a closed POLICY_DENIED; the backend turns exactly that into ORIGIN_NOT_ALLOWED.
+    var offDomain = refused("observe", "{\"code\":\"POLICY_DENIED\"}");
+    assertThat(offDomain.getMessage()).isEqualTo("ORIGIN_NOT_ALLOWED");
+    assertThat(offDomain.status()).isEqualTo(403);
+    assertThat(offDomain.retryable()).isFalse();
+    for (String body :
+        new String[] {
+          "{\"code\":\"BUSY\"}",
+          "{\"code\":\"POLICY_DENIED\",\"extra\":\"" + CANARY + "\"}",
+          "not json " + CANARY,
+          ""
+        }) {
+      assertThat(refused("observe", body).getMessage()).as(body).isEqualTo("UNKNOWN_OUTCOME");
+    }
+    status.set(503);
+    assertThat(refused("observe", "{\"code\":\"POLICY_DENIED\"}").getMessage())
+        .as("only a 409 can be the refusal")
+        .isEqualTo("UNKNOWN_OUTCOME");
+    assertThat(refused("prepare", "{\"code\":\"POLICY_DENIED\"}").getMessage())
+        .isEqualTo("UNKNOWN_OUTCOME");
+    assertThat(rendered()).doesNotContain(CANARY);
+  }
+
+  @Test
   void aPrepareRefusalIsNeverWidenedIntoADefiniteOne() {
     var refusal = refused("prepare", "{\"code\":\"IDENTITY_MISMATCH\"}");
     assertThat(refusal.getMessage()).isEqualTo("UNKNOWN_OUTCOME");

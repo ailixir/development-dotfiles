@@ -20,7 +20,6 @@ import {
 } from '@/services/mocks/studio/executionFixtures';
 import { EXECUTION_ERROR_CODES } from '@/types/studio/studioTypes';
 import studioApi from '@/services/api/studioApi';
-import { studioSchedulesApi } from '@/services/api/studioSchedulesApi';
 import {
   MOCK_EXECUTE_DENIED_CSIS,
   MOCK_READABLE_CSIS,
@@ -198,16 +197,14 @@ describe('Story 10.48 AC-10a: a 403 on execute is worded, never the generic fail
   });
 });
 
-describe('Story 10.48: the mock server refuses execute and reports canManage false on a read-only CSI', () => {
+describe('Story 10.48: the mock server refuses execute on a read-only CSI', () => {
   const runnable = mockTests.find(
     (test) => test.readiness === 'READY' && test.csiId !== null && MOCK_READABLE_CSIS.includes(test.csiId),
   );
 
-  it('answers the backend 403 body before readiness, and capabilities canManage false', async () => {
+  it('answers the backend 403 body before readiness', async () => {
     expect(runnable, 'fixture: a READY test in a readable CSI').toBeDefined();
     const id = runnable!.id;
-    expect((await studioSchedulesApi.capabilities(id)).canManage).toBe(true);
-
     MOCK_EXECUTE_DENIED_CSIS.add(runnable!.csiId!);
 
     const failure = await studioApi.executeTest(id).then(
@@ -216,7 +213,6 @@ describe('Story 10.48: the mock server refuses execute and reports canManage fal
     );
     expect(failure?.status).toBe(403);
     expect(failure?.data).toEqual(STUDIO_FORBIDDEN_BODY);
-    expect((await studioSchedulesApi.capabilities(id)).canManage).toBe(false);
   });
 
   it('is cleared by resetStudioMocks', async () => {

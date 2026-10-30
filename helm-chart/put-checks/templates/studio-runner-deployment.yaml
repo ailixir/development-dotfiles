@@ -7,6 +7,7 @@
 {{- /* The four observed-replay guards (G-O1..G-O4). Also run from the API Deployment, which renders
        when the runner does not, so `studioObserved` on with the runner off still fails. */ -}}
 {{- $_ := include "put-checks.studioObserved.guard" . }}
+{{- $_ := include "put-checks.studioNavigation.guard" . }}
 {{- $name := include "put-checks.studioRunner.fullname" . }}
 {{- $scratch := include "put-checks.studioRunner.scratchDir" . }}
 {{- $guided := include "put-checks.studioRunner.guidedEnabled" . }}
@@ -53,9 +54,9 @@ spec:
       annotations:
         checksum/runner-env: {{ .Values.studioRunner.runnerEnv | toYaml | sha256sum }}
         {{- if $observed }}
-        # The catalog and policy files are read once at start-up, so a policy or catalog change must
-        # roll the pod. (A catalog change also changes the image reference; a policy change does not.)
-        checksum/studio-observed-trust: {{ list $o.catalog $o.policies | toJson | sha256sum }}
+        # The catalog file is read once at start-up, so a catalog change must roll the pod. (A catalog
+        # change also changes the image reference.)
+        checksum/studio-observed-trust: {{ $o.catalog | toJson | sha256sum }}
         {{- end }}
         {{- if $guided }}
         # The controller public key is rendered by this chart (configmap.yaml) and mounted as a
@@ -208,10 +209,21 @@ spec:
               value: {{ printf "%s/%s" $tlsDir $tls.caFile | quote }}
             - name: STUDIO_RUNNER_CONTROLLER_CERTIFICATE_FINGERPRINT256
               value: {{ $tls.controllerCertificateFingerprint256 | quote }}
+            # ── The domain whitelist (STUDIO-FLEX-001 item 1) ─────────────────────────────────────
+            #
+            # The only navigation control, rendered in every deployment from the one list the backend
+            # reads as `studio.navigation.allowed-domains`. Empty (the shipped placeholder) means the
+            # runner denies every navigation. Chart-managed: not settable through `runnerEnv`.
+            - name: STUDIO_RUNNER_ALLOWED_DOMAINS
+              value: {{ include "put-checks.studioNavigation.allowedDomains" . | quote }}
+            # The allow-all switch (default "false"): the same single value the backend reads as
+            # `studio.navigation.allow-all-domains`. When "true" the list above is ignored.
+            - name: STUDIO_RUNNER_ALLOW_ALL_DOMAINS
+              value: {{ include "put-checks.studioNavigation.allowAllDomains" . | quote }}
             # ── Guided mode: a mode of this process, not another process (ruling A2) ──────────────
             #
             # The switch is rendered in both directions so the manifest says what it means. The
-            # other seven are rendered ONLY while it is on: with the switch off the runner refuses
+            # other eight are rendered ONLY while it is on: with the switch off the runner refuses
             # any non-empty `STUDIO_RUNNER_GUIDED_*` key ("no half configuration"). Not one of them
             # may be set through `runnerEnv` (chart-managed), and no `TMPDIR` or `NODE_OPTIONS` is
             # rendered anywhere: `/tmp` is mounted instead (ruling Q4), and the runner refuses
@@ -221,6 +233,9 @@ spec:
             {{- if $guided }}
             - name: STUDIO_RUNNER_GUIDED_WORKER_ID
               value: {{ $g.workerId | quote }}
+            # One key, two consumers: also the backend's `studio.guided-authoring.max-concurrent-sessions`.
+            - name: STUDIO_RUNNER_GUIDED_CAPACITY
+              value: {{ $g.capacity | int | quote }}
             - name: STUDIO_RUNNER_GUIDED_JOURNAL_DIR
               value: {{ printf "%s/%s" $journalMount $g.journal.directory | quote }}
             - name: STUDIO_RUNNER_GUIDED_CONTROLLER_ISSUER
@@ -237,7 +252,7 @@ spec:
             # ── Observed replay: chart-managed, single-sourced from `studioObserved` ─────────────────
             #
             # Both flags are rendered in both directions (the runner accepts only "true", "false" or
-            # unset). The three file/digest keys render ONLY while either flag is on, like the guided
+            # unset). The two file/digest keys render ONLY while either flag is on, like the guided
             # keys: no half configuration. The digest is DERIVED from the catalog, never a second value.
             - name: STUDIO_RUNNER_OBSERVED_VALIDATION_ENABLED
               value: {{ $o.validationEnabled | toString | quote }}
@@ -246,8 +261,6 @@ spec:
             {{- if $observed }}
             - name: STUDIO_RUNNER_OBSERVED_CATALOG_FILE
               value: {{ printf "%s/catalog.json" $trustDir | quote }}
-            - name: STUDIO_RUNNER_OBSERVED_POLICY_FILE
-              value: {{ printf "%s/policies.json" $trustDir | quote }}
             - name: STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST
               value: {{ $o.catalog.build.executableImageDigest | quote }}
             {{- end }}
@@ -302,8 +315,8 @@ spec:
               mountPath: {{ $tls.mountPath }}
               readOnly: true
             {{- if $observed }}
-            # The catalog entry and the trusted policies: read-only, a DIRECTORY mount (no `subPath`).
-            # Public hashes and trust policy, not secrets, so a ConfigMap and not a Secret; this adds
+            # The catalog entry: read-only, a DIRECTORY mount (no `subPath`).
+            # Public hashes, not secrets, so a ConfigMap and not a Secret; this adds
             # no Secret volume, so the `shareProcessNamespace` one-container bound is untouched.
             - name: studio-observed-trust
               mountPath: {{ $o.mountPath }}
@@ -382,8 +395,6 @@ spec:
             items:
               - key: catalog.json
                 path: catalog.json
-              - key: policies.json
-                path: policies.json
         {{- end }}
         {{- if $guided }}
         - name: guided-tmp

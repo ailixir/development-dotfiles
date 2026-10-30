@@ -11,7 +11,7 @@
     "configurationHash": "dc52a6ec856c6e30b512d428302844a530a3dc1b3dcf83ffa27e2e42401e23ee",
     "authoringHash": "e5e180ed2cfadcd2beaf593b3fe050e22349ae16658b24b7dd00596dee1ca4fe",
     "sourceManifestHash": "8661b14c8b13e2386fc38df86f161f1eeb2d570cd0befc6d619f99d32724c650",
-    "authoredInputsHash": "cd11c7f1dcf2cf554909fe805ca7ce8687fe2486cd2295a18881d5df34f7e3a0",
+    "authoredInputsHash": "a47c8a1814196ef024c46a123c8adb98a93afd53790b2f7210b1b15d5263710a",
     "configuration": {
       "browser": "chromium",
       "viewport": {
@@ -52,10 +52,6 @@
       "principalId": "user-1",
       "csiId": "CSI-123",
       "environmentId": "fixture",
-      "applicationId": "orders",
-      "approvedOrigins": [
-        "https://orders.example.test"
-      ],
       "sourceRevision": "1",
       "configurationRevision": "1",
       "modelDataPolicyId": "labels-only-1",
@@ -74,15 +70,11 @@
       "kind": "scopedRun",
       "authorizedAt": "2026-10-08T03:00:00Z",
       "principalId": "user-1",
-      "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715"
+      "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82"
     },
     "replayRequirements": {
       "csiId": "CSI-123",
       "environment": "fixture",
-      "applicationId": "orders",
-      "allowedOrigins": [
-        "https://orders.example.test"
-      ],
       "capabilities": [
         "navigate",
         "read",
@@ -90,9 +82,6 @@
         "click",
         "assert"
       ],
-      "policyId": "policy-orders",
-      "policyVersion": "1",
-      "entryPolicyId": "entry-orders",
       "initialContext": {
         "kind": "initialBlank"
       }
@@ -102,7 +91,7 @@
       "contextRevision": 1,
       "ownerFence": 1,
       "materializationRevision": 1,
-      "inputsHash": "cd11c7f1dcf2cf554909fe805ca7ce8687fe2486cd2295a18881d5df34f7e3a0",
+      "inputsHash": "a47c8a1814196ef024c46a123c8adb98a93afd53790b2f7210b1b15d5263710a",
       "allocationHash": "9bc8519d38d9add555800b067717ce29db6aee096650f2e227e862f73a6a49ac",
       "metadataAcknowledged": true,
       "initialEvidence": {
@@ -118,7 +107,7 @@
       }
     },
     "translationRevision": "1",
-    "translationHash": "eda5230618201a5f826de21922413191e6715bbcc01d1e528905481e8e5a0726",
+    "translationHash": "3a400795d92b9175fe2631a4236bbcee09194a8c6adb7732dfb74d757716926b",
     "translationPlan": {
       "sourceReferences": [
         {
@@ -187,7 +176,7 @@
           "stepId": "00000000-0000-4000-8000-000000000003",
           "occurrence": 1,
           "operationKind": "fill",
-          "targetIntent": "label-input",
+          "targetIntent": "label",
           "scopeIntent": null,
           "referenceIndex": 1,
           "needId": null,
@@ -232,7 +221,7 @@
           "ordinal": 0
         },
         "admissionId": "qa-choice-current-01-admission-0",
-        "proposalHash": "57ed4aad0922d365a324695ec2be0857a9b8cdca0e2980dff540986ad432eb50"
+        "proposalHash": "1fd82a0c8b1e94be6c7d41499d5482724e52ca5d6d1bbd647cacf85e94fb67a6"
       },
       {
         "obligationId": "00000000-0000-4000-8000-000000000101",
@@ -241,7 +230,7 @@
           "ordinal": 0
         },
         "admissionId": "qa-choice-current-01-admission-1",
-        "proposalHash": "2f3d2f67535af76c88cd3453304062bcf851702e54b28735cae688055953c6a8"
+        "proposalHash": "84e00273deec0335b52644438b71d4c2e7496b62a7b56015a9fb5225d49e3279"
       },
       {
         "obligationId": "00000000-0000-4000-8000-000000000102",
@@ -250,7 +239,7 @@
           "ordinal": 0
         },
         "admissionId": "qa-choice-current-01-admission-2",
-        "proposalHash": "dd9039c37503ce0452b7572039bdafd75b14ba017494f74673c9c81922bf44b2"
+        "proposalHash": "5746d6f7da81a699b0dededd27a3bcbc82d7a13c74a355399f79af05ac0d6e3f"
       },
       {
         "obligationId": "00000000-0000-4000-8000-000000000103",
@@ -259,7 +248,7 @@
           "ordinal": 1
         },
         "admissionId": "qa-choice-current-01-admission-3",
-        "proposalHash": "efc1d163a99105d29b5c61a6b457a6e96dab84fb9ba0f348164caa88de1cdb6b"
+        "proposalHash": "4df53cd6475f199d1baec2562588cc24d89b8a6d9d192067ec501d9220846b4e"
       },
       {
         "obligationId": "00000000-0000-4000-8000-000000000104",
@@ -268,7 +257,7 @@
           "ordinal": 2
         },
         "admissionId": "qa-choice-current-01-admission-4",
-        "proposalHash": "c7f1aecd47d2f3191c47c49ac628c66ed4c868f6394913bc0157a1b03e4fead5"
+        "proposalHash": "2f5648e7f8484a9183b078f98299220a05d75a856d50212f1c1d8e4e3cc2d987"
       }
     ],
     "inputs": [
@@ -306,341 +295,273 @@
     "configurationReferences": [],
     "observations": [
       {
-        "observationHash": "8bc918b697bd0399149f316f322c77d61b9ee7e211fd533f3870214393d39bf2",
+        "observationHash": "93731e4c2eb2e44258a7b6502f7cd65a0f12b80e6a48f511cb95bae76023c886",
         "observation": {
           "schemaVersion": 3,
           "sessionId": "qa-choice-current-01",
-          "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+          "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
           "documentId": "document-1",
           "generation": 1,
           "origin": "https://orders.example.test",
           "observedAt": "2026-10-08T03:00:05Z",
           "coverage": {
-            "mode": "semantic",
-            "complete": true,
-            "truncated": false,
             "withheldRegions": 0,
-            "reason": "complete",
+            "unsupportedRegions": 0,
             "passwordControls": 0
           },
-          "nodes": [
-            {
-              "nodeId": "reference",
-              "documentId": "document-1",
-              "generation": 1,
+          "projection": {
+            "projected": false,
+            "tier": null,
+            "totalNodes": 2,
+            "shownNodes": 2,
+            "notShown": 0,
+            "outlineBytes": 67
+          },
+          "readRuleId": "business-reference",
+          "outline": "- document\n  - text \"Reference\" [e1]\n  - textbox \"Destination\" [e2]",
+          "facts": {
+            "e1": {
               "role": "text",
               "name": "Reference",
-              "elementType": "text",
-              "controlType": "none",
-              "classification": "permittedBusinessData",
-              "policyRuleId": "business-reference",
-              "visible": true,
-              "actionable": true,
-              "depth": 0,
-              "parentNodeId": null,
-              "regionId": null,
-              "formId": null,
-              "labelNodeIds": [],
-              "locatorHints": [
+              "editable": false,
+              "evidence": "Reference",
+              "evidenceSegments": [
                 {
-                  "kind": "testId",
-                  "value": "reference",
-                  "exact": true
+                  "field": "name",
+                  "start": 0,
+                  "end": 9
                 }
-              ]
+              ],
+              "text": "Reference",
+              "nameComplete": true,
+              "ownTextComplete": true
             },
-            {
-              "nodeId": "destination",
-              "documentId": "document-1",
-              "generation": 1,
+            "e2": {
               "role": "textbox",
               "name": "Destination",
-              "elementType": "input",
-              "controlType": "text",
-              "classification": "nonsecretApproved",
-              "policyRuleId": "nonsecret-form",
-              "visible": true,
-              "actionable": true,
-              "depth": 0,
-              "parentNodeId": null,
-              "regionId": null,
-              "formId": null,
-              "labelNodeIds": [],
-              "locatorHints": [
+              "editable": true,
+              "evidence": "Destination",
+              "evidenceSegments": [
                 {
-                  "kind": "testId",
-                  "value": "destination",
-                  "exact": true
+                  "field": "name",
+                  "start": 0,
+                  "end": 11
                 }
-              ]
+              ],
+              "nameComplete": true,
+              "ownTextComplete": true
             }
-          ]
+          }
         }
       },
       {
-        "observationHash": "3619eaf7d840feb5087d6e1d8615840cd0f218f03e48d2e5d43fe22b99f79414",
+        "observationHash": "0795b4314a012049cfbb4047459460307803d94353adf5abb92449829fbe7fd5",
         "observation": {
           "schemaVersion": 3,
           "sessionId": "qa-choice-current-01",
-          "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+          "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
           "documentId": "document-1",
           "generation": 3,
           "origin": "https://orders.example.test",
           "observedAt": "2026-10-08T03:00:05Z",
           "coverage": {
-            "mode": "semantic",
-            "complete": true,
-            "truncated": false,
             "withheldRegions": 0,
-            "reason": "complete",
+            "unsupportedRegions": 0,
             "passwordControls": 0
           },
-          "nodes": [
-            {
-              "nodeId": "reference",
-              "documentId": "document-1",
-              "generation": 3,
+          "projection": {
+            "projected": false,
+            "tier": null,
+            "totalNodes": 3,
+            "shownNodes": 3,
+            "notShown": 0,
+            "outlineBytes": 100
+          },
+          "readRuleId": "business-reference",
+          "outline": "- document\n  - text \"Reference\" [e1]\n  - textbox \"Label\" [e2]\n  - textbox \"Backup label é🧪\" [e3]",
+          "facts": {
+            "e1": {
               "role": "text",
               "name": "Reference",
-              "elementType": "text",
-              "controlType": "none",
-              "classification": "permittedBusinessData",
-              "policyRuleId": "business-reference",
-              "visible": true,
-              "actionable": true,
-              "depth": 0,
-              "parentNodeId": null,
-              "regionId": null,
-              "formId": null,
-              "labelNodeIds": [],
-              "locatorHints": [
+              "editable": false,
+              "evidence": "Reference",
+              "evidenceSegments": [
                 {
-                  "kind": "testId",
-                  "value": "reference",
-                  "exact": true
+                  "field": "name",
+                  "start": 0,
+                  "end": 9
                 }
-              ]
+              ],
+              "text": "Reference",
+              "nameComplete": true,
+              "ownTextComplete": true
             },
-            {
-              "nodeId": "label-input",
-              "documentId": "document-1",
-              "generation": 3,
+            "e2": {
               "role": "textbox",
               "name": "Label",
-              "elementType": "input",
-              "controlType": "text",
-              "classification": "nonsecretApproved",
-              "policyRuleId": "nonsecret-form",
-              "visible": true,
-              "actionable": true,
-              "depth": 0,
-              "parentNodeId": null,
-              "regionId": null,
-              "formId": null,
-              "labelNodeIds": [],
-              "locatorHints": [
+              "editable": true,
+              "evidence": "Label",
+              "evidenceSegments": [
                 {
-                  "kind": "testId",
-                  "value": "label-input",
-                  "exact": true
+                  "field": "name",
+                  "start": 0,
+                  "end": 5
                 }
-              ]
+              ],
+              "nameComplete": true,
+              "ownTextComplete": true
             },
-            {
-              "nodeId": "backup-label-fresh",
-              "documentId": "document-1",
-              "generation": 3,
+            "e3": {
               "role": "textbox",
               "name": "Backup label é🧪",
-              "elementType": "input",
-              "controlType": "text",
-              "classification": "nonsecretApproved",
-              "policyRuleId": "nonsecret-form",
-              "visible": true,
-              "actionable": true,
-              "depth": 0,
-              "parentNodeId": null,
-              "regionId": null,
-              "formId": null,
-              "labelNodeIds": [],
-              "locatorHints": [
+              "editable": true,
+              "evidence": "Backup label é🧪",
+              "evidenceSegments": [
                 {
-                  "kind": "testId",
-                  "value": "backup-label-é",
-                  "exact": true
+                  "field": "name",
+                  "start": 0,
+                  "end": 16
                 }
-              ]
+              ],
+              "nameComplete": true,
+              "ownTextComplete": true
             }
-          ]
+          }
         }
       },
       {
-        "observationHash": "125ddee9486896b7be080bb1c9e5653bd38538a4093d651c1dd1f9297d0db6ba",
+        "observationHash": "ad29422aeecf7af746d0c74cc7e96d6a68012767b0250aa43f10230ee5190541",
         "observation": {
           "schemaVersion": 3,
           "sessionId": "qa-choice-current-01",
-          "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+          "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
           "documentId": "document-1",
           "generation": 4,
           "origin": "https://orders.example.test",
           "observedAt": "2026-10-08T03:00:05Z",
           "coverage": {
-            "mode": "semantic",
-            "complete": true,
-            "truncated": false,
             "withheldRegions": 0,
-            "reason": "complete",
+            "unsupportedRegions": 0,
             "passwordControls": 0
           },
-          "nodes": [
-            {
-              "nodeId": "reference",
-              "documentId": "document-1",
-              "generation": 4,
+          "projection": {
+            "projected": false,
+            "tier": null,
+            "totalNodes": 2,
+            "shownNodes": 2,
+            "notShown": 0,
+            "outlineBytes": 67
+          },
+          "readRuleId": "business-reference",
+          "outline": "- document\n  - text \"Reference\" [e1]\n  - textbox \"Destination\" [e2]",
+          "facts": {
+            "e1": {
               "role": "text",
               "name": "Reference",
-              "elementType": "text",
-              "controlType": "none",
-              "classification": "permittedBusinessData",
-              "policyRuleId": "business-reference",
-              "visible": true,
-              "actionable": true,
-              "depth": 0,
-              "parentNodeId": null,
-              "regionId": null,
-              "formId": null,
-              "labelNodeIds": [],
-              "locatorHints": [
+              "editable": false,
+              "evidence": "Reference",
+              "evidenceSegments": [
                 {
-                  "kind": "testId",
-                  "value": "reference",
-                  "exact": true
+                  "field": "name",
+                  "start": 0,
+                  "end": 9
                 }
-              ]
+              ],
+              "text": "Reference",
+              "nameComplete": true,
+              "ownTextComplete": true
             },
-            {
-              "nodeId": "destination",
-              "documentId": "document-1",
-              "generation": 4,
+            "e2": {
               "role": "textbox",
               "name": "Destination",
-              "elementType": "input",
-              "controlType": "text",
-              "classification": "nonsecretApproved",
-              "policyRuleId": "nonsecret-form",
-              "visible": true,
-              "actionable": true,
-              "depth": 0,
-              "parentNodeId": null,
-              "regionId": null,
-              "formId": null,
-              "labelNodeIds": [],
-              "locatorHints": [
+              "editable": true,
+              "evidence": "Destination",
+              "evidenceSegments": [
                 {
-                  "kind": "testId",
-                  "value": "destination",
-                  "exact": true
+                  "field": "name",
+                  "start": 0,
+                  "end": 11
                 }
-              ]
+              ],
+              "nameComplete": true,
+              "ownTextComplete": true
             }
-          ]
+          }
         }
       },
       {
-        "observationHash": "8cad397fea8681ea48e9332879ac94734fe4eb17136d1cbd82600ea184a1c053",
+        "observationHash": "da917b7dc2abcf51fa499a1a9e05451c4a927ba8965ba9e909fb1d2aa9fb66de",
         "observation": {
           "schemaVersion": 3,
           "sessionId": "qa-choice-current-01",
-          "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+          "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
           "documentId": "document-1",
           "generation": 2,
           "origin": "https://orders.example.test",
           "observedAt": "2026-10-08T03:00:05Z",
           "coverage": {
-            "mode": "semantic",
-            "complete": true,
-            "truncated": false,
             "withheldRegions": 0,
-            "reason": "complete",
+            "unsupportedRegions": 0,
             "passwordControls": 0
           },
-          "nodes": [
-            {
-              "nodeId": "reference",
-              "documentId": "document-1",
-              "generation": 2,
+          "projection": {
+            "projected": false,
+            "tier": null,
+            "totalNodes": 3,
+            "shownNodes": 3,
+            "notShown": 0,
+            "outlineBytes": 100
+          },
+          "readRuleId": "business-reference",
+          "outline": "- document\n  - text \"Reference\" [e1]\n  - textbox \"Label\" [e2]\n  - textbox \"Backup label é🧪\" [e3]",
+          "facts": {
+            "e1": {
               "role": "text",
               "name": "Reference",
-              "elementType": "text",
-              "controlType": "none",
-              "classification": "permittedBusinessData",
-              "policyRuleId": "business-reference",
-              "visible": true,
-              "actionable": true,
-              "depth": 0,
-              "parentNodeId": null,
-              "regionId": null,
-              "formId": null,
-              "labelNodeIds": [],
-              "locatorHints": [
+              "editable": false,
+              "evidence": "Reference",
+              "evidenceSegments": [
                 {
-                  "kind": "testId",
-                  "value": "reference",
-                  "exact": true
+                  "field": "name",
+                  "start": 0,
+                  "end": 9
                 }
-              ]
+              ],
+              "text": "Reference",
+              "nameComplete": true,
+              "ownTextComplete": true
             },
-            {
-              "nodeId": "label-input",
-              "documentId": "document-1",
-              "generation": 2,
+            "e2": {
               "role": "textbox",
               "name": "Label",
-              "elementType": "input",
-              "controlType": "text",
-              "classification": "nonsecretApproved",
-              "policyRuleId": "nonsecret-form",
-              "visible": true,
-              "actionable": true,
-              "depth": 0,
-              "parentNodeId": null,
-              "regionId": null,
-              "formId": null,
-              "labelNodeIds": [],
-              "locatorHints": [
+              "editable": true,
+              "evidence": "Label",
+              "evidenceSegments": [
                 {
-                  "kind": "testId",
-                  "value": "label-input",
-                  "exact": true
+                  "field": "name",
+                  "start": 0,
+                  "end": 5
                 }
-              ]
+              ],
+              "nameComplete": true,
+              "ownTextComplete": true
             },
-            {
-              "nodeId": "backup-label-old",
-              "documentId": "document-1",
-              "generation": 2,
+            "e3": {
               "role": "textbox",
               "name": "Backup label é🧪",
-              "elementType": "input",
-              "controlType": "text",
-              "classification": "nonsecretApproved",
-              "policyRuleId": "nonsecret-form",
-              "visible": true,
-              "actionable": true,
-              "depth": 0,
-              "parentNodeId": null,
-              "regionId": null,
-              "formId": null,
-              "labelNodeIds": [],
-              "locatorHints": [
+              "editable": true,
+              "evidence": "Backup label é🧪",
+              "evidenceSegments": [
                 {
-                  "kind": "testId",
-                  "value": "backup-label-é",
-                  "exact": true
+                  "field": "name",
+                  "start": 0,
+                  "end": 16
                 }
-              ]
+              ],
+              "nameComplete": true,
+              "ownTextComplete": true
             }
-          ]
+          }
         }
       }
     ],
@@ -654,7 +575,7 @@
             "stepId": "00000000-0000-4000-8000-000000000001",
             "ordinal": 0
           },
-          "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+          "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
           "generation": 0,
           "target": {
             "kind": "page",
@@ -677,7 +598,7 @@
             "generation": 0
           },
           "evidenceHash": "0dbfcf1ce24e10a8d23e316284375eb3dd24c27d0c3de6793346a48db8b24fcf",
-          "authoredInputsHash": "cd11c7f1dcf2cf554909fe805ca7ce8687fe2486cd2295a18881d5df34f7e3a0",
+          "authoredInputsHash": "a47c8a1814196ef024c46a123c8adb98a93afd53790b2f7210b1b15d5263710a",
           "contextRevision": 1
         },
         "proof": {
@@ -685,7 +606,7 @@
           "sessionId": "qa-choice-current-01",
           "workerId": "qa-choice-worker-01",
           "ownerFence": 1,
-          "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+          "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
           "contextId": "qa-choice-context-01",
           "contextRevision": 1,
           "sourceRevision": "1",
@@ -694,10 +615,12 @@
             "contract": 3
           },
           "preparationId": "qa-choice-current-01-preparation-0",
-          "requestDigest": "57ed4aad0922d365a324695ec2be0857a9b8cdca0e2980dff540986ad432eb50",
+          "requestDigest": "1fd82a0c8b1e94be6c7d41499d5482724e52ca5d6d1bbd647cacf85e94fb67a6",
           "evidenceHash": "0dbfcf1ce24e10a8d23e316284375eb3dd24c27d0c3de6793346a48db8b24fcf",
-          "authoredInputsHash": "cd11c7f1dcf2cf554909fe805ca7ce8687fe2486cd2295a18881d5df34f7e3a0",
-          "expiresAt": "2026-10-08T03:00:25Z"
+          "authoredInputsHash": "a47c8a1814196ef024c46a123c8adb98a93afd53790b2f7210b1b15d5263710a",
+          "expiresAt": "2026-10-08T03:00:25Z",
+          "target": null,
+          "pressInheritance": null
         },
         "executionEvidence": {
           "kind": "initialBlank",
@@ -722,17 +645,13 @@
             "stepId": "00000000-0000-4000-8000-000000000002",
             "ordinal": 0
           },
-          "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+          "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
           "generation": 1,
           "target": {
-            "nodeId": "reference",
+            "kind": "node",
+            "ref": "e1",
             "documentId": "document-1",
-            "generation": 1,
-            "locator": {
-              "kind": "testId",
-              "value": "reference",
-              "exact": true
-            }
+            "generation": 1
           },
           "operation": {
             "kind": "read",
@@ -750,10 +669,10 @@
             "documentId": "document-1",
             "generation": 1,
             "origin": "https://orders.example.test",
-            "observationHash": "8bc918b697bd0399149f316f322c77d61b9ee7e211fd533f3870214393d39bf2"
+            "observationHash": "93731e4c2eb2e44258a7b6502f7cd65a0f12b80e6a48f511cb95bae76023c886"
           },
-          "evidenceHash": "f97fcb4c292331080f2632ce8fdebeb873cfcd22728e7ffa23081b5060c7c696",
-          "authoredInputsHash": "cd11c7f1dcf2cf554909fe805ca7ce8687fe2486cd2295a18881d5df34f7e3a0",
+          "evidenceHash": "1adec4bf1bbabb05e87ba822864826be0c40f1913f2374678f1b0fdaf2f0031f",
+          "authoredInputsHash": "a47c8a1814196ef024c46a123c8adb98a93afd53790b2f7210b1b15d5263710a",
           "contextRevision": 1
         },
         "proof": {
@@ -761,7 +680,7 @@
           "sessionId": "qa-choice-current-01",
           "workerId": "qa-choice-worker-01",
           "ownerFence": 1,
-          "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+          "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
           "contextId": "qa-choice-context-01",
           "contextRevision": 1,
           "sourceRevision": "1",
@@ -770,10 +689,24 @@
             "contract": 3
           },
           "preparationId": "qa-choice-current-01-preparation-1",
-          "requestDigest": "2f3d2f67535af76c88cd3453304062bcf851702e54b28735cae688055953c6a8",
-          "evidenceHash": "f97fcb4c292331080f2632ce8fdebeb873cfcd22728e7ffa23081b5060c7c696",
-          "authoredInputsHash": "cd11c7f1dcf2cf554909fe805ca7ce8687fe2486cd2295a18881d5df34f7e3a0",
-          "expiresAt": "2026-10-08T03:00:25Z"
+          "requestDigest": "84e00273deec0335b52644438b71d4c2e7496b62a7b56015a9fb5225d49e3279",
+          "evidenceHash": "1adec4bf1bbabb05e87ba822864826be0c40f1913f2374678f1b0fdaf2f0031f",
+          "authoredInputsHash": "a47c8a1814196ef024c46a123c8adb98a93afd53790b2f7210b1b15d5263710a",
+          "expiresAt": "2026-10-08T03:00:25Z",
+          "target": {
+            "locator": [
+              {
+                "by": "testId",
+                "value": "reference"
+              }
+            ],
+            "tier": "testId",
+            "identity": {
+              "role": "text",
+              "name": "Reference"
+            }
+          },
+          "pressInheritance": null
         },
         "executionEvidence": {
           "kind": "observedDocument",
@@ -782,9 +715,9 @@
           "documentId": "document-1",
           "generation": 1,
           "origin": "https://orders.example.test",
-          "observationHash": "8bc918b697bd0399149f316f322c77d61b9ee7e211fd533f3870214393d39bf2"
+          "observationHash": "93731e4c2eb2e44258a7b6502f7cd65a0f12b80e6a48f511cb95bae76023c886"
         },
-        "observationHash": "8bc918b697bd0399149f316f322c77d61b9ee7e211fd533f3870214393d39bf2",
+        "observationHash": "93731e4c2eb2e44258a7b6502f7cd65a0f12b80e6a48f511cb95bae76023c886",
         "materializationRevision": 1
       },
       {
@@ -796,17 +729,13 @@
             "stepId": "00000000-0000-4000-8000-000000000003",
             "ordinal": 0
           },
-          "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+          "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
           "generation": 1,
           "target": {
-            "nodeId": "destination",
+            "kind": "node",
+            "ref": "e2",
             "documentId": "document-1",
-            "generation": 1,
-            "locator": {
-              "kind": "testId",
-              "value": "destination",
-              "exact": true
-            }
+            "generation": 1
           },
           "operation": {
             "kind": "fill",
@@ -822,10 +751,10 @@
             "documentId": "document-1",
             "generation": 1,
             "origin": "https://orders.example.test",
-            "observationHash": "8bc918b697bd0399149f316f322c77d61b9ee7e211fd533f3870214393d39bf2"
+            "observationHash": "93731e4c2eb2e44258a7b6502f7cd65a0f12b80e6a48f511cb95bae76023c886"
           },
-          "evidenceHash": "f97fcb4c292331080f2632ce8fdebeb873cfcd22728e7ffa23081b5060c7c696",
-          "authoredInputsHash": "cd11c7f1dcf2cf554909fe805ca7ce8687fe2486cd2295a18881d5df34f7e3a0",
+          "evidenceHash": "1adec4bf1bbabb05e87ba822864826be0c40f1913f2374678f1b0fdaf2f0031f",
+          "authoredInputsHash": "a47c8a1814196ef024c46a123c8adb98a93afd53790b2f7210b1b15d5263710a",
           "contextRevision": 1
         },
         "proof": {
@@ -833,7 +762,7 @@
           "sessionId": "qa-choice-current-01",
           "workerId": "qa-choice-worker-01",
           "ownerFence": 1,
-          "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+          "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
           "contextId": "qa-choice-context-01",
           "contextRevision": 1,
           "sourceRevision": "1",
@@ -842,10 +771,24 @@
             "contract": 3
           },
           "preparationId": "qa-choice-current-01-preparation-2",
-          "requestDigest": "dd9039c37503ce0452b7572039bdafd75b14ba017494f74673c9c81922bf44b2",
-          "evidenceHash": "f97fcb4c292331080f2632ce8fdebeb873cfcd22728e7ffa23081b5060c7c696",
-          "authoredInputsHash": "cd11c7f1dcf2cf554909fe805ca7ce8687fe2486cd2295a18881d5df34f7e3a0",
-          "expiresAt": "2026-10-08T03:00:25Z"
+          "requestDigest": "5746d6f7da81a699b0dededd27a3bcbc82d7a13c74a355399f79af05ac0d6e3f",
+          "evidenceHash": "1adec4bf1bbabb05e87ba822864826be0c40f1913f2374678f1b0fdaf2f0031f",
+          "authoredInputsHash": "a47c8a1814196ef024c46a123c8adb98a93afd53790b2f7210b1b15d5263710a",
+          "expiresAt": "2026-10-08T03:00:25Z",
+          "target": {
+            "locator": [
+              {
+                "by": "testId",
+                "value": "destination"
+              }
+            ],
+            "tier": "testId",
+            "identity": {
+              "role": "textbox",
+              "name": "Destination"
+            }
+          },
+          "pressInheritance": null
         },
         "executionEvidence": {
           "kind": "observedDocument",
@@ -854,9 +797,9 @@
           "documentId": "document-1",
           "generation": 1,
           "origin": "https://orders.example.test",
-          "observationHash": "8bc918b697bd0399149f316f322c77d61b9ee7e211fd533f3870214393d39bf2"
+          "observationHash": "93731e4c2eb2e44258a7b6502f7cd65a0f12b80e6a48f511cb95bae76023c886"
         },
-        "observationHash": "8bc918b697bd0399149f316f322c77d61b9ee7e211fd533f3870214393d39bf2",
+        "observationHash": "93731e4c2eb2e44258a7b6502f7cd65a0f12b80e6a48f511cb95bae76023c886",
         "materializationRevision": 1
       },
       {
@@ -868,17 +811,13 @@
             "stepId": "00000000-0000-4000-8000-000000000003",
             "ordinal": 1
           },
-          "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+          "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
           "generation": 3,
           "target": {
-            "nodeId": "backup-label-fresh",
+            "kind": "node",
+            "ref": "e3",
             "documentId": "document-1",
-            "generation": 3,
-            "locator": {
-              "kind": "testId",
-              "value": "backup-label-é",
-              "exact": true
-            }
+            "generation": 3
           },
           "operation": {
             "kind": "fill",
@@ -894,10 +833,10 @@
             "documentId": "document-1",
             "generation": 3,
             "origin": "https://orders.example.test",
-            "observationHash": "3619eaf7d840feb5087d6e1d8615840cd0f218f03e48d2e5d43fe22b99f79414"
+            "observationHash": "0795b4314a012049cfbb4047459460307803d94353adf5abb92449829fbe7fd5"
           },
-          "evidenceHash": "853490461bef0aa58f9bb1c7c807cae2810ec8e07da75eb677dafb841b1877ac",
-          "authoredInputsHash": "cd11c7f1dcf2cf554909fe805ca7ce8687fe2486cd2295a18881d5df34f7e3a0",
+          "evidenceHash": "5098ec1f438b659daea39cc4b8a5cd6588a3797775c435c1c980a82a99f5ad1b",
+          "authoredInputsHash": "a47c8a1814196ef024c46a123c8adb98a93afd53790b2f7210b1b15d5263710a",
           "contextRevision": 1
         },
         "proof": {
@@ -905,7 +844,7 @@
           "sessionId": "qa-choice-current-01",
           "workerId": "qa-choice-worker-01",
           "ownerFence": 1,
-          "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+          "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
           "contextId": "qa-choice-context-01",
           "contextRevision": 1,
           "sourceRevision": "1",
@@ -914,10 +853,24 @@
             "contract": 3
           },
           "preparationId": "qa-choice-current-01-preparation-3",
-          "requestDigest": "efc1d163a99105d29b5c61a6b457a6e96dab84fb9ba0f348164caa88de1cdb6b",
-          "evidenceHash": "853490461bef0aa58f9bb1c7c807cae2810ec8e07da75eb677dafb841b1877ac",
-          "authoredInputsHash": "cd11c7f1dcf2cf554909fe805ca7ce8687fe2486cd2295a18881d5df34f7e3a0",
-          "expiresAt": "2026-10-08T03:00:25Z"
+          "requestDigest": "4df53cd6475f199d1baec2562588cc24d89b8a6d9d192067ec501d9220846b4e",
+          "evidenceHash": "5098ec1f438b659daea39cc4b8a5cd6588a3797775c435c1c980a82a99f5ad1b",
+          "authoredInputsHash": "a47c8a1814196ef024c46a123c8adb98a93afd53790b2f7210b1b15d5263710a",
+          "expiresAt": "2026-10-08T03:00:25Z",
+          "target": {
+            "locator": [
+              {
+                "by": "testId",
+                "value": "backup-label-é"
+              }
+            ],
+            "tier": "testId",
+            "identity": {
+              "role": "textbox",
+              "name": "Backup label é🧪"
+            }
+          },
+          "pressInheritance": null
         },
         "executionEvidence": {
           "kind": "observedDocument",
@@ -926,9 +879,9 @@
           "documentId": "document-1",
           "generation": 3,
           "origin": "https://orders.example.test",
-          "observationHash": "3619eaf7d840feb5087d6e1d8615840cd0f218f03e48d2e5d43fe22b99f79414"
+          "observationHash": "0795b4314a012049cfbb4047459460307803d94353adf5abb92449829fbe7fd5"
         },
-        "observationHash": "3619eaf7d840feb5087d6e1d8615840cd0f218f03e48d2e5d43fe22b99f79414",
+        "observationHash": "0795b4314a012049cfbb4047459460307803d94353adf5abb92449829fbe7fd5",
         "observedChoice": {
           "version": 1,
           "receipt": {
@@ -937,13 +890,13 @@
             "preparationId": "qa-choice-current-01-preparation-3",
             "clarificationId": "qa-choice-current-01-question-é",
             "obligationId": "00000000-0000-4000-8000-000000000103",
-            "contextIdentityHash": "59899843ea07bf11013b281d6e52bc0ccc944a52f874ba7f03514e7b43ebb7db",
-            "meaningsHash": "4c890eb86a2fd709577df66fe99443c9526e06c7aa08b1c12df5d6a3d1d85e79",
-            "questionCaptureHash": "79b81d6949cb0341cd2c5d4e2292c99f5d9bec0ffd750f10bdd931ef369f17b7",
+            "contextIdentityHash": "08947e6dfd0594db32213ba1c4359f4c41aab7614ca8fc1fa8a853c1d1d5f4ac",
+            "meaningsHash": "c425f46adb7cbd956579b040dbf5c26007f6c7bda9759945f27b767f97e74453",
+            "questionCaptureHash": "12c4c12b4e97b03ffc29619aa3673a38ca2b3c5b64394cf717a98bf8143ea2eb",
             "acceptedChoiceId": "choice-backup",
             "answer": {
               "sessionId": "qa-choice-current-01",
-              "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+              "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
               "clarificationId": "qa-choice-current-01-question-é",
               "coordinate": {
                 "stepId": "00000000-0000-4000-8000-000000000003",
@@ -952,7 +905,6 @@
               "documentId": "document-1",
               "generation": 2,
               "choiceId": "choice-backup",
-              "nodeId": "backup-label-old",
               "bindingId": null,
               "sourceRevision": "1",
               "configurationRevision": "1",
@@ -961,7 +913,7 @@
           },
           "context": {
             "sessionId": "qa-choice-current-01",
-            "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+            "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
             "sourceRevision": "1",
             "configurationRevision": "1",
             "clarificationId": "qa-choice-current-01-question-é",
@@ -970,7 +922,7 @@
               "phase": "observed",
               "clarificationId": "qa-choice-current-01-question-é",
               "sessionId": "qa-choice-current-01",
-              "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+              "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
               "coordinate": {
                 "stepId": "00000000-0000-4000-8000-000000000003",
                 "ordinal": 1
@@ -986,7 +938,6 @@
                   "labelSource": "PAGE",
                   "role": "textbox",
                   "region": null,
-                  "nodeId": "label-input",
                   "bindingId": null
                 },
                 {
@@ -995,7 +946,6 @@
                   "labelSource": "PAGE",
                   "role": "textbox",
                   "region": null,
-                  "nodeId": "backup-label-old",
                   "bindingId": null
                 }
               ],
@@ -1007,13 +957,13 @@
               "requestId": "qa-choice-current-01-question-request",
               "attempt": 1,
               "planRevision": "1",
-              "planHash": "eda5230618201a5f826de21922413191e6715bbcc01d1e528905481e8e5a0726",
+              "planHash": "3a400795d92b9175fe2631a4236bbcee09194a8c6adb7732dfb74d757716926b",
               "obligationId": "00000000-0000-4000-8000-000000000103",
               "workerId": "qa-choice-worker-01",
               "ownerFence": 1,
               "contextId": "qa-choice-context-01",
               "contextRevision": 1,
-              "authoredInputsHash": "cd11c7f1dcf2cf554909fe805ca7ce8687fe2486cd2295a18881d5df34f7e3a0",
+              "authoredInputsHash": "a47c8a1814196ef024c46a123c8adb98a93afd53790b2f7210b1b15d5263710a",
               "executionEvidence": {
                 "kind": "observedDocument",
                 "sessionId": "qa-choice-current-01",
@@ -1021,11 +971,11 @@
                 "documentId": "document-1",
                 "generation": 2,
                 "origin": "https://orders.example.test",
-                "observationHash": "8cad397fea8681ea48e9332879ac94734fe4eb17136d1cbd82600ea184a1c053"
+                "observationHash": "da917b7dc2abcf51fa499a1a9e05451c4a927ba8965ba9e909fb1d2aa9fb66de"
               },
-              "evidenceHash": "b46e46c92721c69715578aeb6c0747e219710e5032120d72696838c9d53d5ee8",
-              "observationHash": "8cad397fea8681ea48e9332879ac94734fe4eb17136d1cbd82600ea184a1c053",
-              "modelQuestionHash": "8814f681a2ac31c3a93cde718cebe21dc3a294fb725795c50ac1020ae2be108e"
+              "evidenceHash": "60947a507fcd2f4fecbcea27e97a516cb0fe8583f006a759e2d3fac662b15111",
+              "observationHash": "da917b7dc2abcf51fa499a1a9e05451c4a927ba8965ba9e909fb1d2aa9fb66de",
+              "modelQuestionHash": "0665ba7c545b265cc41b4a87cecc187f0c7879e0777ab79b127e54b7fabeceac"
             }
           },
           "meanings": [
@@ -1033,26 +983,26 @@
               "choiceId": "choice-original",
               "meaning": {
                 "obligationId": "00000000-0000-4000-8000-000000000103",
-                "nodeId": "label-input",
-                "bindingId": null,
-                "locator": {
-                  "kind": "testId",
-                  "value": "label-input",
-                  "exact": true
-                }
+                "ref": "e2",
+                "bindingId": null
+              },
+              "selection": {
+                "role": "textbox",
+                "name": "Label",
+                "evidence": "Label"
               }
             },
             {
               "choiceId": "choice-backup",
               "meaning": {
                 "obligationId": "00000000-0000-4000-8000-000000000103",
-                "nodeId": "backup-label-old",
-                "bindingId": null,
-                "locator": {
-                  "kind": "testId",
-                  "value": "backup-label-é",
-                  "exact": true
-                }
+                "ref": "e3",
+                "bindingId": null
+              },
+              "selection": {
+                "role": "textbox",
+                "name": "Backup label é🧪",
+                "evidence": "Backup label é🧪"
               }
             }
           ],
@@ -1065,15 +1015,11 @@
             "status": "APPLIED",
             "projectionHash": "556fb0e3c5213f7beaa31e18ac1de19122f12ae83b8829a1f566fbad44efbaaf",
             "planRevision": "1",
-            "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+            "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
             "scope": {
               "principalId": "user-1",
               "csiId": "CSI-123",
               "environmentId": "fixture",
-              "applicationId": "orders",
-              "approvedOrigins": [
-                "https://orders.example.test"
-              ],
               "sourceRevision": "1",
               "configurationRevision": "1",
               "modelDataPolicyId": "labels-only-1",
@@ -1101,7 +1047,7 @@
               "documentId": "document-1",
               "generation": 2,
               "origin": "https://orders.example.test",
-              "observationHash": "8cad397fea8681ea48e9332879ac94734fe4eb17136d1cbd82600ea184a1c053"
+              "observationHash": "da917b7dc2abcf51fa499a1a9e05451c4a927ba8965ba9e909fb1d2aa9fb66de"
             },
             "responseSchemaVersion": 3,
             "responseRequestId": "qa-choice-current-01-question-request",
@@ -1115,13 +1061,8 @@
                   "safeLabel": "untrusted audit 0",
                   "meaning": {
                     "obligationId": "00000000-0000-4000-8000-000000000103",
-                    "nodeId": "label-input",
-                    "bindingId": null,
-                    "locator": {
-                      "kind": "testId",
-                      "value": "label-input",
-                      "exact": true
-                    }
+                    "ref": "e2",
+                    "bindingId": null
                   }
                 },
                 {
@@ -1129,13 +1070,8 @@
                   "safeLabel": "untrusted audit 1",
                   "meaning": {
                     "obligationId": "00000000-0000-4000-8000-000000000103",
-                    "nodeId": "backup-label-old",
-                    "bindingId": null,
-                    "locator": {
-                      "kind": "testId",
-                      "value": "backup-label-é",
-                      "exact": true
-                    }
+                    "ref": "e3",
+                    "bindingId": null
                   }
                 }
               ]
@@ -1143,7 +1079,7 @@
           },
           "questionPlan": {
             "revision": "1",
-            "planHash": "eda5230618201a5f826de21922413191e6715bbcc01d1e528905481e8e5a0726",
+            "planHash": "3a400795d92b9175fe2631a4236bbcee09194a8c6adb7732dfb74d757716926b",
             "plan": {
               "sourceReferences": [
                 {
@@ -1212,7 +1148,7 @@
                   "stepId": "00000000-0000-4000-8000-000000000003",
                   "occurrence": 1,
                   "operationKind": "fill",
-                  "targetIntent": "label-input",
+                  "targetIntent": "label",
                   "scopeIntent": null,
                   "referenceIndex": 1,
                   "needId": null,
@@ -1261,17 +1197,13 @@
             "stepId": "00000000-0000-4000-8000-000000000003",
             "ordinal": 2
           },
-          "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+          "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
           "generation": 4,
           "target": {
-            "nodeId": "destination",
+            "kind": "node",
+            "ref": "e2",
             "documentId": "document-1",
-            "generation": 4,
-            "locator": {
-              "kind": "testId",
-              "value": "destination",
-              "exact": true
-            }
+            "generation": 4
           },
           "operation": {
             "kind": "assert",
@@ -1288,10 +1220,10 @@
             "documentId": "document-1",
             "generation": 4,
             "origin": "https://orders.example.test",
-            "observationHash": "125ddee9486896b7be080bb1c9e5653bd38538a4093d651c1dd1f9297d0db6ba"
+            "observationHash": "ad29422aeecf7af746d0c74cc7e96d6a68012767b0250aa43f10230ee5190541"
           },
-          "evidenceHash": "6ac50a307591344c859570b482e59527e750292328cd5f3bbc334bce855e7bf4",
-          "authoredInputsHash": "cd11c7f1dcf2cf554909fe805ca7ce8687fe2486cd2295a18881d5df34f7e3a0",
+          "evidenceHash": "af44c019e9c98f340931dc38947c8a8ef7e190578e612058b960439a11b7c1e7",
+          "authoredInputsHash": "a47c8a1814196ef024c46a123c8adb98a93afd53790b2f7210b1b15d5263710a",
           "contextRevision": 1
         },
         "proof": {
@@ -1299,7 +1231,7 @@
           "sessionId": "qa-choice-current-01",
           "workerId": "qa-choice-worker-01",
           "ownerFence": 1,
-          "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+          "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
           "contextId": "qa-choice-context-01",
           "contextRevision": 1,
           "sourceRevision": "1",
@@ -1308,10 +1240,24 @@
             "contract": 3
           },
           "preparationId": "qa-choice-current-01-preparation-4",
-          "requestDigest": "c7f1aecd47d2f3191c47c49ac628c66ed4c868f6394913bc0157a1b03e4fead5",
-          "evidenceHash": "6ac50a307591344c859570b482e59527e750292328cd5f3bbc334bce855e7bf4",
-          "authoredInputsHash": "cd11c7f1dcf2cf554909fe805ca7ce8687fe2486cd2295a18881d5df34f7e3a0",
-          "expiresAt": "2026-10-08T03:00:25Z"
+          "requestDigest": "2f5648e7f8484a9183b078f98299220a05d75a856d50212f1c1d8e4e3cc2d987",
+          "evidenceHash": "af44c019e9c98f340931dc38947c8a8ef7e190578e612058b960439a11b7c1e7",
+          "authoredInputsHash": "a47c8a1814196ef024c46a123c8adb98a93afd53790b2f7210b1b15d5263710a",
+          "expiresAt": "2026-10-08T03:00:25Z",
+          "target": {
+            "locator": [
+              {
+                "by": "testId",
+                "value": "destination"
+              }
+            ],
+            "tier": "testId",
+            "identity": {
+              "role": "textbox",
+              "name": "Destination"
+            }
+          },
+          "pressInheritance": null
         },
         "executionEvidence": {
           "kind": "observedDocument",
@@ -1320,9 +1266,9 @@
           "documentId": "document-1",
           "generation": 4,
           "origin": "https://orders.example.test",
-          "observationHash": "125ddee9486896b7be080bb1c9e5653bd38538a4093d651c1dd1f9297d0db6ba"
+          "observationHash": "ad29422aeecf7af746d0c74cc7e96d6a68012767b0250aa43f10230ee5190541"
         },
-        "observationHash": "125ddee9486896b7be080bb1c9e5653bd38538a4093d651c1dd1f9297d0db6ba",
+        "observationHash": "ad29422aeecf7af746d0c74cc7e96d6a68012767b0250aa43f10230ee5190541",
         "materializationRevision": 1
       }
     ],
@@ -1338,9 +1284,9 @@
             "ordinal": 0
           },
           "idempotencyKey": "admission-request-0",
-          "requestDigest": "57ed4aad0922d365a324695ec2be0857a9b8cdca0e2980dff540986ad432eb50",
-          "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
-          "operationHash": "0d468ced1744419c45b238648a1460bdbf53fe961a3f3864429a6292ac365271",
+          "requestDigest": "1fd82a0c8b1e94be6c7d41499d5482724e52ca5d6d1bbd647cacf85e94fb67a6",
+          "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
+          "operationHash": "04b00e310cdda0146d029c1b78460122854364b4bff74bda333cff5a3319512e",
           "generation": 0,
           "documentId": "blank-document-1",
           "ownerFence": 1,
@@ -1348,7 +1294,7 @@
             "admissionId": "qa-choice-current-01-admission-0",
             "authorizationId": "qa-choice-current-01-authorization",
             "admittedAt": "2026-10-08T03:00:10Z",
-            "policyDecisionHash": "176d67cdc68308f970f228feb0a9f3ae7ffe9827b54b9d5f4010b304bc225006"
+            "policyDecisionHash": "76e43842f3b96bc2979b12edd25cb1ce8e9b39683c0ced2ae80a7f66cb17762b"
           },
           "state": "SUCCEEDED",
           "dispatchCount": 1,
@@ -1366,7 +1312,7 @@
             "generation": 0
           },
           "evidenceHash": "0dbfcf1ce24e10a8d23e316284375eb3dd24c27d0c3de6793346a48db8b24fcf",
-          "authoredInputsHash": "cd11c7f1dcf2cf554909fe805ca7ce8687fe2486cd2295a18881d5df34f7e3a0",
+          "authoredInputsHash": "a47c8a1814196ef024c46a123c8adb98a93afd53790b2f7210b1b15d5263710a",
           "contextRevision": 1,
           "preparationId": "qa-choice-current-01-preparation-0",
           "attemptOrdinal": 0
@@ -1383,9 +1329,9 @@
             "ordinal": 0
           },
           "idempotencyKey": "admission-request-1",
-          "requestDigest": "2f3d2f67535af76c88cd3453304062bcf851702e54b28735cae688055953c6a8",
-          "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
-          "operationHash": "52b94ab1c572f4e4a65de7bf3d33e999a03cb6f74d6e6cb946ed8b274669cdba",
+          "requestDigest": "84e00273deec0335b52644438b71d4c2e7496b62a7b56015a9fb5225d49e3279",
+          "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
+          "operationHash": "29b2a1275e40911e2c71f4e8df6a60ad9441df52d4e1b3b1c914b5a32ab0bac0",
           "generation": 1,
           "documentId": "document-1",
           "ownerFence": 1,
@@ -1393,7 +1339,7 @@
             "admissionId": "qa-choice-current-01-admission-1",
             "authorizationId": "qa-choice-current-01-authorization",
             "admittedAt": "2026-10-08T03:00:10Z",
-            "policyDecisionHash": "65f77ab5ffe0cd4aa34ae288d3afe32512583deaa571d87809d1b755177e2db1"
+            "policyDecisionHash": "2537906c5b9812bc64e716bf7fa8ba7079435c16219c0f606fc800d72ed913f3"
           },
           "state": "SUCCEEDED",
           "dispatchCount": 1,
@@ -1406,10 +1352,10 @@
             "documentId": "document-1",
             "generation": 1,
             "origin": "https://orders.example.test",
-            "observationHash": "8bc918b697bd0399149f316f322c77d61b9ee7e211fd533f3870214393d39bf2"
+            "observationHash": "93731e4c2eb2e44258a7b6502f7cd65a0f12b80e6a48f511cb95bae76023c886"
           },
-          "evidenceHash": "f97fcb4c292331080f2632ce8fdebeb873cfcd22728e7ffa23081b5060c7c696",
-          "authoredInputsHash": "cd11c7f1dcf2cf554909fe805ca7ce8687fe2486cd2295a18881d5df34f7e3a0",
+          "evidenceHash": "1adec4bf1bbabb05e87ba822864826be0c40f1913f2374678f1b0fdaf2f0031f",
+          "authoredInputsHash": "a47c8a1814196ef024c46a123c8adb98a93afd53790b2f7210b1b15d5263710a",
           "contextRevision": 1,
           "preparationId": "qa-choice-current-01-preparation-1",
           "attemptOrdinal": 0
@@ -1426,9 +1372,9 @@
             "ordinal": 0
           },
           "idempotencyKey": "admission-request-2",
-          "requestDigest": "dd9039c37503ce0452b7572039bdafd75b14ba017494f74673c9c81922bf44b2",
-          "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
-          "operationHash": "7402c4d4d31b3fd5dac6ab5c6e71689ea64eb4e3da0af8be8fa075230e338a6e",
+          "requestDigest": "5746d6f7da81a699b0dededd27a3bcbc82d7a13c74a355399f79af05ac0d6e3f",
+          "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
+          "operationHash": "2e2f7c1ddb1f7d3ed0c1c9dfbace60d67d806392db4a2a5fb5afdb93bd5e65c9",
           "generation": 1,
           "documentId": "document-1",
           "ownerFence": 1,
@@ -1436,7 +1382,7 @@
             "admissionId": "qa-choice-current-01-admission-2",
             "authorizationId": "qa-choice-current-01-authorization",
             "admittedAt": "2026-10-08T03:00:10Z",
-            "policyDecisionHash": "d82f7b8bc82aa18253c08648e1b04176a266e31c89f1c802b4b9f208c1a7b91a"
+            "policyDecisionHash": "141b85f38bd47fd180a7a63e6bf518ad5d0c2dc5de928b57bcb5a0756468b57a"
           },
           "state": "SUCCEEDED",
           "dispatchCount": 1,
@@ -1449,10 +1395,10 @@
             "documentId": "document-1",
             "generation": 1,
             "origin": "https://orders.example.test",
-            "observationHash": "8bc918b697bd0399149f316f322c77d61b9ee7e211fd533f3870214393d39bf2"
+            "observationHash": "93731e4c2eb2e44258a7b6502f7cd65a0f12b80e6a48f511cb95bae76023c886"
           },
-          "evidenceHash": "f97fcb4c292331080f2632ce8fdebeb873cfcd22728e7ffa23081b5060c7c696",
-          "authoredInputsHash": "cd11c7f1dcf2cf554909fe805ca7ce8687fe2486cd2295a18881d5df34f7e3a0",
+          "evidenceHash": "1adec4bf1bbabb05e87ba822864826be0c40f1913f2374678f1b0fdaf2f0031f",
+          "authoredInputsHash": "a47c8a1814196ef024c46a123c8adb98a93afd53790b2f7210b1b15d5263710a",
           "contextRevision": 1,
           "preparationId": "qa-choice-current-01-preparation-2",
           "attemptOrdinal": 0
@@ -1469,9 +1415,9 @@
             "ordinal": 1
           },
           "idempotencyKey": "admission-request-3",
-          "requestDigest": "efc1d163a99105d29b5c61a6b457a6e96dab84fb9ba0f348164caa88de1cdb6b",
-          "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
-          "operationHash": "582b047b8a91d5c793fadfc01cf319abd33249f5792e403b1c029e8aec7ee3d3",
+          "requestDigest": "4df53cd6475f199d1baec2562588cc24d89b8a6d9d192067ec501d9220846b4e",
+          "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
+          "operationHash": "9286b913d244f51ae5be4a86568a8b7f962f4b0a1a14f4534c1d191597a21ce3",
           "generation": 3,
           "documentId": "document-1",
           "ownerFence": 1,
@@ -1479,7 +1425,7 @@
             "admissionId": "qa-choice-current-01-admission-3",
             "authorizationId": "qa-choice-current-01-authorization",
             "admittedAt": "2026-10-08T03:00:10Z",
-            "policyDecisionHash": "e3807509f09d89c3785151dc22b30a88d3c2a99ab3d15afbf548c2818dbd97e8"
+            "policyDecisionHash": "3df64e6f5a1917f0d1e212f18d7d35d0a97cf00fdc51c273fc54ae461dc19356"
           },
           "state": "SUCCEEDED",
           "dispatchCount": 1,
@@ -1492,10 +1438,10 @@
             "documentId": "document-1",
             "generation": 3,
             "origin": "https://orders.example.test",
-            "observationHash": "3619eaf7d840feb5087d6e1d8615840cd0f218f03e48d2e5d43fe22b99f79414"
+            "observationHash": "0795b4314a012049cfbb4047459460307803d94353adf5abb92449829fbe7fd5"
           },
-          "evidenceHash": "853490461bef0aa58f9bb1c7c807cae2810ec8e07da75eb677dafb841b1877ac",
-          "authoredInputsHash": "cd11c7f1dcf2cf554909fe805ca7ce8687fe2486cd2295a18881d5df34f7e3a0",
+          "evidenceHash": "5098ec1f438b659daea39cc4b8a5cd6588a3797775c435c1c980a82a99f5ad1b",
+          "authoredInputsHash": "a47c8a1814196ef024c46a123c8adb98a93afd53790b2f7210b1b15d5263710a",
           "contextRevision": 1,
           "preparationId": "qa-choice-current-01-preparation-3",
           "attemptOrdinal": 0
@@ -1512,9 +1458,9 @@
             "ordinal": 2
           },
           "idempotencyKey": "admission-request-4",
-          "requestDigest": "c7f1aecd47d2f3191c47c49ac628c66ed4c868f6394913bc0157a1b03e4fead5",
-          "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
-          "operationHash": "717d72d7f4cee0a4832da57d732341591fb1fadc37a4e36fd18c38d4ded584f5",
+          "requestDigest": "2f5648e7f8484a9183b078f98299220a05d75a856d50212f1c1d8e4e3cc2d987",
+          "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
+          "operationHash": "88578a7c6ed864ee7c445caa187a0378c47b8db74f001d4dcf3efcf74d50641c",
           "generation": 4,
           "documentId": "document-1",
           "ownerFence": 1,
@@ -1522,7 +1468,7 @@
             "admissionId": "qa-choice-current-01-admission-4",
             "authorizationId": "qa-choice-current-01-authorization",
             "admittedAt": "2026-10-08T03:00:10Z",
-            "policyDecisionHash": "d5ca3a278f6c0b1c96a348520519cdbe9a21a1ad2695292b0dcba9f04cd0378e"
+            "policyDecisionHash": "0467d46b70749a9d4e4678019f5c87f7d9db5d830ca30f89e0075da5d508ba17"
           },
           "state": "SUCCEEDED",
           "dispatchCount": 1,
@@ -1535,10 +1481,10 @@
             "documentId": "document-1",
             "generation": 4,
             "origin": "https://orders.example.test",
-            "observationHash": "125ddee9486896b7be080bb1c9e5653bd38538a4093d651c1dd1f9297d0db6ba"
+            "observationHash": "ad29422aeecf7af746d0c74cc7e96d6a68012767b0250aa43f10230ee5190541"
           },
-          "evidenceHash": "6ac50a307591344c859570b482e59527e750292328cd5f3bbc334bce855e7bf4",
-          "authoredInputsHash": "cd11c7f1dcf2cf554909fe805ca7ce8687fe2486cd2295a18881d5df34f7e3a0",
+          "evidenceHash": "af44c019e9c98f340931dc38947c8a8ef7e190578e612058b960439a11b7c1e7",
+          "authoredInputsHash": "a47c8a1814196ef024c46a123c8adb98a93afd53790b2f7210b1b15d5263710a",
           "contextRevision": 1,
           "preparationId": "qa-choice-current-01-preparation-4",
           "attemptOrdinal": 0
@@ -1694,14 +1640,14 @@
         {
           "schemaVersion": 3,
           "sessionId": "qa-choice-current-01",
-          "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+          "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
           "contextId": "qa-choice-context-01",
           "contextRevision": 1,
           "workerId": "qa-choice-worker-01",
           "ownerFence": 1,
           "sourceRevision": "1",
           "configurationRevision": "1",
-          "authoredInputsHash": "cd11c7f1dcf2cf554909fe805ca7ce8687fe2486cd2295a18881d5df34f7e3a0",
+          "authoredInputsHash": "a47c8a1814196ef024c46a123c8adb98a93afd53790b2f7210b1b15d5263710a",
           "birthMaterializationRevision": 1,
           "inputCount": 3,
           "previousInputsHash": null
@@ -1829,7 +1775,8 @@
       },
       "pinnedBase": null,
       "baseProof": null
-    }
+    },
+    "guardAuthorizations": []
   },
   "artifact": {
     "version": 3,
@@ -1843,10 +1790,10 @@
     "learnedPlan": {
       "schemaVersion": 3,
       "planId": "plan-99008d290b3b47769990238b643f09efde9758ff04bdaae5765e03773b2ed0ff",
-      "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+      "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
       "sourceRevision": "1",
       "configurationRevision": "1",
-      "authoredInputsHash": "cd11c7f1dcf2cf554909fe805ca7ce8687fe2486cd2295a18881d5df34f7e3a0",
+      "authoredInputsHash": "a47c8a1814196ef024c46a123c8adb98a93afd53790b2f7210b1b15d5263710a",
       "initialContext": {
         "kind": "initialBlank"
       },
@@ -1865,13 +1812,13 @@
             "ordinal": 0
           },
           "origin": null,
-          "locator": null,
+          "target": null,
           "operation": {
             "kind": "navigate",
             "destinationInputId": "input-destination"
           },
           "admissionId": "qa-choice-current-01-admission-0",
-          "operationHash": "0d468ced1744419c45b238648a1460bdbf53fe961a3f3864429a6292ac365271"
+          "operationHash": "04b00e310cdda0146d029c1b78460122854364b4bff74bda333cff5a3319512e"
         },
         {
           "coordinate": {
@@ -1879,10 +1826,18 @@
             "ordinal": 0
           },
           "origin": "https://orders.example.test",
-          "locator": {
-            "kind": "testId",
-            "value": "reference",
-            "exact": true
+          "target": {
+            "locator": [
+              {
+                "by": "testId",
+                "value": "reference"
+              }
+            ],
+            "tier": "testId",
+            "identity": {
+              "role": "text",
+              "name": "Reference"
+            }
           },
           "operation": {
             "kind": "read",
@@ -1894,7 +1849,7 @@
             }
           },
           "admissionId": "qa-choice-current-01-admission-1",
-          "operationHash": "52b94ab1c572f4e4a65de7bf3d33e999a03cb6f74d6e6cb946ed8b274669cdba"
+          "operationHash": "29b2a1275e40911e2c71f4e8df6a60ad9441df52d4e1b3b1c914b5a32ab0bac0"
         },
         {
           "coordinate": {
@@ -1902,10 +1857,18 @@
             "ordinal": 0
           },
           "origin": "https://orders.example.test",
-          "locator": {
-            "kind": "testId",
-            "value": "destination",
-            "exact": true
+          "target": {
+            "locator": [
+              {
+                "by": "testId",
+                "value": "destination"
+              }
+            ],
+            "tier": "testId",
+            "identity": {
+              "role": "textbox",
+              "name": "Destination"
+            }
           },
           "operation": {
             "kind": "fill",
@@ -1915,7 +1878,7 @@
             }
           },
           "admissionId": "qa-choice-current-01-admission-2",
-          "operationHash": "7402c4d4d31b3fd5dac6ab5c6e71689ea64eb4e3da0af8be8fa075230e338a6e"
+          "operationHash": "2e2f7c1ddb1f7d3ed0c1c9dfbace60d67d806392db4a2a5fb5afdb93bd5e65c9"
         },
         {
           "coordinate": {
@@ -1923,10 +1886,18 @@
             "ordinal": 1
           },
           "origin": "https://orders.example.test",
-          "locator": {
-            "kind": "testId",
-            "value": "backup-label-é",
-            "exact": true
+          "target": {
+            "locator": [
+              {
+                "by": "testId",
+                "value": "backup-label-é"
+              }
+            ],
+            "tier": "testId",
+            "identity": {
+              "role": "textbox",
+              "name": "Backup label é🧪"
+            }
           },
           "operation": {
             "kind": "fill",
@@ -1936,7 +1907,7 @@
             }
           },
           "admissionId": "qa-choice-current-01-admission-3",
-          "operationHash": "582b047b8a91d5c793fadfc01cf319abd33249f5792e403b1c029e8aec7ee3d3"
+          "operationHash": "9286b913d244f51ae5be4a86568a8b7f962f4b0a1a14f4534c1d191597a21ce3"
         },
         {
           "coordinate": {
@@ -1944,10 +1915,18 @@
             "ordinal": 2
           },
           "origin": "https://orders.example.test",
-          "locator": {
-            "kind": "testId",
-            "value": "destination",
-            "exact": true
+          "target": {
+            "locator": [
+              {
+                "by": "testId",
+                "value": "destination"
+              }
+            ],
+            "tier": "testId",
+            "identity": {
+              "role": "textbox",
+              "name": "Destination"
+            }
           },
           "operation": {
             "kind": "assert",
@@ -1958,7 +1937,7 @@
             }
           },
           "admissionId": "qa-choice-current-01-admission-4",
-          "operationHash": "717d72d7f4cee0a4832da57d732341591fb1fadc37a4e36fd18c38d4ded584f5"
+          "operationHash": "88578a7c6ed864ee7c445caa187a0378c47b8db74f001d4dcf3efcf74d50641c"
         }
       ],
       "bindings": [
@@ -2012,14 +1991,14 @@
         }
       ],
       "stepSnapshotHashes": {
-        "00000000-0000-4000-8000-000000000001": "f32b25e334e5525a15039cd8b7b8c4a86acf6fbf12b74fc0011d60b1b97f04be",
-        "00000000-0000-4000-8000-000000000002": "1a6d297f8d38c3ea837eeda1b1e4837b602aedf14e78414608bb1b20a4147b95",
-        "00000000-0000-4000-8000-000000000003": "9a3d9fa5f194fd933af8ff80ebc8e8965efac68cffa3d71abd3c9264b6ec3049"
+        "00000000-0000-4000-8000-000000000001": "d85ae56aedc271b0f27f35b06ea0cebbf47bdff18cdca9ca1c853e045061bf5f",
+        "00000000-0000-4000-8000-000000000002": "9853e5f734b9debc5385d4b804d26f9293b9a34bc005b54fba1f4e271ddbbdb6",
+        "00000000-0000-4000-8000-000000000003": "aa86b6bdbce52e1369d4af87abdfd2742dc38ebd2cb83447b266138478a9e9b7"
       },
       "reusedFrom": {},
       "incremental": null
     },
-    "learnedPlanHash": "85adfa982bfe72e229b9e09734ef574aa9d5d85df2ea5bdf5e9c48fca1ad502b",
+    "learnedPlanHash": "784742ba4cfdb1140fade9611b80c8ead5d5b8ed80eaa798b76554247df6838d",
     "inputRecipes": [
       {
         "inputId": "input-destination",
@@ -2059,17 +2038,17 @@
         "origin": "https://orders.example.test",
         "target": {
           "kind": "element",
-          "locator": {
-            "kind": "testId",
-            "value": "reference",
-            "exact": true
+          "locator": [
+            {
+              "by": "testId",
+              "value": "reference"
+            }
+          ],
+          "tier": "testId",
+          "identity": {
+            "role": "text",
+            "name": "Reference"
           },
-          "role": "text",
-          "elementType": "text",
-          "controlType": "none",
-          "classification": "permittedBusinessData",
-          "visible": true,
-          "actionable": true,
           "readRuleId": "business-reference"
         }
       },
@@ -2078,17 +2057,17 @@
         "origin": "https://orders.example.test",
         "target": {
           "kind": "element",
-          "locator": {
-            "kind": "testId",
-            "value": "destination",
-            "exact": true
+          "locator": [
+            {
+              "by": "testId",
+              "value": "destination"
+            }
+          ],
+          "tier": "testId",
+          "identity": {
+            "role": "textbox",
+            "name": "Destination"
           },
-          "role": "textbox",
-          "elementType": "input",
-          "controlType": "text",
-          "classification": "nonsecretApproved",
-          "visible": true,
-          "actionable": true,
           "readRuleId": null
         }
       },
@@ -2097,17 +2076,17 @@
         "origin": "https://orders.example.test",
         "target": {
           "kind": "element",
-          "locator": {
-            "kind": "testId",
-            "value": "backup-label-é",
-            "exact": true
+          "locator": [
+            {
+              "by": "testId",
+              "value": "backup-label-é"
+            }
+          ],
+          "tier": "testId",
+          "identity": {
+            "role": "textbox",
+            "name": "Backup label é🧪"
           },
-          "role": "textbox",
-          "elementType": "input",
-          "controlType": "text",
-          "classification": "nonsecretApproved",
-          "visible": true,
-          "actionable": true,
           "readRuleId": null
         }
       },
@@ -2116,34 +2095,30 @@
         "origin": "https://orders.example.test",
         "target": {
           "kind": "element",
-          "locator": {
-            "kind": "testId",
-            "value": "destination",
-            "exact": true
+          "locator": [
+            {
+              "by": "testId",
+              "value": "destination"
+            }
+          ],
+          "tier": "testId",
+          "identity": {
+            "role": "textbox",
+            "name": "Destination"
           },
-          "role": "textbox",
-          "elementType": "input",
-          "controlType": "text",
-          "classification": "nonsecretApproved",
-          "visible": true,
-          "actionable": true,
           "readRuleId": null
         }
       }
     ],
     "replayPolicy": {
       "schemaVersion": 4,
-      "learnedPlanHash": "85adfa982bfe72e229b9e09734ef574aa9d5d85df2ea5bdf5e9c48fca1ad502b",
-      "admissionProvenanceHash": "64013a820415b048003f1bf6045348fd47587589c1828757e31186abb409a160",
-      "publicationEvidenceHash": "14c58d659489a3515ce1594c0b0e9439cdba4eaecceb3fef19394265971fa806",
-      "runAuthorizationHash": "006642cb92c77ced893eae43979ad1562c10c21f8b88752d06d5b3cf3d149f9f",
+      "learnedPlanHash": "784742ba4cfdb1140fade9611b80c8ead5d5b8ed80eaa798b76554247df6838d",
+      "admissionProvenanceHash": "9cbc7a69de5ee3a9b10d7161ec049ae9fa5bf62dff62c004a2d3a4c851dfa404",
+      "publicationEvidenceHash": "425267b7945c81f68eaa9448dfab227d9d0a54e77fa6cbdc31bb3a383b4b69d4",
+      "runAuthorizationHash": "5ed3bbe86072957d44a3e2abb52f02f744c8875753fef64c59d26576270ddc78",
       "scope": {
         "csiId": "CSI-123",
         "environment": "fixture",
-        "applicationId": "orders",
-        "allowedOrigins": [
-          "https://orders.example.test"
-        ],
         "capabilities": [
           "navigate",
           "read",
@@ -2151,9 +2126,6 @@
           "click",
           "assert"
         ],
-        "policyId": "policy-orders",
-        "policyVersion": "1",
-        "entryPolicyId": "entry-orders",
         "initialContext": {
           "kind": "initialBlank"
         }
@@ -2358,13 +2330,13 @@
     "sourceHash": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055",
     "configurationHash": "dc52a6ec856c6e30b512d428302844a530a3dc1b3dcf83ffa27e2e42401e23ee",
     "authoringHash": "e5e180ed2cfadcd2beaf593b3fe050e22349ae16658b24b7dd00596dee1ca4fe",
-    "learnedPlanHash": "85adfa982bfe72e229b9e09734ef574aa9d5d85df2ea5bdf5e9c48fca1ad502b",
-    "artifactHash": "b4a66254ffed31ef2f21ba08cd1d555faa19471064e1558c3dd4b503699deae3",
-    "referencePolicyHash": "c43c9584d1eaa1b5af27e2612be85d25ff217241287600b11212a941c1a3c4ee",
-    "operationEquivalenceHash": "7d2fb5bf68358736c1eb777c98fac325ce4f854af491c9f6d2d1717ff2ff0917",
-    "admissionProvenanceHash": "64013a820415b048003f1bf6045348fd47587589c1828757e31186abb409a160",
-    "publicationEvidenceHash": "14c58d659489a3515ce1594c0b0e9439cdba4eaecceb3fef19394265971fa806",
-    "runAuthorizationHash": "006642cb92c77ced893eae43979ad1562c10c21f8b88752d06d5b3cf3d149f9f",
+    "learnedPlanHash": "784742ba4cfdb1140fade9611b80c8ead5d5b8ed80eaa798b76554247df6838d",
+    "artifactHash": "ee390453aa5cc780a0da38f3f7345633bad0455f3bc8d84123d3a3bc65596704",
+    "referencePolicyHash": "82585ddf70e4e383e8db0385f6f2eca1898207a3097b658a2d50a15ff449a65b",
+    "operationEquivalenceHash": "72753fd23926ab1e5505ae003f0b0b03f5b838eb5aa489700c641dd58777326b",
+    "admissionProvenanceHash": "9cbc7a69de5ee3a9b10d7161ec049ae9fa5bf62dff62c004a2d3a4c851dfa404",
+    "publicationEvidenceHash": "425267b7945c81f68eaa9448dfab227d9d0a54e77fa6cbdc31bb3a383b4b69d4",
+    "runAuthorizationHash": "5ed3bbe86072957d44a3e2abb52f02f744c8875753fef64c59d26576270ddc78",
     "profileHash": "9ab82ccb46f99d2b0d9d873dfff963faa7e5fb5fb967e5f9f1916972c25ac9c8"
   },
   "snapshotAuthority": {
@@ -2443,7 +2415,7 @@
     "privateInputs": {
       "schemaVersion": 3,
       "sessionId": "qa-choice-current-01",
-      "scopeHash": "40fcc424991284125ac8414c8322d4d07d70de7ba9708ed544da148f0dc76715",
+      "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
       "sourceRevision": "1",
       "configurationRevision": "1",
       "inputs": [

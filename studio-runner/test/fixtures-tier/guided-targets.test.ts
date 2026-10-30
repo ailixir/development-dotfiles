@@ -1,198 +1,442 @@
-// eslint-disable-next-line no-restricted-imports -- Real Chromium fixture types; production import remains browser.ts only.
-import type { Page } from 'playwright';
-import { beforeAll, afterAll, afterEach, describe, it, expect, vi } from 'vitest';
-import { mkdtemp,rm } from 'node:fs/promises';
-import { join } from 'node:path';
-import { tmpdir } from 'node:os';
-import * as sanitizer from '../../src/run/observationSanitizer.js';
-import type { CollectorOptions } from '../../src/run/observationTypes.js';
-import { playwrightBrowserFactory } from './preparedBrowser.js';
-import type { BrowserHandle } from '../../src/run/browserFactory.js';
-import type { ObservationSession, ObservationRule, GuidedInvocation, ObservationReadGrant } from '../../src/run/observationTypes.js';
-import { startPageServer } from '../helpers/pageServer.js';
-import type { PageServer } from '../helpers/pageServer.js';
-let browser:BrowserHandle,page:Page,server:PageServer,scratch:string;
-const sessions:ObservationSession[]=[];
-beforeAll(async()=>{server=await startPageServer();scratch=await mkdtemp(join(tmpdir(),'guided-targets-'));browser=await playwrightBrowserFactory.launch({browser:'chromium',scratchPath:scratch,viewport:{width:800,height:600},recording:{width:800,height:600}});page=browser.page as unknown as Page;await page.goto(server.baseUrl);});
-afterEach(async()=>{for(const session of sessions)await session.dispose();sessions.length=0;await page.goto(server.baseUrl);});
-afterAll(async()=>{await browser.dispose();await server.close();await rm(scratch,{recursive:true,force:true});});
-const rule:ObservationRule={testId:'field',name:'Approved field',accessibleName:'Approved field',policyRuleId:'read-field',classification:'nonsecretApproved'};
-async function prepared(html:string,rules:ObservationRule[]=[rule],readGrants:ObservationReadGrant[]=[]) {
-  await page.setContent(html);const session=browser.createObservationSession?.({sessionId:'private-session',scopeHash:'a'.repeat(64),approvedOrigins:[server.baseUrl],rules,knownSecrets:[],applicationPolicy:{policyRuleId:'structural',allowStructuralDiscovery:true,readGrants}});if(!session)throw new Error('SESSION');sessions.push(session);
-  const observation=(await session.observe()).observation;const node=observation.nodes.find(n=>(n.elementType==='input'||n.elementType==='textarea'||n.name==='Read source'||n.name==='Approved field')&&n.locatorHints.length>0);if(!node?.locatorHints[0])throw new Error('NODE');
-  const invocation:GuidedInvocation={target:{nodeId:node.nodeId,documentId:node.documentId,generation:node.generation,locator:node.locatorHints[0]},operation:{kind:'read',bindingId:'local',recipe:{kind:'controlValue',classification:'nonsecretApproved',controlType:'text',policyRuleId:'read-field'}},resolvedValue:null,origin:server.baseUrl,maxValueBytes:4096};
-  return {session,invocation};
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+// eslint-disable-next-line no-restricted-imports -- Real Chromium fixture types; the production import stays in src/run/browser.ts only.
+import type { Browser } from 'playwright';
+
+import { observationReadProfile, readGrantId } from '../../src/run/observationReadProfile.js';
+import { PrivateInventory } from '../../src/run/privateInventory.js';
+import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
+import { launchChromium } from './perception/harness.js';
+import { codeOf, html, invoke, open, rejection, serve, TestControl } from './perception/cutover-support.js';
+import type { InvokeOptions, Opened, Operation, Prepared, Served } from './perception/cutover-support.js';
+import type { ObservationExport } from '../../src/run/observationTypes.js';
+
+/**
+ * The retained, isolated target at invocation (ADR-SC-007 WI-4): every case goes through the production path, a ref in the
+ * observation, prepareTarget (synthesis, binding) and the one executor invoke, over a real Chromium page. The page of a case is
+ * served from `current`, so each case reaches the session as a fresh document.
+ */
+let browser: Browser;
+let served: Served;
+let current = '';
+const opened: Opened[] = [];
+
+beforeAll(async () => {
+  browser = await launchChromium();
+  served = await serve({
+    '/case': (_request, response) => {
+      response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+      response.end(current);
+    },
+    '/next': html('<p>next</p>'),
+  });
+});
+afterEach(async () => {
+  for (const created of opened.splice(0)) await created.close();
+});
+afterAll(async () => {
+  await browser.close();
+  await served.close();
+});
+
+const FIELD = 'Approved field';
+const FILL: Operation = { kind: 'fill', value: { kind: 'authoredLiteral', sourceInputId: 'source' } };
+const readOf = (rule: string | null, kind: 'visibleText' | 'controlValue' = 'visibleText'): Operation =>
+  ({ kind: 'read', bindingId: 'local', recipe: kind === 'visibleText' ? { kind, classification: 'permittedBusinessData', policyRuleId: rule ?? 'none' } : { kind, classification: 'nonsecretApproved', controlType: 'text', policyRuleId: rule ?? 'none' } }) as Operation;
+const HAS_VALUE: Operation = { kind: 'assert', predicate: 'hasValue', expected: { kind: 'authoredLiteral', sourceInputId: 'expected' } };
+const CELL = (text: string, attributes = ''): string => `<main aria-label="Operations"><table aria-label="Orders"><tbody><tr><td aria-label="${FIELD}" ${attributes}>${text}</td></tr></tbody></table></main>`;
+
+type Config = Parameters<typeof open>[3];
+async function ready(markup: string, config: Config = {}): Promise<Opened> {
+  current = html(markup);
+  const created = await open(browser, served, '/case', config);
+  opened.push(created);
+  return created;
 }
-describe('retained isolated target at invocation',()=>{
-  it('reads a positively classified field exactly without accepting runtime policy substitutions',async()=>{
-    const h=await prepared('<input data-testid="field" aria-label="Approved field" value="  exact-é  ">');expect(await h.session.invoke?.(h.invocation)).toEqual({value:'  exact-é  '});
-    const wrong={...h.invocation,operation:{kind:'read' as const,bindingId:'other',recipe:{kind:'controlValue' as const,classification:'nonsecretApproved' as const,controlType:'text' as const,policyRuleId:'invented'}}};await expect(h.session.invoke?.(wrong)).rejects.toThrow('TARGET_CHANGED');
-  });
-  it.each(['password','hidden','email'])('refuses a post-prepare type change to %s',async type=>{
-    const h=await prepared('<input data-testid="field" aria-label="Approved field" value="private">');expect(await h.session.matches(h.invocation.target,h.invocation.target.locator)).toBe(true);await page.locator('input').evaluate((element,type)=>{element.setAttribute('type',type);},type);await expect(h.session.invoke?.(h.invocation)).rejects.toThrow(type === 'password' ? 'PASSWORD_CONTROL_READ_REFUSED' : 'TARGET_CHANGED');
-  });
-  it('refuses replacement by an indistinguishable node and never fills the replacement',async()=>{
-    const h=await prepared('<input data-testid="field" aria-label="Approved field">');await page.locator('input').evaluate(element=>{element.replaceWith(element.cloneNode());});h.invocation.operation={kind:'fill',value:{kind:'authoredLiteral',sourceInputId:'source'}};h.invocation.resolvedValue='NEVER_FILL';await expect(h.session.invoke?.(h.invocation)).rejects.toThrow('TARGET_CHANGED');expect(await page.locator('input').inputValue()).toBe('');
-  });
-  it('rejects a hidden locator twin inserted after preparation',async()=>{
-    const h=await prepared('<input data-testid="field" aria-label="Approved field">');await page.locator('body').evaluate(element=>{const twin=document.createElement('input');twin.setAttribute('data-testid','field');twin.hidden=true;element.appendChild(twin);});await expect(h.session.invoke?.(h.invocation)).rejects.toThrow('TARGET_CHANGED');
-  });
-  it('refuses a cross-origin/document race and disposed capture context',async()=>{
-    const h=await prepared('<input data-testid="field" aria-label="Approved field" value="private">');await page.goto('about:blank');await expect(h.session.invoke?.(h.invocation)).rejects.toThrow('TARGET_CHANGED');await h.session.dispose();await expect(h.session.invoke?.(h.invocation)).rejects.toThrow('TARGET_CHANGED');
-  });
-  it.each([['empty',''],['whitespace','   '],['oversize','x'.repeat(4097)],['invalid Unicode','\ud800']])('refuses %s reads',async (_label,value='')=>{
-    await page.setContent('<input data-testid="field" aria-label="Approved field">');await page.locator('input').evaluate((element,value)=>{(element as HTMLInputElement).value=value;},value);
-    const session=browser.createObservationSession?.({sessionId:'private',scopeHash:'a'.repeat(64),approvedOrigins:[server.baseUrl],rules:[rule],knownSecrets:[]});if(!session)throw new Error('SESSION');sessions.push(session);
-    if(value==='\ud800'){await expect(session.observe()).rejects.toThrow('INVALID_UNICODE');return;}
-    const observation=(await session.observe()).observation;const node=observation.nodes.find(n=>n.elementType==='input');
-    if(!node?.locatorHints[0]){expect(observation.nodes).toHaveLength(0);return;}
-    await expect(session.invoke?.({target:{...node,locator:node.locatorHints[0]},operation:{kind:'read',bindingId:'value',recipe:{kind:'controlValue',classification:'nonsecretApproved',controlType:'text',policyRuleId:'read-field'}},origin:server.baseUrl,resolvedValue:null,maxValueBytes:4096})).rejects.toThrow();
-  });
-  it('checks lowered UTF-8 byte limit on the exact read',async()=>{
-    const h=await prepared('<input data-testid="field" aria-label="Approved field" value="éé">');h.invocation.maxValueBytes=3;await expect(h.session.invoke?.(h.invocation)).rejects.toThrow('TARGET_CHANGED');
-  });
-  it('produces native CSS hover and trusted mouse click sequencing',async()=>{
-    const h=await prepared('<style>button:hover{background-color:rgb(1,2,3)}</style><button data-testid="field" aria-label="Approved field" onclick="document.body.dataset.trusted=String(event.isTrusted)">Native button</button>');
-    h.invocation.operation={kind:'hover'};await h.session.invoke?.(h.invocation);expect(await page.locator('button').evaluate(e=>getComputedStyle(e).backgroundColor)).toBe('rgb(1, 2, 3)');
-    h.invocation.operation={kind:'click'};await h.session.invoke?.(h.invocation);expect(await page.locator('body').getAttribute('data-trusted')).toBe('true');
-  });
-  it('implements native Tab and prevented Enter default behavior',async()=>{
-    const h=await prepared('<form onsubmit="event.preventDefault();document.body.dataset.submitted=String(event.isTrusted)"><input data-testid="field" aria-label="Approved field"><button>Submit</button></form>');
-    h.invocation.operation={kind:'press',key:'Tab'};await h.session.invoke?.(h.invocation);expect(await page.locator('button').evaluate(e=>e===document.activeElement)).toBe(true);
-    h.invocation.operation={kind:'press',key:'Enter'};await h.session.invoke?.(h.invocation);expect(await page.locator('body').getAttribute('data-submitted')).toBe('true');
-  });
-  it('implements native Arrow selection and trusted check/uncheck without duplicate no-op effects',async()=>{
-    const h=await prepared('<textarea data-testid="field" aria-label="Approved field">first line\nsecond line</textarea>');
-    await page.locator('textarea').evaluate(e=>{(e as HTMLTextAreaElement).setSelectionRange(0,0);});
-    h.invocation.operation={kind:'press',key:'ArrowDown'};await h.session.invoke?.(h.invocation);expect(await page.locator('textarea').evaluate(e=>(e as HTMLTextAreaElement).selectionStart)).toBeGreaterThan(0);
-    h.invocation.operation={kind:'press',key:'ArrowUp'};await h.session.invoke?.(h.invocation);expect(await page.locator('textarea').evaluate(e=>(e as HTMLTextAreaElement).selectionStart)).toBe(0);
-    const check=await prepared('<input type="checkbox" data-testid="field" aria-label="Approved field" onchange="document.body.dataset.changed=String(event.isTrusted)">');
-    check.invocation.operation={kind:'check'};await check.session.invoke?.(check.invocation);expect(await page.locator('input').isChecked()).toBe(true);expect(await page.locator('body').getAttribute('data-changed')).toBe('true');
-    const observation=(await check.session.observe()).observation;const node=observation.nodes.find(n=>n.elementType==='input');if(!node?.locatorHints[0])throw new Error('NODE');check.invocation.target={...node,locator:node.locatorHints[0]};
-    await check.session.invoke?.(check.invocation);check.invocation.operation={kind:'uncheck'};await check.session.invoke?.(check.invocation);expect(await page.locator('input').isChecked()).toBe(false);
-  });
-  it('allows native Escape to dismiss a modal dialog and respects prevented keyboard defaults',async()=>{
-    const modal=await prepared('<dialog><input data-testid="field" aria-label="Approved field"></dialog><script>document.querySelector("dialog").showModal()</script>');modal.invocation.operation={kind:'press',key:'Escape'};await modal.session.invoke?.(modal.invocation);await expect.poll(()=>page.locator('dialog').evaluate(e=>(e as HTMLDialogElement).open)).toBe(false);
-    const blocked=await prepared('<form onsubmit="document.body.dataset.submitted=1;event.preventDefault()"><input data-testid="field" aria-label="Approved field" onkeydown="event.preventDefault()"><button>Submit</button></form>');blocked.invocation.operation={kind:'press',key:'Enter'};await blocked.session.invoke?.(blocked.invocation);expect(await page.locator('body').getAttribute('data-submitted')).toBeNull();
-  });
-  it('stops uncertain after focus theft or a mouseover overlay and does not click a replacement',async()=>{
-    const focus=await prepared('<input data-testid="field" aria-label="Approved field" onfocus="document.querySelector(\'button\').focus()"><button>Steal focus</button>');focus.invocation.operation={kind:'press',key:'Enter'};await expect(focus.session.invoke?.(focus.invocation)).rejects.toThrow('UNKNOWN_OUTCOME');
-    const hover=await prepared('<button data-testid="field" aria-label="Approved field" onmouseover="this.outerHTML=\'<button onclick=&quot;document.body.dataset.clicked=1&quot;>Replacement</button>\'">First target</button>');hover.invocation.operation={kind:'click'};await expect(hover.session.invoke?.(hover.invocation)).rejects.toThrow('UNKNOWN_OUTCOME');expect(await page.locator('body').getAttribute('data-clicked')).toBeNull();
-  });
+const readRuleOf = (exported: ObservationExport): string | null => exported.observation.readRuleId;
 
-  it('requires a positive region grant without treating generic discovery or application consent as a field override',async()=>{
-    const grant:ObservationReadGrant={policyRuleId:'region-read',origin:server.baseUrl,region:{kind:'role',role:'main',name:'Operations',exact:true},visibleText:{classification:'permittedBusinessData'},controlValue:{classification:'nonsecretApproved',types:['text']}};
-    const markup='<main aria-label="Operations"><input aria-label="Approved field" value="nonsecret"></main>';
-    const none=await prepared(markup,[]);none.invocation.operation={kind:'read',bindingId:'local',recipe:{kind:'controlValue',classification:'nonsecretApproved',controlType:'text',policyRuleId:'region-read'}};expect(await none.session.validateInvocation?.(none.invocation)).toBe(false);
-    const region=await prepared(markup,[],[grant]);region.invocation.operation=none.invocation.operation;expect(await region.session.invoke?.(region.invocation)).toEqual({value:'nonsecret'});
-    const outside=await prepared('<main aria-label="Operations"><p>Scope</p></main><input aria-label="Approved field" value="nonsecret">',[],[grant]);outside.invocation.operation=none.invocation.operation;await expect(outside.session.invoke?.(outside.invocation)).rejects.toThrow('TARGET_CHANGED');
-    const duplicates=await prepared(`${markup}<main aria-label="Operations"><p>Other region</p></main>`,[],[grant]);duplicates.invocation.operation=none.invocation.operation;await expect(duplicates.session.invoke?.(duplicates.invocation)).rejects.toThrow('TARGET_CHANGED');
-    const veto=await prepared('<main aria-label="Operations"><input data-testid="field" aria-label="Approved field" value="nonsecret"></main>',[{...rule,classification:'structuralOnly'}],[grant]);veto.invocation.operation=none.invocation.operation;await expect(veto.session.invoke?.(veto.invocation)).rejects.toThrow('TARGET_CHANGED');
-    const replaced=await prepared(markup,[],[grant]);replaced.invocation.operation=none.invocation.operation;await page.locator('main').evaluate(element=>{element.replaceWith(element.cloneNode(true));});await expect(replaced.session.invoke?.(replaced.invocation)).rejects.toThrow('TARGET_CHANGED');
+/** The one fact named like the approved field, prepared for `operation`. */
+async function prep(h: Opened, operation: Operation, options: { name?: string; literal?: string | null; exported?: ObservationExport } = {}): Promise<Prepared> {
+  const exported = options.exported ?? (await h.session.observe(undefined, false));
+  const name = options.name ?? FIELD;
+  const found = Object.entries(exported.observation.facts).filter(([, fact]) => fact.name === name);
+  if (found.length !== 1 || found[0] === undefined) throw new Error(`expected one "${name}", found ${String(found.length)} in:\n${exported.observation.outline}`);
+  const resolved = await h.session.prepareTarget({
+    ref: found[0][0],
+    documentId: exported.observation.documentId,
+    generation: exported.observation.generation,
+    origin: exported.observation.origin,
+    operation,
+    authoredLiteral: options.literal ?? null,
   });
-  it('rejects the entire region text source with hidden/sensitive/field descendants and private text echoes',async()=>{
-    const grant:ObservationReadGrant={policyRuleId:'region-text',origin:server.baseUrl,region:{kind:'role',role:'main',name:'Operations',exact:true},visibleText:{classification:'permittedBusinessData'}};
-    for(const descendant of ['<span hidden>private</span>','<span data-sensitive>private</span>','<input type="password" value="private">']){
-      const h=await prepared(`<main aria-label="Operations"><output aria-label="Approved field">Public part${descendant}</output></main>`,[],[grant]);h.invocation.operation={kind:'read',bindingId:'local',recipe:{kind:'visibleText',classification:'permittedBusinessData',policyRuleId:'region-text'}};expect(await h.session.validateInvocation?.(h.invocation)).toBe(false);await expect(h.session.invoke?.(h.invocation)).rejects.toThrow('TARGET_CHANGED');
+  return { ref: found[0][0], resolved, exported };
+}
+const run = async (h: Opened, operation: Operation, options: InvokeOptions & { name?: string } = {}): Promise<Awaited<ReturnType<typeof invoke>>> => invoke(h, await prep(h, operation, options.name === undefined ? {} : { name: options.name }), operation, options);
+const prepareCode = (h: Opened, operation: Operation, name = FIELD): Promise<string | null> => codeOf(prep(h, operation, { name }));
+const inputValue = (h: Opened): Promise<string> => h.page.locator('input').inputValue();
+
+describe('retained isolated target at invocation', () => {
+  it('reads a positively classified field exactly without accepting runtime policy substitutions', async () => {
+    const h = await ready(CELL('  exact-é  '));
+    const exported = await h.session.observe(undefined, false);
+    const rule = readRuleOf(exported);
+    expect(rule).toBe(readGrantId('localhost'));
+    const prepared = await prep(h, readOf(rule), { exported });
+    const expected = await h.page.locator('td').innerText();
+    expect(expected).toContain('exact-é');
+    expect(await invoke(h, prepared, readOf(rule), { readRuleId: rule })).toEqual({ value: expected });
+    expect(await prepareCode(h, readOf('invented'))).toBe('READ_NOT_ALLOWED');
+    expect(await codeOf(invoke(h, prepared, readOf('invented'), { readRuleId: 'invented' }))).not.toBeNull();
+  });
+  it.each(['password', 'hidden'])('refuses a post-prepare type change to %s', async (type) => {
+    const h = await ready(`<main aria-label="Operations"><input aria-label="${FIELD}" value="private"></main>`);
+    const prepared = await prep(h, FILL);
+    await h.page.locator('input').evaluate((element, kind) => {
+      element.setAttribute('type', kind);
+    }, type);
+    expect(await codeOf(invoke(h, prepared, FILL, { value: 'NEVER-WRITTEN' }))).toBe('TARGET_CHANGED');
+    expect(await inputValue(h)).toBe('private');
+  });
+  it('a post-prepare change to email leaves an ordinary text field, so the prepared fill still lands in the same node', async () => {
+    // The target is identified by role and name, and an email input is still a textbox; only password and hidden leave the role.
+    const h = await ready(`<main aria-label="Operations"><input aria-label="${FIELD}" value="private"></main>`);
+    const prepared = await prep(h, FILL);
+    await h.page.locator('input').evaluate((element) => {
+      element.setAttribute('type', 'email');
+    });
+    expect(await codeOf(invoke(h, prepared, FILL, { value: 'name@example.test' }))).toBeNull();
+    expect(await inputValue(h)).toBe('name@example.test');
+  });
+  it('refuses replacement by an indistinguishable node and never fills the replacement', async () => {
+    const h = await ready(`<main aria-label="Operations"><input aria-label="${FIELD}"></main>`);
+    const prepared = await prep(h, FILL);
+    await h.page.locator('input').evaluate((element) => {
+      element.replaceWith(element.cloneNode());
+    });
+    expect(await codeOf(invoke(h, prepared, FILL, { value: 'NEVER_FILL' }))).toBe('TARGET_CHANGED');
+    expect(await inputValue(h)).toBe('');
+  });
+  it('rejects a hidden locator twin inserted after preparation', async () => {
+    const h = await ready(`<main aria-label="Operations"><input aria-label="${FIELD}"></main>`);
+    const prepared = await prep(h, FILL);
+    await h.page.locator('main').evaluate((element) => {
+      const twin = document.createElement('input');
+      twin.setAttribute('aria-label', 'Approved field');
+      element.appendChild(twin);
+    });
+    expect(await codeOf(invoke(h, prepared, FILL, { value: 'NEVER_FILL' }))).toBe('TARGET_CHANGED');
+    expect(await h.page.locator('input').evaluateAll((all) => all.map((one) => (one as HTMLInputElement).value))).toEqual(['', '']);
+  });
+  it('refuses a cross-origin/document race and disposed capture context', async () => {
+    const h = await ready(`<main aria-label="Operations"><input aria-label="${FIELD}" value="private"></main>`);
+    const prepared = await prep(h, FILL);
+    await h.page.goto('about:blank');
+    expect(await codeOf(invoke(h, prepared, FILL, { value: 'X' }))).toBe('TARGET_CHANGED');
+    await h.session.dispose();
+    expect(await codeOf(invoke(h, prepared, FILL, { value: 'X' }))).toBe('CONTEXT_LOST');
+  });
+  it.each([['empty', ''], ['whitespace', '   '], ['oversize', 'x'.repeat(4097)], ['invalid Unicode', '\ud800']])('refuses %s reads', async (_label, value) => {
+    const h = await ready(CELL('seed'));
+    await h.page.locator('td').evaluate((element, text) => {
+      element.textContent = text;
+    }, value);
+    if (value === '\ud800') {
+      expect(await codeOf(h.session.observe(undefined, false))).toBe('INVALID_UNICODE');
+      return;
     }
-    const h=await prepared('<main aria-label="Operations"><output aria-label="Approved field">REGION-PRIVATE-TEXT</output><button>REGION-PRIVATE-TEXT</button></main>',[],[grant]);const observed=await h.session.observe();expect(observed.json).not.toContain('REGION-PRIVATE-TEXT');
+    const exported = await h.session.observe(undefined, false);
+    if (!Object.values(exported.observation.facts).some((fact) => fact.name === FIELD)) return;
+    const rule = readRuleOf(exported);
+    const control = new TestControl();
+    expect(await codeOf(invoke(h, await prep(h, readOf(rule), { exported }), readOf(rule), { readRuleId: rule, control }))).toBe('POLICY_DENIED');
+    expect(control.fenced).toBe(0);
   });
-  it('prefers a unique region over application grants and denies equal-priority overlaps',async()=>{
-    const app:ObservationReadGrant={policyRuleId:'app-read',origin:server.baseUrl,region:{kind:'application'},controlValue:{classification:'nonsecretApproved',types:['text']}};
-    const scoped:ObservationReadGrant={...app,policyRuleId:'region-read',region:{kind:'role',role:'main',name:'Operations',exact:true}};
-    const html='<main aria-label="Operations"><input aria-label="Approved field" value="nonsecret"></main>';
-    const h=await prepared(html,[],[app,scoped]);h.invocation.operation={kind:'read',bindingId:'local',recipe:{kind:'controlValue',classification:'nonsecretApproved',controlType:'text',policyRuleId:'region-read'}};expect(await h.session.invoke?.(h.invocation)).toEqual({value:'nonsecret'});
-    const conflict=await prepared(html,[],[app,{...app,policyRuleId:'other-app-read'}]);conflict.invocation.operation=h.invocation.operation;await expect(conflict.session.invoke?.(conflict.invocation)).rejects.toThrow('TARGET_CHANGED');
-    await expect(prepared('<main aria-label="Operations"><input type="password" aria-label="Approved field" value="private"></main>',[],[scoped])).rejects.toThrow('NODE');
-    const changed=await prepared(html,[],[scoped]);changed.invocation.operation=h.invocation.operation;await page.locator('input').evaluate(e=>{ e.setAttribute('type','email'); });await expect(changed.session.invoke?.(changed.invocation)).rejects.toThrow('TARGET_CHANGED');
+  it('checks lowered UTF-8 byte limit on the exact read', async () => {
+    const h = await ready(CELL('éé'));
+    const exported = await h.session.observe(undefined, false);
+    const rule = readRuleOf(exported);
+    const control = new TestControl();
+    expect(await codeOf(invoke(h, await prep(h, readOf(rule), { exported }), readOf(rule), { readRuleId: rule, maxValueBytes: 3, control }))).toBe('POLICY_DENIED');
+    expect(control.fenced).toBe(0);
+  });
+  it('produces native CSS hover and trusted mouse click sequencing', async () => {
+    const h = await ready('<style>button:hover{background-color:rgb(1,2,3)}</style><button aria-label="Approved field" onclick="document.body.dataset.trusted=String(event.isTrusted)">Native button</button>');
+    await run(h, { kind: 'hover' });
+    expect(await h.page.locator('button').evaluate((e) => getComputedStyle(e).backgroundColor)).toBe('rgb(1, 2, 3)');
+    await run(h, { kind: 'click' });
+    expect(await h.page.locator('body').getAttribute('data-trusted')).toBe('true');
+  });
+  it('implements native Tab and prevented Enter default behavior', async () => {
+    const h = await ready('<form onsubmit="event.preventDefault();document.body.dataset.submitted=String(event.isTrusted)"><input aria-label="Approved field"><button>Submit</button></form>');
+    await run(h, { kind: 'press', key: 'Tab' });
+    expect(await h.page.locator('button').evaluate((e) => e === document.activeElement)).toBe(true);
+    await run(h, { kind: 'press', key: 'Enter' });
+    expect(await h.page.locator('body').getAttribute('data-submitted')).toBe('true');
+  });
+  it('implements native Arrow selection and trusted check/uncheck without duplicate no-op effects', async () => {
+    const h = await ready('<textarea aria-label="Approved field">first line\nsecond line</textarea>');
+    await h.page.locator('textarea').evaluate((e) => {
+      (e as HTMLTextAreaElement).setSelectionRange(0, 0);
+    });
+    await run(h, { kind: 'press', key: 'ArrowDown' });
+    expect(await h.page.locator('textarea').evaluate((e) => (e as HTMLTextAreaElement).selectionStart)).toBeGreaterThan(0);
+    await run(h, { kind: 'press', key: 'ArrowUp' });
+    expect(await h.page.locator('textarea').evaluate((e) => (e as HTMLTextAreaElement).selectionStart)).toBe(0);
+    const check = await ready('<input type="checkbox" aria-label="Approved field" onchange="document.body.dataset.changes=String(Number(document.body.dataset.changes||0)+1);document.body.dataset.changed=String(event.isTrusted)">');
+    await run(check, { kind: 'check' });
+    expect(await check.page.locator('input').isChecked()).toBe(true);
+    expect(await check.page.locator('body').getAttribute('data-changed')).toBe('true');
+    await run(check, { kind: 'check' });
+    expect(await check.page.locator('body').getAttribute('data-changes')).toBe('1');
+    await run(check, { kind: 'uncheck' });
+    expect(await check.page.locator('input').isChecked()).toBe(false);
+  });
+  it('allows native Escape to dismiss a modal dialog and respects prevented keyboard defaults', async () => {
+    const modal = await ready('<dialog><input aria-label="Approved field"></dialog><script>document.querySelector("dialog").showModal()</script>');
+    await run(modal, { kind: 'press', key: 'Escape' });
+    await expect.poll(() => modal.page.locator('dialog').evaluate((e) => (e as HTMLDialogElement).open)).toBe(false);
+    const blocked = await ready('<form onsubmit="document.body.dataset.submitted=1;event.preventDefault()"><input aria-label="Approved field" onkeydown="event.preventDefault()"><button>Submit</button></form>');
+    await run(blocked, { kind: 'press', key: 'Enter' });
+    expect(await blocked.page.locator('body').getAttribute('data-submitted')).toBeNull();
+  });
+  it('stops uncertain after focus theft or a mouseover overlay and does not click a replacement', async () => {
+    const focus = await ready('<input aria-label="Approved field" onfocus="document.querySelector(\'button\').focus()"><button>Steal focus</button>');
+    expect(await codeOf(run(focus, { kind: 'press', key: 'Enter' }))).toBe('UNKNOWN_OUTCOME');
+    const hover = await ready('<button aria-label="Approved field" onmouseover="this.outerHTML=\'<button onclick=&quot;document.body.dataset.clicked=1&quot;>Replacement</button>\'">First target</button>');
+    // The hover of the executor's non-committing pre-flight already fires the handler, so the replacement ends before the fence (no effect).
+    expect(['TARGET_CHANGED', 'UNKNOWN_OUTCOME']).toContain(await codeOf(run(hover, { kind: 'click' })));
+    expect(await hover.page.locator('body').getAttribute('data-clicked')).toBeNull();
   });
 
-  it('erases the private masking inventory and refuses late repopulation after disposal',async()=>{
-    const original=sanitizer.observationOptions;const inventories:CollectorOptions[]=[];const spy=vi.spyOn(sanitizer,'observationOptions').mockImplementation(config=>{const options=original(config);inventories.push(options);return options;});
+  it('requires a positive region grant without treating generic discovery or application consent as a field override', async () => {
+    const markup = CELL('nonsecret');
+    const none = await ready(markup, { readProfile: { policyRuleId: 'observed-structure-v1', allowStructuralDiscovery: true, readGrants: [] } });
+    expect(readRuleOf(await none.session.observe(undefined, false))).toBeNull();
+    expect(await prepareCode(none, readOf(null))).toBe('READ_NOT_ALLOWED');
+    const granted = await ready(markup);
+    const exported = await granted.session.observe(undefined, false);
+    const rule = readRuleOf(exported);
+    expect(await invoke(granted, await prep(granted, readOf(rule), { exported }), readOf(rule), { readRuleId: rule })).toEqual({ value: 'nonsecret' });
+    // No grant reads a field value: a controlValue recipe is refused even under the application grant.
+    expect(await prepareCode(granted, readOf(rule, 'controlValue'))).toBe('READ_NOT_ALLOWED');
+    const field = await ready(`<main aria-label="Operations"><input aria-label="${FIELD}" value="nonsecret"></main>`);
+    expect(await prepareCode(field, readOf(readRuleOf(await field.session.observe(undefined, false))))).toBe('READ_NOT_ALLOWED');
+    const replaced = await ready(markup);
+    const prepared = await prep(replaced, readOf(rule));
+    await replaced.page.locator('main').evaluate((element) => {
+      element.replaceWith(element.cloneNode(true));
+    });
+    expect(await codeOf(invoke(replaced, prepared, readOf(rule), { readRuleId: rule }))).toBe('TARGET_CHANGED');
+  });
+  it('rejects the entire region text source with hidden/sensitive/field descendants and private text echoes', async () => {
+    for (const descendant of ['<span hidden>private</span>', '<span data-sensitive>private</span>', '<input type="password" value="private">']) {
+      const h = await ready(CELL(`Public part${descendant}`));
+      const exported = await h.session.observe(undefined, false);
+      const shown = Object.values(exported.observation.facts).some((fact) => fact.name === FIELD);
+      if (!shown) {
+        expect(exported.json).not.toContain('private');
+        continue;
+      }
+      if (descendant.includes('hidden')) {
+        // innerText never includes a hidden descendant, so the read is eligible and returns the visible part only.
+        const rule = readRuleOf(exported);
+        const read = await invoke(h, await prep(h, readOf(rule), { exported }), readOf(rule), { readRuleId: rule });
+        expect(read).toEqual({ value: 'Public part' });
+        continue;
+      }
+      expect(await prepareCode(h, readOf(readRuleOf(exported)))).toBe('READ_NOT_ALLOWED');
+    }
+  });
+  it('prefers a unique region over application grants and denies equal-priority overlaps', async () => {
+    // The read profile has one application grant per whitelist entry. Two grants for the entry give no single winner, so the
+    // page has no read grant at all and a read is refused; a single grant reads.
+    const profile = observationReadProfile(TEST_DOMAINS);
+    const first = profile.readGrants?.find((grant) => grant.domain === 'localhost');
+    if (first === undefined) throw new Error('GRANT');
+    const overlap = await ready(CELL('nonsecret'), { readProfile: { ...profile, readGrants: [first, { ...first, policyRuleId: 'other-app-read' }] } });
+    expect(readRuleOf(await overlap.session.observe(undefined, false))).toBeNull();
+    expect(await prepareCode(overlap, readOf('other-app-read'))).toBe('READ_NOT_ALLOWED');
+    const single = await ready(CELL('nonsecret'));
+    const exported = await single.session.observe(undefined, false);
+    expect(readRuleOf(exported)).toBe(first.policyRuleId);
+    expect(await invoke(single, await prep(single, readOf(first.policyRuleId), { exported }), readOf(first.policyRuleId), { readRuleId: first.policyRuleId })).toEqual({ value: 'nonsecret' });
+  });
+
+  it('erases the private masking inventory and refuses late repopulation after disposal', async () => {
+    const inventories = new Set<PrivateInventory>();
+    // eslint-disable-next-line @typescript-eslint/unbound-method -- the original is invoked with .call(this, ...) in the wrapper below.
+    const original = PrivateInventory.prototype.withhold;
+    const spy = vi.spyOn(PrivateInventory.prototype, 'withhold').mockImplementation(function (this: PrivateInventory, values: readonly string[]) {
+      inventories.add(this);
+      original.call(this, values);
+    });
     try {
-      const h=await prepared('<input data-testid="field" aria-label="Approved field" value="PRIVATE-CAPTURE-CANARY">');const result=await h.session.invoke?.(h.invocation);if(!result?.value)throw new Error('READ');await h.session.withhold?.([result.value]);expect(inventories.some(options=>options.knownSecrets.includes('PRIVATE-CAPTURE-CANARY'))).toBe(true);
-      await h.session.dispose();expect(inventories.every(options=>options.knownSecrets.length===0)).toBe(true);await expect(h.session.withhold?.(['LATE-CANARY'])).rejects.toThrow('CONTEXT_LOST');expect(inventories.every(options=>options.knownSecrets.length===0)).toBe(true);await expect(h.session.invoke?.(h.invocation)).rejects.toThrow('TARGET_CHANGED');
-    } finally {spy.mockRestore();}
-  });
-
-  it('permits benign focus styling but never writes after focus retypes, detaches or steals the pinned field',async()=>{
-    const positive=await prepared('<style>.focused{border-color:blue}</style><input data-testid="field" aria-label="Approved field" onfocus="this.classList.add(\'focused\')">');positive.invocation.operation={kind:'fill',value:{kind:'authoredLiteral',sourceInputId:'input'}};positive.invocation.resolvedValue='EXPECTED-FILL';await positive.session.invoke?.(positive.invocation);expect(await page.locator('input').inputValue()).toBe('EXPECTED-FILL');
-    for(const handler of ["this.type='password'","this.type='hidden'","this.readOnly=true","this.disabled=true","this.replaceWith(this.cloneNode())","document.querySelector('button').focus()"]){
-      const h=await prepared(`<input data-testid="field" aria-label="Approved field" onfocus="${handler}"><button>Other control</button>`);h.invocation.operation={kind:'fill',value:{kind:'authoredLiteral',sourceInputId:'input'}};h.invocation.resolvedValue='MUST-NOT-WRITE';await expect(h.session.invoke?.(h.invocation)).rejects.toThrow('UNKNOWN_OUTCOME');expect(await page.locator('input').inputValue()).toBe('');
+      const h = await ready(`<main aria-label="Operations"><button>Other</button></main>`);
+      await h.session.withhold?.(['PRIVATE-CAPTURE-CANARY']);
+      expect([...inventories].some((inventory) => inventory.snapshot().some(([value]) => value === 'PRIVATE-CAPTURE-CANARY'))).toBe(true);
+      const exported = await h.session.observe(undefined, false);
+      const prepared = await prep(h, { kind: 'click' }, { name: 'Other', exported });
+      await h.session.dispose();
+      for (const inventory of inventories) {
+        let entries: unknown[] | null = null;
+        try {
+          entries = inventory.snapshot();
+        } catch {
+          entries = null;
+        }
+        expect(entries === null || entries.length === 0).toBe(true);
+      }
+      expect(await codeOf(h.session.withhold?.(['LATE-CANARY']) ?? Promise.resolve())).toBe('CONTEXT_LOST');
+      for (const inventory of inventories) {
+        let entries: unknown[] | null = null;
+        try {
+          entries = inventory.snapshot();
+        } catch {
+          entries = null;
+        }
+        expect(entries === null || entries.length === 0).toBe(true);
+      }
+      expect(await codeOf(invoke(h, prepared, { kind: 'click' }))).toBe('CONTEXT_LOST');
+    } finally {
+      spy.mockRestore();
     }
   });
 
-  it('asserts readonly/disabled nonsecret values without granting password/hidden access',async()=>{
-    for(const attribute of ['readonly','disabled']){
-      const h=await prepared(`<input data-testid="field" aria-label="Approved field" value="expected" ${attribute}>`);h.invocation.operation={kind:'assert',predicate:'hasValue',expected:{kind:'authoredLiteral',sourceInputId:'expected'}};h.invocation.resolvedValue='expected';expect(await h.session.invoke?.(h.invocation)).toEqual({assertionPassed:true});
-    }
-    for(const type of ['password','hidden']){
-      const h=await prepared('<input data-testid="field" aria-label="Approved field" value="expected">');h.invocation.operation={kind:'assert',predicate:'hasValue',expected:{kind:'authoredLiteral',sourceInputId:'expected'}};h.invocation.resolvedValue='expected';await page.locator('input').evaluate((e,type)=>{e.setAttribute('type',type);},type);await expect(h.session.invoke?.(h.invocation)).rejects.toThrow(type === 'password' ? 'PASSWORD_CONTROL_READ_REFUSED' : 'TARGET_CHANGED');
+  it('permits benign focus styling but never writes after focus retypes, detaches or steals the pinned field', async () => {
+    const positive = await ready('<style>.focused{border-color:blue}</style><input aria-label="Approved field" onfocus="this.classList.add(\'focused\')">');
+    await run(positive, FILL, { value: 'EXPECTED-FILL' });
+    expect(await inputValue(positive)).toBe('EXPECTED-FILL');
+    for (const handler of ["this.type='password'", "this.type='hidden'", 'this.readOnly=true', 'this.disabled=true', 'this.replaceWith(this.cloneNode())', "document.querySelector('button').focus()"]) {
+      const h = await ready(`<input aria-label="Approved field" onfocus="${handler}"><button>Other control</button>`);
+      expect(await codeOf(run(h, FILL, { value: 'MUST-NOT-WRITE' }))).toBe('UNKNOWN_OUTCOME');
+      expect(await inputValue(h)).toBe('');
     }
   });
 
-  it.each(['click','hover','check','press'] as const)('reveals the retained below-fold target before native %s',async kind=>{
-    const receipt="document.body.dataset.receipt=String(event.isTrusted)";
-    const element=kind==='check'?`<input type="checkbox" aria-label="Approved field" onchange="${receipt}">`:kind==='press'?`<input aria-label="Approved field" onkeydown="${receipt}">`:`<button aria-label="Approved field" ${kind==='hover'?'onmouseover':'onclick'}="${receipt}">Perform action</button>`;
-    const h=await prepared(`<div style="height:2200px"></div>${element}`,[]);await page.evaluate(()=>{ window.scrollTo(0,0); });h.invocation.operation=kind==='press'?{kind,key:'Enter'}:{kind};expect(await h.session.validateInvocation?.(h.invocation)).toBe(true);expect(await page.evaluate(()=>window.scrollY)).toBe(0);
-    await h.session.invoke?.(h.invocation);expect(await page.evaluate(()=>window.scrollY)).toBeGreaterThan(0);expect(await page.locator('body').getAttribute('data-receipt')).toBe('true');
-  });
-  it('reveals an unchanged target inside nested scrolling containers without reacquiring it',async()=>{
-    const h=await prepared('<section style="height:150px;width:500px;overflow:auto"><div style="height:1200px"></div><section style="height:100px;overflow:auto"><div style="height:900px"></div><button aria-label="Approved field" onclick="document.body.dataset.receipt=String(event.isTrusted)">Perform action</button></section></section>',[]);h.invocation.operation={kind:'click'};expect(await h.session.validateInvocation?.(h.invocation)).toBe(true);await h.session.invoke?.(h.invocation);expect(await page.locator('body').getAttribute('data-receipt')).toBe('true');expect(await page.locator('section').evaluateAll(elements=>elements.every(element=>element.scrollTop>0))).toBe(true);
-  });
-  it.each([['check',true],['uncheck',false]] as const)('does not scroll an already satisfied offscreen %s',async(kind,checked)=>{
-    const h=await prepared(`<div style="height:2200px"></div><input type="checkbox" aria-label="Approved field" ${checked?'checked':''} onchange="document.body.dataset.changed=1">`,[]);await page.evaluate(()=>{ window.scrollTo(0,0); });h.invocation.operation={kind};expect(await h.session.validateInvocation?.(h.invocation)).toBe(true);await h.session.invoke?.(h.invocation);expect(await page.evaluate(()=>window.scrollY)).toBe(0);expect(await page.locator('body').getAttribute('data-changed')).toBeNull();
-  });
-  it('stops uncertain after a scroll handler replaces the retained target, without clicking the replacement',async()=>{
-    const h=await prepared('<div style="height:2200px"></div><button aria-label="Approved field" onclick="document.body.dataset.clicked=1">Perform action</button><script>addEventListener("scroll",()=>{const button=document.querySelector("button");const replacement=button.cloneNode(true);replacement.setAttribute("data-replacement","true");button.replaceWith(replacement);},{once:true});</script>',[]);h.invocation.operation={kind:'click'};expect(await h.session.validateInvocation?.(h.invocation)).toBe(true);await expect(h.session.invoke?.(h.invocation)).rejects.toThrow('UNKNOWN_OUTCOME');expect(await page.locator('button').getAttribute('data-replacement')).toBe('true');expect(await page.locator('body').getAttribute('data-clicked')).toBeNull();
+  it('asserts readonly/disabled nonsecret values without granting password/hidden access', async () => {
+    for (const attribute of ['readonly', 'disabled']) {
+      const h = await ready(`<main aria-label="Operations"><input aria-label="${FIELD}" value="expected" ${attribute}></main>`);
+      expect(await run(h, HAS_VALUE, { value: 'expected' })).toEqual({ assertionPassed: true });
+    }
+    for (const type of ['password', 'hidden']) {
+      const h = await ready(`<main aria-label="Operations"><input aria-label="${FIELD}" value="expected"></main>`);
+      const prepared = await prep(h, HAS_VALUE);
+      await h.page.locator('input').evaluate((e, kind) => {
+        e.setAttribute('type', kind);
+      }, type);
+      expect(await codeOf(invoke(h, prepared, HAS_VALUE, { value: 'expected' }))).toBe(type === 'password' ? 'PASSWORD_CONTROL_READ_REFUSED' : 'TARGET_CHANGED');
+    }
   });
 
+  it.each(['click', 'hover', 'check', 'press'] as const)('reveals the retained below-fold target before native %s', async (kind) => {
+    const receipt = 'document.body.dataset.receipt=String(event.isTrusted)';
+    const element = kind === 'check' ? `<input type="checkbox" aria-label="Approved field" onchange="${receipt}">` : kind === 'press' ? `<input aria-label="Approved field" onkeydown="${receipt}">` : `<button aria-label="Approved field" ${kind === 'hover' ? 'onmouseover' : 'onclick'}="${receipt}">Perform action</button>`;
+    const h = await ready(`<div style="height:2200px"></div>${element}`);
+    await h.page.evaluate(() => {
+      window.scrollTo(0, 0);
+    });
+    const operation: Operation = kind === 'press' ? { kind, key: 'Enter' } : { kind };
+    const prepared = await prep(h, operation);
+    expect(await h.page.evaluate(() => window.scrollY)).toBe(0);
+    await invoke(h, prepared, operation);
+    expect(await h.page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+    expect(await h.page.locator('body').getAttribute('data-receipt')).toBe('true');
+  });
+  it('reveals an unchanged target inside nested scrolling containers without reacquiring it', async () => {
+    const h = await ready('<section style="height:150px;width:500px;overflow:auto"><div style="height:1200px"></div><section style="height:100px;overflow:auto"><div style="height:900px"></div><button aria-label="Approved field" onclick="document.body.dataset.receipt=String(event.isTrusted)">Perform action</button></section></section>');
+    await run(h, { kind: 'click' });
+    expect(await h.page.locator('body').getAttribute('data-receipt')).toBe('true');
+    expect(await h.page.locator('section').evaluateAll((elements) => elements.every((element) => element.scrollTop > 0))).toBe(true);
+  });
+  it.each([['check', true], ['uncheck', false]] as const)('does not scroll an already satisfied offscreen %s', async (kind, checked) => {
+    const h = await ready(`<div style="height:2200px"></div><input type="checkbox" aria-label="Approved field" ${checked ? 'checked' : ''} onchange="document.body.dataset.changed=1">`);
+    await h.page.evaluate(() => {
+      window.scrollTo(0, 0);
+    });
+    const prepared = await prep(h, { kind });
+    await invoke(h, prepared, { kind });
+    expect(await h.page.evaluate(() => window.scrollY)).toBe(0);
+    expect(await h.page.locator('body').getAttribute('data-changed')).toBeNull();
+  });
+  it('stops uncertain after a scroll handler replaces the retained target, without clicking the replacement', async () => {
+    const h = await ready('<div style="height:2200px"></div><button aria-label="Approved field" onclick="document.body.dataset.clicked=1">Perform action</button><script>addEventListener("scroll",()=>{const button=document.querySelector("button");const replacement=button.cloneNode(true);replacement.setAttribute("data-replacement","true");button.replaceWith(replacement);},{once:true});</script>');
+    await h.page.evaluate(() => {
+      window.scrollTo(0, 0);
+    });
+    // The executor's non-committing pre-flight scrolls the target into view, which fires the handler before the fence.
+    expect(['TARGET_CHANGED', 'UNKNOWN_OUTCOME']).toContain(await codeOf(run(h, { kind: 'click' })));
+    expect(await h.page.locator('button').getAttribute('data-replacement')).toBe('true');
+    expect(await h.page.locator('body').getAttribute('data-clicked')).toBeNull();
+  });
 });
 
-describe('QA session privacy and native toggle postconditions',()=>{
-  it.each(['password','text'])('withholds uncaptured %s bytes and aliases after removal and navigation',async type=>{
-    const secret='QA_PRIOR_  private\u200b\n token';const alias='QA_PRIOR_ private token';
-    const h=await prepared(`<input data-testid="field" aria-label="Approved field" type="text"><button>Continue</button>`);
-    await page.locator('input').evaluate((e,args)=>{e.setAttribute('type',args.type);(e as HTMLInputElement).value=args.secret;},{secret,type});
-    const first=await h.session.observe();expect(JSON.stringify(first)).not.toContain('QA_PRIOR_');
-    await page.setContent(`<button>${alias}</button>`);const removed=await h.session.observe();expect(JSON.stringify(removed)).not.toContain('QA_PRIOR_');
-    await page.goto(server.baseUrl+'/next');await page.setContent(`<button>${alias}</button>`);const navigated=await h.session.observe();expect(JSON.stringify(navigated)).not.toContain('QA_PRIOR_');
-    await h.session.dispose();await expect(h.session.observe()).rejects.toThrow();await expect(h.session.withhold?.(['LATE_PRIVATE'])).rejects.toThrow();
+describe('QA session privacy and native toggle postconditions', () => {
+  it.each(['password', 'text'])('withholds uncaptured %s bytes and aliases after removal and navigation', async (type) => {
+    const secret = 'QA_PRIOR_  private​\n token';
+    const alias = 'QA_PRIOR_ private token';
+    const h = await ready('<input aria-label="Approved field" type="text"><button>Continue</button>');
+    await h.page.locator('input').evaluate((e, args) => {
+      e.setAttribute('type', args.type);
+      (e as HTMLInputElement).value = args.secret;
+    }, { secret, type });
+    // The control value must be discovered automatically; an explicit withhold seed would
+    // defeat this uncaptured-value retention oracle.
+    // Native text/password inputs remove line breaks from an assigned value.
+    expect((await h.page.locator('input').inputValue()) === secret.replace(/[\r\n]/gu, '')).toBe(true);
+    const first = await h.session.observe(undefined, false);
+    expect(JSON.stringify(first)).not.toContain('QA_PRIOR_');
+    await h.page.setContent(`<button>${alias}</button>`);
+    expect(JSON.stringify(await h.session.observe(undefined, false))).not.toContain('QA_PRIOR_');
+    await h.page.goto(`${h.origin}/next`);
+    await h.page.setContent(`<button>${alias}</button>`);
+    expect(JSON.stringify(await h.session.observe(undefined, false))).not.toContain('QA_PRIOR_');
+    await h.session.dispose();
+    await expect(h.session.observe(undefined, false)).rejects.toThrow();
+    await expect(h.session.withhold?.(['LATE_PRIVATE'])).rejects.toThrow();
   });
-  it('retains authorized business source text after removal without requiring a capture',async()=>{
-    const value='QA_UNCAPTURED_BUSINESS_7';
-    const h=await prepared(`<main aria-label="Operations"><output role="status" aria-label="Read source">${value}</output></main>`,[],[{policyRuleId:'business',origin:server.baseUrl,region:{kind:'role',role:'main',name:'Operations',exact:true},visibleText:{classification:'permittedBusinessData'}}]);
-    await page.goto(server.baseUrl+'/next');await page.setContent(`<button>${value}</button>`);expect(JSON.stringify(await h.session.observe())).not.toContain(value);
-  });
-  it('fails closed persistently on private inventory count/byte overflow instead of evicting earlier bytes',async()=>{
-    for(const values of [Array.from({length:4097},(_,i)=>`secret-${String(i)}`),Array.from({length:260},(_,i)=>`${String(i)}-`+'x'.repeat(4096))]) {
-      const h=await prepared('<input data-testid="field" aria-label="Approved field" value="EARLIER_SECRET">');
+  it('fails closed persistently on private inventory count/byte overflow instead of evicting earlier bytes', async () => {
+    for (const values of [Array.from({ length: 4097 }, (_, i) => `secret-${String(i)}`), Array.from({ length: 260 }, (_, i) => `${String(i)}-${'x'.repeat(4096)}`)]) {
+      const h = await ready('<input aria-label="Approved field" value="EARLIER_SECRET">');
       await expect(h.session.withhold?.(values)).rejects.toThrow('CONTEXT_LOST');
-      await page.goto(server.baseUrl+'/next');await page.setContent('<button>EARLIER_SECRET</button>');
-      await expect(h.session.observe()).rejects.toThrow();await expect(h.session.withhold?.(['new'])).rejects.toThrow();
+      await h.page.goto(`${h.origin}/next`);
+      await h.page.setContent('<button>EARLIER_SECRET</button>');
+      await expect(h.session.observe(undefined, false)).rejects.toThrow();
+      await expect(h.session.withhold?.(['new'])).rejects.toThrow();
     }
   });
-  it.each(['event.preventDefault()','this.checked=false','this.replaceWith(this.cloneNode())',"this.type='radio'"])('does not report a prevented/reverted/replaced checkbox as success: %s',async handler=>{
-    const h=await prepared(`<input type="checkbox" data-testid="field" aria-label="Approved field" onclick="window.receipt=(window.receipt||0)+1;${handler}">`);
-    h.invocation.operation={kind:'check'};await expect(h.session.invoke?.(h.invocation)).rejects.toThrow('UNKNOWN_OUTCOME');
-    expect(await page.evaluate(()=>Reflect.get(window,'receipt') as unknown)).toBe(1);
+  it.each(['event.preventDefault()', 'this.checked=false', 'this.replaceWith(this.cloneNode())', "this.type='radio'"])('does not report a prevented/reverted/replaced checkbox as success: %s', async (handler) => {
+    const h = await ready(`<input type="checkbox" aria-label="Approved field" onclick="window.receipt=(window.receipt||0)+1;${handler}">`);
+    expect(await codeOf(run(h, { kind: 'check' }))).toBe('UNKNOWN_OUTCOME');
+    expect(await h.page.evaluate(() => Reflect.get(window, 'receipt') as unknown)).toBe(1);
   });
-  it('refuses radio uncheck during preparation and before any native input while allowing radio check',async()=>{
-    const h=await prepared('<input type="radio" checked data-testid="field" aria-label="Approved field" onclick="window.receipt=(window.receipt||0)+1">');
-    h.invocation.operation={kind:'uncheck'};expect(await h.session.validateInvocation?.(h.invocation)).toBe(false);await expect(h.session.invoke?.(h.invocation)).rejects.toThrow('TARGET_CHANGED');
-    expect(await page.locator('input').isChecked()).toBe(true);expect(await page.evaluate(()=>Reflect.get(window,'receipt') as unknown)).toBeUndefined();
-    const unchecked=await prepared('<input type="radio" data-testid="field" aria-label="Approved field" onclick="window.receipt=(window.receipt||0)+1">');unchecked.invocation.operation={kind:'check'};await unchecked.session.invoke?.(unchecked.invocation);expect(await page.locator('input').isChecked()).toBe(true);expect(await page.evaluate(()=>Reflect.get(window,'receipt') as unknown)).toBe(1);
+  it('refuses radio uncheck during preparation and before any native input while allowing radio check', async () => {
+    const h = await ready('<input type="radio" checked aria-label="Approved field" onclick="window.receipt=(window.receipt||0)+1">');
+    const refusal = await rejection(run(h, { kind: 'uncheck' }));
+    expect(refusal).not.toBeNull();
+    expect(await h.page.locator('input').isChecked()).toBe(true);
+    expect(await h.page.evaluate(() => Reflect.get(window, 'receipt') as unknown)).toBeUndefined();
+    const unchecked = await ready('<input type="radio" aria-label="Approved field" onclick="window.receipt=(window.receipt||0)+1">');
+    await run(unchecked, { kind: 'check' });
+    expect(await unchecked.page.locator('input').isChecked()).toBe(true);
+    expect(await unchecked.page.evaluate(() => Reflect.get(window, 'receipt') as unknown)).toBe(1);
   });
 });
 
-it('poisons later observation after an unexpected collector error instead of forgetting prior inventory',async()=>{
-  const h=await prepared('<input data-testid="field" aria-label="Approved field" value="PRIVATE_BEFORE_ERROR">');
-  await page.locator('input').evaluate(e=>{(e as HTMLInputElement).value='\ud800';});
-  await expect(h.session.observe()).rejects.toThrow('INVALID_UNICODE');
-  await page.goto(server.baseUrl+'/next');await page.setContent('<button>PRIVATE_BEFORE_ERROR</button>');await expect(h.session.observe()).rejects.toThrow();
+it('poisons later observation after an unexpected collector error instead of forgetting prior inventory', async () => {
+  const h = await ready('<button aria-label="Approved field">Seed</button>');
+  await h.session.withhold?.(['PRIVATE_BEFORE_ERROR']);
+  await h.page.locator('button').evaluate((e) => {
+    e.textContent = '\ud800';
+  });
+  expect(await codeOf(h.session.observe(undefined, false))).toBe('INVALID_UNICODE');
+  await h.page.goto(`${h.origin}/next`);
+  await h.page.setContent('<button>PRIVATE_BEFORE_ERROR</button>');
+  await expect(h.session.observe(undefined, false)).rejects.toThrow();
 });
 
-it('keeps explicit sensitive-region text private after the region is gone',async()=>{
-  const h=await prepared('<section data-sensitive><span>PRIVATE_REGION_004</span></section><input data-testid="field" aria-label="Approved field">');
-  await page.goto(server.baseUrl+'/next');await page.setContent('<button>PRIVATE_REGION_004</button>');expect(JSON.stringify(await h.session.observe())).not.toContain('PRIVATE_REGION_004');
+it('keeps explicit sensitive-region text private after the region is gone', async () => {
+  const h = await ready('<section data-sensitive><span>PRIVATE_REGION_004</span></section><input aria-label="Approved field">');
+  expect(JSON.stringify(await h.session.observe(undefined, false))).not.toContain('PRIVATE_REGION_004');
+  await h.page.goto(`${h.origin}/next`);
+  await h.page.setContent('<button>PRIVATE_REGION_004</button>');
+  expect(JSON.stringify(await h.session.observe(undefined, false))).not.toContain('PRIVATE_REGION_004');
 });

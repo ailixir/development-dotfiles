@@ -1,6 +1,5 @@
 package com.citi.put.checks.studio.support;
 
-import com.citi.put.checks.studio.guided.policy.ObservationPolicyRepository;
 import com.citi.put.checks.studio.guided.publication.GuidedPlanBuilder;
 import com.citi.put.checks.studio.guided.publication.GuidedPublicationBaseRepository;
 import com.citi.put.checks.studio.guided.publication.GuidedPublicationEvidenceRepository;
@@ -53,41 +52,6 @@ public final class GuidedPublicationEvidenceFixture {
 
   private static ObjectNode freezeSource(
       JdbcTemplate jdbc, TransactionTemplate tx, JsonNode supplied, boolean historical) {
-    JsonNode scope = supplied.path("scope");
-    List<String> origins = new ArrayList<>();
-    scope.path("approvedOrigins").forEach(origin -> origins.add(origin.asText()));
-    if (origins.isEmpty()) {
-      throw new IllegalArgumentException("Fixture must declare its governed origins");
-    }
-    if (!historical) {
-      var policyRepository = new ObservationPolicyRepository(jdbc, C);
-      var currentPolicy =
-          tx.execute(
-              status ->
-                  policyRepository.active(
-                      scope.path("csiId").asText(),
-                      scope.path("applicationId").asText(),
-                      scope.path("environmentId").asText()));
-      if (currentPolicy.isEmpty()) {
-        if (tx.execute(
-                status ->
-                    policyRepository.state(
-                        scope.path("csiId").asText(),
-                        scope.path("applicationId").asText(),
-                        scope.path("environmentId").asText()))
-            .isPresent()) {
-          throw new IllegalStateException("Fixture must not replace an existing unapproved policy");
-        }
-        ObservedPublicationFixture.ensurePolicy(
-            jdbc,
-            scope.path("csiId").asText(),
-            scope.path("applicationId").asText(),
-            scope.path("environmentId").asText(),
-            origins,
-            null,
-            "ALLOW");
-      }
-    }
     return tx.execute(
         status -> {
           var sessions = new GuidedSessionRepository(jdbc, tx, C);
@@ -106,18 +70,12 @@ public final class GuidedPublicationEvidenceFixture {
                       "SELECT variables::text FROM ui_tests WHERE id=?",
                       String.class,
                       UUID.fromString(session.path("testId").asText()))));
-          var properties =
-              new GuidedTranslationProperties(
-                  true,
-                  true,
-                  List.of(scope.path("applicationId").asText()),
-                  List.of(scope.path("environmentId").asText()),
-                  65536,
-                  4096,
-                  60,
-                  "fixture-worker");
+          var properties = new GuidedTranslationProperties(true, 65536, 4096, 60, "fixture-worker");
           ObjectNode manifest =
-              new GuidedSourceClassifier(C, properties, new CredentialPatternScreen())
+              new GuidedSourceClassifier(
+                      C,
+                      new CredentialPatternScreen(),
+                      com.citi.put.checks.studio.support.TestDomains.FIXTURES)
                   .classify(current, session.path("scope"));
           var existing =
               jdbc.queryForList(
@@ -126,8 +84,9 @@ public final class GuidedPublicationEvidenceFixture {
                   id);
           if (existing.isEmpty()) {
             jdbc.update(
-                "INSERT INTO studio_guided_source_manifests(session_id,scope_hash,manifest,manifest_hash) "
-                    + "VALUES (?,?,?::jsonb,?)",
+                "INSERT INTO"
+                    + " studio_guided_source_manifests(session_id,scope_hash,manifest,manifest_hash)"
+                    + " VALUES (?,?,?::jsonb,?)",
                 id,
                 session.path("scopeHash").asText(),
                 manifest.toString(),
@@ -137,25 +96,9 @@ public final class GuidedPublicationEvidenceFixture {
                 "Already frozen fixture source differs; no manifest rewrite permitted");
           }
           jdbc.update(
-              "INSERT INTO studio_guided_translation_state(session_id) VALUES (?) ON CONFLICT(session_id) DO NOTHING",
+              "INSERT INTO studio_guided_translation_state(session_id) VALUES (?) ON"
+                  + " CONFLICT(session_id) DO NOTHING",
               id);
-          if (!historical) {
-            var policies = new ObservationPolicyRepository(jdbc, C);
-            var active =
-                policies
-                    .active(
-                        scope.path("csiId").asText(),
-                        scope.path("applicationId").asText(),
-                        scope.path("environmentId").asText())
-                    .orElseThrow();
-            if (jdbc.queryForObject(
-                    "SELECT count(*) FROM studio_guided_session_policies WHERE session_id=?",
-                    Integer.class,
-                    id)
-                == 0) {
-              policies.freeze(id, active);
-            }
-          }
           return manifest;
         });
   }
@@ -183,12 +126,14 @@ public final class GuidedPublicationEvidenceFixture {
                       id)
                   != 0) {
             throw new IllegalStateException(
-                "Shared original bootstrap must precede every action/preparation and cannot be replaced");
+                "Shared original bootstrap must precede every action/preparation and cannot be"
+                    + " replaced");
           }
           JsonNode material =
               C.parse(
                   jdbc.queryForObject(
-                      "SELECT to_jsonb(m)::text FROM studio_guided_materializations m WHERE session_id=?",
+                      "SELECT to_jsonb(m)::text FROM studio_guided_materializations m WHERE"
+                          + " session_id=?",
                       String.class,
                       id));
           JsonNode inputs = material.path("authored_inputs");
@@ -222,7 +167,6 @@ public final class GuidedPublicationEvidenceFixture {
                   .put("leaseExpiresAt", session.path("owner").path("leaseExpiresAt").asText());
           context.putObject("versions").put("contract", 3);
           context.set("authoredInputs", inputs.deepCopy());
-          context.set("approvedOrigins", session.path("scope").path("approvedOrigins").deepCopy());
           context.set("limits", session.path("limits").deepCopy());
           ArrayNode sourceIds = context.putArray("sourceStepIds");
           session.path("sourceSteps").forEach(step -> sourceIds.add(step.path("stepId")));
@@ -241,17 +185,6 @@ public final class GuidedPublicationEvidenceFixture {
                     id)
                 .forEach(json -> values.add(C.parse(json)));
           }
-          JsonNode policy =
-              C.parse(
-                      jdbc.queryForObject(
-                          "SELECT v.document::text FROM studio_guided_session_policies s JOIN "
-                              + "studio_guided_policy_versions v ON v.policy_id=s.policy_id AND "
-                              + "v.version=s.policy_version WHERE s.session_id=?",
-                          String.class,
-                          id))
-                  .path("applicationPolicy");
-          context.set("applicationPolicy", policy.deepCopy());
-          context.put("policyHash", GuidedContracts.hash(policy));
           ObjectNode identity =
               C.object()
                   .put("workerId", worker)
@@ -338,7 +271,8 @@ public final class GuidedPublicationEvidenceFixture {
               PublicationContracts.copy(
                   C.parse(
                       jdbc.queryForObject(
-                          "SELECT manifest::text FROM studio_guided_source_manifests WHERE session_id=?",
+                          "SELECT manifest::text FROM studio_guided_source_manifests WHERE"
+                              + " session_id=?",
                           String.class,
                           id)));
           if (historical
@@ -404,7 +338,8 @@ public final class GuidedPublicationEvidenceFixture {
                 }
                 if (selected == null) {
                   throw new IllegalArgumentException(
-                      "First fixture step needs authored URL or explicit declared navigation context");
+                      "First fixture step needs authored URL or explicit declared navigation"
+                          + " context");
                 }
                 JsonNode value =
                     manifest
@@ -426,8 +361,8 @@ public final class GuidedPublicationEvidenceFixture {
               }
               URI uri = URI.create(destination);
               origin = uri.getScheme() + "://" + uri.getRawAuthority();
-              if (!contains(session.path("scope").path("approvedOrigins"), origin)) {
-                throw new IllegalArgumentException("Fixture URL is outside governed origins");
+              if (!TestDomains.FIXTURES.allows(destination)) {
+                throw new IllegalArgumentException("Fixture URL is outside the allowed domains");
               }
               String inputId = id + "-destination";
               int reference = references.size();
@@ -580,13 +515,17 @@ public final class GuidedPublicationEvidenceFixture {
             throw new IllegalStateException("Fixture may not overwrite an existing source plan");
           }
           jdbc.update(
-              "INSERT INTO studio_guided_translation_plans(session_id,plan_revision,parent_revision,plan,"
-                  + "plan_hash) VALUES (?,1,0,?::jsonb,?)",
+              "INSERT INTO"
+                  + " studio_guided_translation_plans(session_id,plan_revision,pa"
+                  + "rent_revision,plan,plan_hash)"
+                  + " VALUES (?,1,0,?::jsonb,?)",
               id,
               plan.toString(),
               GuidedContracts.hash(plan));
           jdbc.update(
-              "UPDATE studio_guided_translation_state SET plan_revision=1,continuation='OBSERVING' WHERE session_id=?",
+              "UPDATE studio_guided_translation_state SET plan_revision=1,c"
+                  + "ontinuation='OBSERVING'"
+                  + " WHERE session_id=?",
               id);
           ObjectNode intent =
               C.object()
@@ -596,7 +535,8 @@ public final class GuidedPublicationEvidenceFixture {
                   .put("workerId", worker)
                   .put("expectedFence", fence - 1);
           jdbc.update(
-              "INSERT INTO studio_guided_assignments(session_id,assignment_id,scope_hash,worker_id,"
+              "INSERT INTO studio_guided_assignments(session_id,assignment_"
+                  + "id,scope_hash,worker_id,"
                   + "expected_fence,intent) VALUES (?,?,?,?,?,?::jsonb)",
               id,
               id + "-assignment",
@@ -606,9 +546,13 @@ public final class GuidedPublicationEvidenceFixture {
               intent.toString());
           String inputsHash = GuidedContracts.hash(inputs);
           jdbc.update(
-              "INSERT INTO studio_guided_materializations(session_id,scope_hash,context_id,context_revision,"
-                  + "materialization_revision,worker_id,owner_fence,source_revision,configuration_revision,"
-                  + "authored_inputs_hash,authored_inputs) VALUES (?,?,?,1,1,?,?,?,?,?,?::jsonb)",
+              "INSERT INTO"
+                  + " studio_guided_materializations(session_id,scope_hash,contex"
+                  + "t_id,context_revision,"
+                  + "materialization_revision,worker_id,owner_fence,source_revisi"
+                  + "on,configuration_revision,authored_inputs_hash,authored_inpu"
+                  + "ts)"
+                  + " VALUES (?,?,?,1,1,?,?,?,?,?,?::jsonb)",
               id,
               scopeHash,
               contextId,
@@ -636,32 +580,11 @@ public final class GuidedPublicationEvidenceFixture {
               .put("expiresAt", session.path("expiresAt").asText())
               .put("leaseExpiresAt", session.path("owner").path("leaseExpiresAt").asText());
           context.putObject("versions").put("contract", 3);
-          context.set("approvedOrigins", session.path("scope").path("approvedOrigins"));
           ArrayNode sourceIds = context.putArray("sourceStepIds");
           manifest.path("sourceSteps").forEach(step -> sourceIds.add(step.path("stepId")));
           context.putArray("producers");
           context.putArray("consumerEdges");
           context.set("limits", session.path("limits"));
-          // This test-only structural context on V18 is synthetic input, not a V19
-          // approval/backfill.
-          ObjectNode historicalPolicy =
-              C.object()
-                  .put("policyRuleId", "historical-v18-structural-fixture")
-                  .put("allowStructuralDiscovery", true);
-          historicalPolicy.putArray("readGrants");
-          JsonNode applicationPolicy =
-              historical
-                  ? historicalPolicy
-                  : C.parse(
-                          jdbc.queryForObject(
-                              "SELECT v.document::text FROM studio_guided_session_policies s JOIN "
-                                  + "studio_guided_policy_versions v ON v.policy_id=s.policy_id AND "
-                                  + "v.version=s.policy_version WHERE s.session_id=?",
-                              String.class,
-                              id))
-                      .path("applicationPolicy");
-          context.set("applicationPolicy", applicationPolicy);
-          context.put("policyHash", GuidedContracts.hash(applicationPolicy));
           ObjectNode identity =
               C.object().put("workerId", worker).put("fence", fence).put("scopeHash", scopeHash);
           for (String field : List.of("sourceRevision", "configurationRevision")) {
@@ -735,12 +658,15 @@ public final class GuidedPublicationEvidenceFixture {
                     .put(
                         "configurationRevision",
                         base.document().path("configurationRevision").asText())
+                    .putNull("pressInheritance")
                     .put("preparationId", preparation)
                     .put("requestDigest", digest)
                     .put("evidenceHash", GuidedContracts.hash(execution))
                     .put("authoredInputsHash", inputsHash)
                     .put("expiresAt", PublicationContracts.time(Instant.now().plusSeconds(30)));
             proof.putObject("versions").put("contract", 3);
+            // A page or password-control action reports no element target.
+            proof.putNull("target");
             current = sessions.lock(id);
             current.progress().set("executionEvidence", execution);
             if (observed != null) {
@@ -749,8 +675,10 @@ public final class GuidedPublicationEvidenceFixture {
             }
             sessions.save(current);
             jdbc.update(
-                "INSERT INTO studio_guided_preparations(session_id,preparation_id,context_id,owner_fence,"
-                    + "request_digest,proof,expires_at) VALUES (?,?,?,?,?,?::jsonb,?::timestamptz)",
+                "INSERT INTO"
+                    + " studio_guided_preparations(session_id,preparation_id,contex"
+                    + "t_id,owner_fence,request_digest,proof,expires_at)"
+                    + " VALUES (?,?,?,?,?,?::jsonb,?::timestamptz)",
                 id,
                 preparation,
                 contextId,
@@ -762,7 +690,7 @@ public final class GuidedPublicationEvidenceFixture {
             ObjectNode operation = C.object();
             operation.set("coordinate", exercise.coordinate());
             operation.set("origin", execution.path("origin"));
-            operation.putNull("locator");
+            operation.putNull("target");
             operation.set("operation", exercise.operation());
             ObjectNode ledger =
                 C.object()
@@ -809,8 +737,10 @@ public final class GuidedPublicationEvidenceFixture {
                 throw new IllegalStateException("Historical action digest mismatch");
               }
               jdbc.update(
-                  "INSERT INTO studio_guided_actions(admission_id,session_id,step_id,ordinal,document,"
-                      + "proposal) VALUES (?,?,?,?,?::jsonb,?::jsonb)",
+                  "INSERT INTO"
+                      + " studio_guided_actions(admission_id,session_id,step_id,ordin"
+                      + "al,document,proposal)"
+                      + " VALUES (?,?,?,?,?::jsonb,?::jsonb)",
                   admission,
                   id,
                   exercise.coordinate().path("stepId").asText(),
@@ -821,7 +751,8 @@ public final class GuidedPublicationEvidenceFixture {
               sessions.insertAction(ledger, proposal);
             }
             jdbc.update(
-                "UPDATE studio_guided_preparations SET admission_id=? WHERE session_id=? AND preparation_id=?",
+                "UPDATE studio_guided_preparations SET admission_id=? WHERE session_id=? AND"
+                    + " preparation_id=?",
                 admission,
                 id,
                 preparation);
@@ -829,7 +760,8 @@ public final class GuidedPublicationEvidenceFixture {
             String attemptColumn = historical ? "" : ",attempt_ordinal",
                 attemptValue = historical ? "" : ",0";
             jdbc.update(
-                "INSERT INTO studio_guided_obligation_admissions(session_id,obligation_id,plan_revision,"
+                "INSERT INTO"
+                    + " studio_guided_obligation_admissions(session_id,obligation_id,plan_revision,"
                     + "meaning,proposal,proposal_digest,admission_key,admission_id"
                     + attemptColumn
                     + ") VALUES (?,?,1,?::jsonb,?::jsonb,?,?,?"
@@ -852,8 +784,9 @@ public final class GuidedPublicationEvidenceFixture {
               .put(
                   "sanitizedEvidenceBytes",
                   jdbc.queryForObject(
-                      "SELECT coalesce(sum(octet_length(convert_to(observation::text,'UTF8'))),0)::int FROM "
-                          + "studio_guided_publication_observations WHERE session_id=?",
+                      "SELECT"
+                          + " coalesce(sum(octet_length(convert_to(observation::text,'UTF8'))),0)::int"
+                          + " FROM studio_guided_publication_observations WHERE session_id=?",
                       Integer.class,
                       id));
           sessions.save(current);
@@ -875,15 +808,17 @@ public final class GuidedPublicationEvidenceFixture {
 
   public static void requireV18(JdbcTemplate jdbc) {
     if (!jdbc.queryForObject(
-            "SELECT count(*)=18 AND count(*) FILTER (WHERE success)=18 AND min(version::int)=1 AND "
-                + "max(version::int)=18 AND count(DISTINCT version::int)=18 FROM flyway_schema_history WHERE "
-                + "version IS NOT NULL",
+            "SELECT count(*)=18 AND count(*) FILTER (WHERE success)=18 AN"
+                + "D min(version::int)=1 AND"
+                + " max(version::int)=18 AND count(DISTINCT version::int)=18 FROM"
+                + " flyway_schema_history WHERE version IS NOT NULL",
             Boolean.class)
         || !jdbc.queryForObject(
-            "SELECT current_setting('server_version_num')::integer BETWEEN 150000 AND 159999 AND "
-                + "current_setting('session_replication_role')='origin' AND NOT EXISTS(SELECT 1 FROM pg_trigger "
-                + "WHERE NOT tgisinternal AND tgenabled<>'O' AND tgrelid IN (SELECT oid FROM pg_class WHERE "
-                + "relnamespace=current_schema()::regnamespace))",
+            "SELECT current_setting('server_version_num')::integer BETWEE"
+                + "N 150000 AND 159999 AND"
+                + " current_setting('session_replication_role')='origin' AND NOT EXISTS(SELECT 1"
+                + " FROM pg_trigger WHERE NOT tgisinternal AND tgenabled<>'O' AND tgrelid IN"
+                + " (SELECT oid FROM pg_class WHERE relnamespace=current_schema()::regnamespace))",
             Boolean.class)
         || jdbc.queryForObject(
             "SELECT to_regprocedure('studio_015_relearned_from(text)') IS NOT NULL OR "
@@ -911,8 +846,10 @@ public final class GuidedPublicationEvidenceFixture {
     snapshot.putNull("pinnedBase").putNull("baseProof");
     var plan =
         jdbc.queryForMap(
-            "SELECT p.plan_revision,p.plan::text,p.plan_hash FROM studio_guided_translation_state s JOIN "
-                + "studio_guided_translation_plans p USING(session_id,plan_revision) WHERE s.session_id=?",
+            "SELECT p.plan_revision,p.plan::text,p.plan_hash FROM studio_"
+                + "guided_translation_state s"
+                + " JOIN studio_guided_translation_plans p USING(session_id,plan_revision) WHERE"
+                + " s.session_id=?",
             id);
     JsonNode planBody = C.parse((String) plan.get("plan"));
     com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlan.validate(C, planBody);
@@ -924,9 +861,11 @@ public final class GuidedPublicationEvidenceFixture {
     raw.set("translationPlan", planBody);
     var m =
         jdbc.queryForMap(
-            "SELECT context_id,context_revision,materialization_revision,worker_id,owner_fence,"
-                + "source_revision,configuration_revision,authored_inputs_hash,authored_inputs::text,scope_hash "
-                + "FROM studio_guided_materializations WHERE session_id=?",
+            "SELECT"
+                + " context_id,context_revision,materialization_revision,worker"
+                + "_id,owner_fence,source_revision,configuration_revision,autho"
+                + "red_inputs_hash,authored_inputs::text,scope_hash"
+                + " FROM studio_guided_materializations WHERE session_id=?",
             id);
     JsonNode full = C.parse((String) m.get("authored_inputs"));
     C.validate("v3/authored-inputs", full);
@@ -980,8 +919,10 @@ public final class GuidedPublicationEvidenceFixture {
     C.validate("v3/replay-validation#/definitions/MaterializationEvidence", materialEvidence);
     ArrayNode preps = raw.putArray("preparations");
     jdbc.query(
-            "SELECT preparation_id,proposal::text,proof::text,execution_evidence::text,observation_hash,"
-                + "materialization_revision FROM studio_guided_publication_preparations WHERE session_id=? ORDER BY "
+            "SELECT"
+                + " preparation_id,proposal::text,proof::text,execution_evidenc"
+                + "e::text,observation_hash,materialization_revision"
+                + " FROM studio_guided_publication_preparations WHERE session_id=? ORDER BY "
                 + "preparation_id",
             (rs, n) -> {
               ObjectNode out =
@@ -1010,8 +951,11 @@ public final class GuidedPublicationEvidenceFixture {
         .forEach(admissions::add);
     ArrayNode obligations = raw.putArray("obligationAssociations");
     jdbc.query(
-            "SELECT obligation_id,meaning::text,proposal::text,proposal_digest,admission_id,plan_revision "
-                + "FROM studio_guided_obligation_admissions WHERE session_id=? ORDER BY obligation_id",
+            "SELECT"
+                + " obligation_id,meaning::text,proposal::text,proposal_digest,"
+                + "admission_id,plan_revision"
+                + " FROM studio_guided_obligation_admissions WHERE session_id=? ORDER BY"
+                + " obligation_id",
             (rs, n) -> {
               ObjectNode out =
                   C.object()
@@ -1083,15 +1027,6 @@ public final class GuidedPublicationEvidenceFixture {
     return new PublicationContracts.Evidence(raw);
   }
 
-  private static boolean contains(JsonNode values, String expected) {
-    for (JsonNode value : values) {
-      if (value.asText().equals(expected)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   private static ObjectNode observation(
       String session,
       String scope,
@@ -1099,23 +1034,19 @@ public final class GuidedPublicationEvidenceFixture {
       int generation,
       String origin,
       boolean password) {
-    ObjectNode out =
-        C.object()
-            .put("schemaVersion", 3)
-            .put("sessionId", session)
-            .put("documentId", document)
-            .put("generation", generation)
-            .put("origin", origin)
-            .put("scopeHash", scope)
-            .put("observedAt", PublicationContracts.time(Instant.now()));
-    out.putObject("coverage")
-        .put("mode", "semantic")
-        .put("complete", true)
-        .put("truncated", false)
-        .put("withheldRegions", 0)
-        .put("reason", "complete")
-        .put("passwordControls", password ? 1 : 0);
-    out.putArray("nodes");
+    // ADR-SC-007: an outline plus a facts table; these exercises act on the page or a password
+    // control, so no element is shown (a password control is a line without a ref).
+    var builder = ObservationFixtures.observation().coverage(0, 0, password ? 1 : 0);
+    if (password) {
+      builder.line("  - passwordControl");
+    }
+    ObjectNode out = builder.build();
+    out.put("sessionId", session)
+        .put("documentId", document)
+        .put("generation", generation)
+        .put("origin", origin)
+        .put("scopeHash", scope)
+        .put("observedAt", PublicationContracts.time(Instant.now()));
     return out;
   }
 

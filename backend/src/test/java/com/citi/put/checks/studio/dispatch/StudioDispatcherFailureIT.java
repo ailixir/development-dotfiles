@@ -152,8 +152,7 @@ public class StudioDispatcherFailureIT {
         VaultScope.of("CSI", "Development", f.testId()),
         "PASS",
         canary + "L".repeat(4097));
-    var resolver =
-        new VaultStudioReferenceResolver(provider, (principal, csi, environment, id) -> true);
+    var resolver = new VaultStudioReferenceResolver(provider);
     var sends = new AtomicInteger();
     // This phase uses the real JDBC declaration lookup, resolver facts and owner transaction.
     // Unused dispatch acceptance ports are deliberately absent from this focused constructor.
@@ -672,29 +671,12 @@ public class StudioDispatcherFailureIT {
       String change) throws Exception {
     try (var owner = owner()) {
       var contracts = new com.citi.put.checks.studio.guided.session.GuidedContracts();
-      var policy =
-          contracts
-              .object()
-              .put("version", 1)
-              .put("policyId", "policy")
-              .put("policyVersion", "1")
-              .put("applicationId", "app")
-              .put("environment", "Development")
-              .put("entryPolicyId", "entry")
-              .putNull("applicationPolicy");
-      policy.putArray("allowedOrigins").add("https://orders.example.test");
-      policy.putArray("rules");
       var binding = owner.fixture().original().deepCopy();
       UUID id = UUID.randomUUID();
-      binding
-          .put("executionId", id.toString())
-          .put(
-              "currentPolicyHash",
-              com.citi.put.checks.studio.guided.session.GuidedContracts.hash(policy));
+      binding.put("executionId", id.toString());
       ((com.fasterxml.jackson.databind.node.ObjectNode) binding.path("replayGrant"))
           .put("executionId", id.toString())
-          .put("grantId", UUID.randomUUID().toString())
-          .put("currentPolicyHash", binding.path("currentPolicyHash").asText());
+          .put("grantId", UUID.randomUUID().toString());
       var catalog = contracts.object();
       catalog.set("profile", binding.path("requiredProfile"));
       catalog.set("build", binding.path("requiredBuild"));
@@ -706,7 +688,6 @@ public class StudioDispatcherFailureIT {
               4194304,
               2097152,
               new ObjectMapper().createArrayNode().add(catalog).toString(),
-              new ObjectMapper().createArrayNode().add(policy).toString(),
               1280,
               720);
       var authorization =

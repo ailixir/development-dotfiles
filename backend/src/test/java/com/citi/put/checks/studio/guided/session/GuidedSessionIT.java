@@ -24,6 +24,7 @@ import com.citi.put.checks.studio.guided.publication.ObservedReplayProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
@@ -66,6 +67,12 @@ class GuidedSessionIT {
   private final MutableClock clock = new MutableClock();
   private final TestAccess access = new TestAccess();
   private GuidedSessionRepository repository;
+
+  /**
+   * The fixture's deployment-wide cap on live learning sessions: generous unless a test lowers it.
+   */
+  private int deploymentCap = 1000;
+
   private GuidedSessionService service;
   private GuidedMaterializationService materialization;
   private GuidedAssignmentStore assignments;
@@ -131,7 +138,7 @@ class GuidedSessionIT {
         "CREATE TABLE guided_migration_sentinel(id integer PRIMARY KEY, value text NOT NULL)");
     jdbc.execute("INSERT INTO guided_migration_sentinel VALUES (1,'legacy')");
     // STUDIO-OBS-014 S3: the governed policy and per-CSI budget tables are V19; migrate to head.
-    Flyway.configure().dataSource(source).target("23").load().migrate();
+    Flyway.configure().dataSource(source).target("29").load().migrate();
     repository =
         new GuidedSessionRepository(
             jdbc,
@@ -184,7 +191,7 @@ class GuidedSessionIT {
     assertThat(jdbc.queryForObject("SELECT count(*) FROM studio_guided_sessions", Integer.class))
         .isEqualTo(1);
     ObjectNode changed = start();
-    changed.put("applicationId", "other");
+    changed.put("environmentId", "other");
     assertThatThrownBy(() -> service.start(user, "not-a-uuid", changed))
         .hasMessage("IDEMPOTENCY_CONFLICT");
     GuidedSessionService restarted = newService(new GuidedSessionProperties(true, Map.of()));
@@ -194,8 +201,10 @@ class GuidedSessionIT {
 
   @Test
   void concurrentConflictingStartsHaveOneWinner() throws Exception {
+    // Same principal and test; the second start names the test's first step as its first learned
+    // step (the same selection, spelled out), so both are valid starts with different digests.
     ObjectNode changed = start();
-    changed.put("applicationId", "other");
+    changed.put("firstLearnStepId", STEP_1);
     // GS-T-S2: both requests are valid starts before they compete for one idempotency key.
     assertThat(service.start(user, "control-orders", start()).path("state").asText())
         .isEqualTo("PREPARING");
@@ -210,6 +219,45 @@ class GuidedSessionIT {
                 .filter(n -> n.path("code").asText().equals("IDEMPOTENCY_CONFLICT"))
                 .count())
         .isEqualTo(1);
+    assertThat(results.stream().filter(n -> n.path("state").asText().equals("PREPARING")).count())
+        .isEqualTo(1);
+  }
+
+  @Test
+  void theDeploymentCapRefusesTheNextStartRetryableAndWritesNothing() {
+    // STUDIO-FLEX-001: the (N+1)th live learning session of the deployment is refused 429
+    // LEARNING_CAPACITY_EXHAUSTED with a Retry-After, before any row or charge is written.
+    deploymentCap = 2;
+    // The budget counts live sessions on the database clock, so the fixture clock must be real.
+    clock.now = Instant.now();
+    service = newService(new GuidedSessionProperties(true, Map.of()));
+    String first = service.start(user, "cap-1", start()).path("sessionId").asText();
+    assertThat(service.start(user, "cap-2", start()).path("state").asText()).isEqualTo("PREPARING");
+
+    int sessionsBefore = rows("studio_guided_sessions");
+    int commandsBefore = rows("studio_guided_commands");
+    int daysBefore = rows("studio_guided_csi_token_days");
+    assertThatThrownBy(() -> service.start(user, "cap-3", start()))
+        .isInstanceOfSatisfying(
+            GuidedSessionException.class,
+            refusal -> {
+              assertThat(refusal.getMessage()).isEqualTo("BUDGET_EXCEEDED");
+              assertThat(refusal.status()).isEqualTo(429);
+              assertThat(refusal.messageCode()).isEqualTo("LEARNING_CAPACITY_EXHAUSTED");
+              assertThat(refusal.retryable()).isTrue();
+              assertThat(refusal.retryAfterSeconds()).isBetween(1, 600);
+            });
+    assertThat(rows("studio_guided_sessions")).as("no session row").isEqualTo(sessionsBefore);
+    assertThat(rows("studio_guided_commands")).as("no start command").isEqualTo(commandsBefore);
+    assertThat(rows("studio_guided_csi_token_days")).as("no charge").isEqualTo(daysBefore);
+
+    // A slot frees when a session ends.
+    service.cancel(user, first, "cancel", cancel());
+    assertThat(service.start(user, "cap-3", start()).path("state").asText()).isEqualTo("PREPARING");
+  }
+
+  private int rows(String table) {
+    return jdbc.queryForObject("SELECT count(*) FROM " + table, Integer.class);
   }
 
   @Test
@@ -231,6 +279,71 @@ class GuidedSessionIT {
     assertThat(repository.actions(id)).hasSize(1);
     assertThat(service.read(user, id, "session").path("counters").path("actions").asInt())
         .isEqualTo(1);
+  }
+
+  /**
+   * ADR-SC-007 D2/D15: the target the runner reports on a preparation proof must agree with the
+   * fact the gates admitted. A disagreement is refused EVIDENCE_MISMATCH before the preparation is
+   * stored, so nothing can be admitted on it; the matching report is then accepted.
+   */
+  @Test
+  void storePreparationRefusesEvidenceMismatchBeforeAdmission() {
+    String id = observing();
+    JsonNode proposal = proposal(id);
+    service.observe(worker, id, 1, "observe", observation(id, 1));
+    JsonNode association = planner(id).reserve(id, "admit", proposal);
+    JsonNode reserved = association.path("proposal");
+    String issuedKey = association.path("admissionKey").asText();
+    ObjectNode base = materialization.identity(context(id));
+    base.putNull("pressInheritance")
+        .put("preparationId", UUID.randomUUID().toString())
+        .put("requestDigest", GuidedContracts.hash(reserved))
+        .put("evidenceHash", reserved.path("evidenceHash").asText())
+        .put("authoredInputsHash", reserved.path("authoredInputsHash").asText())
+        .put("expiresAt", clock.now.plusSeconds(20).toString());
+    var oneBad = new java.util.LinkedHashMap<String, JsonNode>();
+    oneBad.put(
+        "role differs",
+        com.citi.put.checks.studio.support.ObservationFixtures.resolvedTarget(
+            "order-reference", "button", "Order number"));
+    oneBad.put(
+        "name differs",
+        com.citi.put.checks.studio.support.ObservationFixtures.resolvedTarget(
+            "order-reference", "text", "Another name"));
+    oneBad.put("a node action with no reported target", contracts.parse("null"));
+    int storedBefore = rows("studio_guided_preparations");
+    for (var bad : oneBad.entrySet()) {
+      ObjectNode proof = base.deepCopy();
+      proof.set("target", bad.getValue());
+      assertThatThrownBy(() -> service.storePreparation(controller, id, 1, reserved, proof))
+          .as(bad.getKey())
+          .isInstanceOfSatisfying(
+              GuidedSessionException.class,
+              refusal -> {
+                assertThat(refusal.getMessage()).isEqualTo("EVIDENCE_MISMATCH");
+                assertThat(refusal.status()).isEqualTo(422);
+              });
+    }
+    assertThat(rows("studio_guided_preparations")).isEqualTo(storedBefore);
+    assertThat(repository.actions(id)).isEmpty();
+    assertThatThrownBy(
+            () ->
+                service.admit(
+                    controller, id, 1, issuedKey, reserved, base.path("preparationId").asText()))
+        .isInstanceOf(GuidedSessionException.class);
+    assertThat(repository.actions(id)).isEmpty();
+    // The runner's report for the same element is stored and admitted.
+    ObjectNode proof = base.deepCopy();
+    proof.set("target", proofTarget(reserved));
+    service.storePreparation(controller, id, 1, reserved, proof);
+    assertThat(rows("studio_guided_preparations")).isEqualTo(storedBefore + 1);
+    assertThat(
+            service
+                .admit(controller, id, 1, issuedKey, reserved, base.path("preparationId").asText())
+                .path("admission")
+                .isObject())
+        .isTrue();
+    assertThat(repository.actions(id)).hasSize(1);
   }
 
   @Test
@@ -281,10 +394,6 @@ class GuidedSessionIT {
         .hasMessage("FORBIDDEN_SCOPE");
     assertThatThrownBy(() -> service.read(user("user-1", "viewer"), id, "session"))
         .hasMessage("FORBIDDEN_SCOPE");
-    access.granted = false;
-    assertThatThrownBy(() -> service.observe(worker, id, 1, "observe", observation(id, 1)))
-        .hasMessage("FORBIDDEN_SCOPE");
-    access.granted = true;
     ObjectNode bad = observation(id, 1);
     bad.put("scopeHash", "0".repeat(64));
     assertThatThrownBy(() -> service.observe(worker, id, 1, "observe", bad))
@@ -628,7 +737,9 @@ class GuidedSessionIT {
     service.clarify(user, id, "answer", answer);
     JsonNode stored = service.clarificationSelection(controller, id, 1, "question-1");
     assertThat(stored.path("choiceId").asText()).isEqualTo("choice-1");
-    assertThat(stored.path("nodeId").asText()).isEqualTo("node-1");
+    // ADR-SC-007: an answer keeps a choice id and a binding, never an element id or a locator.
+    assertThat(stored.has("nodeId")).isFalse();
+    assertThat(stored.has("locator")).isFalse();
     assertThat(stored.path("bindingId").isNull()).isTrue();
     assertThat(stored.path("scopeHash").asText()).isEqualTo(scope(id));
     assertThat(stored.path("sourceRevision").asText()).isEqualTo("1");
@@ -667,10 +778,6 @@ class GuidedSessionIT {
         .hasMessage("FORBIDDEN_SCOPE");
     assertThatThrownBy(() -> service.clarificationSelection(controller, id, 0, "question-1"))
         .hasMessage("STALE_FENCE");
-    access.granted = false;
-    assertThatThrownBy(() -> service.clarificationSelection(controller, id, 1, "question-1"))
-        .hasMessage("FORBIDDEN_SCOPE");
-    access.granted = true;
     access.current = false;
     assertThatThrownBy(() -> service.clarificationSelection(controller, id, 1, "question-1"))
         .hasMessage("REVISION_CONFLICT");
@@ -780,8 +887,8 @@ class GuidedSessionIT {
     JsonNode command =
         contracts.parse(
             jdbc.queryForObject(
-                "SELECT response::text FROM studio_guided_commands WHERE namespace=? AND route='claim'"
-                    + " AND idempotency_key=?",
+                "SELECT response::text FROM studio_guided_commands WHERE namespace=? AND"
+                    + " route='claim' AND idempotency_key=?",
                 String.class,
                 id,
                 "atomic-renew"));
@@ -851,8 +958,8 @@ class GuidedSessionIT {
                           .isNotEqualTo(before.path("owner").path("leaseExpiresAt"));
                       assertThat(
                               jdbc.queryForObject(
-                                  "SELECT count(*) FROM studio_guided_commands"
-                                      + " WHERE namespace=? AND route='claim' AND idempotency_key=?",
+                                  "SELECT count(*) FROM studio_guided_commands WHERE namespace=?"
+                                      + " AND route='claim' AND idempotency_key=?",
                                   Integer.class,
                                   id,
                                   "outer-rollback-renew"))
@@ -1005,7 +1112,9 @@ class GuidedSessionIT {
     String id = observing();
     GuidedContracts checked = org.mockito.Mockito.spy(new GuidedContracts());
     JdbcTemplate queried = org.mockito.Mockito.spy(jdbc);
-    var selected = new GuidedMaterializationService(queried, checked);
+    var selected =
+        new GuidedMaterializationService(
+            queried, checked, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     repository.transaction(
         () -> {
           ObjectNode session = repository.lock(id).document();
@@ -1037,7 +1146,9 @@ class GuidedSessionIT {
   void completeContextLeaseArraysRepresentationRevisionAndForeignProofFallBack() {
     String id = observing();
     GuidedContracts checked = org.mockito.Mockito.spy(new GuidedContracts());
-    var selected = new GuidedMaterializationService(jdbc, checked);
+    var selected =
+        new GuidedMaterializationService(
+            jdbc, checked, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     repository.transaction(
         () -> {
           ObjectNode session = repository.lock(id).document();
@@ -1050,10 +1161,7 @@ class GuidedSessionIT {
                   .toString();
           renewed.withObject("/owner").put("leaseExpiresAt", lease);
           ObjectNode arrays = session.deepCopy();
-          arrays
-              .withObject("/scope")
-              .withArray("approvedOrigins")
-              .add("https://additional.example.test");
+          arrays.withArray("sourceSteps").addObject().put("stepId", "additional-step");
           // Representation-only change of a context-carried object. STUDIO-OBS-012A: versions is
           // the one-key {contract:3}, so the reorder moves the first limits member instead.
           ObjectNode reordered = session.deepCopy();
@@ -1071,7 +1179,8 @@ class GuidedSessionIT {
                     org.mockito.ArgumentMatchers.any());
           }
           var foreign =
-              new GuidedMaterializationService(jdbc, checked)
+              new GuidedMaterializationService(
+                      jdbc, checked, com.citi.put.checks.studio.support.TestDomains.FIXTURES)
                   .verifyAndCapture(session, frozenCallbackIdentities.get(id));
           org.mockito.Mockito.clearInvocations(checked);
           selected.context(session, foreign);
@@ -1097,7 +1206,9 @@ class GuidedSessionIT {
   void contextProofCannotSkipFirstIdentityCanonicalOrFreshLiveRefusal() {
     String id = observing();
     GuidedContracts checked = org.mockito.Mockito.spy(new GuidedContracts());
-    var selected = new GuidedMaterializationService(jdbc, checked);
+    var selected =
+        new GuidedMaterializationService(
+            jdbc, checked, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     repository.transaction(
         () -> {
           ObjectNode session = repository.lock(id).document();
@@ -1131,13 +1242,16 @@ class GuidedSessionIT {
   void observeV2ReusesOnlySecondSchemaAndUnavailableCaptureDefaults() {
     String id = observing();
     GuidedContracts checked = org.mockito.Mockito.spy(new GuidedContracts());
-    var selected = new GuidedMaterializationService(jdbc, checked);
+    var selected =
+        new GuidedMaterializationService(
+            jdbc, checked, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     var localService =
         new GuidedSessionService(
             repository,
             contracts,
             sourceAccess(),
             new GuidedSessionProperties(true, Map.of()),
+            com.citi.put.checks.studio.support.TestDomains.FIXTURES,
             clock);
     installTranslation(localService, jdbc, contracts);
     localService.installBridge(
@@ -1187,6 +1301,7 @@ class GuidedSessionIT {
             validationContracts,
             sourceAccess(),
             new GuidedSessionProperties(true, Map.of()),
+            com.citi.put.checks.studio.support.TestDomains.FIXTURES,
             clock);
     installTranslation(selected, jdbc, contracts);
     selected.installBridge(
@@ -1250,10 +1365,6 @@ class GuidedSessionIT {
         .validate(
             org.mockito.ArgumentMatchers.eq("observation"), org.mockito.ArgumentMatchers.any());
     var selected = observationValidationService(controlled);
-    access.granted = false;
-    assertThatThrownBy(() -> selected.observeV2(worker, id, 1, "denied-observation", request))
-        .hasMessage("FORBIDDEN_SCOPE");
-    access.granted = true;
     assertThatThrownBy(() -> selected.observeV2(worker, id, 2, "wrong-owner", request))
         .hasMessage("STALE_FENCE");
     ObjectNode wrongContext = request.deepCopy().put("contextRevision", 2);
@@ -1377,6 +1488,7 @@ class GuidedSessionIT {
             checked,
             sourceAccess(),
             new GuidedSessionProperties(true, Map.of()),
+            com.citi.put.checks.studio.support.TestDomains.FIXTURES,
             clock);
     installTranslation(selectedService, jdbc, contracts);
     selectedService.installBridge(
@@ -1390,7 +1502,8 @@ class GuidedSessionIT {
     assertThat(repository.actions(id).getFirst()).isEqualTo(dispatched);
     assertThat(
             jdbc.queryForObject(
-                "SELECT count(*) FROM studio_guided_commands WHERE namespace=? AND route='outcomes-v2'",
+                "SELECT count(*) FROM studio_guided_commands WHERE namespace=? AND"
+                    + " route='outcomes-v2'",
                 Integer.class,
                 id))
         .isZero();
@@ -1408,27 +1521,36 @@ class GuidedSessionIT {
     assertThat(repository.actions(id).getFirst()).isEqualTo(report);
     assertThat(
             jdbc.queryForObject(
-                "SELECT count(*) FROM studio_guided_commands WHERE namespace=? AND route='outcomes-v2'",
+                "SELECT count(*) FROM studio_guided_commands WHERE namespace=? AND"
+                    + " route='outcomes-v2'",
                 Integer.class,
                 id))
         .isEqualTo(1);
   }
 
   private GuidedSessionService newService(GuidedSessionProperties properties) {
-    var result = new GuidedSessionService(repository, contracts, sourceAccess(), properties, clock);
+    var result =
+        new GuidedSessionService(
+            repository,
+            contracts,
+            sourceAccess(),
+            properties,
+            com.citi.put.checks.studio.support.TestDomains.FIXTURES,
+            clock);
     installTranslation(result, jdbc, contracts);
     // STUDIO-OBS-008 P2/P3: the real presentation projector, as the production composition wires.
     result.installPresentation(new GuidedPublicPresentationProjector(jdbc, contracts));
-    materialization = new GuidedMaterializationService(jdbc, contracts);
+    materialization =
+        new GuidedMaterializationService(
+            jdbc, contracts, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     assignments = new GuidedAssignmentStore(jdbc, contracts);
     result.installBridge(
         materialization,
         new GuidedPreparationStore(jdbc, contracts),
         new GuidedBindingStore(jdbc, contracts, materialization),
         assignments);
-    // STUDIO-OBS-014 S3: every start needs an approved governed policy for its scope. "other" is
-    // governed too so concurrentConflictingStartsHaveOneWinner races two startable requests.
-    installFixtureGovernance(result);
+    // STUDIO-OBS-014 AC-8: every start passes the per-CSI budget.
+    installFixtureCsiBudget(result);
     // STUDIO-OBS-013/014 S3b: the production recording projection, as GuidedEvidenceConfiguration
     // installs it; the NONE default's null video is invalid v3/result after C2b by design.
     result.installEvidence(
@@ -1440,67 +1562,11 @@ class GuidedSessionIT {
     return result;
   }
 
-  /** Same governed policies and CSI limits; trusted pins cover both raced applications. */
-  private void installFixtureGovernance(GuidedSessionService result) {
-    var trusted = new java.util.ArrayList<JsonNode>();
-    for (String application : List.of("orders", "other")) {
-      for (String environment :
-          application.equals("orders") ? List.of("fixture", "other") : List.of("fixture")) {
-        com.citi.put.checks.studio.support.ObservedPublicationFixture.ensurePolicy(
-            jdbc,
-            "CSI-123",
-            application,
-            environment,
-            List.of("https://orders.example.test"),
-            null,
-            "ALLOW");
-        ObjectNode policy =
-            contracts
-                .object()
-                .put("version", 1)
-                .put("policyId", "policy-" + application + "-" + environment)
-                .put("policyVersion", "1")
-                .put("applicationId", application)
-                .put("environment", environment)
-                .put("entryPolicyId", "entry-" + application);
-        policy.putArray("allowedOrigins").add("https://orders.example.test");
-        policy
-            .putObject("applicationPolicy")
-            .put("policyRuleId", "app")
-            .put("allowStructuralDiscovery", true)
-            .putArray("readGrants");
-        policy.putArray("rules");
-        trusted.add(policy);
-      }
-    }
-    var fixture = com.citi.put.checks.studio.support.ObservedPublicationFixture.properties();
-    var pins =
-        new com.citi.put.checks.studio.guided.publication.ObservedReplayPins(
-            contracts,
-            new com.citi.put.checks.studio.guided.publication.ObservedReplayProperties(
-                true,
-                30000,
-                1048576,
-                4194304,
-                2097152,
-                fixture.catalogJson(),
-                com.citi.put.checks.studio.support.ObservedPublicationFixture.policiesJsonWith(
-                    trusted.toArray(JsonNode[]::new)),
-                1280,
-                720));
-    result.installGovernance(
-        new com.citi.put.checks.studio.guided.policy.ObservationPolicyService(
-            new com.citi.put.checks.studio.guided.policy.ObservationPolicyRepository(
-                jdbc, contracts),
-            contracts,
-            new CsiOwnershipEvaluator(),
-            pins,
-            new com.citi.put.checks.studio.guided.policy.GuidedPolicyProperties(
-                List.of(),
-                com.citi.put.checks.studio.support.ObservedPublicationFixture
-                    .DEFAULT_DESTRUCTIVE_VOCABULARY),
-            new TransactionTemplate(new DataSourceTransactionManager(jdbc.getDataSource()))),
-        new GuidedCsiBudget(jdbc, new GuidedCsiBudgetProperties(1000, 5242880, 640000)));
+  /** The fixture's per-CSI limits: generous, because the raced starts share one CSI. */
+  private void installFixtureCsiBudget(GuidedSessionService result) {
+    result.installCsiBudget(
+        new GuidedCsiBudget(
+            jdbc, new GuidedCsiBudgetProperties(1000, 5242880, 640000), deploymentCap));
   }
 
   private ObjectNode versions() {
@@ -1552,13 +1618,16 @@ class GuidedSessionIT {
     }
     ObjectNode proof = materialization.identity(context(id));
     proof
+        .putNull("pressInheritance")
         .put("preparationId", UUID.randomUUID().toString())
         .put("requestDigest", GuidedContracts.hash(proposal))
         .put("evidenceHash", proposal.path("evidenceHash").asText())
         .put("authoredInputsHash", proposal.path("authoredInputsHash").asText())
         .put("expiresAt", clock.now.plusSeconds(20).toString());
+    proof.set("target", proofTarget(proposal));
     service.storePreparation(actor, id, fence, proposal, proof);
-    return service.admit(actor, id, fence, issuedKey, proposal);
+    return service.admit(
+        actor, id, fence, issuedKey, proposal, proof.path("preparationId").asText());
   }
 
   private JsonNode refusedAdmission(
@@ -1569,13 +1638,15 @@ class GuidedSessionIT {
     }
     ObjectNode proof = materialization.identity(context(id));
     proof
+        .putNull("pressInheritance")
         .put("preparationId", UUID.randomUUID().toString())
         .put("requestDigest", GuidedContracts.hash(proposal))
         .put("evidenceHash", proposal.path("evidenceHash").asText())
         .put("authoredInputsHash", proposal.path("authoredInputsHash").asText())
         .put("expiresAt", clock.now.plusSeconds(20).toString());
+    proof.set("target", proofTarget(proposal));
     service.storePreparation(actor, id, fence, proposal, proof);
-    return service.admit(actor, id, fence, key, proposal);
+    return service.admit(actor, id, fence, key, proposal, proof.path("preparationId").asText());
   }
 
   private JsonNode consume(
@@ -1669,51 +1740,40 @@ class GuidedSessionIT {
               .remaining(plan, obligation.path("obligationId").asText());
           var meanings = new ObjectMapper().createArrayNode();
           for (JsonNode choice : question.path("choices")) {
-            JsonNode node = null;
-            for (JsonNode item : observed.path("nodes")) {
-              if (item.path("nodeId").equals(choice.path("nodeId"))) {
-                if (node != null) {
-                  throw new AssertionError("duplicate clarification observed node");
-                }
-                node = item;
-              }
-            }
-            if (node == null
-                || !node.path("documentId").equals(question.path("documentId"))
-                || !node.path("generation").equals(question.path("generation"))
-                || !node.path("name").equals(choice.path("safeLabel"))
-                || !node.path("role").equals(choice.path("role"))
-                || !node.path("regionId").equals(choice.path("region"))
+            // ADR-SC-007: a choice names one ref of the observation the question is asked on; the
+            // fixture's single offered element is e2 ("Order reference"), and it is the only fact
+            // with that {role, name, evidence}, so it can be offered.
+            String ref = "e2";
+            JsonNode fact = observed.path("facts").path(ref);
+            if (!fact.isObject()
+                || !fact.path("name").equals(choice.path("safeLabel"))
+                || !fact.path("role").equals(choice.path("role"))
+                || !choice.path("region").isNull()
                 || !choice.path("labelSource").asText().equals("PAGE")
-                || !choice.path("bindingId").isNull()
-                || node.path("locatorHints").size() != 1) {
-              throw new AssertionError("clarification committed node prerequisite");
+                || !choice.path("bindingId").isNull()) {
+              throw new AssertionError("clarification committed fact prerequisite");
             }
-            JsonNode locator = node.path("locatorHints").get(0);
-            int matches = 0;
-            for (JsonNode item : observed.path("nodes")) {
-              if (item.path("role").equals(locator.path("role"))
-                  && item.path("name").equals(locator.path("name"))) {
-                matches++;
-              }
-            }
-            if (!locator.path("kind").asText().equals("role")
-                || !locator.path("exact").asBoolean()
-                || !locator.path("role").equals(node.path("role"))
-                || !locator.path("name").equals(node.path("name"))
-                || matches != 1) {
-              throw new AssertionError("clarification unique committed locator prerequisite");
+            var selection =
+                com.citi.put.checks.studio.guided.translation.GuidedGates.selectionOf(fact);
+            if (!com.citi.put.checks.studio.guided.translation.GuidedGates.matchingRefs(
+                    observed.path("facts"), selection)
+                .equals(List.of(ref))) {
+              throw new AssertionError("clarification unique committed selection prerequisite");
             }
             ObjectNode meaning = contracts.object();
             meaning.set("obligationId", obligation.path("obligationId"));
-            meaning.set("nodeId", node.path("nodeId"));
+            meaning.put("ref", ref);
             meaning.set("bindingId", choice.path("bindingId"));
-            meaning.set("locator", locator.deepCopy());
             contracts.validate(
                 "v3/replay-validation#/definitions/ObservedQuestionMeaning", meaning);
             ObjectNode mapping = meanings.addObject();
             mapping.set("choiceId", choice.path("choiceId"));
             mapping.set("meaning", meaning);
+            mapping
+                .putObject("selection")
+                .put("role", selection.role())
+                .put("name", selection.name())
+                .put("evidence", selection.evidence());
           }
           service.translationQuestion(controller, id, 1, "ask", question, meanings);
           return null;
@@ -1754,7 +1814,6 @@ class GuidedSessionIT {
         .put("sourceRevision", "1")
         .put("configurationRevision", "1")
         .put("environmentId", "fixture")
-        .put("applicationId", "orders")
         .set("versions", versions());
   }
 
@@ -1791,36 +1850,6 @@ class GuidedSessionIT {
     return id;
   }
 
-  /**
-   * STUDIO-OBS-014 AC-1 oracle "approved v2 => context hash changes" (po-qa014-rulings b, item 1;
-   * AC-1 clarification h1): the runner context materialized for a session started after v2's
-   * approval carries the v2 application policy and hash(v2), which differs from the hash the v1
-   * session's context carries. The runner's acceptance of only the bound hash is R14's policyHash
-   * tests.
-   */
-  @Test
-  void theRunnerContextOfASessionStartedAfterV2CarriesV2AndItsHash() {
-    String v1Session = observing();
-    ObjectNode v1Context = context(v1Session);
-    ObjectNode v2 = contracts.object();
-    v2.put("policyRuleId", "governed-v2")
-        .put("allowStructuralDiscovery", true)
-        .putArray("readGrants");
-    com.citi.put.checks.studio.support.ObservedPublicationFixture.ensurePolicy(
-        jdbc, "CSI-123", "orders", "fixture", List.of("https://orders.example.test"), v2, "ALLOW");
-    String v2Session = observing();
-    ObjectNode v2Context = context(v2Session);
-
-    assertThat(v2Context.path("applicationPolicy")).isEqualTo(v2);
-    assertThat(v2Context.path("policyHash").asText()).isEqualTo(GuidedContracts.hash(v2));
-    assertThat(v1Context.path("policyHash").asText())
-        .isEqualTo(GuidedContracts.hash(v1Context.path("applicationPolicy")))
-        .isNotEqualTo(v2Context.path("policyHash").asText());
-    assertThat(context(v1Session).path("policyHash"))
-        .as("the v1 session keeps its frozen v1 policy")
-        .isEqualTo(v1Context.path("policyHash"));
-  }
-
   private String scope(String id) {
     return repository.transaction(() -> repository.lock(id).document().path("scopeHash").asText());
   }
@@ -1828,40 +1857,24 @@ class GuidedSessionIT {
   private ObjectNode observation(String id, int generation) {
     ObjectNode o = fixture("observation");
     o.put("sessionId", id).put("scopeHash", scope(id)).put("generation", generation);
-    for (JsonNode n : o.path("nodes")) {
-      ((ObjectNode) n).put("generation", generation);
-    }
     if (clarificationSubject) {
-      JsonNode choice = fixture("clarification").path("choices").get(0);
-      JsonNode policy = context(id).path("applicationPolicy");
-      if (!policy.path("allowStructuralDiscovery").asBoolean()
-          || !policy.path("policyRuleId").isTextual()) {
-        throw new AssertionError("clarification structural policy prerequisite");
-      }
-      ObjectNode node =
-          ((com.fasterxml.jackson.databind.node.ArrayNode) o.path("nodes")).addObject();
-      node.put("nodeId", choice.path("nodeId").asText())
-          .put("documentId", o.path("documentId").asText())
-          .put("generation", generation)
-          .put("role", "textbox")
+      // The clarification fixture offers "Order reference": one more shown element (e2) whose
+      // {role, name, evidence} no other fact shares.
+      o.put("outline", o.path("outline").asText() + "\n  - textbox \"Order reference\" [e2]");
+      ObjectNode fact = o.withObject("/facts").putObject("e2");
+      fact.put("role", "textbox")
           .put("name", "Order reference")
-          .put("elementType", "input")
-          .put("controlType", "text")
-          .put("classification", "structuralOnly")
-          .put("policyRuleId", policy.path("policyRuleId").asText())
-          .put("visible", true)
-          .put("actionable", true)
-          .put("depth", 0)
-          .putNull("parentNodeId")
-          .putNull("regionId")
-          .putNull("formId");
-      node.putArray("labelNodeIds");
-      node.putArray("locatorHints")
+          .put("editable", true)
+          .put("evidence", "Order reference");
+      fact.putArray("evidenceSegments")
           .addObject()
-          .put("kind", "role")
-          .put("role", "textbox")
-          .put("name", "Order reference")
-          .put("exact", true);
+          .put("field", "name")
+          .put("start", 0)
+          .put("end", 15);
+      o.withObject("/projection")
+          .put("totalNodes", 3)
+          .put("shownNodes", 3)
+          .put("outlineBytes", o.path("outline").asText().getBytes(StandardCharsets.UTF_8).length);
     }
     return o;
   }
@@ -1930,8 +1943,9 @@ class GuidedSessionIT {
             org.mockito.Mockito.mock(DispatchAuthorization.class),
             access,
             new GuidedPublicationProperties(true, 3, 15000, 5000, 8388608),
-            new ObservedReplayProperties(
-                true, 30000, 1048576, 4194304, 2097152, "[]", "[]", 1280, 720),
+            new ObservedReplayProperties(true, 30000, 1048576, 4194304, 2097152, "[]", 1280, 720),
+            org.mockito.Mockito.mock(
+                com.citi.put.checks.studio.guided.publication.PublicationProofLauncher.class),
             clock);
     try {
       return publisher
@@ -2017,8 +2031,9 @@ class GuidedSessionIT {
 
     @Override
     public Snapshot resolve(Authentication principal, JsonNode start) {
+      GuidedSessionException.require(granted, "FORBIDDEN_SCOPE", 403);
       ObjectNode session = fixture("session"), scope = (ObjectNode) session.path("scope");
-      for (String field : List.of("environmentId", "applicationId")) {
+      for (String field : List.of("environmentId")) {
         scope.set(field, start.path(field));
       }
       return new Snapshot(scope, session.path("sourceSteps"));
@@ -2027,11 +2042,6 @@ class GuidedSessionIT {
     @Override
     public GuidedSourceReferenceValidator.Sources sources(JsonNode session) {
       return new GuidedSourceReferenceValidator.Sources("1", "1", Map.of(), Map.of());
-    }
-
-    @Override
-    public void checkCurrent(JsonNode session) {
-      GuidedSessionException.require(granted, "FORBIDDEN_SCOPE", 403);
     }
 
     @Override
@@ -2068,6 +2078,7 @@ class GuidedSessionIT {
       java.util.Set.of(
           "duplicateAdmissionAndConcurrentConsumptionNeverRedispatch",
           "conflictingAdmissionAndUniqueCoordinatesFail",
+          "storePreparationRefusesEvidenceMismatchBeforeAdmission",
           "rollbackBeforeDispatchLeavesNoAdmissionAndNoBudgetCharge",
           "takeoverAfterEffectsOrLostAcknowledgmentStopsUnknown",
           "lostAckNeverRetriesAndDelayedCallbackCannotRevive",
@@ -2122,10 +2133,12 @@ class GuidedSessionIT {
       jdbc.update(
           "INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,variables,authoring,"
               + "authoring_revision_inputs,created_by) VALUES (?,'GS-T source','CSI-123','fixture',"
-              + "'chromium',?::jsonb,'[]'::jsonb,?::jsonb,?::jsonb,?)",
+              + "'chromium',?::jsonb,?::jsonb,?::jsonb,?::jsonb,?)",
           SOURCE_TEST,
           mapper.writeValueAsString(
               List.of("Click Order number.", "Assert Order reference is visible.")),
+          // A test may only be learned on the origins it names (STUDIO-GOV-001.4).
+          "[{\"name\":\"appUrl\",\"kind\":\"plain\",\"value\":\"https://orders.example.test\"}]",
           mapper.writeValueAsString(authoring),
           mapper.writeValueAsString(
               com.citi.put.checks.studio.authoring.AuthoringRevisionIdentity.create(
@@ -2193,7 +2206,8 @@ class GuidedSessionIT {
                   jdbc.queryForList(
                       "SELECT csi_id,environment,steps::text,variables::text,authoring::text,"
                           + "authoring_revision_inputs::text,source_revision,configuration_revision"
-                          + " FROM ui_tests WHERE id=? AND deleted_at IS NULL AND quarantined_at IS NULL FOR UPDATE",
+                          + " FROM ui_tests WHERE id=? AND deleted_at IS NULL AND quarantined_at IS"
+                          + " NULL FOR UPDATE",
                       id);
               if (rows.isEmpty()) {
                 return java.util.Optional.empty();
@@ -2228,14 +2242,7 @@ class GuidedSessionIT {
   private static com.citi.put.checks.studio.guided.translation.GuidedTranslationProperties
       planningProperties() {
     return new com.citi.put.checks.studio.guided.translation.GuidedTranslationProperties(
-        true,
-        true,
-        List.of("orders", "other"),
-        List.of("fixture", "other"),
-        131072,
-        2048,
-        60,
-        "worker-1");
+        true, 131072, 2048, 60, "worker-1");
   }
 
   /** The controls can only narrow real current/source/user checks; initialize is never stubbed. */
@@ -2247,34 +2254,6 @@ class GuidedSessionIT {
           String origin) {
     var store =
         new com.citi.put.checks.studio.guided.translation.GuidedTranslationStore(jdbc, contracts);
-    var policy =
-        contracts
-            .object()
-            .put("version", 1)
-            .put("policyId", "gs-t-source-policy")
-            .put("policyVersion", "1")
-            .put("applicationId", "orders")
-            .put("environment", "fixture")
-            .put("entryPolicyId", "blank");
-    policy.putArray("allowedOrigins").add(origin);
-    policy.putArray("rules");
-    policy.putNull("applicationPolicy");
-    var policies = contracts.object().putArray("policies");
-    for (String application : List.of("orders", "other")) {
-      for (String environment : List.of("fixture", "other")) {
-        var configured = policy.deepCopy();
-        configured
-            .put("policyId", "gs-t-" + application + "-" + environment)
-            .put("applicationId", application)
-            .put("environment", environment);
-        policies.add(configured);
-      }
-    }
-    var pins =
-        new com.citi.put.checks.studio.guided.publication.ObservedReplayPins(
-            contracts,
-            new com.citi.put.checks.studio.guided.publication.ObservedReplayProperties(
-                true, 30000, 1048576, 4194304, 2097152, "[]", policies.toString(), 1280, 720));
     var access =
         org.mockito.Mockito.spy(
             new com.citi.put.checks.studio.guided.translation.GuidedProductionSessionAccess(
@@ -2282,24 +2261,23 @@ class GuidedSessionIT {
                     sourceRepository(jdbc, contracts), contracts),
                 new com.citi.put.checks.studio.guided.translation.GuidedSourceClassifier(
                     contracts,
-                    planningProperties(),
-                    new com.citi.put.checks.studio.guided.translation.CredentialPatternScreen()),
+                    new com.citi.put.checks.studio.guided.translation.CredentialPatternScreen(),
+                    com.citi.put.checks.studio.support.TestDomains.FIXTURES),
                 new com.citi.put.checks.studio.guided.translation.GuidedSourceInputResolver(
-                    contracts),
+                    contracts, com.citi.put.checks.studio.support.TestDomains.FIXTURES),
                 store,
                 new com.citi.put.checks.studio.guided.translation.GuidedStepVerifier(store),
                 new CsiOwnershipEvaluator(),
-                pins,
+                com.citi.put.checks.studio.support.TestDomains.FIXTURES,
                 org.mockito.Mockito.mock(
-                    com.citi.put.checks.studio.dispatch.StudioReferenceResolver.class),
-                (principal, csi, environment, secret) -> true));
+                    com.citi.put.checks.studio.dispatch.StudioReferenceResolver.class)));
     org.mockito.Mockito.doAnswer(
             call -> {
-              controls.checkCurrent(call.getArgument(0));
+              controls.resolve(call.getArgument(0), call.getArgument(1));
               return call.callRealMethod();
             })
         .when(access)
-        .checkCurrent(org.mockito.ArgumentMatchers.any());
+        .resolve(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
     org.mockito.Mockito.doAnswer(
             call -> {
               controls.checkSourceCurrent(call.getArgument(0));
@@ -2379,7 +2357,8 @@ class GuidedSessionIT {
   /** Authenticated worker protocol at the existing trusted transport seam, not browser proof. */
   private static ObjectNode blankBootstrap(GuidedContracts contracts, JsonNode context) {
     var request =
-        new com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService(null, contracts)
+        new com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService(
+                null, contracts, com.citi.put.checks.studio.support.TestDomains.FIXTURES)
             .identity(context);
     var evidence =
         contracts
@@ -2450,7 +2429,6 @@ class GuidedSessionIT {
                     .SOURCE_PLAN) {
               var references = response.putArray("sourceReferences");
               var obligations = response.putArray("obligations");
-              response.putArray("needs");
               for (JsonNode step : context.path("sourceSteps")) {
                 String stepId = step.path("stepId").asText();
                 JsonNode secret = null;
@@ -2467,7 +2445,7 @@ class GuidedSessionIT {
                         .put("stepId", stepId)
                         .put("occurrence", 0)
                         .put("operationKind", kind)
-                        .put("targetIntent", secret == null ? "order-reference" : "Password")
+                        .put("targetIntent", secret == null ? "Order number" : "Password")
                         .putNull("scopeIntent")
                         .putNull("needId");
                 if (secret == null) {
@@ -2532,9 +2510,10 @@ class GuidedSessionIT {
               stopped,
               gateway,
               contracts,
-              new com.citi.put.checks.studio.guided.translation.GuidedPromptAssembler(contracts),
+              new com.citi.put.checks.studio.guided.translation.GuidedPromptAssembler(
+                  contracts, com.citi.put.checks.studio.support.TestDomains.FIXTURES),
               new com.citi.put.checks.studio.guided.translation.GuidedSourceInputResolver(
-                  contracts),
+                  contracts, com.citi.put.checks.studio.support.TestDomains.FIXTURES),
               new com.citi.put.checks.studio.guided.translation.GuidedProposalValidator(contracts),
               new com.citi.put.checks.studio.guided.translation.GuidedDependencyPlanner(sessions),
               planningProperties(),
@@ -2622,5 +2601,17 @@ class GuidedSessionIT {
       }
       return association;
     }
+  }
+
+  /**
+   * The ResolvedTarget the runner reports on a preparation proof (ADR-SC-007): for a node action it
+   * is the locator it derived for the picked ref and the {role, name} identity of that element,
+   * which the backend cross-checks against the fact the ref names; null for any other target.
+   */
+  private static JsonNode proofTarget(JsonNode proposal) {
+    return proposal.path("target").path("kind").asText().equals("node")
+        ? com.citi.put.checks.studio.support.ObservationFixtures.resolvedTarget(
+            "order-reference", "text", "Order number")
+        : com.fasterxml.jackson.databind.node.NullNode.instance;
   }
 }

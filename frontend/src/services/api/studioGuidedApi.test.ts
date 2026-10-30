@@ -46,7 +46,6 @@ const START: GuidedStartRequest = {
   sourceRevision: '4',
   configurationRevision: '1',
   environmentId: 'Production',
-  applicationId: '60406',
   versions: { contract: 3 },
 };
 
@@ -359,6 +358,99 @@ describe('capabilities', () => {
       .getCapabilities('a0000000-0000-0000-0000-000000000001')
       .catch((error: unknown) => error);
     expect(httpStatusOf(failure)).toBe(503);
+    expect(calls).toBe(1);
+  });
+});
+
+/**
+ * STUDIO-UNIFY-001.6 AC-04, AC-10: `readLatestGuidedAttempts`. The assertions are on the request that
+ * left the client: the repeated `testId` form, the chunking at 50, and what a cancel or a failure
+ * does.
+ */
+describe('readLatestAttempts', () => {
+  const uuid = (n: number): string => `a0000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
+  const attemptFor = (testId: string) => ({
+    testId,
+    sessionId: `session-${testId}`,
+    state: 'SUCCEEDED',
+    startedAt: '2026-10-23T16:05:12Z',
+    errorCode: null,
+    explanation: null,
+  });
+  const requestedIds: string[][] = [];
+
+  function serveLatest(): void {
+    requestedIds.length = 0;
+    server.use(
+      http.get('*/api/v1/studio/guided-sessions/latest', ({ request }) => {
+        const ids = new URL(request.url).searchParams.getAll('testId');
+        requestedIds.push(ids);
+        return HttpResponse.json({ schemaVersion: 3, attempts: ids.map(attemptFor) });
+      }),
+    );
+  }
+
+  it('sends the ids as a repeated testId parameter, with no brackets and no index', async () => {
+    let search = '';
+    server.use(
+      http.get('*/api/v1/studio/guided-sessions/latest', ({ request }) => {
+        search = new URL(request.url).search;
+        return HttpResponse.json({ schemaVersion: 3, attempts: [] });
+      }),
+    );
+    await studioGuidedApi.readLatestAttempts([uuid(1), uuid(2)]);
+    expect(search).toBe(`?testId=${uuid(1)}&testId=${uuid(2)}`);
+  });
+
+  it('returns the attempts array of the answer', async () => {
+    serveLatest();
+    const attempts = await studioGuidedApi.readLatestAttempts([uuid(1)]);
+    expect(attempts).toEqual([attemptFor(uuid(1))]);
+  });
+
+  it('sends no request for an empty list', async () => {
+    serveLatest();
+    await expect(studioGuidedApi.readLatestAttempts([])).resolves.toEqual([]);
+    expect(requestedIds).toEqual([]);
+  });
+
+  it('collapses duplicates and splits more than 50 ids into chunks of at most 50, merged in order', async () => {
+    serveLatest();
+    const ids = Array.from({ length: 120 }, (_, index) => uuid(index + 1));
+    const attempts = await studioGuidedApi.readLatestAttempts([...ids, ids[0], ids[60]]);
+    expect(requestedIds.map((chunk) => chunk.length).sort((a, b) => a - b)).toEqual([20, 50, 50]);
+    expect(requestedIds.every((chunk) => chunk.length <= 50)).toBe(true);
+    expect(attempts.map((attempt) => attempt.testId)).toEqual(ids);
+  });
+
+  it('rejects quietly when the signal aborts, without logging an API error', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    server.use(
+      http.get('*/api/v1/studio/guided-sessions/latest', async () => {
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        return HttpResponse.json({ schemaVersion: 3, attempts: [] });
+      }),
+    );
+    const controller = new AbortController();
+    const pending = studioGuidedApi
+      .readLatestAttempts([uuid(1)], { signal: controller.signal })
+      .catch((reason: unknown) => reason);
+    controller.abort();
+    expect(await pending).toBeInstanceOf(Error);
+    expect(error).not.toHaveBeenCalled();
+  });
+
+  it('does not retry a failed read: one request, then the rejection', async () => {
+    silenceClientErrorLog();
+    let calls = 0;
+    server.use(
+      http.get('*/api/v1/studio/guided-sessions/latest', () => {
+        calls += 1;
+        return HttpResponse.json({ error: 'X' }, { status: 500 });
+      }),
+    );
+    const failure = await studioGuidedApi.readLatestAttempts([uuid(1)]).catch((reason: unknown) => reason);
+    expect(httpStatusOf(failure)).toBe(500);
     expect(calls).toBe(1);
   });
 });

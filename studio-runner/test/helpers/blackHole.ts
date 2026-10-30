@@ -25,7 +25,7 @@ export function startBlackHole(): Promise<BlackHole> {
       const port = typeof address === 'object' && address !== null ? address.port : 0;
       resolve({
         server: instance,
-        url: `http://127.0.0.1:${String(port)}/never`,
+        url: `http://localhost:${String(port)}/never`,
         close(): Promise<void> {
           // The hung sockets would otherwise keep `close` waiting for ever.
           instance.closeAllConnections();

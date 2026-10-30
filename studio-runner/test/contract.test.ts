@@ -223,7 +223,6 @@ components:
         - referencePolicyHash
         - publicationEvidenceHash
         - scopeHash
-        - currentPolicyHash
         - grantId
         - profile
         - build
@@ -257,8 +256,6 @@ components:
         publicationEvidenceHash:
           type: string
         scopeHash:
-          type: string
-        currentPolicyHash:
           type: string
         grantId:
           type: string

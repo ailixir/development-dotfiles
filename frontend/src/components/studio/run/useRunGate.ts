@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import studioApi from '@/services/api/studioApi';
-import { studioSchedulesApi } from '@/services/api/studioSchedulesApi';
 import type { TestDetailDto } from '@/types/studio/studioTypes';
 import type {
   GuidedStartContext,
@@ -115,22 +114,8 @@ export type LearnFromRequest =
   | { readonly kind: 'drift'; readonly stepId: string; readonly revisionId: string }
   | { readonly kind: 'firstStep' };
 
-/**
- * Whether the caller may start a run of this test, as far as the server has said (story 10.48).
- * `unknown` while the read is pending or after it failed: the server stays the authority, so only an
- * explicit `denied` disables Run.
- */
-export type ExecutePermission = 'allowed' | 'denied' | 'unknown';
-
 export interface RunGateState {
   readonly test: TestDetailDto | null;
-  readonly executePermission: ExecutePermission;
-  /**
-   * True once the capabilities read for the current test has settled, answered or failed (STUDIO-UNIFY-001,
-   * DC-01). `executePermission` reads `'unknown'` both while that read is pending and after it failed,
-   * so it cannot say which; this can. It is false again as soon as the test id changes.
-   */
-  readonly capabilitiesSettled: boolean;
   /**
    * True once the first read of the current test has completed, with a test or with a failure. False
    * for a test id whose read has not completed, however long ago another id's did.
@@ -251,9 +236,6 @@ export function useRunGate(
   const [refusal, setRefusal] = useState<RunRefusalState | null>(null);
   const [phase, setPhase] = useState<RunPhase>('idle');
   const [preparationMessage, setPreparationMessage] = useState<string | null>(null);
-  const [executePermission, setExecutePermission] = useState<ExecutePermission>('unknown');
-  /** The test id whose capabilities read has settled (keyed by id, so a stale render never reads `true`). */
-  const [capabilitiesSettledFor, setCapabilitiesSettledFor] = useState<string | null>(null);
   /** The test id whose first read has completed. */
   const [readDoneFor, setReadDoneFor] = useState<string | null>(null);
   const [learnBlock, setLearnBlock] = useState<LearnStartBlock | null>(null);
@@ -341,61 +323,18 @@ export function useRunGate(
     };
   }, [refreshToken, testId]);
 
-  /*
-   * Story 10.48 (ADR-002 O-22): may this caller run the test at all? Read once per selected test.
-   *
-   * The signal is `GET /tests/{id}/schedule/capabilities` → `canManage`, ruled by @po at
-   * validation: no field on the Studio read model says whether the caller may execute, and
-   * `canManage` is computed server-side as `canWrite` on the test's CSI whether or not scheduling
-   * is enabled. The field is named for scheduling and stands in for execute ONLY while the server's
-   * `canExecute == canWrite`, which `StudioServiceExecuteAuthorizationTest` (AC-7a) pins: if execute
-   * is ever split from write, that test fails and this read must move to a dedicated field.
-   *
-   * A failed, pending or absent read is `unknown` and never disables Run. The server answers a
-   * refused execute with `403`, which `executeRefusalFor` words.
-   */
-  useEffect(() => {
-    let current = true;
-    setExecutePermission('unknown');
-    setCapabilitiesSettledFor(null);
-    if (!testId) {
-      return () => {
-        current = false;
-      };
-    }
-    studioSchedulesApi
-      .capabilities(testId)
-      .then((capabilities) => {
-        if (!current) return;
-        if (typeof capabilities?.canManage === 'boolean') {
-          setExecutePermission(capabilities.canManage ? 'allowed' : 'denied');
-        }
-        setCapabilitiesSettledFor(testId);
-      })
-      .catch(() => {
-        // Unknown, not denied: the read is advisory and the server decides on execute. It has settled.
-        if (current) setCapabilitiesSettledFor(testId);
-      });
-    return () => {
-      current = false;
-    };
-  }, [testId]);
-
   const mode = test ? runModeFor(test.readiness) : null;
   const canLearn = options?.startLearn !== undefined;
   const canRun =
     test !== null &&
     runAvailableFor(test.readiness) &&
     (mode === 'replay' || canLearn) &&
-    phase === 'idle' &&
-    executePermission !== 'denied';
+    phase === 'idle';
 
   const activate = useCallback((intent: Activation) => {
     if (inFlight.current) return;
     if (!test || !testId) return;
     if (intent.type === 'run' && !runAvailableFor(test.readiness)) return;
-    // The server said this caller may not run it: send nothing (story 10.48, AC-10b).
-    if (executePermission === 'denied') return;
 
     inFlight.current = true;
     setPhase(runOptions.current?.isDirty === true ? 'saving' : 'starting');
@@ -551,7 +490,7 @@ export function useRunGate(
         }
       }
     })();
-  }, [executePermission, releaseLatch, test, testId]);
+  }, [releaseLatch, test, testId]);
 
   const run = useCallback(() => activate({ type: 'run' }), [activate]);
   const learnFrom = useCallback(
@@ -561,8 +500,6 @@ export function useRunGate(
 
   return {
     test,
-    executePermission,
-    capabilitiesSettled: testId !== null && capabilitiesSettledFor === testId,
     readDone: testId !== null && readDoneFor === testId,
     loading,
     loadError,

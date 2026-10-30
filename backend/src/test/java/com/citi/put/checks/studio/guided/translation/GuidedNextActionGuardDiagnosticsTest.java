@@ -66,14 +66,19 @@ class GuidedNextActionGuardDiagnosticsTest {
           Gate.NEXT_ACTION_CONTRACT_CALL,
           Gate.NEXT_ACTION_MEANING,
           Gate.NEXT_ACTION_EVIDENCE,
+          Gate.NEXT_TARGET_REF,
           Gate.NEXT_TARGET_INTENT,
+          Gate.NEXT_SELECTED_CHOICE,
+          Gate.NEXT_OPERATION_TARGET,
+          Gate.NEXT_READ_RULE,
           Gate.NEXT_AUTHORED_SOURCE,
           Gate.NEXT_SECRET_POLICY,
           Gate.NEXT_BINDING_MEANING,
-          Gate.NEXT_ASSERTION_PREDICATE);
+          Gate.NEXT_ASSERTION_PREDICATE,
+          Gate.NEXT_ASSERT_TEXT_ABSENT);
 
   @TestFactory
-  Stream<DynamicTest> allTwentyThreeRealSeamsFailAndSucceed() {
+  Stream<DynamicTest> everyRealSeamFailsAndSucceeds() {
     return Stream.concat(SERVICE.stream(), VALIDATOR.stream())
         .flatMap(
             gate ->
@@ -87,10 +92,15 @@ class GuidedNextActionGuardDiagnosticsTest {
                               f.question();
                             }
                             f.fail(gate);
-                            assertSame(
-                                f.sentinel,
+                            GuidedSessionException thrown =
                                 assertThrows(
-                                    GuidedSessionException.class, () -> f.apply(f.gates::add)));
+                                    GuidedSessionException.class, () -> f.apply(f.gates::add));
+                            if (gate == Gate.NEXT_POLICY_CALL) {
+                              assertEquals("POLICY_DENIED", thrown.getMessage());
+                              assertEquals("UNGROUNDED_TARGET", thrown.messageCode());
+                            } else {
+                              assertSame(f.sentinel, thrown);
+                            }
                             assertEquals(
                                 gate == Gate.NEXT_EFFECTIVE_CHOICE_CALL
                                     ? List.of(gate, Gate.NEXT_VALIDATE_ACTION_CALL)
@@ -137,7 +147,7 @@ class GuidedNextActionGuardDiagnosticsTest {
   }
 
   @Test
-  void bothOriginalValidationsRunOnceAndDisabledUsesOldValidatorMockRoutes() throws Throwable {
+  void bothOriginalValidationsRunOnceAndTheServiceAlwaysPassesTheRecorder() throws Throwable {
     var f = new ValidatorFixture(Gate.NEXT_ACTION_MEANING);
     JsonNode materialized =
         f.validator.materializeAction(
@@ -150,36 +160,29 @@ class GuidedNextActionGuardDiagnosticsTest {
             1,
             f.gates::add);
     f.validator.action(
-        f.session, f.progress, f.plan, f.obligation, materialized, f.context, f.gates::add);
+        f.session, f.progress, f.plan, f.obligation, materialized, f.context, null, f.gates::add);
     verify(f.contracts, times(2)).validate(eq("v3/action"), any());
     assertTrue(f.gates.isEmpty());
-    ServiceFixture old = new ServiceFixture();
-    assertSame(old.result, old.apply(Capture.NONE));
-    verify(old.validator, times(1))
-        .materializeAction(any(), any(), any(), any(), any(), any(), eq(1L));
-    verify(old.validator, never())
-        .materializeAction(any(), any(), any(), any(), any(), any(), anyLong(), any());
-    verify(old.validator, times(1)).action(any(), any(), any(), any(), any(), any());
-    verify(old.validator, never()).action(any(), any(), any(), any(), any(), any(), any());
-    ServiceFixture enabled = new ServiceFixture();
-    enabled.apply(enabled.gates::add);
-    verify(enabled.validator, never())
-        .materializeAction(any(), any(), any(), any(), any(), any(), anyLong());
-    verify(enabled.validator, times(1))
-        .materializeAction(any(), any(), any(), any(), any(), any(), eq(1L), any());
-    verify(enabled.validator, times(1)).action(any(), any(), any(), any(), any(), any(), any());
-    var order = inOrder(enabled.validator, enabled.questions, enabled.sessions, enabled.store);
-    order.verify(enabled.validator).sourceSelections(any(), any(), any());
-    order.verify(enabled.validator).remaining(any(), anyString());
-    order.verify(enabled.store).obligation(anyString(), anyString());
-    order.verify(enabled.sessions).runnerContext(any(), anyString(), anyLong());
+    // ADR-SC-007 D5: production always hands the apply a recorder; there is no uncaptured route.
+    ServiceFixture service = new ServiceFixture();
+    var recorder = new GuidedGateRecorder();
+    assertSame(service.result, service.apply(recorder));
+    verify(service.validator, times(1))
+        .materializeAction(any(), any(), any(), any(), any(), any(), eq(1L), eq(recorder));
+    verify(service.validator, times(1))
+        .action(any(), any(), any(), any(), any(), any(), any(), eq(recorder));
+    assertEquals(null, recorder.firstGate());
+    var order = inOrder(service.validator, service.questions, service.sessions, service.store);
+    order.verify(service.validator).sourceSelections(any(), any(), any());
+    order.verify(service.validator).remaining(any(), anyString());
+    order.verify(service.store).obligation(anyString(), anyString());
+    order.verify(service.sessions).runnerContext(any(), anyString(), anyLong());
     order
-        .verify(enabled.validator)
+        .verify(service.validator)
         .materializeAction(any(), any(), any(), any(), any(), any(), anyLong(), any());
-    order.verify(enabled.questions).acceptedObserved(anyString());
-    order.verify(enabled.validator).action(any(), any(), any(), any(), any(), any(), any());
-    order.verify(enabled.store).frozenPolicy(anyString());
-    order.verify(enabled.store).reserveObligation(any(), anyString(), any());
+    order.verify(service.questions).effectiveObserved(anyString());
+    order.verify(service.validator).action(any(), any(), any(), any(), any(), any(), any(), any());
+    order.verify(service.store).reserveObligation(any(), anyString(), any());
   }
 
   @Test
@@ -271,7 +274,7 @@ class GuidedNextActionGuardDiagnosticsTest {
             f.gates::add);
     verify(contracts, times(1)).validate("v3/action", proposal);
     validator.action(
-        f.session, f.progress, f.plan, f.obligation, proposal, f.context, f.gates::add);
+        f.session, f.progress, f.plan, f.obligation, proposal, f.context, null, f.gates::add);
     verify(contracts, times(2)).validate("v3/action", proposal);
     assertTrue(f.gates.isEmpty());
   }
@@ -287,7 +290,14 @@ class GuidedNextActionGuardDiagnosticsTest {
         GuidedSessionException.class,
         () ->
             f.validator.action(
-                f.session, f.progress, f.plan, f.obligation, proposal, f.context, f.gates::add));
+                f.session,
+                f.progress,
+                f.plan,
+                f.obligation,
+                proposal,
+                f.context,
+                null,
+                f.gates::add));
     verify(proposal, times(1)).path("sessionId");
     verify(proposal, never()).path("scopeHash");
     verify(proposal, never()).path("generation");
@@ -375,6 +385,9 @@ class GuidedNextActionGuardDiagnosticsTest {
     final ObjectNode plan = C.object();
     ObjectNode proposal;
 
+    /** The authored literal the G2 text gate compares an assert containsText against. */
+    String literal;
+
     ValidatorFixture(Gate variant) {
       when(contracts.object()).thenAnswer(invocation -> C.object());
       session.putObject("scope");
@@ -385,7 +398,22 @@ class GuidedNextActionGuardDiagnosticsTest {
           .put("kind", "observedDocument")
           .put("contextId", "ctx")
           .put("observationHash", "d".repeat(64));
-      progress.putObject("observation").putObject("coverage").put("passwordControls", 1);
+      ObjectNode observation = progress.putObject("observation");
+      observation.putObject("coverage").put("passwordControls", 1);
+      observation.put("readRuleId", "rule");
+      // ADR-SC-007: the observation the gates judge is a facts table keyed by ref.
+      observation
+          .putObject("facts")
+          .putObject("e1")
+          .put("role", "button")
+          .put("name", "Synthetic")
+          .put("editable", false)
+          .put("evidence", "Synthetic")
+          .putArray("evidenceSegments")
+          .addObject()
+          .put("field", "name")
+          .put("start", 0)
+          .put("end", 9);
       for (String key : List.of("scope", "scopeHash", "owner")) {
         attempt.set(key, session.path(key));
       }
@@ -393,14 +421,7 @@ class GuidedNextActionGuardDiagnosticsTest {
         attempt.set(key, progress.path(key));
       }
       context.putObject("authoredInputs").putArray("inputs");
-      selection
-          .putObject("target")
-          .put("nodeId", "node")
-          .putObject("locator")
-          .put("kind", "role")
-          .put("role", "button")
-          .put("name", "Synthetic")
-          .put("exact", true);
+      selection.putObject("target").put("kind", "node").put("ref", "e1");
       selection.putObject("operation").put("kind", "click");
       plan.putArray("sourceReferences");
       plan.putArray("needs");
@@ -455,7 +476,50 @@ class GuidedNextActionGuardDiagnosticsTest {
         obligation.put("operationKind", "assert").put("predicate", "visible");
         proposal.withObject("/operation").put("kind", "assert").put("predicate", "visible");
       }
+      if (variant == Gate.NEXT_OPERATION_TARGET) {
+        // A check needs a checkbox-like element: the success path picks one, the failure a button.
+        obligation.put("operationKind", "check");
+        proposal.withObject("/operation").put("kind", "check");
+        fact().put("role", "checkbox");
+      }
+      if (variant == Gate.NEXT_READ_RULE) {
+        obligation.put("operationKind", "read").put("needId", "need");
+        plan.withArray("needs").addObject().put("needId", "need").put("bindingId", "binding");
+        ObjectNode operation = proposal.withObject("/operation");
+        operation.put("kind", "read").put("bindingId", "binding");
+        operation
+            .putObject("recipe")
+            .put("kind", "visibleText")
+            .put("classification", "permittedBusinessData")
+            .put("policyRuleId", "rule");
+        fact().put("text", "Synthetic");
+      }
+      if (variant == Gate.NEXT_ASSERT_TEXT_ABSENT) {
+        obligation.put("operationKind", "assert").put("predicate", "containsText");
+        obligation.put("referenceIndex", 0);
+        ObjectNode ref = C.object().put("kind", "authoredLiteral");
+        plan.withArray("sourceReferences").add(ref);
+        ObjectNode input =
+            context
+                .withObject("/authoredInputs")
+                .withArray("inputs")
+                .addObject()
+                .put("inputId", "input");
+        input.set("provenance", ref);
+        ObjectNode operation = proposal.withObject("/operation");
+        operation.put("kind", "assert").put("predicate", "containsText");
+        operation
+            .putObject("expected")
+            .put("kind", "authoredLiteral")
+            .put("sourceInputId", "input");
+        fact().put("text", "Synthetic");
+        literal = "Synthetic";
+      }
       clearInvocations(contracts);
+    }
+
+    ObjectNode fact() {
+      return progress.withObject("/observation/facts/e1");
     }
 
     void fail(Gate gate) {
@@ -469,7 +533,12 @@ class GuidedNextActionGuardDiagnosticsTest {
         }
         case NEXT_ACTION_MEANING -> proposal.put("sessionId", "other");
         case NEXT_ACTION_EVIDENCE -> proposal.put("generation", 2);
+        case NEXT_TARGET_REF -> proposal.withObject("/target").put("ref", "e9");
         case NEXT_TARGET_INTENT -> obligation.put("targetIntent", "other");
+        case NEXT_SELECTED_CHOICE -> obligation.put("reconfirm", true);
+        case NEXT_OPERATION_TARGET -> fact().put("role", "button");
+        case NEXT_READ_RULE -> fact().remove("text");
+        case NEXT_ASSERT_TEXT_ABSENT -> literal = "absent text";
         case NEXT_AUTHORED_SOURCE ->
             proposal.withObject("/operation/value").put("sourceInputId", "other");
         case NEXT_SECRET_POLICY ->
@@ -497,11 +566,7 @@ class GuidedNextActionGuardDiagnosticsTest {
               session, progress, obligation, selection, context, attempt, 1, capture);
         }
       } else {
-        if (capture == Capture.NONE) {
-          validator.action(session, progress, plan, obligation, proposal, context);
-        } else {
-          validator.action(session, progress, plan, obligation, proposal, context, capture);
-        }
+        validator.action(session, progress, plan, obligation, proposal, context, literal, capture);
       }
     }
   }
@@ -533,14 +598,6 @@ class GuidedNextActionGuardDiagnosticsTest {
           .put("stepId", "step")
           .put("text", "Click Synthetic");
       inputs.progress.putObject("resolvedClarifications");
-      inputs
-          .progress
-          .withObject("/observation")
-          .putArray("nodes")
-          .addObject()
-          .put("nodeId", "node")
-          .put("name", "Synthetic")
-          .put("role", "button");
       when(store.state(anyString())).thenReturn(state);
       when(validator.remaining(any(), anyString())).thenReturn(inputs.obligation);
       when(validator.materializeAction(any(), any(), any(), any(), any(), any(), anyLong()))
@@ -548,12 +605,7 @@ class GuidedNextActionGuardDiagnosticsTest {
       when(validator.materializeAction(any(), any(), any(), any(), any(), any(), anyLong(), any()))
           .thenReturn(inputs.proposal);
       when(sessions.runnerContext(any(), anyString(), anyLong())).thenReturn(inputs.context);
-      when(questions.acceptedObserved(anyString())).thenReturn(List.of());
-      when(store.frozenPolicy(anyString()))
-          .thenReturn(
-              C.object()
-                  .put("sideEffectStance", "ALLOW")
-                  .set("destructiveVocabulary", C.object().putArray("items")));
+      when(questions.effectiveObserved(anyString())).thenReturn(List.of());
       when(store.reserveObligation(any(), anyString(), any())).thenReturn(result);
       when(sessions.translationQuestion(
               any(), anyString(), anyLong(), anyString(), any(), any(), any()))
@@ -571,26 +623,20 @@ class GuidedNextActionGuardDiagnosticsTest {
               null,
               validator,
               null,
-              new GuidedTranslationProperties(
-                  true, true, List.of(), List.of(), 131072, 4096, 20, "worker"),
+              new GuidedTranslationProperties(true, 131072, 4096, 20, "worker"),
               Clock.systemUTC());
     }
 
     void question() {
       response.put("status", "CLARIFICATION");
       ObjectNode candidate = response.putObject("question").put("reason", "AMBIGUOUS");
-      ObjectNode meaning =
-          candidate
-              .putArray("choices")
-              .addObject()
-              .putObject("meaning")
-              .put("nodeId", "node")
-              .put("obligationId", "o")
-              .putNull("bindingId");
-      meaning.set("locator", inputs.proposal.path("target").path("locator"));
-      ((ObjectNode) inputs.progress.withObject("/observation").withArray("nodes").get(0))
-          .withArray("locatorHints")
-          .add(meaning.path("locator"));
+      candidate
+          .putArray("choices")
+          .addObject()
+          .putObject("meaning")
+          .put("ref", "e1")
+          .put("obligationId", "o")
+          .putNull("bindingId");
       inputs.attempt.put("kind", "NEXT_ACTION");
       inputs.context.put("workerId", "worker").put("ownerFence", 1).put("contextId", "ctx");
       inputs.progress.set(
@@ -618,12 +664,15 @@ class GuidedNextActionGuardDiagnosticsTest {
                     any(), any(), any(), any(), any(), any(), anyLong(), any()))
                 .thenThrow(sentinel);
         case NEXT_EFFECTIVE_CHOICE_CALL ->
-            when(questions.acceptedObserved(anyString())).thenThrow(sentinel);
+            when(questions.effectiveObserved(anyString())).thenThrow(sentinel);
         case NEXT_VALIDATE_ACTION_CALL ->
             doThrow(sentinel)
                 .when(validator)
-                .action(any(), any(), any(), any(), any(), any(), any());
-        case NEXT_POLICY_CALL -> when(store.frozenPolicy(anyString())).thenThrow(sentinel);
+                .action(any(), any(), any(), any(), any(), any(), any(), any());
+        case NEXT_POLICY_CALL ->
+            // The action guard is pure: its only failure is a refusal. The authored step no
+            // longer names the proposed target, so the guard refuses it as ungrounded.
+            state.withArray("/manifest/sourceSteps").removeAll();
         case NEXT_RESERVATION_CALL ->
             when(store.reserveObligation(any(), anyString(), any())).thenThrow(sentinel);
         default -> throw new AssertionError();

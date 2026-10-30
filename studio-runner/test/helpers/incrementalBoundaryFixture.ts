@@ -33,14 +33,14 @@ function sealWitness(w:Witness):void {
 function expectedCandidate(b:MutableBasis):{artifact:Artifact3;hashes:ObservedHashes} {
   const origin='https://orders.example.test',scopeHash=boundaryHash(b.scope),ids=b.sourceSteps.map(s=>s.stepId);
   // Literal descriptor: one blank-page navigation, then one selected Proceed click per step.
+  const targetOf=(index:number)=>({locator:[{by:'testId' as const,value:`proceed-${String(index).padStart(3,'0')}`}],tier:'testId' as const,identity:{role:'button',name:'Proceed'}});
   const actions:LearnedPlan['actions'][number][]=ids.map((stepId,index)=>{
     const coordinate={stepId,ordinal:0 as const},operation=index===0?{kind:'navigate' as const,destinationInputId:'input-destination'}:{kind:'click' as const};
-    const locator=index===0?null:{kind:'testId' as const,value:`proceed-${String(index).padStart(3,'0')}`,exact:true as const};
-    const actionOrigin=index===0?null:origin;
-    const admissionId=`boundary-admission-${String(index).padStart(3,'0')}`,operationHash=boundaryHash({coordinate,origin:actionOrigin,locator,operation});
-    return index===0?{coordinate,origin:null,locator:null,operation:{kind:'navigate',destinationInputId:'input-destination'},admissionId,operationHash}:{coordinate,origin,locator:need(locator),operation:{kind:'click'},admissionId,operationHash};
+    const actionOrigin=index===0?null:origin,target=index===0?null:targetOf(index);
+    const admissionId=`boundary-admission-${String(index).padStart(3,'0')}`,operationHash=boundaryHash({coordinate,origin:actionOrigin,target,operation});
+    return index===0?{coordinate,origin:null,operation:{kind:'navigate',destinationInputId:'input-destination'},admissionId,operationHash,target:null}:{coordinate,origin,operation:{kind:'click'},admissionId,operationHash,target:need(target)};
   });
-  const guards:Guard[]=ids.map((_,index)=>index===0?{guardId:'g0',origin:null,target:{kind:'initialBlank'}}:{guardId:'g'+String(index),origin,target:{kind:'element',locator:{kind:'testId',value:`proceed-${String(index).padStart(3,'0')}`,exact:true},role:'button',elementType:'button',controlType:'none',classification:'structuralOnly',visible:true,actionable:true,readRuleId:null}});
+  const guards:Guard[]=ids.map((_,index)=>index===0?{guardId:'g0',origin:null,target:{kind:'initialBlank'}}:{guardId:'g'+String(index),origin,target:{kind:'element',...targetOf(index),readRuleId:null}});
   const replay:ReplayAction[]=actions.map((action,index)=>({coordinate:action.coordinate,guardId:'g'+String(index),operation:action.operation}));
   const context={entries:[],evidenceReferences:[]};
   let previous=boundaryHash({domain:'studio.test-config',version:1,...b.configuration,globalContextHash:boundaryHash(context),globalReferences:[]});
@@ -48,7 +48,7 @@ function expectedCandidate(b:MutableBasis):{artifact:Artifact3;hashes:ObservedHa
   for(const [index,source]of b.sourceSteps.entries()){
     const stepInputHash=boundaryHash({domain:'studio.step-input',version:1,stepId:source.stepId,text:source.source,context,references:[]});
     previous=boundaryHash({domain:'studio.step-chain',version:1,stepId:source.stepId,stepInputHash,previous});
-    const action=need(actions[index]),semanticAction={coordinate:action.coordinate,origin:action.origin,locator:action.locator,operation:action.operation,operationHash:action.operationHash};
+    const action=need(actions[index]),semanticAction={coordinate:action.coordinate,origin:action.origin,operation:action.operation,operationHash:action.operationHash,target:action.target};
     stepSnapshotHashes[source.stepId]=boundaryHash({domain:'studio.step-snapshot',version:1,stepId:source.stepId,inputChain:previous,learnedStepHash:boundaryHash({actions:[semanticAction],producedBindings:[],consumedBindings:[]})});
   }
   const pin=need(b.snapshotEvidence.pinnedBase),first=need(ids[0]);
@@ -70,6 +70,7 @@ export function incrementalBoundaryFixture():BoundaryParent {
   const firstPrep=structuredClone(need(b.preparations[0])),firstAction=structuredClone(need(b.actions[0]));
   const choiceTemplate=need(need(publicationFixture.observedChoice.basis.preparations[3]).observedChoice);
   const scopeHash=boundaryHash(b.scope),contextId=b.bootstrap.contextId,header=need(b.materializationEvidence.versions[0]),worker=header.workerId;
+  b.guardAuthorizations=[];
   b.sourceSteps=Array.from({length:100},(_,ordinal)=>({stepId:uuid(ordinal+1),ordinal,source:ordinal===0?'Open https://orders.example.test/start':'Click Proceed'}));
   b.sourceHash=boundaryHash(b.sourceSteps.map(s=>s.source));b.authoringHash=boundaryHash(b.sourceSteps);b.configurationHash=boundaryHash(b.configuration);
   b.snapshotEvidence.current={authoringIdentityVersion:1,authoring:{authoringSchemaVersion:2,globalContext:{entries:[],evidenceReferences:[]},steps:b.sourceSteps.map(s=>({id:s.stepId,text:s.source,context:{entries:[],evidenceReferences:[]}}))},authoredDeclarations:[]};
@@ -96,28 +97,30 @@ export function incrementalBoundaryFixture():BoundaryParent {
     if(index>0){
       const documentId='boundary-document-'+suffix,oldGeneration=index*2-1,freshGeneration=index*2;
       const observe=(generation:number)=>{
-        const observation={schemaVersion:3,sessionId:b.sessionId,scopeHash,documentId,generation,origin,observedAt:'2026-10-08T03:00:05.123456789Z',coverage:{mode:'semantic' as const,complete:true,truncated:false,withheldRegions:0,reason:'complete' as const,passwordControls:0},nodes:[0,1].map(alternative=>({nodeId:`${alternative===0?'alternate':'proceed'}-${suffix}-${String(generation)}`,documentId,generation,role:'button',name:alternative===0?'Alternate':'Proceed',elementType:'button' as const,controlType:'none' as const,classification:'structuralOnly' as const,policyRuleId:'structure-only',visible:true,actionable:true,depth:0,parentNodeId:null,regionId:null,formId:null,labelNodeIds:[],locatorHints:[{kind:'testId' as const,value:`${alternative===0?'alternate':'proceed'}-${suffix}`,exact:true}]}))};
+        const labels=['Alternate','Proceed'];
+        const observation={schemaVersion:3,sessionId:b.sessionId,scopeHash,documentId,generation,origin,observedAt:'2026-10-08T03:00:05.123456789Z',coverage:{withheldRegions:0,unsupportedRegions:0,passwordControls:0},projection:{projected:false,tier:null,totalNodes:2,shownNodes:2,notShown:0,outlineBytes:60},readRuleId:null,outline:labels.map((name,alternative)=>`- button "${name}" [e${String(alternative+1)}]`).join('\n'),facts:Object.fromEntries(labels.map((name,alternative)=>['e'+String(alternative+1),{role:'button',name,editable:false, nameComplete: true, ownTextComplete: true,evidence:name,evidenceSegments:[{field:'name' as const,start:0,end:name.length}]}]))};
         const row={observationHash:boundaryHash(observation),observation};b.observations.push(row);return row;
       };
       const old=observe(oldGeneration),fresh=observe(freshGeneration);
       const oldEvidence={kind:'observedDocument' as const,sessionId:b.sessionId,contextId,documentId,generation:oldGeneration,origin,observationHash:old.observationHash};
       evidence={...oldEvidence,generation:freshGeneration,observationHash:fresh.observationHash};
-      p.proposal.target={nodeId:need(fresh.observation.nodes[1]).nodeId,documentId,generation:freshGeneration,locator:need(need(fresh.observation.nodes[1]).locatorHints[0])};
+      p.proposal.target={kind:'node',ref:'e2',documentId,generation:freshGeneration};
+      p.proof.target={locator:[{by:'testId',value:`proceed-${suffix}`}],tier:'testId',identity:{role:'button',name:'Proceed'}};
       p.proposal.operation={kind:'click'};
       const w=structuredClone(choiceTemplate),clarificationId='boundary-question-'+suffix,requestId='boundary-question-request-'+suffix,attemptId='boundary-question-attempt-'+suffix;
       w.acceptedChoiceId='boundary-choice-'+suffix+'-1';
-      w.meanings=old.observation.nodes.map((node,alternative)=>({choiceId:`boundary-choice-${suffix}-${String(alternative)}`,meaning:{obligationId:obligation.obligationId,nodeId:node.nodeId,bindingId:null,locator:need(node.locatorHints[0])}}));
-      w.context={sessionId:b.sessionId,scopeHash,sourceRevision:b.sourceRevision,configurationRevision:b.configurationRevision,clarificationId,question:{...w.context.question,clarificationId,sessionId:b.sessionId,scopeHash,coordinate,documentId,generation:oldGeneration,choices:w.meanings.map((mapping,alternative)=>({choiceId:mapping.choiceId,safeLabel:alternative===0?'Alternate':'Proceed',labelSource:'PAGE',role:'button',region:null,nodeId:mapping.meaning.nodeId,bindingId:null}))},questionCapture:{...w.context.questionCapture,attemptId,requestId,planRevision:'2',obligationId:obligation.obligationId,workerId:worker,ownerFence:b.bootstrap.ownerFence,contextId,contextRevision:1,authoredInputsHash:b.authoredInputsHash,executionEvidence:oldEvidence,evidenceHash:boundaryHash(oldEvidence),observationHash:old.observationHash}};
+      w.meanings=['e1','e2'].map((ref,alternative)=>{const fact=need(old.observation.facts[ref]);return{choiceId:`boundary-choice-${suffix}-${String(alternative)}`,meaning:{obligationId:obligation.obligationId,ref,bindingId:null},selection:{role:fact.role,name:fact.name,evidence:fact.evidence}};});
+      w.context={sessionId:b.sessionId,scopeHash,sourceRevision:b.sourceRevision,configurationRevision:b.configurationRevision,clarificationId,question:{...w.context.question,clarificationId,sessionId:b.sessionId,scopeHash,coordinate,documentId,generation:oldGeneration,choices:w.meanings.map((mapping,alternative)=>({choiceId:mapping.choiceId,safeLabel:alternative===0?'Alternate':'Proceed',labelSource:'PAGE',role:'button',region:null,bindingId:null}))},questionCapture:{...w.context.questionCapture,attemptId,requestId,planRevision:'2',obligationId:obligation.obligationId,workerId:worker,ownerFence:b.bootstrap.ownerFence,contextId,contextRevision:1,authoredInputsHash:b.authoredInputsHash,executionEvidence:oldEvidence,evidenceHash:boundaryHash(oldEvidence),observationHash:old.observationHash}};
       w.attempt={...w.attempt,attemptId,requestId,responseRequestId:requestId,planRevision:'2',scopeHash,scope:structuredClone(b.scope),owner:{...w.attempt.owner,workerId:worker,fence:b.bootstrap.ownerFence},documentId,generation:oldGeneration,executionEvidence:oldEvidence,projectionHash:boundaryHash({sessionId:b.sessionId,coordinate,observationHash:old.observationHash}),modelQuestion:{reason:'AMBIGUOUS_TARGET',choices:w.meanings.map((mapping,alternative)=>({choiceId:`boundary-provider-${suffix}-${String(alternative)}`,safeLabel:alternative===0?'Alternate':'Proceed',meaning:structuredClone(mapping.meaning)}))}};
       w.questionPlan={revision:'2',planHash:boundaryHash(b.translationPlan),plan:structuredClone(b.translationPlan)};
-      w.receipt={...w.receipt,sessionId:b.sessionId,preparationId,clarificationId,obligationId:obligation.obligationId,acceptedChoiceId:w.acceptedChoiceId,answer:{...w.receipt.answer,sessionId:b.sessionId,scopeHash,clarificationId,coordinate,documentId,generation:oldGeneration,choiceId:w.acceptedChoiceId,nodeId:need(need(w.meanings[1]).meaning.nodeId),bindingId:null,sourceRevision:b.sourceRevision,configurationRevision:b.configurationRevision}};
+      w.receipt={...w.receipt,sessionId:b.sessionId,preparationId,clarificationId,obligationId:obligation.obligationId,acceptedChoiceId:w.acceptedChoiceId,answer:{...w.receipt.answer,sessionId:b.sessionId,scopeHash,clarificationId,coordinate,documentId,generation:oldGeneration,choiceId:w.acceptedChoiceId,bindingId:null,sourceRevision:b.sourceRevision,configurationRevision:b.configurationRevision}};
       sealWitness(w);p.observedChoice=w;
     }
     const evidenceHash=boundaryHash(evidence);
     p.preparationId=preparationId;p.materializationRevision=1;p.observationHash=evidence.kind==='observedDocument'?need(evidence.observationHash):null;p.executionEvidence=structuredClone(evidence);
     p.proposal={...p.proposal,sessionId:b.sessionId,coordinate,scopeHash,generation:evidence.generation,executionEvidence:structuredClone(evidence),evidenceHash,authoredInputsHash:b.authoredInputsHash,contextRevision:1};
-    p.proof={...p.proof,sessionId:b.sessionId,workerId:worker,ownerFence:b.bootstrap.ownerFence,scopeHash,contextId,contextRevision:1,sourceRevision:b.sourceRevision,configurationRevision:b.configurationRevision,preparationId,requestDigest:boundaryHash(p.proposal),evidenceHash,authoredInputsHash:b.authoredInputsHash};
-    const operationHash=boundaryHash({coordinate,origin:evidence.origin,locator:'locator'in p.proposal.target?p.proposal.target.locator:null,operation:p.proposal.operation});
+    p.proof={...p.proof,pressInheritance:null,sessionId:b.sessionId,workerId:worker,ownerFence:b.bootstrap.ownerFence,scopeHash,contextId,contextRevision:1,sourceRevision:b.sourceRevision,configurationRevision:b.configurationRevision,preparationId,requestDigest:boundaryHash(p.proposal),evidenceHash,authoredInputsHash:b.authoredInputsHash};
+    const operationHash=boundaryHash({coordinate,origin:evidence.origin,target:p.proof.target,operation:p.proposal.operation});
     fact.obligationId=obligation.obligationId;fact.preparationId=preparationId;
     fact.ledger={...fact.ledger,sessionId:b.sessionId,coordinate,idempotencyKey:'boundary-request-'+suffix,requestDigest:p.proof.requestDigest,scopeHash,operationHash,generation:evidence.generation,documentId:evidence.documentId,ownerFence:b.bootstrap.ownerFence,admission:{admissionId,authorizationId:b.runAuthorization.authorizationId,admittedAt:'2026-10-08T03:00:10Z',policyDecisionHash:boundaryHash({scopeHash,preparation:p.proof,requestDigest:p.proof.requestDigest})},state:'SUCCEEDED',dispatchCount:1,outcomeCode:'OK',assertionPassed:null,executionEvidence:structuredClone(evidence),evidenceHash,authoredInputsHash:b.authoredInputsHash,contextRevision:1,preparationId,attemptOrdinal:0};
     b.preparations.push(p);b.actions.push(fact);b.obligationAssociations.push({obligationId:obligation.obligationId,coordinate,admissionId,proposalHash:p.proof.requestDigest});

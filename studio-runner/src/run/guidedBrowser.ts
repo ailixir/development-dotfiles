@@ -181,10 +181,10 @@ export interface GuidedBrowser {
 }
 
 /** Why an already running guided browser reported itself lost. Closed vocabulary, no free text. */
-export type GuidedLossReason = 'PAGE_CRASH' | 'EXTRA_PAGE' | 'BROWSER_DISCONNECTED' | 'ROUTE_FAILURE';
+export type GuidedLossReason = 'PAGE_CRASH' | 'EXTRA_PAGE' | 'BROWSER_DISCONNECTED';
 
 /** Last launch step entered before a launch failure. Closed vocabulary, no free text. */
-export type GuidedLaunchPhase = 'PROFILE' | 'PROCESS' | 'PROBE' | 'STARTUP_PAGE' | 'APP_PAGE' | 'ROUTING' | 'BLANK_DOCUMENT';
+export type GuidedLaunchPhase = 'PROFILE' | 'PROCESS' | 'PROBE' | 'STARTUP_PAGE' | 'APP_PAGE' | 'BLANK_DOCUMENT';
 
 /**
  * A launch that failed. The wire code stays `CONTEXT_LOST`, but the original error is kept as `cause`

@@ -2,12 +2,15 @@ import axios, { type AxiosResponseTransformer } from 'axios';
 import { studioVideoUrl } from '@/components/studio/evidence/studioVideoUrl';
 import {
   GUIDED_ERROR_CODES,
+  GUIDED_LATEST_ATTEMPTS_MAX_TEST_IDS,
   type CancelRequest,
   type ClarifyRequest,
   type FinalizeRequest,
   type GuidedClarification,
   type GuidedError,
   type GuidedErrorCode,
+  type GuidedLatestAttempt,
+  type GuidedLatestAttempts,
   type GuidedResult,
   type GuidedResultRead,
   type GuidedSessionView,
@@ -21,8 +24,8 @@ import apiClient from './apiClient';
 /**
  * Guided-session client (STUDIO-OBS-008 AC-1, W2.0 interface drop), typed against
  * `docs/specs/studio/openapi.yaml` operations `startGuidedSession`, `readGuidedSession`,
- * `readGuidedResult`, `readGuidedClarification`, `clarifyGuidedSession`, `cancelGuidedSession` and
- * `finalizeObservedPublication`. All calls go through `apiClient` (base `/api/v1`).
+ * `readGuidedResult`, `readGuidedClarification`, `clarifyGuidedSession`, `cancelGuidedSession`,
+ * `finalizeObservedPublication` and `readLatestGuidedAttempts`. All calls go through `apiClient` (base `/api/v1`).
  *
  * Every guided mutation takes a **required** `Idempotency-Key` (`GuidedIdempotencyKey`, 1..256
  * characters; ruling D-1, plan B5). The key is the caller's: it is stable per logical operation and
@@ -85,6 +88,8 @@ function defaultResponseTransforms(): AxiosResponseTransformer[] {
   return Array.isArray(defaults) ? defaults : [defaults];
 }
 
+const LATEST_ATTEMPTS_PATH = `${GUIDED_SESSIONS_PATH}/latest`;
+
 const KEEP_SUCCESS_STATUS: AxiosResponseTransformer[] = [
   ...defaultResponseTransforms(),
   (data: unknown, _headers, status?: number) =>
@@ -97,7 +102,7 @@ export const studioGuidedApi = {
   /**
    * `POST /studio/guided-sessions` (`startGuidedSession`, `202`). `body` is the capability's exact
    * `guidedStart.context` plus the optional `baseRevisionId` and `firstLearnStepId` hints. A `409`
-   * or `429` refusal rejects (`REVISION_CONFLICT`, `POLICY_NOT_APPROVED`, `BUDGET_EXCEEDED`, …) and
+   * or `429` refusal rejects (`REVISION_CONFLICT`, `BUDGET_EXCEEDED`, …) and
    * leaves nothing written. A lost response retries the exact body under the same key.
    */
   startSession: async (
@@ -181,6 +186,39 @@ export const studioGuidedApi = {
     ),
 
   /**
+   * `GET /studio/guided-sessions/latest?testId=…&testId=…` (`readLatestGuidedAttempts`): the
+   * caller's own latest terminal learning attempt for each test that has one. A test with none, an
+   * unknown test and one the caller cannot read are simply absent from the answer. The route takes
+   * 1..50 ids, so an empty list resolves `[]` without a request and a longer one is split into
+   * chunks of 50 (duplicates collapse first) whose answers are merged in request order.
+   *
+   * `signal` cancels every chunk (story .5: a cancelled call rejects quietly). This is a best-effort
+   * read for a caption, so a failed call is not retried: the caller shows nothing instead.
+   */
+  readLatestAttempts: async (
+    testIds: readonly string[],
+    options: { signal?: AbortSignal } = {},
+  ): Promise<GuidedLatestAttempt[]> => {
+    const unique = [...new Set(testIds)];
+    const chunks: string[][] = [];
+    for (let at = 0; at < unique.length; at += GUIDED_LATEST_ATTEMPTS_MAX_TEST_IDS) {
+      chunks.push(unique.slice(at, at + GUIDED_LATEST_ATTEMPTS_MAX_TEST_IDS));
+    }
+    const answers = await Promise.all(
+      chunks.map((chunk) =>
+        apiClient.get<GuidedLatestAttempts>(LATEST_ATTEMPTS_PATH, {
+          params: { testId: chunk },
+          // `testId=a&testId=b`, the contract's repeated form; axios's default adds `[]`.
+          paramsSerializer: { indexes: null },
+          signal: options.signal,
+          __doNotRetry: true,
+        }),
+      ),
+    );
+    return answers.flatMap((answer) => (Array.isArray(answer?.attempts) ? answer.attempts : []));
+  },
+
+  /**
    * The `<video src>` for `getGuidedSessionVideo`: built from `sessionId`, like
    * {@link studioVideoUrl} builds execution video. No fetch and no token query; the ambient session
    * authorizes the native request. Render only when `result.evidence.video.status` is `AVAILABLE`.
@@ -206,7 +244,6 @@ export function startBodyFrom(input: GuidedStartRequest): GuidedStartRequest {
     sourceRevision: input.sourceRevision,
     configurationRevision: input.configurationRevision,
     environmentId: input.environmentId,
-    applicationId: input.applicationId,
     versions: { contract: 3 },
   };
   if (input.baseRevisionId !== undefined) body.baseRevisionId = input.baseRevisionId;

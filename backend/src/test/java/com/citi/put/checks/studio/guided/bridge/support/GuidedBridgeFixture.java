@@ -133,7 +133,7 @@ final class GuidedBridgeFixture {
     // AC-12 h: an exclusive bind on both loopback families, outside the database range.
     runnerPort = RunnerProcessHarness.exclusivelyFreePort();
     application = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-    origin = "http://127.0.0.1:" + application.getAddress().getPort();
+    origin = "http://localhost:" + application.getAddress().getPort();
     application.createContext(
         "/connect",
         exchange -> {
@@ -155,8 +155,8 @@ final class GuidedBridgeFixture {
             }
           }
           String html =
-              "<html><body><main aria-label='Operations'><output aria-label='Order number' "
-                  + "data-testid='source'>"
+              "<html><body><main aria-label='Operations'><output aria-label='Order number'"
+                  + " style='white-space:pre' data-testid='source'>"
                   + capture
                   + "</output></main><input aria-label='Destination' data-testid='destination' "
                   + "oninput=\"fetch('/receipt',{method:'POST',body:this.value})\"><button "
@@ -170,7 +170,7 @@ final class GuidedBridgeFixture {
           if (genericRead) {
             html =
                 "<html><body><main aria-label='Operations'>"
-                    + "<output aria-label='Order reference'>"
+                    + "<output aria-label='Order reference' style='white-space:pre'>"
                     + capture
                     + "</output>"
                     + "<label>Destination<textarea oninput=\"fetch('/receipt',"
@@ -271,7 +271,7 @@ final class GuidedBridgeFixture {
     Flyway.configure()
         .dataSource(database.getJdbcUrl(), database.getUsername(), database.getPassword())
         .locations("classpath:db/migration")
-        .target("23") // STUDIO-OBS-014 S3: governance tables (V19) at head
+        .target("29")
         .load()
         .migrate();
   }
@@ -284,31 +284,6 @@ final class GuidedBridgeFixture {
         () -> Base64.getEncoder().encodeToString(issuer.getPublic().getEncoded()));
     registry.add("studio.guided-authoring.service-issuer", () -> "fixture-issuer");
     registry.add("studio.guided-authoring.mtls-required", () -> true);
-  }
-
-  ObjectNode governedPolicy() {
-    ObjectNode policy =
-        contracts
-            .object()
-            .put("policyRuleId", "structural-policy")
-            .put("allowStructuralDiscovery", true);
-    ObjectNode grant =
-        contracts.object().put("policyRuleId", "business-read").put("origin", origin);
-    grant
-        .putObject("region")
-        .put("kind", "role")
-        .put("role", "main")
-        .put("name", "Operations")
-        .put("exact", true);
-    grant.putObject("visibleText").put("classification", "permittedBusinessData");
-    grant
-        .putObject("controlValue")
-        .put("classification", "nonsecretApproved")
-        .putArray("types")
-        .add("text")
-        .add("textarea");
-    policy.putArray("readGrants").add(grant);
-    return policy;
   }
 
   String token(String role, String subject, String audience) {

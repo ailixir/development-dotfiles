@@ -190,11 +190,17 @@ public final class ObservedRevisionVerifier {
           new java.util.TreeSet<String>(
               com.citi.put.checks.studio.authoring.IncrementalAuthoringIdentity.UTF8);
       for (JsonNode recipe : artifact.path("inputRecipes")) {
-        if (recipe.path("provenance").path("kind").asText().equals("configuration")) {
-          (recipe.path("kind").asText().equals("secretRef") ? secrets : plain)
-              .add(recipe.path("provenance").path("referenceName").asText());
+        if (recipe.path("kind").asText().equals("secretRef")
+            && recipe.path("provenance").path("kind").asText().equals("configuration")) {
+          secrets.add(recipe.path("provenance").path("referenceName").asText());
         }
       }
+      // A template span (text mixed with <var NAME> tokens) declares the variables it names.
+      plain.addAll(
+          com.citi.put.checks.studio.guided.bridge.SourceTemplate.declaredPlainVariables(
+              artifact.path("inputRecipes"),
+              stepId ->
+                  text(GuidedPlanBuilder.unique(authoring.path("steps"), "id", stepId), "text")));
       require(
           mapper.valueToTree(plain).equals(references.path("variables"))
               && mapper.valueToTree(secrets).equals(references.path("secrets")),
@@ -247,9 +253,7 @@ public final class ObservedRevisionVerifier {
             operation.path("coordinate").equals(original.path("coordinate"))
                 && operation.path("operation").equals(original.path("operation"))
                 && guard.path("origin").equals(original.path("origin"))
-                && (original.path("locator").isNull()
-                    ? !guard.path("target").has("locator")
-                    : guard.path("target").path("locator").equals(original.path("locator"))),
+                && guardTargetsAction(guard.path("target"), original.path("target")),
             "OPERATION_MISMATCH",
             409);
         operations.add(operation);
@@ -314,5 +318,19 @@ public final class ObservedRevisionVerifier {
     result.set("policy", policy);
     result.set("receipt", receipt);
     return result;
+  }
+
+  /**
+   * ADR-SC-007 D3: the Guard's element target is the very ResolvedTarget the learned action carries
+   * (locator, tier, identity); an action without a target has no element Guard.
+   */
+  private static boolean guardTargetsAction(JsonNode guardTarget, JsonNode actionTarget) {
+    if (!actionTarget.isObject()) {
+      return !guardTarget.path("kind").asText().equals("element");
+    }
+    return guardTarget.path("kind").asText().equals("element")
+        && guardTarget.path("locator").equals(actionTarget.path("locator"))
+        && guardTarget.path("tier").equals(actionTarget.path("tier"))
+        && guardTarget.path("identity").equals(actionTarget.path("identity"));
   }
 }

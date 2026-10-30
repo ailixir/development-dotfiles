@@ -3,12 +3,9 @@ package com.citi.put.checks.studio.secrets;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.citi.put.checks.studio.StudioExecutionFixtures;
-import com.citi.put.checks.studio.guided.policy.ObservationPolicyRepository;
-import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -49,46 +46,14 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Import(ObservedPublicationFixture.FreshAuthority.class)
 class StudioCapabilitiesIT {
 
-  private static final String SECOND_APPLICATION = "studio-fixture-second";
   private static final String ENVIRONMENT = "Production";
 
   @DynamicPropertySource
   static void configuration(DynamicPropertyRegistry registry) {
     ObservedPublicationFixture.register(registry);
-    // A second trusted application, so one CSI can have two candidate applications.
-    registry.add(
-        "studio.observed-replay.policies-json",
-        () -> ObservedPublicationFixture.policiesJsonWith(trustedSecondApplication()));
-    registry.add(
-        "studio.guided-authoring.translation.applications",
-        () -> ObservedPublicationFixture.APPLICATION + "," + SECOND_APPLICATION);
-    registry.add("studio.guided-authoring.translation.environments", () -> ENVIRONMENT);
-  }
-
-  private static ObjectNode trustedSecondApplication() {
-    var contracts = new GuidedContracts();
-    ObjectNode policy =
-        contracts
-            .object()
-            .put("version", 1)
-            .put("policyId", "policy-" + SECOND_APPLICATION)
-            .put("policyVersion", "1")
-            .put("applicationId", SECOND_APPLICATION)
-            .put("environment", ENVIRONMENT)
-            .put("entryPolicyId", "entry-" + SECOND_APPLICATION);
-    policy.putArray("allowedOrigins").add(ObservedPublicationFixture.ORIGIN);
-    policy
-        .putObject("applicationPolicy")
-        .put("policyRuleId", "app")
-        .put("allowStructuralDiscovery", true)
-        .putArray("readGrants");
-    policy.putArray("rules");
-    return policy;
   }
 
   private static final String CSI_ONE = "60481";
-  private static final String CSI_TWO = "60482";
-  private static final String CSI_PENDING = "60483";
   private static final String OWNER = "capabilities-owner@citi.com";
   private static final String READER = "capabilities-reader@citi.com";
   private static final String STRANGER = "capabilities-stranger@citi.com";
@@ -147,26 +112,17 @@ class StudioCapabilitiesIT {
     for (String user : List.of(OWNER, READER, STRANGER)) {
       fixtures.seedUser(user);
     }
-    for (String csi : List.of(CSI_ONE, CSI_TWO, CSI_PENDING)) {
+    for (String csi : List.of(CSI_ONE)) {
       fixtures.seedCsi(csi, OWNER);
     }
-    // CSI one governs only the fixture application; CSI two governs two trusted applications.
-    ObservedPublicationFixture.seedApprovedPolicies(jdbc, CSI_ONE, CSI_TWO);
-    ObservedPublicationFixture.ensurePolicy(
-        jdbc,
-        CSI_TWO,
-        SECOND_APPLICATION,
-        ENVIRONMENT,
-        List.of(ObservedPublicationFixture.ORIGIN),
-        null,
-        "ALLOW");
     testOne = fixtures.seedTest("Capabilities draft", CSI_ONE, OWNER, List.of("Open page"));
+    new ObservedPublicationFixture(jdbc).seedCanonicalAuthoring(testOne);
   }
 
   // ── P1: authorization first ──────────────────────────────────────────────
 
   @Test
-  void authorizesBeforeProviderAndScopedPolicyLookup() throws Exception {
+  void authorizesBeforeProviderAndAnyLookup() throws Exception {
     UUID absent = UUID.randomUUID();
 
     ResponseEntity<String> stranger = get(testOne, stranger());
@@ -233,7 +189,7 @@ class StudioCapabilitiesIT {
   // ── P6: the start context ────────────────────────────────────────────────
 
   @Test
-  void startContextUsesExactPersistedScopeAndUniqueApplication() throws Exception {
+  void startContextUsesExactPersistedScope() throws Exception {
     int sessionsBefore = rows("studio_guided_sessions");
     int guardsBefore = rows("studio_guided_csi_guards") + rows("studio_guided_csi_token_days");
 
@@ -249,13 +205,11 @@ class StudioCapabilitiesIT {
             "sourceRevision",
             "configurationRevision",
             "environmentId",
-            "applicationId",
             "versions");
     assertThat(context.path("schemaVersion").asInt()).isEqualTo(3);
     assertThat(context.path("testId").asText()).isEqualTo(testOne.toString());
     assertThat(context.path("environmentId").asText()).isEqualTo(ENVIRONMENT);
-    assertThat(context.path("applicationId").asText())
-        .isEqualTo(ObservedPublicationFixture.APPLICATION);
+    assertThat(context.has("applicationId")).isFalse();
     assertThat(context.path("sourceRevision").asText())
         .isEqualTo(
             jdbc.queryForObject(
@@ -276,39 +230,42 @@ class StudioCapabilitiesIT {
   }
 
   @Test
-  void zeroOrSeveralCandidatesAreRuntimeIncompatible() throws Exception {
-    UUID two = fixtures.seedTest("Two applications", CSI_TWO, OWNER, List.of("Open page"));
-    JsonNode several =
-        objectMapper.readTree(get(two, owner(CSI_TWO)).getBody()).path("guidedStart");
-    assertThat(several.toString())
-        .as("two governed, permitted, trusted applications: nothing is chosen")
-        .isEqualTo("{\"available\":false,\"code\":\"RUNTIME_INCOMPATIBLE\"}");
-
-    jdbc.update("UPDATE ui_tests SET environment='Nowhere' WHERE id=?", testOne);
+  void aTestWithoutAStepIsRuntimeIncompatible() throws Exception {
+    jdbc.update(
+        "UPDATE ui_tests SET authoring=CAST('{\"authoringSchemaVersion\":2,\"steps\":[]}' AS jsonb)"
+            + " WHERE id=?",
+        testOne);
     JsonNode none =
         objectMapper.readTree(get(testOne, owner(CSI_ONE)).getBody()).path("guidedStart");
     assertThat(none.toString())
-        .as("no governed policy scope for this environment")
+        .as("guided start needs a step")
         .isEqualTo("{\"available\":false,\"code\":\"RUNTIME_INCOMPATIBLE\"}");
   }
 
+  /** STUDIO-GOV-001.3: the governed policy has no route, for anyone. */
   @Test
-  void anUnapprovedScopeStillNamesItsCandidateSoTheRealStartCanRefuseIt() throws Exception {
-    new ObservationPolicyRepository(jdbc, new GuidedContracts())
-        .insertPolicy(
-            UUID.randomUUID(),
-            CSI_PENDING,
-            ObservedPublicationFixture.APPLICATION,
-            ENVIRONMENT,
-            OWNER);
-    UUID pending = fixtures.seedTest("Unapproved scope", CSI_PENDING, OWNER, List.of("Open page"));
-
-    JsonNode start =
-        objectMapper.readTree(get(pending, owner(CSI_PENDING)).getBody()).path("guidedStart");
-
-    assertThat(start.path("available").asBoolean()).isTrue();
-    assertThat(start.path("context").path("applicationId").asText())
-        .isEqualTo(ObservedPublicationFixture.APPLICATION);
+  void theRetiredGuidedPolicyRoutesAnswerNotFound() {
+    String base = "/api/v1/studio/guided-policies";
+    String id = UUID.randomUUID().toString();
+    for (String route :
+        List.of(
+            base + "?csiId=" + CSI_ONE + "&environmentId=Production",
+            base + "/" + id,
+            base + "/" + id + "/versions/1/approval")) {
+      for (HttpMethod method : List.of(HttpMethod.GET, HttpMethod.POST)) {
+        HttpHeaders headers = owner(CSI_ONE);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Idempotency-Key", UUID.randomUUID().toString());
+        String body = method == HttpMethod.GET ? null : "{}";
+        assertThat(
+                restTemplate
+                    .exchange(route, method, new HttpEntity<>(body, headers), String.class)
+                    .getStatusCode()
+                    .value())
+            .as("%s %s", method, route)
+            .isEqualTo(404);
+      }
+    }
   }
 
   @Test

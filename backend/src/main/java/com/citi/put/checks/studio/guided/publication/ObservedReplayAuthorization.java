@@ -102,8 +102,7 @@ public final class ObservedReplayAuthorization {
             "learnedPlanHash",
             "referencePolicyHash",
             "publicationEvidenceHash",
-            "scopeHash",
-            "currentPolicyHash")) {
+            "scopeHash")) {
       require(request.path(field).equals(binding.path(field)), "FORBIDDEN_SCOPE", 403);
     }
     require(
@@ -121,11 +120,9 @@ public final class ObservedReplayAuthorization {
   }
 
   /**
-   * Background authority for an observed schedule (STUDIO-OBS-009 AC-6, A17). No caller session
-   * exists, so no Core read happens here: the schedule's activation fixed the revision and the
-   * execution principal, and the scheduler has already required the live background grant for that
-   * principal, CSI and environment before it asks for this binding (and requires it again at the
-   * final write boundary and at every dispatch recheck). The binding is the same shape that {@link
+   * Background authority for a scheduled run of a UI test. No caller session exists, so no Core
+   * read happens here: the run executes as the constant scheduler principal against the test's
+   * current confirmed revision. The binding is the same shape that {@link
    * ObservedReplayAuthorizer#authorize} issues for an explicit Run, minted on the database clock
    * and bound to the same short grant window; {@link #bind} then pins it to the locked test and
    * revision exactly as for a manual Run.
@@ -135,6 +132,27 @@ public final class ObservedReplayAuthorization {
    * for this principal through the secret-use authorization.
    */
   public Prepared prepareScheduled(UITest test, UITestRevision revision, String principal) {
+    return prepareWithoutCore(test, revision, principal);
+  }
+
+  /**
+   * Authority for the proof replay a publication accepts inside its own commit transaction. No Core
+   * read happens here and none is needed: the authority is the fresh {@code execution=true} Core
+   * proof that the same finalize request has just obtained for this principal and CSI in {@link
+   * PublicationGrantAuthority#authorizePublication} (line 84, {@code fresh(caller, request,
+   * principal, csiId, true)}). It is not learning consent from the session start, so the class rule
+   * above (a replay needs its own fresh authority) holds. The binding is the same shape and the
+   * same short grant window an explicit Run carries, and {@link #bind} pins it to the locked test
+   * and to the revision that publication has just made the confirmed one.
+   *
+   * <p>Called only from {@code StudioAcceptanceService.acceptPublished}, inside the publication
+   * transaction, after the revision has been loaded and before any row is written.
+   */
+  public Prepared prepareForPublication(UITest test, UITestRevision revision, String principal) {
+    return prepareWithoutCore(test, revision, principal);
+  }
+
+  private Prepared prepareWithoutCore(UITest test, UITestRevision revision, String principal) {
     require(properties.enabled(), "RUNTIME_INCOMPATIBLE", 409);
     require(principal != null && !principal.isBlank(), "FORBIDDEN_SCOPE", 403);
     UUID testId = test.getId(), revisionId = revision.getId();
@@ -254,9 +272,7 @@ public final class ObservedReplayAuthorization {
         "AUTHORIZATION_EXPIRED",
         409);
     require(
-        GuidedContracts.hash(binding.path("scope")).equals(text(binding, "scopeHash"))
-            && GuidedContracts.hash(pins.policy(binding.path("scope")))
-                .equals(text(binding, "currentPolicyHash")),
+        GuidedContracts.hash(binding.path("scope")).equals(text(binding, "scopeHash")),
         "FORBIDDEN_SCOPE",
         403);
     JsonNode grant = binding.path("replayGrant");
@@ -268,8 +284,7 @@ public final class ObservedReplayAuthorization {
             "revisionDigest",
             "principalId",
             "csiId",
-            "scopeHash",
-            "currentPolicyHash")) {
+            "scopeHash")) {
       require(grant.path(field).equals(binding.path(field)), "FORBIDDEN_SCOPE", 403);
     }
     require(
@@ -412,7 +427,12 @@ public final class ObservedReplayAuthorization {
           String source = text(step, "text");
           int start = provenance.path("start").asInt(-1), end = provenance.path("end").asInt(-1);
           require(start >= 0 && end > start && end <= source.length(), "REFERENCE_MISMATCH", 422);
-          value = source.substring(start, end);
+          // A template span (text mixed with <var NAME> tokens) takes each variable's accepted
+          // value, resolved exactly as a whole-variable configuration recipe is.
+          value =
+              com.citi.put.checks.studio.guided.bridge.SourceTemplate.expand(
+                  source, start, end, plainValues::get);
+          require(value != null, "REFERENCE_MISMATCH", 422);
         } else {
           value = plainValues.get(text(provenance, "referenceName"));
           require(value != null, "REFERENCE_MISMATCH", 422);

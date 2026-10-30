@@ -74,7 +74,6 @@ class GuidedGuardProvenanceTest {
             "PASSIVE_WAIT_TIMEOUT",
             "PASSIVE_WAIT_INTERRUPTED",
             "OBSERVATION_SHAPE",
-            "OBSERVATION_DEPTH",
             "OBSERVATION_COUNT_RESERVE",
             "OBSERVATION_EVIDENCE_RESERVE",
             "OBSERVATION_REFRESH_LIMITS"),
@@ -219,14 +218,14 @@ class GuidedGuardProvenanceTest {
                 outer -> {
                   tx.executeWithoutResult(
                       inner -> {
-                        diagnostic.observation(Guard.OBSERVATION_DEPTH, () -> SESSION).register();
+                        diagnostic.observation(Guard.OBSERVATION_SHAPE, () -> SESSION).register();
                         inner.setRollbackOnly();
                       });
                   assertTrue(events.isEmpty());
                 }));
     assertEquals(1, events.size());
     assertEquals(Transaction.ROLLED_BACK, events.getFirst().transaction());
-    assertEquals(Guard.OBSERVATION_DEPTH, events.getFirst().guard());
+    assertEquals(Guard.OBSERVATION_SHAPE, events.getFirst().guard());
   }
 
   @Test

@@ -294,8 +294,38 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
   // ReportedRuntimeVersions describe the observed identities (T0 A7) and startGuidedSession
   // declares 422 INVALID_CONTRACT (AUTHORING_REFERENCE_AMBIGUOUS); operations stay 44.
   // Previous digest b5ecdcad…ae29244.
-  // new "bbf37fd1f96c0da33bbca6db4c04c94222a44429a4b6f0e33c92dfc59fca02c4".
-  const BASE_SHA256 = 'bbf37fd1f96c0da33bbca6db4c04c94222a44429a4b6f0e33c92dfc59fca02c4';
+  // old "bbf37fd1f96c0da33bbca6db4c04c94222a44429a4b6f0e33c92dfc59fca02c4".
+  // STUDIO-GOV-001.3: the five guided-policies operations, their tag and path parameters and the
+  // startGuidedSession POLICY_NOT_APPROVED conflict are deleted (ADR-002 §13).
+  // STUDIO-GOV-001.2 (ADR-002 §13): the eight Studio schedule operations and their schemas, and the
+  // ExecutionSnapshot provenance fields scheduleVersion, occurrenceId, activationId, activatedBy and
+  // activatedAt, are removed; operations 45 -> 32. The digest also carries STUDIO-UNIFY-001.6's
+  // readLatestGuidedAttempts, which had not been re-anchored.
+  // STUDIO-GOV-001.4: startGuidedSession drops `applicationId` from its body and declares the 422
+  // NO_APPLICATION_URL refusal; the capability `guidedStart.context` drops `applicationId`
+  // (ADR-002 §13).
+  // old "ffb9934ad95f4dc99cedd1022e3e14f2eb77d6dc8be10f728fb034941fd3c7f6".
+  // new "8daf493b427fbe472df6b69131423abd8427f032036db695bad472328943a7b2".
+  // Proof = replay of the published revision (ADR-002 §13): GuidedResult gains `proof` and a
+  // publication-keyed `evidence.video` (null when PUBLISHED), ExecutionSnapshot.triggerSource gains
+  // AFTER_LEARN, and getGuidedSessionVideo documents its 404 for a published session; operations
+  // stay 32.
+  // old "8daf493b427fbe472df6b69131423abd8427f032036db695bad472328943a7b2".
+  // new "a3328f879e0a367233a48196290dbfe05a422bea320ab559ee601752dfff4957".
+  // STUDIO-FLEX-001: text only. startGuidedSession declares 403 ORIGIN_NOT_ALLOWED (first URL not on the
+  // allowed-domains list) and the 429 messageCode LEARNING_CAPACITY_EXHAUSTED; createTestSecret's
+  // INVALID_SECRET_ORIGINS also covers an origin off the list; operations stay 32.
+  // old "a3328f879e0a367233a48196290dbfe05a422bea320ab559ee601752dfff4957".
+  // new "10b0cb1ead65f234e30d8eacd4c63dcd4f995fb8f96a739cd0e77303530b84ea".
+  // Wording only: getGuidedSessionVideo names the published-session 404 by its wire code
+  // VIDEO_UNAVAILABLE (was NO_EVIDENCE, the Java constant name); operations stay 32.
+  // old "10b0cb1ead65f234e30d8eacd4c63dcd4f995fb8f96a739cd0e77303530b84ea".
+  // new "35d42df7d2dca7099e3be1cc98fa2993bea8a6f3271007fb7738726ffa5afc7a".
+  // ADR-SC-007 (WI-3): wording only: the clarification example choice no longer carries a node identifier (the
+  // observed clarification choice is {choiceId, safeLabel, labelSource, role, region, bindingId}); operations stay 32.
+  // old "35d42df7d2dca7099e3be1cc98fa2993bea8a6f3271007fb7738726ffa5afc7a".
+  // new "cd28f40b3e96c6e6c9ffd34afdf704702a2a6c6cd01eeee00c76acb8abf9b663".
+  const BASE_SHA256 = 'cd28f40b3e96c6e6c9ffd34afdf704702a2a6c6cd01eeee00c76acb8abf9b663';
 
   it('pins the entire reviewed OpenAPI document including observed routes', () => {
     // ADR-002 §11.2 rejected `recordingOriginMs` and amended the document itself; §11.6 moved the

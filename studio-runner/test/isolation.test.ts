@@ -162,7 +162,13 @@ describe('AC-22c — the configuration surface rejects what it does not enumerat
   it('accepts a minimal valid configuration', () => {
     const config = loadConfig(validEnv());
     expect(config.callbackBaseUrl).toBe('https://api.internal.example');
-    expect(config.poolSize).toBe(1);
+    // The defaults: two runs per pod, five minutes of browser time, a drain that outlasts it, no whitelisted domain,
+    // and allow-all ON (the default for now), so the effective list is the allow-all one.
+    expect(config.poolSize).toBe(2);
+    expect(config.maxTotalRuntimeMs).toBe(300_000);
+    expect(config.drainTimeoutMs).toBe(360_000);
+    expect(config.allowedDomains).toEqual(['*']);
+    expect(loadConfig({ ...validEnv(), [`${CONFIG_PREFIX}ALLOW_ALL_DOMAINS`]: 'false' }).allowedDomains).toEqual([]);
     expect(config.objectStoreProvider).toBe('filesystem');
     expect(
       loadConfig({ ...validEnv(), [`${CONFIG_PREFIX}OBJECT_STORE_PROVIDER`]: 'local' }).objectStoreProvider,

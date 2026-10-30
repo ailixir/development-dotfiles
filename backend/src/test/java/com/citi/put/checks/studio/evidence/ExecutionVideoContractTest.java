@@ -58,34 +58,21 @@ class ExecutionVideoContractTest {
               "reportProgress",
               "runnerHealth",
               "runnerReadiness",
-              // STUDIO-SCHED-001 (standalone story), the eight scheduling operations, added
-              // deliberately; StudioContractTest pins each one's value.
-              "studioScheduleCapabilities",
-              "readStudioSchedule",
-              "createStudioSchedule",
-              "updateStudioSchedule",
-              "removeStudioSchedule",
-              "enableStudioSchedule",
-              "previewStudioSchedule",
-              "listStudioScheduleOccurrences",
               // STUDIO-OBS-012A: the seven guided-session operations move into the one public
               // document under /api/v1/studio with their OBS-003/005/006 attributions.
               "startGuidedSession",
               "readGuidedSession",
               "readGuidedResult",
               "readGuidedClarification",
+              // STUDIO-UNIFY-001.6: the caller's latest learning attempt per test.
+              "readLatestGuidedAttempts",
               "clarifyGuidedSession",
               "cancelGuidedSession",
               "finalizeObservedPublication",
               // STUDIO-OBS-013 (AR-1): the guided learn-run recording route.
               "getGuidedSessionVideo",
-              // STUDIO-OBS-014 C2b: the five guided-policy operations (x-implemented-by
-              // STUDIO-OBS-014).
-              "lookupGuidedPolicy",
-              "createGuidedPolicy",
-              "readGuidedPolicy",
-              "createGuidedPolicyVersion",
-              "approveGuidedPolicyVersion",
+              // STUDIO-UNIFY-001.6: the caller's latest terminal attempt per test.
+              "readLatestGuidedAttempts",
               // STUDIO-OBS-008 C-int W1 (P1): the per-test capability read.
               "getStudioTestCapabilities"));
 
@@ -127,16 +114,6 @@ class ExecutionVideoContractTest {
               // deliberately.
               "listTestSecrets",
               "createTestSecret",
-              // STUDIO-SCHED-001, the sixteenth to twenty-third, added deliberately: all eight are
-              // session-authenticated public routes.
-              "studioScheduleCapabilities",
-              "readStudioSchedule",
-              "createStudioSchedule",
-              "updateStudioSchedule",
-              "removeStudioSchedule",
-              "enableStudioSchedule",
-              "previewStudioSchedule",
-              "listStudioScheduleOccurrences",
               // STUDIO-OBS-012A: validate-variables and the seven guided-session routes are
               // session-authenticated public operations of the one public document (21 -> 29).
               "validateTestVariables",
@@ -144,20 +121,17 @@ class ExecutionVideoContractTest {
               "readGuidedSession",
               "readGuidedResult",
               "readGuidedClarification",
+              // STUDIO-UNIFY-001.6: the caller's latest learning attempt per test.
+              "readLatestGuidedAttempts",
               "clarifyGuidedSession",
               "cancelGuidedSession",
               "finalizeObservedPublication",
               // STUDIO-OBS-013 (AR-1): getGuidedSessionVideo is a session-authenticated public
               // route (29 -> 30).
               "getGuidedSessionVideo",
-              // STUDIO-OBS-014 C2b: the five guided-policy operations are session-authenticated
-              // public routes; their 401 is SessionUnauthorized (30 -> 35).
-              "lookupGuidedPolicy",
-              "createGuidedPolicy",
-              "readGuidedPolicy",
-              "createGuidedPolicyVersion",
-              "approveGuidedPolicyVersion",
-              // STUDIO-OBS-008 C-int W1 (P1): a session-authenticated public route (35 -> 36).
+              // STUDIO-UNIFY-001.6: a session-authenticated public route (30 -> 31).
+              "readLatestGuidedAttempts",
+              // STUDIO-OBS-008 C-int W1 (P1): a session-authenticated public route (31 -> 32).
               "getStudioTestCapabilities"));
 
   /**
@@ -537,10 +511,12 @@ class ExecutionVideoContractTest {
     // Each total on its own. A set comparison alone is satisfied by two collections that stopped
     // collecting together, and a correctly-added thirteenth public operation passes every
     // comparison above.
-    // STUDIO-OBS-013: + getGuidedSessionVideo (29 -> 30). STUDIO-OBS-014 C2b: + five
-    // guided-policy operations (30 -> 35). STUDIO-OBS-008 C-int W1: + getStudioTestCapabilities
-    // (35 -> 36).
-    assertThat(publicRefs).as("the number of public operations declaring a 401 moved").hasSize(36);
+    // STUDIO-OBS-013: + getGuidedSessionVideo (29 -> 30). STUDIO-UNIFY-001.6: +
+    // readLatestGuidedAttempts (30 -> 31). STUDIO-OBS-008 C-int W1: + getStudioTestCapabilities
+    // (31 -> 32). STUDIO-GOV-001.3 deleted five operations that had declared the public 401
+    // (guided policies), and STUDIO-GOV-001.2 deleted the eight Studio schedule operations that
+    // had declared it (32 -> 24).
+    assertThat(publicRefs).as("the number of public operations declaring a 401 moved").hasSize(24);
     assertThat(callbackRefs)
         .as("the number of internal callbacks declaring a 401 moved")
         .hasSize(3);

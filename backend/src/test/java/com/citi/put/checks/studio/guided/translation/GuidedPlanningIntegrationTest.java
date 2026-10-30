@@ -139,6 +139,22 @@ class GuidedPlanningIntegrationTest {
   static volatile boolean refuseSource;
   static volatile boolean omitUsage;
 
+  /**
+   * ADR-SC-007 WI-4 (T-J1 to T-J4): null keeps the controlled page and plan. {@code select} serves
+   * a native select and plans a selectOption of an authored literal; {@code readCell} serves a
+   * table cell with an input inside it as the "Order reference"; {@code heavy} serves a page the
+   * runner cannot collect inside its deadline; {@code vanish} removes the Submit button while the
+   * scripted model is still answering for it.
+   */
+  static volatile String cutover;
+
+  static final AtomicInteger SELECTIONS = new AtomicInteger();
+  static final java.util.concurrent.atomic.AtomicBoolean REMOVE_SUBMIT =
+      new java.util.concurrent.atomic.AtomicBoolean();
+  static volatile java.util.concurrent.CountDownLatch submitRemoved =
+      new java.util.concurrent.CountDownLatch(1);
+  static final String ABSENT_LITERAL = "3.99";
+
   /** Thought tokens the provider stub reports on top of its 100 visible ones; 0 reports none. */
   static volatile int reportedThoughtTokens;
 
@@ -149,7 +165,7 @@ class GuidedPlanningIntegrationTest {
   /**
    * STUDIO-OBS-014 TEST-001: null keeps today's Submit (a button outside any form). "button" or
    * "input" places the Submit control inside a labelled form (exported with a formId) as a {@code
-   * <button>} or an {@code <input type=submit>}, so the side-effect stance applies.
+   * <button>} or an {@code <input type=submit>}.
    */
   static volatile String formSubmit;
 
@@ -226,21 +242,52 @@ class GuidedPlanningIntegrationTest {
             Environment.NAVIGATIONS.incrementAndGet();
             NAVIGATION_DESTINATIONS.add(exchange.getRequestURI().toString());
             String html =
-                "<main aria-label='Operations'><output aria-label='Order reference'>"
+                "<main aria-label='Operations'><output aria-label='Order reference' style='white-space:pre'>"
                     + Environment.CAPTURE
                     + "</output>"
                     + (hostileMutation == null
                         ? ""
                         : "<output aria-label=\"" + HOSTILE + "\">Instruction</output>")
                     + "<label>Destination<textarea></textarea></label><label>Backup"
-                    + " destination<textarea></textarea></label><output aria-label='Confirmation'"
+                    + " destination<textarea></textarea></label>"
+                    + ("target".equals(hostileMutation)
+                        ? "<label>Billing notes<textarea></textarea></label>"
+                        : "")
+                    + "<output aria-label='Confirmation'"
                     + " hidden>Submitted</output>"
                     + submitControl()
                     + "</main>";
+            html = cutoverPage(html);
             byte[] body = html.getBytes(StandardCharsets.UTF_8);
             exchange.getResponseHeaders().add("Content-Type", "text/html; charset=utf-8");
             exchange.sendResponseHeaders(200, body.length);
             exchange.getResponseBody().write(body);
+            exchange.close();
+          });
+      Environment.APPLICATION.createContext(
+          "/translation-select",
+          exchange -> {
+            SELECTIONS.incrementAndGet();
+            exchange.getRequestBody().readAllBytes();
+            exchange.sendResponseHeaders(204, -1);
+            exchange.close();
+          });
+      Environment.APPLICATION.createContext(
+          "/translation-mutation",
+          exchange -> {
+            byte[] body =
+                (REMOVE_SUBMIT.get() ? "remove" : "keep").getBytes(StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(200, body.length);
+            exchange.getResponseBody().write(body);
+            exchange.close();
+          });
+      Environment.APPLICATION.createContext(
+          "/translation-mutated",
+          exchange -> {
+            REMOVE_SUBMIT.set(false);
+            submitRemoved.countDown();
+            exchange.getRequestBody().readAllBytes();
+            exchange.sendResponseHeaders(204, -1);
             exchange.close();
           });
       Environment.APPLICATION.createContext(
@@ -255,6 +302,80 @@ class GuidedPlanningIntegrationTest {
     } catch (Exception error) {
       throw new ExceptionInInitializerError(error);
     }
+  }
+
+  /** The page of a WI-4 cutover case, or the controlled page itself. */
+  private static String cutoverPage(String page) {
+    if (cutover == null) {
+      return page;
+    }
+    return switch (cutover) {
+      case "select" ->
+          "<main aria-label='Operations'><label>Plan<select onchange=\"fetch('/translation-select',"
+              + "{method:'POST',body:this.value})\"><option>Alpha</option><option>Beta</option>"
+              + "</select></label><button>Submit</button><output aria-label='Confirmation'"
+              + " hidden>Submitted</output></main>";
+      case "readCell" ->
+          page.replace(
+              "<output aria-label='Order reference' style='white-space:pre'>"
+                  + Environment.CAPTURE
+                  + "</output>",
+              "<table aria-label='Orders'><tbody><tr><td aria-label='Order reference' style='white-space:pre'>"
+                  + Environment.CAPTURE
+                  + "<input aria-label='Adjust'></td></tr></tbody></table>");
+      case "heavy" -> heavyPage();
+      case "vanish" ->
+          page
+              + "<script>setInterval(async()=>{if((await (await fetch('/translation-mutation'))"
+              + ".text())==='remove'){const b=document.querySelector('main > button');if(b){"
+              + "b.remove();await fetch('/translation-mutated',{method:'POST'});}}},25)</script>";
+      default -> throw new IllegalStateException("UNKNOWN_CUTOVER");
+    };
+  }
+
+  /**
+   * A 12,000 row order form with 4,000 filled fields (the runner's perception-tier runaway page):
+   * it demands more than three times the work budget of the real collection deadline, so no host
+   * collects it inside the deadline.
+   */
+  private static String heavyPage() {
+    var heavy = new StringBuilder("<main aria-label='Orders'><form aria-label='Order form'>");
+    long state = 0;
+    for (int index = 0; index < 12_000; index++) {
+      String value = "";
+      if (index < 4_000) {
+        state = index;
+        var noise = new StringBuilder();
+        for (int n = 0; n < 12; n++) {
+          state = ((state * 1103515245L) + 12345L) & 0xFFFFFFFFL;
+          noise.append("abcdefghijklmnopqrstuvwxyz0123456789".charAt((int) ((state >>> 16) % 36)));
+        }
+        value = " value=\"customer value number " + index + " " + noise + "\"";
+      }
+      heavy
+          .append("<div class=\"row\"><div><span>Field ")
+          .append(index)
+          .append("</span></div><div><label for=\"a")
+          .append(index)
+          .append("\">Name ")
+          .append(index)
+          .append("<span>*</span></label></div><div><input id=\"a")
+          .append(index)
+          .append("\" name=\"a")
+          .append(index)
+          .append("\"")
+          .append(value)
+          .append("></div><div><p>Hint <b>one</b> <i>two</i> text ")
+          .append(index)
+          .append("</p></div><ul><li>a</li><li>b</li><li>c</li></ul><button>Edit ")
+          .append(index)
+          .append("</button><a href=\"#r")
+          .append(index)
+          .append("\">Link ")
+          .append(index)
+          .append("</a></div>");
+    }
+    return heavy.append("</form></main>").toString();
   }
 
   private static String submitControl() {
@@ -344,8 +465,7 @@ class GuidedPlanningIntegrationTest {
 
     @Bean
     GuidedTranslationProperties properties() {
-      return new GuidedTranslationProperties(
-          true, true, List.of("orders"), List.of("fixture"), 131072, 2048, 60, "worker-1");
+      return new GuidedTranslationProperties(true, 131072, 2048, 60, "worker-1");
     }
 
     @Bean
@@ -355,35 +475,21 @@ class GuidedPlanningIntegrationTest {
 
     @Bean
     GuidedSourceClassifier classifier(GuidedTranslationProperties props) {
-      return new GuidedSourceClassifier(C, props, new CredentialPatternScreen());
+      return new GuidedSourceClassifier(
+          C,
+          new CredentialPatternScreen(),
+          com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     }
 
     @Bean
     GuidedSourceInputResolver inputs() {
-      return new GuidedSourceInputResolver(C);
+      return new GuidedSourceInputResolver(
+          C, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     }
 
     @Bean
     GuidedStepVerifier verifier(GuidedTranslationStore store) {
       return new GuidedStepVerifier(store);
-    }
-
-    private com.citi.put.checks.studio.guided.publication.ObservedReplayPins fixturePins() {
-      var policy =
-          C.object()
-              .put("version", 1)
-              .put("policyId", "fixture-policy")
-              .put("policyVersion", "1")
-              .put("applicationId", "orders")
-              .put("environment", "fixture")
-              .put("entryPolicyId", "blank");
-      policy.putArray("allowedOrigins").add(Environment.ORIGIN);
-      policy.putArray("rules");
-      policy.putNull("applicationPolicy");
-      return new com.citi.put.checks.studio.guided.publication.ObservedReplayPins(
-          C,
-          new com.citi.put.checks.studio.guided.publication.ObservedReplayProperties(
-              true, 30000, 1048576, 4194304, 2097152, "[]", "[" + policy + "]", 1280, 720));
     }
 
     @Bean
@@ -400,16 +506,15 @@ class GuidedPlanningIntegrationTest {
           store,
           verifier,
           new CsiOwnershipEvaluator(),
-          fixturePins(),
+          com.citi.put.checks.studio.support.TestDomains.FIXTURES,
           new com.citi.put.checks.studio.secrets.VaultStudioReferenceResolver(
-              new com.citi.put.checks.studio.secrets.FakeStudioVaultProvider(java.util.Map.of()),
-              (principal, csi, env, secret) -> true),
-          (principal, csi, env, secret) -> true);
+              new com.citi.put.checks.studio.secrets.FakeStudioVaultProvider(java.util.Map.of())));
     }
 
     @Bean
     GuidedMaterializationService materialization(JdbcTemplate jdbc) {
-      return new GuidedMaterializationService(jdbc, C);
+      return new GuidedMaterializationService(
+          jdbc, C, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     }
 
     @Bean
@@ -422,7 +527,13 @@ class GuidedPlanningIntegrationTest {
         GuidedClarificationContextStore questions) {
       var sessionLimits = new GuidedSessionProperties(true, Map.of());
       var service =
-          new GuidedSessionService(repository, C, access, sessionLimits, Clock.systemUTC());
+          new GuidedSessionService(
+              repository,
+              C,
+              access,
+              sessionLimits,
+              com.citi.put.checks.studio.support.TestDomains.FIXTURES,
+              Clock.systemUTC());
       service.installBridge(
           materialization,
           new GuidedPreparationStore(jdbc, C),
@@ -437,19 +548,14 @@ class GuidedPlanningIntegrationTest {
               C));
       // STUDIO-OBS-008 P2/P3: this test reads /result, so it wires the real presentation projector.
       service.installPresentation(new GuidedPublicPresentationProjector(jdbc, C));
-      // STUDIO-OBS-014 S3: every start needs an approved governed policy for its scope.
-      com.citi.put.checks.studio.support.ObservedPublicationFixture.installGovernance(
+      // Every test here shares CSI-123 and reserves a full per-session ceiling per model call, so
+      // the production day (about 6 full ceilings) runs out part-way through the class. Nothing
+      // here
+      // asserts the daily budget (GuidedCsiBudgetIT does, at the production defaults): the day is
+      // sized in whole session ceilings instead.
+      com.citi.put.checks.studio.support.ObservedPublicationFixture.installCsiBudget(
           service,
           jdbc,
-          "CSI-123",
-          "orders",
-          java.util.List.of("fixture"),
-          java.util.List.of(Environment.ORIGIN),
-          null,
-          // Every test here shares CSI-123 and reserves a full per-session ceiling per model
-          // call, so the production day (about 6 full ceilings) runs out part-way through the
-          // class. Nothing here asserts the daily budget (GuidedCsiBudgetIT does, at the
-          // production defaults): the day is sized in whole session ceilings instead.
           new GuidedCsiBudgetProperties(
               1000,
               (long) sessionLimits.maxModelInputTokensTotal() * DAILY_SESSION_CEILINGS,
@@ -520,7 +626,7 @@ class GuidedPlanningIntegrationTest {
               dispatch,
               gateway,
               C,
-              new GuidedPromptAssembler(C),
+              new GuidedPromptAssembler(C, com.citi.put.checks.studio.support.TestDomains.FIXTURES),
               inputs,
               new GuidedProposalValidator(C),
               new GuidedDependencyPlanner(sessions),
@@ -578,13 +684,10 @@ class GuidedPlanningIntegrationTest {
   /** AC-4 tally (po-qa014-rulings a1): the tests of this class that plant a guard refusal. */
   static final java.util.Set<String> PLANTED_GUARD_REFUSALS =
       java.util.Set.of(
-          "governedDenyRefusesTheFormSubmitBeforeAnyDispatchAndFailsPolicyDenied",
-          "governedDenyRefusesAnUnlabelledOrFormAttributeSubmit",
           "hostileCurrentPageCannotSubstituteAnotherPermittedEffect",
           "aSchemaValidUngroundedClickIsRejectedBeforeAdmissionOrDispatch",
           "aSchemaValidDeleteAccountForOpenReportsIsRejectedBeforeAdmissionOrDispatch",
-          "anAbsentDestructiveTargetFailsUngroundedBeforeDestructivePrecedence",
-          "anAuthoredDeleteStillFailsTheGovernedDenyStance");
+          "anAbsentDestructiveTargetFailsUngroundedBeforeDestructivePrecedence");
 
   private String tallyTest;
   private java.util.Set<String> tallyBefore;
@@ -622,6 +725,10 @@ class GuidedPlanningIntegrationTest {
     corruptFirstReply = false;
     refuseSource = false;
     omitUsage = false;
+    cutover = null;
+    SELECTIONS.set(0);
+    REMOVE_SUBMIT.set(false);
+    submitRemoved = new java.util.concurrent.CountDownLatch(1);
     reportedThoughtTokens = 0;
     BEFORE_RESPONSE.set(null);
     jdbc.update(
@@ -801,7 +908,8 @@ class GuidedPlanningIntegrationTest {
                 dispatch,
                 gateway,
                 C,
-                new GuidedPromptAssembler(C),
+                new GuidedPromptAssembler(
+                    C, com.citi.put.checks.studio.support.TestDomains.FIXTURES),
                 inputs,
                 new GuidedProposalValidator(C),
                 new GuidedDependencyPlanner(sessions),
@@ -824,7 +932,8 @@ class GuidedPlanningIntegrationTest {
                   dispatch,
                   gateway,
                   C,
-                  new GuidedPromptAssembler(C),
+                  new GuidedPromptAssembler(
+                      C, com.citi.put.checks.studio.support.TestDomains.FIXTURES),
                   inputs,
                   new GuidedProposalValidator(C),
                   new GuidedDependencyPlanner(sessions),
@@ -1004,9 +1113,7 @@ class GuidedPlanningIntegrationTest {
     String id = startSession();
     invoke(id, "plans");
     forceComplete = true;
-    var optional =
-        new GuidedTranslationProperties(
-            true, true, List.of("orders"), List.of("fixture"), 131072, 2048, 60, "worker-1", true);
+    var optional = new GuidedTranslationProperties(true, 131072, 2048, 60, "worker-1", true);
     var service =
         new GuidedTranslationService(
             sessions,
@@ -1016,7 +1123,7 @@ class GuidedPlanningIntegrationTest {
             dispatch,
             gateway,
             C,
-            new GuidedPromptAssembler(C),
+            new GuidedPromptAssembler(C, com.citi.put.checks.studio.support.TestDomains.FIXTURES),
             inputs,
             new GuidedProposalValidator(C),
             new GuidedDependencyPlanner(sessions),
@@ -1110,6 +1217,140 @@ class GuidedPlanningIntegrationTest {
         .isZero();
   }
 
+  /**
+   * T-J1 (ADR-SC-007 D3 G1, AC5): the authored option "3.99" is not among the live options of the
+   * select. The real runner refuses at prepare, before any fence; the session ends TARGET_MISMATCH
+   * and the model is not asked again.
+   */
+  @Test
+  void absentSelectOptionLiteralEndsTargetMismatchAtPrepareWithoutReask() throws Exception {
+    cutover = "select";
+    askField = false;
+    rewriteAuthoredStep(ONE, OPEN_ONLY_TEXT);
+    rewriteAuthoredStep(TWO, SELECT_TEXT);
+    String id = startSession();
+    var refused = driveUntilRefused(id);
+    assertThat(refused.statusCode()).as(refused.body()).isEqualTo(422);
+    assertThat(C.parse(refused.body()).path("code").asText()).isEqualTo("TARGET_MISMATCH");
+    assertThat(sessionState(id)).isEqualTo("FAILED");
+    assertThat(publicGet("/" + id + "/result").path("errorCode").asText())
+        .isEqualTo("TARGET_MISMATCH");
+    assertThat(refusalGate(id)).isEqualTo("RUNNER_OPTION_NOT_PRESENT");
+    assertNoReaskAndNoEffect(id);
+    assertThat(SELECTIONS.get()).as("nothing was selected on the page").isZero();
+    assertThat(SUBMITS.get()).isZero();
+  }
+
+  /**
+   * T-J2 (ADR-SC-007 D3, AC9 gate chain): the picked "Order reference" is a table cell with an
+   * input inside it. The backend admits the read (the cell has text), the kept read profile of the
+   * real runner refuses it at prepare, and the session ends UNSUPPORTED_SURFACE.
+   */
+  @Test
+  void readOnIneligibleElementIsRefusedReadNotAllowedAndEndsUnsupportedSurface() throws Exception {
+    cutover = "readCell";
+    askField = false;
+    String id = startSession();
+    var refused = driveUntilRefused(id);
+    assertThat(refused.statusCode()).as(refused.body()).isEqualTo(422);
+    assertThat(C.parse(refused.body()).path("code").asText()).isEqualTo("UNSUPPORTED_SURFACE");
+    assertThat(sessionState(id)).isEqualTo("FAILED");
+    assertThat(publicGet("/" + id + "/result").path("errorCode").asText())
+        .isEqualTo("UNSUPPORTED_SURFACE");
+    assertThat(refusalGate(id)).isEqualTo("RUNNER_READ_NOT_ALLOWED");
+    assertNoReaskAndNoEffect(id);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND ordinal=1",
+                Integer.class,
+                id))
+        .as("the refused read was never fenced or dispatched")
+        .isZero();
+  }
+
+  /**
+   * T-J3 (ADR-SC-007 D1/D8, AC7): the page holds far more than the collection deadline allows (the
+   * runaway form of the perception tier). The runner answers 409 BUDGET_EXCEEDED /
+   * OBSERVATION_DEADLINE, the backend maps it to UNSUPPORTED_SURFACE, and no emptied observation is
+   * stored.
+   */
+  @Test
+  void observationOverDeadlineEndsUnsupportedSurface() throws Exception {
+    cutover = "heavy";
+    askField = false;
+    String id = startSession();
+    invokeRaw(id, "plans");
+    for (int n = 0; n < 24 && !TERMINAL_STATES.contains(sessionState(id)); n++) {
+      invokeRaw(id, "proposals");
+    }
+    assertThat(sessionState(id)).isEqualTo("FAILED");
+    assertThat(publicGet("/" + id + "/result").path("errorCode").asText())
+        .isEqualTo("UNSUPPORTED_SURFACE");
+    String stored =
+        repository.transaction(() -> repository.lock(id).progress().path("observation").toString());
+    assertThat(stored).as("no observation of the heavy page was stored").doesNotContain("Edit ");
+    assertThat(SUBMITS.get()).isZero();
+  }
+
+  /**
+   * T-J4 (ADR-SC-007 D2 step 2): the scripted model picks Submit, and its reply is held until the
+   * page has removed that button, so the ref no longer resolves. The runner has no durable locator
+   * for it and refuses at prepare; the session ends UNSUPPORTED_SURFACE without a re-ask. (Framed
+   * and closed-shadow elements cannot reach this: perception renders an iframe as an unsupported
+   * surface without refs.)
+   */
+  @Test
+  void pickWithoutDurableLocatorIsRefusedAndEndsUnsupportedSurface() throws Exception {
+    cutover = "vanish";
+    askField = false;
+    String id = startSession();
+    var refused = driveUntilRefused(id);
+    assertThat(refused.statusCode()).as(refused.body()).isEqualTo(422);
+    assertThat(C.parse(refused.body()).path("code").asText()).isEqualTo("UNSUPPORTED_SURFACE");
+    assertThat(sessionState(id)).isEqualTo("FAILED");
+    assertThat(publicGet("/" + id + "/result").path("errorCode").asText())
+        .isEqualTo("UNSUPPORTED_SURFACE");
+    assertThat(refusalGate(id)).isEqualTo("RUNNER_NO_DURABLE_LOCATOR");
+    assertNoReaskAndNoEffect(id);
+    assertThat(SUBMITS.get()).as("the removed button was never clicked").isZero();
+  }
+
+  /** Plans, then drives proposals until the first refused call (or a terminal state). */
+  private HttpResponse<String> driveUntilRefused(String id) throws Exception {
+    var planned = invokeRaw(id, "plans");
+    if (planned.statusCode() != 202) {
+      return planned;
+    }
+    HttpResponse<String> last = planned;
+    for (int n = 0; n < 24; n++) {
+      last = invokeRaw(id, "proposals");
+      if (last.statusCode() != 202 || TERMINAL_STATES.contains(sessionState(id))) {
+        return last;
+      }
+    }
+    throw new AssertionError("the session was never refused: " + last.body());
+  }
+
+  private String refusalGate(String id) {
+    return repository.transaction(
+        () -> repository.lock(id).progress().path("refusalGate").asText());
+  }
+
+  /** The refused call is final: a further call asks the model nothing and changes nothing. */
+  private void assertNoReaskAndNoEffect(String id) throws Exception {
+    int calls = PROVIDER_KINDS.size();
+    int actions =
+        jdbc.queryForObject(
+            "SELECT count(*) FROM studio_guided_actions WHERE session_id=?", Integer.class, id);
+    var again = invokeRaw(id, "proposals");
+    assertThat(again.statusCode()).isNotEqualTo(202);
+    assertThat(PROVIDER_KINDS).as("the model is not asked again").hasSize(calls);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM studio_guided_actions WHERE session_id=?", Integer.class, id))
+        .isEqualTo(actions);
+  }
+
   @Test
   void typedUnsupportedOutcomeStopsWithoutInventingAnAction() throws Exception {
     refuseSource = true;
@@ -1117,6 +1358,10 @@ class GuidedPlanningIntegrationTest {
     JsonNode result = invoke(id, "plans");
     assertThat(result.path("state").asText()).isEqualTo("FAILED");
     assertThat(PROVIDER_BYTES).hasSize(1);
+    // The model's refusal names the cause: a step Studio cannot do yet, never "runtime
+    // incompatible", which names none.
+    assertThat(publicGet("/" + id + "/result").path("errorCode").asText())
+        .isEqualTo("UNSUPPORTED_STEP");
     assertThat(
             jdbc.queryForObject(
                 "SELECT count(*) FROM studio_guided_actions WHERE session_id=?", Integer.class, id))
@@ -1139,11 +1384,10 @@ class GuidedPlanningIntegrationTest {
 
   @org.junit.jupiter.params.ParameterizedTest
   @org.junit.jupiter.params.provider.ValueSource(strings = {"Save", "Delete"})
-  void anAuthoredSaveOrDestructiveClickUnderAllowRunsExactlyOnce(String label) throws Exception {
+  void anAuthoredSaveOrDestructiveClickRunsExactlyOnce(String label) throws Exception {
     guardTarget = label;
     askField = false;
     rewriteAuthoredStep(THREE, "Click " + label + " then check Confirmation appears.");
-    governedStance("ALLOW");
     String id = startSession();
     invoke(id, "plans");
     for (int n = 0; n < 24 && !sessionState(id).equals("FINALIZING"); n++) {
@@ -1159,23 +1403,21 @@ class GuidedPlanningIntegrationTest {
     guardTarget = "Delete account";
     missingGuardTarget = true;
     rewriteAuthoredStep(THREE, "Open reports then check Confirmation appears.");
-    assertGuardRefusal("UNGROUNDED_TARGET");
-  }
-
-  @Test
-  void anAuthoredDeleteStillFailsTheGovernedDenyStance() throws Exception {
-    guardTarget = "Delete";
-    rewriteAuthoredStep(THREE, "Click Delete then check Confirmation appears.");
-    assertGuardRefusal("SIDE_EFFECT_DENIED", "DENY");
+    // ADR-SC-007 D2/D7: the model names a ref, and a ref the observation never showed is refused by
+    // the validator's target-ref gate
+    // (INVALID_CONTRACT) before any guard sees the click; the guard's UNGROUNDED_TARGET refusal
+    // remains for a ref that exists but
+    // fails the intent gate (the sibling cases above).
+    assertGuardRefusal("UNGROUNDED_TARGET", "INVALID_CONTRACT", "UNSUPPORTED_SURFACE", false);
   }
 
   private void assertGuardRefusal(String reason) throws Exception {
-    assertGuardRefusal(reason, "ALLOW");
+    assertGuardRefusal(reason, "POLICY_DENIED", "POLICY_DENIED", true);
   }
 
-  private void assertGuardRefusal(String reason, String stance) throws Exception {
+  private void assertGuardRefusal(String reason, String code, String publicCode, boolean audited)
+      throws Exception {
     askField = false;
-    governedStance(stance);
     var audit = attachAuditCapture();
     try {
       String id = startSession();
@@ -1195,14 +1437,13 @@ class GuidedPlanningIntegrationTest {
       }
       assertThat(refused).isNotNull();
       assertThat(refused.statusCode()).as(refused.body()).isEqualTo(422);
-      assertThat(C.parse(refused.body()).path("code").asText()).isEqualTo("POLICY_DENIED");
+      assertThat(C.parse(refused.body()).path("code").asText()).isEqualTo(code);
       assertThat(sessionState(id)).isEqualTo("FAILED");
-      assertThat(publicGet("/" + id + "/result").path("errorCode").asText())
-          .isEqualTo("POLICY_DENIED");
+      assertThat(publicGet("/" + id + "/result").path("errorCode").asText()).isEqualTo(publicCode);
       assertThat(
               repository.transaction(
                   () -> repository.lock(id).progress().path("errorCode").asText()))
-          .isEqualTo("POLICY_DENIED");
+          .isEqualTo(publicCode);
       assertThat(
               jdbc.queryForObject(
                   "SELECT count(*) FROM studio_guided_model_attempts WHERE session_id=? AND"
@@ -1233,16 +1474,17 @@ class GuidedPlanningIntegrationTest {
           .as("the refused guard call performed no preparation")
           .isEqualTo(preparationsBeforeRefusal);
       assertThat(SUBMITS.get()).as("no native click effect").isZero();
-      assertThat(audit.list)
-          .anyMatch(
-              event ->
-                  event.getFormattedMessage().equals("GUIDED_ACTION_REFUSED")
-                      && java.util.Arrays.stream(event.getArgumentArray())
-                          .anyMatch(
-                              argument -> argument.toString().equals("reasonCode=" + reason)));
+      if (audited) {
+        assertThat(audit.list)
+            .anyMatch(
+                event ->
+                    event.getFormattedMessage().equals("GUIDED_ACTION_REFUSED")
+                        && java.util.Arrays.stream(event.getArgumentArray())
+                            .anyMatch(
+                                argument -> argument.toString().equals("reasonCode=" + reason)));
+      }
     } finally {
       detachAuditCapture(audit);
-      governedStance("ALLOW");
     }
   }
 
@@ -1279,141 +1521,31 @@ class GuidedPlanningIntegrationTest {
   }
 
   /**
-   * STUDIO-OBS-014 AC-6 / AC-4 at session level (QA TEST-001, SEC-001): under an approved governed
-   * DENY stance the form-submit click, as a {@code <button>} or an {@code <input type=submit>}, is
-   * refused before anything is admitted or dispatched, the session ends FAILED with errorCode
-   * POLICY_DENIED, and the refusal is audited GUIDED_ACTION_REFUSED / SIDE_EFFECT_DENIED.
-   */
-  @org.junit.jupiter.params.ParameterizedTest
-  @org.junit.jupiter.params.provider.ValueSource(strings = {"button", "input"})
-  void governedDenyRefusesTheFormSubmitBeforeAnyDispatchAndFailsPolicyDenied(String control)
-      throws Exception {
-    formSubmit = control;
-    askField = false;
-    var audit = attachAuditCapture();
-    try {
-      governedStance("DENY");
-      String id = startSession();
-      invoke(id, "plans");
-      HttpResponse<String> refused = null;
-      for (int n = 0; n < 16 && refused == null; n++) {
-        String state = sessionState(id);
-        if (state.equals("FINALIZING") || TERMINAL_STATES.contains(state)) {
-          break;
-        }
-        assertThat(state).isNotEqualTo("AWAITING_CLARIFICATION");
-        var response = invokeRaw(id, "proposals");
-        if (response.statusCode() != 202) {
-          refused = response;
-        }
-      }
-      assertThat(refused).as("the form-submit proposal was refused").isNotNull();
-      assertThat(refused.statusCode()).as(refused.body()).isEqualTo(422);
-      assertThat(C.parse(refused.body()).path("code").asText()).isEqualTo("POLICY_DENIED");
-      assertThat(sessionState(id)).isEqualTo("FAILED");
-      assertThat(
-              repository.transaction(
-                  () -> repository.lock(id).progress().path("errorCode").asText()))
-          .isEqualTo("POLICY_DENIED");
-      assertThat(SUBMITS.get()).as("nothing dispatched").isZero();
-      assertThat(submitStepAdmissions(id)).as("nothing admitted for the Submit step").isZero();
-      assertThat(audit.list)
-          .anyMatch(
-              event ->
-                  event.getFormattedMessage().equals("GUIDED_ACTION_REFUSED")
-                      && java.util.Arrays.stream(event.getArgumentArray())
-                          .anyMatch(
-                              argument ->
-                                  argument.toString().equals("reasonCode=SIDE_EFFECT_DENIED")));
-    } finally {
-      detachAuditCapture(audit);
-      governedStance("ALLOW");
-    }
-  }
-
-  /**
-   * STUDIO-OBS-014 AC-6 at session level (QA TEST-001), under the production default stance
-   * CLARIFY_FIRST: exactly one SIDE_EFFECT_CONFIRMATION / CONFIRM_ACTION question with one AUTHORED
-   * choice (the authored step text) is raised before the first side-effecting dispatch; confirming
-   * continues to the real submit, and no second question is asked.
-   */
-  @Test
-  void governedClarifyFirstAsksOnceBeforeTheFormSubmitAndConfirmingContinues() throws Exception {
-    clarifyFirstAsksOnceThenContinues("input");
-  }
-
-  /**
-   * AR-SEC001-FM I-1: under governed DENY, the submit of an unlabelled form (as {@code <button>} or
-   * {@code <input type=submit>}, the OBS-007 login shape) and a submit button associated through
-   * {@code form=} are refused exactly like the labelled form's (same oracle).
+   * STUDIO-GOV-001.3: a form-submit click, as a {@code <button>} or an {@code <input type=submit>},
+   * in a labelled form, an unlabelled one or through {@code form=}, is neither refused nor
+   * questioned. No confirmation is raised, the session reaches FINALIZING and the real submit runs
+   * exactly once.
    */
   @org.junit.jupiter.params.ParameterizedTest
   @org.junit.jupiter.params.provider.ValueSource(
-      strings = {"unlabelled-button", "unlabelled-input", "form-attribute"})
-  void governedDenyRefusesAnUnlabelledOrFormAttributeSubmit(String control) throws Exception {
-    governedDenyRefusesTheFormSubmitBeforeAnyDispatchAndFailsPolicyDenied(control);
-  }
-
-  /**
-   * AR-SEC001-FM I-2: under governed CLARIFY_FIRST, the unlabelled form's submit raises exactly one
-   * confirmation before any dispatch; confirming continues to one real submit (same oracle).
-   */
-  @Test
-  void governedClarifyFirstAsksOnceBeforeAnUnlabelledFormSubmit() throws Exception {
-    clarifyFirstAsksOnceThenContinues("unlabelled-input");
-  }
-
-  private void clarifyFirstAsksOnceThenContinues(String control) throws Exception {
+      strings = {"button", "input", "unlabelled-button", "unlabelled-input", "form-attribute"})
+  void aFormSubmitClickRunsOnceWithoutAnyQuestion(String control) throws Exception {
     formSubmit = control;
     askField = false;
-    try {
-      governedStance("CLARIFY_FIRST");
-      String id = startSession();
-      invoke(id, "plans");
-      int confirmations = 0;
-      for (int n = 0; n < 24; n++) {
-        String state = sessionState(id);
-        if (state.equals("FINALIZING") || TERMINAL_STATES.contains(state)) {
-          break;
-        }
-        if (state.equals("AWAITING_CLARIFICATION")) {
-          confirmations++;
-          assertThat(SUBMITS.get()).as("asked before the first side-effecting dispatch").isZero();
-          assertThat(submitStepAdmissions(id)).isZero();
-          JsonNode question = publicGet("/" + id + "/clarification");
-          assertThat(question.path("reason").asText()).isEqualTo("SIDE_EFFECT_CONFIRMATION");
-          assertThat(question.path("promptCode").asText()).isEqualTo("CONFIRM_ACTION");
-          assertThat(question.path("choices")).hasSize(1);
-          JsonNode choice = question.path("choices").get(0);
-          assertThat(choice.path("labelSource").asText()).isEqualTo("AUTHORED");
-          assertThat(choice.path("safeLabel").asText()).isEqualTo(TEXT.get(2));
-          publicPost(
-              "/" + id + "/clarify",
-              C.object()
-                  .put("schemaVersion", 3)
-                  .put("clarificationId", question.path("clarificationId").asText())
-                  .put("generation", question.path("generation").asInt())
-                  .put("choiceId", choice.path("choiceId").asText()));
-          continue;
-        }
-        invoke(id, "proposals");
+    String id = startSession();
+    invoke(id, "plans");
+    for (int n = 0; n < 24; n++) {
+      String state = sessionState(id);
+      if (state.equals("FINALIZING") || TERMINAL_STATES.contains(state)) {
+        break;
       }
-      assertThat(sessionState(id)).isEqualTo("FINALIZING");
-      assertThat(confirmations).as("one confirmation per session").isEqualTo(1);
-      assertThat(SUBMITS.get()).as("the confirmed submit ran once").isEqualTo(1);
-      assertThat(
-              repository.transaction(
-                  () ->
-                      repository
-                          .lock(id)
-                          .progress()
-                          .path("sideEffectConfirmation")
-                          .path("status")
-                          .asText()))
-          .isEqualTo("CONFIRMED");
-    } finally {
-      governedStance("ALLOW");
+      assertThat(state).isNotEqualTo("AWAITING_CLARIFICATION");
+      invoke(id, "proposals");
     }
+    assertThat(sessionState(id)).isEqualTo("FINALIZING");
+    assertThat(SUBMITS.get()).as("the submit ran once").isEqualTo(1);
+    assertThat(repository.transaction(() -> repository.lock(id).progress().has("clarification")))
+        .isFalse();
   }
 
   private static final java.util.Set<String> TERMINAL_STATES =
@@ -1430,29 +1562,6 @@ class GuidedPlanningIntegrationTest {
         Integer.class,
         id,
         THREE);
-  }
-
-  /**
-   * Approves the class's governed policy with {@code stance}, keeping the active version's
-   * application policy (the per-test read grant the worker start seeded); sessions freeze it at
-   * start.
-   */
-  private void governedStance(String stance) {
-    var policyJdbc = Environment.policyJdbc();
-    JsonNode active =
-        new com.citi.put.checks.studio.guided.policy.ObservationPolicyRepository(policyJdbc, C)
-            .active("CSI-123", "orders", "fixture")
-            .orElseThrow()
-            .document()
-            .path("applicationPolicy");
-    com.citi.put.checks.studio.support.ObservedPublicationFixture.ensurePolicy(
-        policyJdbc,
-        "CSI-123",
-        "orders",
-        "fixture",
-        List.of(Environment.ORIGIN),
-        active.deepCopy(),
-        stance);
   }
 
   private static ch.qos.logback.core.read.ListAppender<ch.qos.logback.classic.spi.ILoggingEvent>
@@ -1618,7 +1727,9 @@ class GuidedPlanningIntegrationTest {
                 instrumentedTranslation(interruptedSessions, gateway)
                     .plan(fixture.controller, id, 0, "pin-plan", command(id)))
         .hasMessage("process-stop");
-    var changedPins = org.mockito.Mockito.spy(new GuidedPromptAssembler(C));
+    var changedPins =
+        org.mockito.Mockito.spy(
+            new GuidedPromptAssembler(C, com.citi.put.checks.studio.support.TestDomains.FIXTURES));
     ObjectNode newPins = changedPins.schemaProvenance().deepCopy();
     newPins.put("outputContractHash", "f".repeat(64));
     org.mockito.Mockito.doReturn(newPins).when(changedPins).schemaProvenance();
@@ -1756,7 +1867,7 @@ class GuidedPlanningIntegrationTest {
             bridge,
             gateway,
             C,
-            new GuidedPromptAssembler(C),
+            new GuidedPromptAssembler(C, com.citi.put.checks.studio.support.TestDomains.FIXTURES),
             inputs,
             new GuidedProposalValidator(C),
             new GuidedDependencyPlanner(service),
@@ -2097,234 +2208,6 @@ class GuidedPlanningIntegrationTest {
     assertThat(NAVIGATION_DESTINATIONS).isEmpty();
   }
 
-  @Test
-  void aForgedFrozenPolicyHashFromTheRealBackendIsRejectedByTheRealWorkerBeforeBrowserLaunch()
-      throws Exception {
-    assertThat(fixture.worker.isAlive()).isTrue();
-    JsonNode initialCounter = C.parse(Files.readString(fixture.livePolicyCounter));
-    assertThat(initialCounter.path("registered").asBoolean()).isTrue();
-    assertThat(initialCounter.path("launches").asInt()).isZero();
-    assertThat(fixture.worker.descendants().filter(ProcessHandle::isAlive).count()).isZero();
-    String id = startSession();
-    String frozenBefore =
-        jdbc.queryForObject(
-            "SELECT to_jsonb(p)::text FROM studio_guided_session_policies p WHERE session_id=?",
-            String.class,
-            id);
-    String frozenHash =
-        jdbc.queryForObject(
-            "SELECT observation_policy_hash FROM studio_guided_session_policies WHERE session_id=?",
-            String.class,
-            id);
-    JsonNode approvedPolicy =
-        repository.transaction(() -> store.frozenPolicy(id).path("applicationPolicy").deepCopy());
-    assertThat(GuidedContracts.hash(approvedPolicy)).isEqualTo(frozenHash);
-    long fence =
-        dispatch
-            .assign(fixture.controller, id, "translation-assignment", properties.workerId())
-            .path("ownerFence")
-            .asLong();
-    JsonNode assigned = repository.transaction(() -> repository.lock(id).document().deepCopy());
-    String assignmentBefore =
-        jdbc.queryForObject(
-            "SELECT (to_jsonb(a)-'live')::text FROM studio_guided_assignments a WHERE session_id=?",
-            String.class,
-            id);
-    String sourceBefore =
-        jdbc.queryForObject(
-            "SELECT to_jsonb(m)::text FROM studio_guided_source_manifests m WHERE session_id=?",
-            String.class,
-            id);
-    var realClient =
-        new HttpRunnerDispatchClient(
-            URI.create("https://127.0.0.1:" + Environment.RUNNER_PORT),
-            Environment.TLS,
-            () -> Environment.token("backend-controller", "controller-1", "studio-guided-runner"),
-            C);
-    var measuredClient = org.mockito.Mockito.spy(realClient);
-    var original = new AtomicReference<JsonNode>();
-    var forged = new AtomicReference<JsonNode>();
-    var materialBefore = new AtomicReference<String>();
-    var contextCalls = new AtomicInteger();
-    org.mockito.Mockito.doAnswer(
-            invocation -> {
-              JsonNode genuine = invocation.getArgument(1);
-              original.set(genuine.deepCopy());
-              assertThat(genuine.path("applicationPolicy")).isEqualTo(approvedPolicy);
-              assertThat(genuine.path("policyHash").asText()).isEqualTo(frozenHash);
-              ObjectNode changed = genuine.deepCopy();
-              changed.put(
-                  "policyHash",
-                  frozenHash.equals("0".repeat(64)) ? "1".repeat(64) : "0".repeat(64));
-              C.validate("v3/runner-context", changed);
-              assertThat(changed.path("policyHash")).isNotEqualTo(genuine.path("policyHash"));
-              ObjectNode unchanged = changed.deepCopy();
-              unchanged.set("policyHash", genuine.path("policyHash"));
-              assertThat(unchanged).isEqualTo(genuine);
-              forged.set(changed.deepCopy());
-              materialBefore.set(
-                  jdbc.queryForObject(
-                      "SELECT (to_jsonb(m)-'live')::text FROM studio_guided_materializations m WHERE session_id=?",
-                      String.class,
-                      id));
-              contextCalls.incrementAndGet();
-              return realClient.send("context", changed);
-            })
-        .when(measuredClient)
-        .send(
-            org.mockito.ArgumentMatchers.eq("context"),
-            org.mockito.ArgumentMatchers.any(JsonNode.class));
-    var bridge = new GuidedDispatchService(sessions, materialization, measuredClient);
-    var continuation = translationWithBridge(bridge);
-    var log = new ch.qos.logback.core.read.ListAppender<ch.qos.logback.classic.spi.ILoggingEvent>();
-    log.start();
-    var logger =
-        (ch.qos.logback.classic.Logger)
-            org.slf4j.LoggerFactory.getLogger(HttpRunnerDispatchClient.class);
-    logger.addAppender(log);
-    try {
-      var refusal =
-          org.assertj.core.api.Assertions.catchThrowableOfType(
-              () ->
-                  continuation.plan(
-                      fixture.controller, id, fence, "actual-forged-policy", command(id)),
-              GuidedSessionException.class);
-      assertThat(refusal).isNotNull();
-      assertThat(refusal.getMessage()).isEqualTo("RUNTIME_INCOMPATIBLE");
-      assertThat(refusal.status()).isEqualTo(409);
-      assertThat(refusal.retryable()).isFalse();
-      assertThat(refusal.messageCode()).isEqualTo(HttpRunnerDispatchClient.CONTEXT_REFUSED);
-      assertThat(contextCalls.get()).isEqualTo(1);
-      assertThat(PROVIDER_KINDS).containsExactly("SOURCE_PLAN");
-      assertThat(log.list)
-          .anyMatch(
-              event ->
-                  event
-                      .getFormattedMessage()
-                      .equals(
-                          "Guided runner refused the context for session "
-                              + id
-                              + " (contextHash "
-                              + GuidedContracts.hash(forged.get())
-                              + "): IDENTITY_MISMATCH"));
-      Environment.await(
-          () ->
-              repository.transaction(
-                  () ->
-                      repository
-                          .lock(id)
-                          .progress()
-                          .path("teardownStatus")
-                          .asText()
-                          .equals("CONFIRMED")),
-          10000);
-      JsonNode failed = repository.transaction(() -> repository.lock(id).document().deepCopy());
-      JsonNode progress = repository.transaction(() -> repository.lock(id).progress().deepCopy());
-      assertThat(failed.path("state").asText()).isEqualTo("FAILED");
-      assertThat(progress.path("errorCode").asText()).isEqualTo("RUNTIME_INCOMPATIBLE");
-      assertThat(progress.path("translationBootstrap").path("deliveries")).hasSize(1);
-      assertThat(
-              progress
-                  .path("translationBootstrap")
-                  .path("deliveries")
-                  .get(0)
-                  .path("outcome")
-                  .asText())
-          .isEqualTo("REFUSED");
-      assertThat(failed.path("counters").path("observations").asInt()).isZero();
-      assertThat(progress.path("observation").isMissingNode()).isTrue();
-      for (String field :
-          List.of("scope", "scopeHash", "versions", "limits", "sourceSteps", "runAuthorization")) {
-        assertThat(failed.path(field))
-            .as("unchanged session %s", field)
-            .isEqualTo(assigned.path(field));
-      }
-      assertThat(failed.path("owner").path("fence").asLong()).isEqualTo(fence);
-      assertThat(
-              jdbc.queryForObject(
-                  "SELECT to_jsonb(p)::text FROM studio_guided_session_policies p WHERE session_id=?",
-                  String.class,
-                  id))
-          .isEqualTo(frozenBefore);
-      assertThat(
-              jdbc.queryForObject(
-                  "SELECT (to_jsonb(m)-'live')::text FROM studio_guided_materializations m WHERE session_id=?",
-                  String.class,
-                  id))
-          .isEqualTo(materialBefore.get());
-      assertThat(original.get().path("policyHash").asText()).isEqualTo(frozenHash);
-      assertThat(
-              jdbc.queryForObject(
-                  "SELECT (to_jsonb(a)-'live')::text FROM studio_guided_assignments a WHERE session_id=?",
-                  String.class,
-                  id))
-          .isEqualTo(assignmentBefore);
-      assertThat(
-              jdbc.queryForObject(
-                  "SELECT to_jsonb(m)::text FROM studio_guided_source_manifests m WHERE session_id=?",
-                  String.class,
-                  id))
-          .isEqualTo(sourceBefore);
-      for (String table :
-          List.of(
-              "studio_guided_actions",
-              "studio_guided_preparations",
-              "studio_guided_obligation_admissions",
-              "studio_guided_publication_observations")) {
-        assertThat(
-                jdbc.queryForObject(
-                    "SELECT count(*) FROM " + table + " WHERE session_id=?", Integer.class, id))
-            .as("zero row in %s", table)
-            .isZero();
-      }
-      assertThat(NAVIGATION_DESTINATIONS).isEmpty();
-      assertThat(SUBMITS.get()).isZero();
-      JsonNode beforeAgain = C.parse(Files.readString(fixture.livePolicyCounter));
-      assertThat(beforeAgain.path("registered").asBoolean()).isTrue();
-      assertThat(beforeAgain.path("launches").asInt()).isZero();
-      assertThat(beforeAgain.path("rpcs").path("context").asInt()).isEqualTo(1);
-      assertThat(fixture.worker.descendants().filter(ProcessHandle::isAlive).count()).isZero();
-      int allClientCalls =
-          org.mockito.Mockito.mockingDetails(measuredClient).getInvocations().size();
-      JsonNode again =
-          continuation.plan(fixture.controller, id, fence, "after-actual-forgery", command(id));
-      assertThat(again.path("state").asText()).isEqualTo("FAILED");
-      assertThat(C.parse(Files.readString(fixture.livePolicyCounter))).isEqualTo(beforeAgain);
-      assertThat(org.mockito.Mockito.mockingDetails(measuredClient).getInvocations())
-          .hasSize(allClientCalls);
-      assertThat(PROVIDER_KINDS).containsExactly("SOURCE_PLAN");
-      assertThat(repository.transaction(() -> repository.lock(id).document().deepCopy()).toString())
-          .isEqualTo(failed.toString());
-      assertThat(repository.transaction(() -> repository.lock(id).progress().deepCopy()).toString())
-          .isEqualTo(progress.toString());
-      assertThat(fixture.worker.descendants().filter(ProcessHandle::isAlive).count()).isZero();
-      var proof =
-          C.object()
-              .put("sessionId", id)
-              .put("workerPid", fixture.worker.pid())
-              .put("originalPolicyHash", frozenHash)
-              .put("forgedPolicyHash", forged.get().path("policyHash").asText())
-              .put("runnerCode", "IDENTITY_MISMATCH")
-              .put("state", "FAILED")
-              .put("errorCode", "RUNTIME_INCOMPATIBLE")
-              .put("contextCalls", contextCalls.get())
-              .put("observations", 0)
-              .put("ownedBrowserChildren", 0)
-              .put("secondContinuationRpcDelta", 0)
-              .put(
-                  "wrapperHash",
-                  GuidedContracts.hash(
-                      C.object().put("script", Files.readString(fixture.livePolicyWrapper))));
-      proof.set("actualWorkerMeasurements", beforeAgain);
-      Path destination = Path.of("build", "strict-live-policy-proof.json");
-      Files.createDirectories(destination.getParent());
-      Files.writeString(destination, proof.toPrettyString());
-    } finally {
-      logger.detachAppender(log);
-      log.stop();
-    }
-  }
-
   /**
    * ar-2-r14-stops ruling 2 tests[1] (STUDIO-OBS-014 AC-1 clarification h2): the runner definitely
    * refuses the first bootstrap context with IDENTITY_MISMATCH. Exactly one context request is
@@ -2536,7 +2419,7 @@ class GuidedPlanningIntegrationTest {
             bridge,
             gateway,
             C,
-            new GuidedPromptAssembler(C),
+            new GuidedPromptAssembler(C, com.citi.put.checks.studio.support.TestDomains.FIXTURES),
             inputs,
             new GuidedProposalValidator(C),
             new GuidedDependencyPlanner(sessions),
@@ -2550,15 +2433,16 @@ class GuidedPlanningIntegrationTest {
     Path token = Files.createTempFile("obs005-r1-controller", ".jwt");
     Files.writeString(
         token, Environment.token("backend-controller", "controller-1", "studio-guided-controller"));
-    try {
-      new com.citi.put.checks.studio.guided.translation.GuidedTranslationCoordinator(
-              store,
-              repository,
-              C,
-              URI.create("https://localhost:" + port),
-              token,
-              Environment.RUNNER_TLS.backendTls())
-          .continueRuns();
+    try (var coordinator =
+        new com.citi.put.checks.studio.guided.translation.GuidedTranslationCoordinator(
+            store,
+            repository,
+            C,
+            URI.create("https://localhost:" + port),
+            token,
+            Environment.RUNNER_TLS.backendTls())) {
+      coordinator.continueRuns();
+      coordinator.drain(Duration.ofSeconds(120));
     } finally {
       Files.deleteIfExists(token);
     }
@@ -2643,18 +2527,15 @@ class GuidedPlanningIntegrationTest {
                           "sourceInputId",
                           request.path("context").path("inputs").get(0).path("inputId").asText()));
         } else {
-          String wanted = hostileMutation.equals("operation") ? "Submit" : "Backup destination";
-          for (JsonNode node : request.path("context").path("observation").path("nodes")) {
-            if (node.path("name").asText().equals(wanted)) {
-              var target = action.putObject("target").put("nodeId", node.path("nodeId").asText());
-              target
-                  .putObject("locator")
-                  .put("kind", "role")
-                  .put("role", node.path("role").asText())
-                  .put("name", wanted)
-                  .put("exact", true);
-            }
-          }
+          String wanted = hostileMutation.equals("operation") ? "Submit" : "Billing notes";
+          // ADR-SC-007: the model names a ref of the outline it was shown.
+          action
+              .putObject("target")
+              .put("kind", "node")
+              .put(
+                  "ref",
+                  com.citi.put.checks.studio.support.JoinedRefs.refInOutline(
+                      request.path("context").path("observation").asText(), wanted));
           if (hostileMutation.equals("operation")) {
             action.putObject("operation").put("kind", "click");
           }
@@ -2892,7 +2773,9 @@ class GuidedPlanningIntegrationTest {
             org.mockito.ArgumentMatchers.any(),
             org.mockito.ArgumentMatchers.eq(id),
             org.mockito.ArgumentMatchers.eq(1L));
-    var prompts = org.mockito.Mockito.spy(new GuidedPromptAssembler(C));
+    var prompts =
+        org.mockito.Mockito.spy(
+            new GuidedPromptAssembler(C, com.citi.put.checks.studio.support.TestDomains.FIXTURES));
     ObjectNode current = prompts.schemaProvenance();
     ObjectNode changed = current.deepCopy().put("outputContractHash", "f".repeat(64));
     org.mockito.Mockito.doReturn(current, changed).when(prompts).schemaProvenance();
@@ -3006,7 +2889,7 @@ class GuidedPlanningIntegrationTest {
             dispatch,
             provider,
             C,
-            new GuidedPromptAssembler(C),
+            new GuidedPromptAssembler(C, com.citi.put.checks.studio.support.TestDomains.FIXTURES),
             inputs,
             new GuidedProposalValidator(C),
             new GuidedDependencyPlanner(service),
@@ -3093,8 +2976,7 @@ class GuidedPlanningIntegrationTest {
             .put("testId", testId.toString())
             .put("sourceRevision", "1")
             .put("configurationRevision", "1")
-            .put("environmentId", "fixture")
-            .put("applicationId", "orders");
+            .put("environmentId", "fixture");
     start.set(
         "versions",
         C.parse(
@@ -3193,6 +3075,9 @@ class GuidedPlanningIntegrationTest {
     assertThat(response.statusCode()).as(response.body()).isBetween(200, 202);
     return C.parse(response.body());
   }
+
+  static final String SELECT_TEXT = "Select " + ABSENT_LITERAL + " in Plan.";
+  static final String OPEN_ONLY_TEXT = "Open " + URL + ".";
 
   private static ObjectNode providerResponse(JsonNode request) {
     String kind = request.path("kind").asText();
@@ -3317,6 +3202,27 @@ class GuidedPlanningIntegrationTest {
           .put("endUtf16", 5 + URL.length())
           .put("kind", "destination")
           .put("intendedSlot", "navigate.destination");
+      if ("select".equals(cutover)) {
+        // T-J1: step TWO is "Select 3.99 in Plan.": an authored literal for a native select.
+        int start = SELECT_TEXT.indexOf(ABSENT_LITERAL);
+        response
+            .withArray("sourceReferences")
+            .addObject()
+            .put("referenceKind", "sourceSpan")
+            .put("sourceRevision", "1")
+            .put("stepId", TWO)
+            .put("startUtf16", start)
+            .put("endUtf16", start + ABSENT_LITERAL.length())
+            .put("kind", "nonsecretText")
+            .put("intendedSlot", "selectOption.value");
+        var selectObligations = response.putArray("obligations");
+        selectObligations.add(obligation(ONE, 0, "navigate", "page", 0, null));
+        selectObligations.add(obligation(TWO, 0, "selectOption", "Plan", 1, null));
+        selectObligations.add(obligation(THREE, 0, "click", "Submit", null, null));
+        selectObligations.add(
+            obligation(THREE, 1, "assert", "Confirmation", null, null).put("predicate", "visible"));
+        return response;
+      }
       if (!context.path("clarificationSelections").isEmpty()) {
         if (sourceChoiceSubstitution) {
           response
@@ -3336,15 +3242,6 @@ class GuidedPlanningIntegrationTest {
           obligation(THREE, 0, "click", guardTarget == null ? "Submit" : guardTarget, null, null));
       obligations.add(
           obligation(THREE, 1, "assert", "Confirmation", null, null).put("predicate", "visible"));
-      response
-          .putArray("needs")
-          .addObject()
-          .put("needId", "order")
-          .put("producerStepId", ONE)
-          .putArray("consumers")
-          .addObject()
-          .put("stepId", TWO)
-          .put("argumentSlot", "fill.value");
       return response;
     }
     if (kind.equals("VERIFY_STEP")) {
@@ -3399,34 +3296,54 @@ class GuidedPlanningIntegrationTest {
           .put("kind", op)
           .put("destinationInputId", context.path("inputs").get(0).path("inputId").asText());
     } else {
-      JsonNode node = null;
-      for (JsonNode candidate : context.path("observation").path("nodes")) {
-        if (candidate.path("name").asText().equals(obligation.path("targetIntent").asText())) {
-          node = candidate;
-        }
-      }
-      if (node == null) {
-        throw new IllegalStateException("Controlled expected node missing");
-      }
-      target.put("nodeId", node.path("nodeId").asText());
-      ObjectNode locator =
-          target
-              .putObject("locator")
-              .put("kind", "role")
-              .put("role", node.path("role").asText())
-              .put("name", node.path("name").asText())
-              .put("exact", true);
+      String outline = context.path("observation").asText();
+      // ADR-SC-007 D6: after a clarification the obligation carries the stored selection, and only
+      // the selected element is admissible.
+      JsonNode selection = obligation.path("selectedChoice");
+      String pickedRef =
+          selection.isObject()
+              ? selection.path("ref").asText()
+              : com.citi.put.checks.studio.support.JoinedRefs.lineInOutline(
+                      outline, obligation.path("targetIntent").asText())
+                  .ref();
+      target.put("kind", "node").put("ref", pickedRef);
       ObjectNode operation = action.putObject("operation").put("kind", op);
       if (op.equals("read")) {
-        operation
-            .put("bindingId", context.path("needs").get(0).path("bindingId").asText())
-            .putObject("recipe")
-            .put("kind", "visibleText")
-            .put("classification", "permittedBusinessData")
-            .put("policyRuleId", "business-read");
+        // ADR-SC-007: a model-facing read names no recipe; the backend completes it from the page's
+        // read grant.
+        operation.put("bindingId", context.path("needs").get(0).path("bindingId").asText());
       }
       if (op.equals("assert")) {
         operation.put("predicate", "visible").putNull("expected");
+      }
+      if (op.equals("selectOption")) {
+        String sourceInputId = null;
+        for (JsonNode input : context.path("inputs")) {
+          if (input.path("sourceStepId").equals(obligation.path("stepId"))
+              && input.path("intendedSlot").asText().equals("selectOption.value")) {
+            sourceInputId = input.path("inputId").asText();
+          }
+        }
+        if (sourceInputId == null) {
+          throw new IllegalStateException("Authored select literal missing");
+        }
+        operation
+            .putObject("value")
+            .put("kind", "authoredLiteral")
+            .put("sourceInputId", sourceInputId);
+      }
+      if (op.equals("click") && "vanish".equals(cutover)) {
+        // T-J4: the model answers late. By the time its reply is used the page has removed the
+        // button it picked, so the runner cannot synthesize a locator for the ref.
+        REMOVE_SUBMIT.set(true);
+        try {
+          if (!submitRemoved.await(10, TimeUnit.SECONDS)) {
+            throw new IllegalStateException("The page did not remove the Submit button");
+          }
+        } catch (InterruptedException interrupted) {
+          Thread.currentThread().interrupt();
+          throw new IllegalStateException(interrupted);
+        }
       }
       if (op.equals("fill")) {
         if (askField) {
@@ -3435,25 +3352,17 @@ class GuidedPlanningIntegrationTest {
           var question = response.putObject("question").put("reason", "AMBIGUOUS_TARGET");
           var choices = question.putArray("choices");
           for (int n = 0; n < 2; n++) {
-            JsonNode selected = node;
-            if (n == 1) {
-              for (JsonNode other : context.path("observation").path("nodes")) {
-                if (other.path("name").asText().equals("Backup destination")) {
-                  selected = other;
-                }
-              }
-            }
+            var selected =
+                n == 0
+                    ? com.citi.put.checks.studio.support.JoinedRefs.lineInOutline(
+                        outline, obligation.path("targetIntent").asText())
+                    : com.citi.put.checks.studio.support.JoinedRefs.lineInOutline(
+                        outline, "Backup destination");
             ObjectNode meaning =
                 C.object()
                     .put("obligationId", obligation.path("obligationId").asText())
-                    .put("nodeId", selected.path("nodeId").asText())
+                    .put("ref", selected.ref())
                     .putNull("bindingId");
-            meaning
-                .putObject("locator")
-                .put("kind", "role")
-                .put("role", selected.path("role").asText())
-                .put("name", selected.path("name").asText())
-                .put("exact", true);
             choices
                 .addObject()
                 .put("choiceId", "choice-" + n)
@@ -3487,7 +3396,8 @@ class GuidedPlanningIntegrationTest {
             "contextRevision"));
     target.remove(java.util.List.of("documentId", "generation"));
     if (op.equals("click") && missingGuardTarget) {
-      target.put("nodeId", "node-1-999999");
+      // A ref the outline never showed.
+      target.put("ref", "e999999");
     }
     if (op.equals("click")) {
       lastSubmit = response.deepCopy();
@@ -3522,13 +3432,6 @@ class GuidedPlanningIntegrationTest {
   static class Environment {
     static final GuidedContracts CONTRACTS = new GuidedContracts();
     static final PostgreSQLContainer<?> DATABASE = new PostgreSQLContainer<>("postgres:15-alpine");
-
-    /** A direct handle for test-side governed-policy seeding (no Spring context needed). */
-    static JdbcTemplate policyJdbc() {
-      return new JdbcTemplate(
-          new DriverManagerDataSource(
-              DATABASE.getJdbcUrl(), DATABASE.getUsername(), DATABASE.getPassword()));
-    }
 
     static final Path TEMP;
     static final Path DIST;
@@ -3625,14 +3528,14 @@ class GuidedPlanningIntegrationTest {
         // AC-12 h: an exclusive bind on both loopback families, outside the database range.
         RUNNER_PORT = RunnerProcessHarness.exclusivelyFreePort();
         APPLICATION = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-        ORIGIN = "http://127.0.0.1:" + APPLICATION.getAddress().getPort();
+        ORIGIN = "http://localhost:" + APPLICATION.getAddress().getPort();
         APPLICATION.start();
         DATABASE.start();
         // STUDIO-OBS-012A / ADR-SC-005 D-B: the re-baselined schema head (core V1–V11 + V12–V18).
         Flyway.configure()
             .dataSource(DATABASE.getJdbcUrl(), DATABASE.getUsername(), DATABASE.getPassword())
             .locations("classpath:db/migration")
-            .target("23") // STUDIO-OBS-014 S3: governance tables (V19) at head
+            .target("29")
             .load()
             .migrate();
       } catch (Exception failure) {
@@ -3665,8 +3568,6 @@ class GuidedPlanningIntegrationTest {
                 List.of(new CsiOwnershipEntry("CSI-123", "owner"))));
     Process worker;
     RunnerProcessHarness workerHarness;
-    Path livePolicyCounter;
-    Path livePolicyWrapper;
 
     void startWorker(org.junit.jupiter.api.TestInfo testInfo) throws Exception {
       String testName = testInfo.getTestMethod().orElseThrow().getName();
@@ -3716,44 +3617,7 @@ class GuidedPlanningIntegrationTest {
           TEMP.resolve("worker.jwt"),
           token("owning-worker", "worker-1", "studio-guided-controller"));
       Path journal = Files.createTempDirectory(TEMP, "journal-");
-      // STUDIO-OBS-014 S3 (RK-2, ar-mounted-rules): the worker mounts neither `rules` nor
-      // `applicationPolicy`. The same per-test application policy is the governed, approved
-      // policy of the learning scope; each session freezes the version active at its start.
-      ObjectNode policy = null;
-      if (genericRead) {
-        policy =
-            CONTRACTS
-                .object()
-                .put("policyRuleId", "structural-policy")
-                .put("allowStructuralDiscovery", true);
-        ObjectNode grant =
-            CONTRACTS.object().put("policyRuleId", "business-read").put("origin", ORIGIN);
-        grant
-            .putObject("region")
-            .put("kind", "role")
-            .put("role", "main")
-            .put("name", "Operations")
-            .put("exact", true);
-        grant.putObject("visibleText").put("classification", "permittedBusinessData");
-        grant
-            .putObject("controlValue")
-            .put("classification", "nonsecretApproved")
-            .putArray("types")
-            .add("text")
-            .add("textarea");
-        policy.putArray("readGrants").add(grant);
-      }
-      if (belowFold || privacyEcho || nativeToggle) {
-        policy = null;
-      }
-      com.citi.put.checks.studio.support.ObservedPublicationFixture.ensurePolicy(
-          Environment.policyJdbc(),
-          "CSI-123",
-          "orders",
-          "fixture",
-          java.util.List.of(ORIGIN),
-          policy,
-          "ALLOW");
+      // The worker mounts no `rules`: the read profile is the runner's own constant.
       // STUDIO-OBS-009 AC-3 / AC-12 h: the one folded entry point over TLS, spawned and reaped by
       // the harness. STUDIO-OBS-013/014 S3: a per-class object store, never a shared default
       // directory.
@@ -3772,45 +3636,8 @@ class GuidedPlanningIntegrationTest {
                       TEMP.resolve("issuer.pub"),
                       "https://localhost:" + backendPort,
                       TEMP.resolve("worker.jwt")));
-      boolean measured =
-          testName.equals(
-              "aForgedFrozenPolicyHashFromTheRealBackendIsRejectedByTheRealWorkerBeforeBrowserLaunch");
-      if (measured) {
-        livePolicyCounter = TEMP.resolve("live-policy-counter-" + UUID.randomUUID() + ".json");
-        String playwright =
-            Path.of("../studio-runner/node_modules/playwright/index.mjs")
-                .toAbsolutePath()
-                .normalize()
-                .toUri()
-                .toString();
-        String counter = new ObjectMapper().writeValueAsString(livePolicyCounter.toString());
-        // Measurement only: exact production module, original Playwright call-through, and actual
-        // HTTPS request events. No body, token, config, result or browser replacement is observed.
-        // The harness appends the standard main() call after this prelude.
-        String prelude =
-            "import {chromium} from '"
-                + playwright
-                + "';"
-                + "import fs from 'node:fs';import https from 'node:https';"
-                + "import {syncBuiltinESMExports} from 'node:module';const file="
-                + counter
-                + ";"
-                + "const original=chromium.launchPersistentContext;"
-                + "const state={registered:typeof original==='function',launches:0,rpcs:{}};"
-                + "const save=()=>fs.writeFileSync(file,JSON.stringify(state),{mode:0o600});save();"
-                + "chromium.launchPersistentContext=function(...args){state.launches++;save();"
-                + "return Reflect.apply(original,this,args);};"
-                + "const serverFactory=https.createServer;https.createServer=function(...args){"
-                + "const server=Reflect.apply(serverFactory,this,args);server.prependListener('request',req=>{"
-                + "const route=(req.url||'').split('/').at(-1);state.rpcs[route]=(state.rpcs[route]||0)+1;save();});"
-                + "return server;};syncBuiltinESMExports();";
-        spawn.preload(prelude);
-      }
       workerHarness = spawn.start();
       worker = workerHarness.process();
-      if (measured) {
-        livePolicyWrapper = workerHarness.workDirectory().resolve("entry.mjs");
-      }
       workerHarness.awaitReady(Duration.ofSeconds(60));
     }
 

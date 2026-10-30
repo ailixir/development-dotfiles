@@ -1,13 +1,11 @@
-import CommandPalette from '@/components/home/CommandPalette';
 import GlobalSearch from '@/components/home/GlobalSearch';
 import { Box, Button, Drawer, IconButton, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { Close, Menu } from '@mui/icons-material';
 import { PlatformSidebar } from '@put/core-components';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getCurrentPageId, registerChecksNavigation } from '../../../utils/navigation/navigationSetup';
 import { useLayout } from '../LayoutProvider';
-import HelpDialog from './HelpDialog';
 import Notifications from './Notifications';
 
 interface ChecksLayoutProps {
@@ -22,8 +20,6 @@ export const ChecksLayout: React.FC<ChecksLayoutProps> = ({ children }) => {
   const [currentPage, setCurrentPage] = useState('home');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false);
-  const [paletteOpen, setPaletteOpen] = useState(false);
-  const [helpOpen, setHelpOpen] = useState(false);
   
   const { deploymentMode } = useLayout();
 
@@ -51,31 +47,9 @@ export const ChecksLayout: React.FC<ChecksLayoutProps> = ({ children }) => {
   // In federated mode, we might not show the sidebar depending on host configuration
   const shouldShowSidebar = deploymentMode === 'standalone' || !isMobile;
   const sidebarSpace = shouldShowSidebar ? (sidebarCollapsed ? 100 : 320) : 0;
-  // Match vertical rhythm used by SidebarHeader: larger top padding when expanded
-  const contentPaddingTop = 0; // px
-
-  const onKeyDown = useCallback((e: KeyboardEvent) => {
-    const isMac = navigator.platform.toLowerCase().includes('mac');
-    if ((isMac ? e.metaKey : e.ctrlKey) && e.key.toLowerCase() === 'k') {
-      e.preventDefault();
-      setPaletteOpen((v) => !v);
-    }
-    if (e.key === '?') {
-      e.preventDefault();
-      setHelpOpen(true);
-    }
-    // Quick nav shortcuts
-    if ((isMac ? e.metaKey : e.ctrlKey) && e.key.toLowerCase() === 'n') {
-      e.preventDefault();
-      navigate('/checks/create');
-    }
-    // Reduced motion preference: no-op shortcut but show how we'd adapt animations if needed
-  }, [navigate]);
-
-  useEffect(() => {
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [onKeyDown]);
+  // Standalone: match the 24px gutter between the sidebar card and the content. Federated: the host shell
+  // provides its own top spacing.
+  const contentPaddingTop = deploymentMode === 'standalone' ? 24 : 0; // px
 
   const showGlobalSearch = useMemo(() => {
     const p = location.pathname;
@@ -171,8 +145,6 @@ export const ChecksLayout: React.FC<ChecksLayoutProps> = ({ children }) => {
             </Stack>
           )}
         {children}
-          <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
-          <HelpDialog open={helpOpen} onClose={() => setHelpOpen(false)} />
           <Notifications />
       </Box>
     </Box>

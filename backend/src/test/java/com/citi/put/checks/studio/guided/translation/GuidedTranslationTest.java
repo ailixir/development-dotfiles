@@ -37,7 +37,7 @@ class GuidedTranslationTest {
    * Real source rows and production store; callback checkpoints below are synthetic, not browser
    * evidence.
    */
-  private final class DelayedFixture {
+  final class DelayedFixture {
     final String id = java.util.UUID.randomUUID().toString();
     final java.util.UUID testId;
     final ObjectNode obligation;
@@ -251,6 +251,12 @@ class GuidedTranslationTest {
               request.set(field, current.document().path("scope").path(field));
             }
             request.set("expectedGeneration", current.progress().path("generation"));
+            // ADR-SC-007: every observation request carries the focus the outline is projected on.
+            request.set(
+                "focus",
+                GuidedObservationFocus.focus(
+                    "Click " + required.path("targetIntent").asText(),
+                    List.of(required.path("targetIntent").asText())));
             return delayedDb.store.acquire(
                 current, delayedDb.store.state(id), required, ready, request);
           });
@@ -500,11 +506,18 @@ class GuidedTranslationTest {
               case "session" -> marker.put("totalExtraPolls", 200);
               case "observations" ->
                   current.document().withObject("/counters").put("observations", 400);
-              default ->
-                  current
-                      .document()
-                      .withObject("/counters")
-                      .put("sanitizedEvidenceBytes", 1048576 - 32768 + 1);
+              default -> {
+                // Less room left than one observation may take (524,288 of 4,194,304 bytes).
+                var limits = current.document().path("limits");
+                current
+                    .document()
+                    .withObject("/counters")
+                    .put(
+                        "sanitizedEvidenceBytes",
+                        limits.path("maxSanitizedEvidenceBytesTotal").asLong()
+                            - limits.path("maxObservationBytes").asLong()
+                            + 1);
+              }
             }
           });
       assertThat(f.acquire(false).disposition())
@@ -694,35 +707,96 @@ class GuidedTranslationTest {
     assertThat(f.active().path("obligationId")).isEqualTo(next.path("obligationId"));
   }
 
-  @Test
-  void coverageRefusesMatchingNodesAndSelectedLocatorCannotUseAnotherNamedCandidate() {
-    ObjectNode obligation =
-        c.object().put("operationKind", "click").put("targetIntent", "Confirmation");
+  /** One shown element: the observation is an outline plus a facts table keyed by ref. */
+  private static ObjectNode shownElement(
+      ObjectNode observation, String ref, String role, String name) {
+    observation.put(
+        "outline",
+        observation.path("outline").asText("- document")
+            + "\n  - "
+            + role
+            + " \""
+            + name
+            + "\" ["
+            + ref
+            + "]");
+    ObjectNode fact = observation.withObject("/facts").putObject(ref);
+    fact.put("role", role).put("name", name).put("editable", false).put("evidence", name);
+    fact.putArray("evidenceSegments")
+        .addObject()
+        .put("field", "name")
+        .put("start", 0)
+        .put("end", name.length());
+    return fact;
+  }
+
+  private ObjectNode observationProgress(int unsupportedRegions, int passwordControls) {
     ObjectNode progress = c.object();
-    var observation = progress.putObject("observation");
-    observation.putObject("coverage").put("truncated", false).put("reason", "complete");
-    var node = observation.putArray("nodes").addObject().put("name", "Confirmation");
-    var locator = c.object().put("kind", "testId").put("value", "confirmation-1");
-    node.putArray("locatorHints").add(locator);
-    assertThat(GuidedTranslationService.acquisitionAvailable(progress, obligation)).isTrue();
-    for (String condition : List.of("truncated", "unsupportedSurface")) {
-      ObjectNode changed = progress.deepCopy();
-      if (condition.equals("truncated")) {
-        changed.withObject("/observation/coverage").put("truncated", true);
-      } else {
-        changed.withObject("/observation/coverage").put("reason", condition);
-      }
-      assertThatThrownBy(() -> GuidedTranslationService.acquisitionAvailable(changed, obligation))
-          .hasMessage("UNSUPPORTED_SURFACE");
-    }
-    obligation.set("selectedLocator", locator.deepCopy().put("value", "other"));
-    assertThat(GuidedTranslationService.acquisitionAvailable(progress, obligation)).isFalse();
-    obligation.set("selectedLocator", locator);
-    assertThat(GuidedTranslationService.acquisitionAvailable(progress, obligation)).isTrue();
+    ObjectNode observation = progress.putObject("observation");
+    observation.put("outline", "- document");
+    observation.putObject("facts");
+    observation.putNull("readRuleId");
+    observation
+        .putObject("coverage")
+        .put("withheldRegions", 0)
+        .put("unsupportedRegions", unsupportedRegions)
+        .put("passwordControls", passwordControls);
+    return progress;
   }
 
   @Test
-  void nodeFreeSecretCountOneEnablesInferenceOnlyForTheAcceptedPlan() {
+  void coverageRefusesAnEmptyUnsupportedSurfaceAndASelectionNeedsAnEqualFactOrAnIntentPass() {
+    ObjectNode obligation =
+        c.object().put("operationKind", "click").put("targetIntent", "Confirmation");
+    ObjectNode progress = observationProgress(0, 0);
+    shownElement((ObjectNode) progress.path("observation"), "e1", "button", "Confirmation");
+    assertThat(GuidedTranslationService.acquisitionAvailable(progress, obligation)).isTrue();
+    // Nothing the model could name while the runner reported regions it cannot represent.
+    ObjectNode empty = observationProgress(1, 0);
+    assertThatThrownBy(() -> GuidedTranslationService.acquisitionAvailable(empty, obligation))
+        .hasMessage("UNSUPPORTED_SURFACE");
+    // A page whose elements cannot take the intent leaves the passive wait unavailable.
+    ObjectNode elsewhere =
+        c.object().put("operationKind", "click").put("targetIntent", "Nothing here");
+    assertThat(GuidedTranslationService.acquisitionAvailable(progress, elsewhere)).isFalse();
+    // A stored selection that matches no fact now: the intent gate decides whether the model can be
+    // asked.
+    obligation
+        .putObject("selection")
+        .put("role", "button")
+        .put("name", "Other")
+        .put("evidence", "Other");
+    assertThat(GuidedTranslationService.acquisitionAvailable(progress, obligation)).isTrue();
+    elsewhere
+        .putObject("selection")
+        .put("role", "button")
+        .put("name", "Other")
+        .put("evidence", "Other");
+    assertThat(GuidedTranslationService.acquisitionAvailable(progress, elsewhere)).isFalse();
+    // An equal fact makes the target available whatever the intent says.
+    ObjectNode selected =
+        c.object().put("operationKind", "click").put("targetIntent", "Nothing here");
+    selected
+        .putObject("selection")
+        .put("role", "button")
+        .put("name", "Confirmation")
+        .put("evidence", "Confirmation");
+    assertThat(GuidedTranslationService.acquisitionAvailable(progress, selected)).isTrue();
+  }
+
+  @Test
+  void aReadOnAPageWithoutAReadGrantIsUnsupportedBeforeAnyModelCall() {
+    ObjectNode read = c.object().put("operationKind", "read").put("targetIntent", "Confirmation");
+    ObjectNode progress = observationProgress(0, 0);
+    shownElement((ObjectNode) progress.path("observation"), "e1", "text", "Confirmation");
+    assertThatThrownBy(() -> GuidedTranslationService.acquisitionAvailable(progress, read))
+        .hasMessage("UNSUPPORTED_SURFACE");
+    ((ObjectNode) progress.path("observation")).put("readRuleId", "observed-read-v1-grant");
+    assertThat(GuidedTranslationService.acquisitionAvailable(progress, read)).isTrue();
+  }
+
+  @Test
+  void elementFreeSecretCountOneEnablesInferenceOnlyForTheAcceptedPlan() {
     var fixture = secretAcquisitionFixture(1);
     assertThat(
             GuidedTranslationService.acquisitionAvailable(
@@ -731,7 +805,7 @@ class GuidedTranslationTest {
     assertThat(
             GuidedTranslationService.acquisitionAvailable(fixture.progress(), fixture.obligation()))
         .isFalse();
-    assertThat(fixture.progress().path("observation").path("nodes")).isEmpty();
+    assertThat(fixture.progress().path("observation").path("facts")).isEmpty();
   }
 
   @Test
@@ -811,14 +885,15 @@ class GuidedTranslationTest {
 
   @Test
   void passwordHintPreservesObservationCoverageAndShapeRefusals() {
-    for (String condition : List.of("truncated", "unsupportedSurface", "missingNodes")) {
+    for (String condition :
+        List.of("unsupportedRegionsWithNoFacts", "missingFacts", "missingOutline")) {
       var fixture = secretAcquisitionFixture(1);
-      if (condition.equals("truncated")) {
-        fixture.progress().withObject("/observation/coverage").put("truncated", true);
-      } else if (condition.equals("unsupportedSurface")) {
-        fixture.progress().withObject("/observation/coverage").put("reason", condition);
+      if (condition.equals("unsupportedRegionsWithNoFacts")) {
+        fixture.progress().withObject("/observation/coverage").put("unsupportedRegions", 1);
+      } else if (condition.equals("missingFacts")) {
+        fixture.progress().withObject("/observation").remove("facts");
       } else {
-        fixture.progress().withObject("/observation").remove("nodes");
+        fixture.progress().withObject("/observation").remove("outline");
       }
       assertThatThrownBy(
               () ->
@@ -857,14 +932,7 @@ class GuidedTranslationTest {
         .put("referenceName", "PASS");
     plan.putArray("obligations").add(obligation.deepCopy());
     plan.putArray("needs");
-    ObjectNode progress = c.object();
-    ObjectNode observation = progress.putObject("observation");
-    observation.putArray("nodes");
-    observation
-        .putObject("coverage")
-        .put("truncated", false)
-        .put("reason", "complete")
-        .put("passwordControls", count);
+    ObjectNode progress = observationProgress(0, count);
     return new SecretAcquisitionFixture(progress, obligation, plan);
   }
 
@@ -901,7 +969,8 @@ class GuidedTranslationTest {
                     "../docs/specs/studio-observed-authoring/contracts/v3/planning-fixtures.json")));
     JsonNode answer = fixtures.path("cases").get(15).path("value");
     ObjectNode context = (ObjectNode) fixtures.path("cases").get(1).path("value");
-    var assembler = new GuidedPromptAssembler(c);
+    var assembler =
+        new GuidedPromptAssembler(c, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     var request =
         new GuidedModelRequest(
             "request-1",
@@ -938,7 +1007,8 @@ class GuidedTranslationTest {
 
   @Test
   void providerSchemaIsSelfContainedSupportedAndBothIdentitiesArePinned() {
-    var assembler = new GuidedPromptAssembler(c);
+    var assembler =
+        new GuidedPromptAssembler(c, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     for (GuidedModelRequest.Kind kind : GuidedModelRequest.Kind.values()) {
       JsonNode schema = assembler.providerSchema(kind);
       assertThat(schema.toString())
@@ -963,7 +1033,8 @@ class GuidedTranslationTest {
   @Test
   void startupSchemaEpochReturnsDefensiveCopiesWithoutRebuildingMetadata() {
     GuidedContracts parsing = org.mockito.Mockito.spy(new GuidedContracts());
-    var assembler = new GuidedPromptAssembler(parsing);
+    var assembler =
+        new GuidedPromptAssembler(parsing, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     ObjectNode baselinePins = assembler.schemaProvenance();
     String pinsCanonical = GuidedContracts.canonical(baselinePins);
     var canonicalSchemas =
@@ -1010,7 +1081,11 @@ class GuidedTranslationTest {
         .when(parsing)
         .parse(org.mockito.ArgumentMatchers.anyString());
     var published = new java.util.concurrent.atomic.AtomicReference<GuidedPromptAssembler>();
-    assertThatThrownBy(() -> published.set(new GuidedPromptAssembler(parsing)))
+    assertThatThrownBy(
+            () ->
+                published.set(
+                    new GuidedPromptAssembler(
+                        parsing, com.citi.put.checks.studio.support.TestDomains.FIXTURES)))
         .isInstanceOf(com.citi.put.checks.studio.guided.session.GuidedSessionException.class)
         .hasMessage("INVALID_CONTRACT");
     assertThat(parsed.get()).isEqualTo(2);
@@ -1091,9 +1166,14 @@ class GuidedTranslationTest {
   @Test
   void projectionPreparationIsPrivateFactoryAndSameOwnerOnly() throws Exception {
     var fixture = new PreparationFixture();
-    var manual = new GuidedPromptAssembler(c);
-    var first = GuidedPromptAssembler.createForProductionFactory(c);
-    var other = GuidedPromptAssembler.createForProductionFactory(c);
+    var manual =
+        new GuidedPromptAssembler(c, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
+    var first =
+        GuidedPromptAssembler.createForProductionFactory(
+            c, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
+    var other =
+        GuidedPromptAssembler.createForProductionFactory(
+            c, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     ObjectNode context = fixture.context(first);
     assertThat(manual.preparationCapability()).isNull();
     assertThat(
@@ -1115,7 +1195,9 @@ class GuidedTranslationTest {
   @Test
   void projectionPreparationRequiresFreshCutKeyAndOutputMetadata() throws Exception {
     var fixture = new PreparationFixture();
-    var assembler = GuidedPromptAssembler.createForProductionFactory(c);
+    var assembler =
+        GuidedPromptAssembler.createForProductionFactory(
+            c, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     ObjectNode original = fixture.context(assembler);
     var prepared =
         assembler.preparePure(
@@ -1140,7 +1222,9 @@ class GuidedTranslationTest {
   @Test
   void typedPreparationFailureRequiresSameFreshValidationInput() throws Exception {
     var fixture = new PreparationFixture();
-    var assembler = GuidedPromptAssembler.createForProductionFactory(c);
+    var assembler =
+        GuidedPromptAssembler.createForProductionFactory(
+            c, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     JsonNode validHash = fixture.session.path("scopeHash").deepCopy();
     fixture.session.put("scopeHash", "invalid");
     var prepared =
@@ -1165,7 +1249,9 @@ class GuidedTranslationTest {
   void nonfatalPreparationIsUnavailableAndFatalErrorPropagates() throws Exception {
     var fixture = new PreparationFixture();
     GuidedContracts controlled = org.mockito.Mockito.spy(new GuidedContracts());
-    var assembler = GuidedPromptAssembler.createForProductionFactory(controlled);
+    var assembler =
+        GuidedPromptAssembler.createForProductionFactory(
+            controlled, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     ObjectNode context = fixture.context(assembler);
     org.mockito.Mockito.doThrow(new IllegalStateException("controlled preparation failure"))
         .when(controlled)
@@ -1219,13 +1305,28 @@ class GuidedTranslationTest {
             .putNull("needId")
             .putNull("predicate");
     var validator = new GuidedProposalValidator(c);
-    validator.action(docs.path("session"), action, plan, obligation, action, docs.path("context"));
+    validator.action(
+        docs.path("session"),
+        action,
+        plan,
+        obligation,
+        action,
+        docs.path("context"),
+        null,
+        GuidedRefusalDiagnostics.Capture.NONE);
     ObjectNode wrong = action.deepCopy();
     wrong.withObject("/operation").put("destinationInputId", "input-another-valid-destination");
     assertThatThrownBy(
             () ->
                 validator.action(
-                    docs.path("session"), action, plan, obligation, wrong, docs.path("context")))
+                    docs.path("session"),
+                    action,
+                    plan,
+                    obligation,
+                    wrong,
+                    docs.path("context"),
+                    null,
+                    GuidedRefusalDiagnostics.Capture.NONE))
         .hasMessage("INVALID_CONTRACT");
     ObjectNode swapped = action.deepCopy();
     swapped
@@ -1237,7 +1338,14 @@ class GuidedTranslationTest {
     assertThatThrownBy(
             () ->
                 validator.action(
-                    docs.path("session"), action, plan, obligation, swapped, docs.path("context")))
+                    docs.path("session"),
+                    action,
+                    plan,
+                    obligation,
+                    swapped,
+                    docs.path("context"),
+                    null,
+                    GuidedRefusalDiagnostics.Capture.NONE))
         .hasMessage("INVALID_CONTRACT");
   }
 
@@ -1324,7 +1432,6 @@ class GuidedTranslationTest {
             .path("documents");
     ObjectNode proposed = c.object();
     proposed.putArray("sourceReferences");
-    proposed.putArray("needs");
     var list = proposed.putArray("obligations");
     for (JsonNode step : docs.path("session").path("sourceSteps")) {
       list.addObject()
@@ -1445,17 +1552,6 @@ class GuidedTranslationTest {
         .hasMessage("INVALID_CONTRACT");
   }
 
-  private GuidedProductionSessionAccess currentAccess(
-      com.citi.put.checks.studio.secrets.StudioSecretUseAuthorization authorization) {
-    var properties =
-        new GuidedTranslationProperties(
-            true, true, List.of("orders"), List.of("Production"), 65536, 4096, 60, "worker-1");
-    var classifier = new GuidedSourceClassifier(c, properties, new CredentialPatternScreen());
-    // Only checkCurrent is exercised: its real classifier/store and controlled authorization port.
-    return new GuidedProductionSessionAccess(
-        null, classifier, null, delayedDb.store, null, null, null, null, authorization);
-  }
-
   @Test
   void currentManifestMatchesFullStateAndReturnsFreshPersistedProvenance() throws Exception {
     var fixture = new DelayedFixture(false, List.of("PASS", "SECOND", "PASS"));
@@ -1470,29 +1566,6 @@ class GuidedTranslationTest {
   }
 
   @Test
-  void currentAuthorizationWithoutTranslationStateSkipsReferencesButStillChecksPolicy() {
-    ObjectNode document = delayedDb.seed(java.util.UUID.randomUUID().toString());
-    document.withObject("/scope").put("applicationId", "orders").put("environmentId", "Production");
-    AtomicInteger calls = new AtomicInteger();
-    var access =
-        currentAccess(
-            (principal, csi, environment, secret) -> {
-              calls.incrementAndGet();
-              return false;
-            });
-    delayedDb.tx.executeWithoutResult(
-        tx -> {
-          assertThat(delayedDb.store.exists(document.path("sessionId").asText())).isFalse();
-          access.checkCurrent(document);
-        });
-    assertThat(calls.get()).isZero();
-    document.withObject("/scope").put("environmentId", "unapproved");
-    assertThatThrownBy(() -> delayedDb.tx.executeWithoutResult(tx -> access.checkCurrent(document)))
-        .hasMessage("FORBIDDEN_SCOPE");
-    assertThat(calls.get()).isZero();
-  }
-
-  @Test
   void currentManifestWithoutJoinedStateRefusesAndRequiresCallerTransaction() {
     ObjectNode document = delayedDb.seed(java.util.UUID.randomUUID().toString());
     String id = document.path("sessionId").asText();
@@ -1502,49 +1575,6 @@ class GuidedTranslationTest {
         .hasMessage("MISSING_SOURCE");
     assertThatThrownBy(() -> delayedDb.store.currentManifest(id))
         .hasMessage("RUNTIME_INCOMPATIBLE");
-  }
-
-  @Test
-  void currentAuthorizationPreservesScopedReferenceOrderDuplicatesAndRevocation() throws Exception {
-    var fixture = new DelayedFixture(false, List.of("PASS", "SECOND", "PASS"));
-    var calls = new java.util.ArrayList<List<String>>();
-    var revoked = new java.util.concurrent.atomic.AtomicBoolean();
-    var access =
-        currentAccess(
-            (principal, csi, environment, secret) -> {
-              calls.add(List.of(principal, csi, environment, secret));
-              return !revoked.get()
-                  && principal.equals("delayed-owner@citi.com")
-                  && csi.equals("60457")
-                  && environment.equals("Production");
-            });
-    delayedDb.tx.executeWithoutResult(
-        tx -> access.checkCurrent(delayedDb.sessions.lock(fixture.id).document()));
-    assertThat(calls)
-        .containsExactly(
-            List.of("delayed-owner@citi.com", "60457", "Production", "PASS"),
-            List.of("delayed-owner@citi.com", "60457", "Production", "SECOND"),
-            List.of("delayed-owner@citi.com", "60457", "Production", "PASS"));
-    calls.clear();
-    revoked.set(true);
-    assertThatThrownBy(
-            () ->
-                delayedDb.tx.executeWithoutResult(
-                    tx -> access.checkCurrent(delayedDb.sessions.lock(fixture.id).document())))
-        .hasMessage("SECRET_USE_REVOKED");
-    assertThat(calls)
-        .containsExactly(List.of("delayed-owner@citi.com", "60457", "Production", "PASS"));
-    calls.clear();
-    revoked.set(false);
-    delayedDb.tx.executeWithoutResult(
-        tx -> {
-          ObjectNode wrongScope = delayedDb.sessions.lock(fixture.id).document().deepCopy();
-          wrongScope.withObject("/scope").put("csiId", "OTHER-CSI");
-          assertThatThrownBy(() -> access.checkCurrent(wrongScope))
-              .hasMessage("SECRET_USE_REVOKED");
-        });
-    assertThat(calls)
-        .containsExactly(List.of("delayed-owner@citi.com", "OTHER-CSI", "Production", "PASS"));
   }
 
   @Test
@@ -1571,9 +1601,6 @@ class GuidedTranslationTest {
     classes = com.citi.put.checks.ChecksApplication.class,
     properties = {
       "studio.guided-authoring.translation.enabled=true",
-      "studio.guided-authoring.translation.allow-authored-nonsecret=true",
-      "studio.guided-authoring.translation.applications=orders",
-      "studio.guided-authoring.translation.environments=fixture",
       "studio.guided-authoring.runner-origin=https://localhost:1",
       "studio.guided-authoring.translation.controller-origin=https://localhost:1",
       "studio.guided-authoring.controller-token-file=/tmp/obs005-unused-wiring-token",

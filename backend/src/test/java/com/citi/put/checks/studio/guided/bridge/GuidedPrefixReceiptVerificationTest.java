@@ -48,7 +48,12 @@ class GuidedPrefixReceiptVerificationTest {
 
   @BeforeEach
   void stubServerContext() {
-    service = spy(new GuidedMaterializationService(mock(JdbcTemplate.class), contracts));
+    service =
+        spy(
+            new GuidedMaterializationService(
+                mock(JdbcTemplate.class),
+                contracts,
+                com.citi.put.checks.studio.support.TestDomains.FIXTURES));
     context =
         contracts
             .object()

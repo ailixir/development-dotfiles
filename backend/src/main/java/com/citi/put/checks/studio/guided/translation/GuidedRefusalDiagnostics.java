@@ -56,13 +56,45 @@ public final class GuidedRefusalDiagnostics {
     NEXT_ACTION_CONTRACT_CALL,
     NEXT_ACTION_MEANING,
     NEXT_ACTION_EVIDENCE,
+    NEXT_TARGET_REF,
     NEXT_TARGET_INTENT,
+    NEXT_SELECTED_CHOICE,
+    NEXT_OPERATION_TARGET,
     NEXT_AUTHORED_SOURCE,
     NEXT_SECRET_POLICY,
     NEXT_BINDING_MEANING,
     NEXT_ASSERTION_PREDICATE,
+    NEXT_ASSERT_TEXT_ABSENT,
+    NEXT_READ_RULE,
     NEXT_POLICY_CALL,
-    NEXT_RESERVATION_CALL
+    NEXT_RESERVATION_CALL,
+    /** The runner refused at prepare: the authored literal is not among the live options (G1). */
+    RUNNER_OPTION_NOT_PRESENT,
+    /** The runner refused at prepare: it cannot give the picked element a durable locator. */
+    RUNNER_NO_DURABLE_LOCATOR,
+    /** The runner refused at prepare: the kept read profile does not allow the read. */
+    RUNNER_READ_NOT_ALLOWED
+  }
+
+  /**
+   * Closed subcases of a SOURCE_PLAN refusal whose public code stays the same (ADR-SC-007 D6). They
+   * are not receipt gates: the receipt vocabulary above is the NEXT_ACTION refusal point list.
+   */
+  public enum PlanSubcase {
+    /** A {@code read} nothing uses: public code MISSING_SOURCE. */
+    READ_WITHOUT_CONSUMER
+  }
+
+  /** Never throws; a missing sink records nothing. */
+  static void recordPlan(java.util.function.Consumer<PlanSubcase> sink, PlanSubcase subcase) {
+    if (sink == null) {
+      return;
+    }
+    try {
+      sink.accept(subcase);
+    } catch (Throwable unavailable) {
+      // An optional diagnostic cannot replace an original return, exception or transaction.
+    }
   }
 
   private static void ignore(Gate gate) {}
@@ -72,6 +104,12 @@ public final class GuidedRefusalDiagnostics {
     Capture NONE = GuidedRefusalDiagnostics::ignore;
 
     void record(Gate gate);
+
+    /**
+     * The intent gate admitted the pick by {@code path}; {@code fields} are the evidence parts that
+     * supplied the intent words (D7(d)). Only the production recorder keeps it.
+     */
+    default void intent(GuidedGates.IntentPath path, java.util.List<String> fields) {}
   }
 
   record Receipt(UUID sessionId, UUID attemptId, Gate gate) {
@@ -196,11 +234,16 @@ public final class GuidedRefusalDiagnostics {
               NEXT_ACTION_CONTRACT_CALL,
               NEXT_ACTION_MEANING,
               NEXT_ACTION_EVIDENCE,
+              NEXT_TARGET_REF,
               NEXT_TARGET_INTENT,
+              NEXT_SELECTED_CHOICE,
+              NEXT_OPERATION_TARGET,
               NEXT_AUTHORED_SOURCE,
               NEXT_SECRET_POLICY,
               NEXT_BINDING_MEANING,
               NEXT_ASSERTION_PREDICATE,
+              NEXT_ASSERT_TEXT_ABSENT,
+              NEXT_READ_RULE,
               NEXT_POLICY_CALL,
               NEXT_RESERVATION_CALL ->
           true;

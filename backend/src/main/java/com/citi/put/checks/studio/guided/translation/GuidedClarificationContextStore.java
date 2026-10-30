@@ -39,13 +39,19 @@ public final class GuidedClarificationContextStore {
       require(choices.add(choice.path("choiceId").asText()), "INVALID_CONTRACT", 422);
     }
     Set<String> mapped = new HashSet<>();
+    // ADR-SC-007 D6: an observed choice is stored with the semantic selection {role, name,
+    // evidence} copied from the facts of the observation the question was asked on; the
+    // model-facing
+    // meaning carries only the obligation, the ref and the binding.
+    boolean observed = question.path("phase").asText().equals("observed");
     for (JsonNode mapping : meanings) {
       require(
           mapping.isObject()
-              && mapping.size() == 2
+              && mapping.size() == (observed ? 3 : 2)
               && mapping.hasNonNull("choiceId")
               && mapping.hasNonNull("meaning")
               && mapping.path("meaning").isObject()
+              && (!observed || mapping.path("selection").isObject())
               && choices.contains(mapping.path("choiceId").asText())
               && mapped.add(mapping.path("choiceId").asText()),
           "INVALID_CONTRACT",
@@ -174,7 +180,8 @@ public final class GuidedClarificationContextStore {
     return jdbc.query(
         "SELECT identity::text,meanings::text,accepted_choice FROM"
             + " studio_guided_clarification_contexts WHERE session_id=? AND accepted_choice IS NOT"
-            + " NULL AND identity->'question'->>'phase'='observed' ORDER BY clarification_id",
+            + " NULL AND identity->'question'->>'phase'='observed' ORDER BY created_at,"
+            + " clarification_id",
         (rs, n) -> {
           ObjectNode row = contracts.object().put("acceptedChoiceId", rs.getString(3));
           row.set("context", contracts.parse(rs.getString(1)));
@@ -182,6 +189,25 @@ public final class GuidedClarificationContextStore {
           return row;
         },
         sessionId);
+  }
+
+  /**
+   * The accepted observed clarifications that count: the latest accepted question per obligation
+   * (by creation time, then clarification id). Asking again after an earlier choice no longer
+   * identified one element gives an obligation two accepted answers; the later one supersedes the
+   * earlier. Superseded rows stay in the database and are neither a basis for an action nor part of
+   * the publication evidence.
+   */
+  public java.util.List<ObjectNode> effectiveObserved(String sessionId) {
+    java.util.Map<String, ObjectNode> latest = new java.util.LinkedHashMap<>();
+    for (ObjectNode row : acceptedObserved(sessionId)) {
+      for (JsonNode mapping : row.path("meanings")) {
+        if (mapping.path("choiceId").equals(row.path("acceptedChoiceId"))) {
+          latest.put(mapping.path("meaning").path("obligationId").asText(), row);
+        }
+      }
+    }
+    return new java.util.ArrayList<>(latest.values());
   }
 
   public JsonNode meanings(String sessionId, String clarificationId) {

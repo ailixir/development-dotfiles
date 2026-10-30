@@ -7,7 +7,7 @@ import { MOCK_EXECUTE_DENIED_CSIS, MOCK_READABLE_CSIS, mockTests } from './fixtu
 import { studioMockServer } from './server';
 import { resetStudioMocks } from './handlers';
 import { failGuidedRequests, guidedRequestCount, setGuidedScenario } from './guidedHandlers';
-import { PUBLICATION_CONFLICT_SCENARIO, endsIn } from './guidedFixtures';
+import { LEARN_PROOF_REFUSED_SCENARIO, PUBLICATION_CONFLICT_SCENARIO, endsIn } from './guidedFixtures';
 
 beforeAll(() => studioMockServer.listen({ onUnhandledRequest: 'error' }));
 afterEach(() => { studioMockServer.resetHandlers(); resetStudioMocks(); });
@@ -101,6 +101,45 @@ describe('the composed MSW publication and replay lifecycle', () => {
     expect((await studioApi.executeTest(current.id, executeKey)).executionId).toBe(accepted.executionId);
     expect(await studioApi.getExecution(accepted.executionId)).toEqual(terminal);
     expect(guidedRequestCount('start')).toBe(1);
+  });
+
+  it('finalize accepts one AFTER_LEARN proof replay of the published revision; a retry adds none; the learn video route is 404 VIDEO_UNAVAILABLE', async () => {
+    const draft = await createSavedDraft();
+    const session = await start(draft);
+    await readUntil(session.id, 'FINALIZING');
+    const key = crypto.randomUUID();
+    const receipt = await studioGuidedApi.finalize(session.id, finalizeBody(session.request), key);
+    const retried = await studioGuidedApi.finalize(session.id, finalizeBody(session.request), key);
+    expect(retried).toEqual(receipt);
+
+    const { result } = await studioGuidedApi.readResult(session.id);
+    expect(result.publication.status).toBe('PUBLISHED');
+    expect(result.evidence.video).toBeNull();
+    expect(result.actionTimings).toEqual([]);
+    expect(result.proof).not.toBeNull();
+    const proof = await studioApi.getExecution(result.proof!.executionId);
+    expect(proof).toMatchObject({
+      triggerSource: 'AFTER_LEARN', testId: draft.id, revisionId: receipt.revisionId, status: 'PENDING',
+    });
+    // Exactly one proof, listed with the test's runs.
+    const listed = (await studioApi.listExecutions({ testId: draft.id, size: 50 })).data;
+    expect(listed.map((run) => run.executionId)).toEqual([result.proof!.executionId]);
+    expect(listed[0].triggerSource).toBe('AFTER_LEARN');
+
+    const response = await fetch(new URL(studioGuidedApi.videoPath(session.id), 'http://localhost'));
+    expect(response.status).toBe(404);
+    expect(await response.json()).toMatchObject({ error: 'VIDEO_UNAVAILABLE' });
+  });
+
+  it('a refused proof publishes with proof null and makes no execution', async () => {
+    setGuidedScenario(LEARN_PROOF_REFUSED_SCENARIO);
+    const draft = await createSavedDraft();
+    const publication = await learn(draft);
+    expect(publication.receipt.revisionId).toBeTruthy();
+    const { result } = await studioGuidedApi.readResult(publication.id);
+    expect(result.publication.status).toBe('PUBLISHED');
+    expect(result.proof).toBeNull();
+    expect((await studioApi.listExecutions({ testId: draft.id, size: 50 })).data).toEqual([]);
   });
 
   it.each(['source', 'configuration'] as const)('refuses publication after current %s drift without making the draft READY', async (change) => {

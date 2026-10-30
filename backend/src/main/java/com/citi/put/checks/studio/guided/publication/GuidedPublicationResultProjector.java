@@ -31,6 +31,7 @@ public final class GuidedPublicationResultProjector {
   private final ObservedReplayProperties replay;
   private final GuidedPublicPresentationProjector presentation;
   private GuidedEvidenceProjection evidence = GuidedEvidenceProjection.NONE;
+  private final LearnProofRepository proofs;
 
   public GuidedPublicationResultProjector(
       GuidedPublicationBaseRepository bases,
@@ -41,7 +42,8 @@ public final class GuidedPublicationResultProjector {
       GuidedContracts contracts,
       ExecutionReadinessService readiness,
       ObservedReplayProperties replay,
-      GuidedPublicPresentationProjector presentation) {
+      GuidedPublicPresentationProjector presentation,
+      LearnProofRepository proofs) {
     this.bases = bases;
     this.publications = publications;
     this.sessions = sessions;
@@ -51,6 +53,7 @@ public final class GuidedPublicationResultProjector {
     this.readiness = readiness;
     this.replay = replay;
     this.presentation = presentation;
+    this.proofs = proofs;
   }
 
   /**
@@ -129,13 +132,21 @@ public final class GuidedPublicationResultProjector {
       GuidedSessionRepository.Session current, PublicationContracts.Receipt receipt) {
     JsonNode session = current.document();
     String id = text(session, "sessionId");
-    ObjectNode result = guided.projectResult(current, true, evidence, presentation);
+    ObjectNode result =
+        guided.projectResult(current, true, receipt != null, evidence, presentation);
     result.put("learnedFromThisRun", receipt != null);
     ObjectNode publication = (ObjectNode) result.path("publication"),
         ready = (ObjectNode) result.path("currentReadiness");
     if (receipt != null) {
       JsonNode proof = receipt.document();
       publication.put("status", "PUBLISHED").set("receipt", proof.path("publicReceipt"));
+      // The proof is the replay execution the publication accepted; a refused proof (or none)
+      // stays null and its closed code is never published.
+      proofs
+          .find(id)
+          .map(LearnProofRepository.Link::executionId)
+          .ifPresent(
+              execution -> result.putObject("proof").put("executionId", execution.toString()));
       UUID revisionId = UUID.fromString(text(proof, "revisionId")),
           testId = UUID.fromString(text(proof, "testId"));
       var base = bases.find(id).orElseThrow();

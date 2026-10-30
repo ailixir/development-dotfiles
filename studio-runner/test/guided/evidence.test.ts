@@ -173,6 +173,48 @@ describe('guided session recording lifecycle', () => {
   });
 });
 
+describe('guided session recording discard (a learn that published keeps no recording)', () => {
+  it('removes the recording without an upload, a manifest or a callback, and settles once', async () => {
+    const h = await harness(); h.recording.launchRequest()?.ready(true);
+    h.recording.begin('admission-1', 'nav', 0)?.end(true);
+    const video = await playable(h.recording.directory);
+    expect(await stat(video).then(() => true, () => false)).toBe(true);
+    await h.recording.discard();
+    expect(h.store.puts).toEqual([]); expect(h.callback).not.toHaveBeenCalled(); expect(h.calls).toEqual([]);
+    expect(await stat(h.recording.directory ?? '').then(() => true, () => false)).toBe(false);
+    expect(h.recording.begin('admission-2', 'next', 0)).toBeNull(); // nothing stamps after the discard
+    await h.recording.discard(); // a repeat is harmless
+    // A settle that follows joins the discard: still nothing leaves the runner.
+    await h.recording.settle({ identity: sessionIdentity(), videoPath: video, orderlyClose: true, callback: h.callback });
+    expect(h.store.puts).toEqual([]); expect(h.callback).not.toHaveBeenCalled();
+  });
+
+  it('discards a recording that has no directory (not recordable) without failing', async () => {
+    const h = await harness({ csiId: null });
+    await expect(h.recording.discard()).resolves.toBeUndefined();
+    expect(h.store.puts).toEqual([]); expect(h.callback).not.toHaveBeenCalled();
+  });
+
+  it('cannot take back a recording whose settlement already started: the first of settle and discard wins', async () => {
+    const h = await harness(); h.recording.launchRequest()?.ready(true);
+    const video = await playable(h.recording.directory);
+    const settling = h.recording.settle({ identity: sessionIdentity(), videoPath: video, orderlyClose: true, callback: h.callback });
+    await h.recording.discard();
+    expect(await settling).toBe('STORED');
+    expect(h.store.puts.map(p => p.key)).toContain('studio/CSI-123/guided/session-1.webm');
+    expect(h.calls).toHaveLength(1);
+  });
+
+  it('treats 409 RECORDING_NOT_RETAINED as the settled answer: one attempt, no backoff, nothing re-sent', async () => {
+    const h = await harness({ ports: { callbackBackoffMs: 5 } }); h.recording.launchRequest()?.ready(true);
+    const refused = vi.fn<(route: 'recording-evidence', body: RecordingEvidenceBody, key: string) => Promise<void>>(() => Promise.reject(new Error('RECORDING_NOT_RETAINED')));
+    const state = await h.recording.settle({ identity: sessionIdentity(), videoPath: await playable(h.recording.directory), orderlyClose: true, callback: refused });
+    expect(state).toBe('STORED'); // the runner's own word; the backend wrote no row
+    expect(refused).toHaveBeenCalledTimes(1); expect(h.sleep).not.toHaveBeenCalled();
+    expect(await stat(h.recording.directory ?? '').then(() => true, () => false)).toBe(false);
+  });
+});
+
 describe('timing serialization and scale guard', () => {
   it('rounds once and orders by startMs, then ordinal, then stepId code point', () => {
     const r = (admissionId: string, stepId: string, ordinal: number, startMs: number, endMs: number | null) => ({ admissionId, stepId, ordinal, startMs, endMs });

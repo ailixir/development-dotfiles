@@ -139,6 +139,8 @@ describe('src/main.ts — process entry point', () => {
     [`${CONFIG_PREFIX}TLS_CERT_FILE`]: tlsFile('cert'),
     [`${CONFIG_PREFIX}TLS_CA_FILE`]: tlsFile('cert'),
     [`${CONFIG_PREFIX}CONTROLLER_CERTIFICATE_FINGERPRINT256`]: testFingerprint,
+    // Allow-all is ON when unset (the default for now) and would add a WARN line to the startup output these tests count.
+    [`${CONFIG_PREFIX}ALLOW_ALL_DOMAINS`]: 'false',
   });
 
   it('starts, listens and wires SIGTERM and SIGINT to the drain path', async () => {
@@ -370,6 +372,7 @@ describe('STUDIO-OBS-009 AC-1 — one SIGTERM drain for both halves', () => {
       listener: { tls: testTls, controllerCertificateFingerprint256: testFingerprint },
       guided: {
         workerId: 'worker-one',
+        capacity: 1,
         journalDirectory,
         controllerJwt: { issuer: 'fixture-issuer', subject: 'controller', publicKey: testTls.cert.toString() },
         callbackBaseUrl: 'https://127.0.0.1:9',
@@ -476,6 +479,7 @@ describe('STUDIO-OBS-009 AC-1 — one SIGTERM drain for both halves', () => {
       [`${CONFIG_PREFIX}GUIDED_CONTROLLER_PUBLIC_KEY_FILE`]: tlsFile('cert'),
       [`${CONFIG_PREFIX}GUIDED_CALLBACK_BASE_URL`]: 'https://127.0.0.1:9',
       [`${CONFIG_PREFIX}GUIDED_CALLBACK_TOKEN_FILE`]: join(root, 'token'),
+      [`${CONFIG_PREFIX}GUIDED_CAPACITY`]: '1',
     };
     for (const unconfirmed of [true, false]) {
       vi.restoreAllMocks();

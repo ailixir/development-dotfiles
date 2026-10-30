@@ -47,7 +47,8 @@ class StudioActionAuditTest {
 
   @Test
   void anAdmittedActionCarriesTheClosedKeySetAndNoLabelText() {
-    StudioActionAudit.guidedActionAdmitted(session(), "admission-1", proposal(ORIGIN, "button"));
+    StudioActionAudit.guidedActionAdmitted(
+        session(), "admission-1", proposal(ORIGIN), identity("button"));
 
     Map<String, Object> event = only();
     assertThat(event.keySet()).containsExactlyElementsOf(StudioActionAudit.KEYS);
@@ -73,11 +74,12 @@ class StudioActionAuditTest {
   }
 
   @Test
-  void anUnapprovedOriginAndAnUnknownRoleAreNeverEchoed() {
+  void aNonOriginValueAndAnUnknownRoleAreNeverEchoed() {
     StudioActionAudit.guidedActionRefused(
         session(),
         "attempt-1",
-        proposal("https://evil.example.test/path?q=secret", "x-custom-role"),
+        proposal("https://evil.example.test/path?q=secret"),
+        identity("x-custom-role"),
         "DESTRUCTIVE_VERB");
 
     Map<String, Object> event = only();
@@ -118,7 +120,8 @@ class StudioActionAuditTest {
   @Test
   void insideATransactionTheEventWaitsForTheCommitAndARollbackEmitsNothing() {
     TransactionSynchronizationManager.initSynchronization();
-    StudioActionAudit.guidedActionAdmitted(session(), "admission-1", proposal(ORIGIN, "button"));
+    StudioActionAudit.guidedActionAdmitted(
+        session(), "admission-1", proposal(ORIGIN), identity("button"));
     assertThat(captured.list).as("nothing before commit").isEmpty();
     List<TransactionSynchronization> pending =
         TransactionSynchronizationManager.getSynchronizations();
@@ -135,7 +138,7 @@ class StudioActionAuditTest {
   void aRefusalIsAuditedAtTheDecisionEvenInsideATransactionThatWillRollBack() {
     TransactionSynchronizationManager.initSynchronization();
     StudioActionAudit.guidedActionRefused(
-        session(), "attempt-1", proposal(ORIGIN, "button"), "UNGROUNDED_TARGET");
+        session(), "attempt-1", proposal(ORIGIN), identity("button"), "UNGROUNDED_TARGET");
     assertThat(captured.list).hasSize(1);
     assertThat(TransactionSynchronizationManager.getSynchronizations()).isEmpty();
   }
@@ -178,22 +181,24 @@ class StudioActionAuditTest {
             .put("scopeHash", SCOPE_HASH);
     ObjectNode scope =
         session.putObject("scope").put("principalId", "principal-1").put("csiId", "60400");
-    scope.putArray("approvedOrigins").add(ORIGIN);
     return session;
   }
 
-  private static JsonNode proposal(String origin, String role) {
+  private static JsonNode proposal(String origin) {
     ObjectNode proposal = JSON.createObjectNode();
     proposal.putObject("operation").put("kind", "click");
     proposal
         .putObject("target")
-        .put("nodeId", "n1")
-        .putObject("locator")
-        .put("kind", "role")
-        .put("role", role)
-        .put("name", LABEL_CANARY)
-        .put("exact", true);
+        .put("kind", "node")
+        .put("ref", "e1")
+        .put("documentId", "document-1")
+        .put("generation", 1);
     proposal.putObject("executionEvidence").put("origin", origin);
     return proposal;
+  }
+
+  /** ADR-SC-007: the audit takes role and label from the identity of the element, not a locator. */
+  private static JsonNode identity(String role) {
+    return JSON.createObjectNode().put("role", role).put("name", LABEL_CANARY);
   }
 }

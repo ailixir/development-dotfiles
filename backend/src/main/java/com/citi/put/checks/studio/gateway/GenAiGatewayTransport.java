@@ -13,7 +13,9 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
 import okio.Buffer;
@@ -201,9 +203,19 @@ public final class GenAiGatewayTransport implements AutoCloseable {
     return properties;
   }
 
-  /** A null lease means capacity is busy; it never waits or starts credentials/model work. */
-  public Lease tryAcquire(Budget budget) {
-    return capacity.tryAcquire() ? new Lease(budget) : null;
+  /**
+   * Waits for a permit for at most the budget's remaining time; a spent budget does not wait. A
+   * null lease means capacity stayed busy for all of it; no credentials or model work were started.
+   * Callers wait on a request or virtual thread, never on a scheduler thread.
+   */
+  public Lease tryAcquire(Budget budget) throws InterruptedException {
+    Duration wait;
+    try {
+      wait = budget.remaining();
+    } catch (CancellationException spent) {
+      wait = Duration.ZERO;
+    }
+    return capacity.tryAcquire(wait.toNanos(), TimeUnit.NANOSECONDS) ? new Lease(budget) : null;
   }
 
   /** Holds one shared permit until synchronous credential/model work has completely returned. */

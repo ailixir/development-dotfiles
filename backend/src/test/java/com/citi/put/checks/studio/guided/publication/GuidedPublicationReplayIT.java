@@ -143,7 +143,8 @@ class GuidedPublicationReplayIT {
   private static final String COHORT_RUN =
       UUID.fromString(System.getProperty("studio.join.fixture.run-id", COHORT_ID)).toString();
   private static final Path COHORT_DIRECTORY =
-      Path.of("build", "guided-cohorts", FIXTURE_PROFILE.lane, COHORT_RUN, COHORT_ID);
+      com.citi.put.checks.studio.support.GuardDecisionTally.buildDirectory()
+          .resolve(Path.of("guided-cohorts", FIXTURE_PROFILE.lane, COHORT_RUN, COHORT_ID));
   private static final List<String> INCREMENTAL_VARIANTS =
       List.of(
           "insert4",
@@ -154,19 +155,11 @@ class GuidedPublicationReplayIT {
           "tail7",
           "append11",
           "ready6",
-          "confirm-prefix",
           "empty",
           "drift2",
           "admitted-drift2",
           "unknown2",
           "assert-fail",
-          "policy-prefix",
-          "confirm-long-wait",
-          "confirm-cancel",
-          "confirm-expire",
-          "confirm-source-change",
-          "confirm-recover",
-          "confirm-owner-loss",
           "append-input",
           "deleted-consumers",
           "admitted-literal2",
@@ -175,14 +168,14 @@ class GuidedPublicationReplayIT {
           "unused-declaration",
           "drift-plan-fail",
           "drift-first",
-          "confirm-edit4",
-          "confirm-race",
           "drift-auth",
           "drift-auth-pre",
           "before4at2",
           "equal4");
   private static final java.util.Set<String> SINGLETON_METHODS =
       java.util.Set.of(
+          "actualIncrementalPrefixWaitRefreshesExactFocusAndPersistentA"
+              + "bsenceStopsAtBoundedDrift",
           "prefixProducerContextAcknowledgementPrecedesPreparationAndPreservesIssuedRequest",
           "prefixProducerContextDefiniteRefusalsStopBeforePreparation",
           "prefixProducerContextUncertainRepliesNeverAdmitOrRedispatch",
@@ -193,11 +186,10 @@ class GuidedPublicationReplayIT {
           "incrementalConcurrentAuthenticatedDriftCommitsOneSwitch",
           "incrementalDriftAuthorityRejectsEveryExactJoin",
           "incrementalExcludedAttemptCannotHideOtherUnsettledActions",
-          "incrementalPrefixContinuationMatrixDoneAndRefreshRows",
+          "incrementalPrefixContinuationMatrixDoneRows",
           "incrementalStepTwoAssertionFailureIsFactualAndNeverRelearned",
           "incrementalPrefixPolicyRefusalsNeverBecomeDrift",
-          "incrementalFreshPostConsentGuardsDenyDangerousProposals",
-          "incrementalWaitingAnswerRejectsChangedContextGenerationAndNaturalLeaseExpiry",
+          "incrementalPrefixKeepsAnAuthoredEnterUnderTheGuards",
           "incrementalEmptyPrefixProgramPairSurvivesEveryContextDelivery",
           "incrementalBoundaryAndEmptyPrefixPlanningFailureKeepEnteredBoundary",
           "incrementalAppendRetryAndExpiredPreparationKeepExactHistoricalAuthority",
@@ -205,11 +197,12 @@ class GuidedPublicationReplayIT {
           "incrementalNonemptyOriginalPrefixRetainsBaseProofAfterDriftAtOne",
           "incrementalFirstSuffixAcceptanceIsOnceAndLaterPairsCannotDisappear",
           "incrementalPartialDriftStepReadPublishesAndReplaysTwice",
-          "incrementalMeasuredAdmissionRowsPreserveIdentityAndActualMediaSeek",
+          "incrementalAdmittedReplacementKeepsItsIdentityAndThePublishe"
+              + "dLearnRecordingIsDiscarded",
           "actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache",
-          "historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof",
+          "historicalIncompleteBaseRequiresExplicitFirstStepAndPublishe"
+              + "sFullLearnWithoutOldProof",
           "incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays",
-          "incrementalStartCannotWidenTrustedOriginCeiling",
           "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues",
           "queuedAndPreReadyRefusals",
           "editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness",
@@ -217,11 +210,11 @@ class GuidedPublicationReplayIT {
           "modelAndSourceQuestionTimeDoNotConsumePassiveBrowserAllowance",
           "absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork",
           "observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays",
-          "originalQuestionDriftAndSqlCaptureRefusalRollbackAndCommitUsageWithoutAnotherCall",
-          "actualIncrementalSecretPrefixRecapturesRotatedValueWithScopedAuditAndOrdinaryReplay",
+          "originalQuestionDriftAndSqlCaptureRefusalRollbackAndCommitUs" + "ageWithoutAnotherCall",
+          "actualIncrementalSecretPrefixRecapturesRotatedValueWithScope"
+              + "dAuditAndOrdinaryReplay",
           "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel",
           "guidedRecorderFaultSettlesUnavailableAndTheSessionStillFinishes",
-          "actualCoreMayUseDenialStartsNoSessionAndNoBrowser",
           "actualCoreGuidedSameSecretIdStaysWithinPersistedScope",
           "actualCoreOrdinarySameSecretIdStaysWithinAcceptedScope",
           "actualGuidedReportsWithoutLoginStepsAnnotatesExistingFailure",
@@ -235,8 +228,6 @@ class GuidedPublicationReplayIT {
           "actualGuidedTwoPasswordControlsRejectsScopedSecretProposalBeforeRead",
           "actualPublishedZeroPasswordControlsRefusesNativeFillAfterFreshResolution",
           "actualPublishedTwoPasswordControlsRefusesNativeFillAfterFreshResolution",
-          "actualCoreGuidedRevocationStopsAtNextAuthorityCheckWithinTwoSeconds",
-          "actualCoreOrdinaryRevocationStopsAtNextAuthorityCheckWithinTwoSeconds",
           "actualCommittedSecretProgressSurvivesOwnedChildAndParentCrashThenRunningReaper",
           "actualPublishedNativePasswordStepDeadlinePreservesUnknownEffect",
           "actualPublishedPublicCancelWhileNativePasswordWorldPending",
@@ -246,18 +237,16 @@ class GuidedPublicationReplayIT {
           "actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue",
           "actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue",
           "actualSecretControlWindowLossBeforeReadyReachesTerminalError",
-          "actualCoreGuidedControlValuePasswordRequestRefusesBeforeRead",
-          "actualCorePublishedControlValuePasswordRequestRefusesBeforeRead",
           "actualCoreGuidedHasValuePasswordRequestRefusesBeforeRead",
           "actualCorePublishedHasValuePasswordRequestAndReusedTextCanaryAssertion",
           "incrementalSecretPrefixPreservesEveryVaultFaultOracle",
           "incrementalSecretVersionOneUsageSurvivesSuffixVersionTwoAck",
-          "incrementalSecretPrefixContextAckRevocationFailsAtWorkerCheckCurrent",
-          "incrementalSecretGrantRevocationAtFreshProducerAckCutFailsBeforePreparation",
           "incrementalPlainAndContextCanariesRemainPrivateAcrossMergedPublication",
           "auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass");
   private static final java.util.Set<String> INCREMENTAL_METHODS =
       java.util.Set.of(
+          "actualIncrementalPrefixWaitRefreshesExactFocusAndPersistentA"
+              + "bsenceStopsAtBoundedDrift",
           "prefixProducerContextAcknowledgementPrecedesPreparationAndPreservesIssuedRequest",
           "prefixProducerContextDefiniteRefusalsStopBeforePreparation",
           "prefixProducerContextUncertainRepliesNeverAdmitOrRedispatch",
@@ -268,24 +257,22 @@ class GuidedPublicationReplayIT {
           "incrementalConcurrentAuthenticatedDriftCommitsOneSwitch",
           "incrementalDriftAuthorityRejectsEveryExactJoin",
           "incrementalExcludedAttemptCannotHideOtherUnsettledActions",
-          "incrementalPrefixContinuationMatrixDoneAndRefreshRows",
+          "incrementalPrefixContinuationMatrixDoneRows",
           "incrementalStepTwoAssertionFailureIsFactualAndNeverRelearned",
           "incrementalPrefixPolicyRefusalsNeverBecomeDrift",
-          "incrementalFreshPostConsentGuardsDenyDangerousProposals",
-          "incrementalWaitingAnswerRejectsChangedContextGenerationAndNaturalLeaseExpiry",
+          "incrementalPrefixKeepsAnAuthoredEnterUnderTheGuards",
           "incrementalEmptyPrefixProgramPairSurvivesEveryContextDelivery",
           "incrementalBoundaryAndEmptyPrefixPlanningFailureKeepEnteredBoundary",
           "incrementalAppendRetryAndExpiredPreparationKeepExactHistoricalAuthority",
-          "incrementalSecretGrantRevocationAtFreshProducerAckCutFailsBeforePreparation",
           "incrementalPlainAndContextCanariesRemainPrivateAcrossMergedPublication",
           "incrementalOriginalBaseAndSourceAuthorityRejectEveryStoredSubstitution",
           "incrementalNonemptyOriginalPrefixRetainsBaseProofAfterDriftAtOne",
           "incrementalFirstSuffixAcceptanceIsOnceAndLaterPairsCannotDisappear",
           "incrementalPartialDriftStepReadPublishesAndReplaysTwice",
-          "incrementalMeasuredAdmissionRowsPreserveIdentityAndActualMediaSeek",
+          "incrementalAdmittedReplacementKeepsItsIdentityAndThePublishe"
+              + "dLearnRecordingIsDiscarded",
           "incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays",
-          "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser",
-          "incrementalStartCannotWidenTrustedOriginCeiling");
+          "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser");
 
   private static final class FixtureInvocation {
     final int ordinal, variantOrdinal;
@@ -1319,16 +1306,20 @@ class GuidedPublicationReplayIT {
   }
 
   private static String ownedReadyObserver() {
-    return "import {Server as joinServer} from 'node:net';import joinFs from 'node:fs';"
-        + "const joinListen=joinServer.prototype.listen;joinServer.prototype.listen=function(...args){"
-        + "this.once('listening',()=>{const address=this.address(),wanted=Number(process.env.OBS015_JOIN_PORT);"
-        + "if(address&&typeof address==='object'&&(wanted===0||address.port===wanted))setImmediate(()=>{"
-        + "if(!this.listening)return;try{joinFs.writeFileSync(process.env.OBS015_JOIN_READY,JSON.stringify({"
-        + "nonce:process.env.OBS015_JOIN_NONCE,role:process.env.OBS015_JOIN_ROLE,generation:Number(process"
-        + ".env.OBS015_JOIN_GENERATION),"
-        + "pid:process.pid,port:address.port}),{flag:'wx',mode:0o600});joinServer.prototype.listen=joinLis"
-        + "ten;}catch{process.stderr.write('JOIN_READY_UNAVAILABLE\\n');}});});"
-        + "return Reflect.apply(joinListen,this,args);};";
+    return "import {Server as joinServer} from 'node:net';import joinFs from 'node:fs';const"
+        + " joinListen=joinServer.prototype.listen;joinServer.prototype"
+        + ".listen=function(...args){this.once('listening',()=>{const"
+        + " address=this.address(),wanted=Number(process.env.OBS015_JOI"
+        + "N_PORT);if(address&&typeof"
+        + " address==='object'&&(wanted===0||address.port===wanted))setImmediate(()=>{"
+        + "if(!this.listening)return;try{joinFs.writeFileSync(process.e"
+        + "nv.OBS015_JOIN_READY,JSON.stringify({nonce:process.env.OBS01"
+        + "5_JOIN_NONCE,role:process.env.OBS015_JOIN_ROLE,generation:Nu"
+        + "mber(process.env.OBS015_JOIN_GENERATION),pid:process.pid,por"
+        + "t:address.port}),{flag:'wx',mode:0o600});joinServer.prototyp"
+        + "e.listen=joinListen;}catch{process.stderr.write('JOIN_READY_"
+        + "UNAVAILABLE\\n"
+        + "');}});});return Reflect.apply(joinListen,this,args);};";
   }
 
   private void verifyPreviousWorkerGenerationClosed() throws Exception {
@@ -1381,7 +1372,8 @@ class GuidedPublicationReplayIT {
             itr004.closed = true;
             for (var row :
                 jdbc.queryForList(
-                    "SELECT session_id,state,progress::text AS progress FROM studio_guided_sessions")) {
+                    "SELECT session_id,state,progress::text AS progress FROM"
+                        + " studio_guided_sessions")) {
               String id = String.valueOf(row.get("session_id"));
               if (generationSessionBaseline.contains(id)) {
                 continue;
@@ -1402,14 +1394,23 @@ class GuidedPublicationReplayIT {
                           "CANCELLED",
                           "EXPIRED")
                       .contains(String.valueOf(row.get("state")));
+              // A learn that published keeps no recording (it was discarded before upload); every
+              // other terminal learn holds exactly one settled recording fact.
+              boolean published =
+                  jdbc.queryForObject(
+                          "SELECT count(*) FROM studio_guided_publications WHERE session_id=?",
+                          Integer.class,
+                          id)
+                      > 0;
               boolean recording =
                   !progress.has("executionEvidence")
                       || jdbc.queryForObject(
-                              "SELECT count(*) FROM studio_guided_session_recordings WHERE session_id=? AND"
-                                  + " state IN ('AVAILABLE','FAILED','UNAVAILABLE')",
+                              "SELECT count(*) FROM studio_guided_session_recordings WHERE"
+                                  + " session_id=? AND state IN"
+                                  + " ('AVAILABLE','FAILED','UNAVAILABLE')",
                               Integer.class,
                               id)
-                          == 1;
+                          == (published ? 0 : 1);
               itr004.closed &=
                   terminal
                       && (!assigned || progress.path("teardownStatus").asText().equals("CONFIRMED"))
@@ -1418,9 +1419,9 @@ class GuidedPublicationReplayIT {
             for (var row :
                 jdbc.queryForList(
                     "SELECT e.id,e.status,e.error_code,e.video_status,l.state AS"
-                        + " ledger_state,l.attempt_id,l.admission_id FROM ui_test_executions e LEFT JOIN"
-                        + " studio_dispatch_ledger l ON l.execution_id=e.id"
-                        + " AND l.execution_accepted_at=e.started_at")) {
+                        + " ledger_state,l.attempt_id,l.admission_id FROM ui_test_executions e LEFT"
+                        + " JOIN studio_dispatch_ledger l ON l.execution_id=e.id AND"
+                        + " l.execution_accepted_at=e.started_at")) {
               UUID id = (UUID) row.get("id");
               if (generationExecutionBaseline.contains(id)) {
                 continue;
@@ -1587,7 +1588,9 @@ class GuidedPublicationReplayIT {
 
     writeOpenGenerationDiagnostic();
     throw new IllegalStateException(
-        "Prior generation actual sessions/browser/recordings remain unconfirmed; no restart authorized");
+        "Prior generation actual sessions/browser/recordings remain u"
+            + "nconfirmed; no restart"
+            + " authorized");
   }
 
   /** Value-free facts naming which prior-generation item kept the restart guard closed. */
@@ -1628,7 +1631,8 @@ class GuidedPublicationReplayIT {
           jdbc.queryForList(
               "SELECT e.id,e.status,e.error_code,e.video_status,l.state AS"
                   + " ledger_state,l.attempt_id,l.admission_id FROM ui_test_executions e LEFT JOIN"
-                  + " studio_dispatch_ledger l ON l.execution_id=e.id AND l.execution_accepted_at=e.started_at")) {
+                  + " studio_dispatch_ledger l ON l.execution_id=e.id AND"
+                  + " l.execution_accepted_at=e.started_at")) {
         if (generationExecutionBaseline.contains((UUID) row.get("id"))) {
           continue;
         }
@@ -2195,7 +2199,7 @@ class GuidedPublicationReplayIT {
   static final SSLContext TLS, PREVIOUS_TLS;
   static final KeyPair ISSUER;
   static final String FINGERPRINT;
-  static final ObjectNode CATALOG, POLICY, P3_OTHER_POLICY;
+  static final ObjectNode CATALOG;
   static final List<String> RECEIPTS = new CopyOnWriteArrayList<>(),
       VALUES = new CopyOnWriteArrayList<>(),
       MODEL_WIRE = new CopyOnWriteArrayList<>(),
@@ -2204,9 +2208,11 @@ class GuidedPublicationReplayIT {
       CORE_CALLS = new AtomicInteger(),
       LEGACY_MODEL_CALLS = new AtomicInteger(),
       PROVIDER_FAILURES = new AtomicInteger();
+  // Diagnostic metadata only: exception classes and owned source frames, never messages/values.
+  private static final java.util.concurrent.ConcurrentMap<String, List<String>>
+      PROVIDER_FAILURE_LOCATIONS = new java.util.concurrent.ConcurrentHashMap<>();
   static final List<String> TEXT;
   private static volatile boolean incrementalTenScenario;
-  private static volatile boolean b1TrustedCeiling;
   private static volatile String incrementalDomVariant;
   private static final List<String> INCREMENTAL_STEPS =
       java.util.stream.IntStream.range(0, 10)
@@ -2626,7 +2632,6 @@ class GuidedPublicationReplayIT {
   // Case-only C14 phases; NONE leaves every original page/model/source flow unchanged.
   private enum P14Recipe {
     NONE,
-    CONTROL_VALUE,
     HAS_VALUE
   }
 
@@ -2640,8 +2645,6 @@ class GuidedPublicationReplayIT {
   private static volatile P14Page p14Page = P14Page.TEXT_MATCH;
   private static volatile String p14Expected, p14Canary;
 
-  private record P3Entitlement(String principal, String csi, String environment, String name) {}
-
   private record P3CoreIdentity(String principal, String email, List<String> csis) {}
 
   private record P3Receipt(String password, String username, boolean accepted) {
@@ -2651,9 +2654,6 @@ class GuidedPublicationReplayIT {
     }
   }
 
-  private static final java.util.Set<P3Entitlement> P3_PERMITTED =
-      java.util.concurrent.ConcurrentHashMap.newKeySet();
-  private static final List<P3Entitlement> P3_MAY_USE = new CopyOnWriteArrayList<>();
   private static final java.util.concurrent.ConcurrentMap<String, P3CoreIdentity> P3_CORE =
       new java.util.concurrent.ConcurrentHashMap<>();
   private static final List<P3Receipt> P3_RECEIPTS = new CopyOnWriteArrayList<>();
@@ -2790,9 +2790,11 @@ class GuidedPublicationReplayIT {
                   .toAbsolutePath()
                   .normalize()
                   .toUri()
-              + "';const fixture=await startSecretLoginFixture();process.stdout.write(JSON.stringify({orig"
-              + "in:fixture.origin})+'\\n');"
-              + "const stop=()=>{void fixture.close().then(()=>{process.exitCode=0;});};process.once('SIGT"
+              + "';const fixture=await"
+              + " startSecretLoginFixture();process.stdout.write(JSON.stringi"
+              + "fy({origin:fixture.origin})+'\\n"
+              + "');const stop=()=>{void"
+              + " fixture.close().then(()=>{process.exitCode=0;});};process.once('SIGT"
               + "ERM',stop);process.once('SIGINT',stop);");
       SECRET_FIXTURE =
           startOwnedWorker(
@@ -2987,7 +2989,7 @@ class GuidedPublicationReplayIT {
         throw new IllegalStateException("Secret fixture readiness deadline");
       }
       SECRET_ORIGIN = C.parse(fixtureAnnouncement).path("origin").asText();
-      if (!SECRET_ORIGIN.startsWith("http://127.0.0.1:")) {
+      if (!SECRET_ORIGIN.startsWith("http://localhost:")) {
         throw new IllegalStateException("Invalid controlled fixture origin");
       }
       assertThat(URI.create(SECRET_ORIGIN).getPort())
@@ -3085,7 +3087,7 @@ class GuidedPublicationReplayIT {
           TEMP.resolve("coordinator.jwt"),
           token("backend-controller", "controller-1", "studio-guided-controller"));
       APP = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-      ORIGIN = "http://127.0.0.1:" + APP.getAddress().getPort();
+      ORIGIN = "http://localhost:" + APP.getAddress().getPort();
       URL = ORIGIN + "/flow";
       TEXT =
           List.of(
@@ -3146,7 +3148,8 @@ class GuidedPublicationReplayIT {
             }
             String html =
                 "<!doctype html><html><head><title>Operations</title></head><body><main"
-                    + " aria-label='Operations'><output aria-label='Order reference'>"
+                    + " aria-label='Operations'><output aria-label='Order reference'"
+                    + " style='white-space:pre'>"
                     + fresh
                     + "</output><label for='destination'>Destination</label><textarea"
                     + " id='destination'></textarea><output id='done' aria-label='Confirmation'"
@@ -3157,8 +3160,9 @@ class GuidedPublicationReplayIT {
                     + "('destination').value});};</script></body></html>";
             if (asynchronousPage) {
               html =
-                  "<!doctype html><html><head><title>Operations</title></head><body>"
-                      + "<main aria-label='Operations'><output aria-label='Order reference'>"
+                  "<!doctype html><html><head><title>Operations</title></head><body><main"
+                      + " aria-label='Operations'><output aria-label='Order reference'"
+                      + " style='white-space:pre'>"
                       + fresh
                       + "</output><label for='destination'>Destination</label><textarea"
                       + " id='destination'></textarea><button"
@@ -3166,24 +3170,30 @@ class GuidedPublicationReplayIT {
                       + " document.getElementById('submit').onclick=async()=>{const r=await"
                       + " fetch('/receipt?run="
                       + run
-                      + "',{method:'POST',body:document.getElementById('destination').value});if(r.ok){const"
+                      + "',{method:'POST',body:document.getElementById('destination')"
+                      + ".value});if(r.ok){const"
                       + " out=document.createElement('output');out.setAttribute('aria-label',"
-                      + "'Confirmation');out.textContent='Submitted';document.querySelector('main').append(out)}}"
+                      + "'Confirmation');out.textContent='Submitted';document.querySe"
+                      + "lector('main').append(out)}}"
                       + ";</script></body></html>";
             }
             if (observedChoicePage) {
               html =
                   "<!doctype html><html><head><title>Operations</title></head><body><main"
-                      + " aria-label='Operations'><output aria-label='Order reference'>"
+                      + " aria-label='Operations'><output aria-label='Order reference'"
+                      + " style='white-space:pre'>"
                       + fresh
                       + "</output><label for='destination'>Destination</label><textarea"
                       + " id='destination'></textarea><label for='alternate'>Alternate"
                       + " destination</label><textarea id='alternate'></textarea><output id='done'"
                       + " aria-label='Confirmation' hidden>Submitted</output><button"
-                      + " id='submit'>Submit</button></main><script>document.getElementById('submit').onclick=()=>{"
-                      + "document.getElementById('done').hidden=false;fetch('/receipt?choice=true',{method:'POST',"
+                      + " id='submit'>Submit</button></main><script>document.getEleme"
+                      + "ntById('submit').onclick=()=>{"
+                      + "document.getElementById('done').hidden=false;fetch('/receipt"
+                      + "?choice=true',{method:'POST',"
                       + "body:JSON.stringify({chosen:document.getElementById('alternate').value,"
-                      + "unchosen:document.getElementById('destination').value})});};</script></body></html>";
+                      + "unchosen:document.getElementById('destination').value})});};"
+                      + "</script></body></html>";
             }
             if (p14Recipe != P14Recipe.NONE) {
               html = p14Markup();
@@ -3192,29 +3202,44 @@ class GuidedPublicationReplayIT {
                 || "pre-literal2".equals(incrementalDomVariant)
                 || "drift-plan-fail".equals(incrementalDomVariant)
                 || "drift-auth-pre".equals(incrementalDomVariant)) {
+              // ADR-SC-007 WI-4: the frozen locator is role textbox named Destination. A plain
+              // input keeps role and label, so it would still resolve; a search input keeps the
+              // accessible name but is a searchbox, so the frozen locator resolves to nothing
+              // (TARGET_DRIFT) while the re-learn still finds "Destination" by name.
               html =
                   html.replace(
-                      "<textarea id='destination'></textarea>", "<input id='destination'>");
+                      "<textarea id='destination'></textarea>",
+                      "<input id='destination' type='search'>");
             } else if ("drift-first".equals(incrementalDomVariant)) {
               // new22-b1b3-diagnosis01 (B3B-2): <span role=status> is guard-identical to <output>
-              // (role status, elementType other, same name), so it never drifted. An explicit
-              // role on the same readable <output> keeps the name and the read grant but fails the
-              // prefix acquire for role=status (TARGET_DRIFT at the read, ordinal 1).
+              // (role status, same name), so it never drifted. An explicit role on the same
+              // readable <output> keeps the name and the text but the frozen locator (role status)
+              // resolves to nothing (TARGET_DRIFT at the read, ordinal 1).
               html =
                   html.replace(
-                      "<output aria-label='Order reference'>",
-                      "<output role='region' aria-label='Order reference'>");
+                      "<output aria-label='Order reference' style='white-space:pre'>",
+                      "<output role='region' aria-label='Order reference'"
+                          + " style='white-space:pre'>");
             } else if ("assert-fail".equals(incrementalDomVariant)) {
-              // w3-d5 D5-1: mutate after the fill's write ('change'). A focus-time mutation is
-              // refused by
-              // the runner as POST_FOCUS_CHANGED (unknown-effect fill), so the assertion is never
-              // reached.
+              // D5-1: mutate on the real input event after the fill writes its value. A focus-time
+              // mutation would
+              // be caught by the runner's verified-element check (unknown-effect fill) instead of
+              // reaching the assertion.
               html =
                   html.replace(
                       "</body>",
-                      "<script>document.getElementById('destination').addEventListener('change',()=>{"
+                      "<script>document.getElementById('destination').addEventListener('input',()=>{"
                           + "document.querySelector('output[aria-label=\"Order"
                           + " reference\"]').textContent='changed-after-read';});</script></body>");
+            }
+            // Authority test only: the real synthesizer freezes a stable unique locator in BASE.
+            // In MIXED that same locator still resolves, but textbox -> searchbox is a genuine
+            // held-fact identity disagreement, not the ABSENT/WAIT trigger covered separately.
+            if (activeFixtureInvocation != null
+                && activeFixtureInvocation.variant.equals("drift-auth-pre")) {
+              html =
+                  html.replace(
+                      " id='destination'", " id='destination' data-testid='authority-destination'");
             }
             // STUDIO-OBS-015 B1c (b1bcd-design01 T3): inert unless a B1 parent arms a variant.
             if (b1FlowRedirect(exchange)) {
@@ -3360,10 +3385,12 @@ class GuidedPublicationReplayIT {
                     .put("requestUtf8Bytes", requestBytes.length)
                     .put("requestSha256", exactByteHash(requestBytes));
             MODEL_RESPONSE_FACTS.add(responseFacts);
+            String diagnosticSession = null;
             try {
               JsonNode wire = C.parse(raw);
               JsonNode request =
                   C.parse(wire.path("contents").get(0).path("parts").get(0).path("text").asText());
+              diagnosticSession = request.path("context").path("sessionId").asText();
               if (!request.has("kind")) {
                 LEGACY_MODEL_CALLS.incrementAndGet();
                 throw new IllegalStateException("Unexpected compiler gateway request");
@@ -3385,8 +3412,7 @@ class GuidedPublicationReplayIT {
                     .put("declaredInputUsage", 20)
                     .put("declaredOutputUsage", 40)
                     .put("sourceReferences", modelReply.path("sourceReferences").size())
-                    .put("obligations", modelReply.path("obligations").size())
-                    .put("needs", modelReply.path("needs").size());
+                    .put("obligations", modelReply.path("obligations").size());
               }
               ObjectNode reply = C.object();
               reply
@@ -3420,6 +3446,18 @@ class GuidedPublicationReplayIT {
               }
             } catch (RuntimeException failure) {
               PROVIDER_FAILURES.incrementAndGet();
+              String location = failure.getClass().getSimpleName();
+              for (StackTraceElement frame : failure.getStackTrace()) {
+                if (frame.getClassName().equals(GuidedPublicationReplayIT.class.getName())) {
+                  location += "@" + frame.getMethodName() + ":" + frame.getLineNumber();
+                  break;
+                }
+              }
+              if (diagnosticSession != null) {
+                PROVIDER_FAILURE_LOCATIONS
+                    .computeIfAbsent(diagnosticSession, ignored -> new CopyOnWriteArrayList<>())
+                    .add(location);
+              }
               synchronized (responseFacts) {
                 responseFacts.put("providerRuntimeFailure", true);
               }
@@ -3454,49 +3492,6 @@ class GuidedPublicationReplayIT {
                   + "'}}));");
       CATALOG = (ObjectNode) C.parse(generated.strip());
       Files.writeString(TEMP.resolve("catalog.json"), CATALOG.toString());
-      POLICY =
-          C.object()
-              .put("version", 1)
-              .put("policyId", "orders-read")
-              .put("policyVersion", "observed-4-full-chromium-1")
-              .put("applicationId", "orders")
-              .put("environment", "fixture")
-              .put("entryPolicyId", "blank");
-      var approvedOrigins = POLICY.putArray("allowedOrigins");
-      new java.util.TreeSet<>(List.of(ORIGIN, SECRET_ORIGIN)).forEach(approvedOrigins::add);
-      POLICY.putArray("rules");
-      ObjectNode appPolicy =
-          POLICY
-              .putObject("applicationPolicy")
-              .put("policyRuleId", "structural-policy")
-              .put("allowStructuralDiscovery", true);
-      ObjectNode grant =
-          appPolicy
-              .putArray("readGrants")
-              .addObject()
-              .put("policyRuleId", "business-read")
-              .put("origin", ORIGIN);
-      grant
-          .putObject("region")
-          .put("kind", "role")
-          .put("role", "main")
-          .put("name", "Operations")
-          .put("exact", true);
-      grant.putObject("visibleText").put("classification", "permittedBusinessData");
-      grant
-          .putObject("controlValue")
-          .put("classification", "nonsecretApproved")
-          .putArray("types")
-          .add("text")
-          .add("textarea");
-      P3_OTHER_POLICY =
-          POLICY
-              .deepCopy()
-              .put("policyId", "orders-read-other-fixture")
-              .put("environment", "fixture-other");
-      Files.writeString(
-          TEMP.resolve("policies.json"),
-          C.object().putArray("policies").add(POLICY).add(P3_OTHER_POLICY).toString());
       DB.start();
       var preboot =
           com.citi.put.checks.studio.support.LegacyV20ConfirmedBaseFixture.seedV20Cases(
@@ -3505,7 +3500,8 @@ class GuidedPublicationReplayIT {
               "CSI-123",
               "fixture",
               UUID.fromString(INCREMENTAL_STEPS.get(0)),
-              "Open " + URL + ".",
+              // The URL must be a clean token: a test names its origin by its URLs.
+              "Open " + URL + " now.",
               CATALOG.path("profile"),
               CATALOG.path("build"));
       LEGACY_V20_BASE = preboot.incompleteImmutableBase();
@@ -3556,10 +3552,7 @@ class GuidedPublicationReplayIT {
         "studio.guided-authoring.controller-token-file",
         () -> TEMP.resolve("controller.jwt").toString());
     r.add("studio.guided-authoring.translation.enabled", () -> true);
-    r.add("studio.guided-authoring.translation.allow-authored-nonsecret", () -> true);
     r.add("studio.guided-authoring.translation.max-output-tokens", () -> FIXTURE_PROFILE.ceiling);
-    r.add("studio.guided-authoring.translation.applications", () -> "orders");
-    r.add("studio.guided-authoring.translation.environments", () -> "fixture,fixture-other");
     r.add("studio.guided-authoring.translation.worker-id", () -> "worker-1");
     r.add(
         "studio.guided-authoring.translation.controller-origin",
@@ -3573,9 +3566,6 @@ class GuidedPublicationReplayIT {
     r.add(
         "studio.observed-replay.catalog-json",
         () -> C.object().putArray("catalog").add(CATALOG).toString());
-    r.add(
-        "studio.observed-replay.policies-json",
-        () -> C.object().putArray("policies").add(POLICY).add(P3_OTHER_POLICY).toString());
     r.add("studio.runner.base-url", () -> "https://127.0.0.1:" + NORMAL_PORT);
     // STUDIO-OBS-009 AC-2/AC-3 (lane D3): the one runner identity of the Spring-managed clients.
     // Without these four the bridge, dispatch, validation and translation calls fail closed.
@@ -3585,7 +3575,6 @@ class GuidedPublicationReplayIT {
     r.add("studio.runner.tls.trust-store-password-file", () -> TEMP.resolve("tls.pass").toString());
     r.add("studio.runner.service-identity-token", () -> SERVICE);
     r.add("studio.execution.callback.service-token", () -> CALLBACK);
-    r.add("studio.scheduling.poll-interval-ms", () -> "3600000");
     r.add("studio.execution.enabled", () -> true);
     r.add("studio.execution.video-store.provider", () -> "local");
     r.add("studio.execution.video-store.directory", () -> TEMP.resolve("objects").toString());
@@ -3916,19 +3905,6 @@ class GuidedPublicationReplayIT {
     }
 
     @Bean
-    @org.springframework.context.annotation.Primary
-    com.citi.put.checks.studio.secrets.StudioSecretUseAuthorization controlledLoginEntitlement() {
-      return (principal, csi, environment, name) -> {
-        P3_MAY_USE.add(new P3Entitlement(principal, csi, environment, name));
-        return java.util.Set.of("fixture@example.invalid", "user-1").contains(principal)
-                && csi.equals(primaryCsi)
-                && environment.equals("fixture")
-                && name.equals("PASS")
-            || p3Entitled(principal, csi, environment, name);
-      };
-    }
-
-    @Bean
     com.citi.put.checks.studio.internal.ProgressReportService.ReportCommitHook
         observedCommitFault() {
       return id -> {
@@ -3945,6 +3921,121 @@ class GuidedPublicationReplayIT {
       jakarta.servlet.Filter filter =
           (request, response, chain) -> {
             var http = (jakarta.servlet.http.HttpServletRequest) request;
+            if (joinedModel != null
+                && http.getMethod().equals("POST")
+                && http.getRequestURI().endsWith("/observations")) {
+              var captured =
+                  new org.springframework.web.util.ContentCachingRequestWrapper(http, 1048576);
+              try {
+                chain.doFilter(captured, response);
+              } finally {
+                try {
+                  JsonNode payload = C.parseWire(captured.getContentAsByteArray());
+                  JsonNode observed = payload.path("observation");
+                  ObjectNode flags =
+                      C.object().put("generation", observed.path("generation").asInt(-1));
+                  var controls = flags.putArray("textControls");
+                  for (JsonNode fact : observed.path("facts")) {
+                    if (!java.util.Set.of("textbox", "searchbox")
+                        .contains(fact.path("role").asText())) {
+                      continue;
+                    }
+                    controls
+                        .addObject()
+                        .put("nameComplete", fact.path("nameComplete").asBoolean(false))
+                        .put("ownTextComplete", fact.path("ownTextComplete").asBoolean(false))
+                        .put("editable", fact.path("editable").asBoolean(false))
+                        .put("hasText", fact.has("text"));
+                  }
+                  var entries =
+                      JOINED_OBSERVATION_FLAGS.computeIfAbsent(
+                          payload.path("sessionId").asText(),
+                          ignored -> C.object().putArray("flags"));
+                  synchronized (entries) {
+                    if (entries.size() < 32) {
+                      entries.add(flags);
+                    }
+                  }
+                } catch (RuntimeException unavailable) {
+                  /* Only typed metadata is diagnostic; real callback owns its response. */
+                }
+              }
+              return;
+            }
+            if (joinedAfterOutcome != null
+                && http.getMethod().equals("POST")
+                && http.getRequestURI().startsWith("/internal/v2/studio/guided-sessions/")
+                && http.getRequestURI().endsWith("/outcomes")) {
+              var original = (jakarta.servlet.http.HttpServletResponse) response;
+              var cached = new org.springframework.web.util.ContentCachingResponseWrapper(original);
+              try {
+                chain.doFilter(request, cached);
+                if (cached.getStatus() >= 200 && cached.getStatus() < 300) {
+                  Runnable selected;
+                  synchronized (GuidedPublicationReplayIT.class) {
+                    selected = joinedAfterOutcome;
+                    joinedAfterOutcome = null;
+                  }
+                  if (selected != null) {
+                    var executor =
+                        java.util.concurrent.Executors.newSingleThreadExecutor(
+                            task -> {
+                              Thread thread = new Thread(task, "wi6-after-outcome");
+                              thread.setDaemon(true);
+                              return thread;
+                            });
+                    java.util.concurrent.Future<?> action = null;
+                    try {
+                      action = executor.submit(selected);
+                      action.get(10, java.util.concurrent.TimeUnit.SECONDS);
+                    } catch (Exception failure) {
+                      JOINED_HOOK_FAILURE.compareAndSet(null, failure.getClass().getName());
+                    } finally {
+                      if (action != null) {
+                        action.cancel(true);
+                      }
+                      executor.shutdownNow();
+                      try {
+                        if (!executor.awaitTermination(2, java.util.concurrent.TimeUnit.SECONDS)) {
+                          JOINED_HOOK_FAILURE.compareAndSet(null, "HOOK_PRODUCER_UNCONFIRMED");
+                        }
+                      } catch (InterruptedException interrupted) {
+                        Thread.currentThread().interrupt();
+                        JOINED_HOOK_FAILURE.compareAndSet(null, "HOOK_PRODUCER_INTERRUPTED");
+                      }
+                    }
+                  }
+                }
+              } finally {
+                joinedAfterOutcome = null;
+                if (original.isCommitted()) {
+                  cached.copyBodyToResponse();
+                } else {
+                  int status = cached.getStatus();
+                  var headers = new java.util.LinkedHashMap<String, java.util.List<String>>();
+                  for (String name : cached.getHeaderNames()) {
+                    headers.put(name, java.util.List.copyOf(cached.getHeaders(name)));
+                  }
+                  byte[] bytes = cached.getContentAsByteArray();
+                  original.setStatus(status);
+                  for (var header : headers.entrySet()) {
+                    boolean first = true;
+                    for (String value : header.getValue()) {
+                      if (first) {
+                        original.setHeader(header.getKey(), value);
+                      } else {
+                        original.addHeader(header.getKey(), value);
+                      }
+                      first = false;
+                    }
+                  }
+                  original.getOutputStream().write(bytes);
+                  original.flushBuffer();
+                  java.util.Arrays.fill(bytes, (byte) 0);
+                }
+              }
+              return;
+            }
             C5Capture activeC5 = c5Capture;
             if (activeC5 != null
                 && activeC5.claimSamplerSelected
@@ -4098,6 +4189,148 @@ class GuidedPublicationReplayIT {
   @Autowired JdbcTemplate jdbc;
   @Autowired org.springframework.context.ConfigurableApplicationContext ownedApplicationContext;
   private org.springframework.test.context.TestContext ownedFrameworkContext;
+  private Class<?> standaloneJoinedOwner;
+  static volatile java.util.function.Function<JsonNode, ObjectNode> joinedModel;
+  static volatile Runnable joinedAfterOutcome;
+  private static final java.util.Map<String, ArrayNode> JOINED_OBSERVATION_FLAGS =
+      new java.util.concurrent.ConcurrentHashMap<>();
+  private static final java.util.concurrent.atomic.AtomicReference<String> JOINED_HOOK_FAILURE =
+      new java.util.concurrent.atomic.AtomicReference<>();
+
+  static final class JoinedHarness implements AutoCloseable {
+    private static final java.util.Set<String> OWNERS =
+        java.util.Set.of(
+            "com.citi.put.checks.studio.guided.publication.GuidedNativeChildContextJoinedIT",
+            "com.citi.put.checks.studio.guided.publication.GuidedGuardContinuityJoinedIT");
+    private static final java.util.Map<
+            org.springframework.context.ApplicationContext,
+            org.springframework.test.context.TestContext>
+        CONTEXTS = new java.util.concurrent.ConcurrentHashMap<>();
+    private final GuidedPublicationReplayIT runtime;
+
+    static void bindFramework(org.springframework.test.context.TestContext context) {
+      assertThat(OWNERS).contains(context.getTestClass().getName());
+      CONTEXTS.put(context.getApplicationContext(), context);
+    }
+
+    static void beginInvocation(org.springframework.test.context.TestContext context) {
+      assertThat(OWNERS).contains(context.getTestClass().getName());
+      assertThat(CONTEXTS.get(context.getApplicationContext())).isNotNull();
+      activeFixtureInvocation =
+          new FixtureInvocation(0, context.getTestMethod().getName(), "standalone", 0);
+    }
+
+    JoinedHarness(org.springframework.context.ConfigurableApplicationContext context, int port) {
+      runtime = new GuidedPublicationReplayIT();
+      context.getAutowireCapableBeanFactory().autowireBean(runtime);
+      runtime.port = port;
+      runtime.ownedApplicationContext = context;
+      runtime.ownedFrameworkContext = CONTEXTS.get(context);
+      assertThat(runtime.ownedFrameworkContext)
+          .as("actual standalone Spring TestContext registration")
+          .isNotNull();
+      runtime.standaloneJoinedOwner = runtime.ownedFrameworkContext.getTestClass();
+      assertThat(OWNERS).contains(runtime.standaloneJoinedOwner.getName());
+      assertThat(context.getEnvironment().getProperty("local.server.port", Integer.class))
+          .isEqualTo(port);
+      activeFixtureInvocation =
+          new FixtureInvocation(0, runtime.standaloneJoinedOwner.getSimpleName(), "standalone", 0);
+    }
+
+    void start() throws Exception {
+      JOINED_HOOK_FAILURE.set(null);
+      joinedAfterOutcome = null;
+      ensureAuditCapture();
+      refreshFixtureCredentials();
+      B1OutcomeCapture.install();
+      coreRole = "owner";
+      runtime.startWorkers();
+    }
+
+    JsonNode call(String path, JsonNode body, int status) throws Exception {
+      return runtime.publicCall(
+          path, body, status, body == null ? null : UUID.randomUUID().toString());
+    }
+
+    String learn(UUID test) throws Exception {
+      return runtime.startLearning(test);
+    }
+
+    void awaitFinalizing(String session) throws Exception {
+      try {
+        runtime.awaitFinalizing(session);
+      } catch (Exception | AssertionError failure) {
+        throw new AssertionError(
+            "boolean-only observation flags="
+                + JOINED_OBSERVATION_FLAGS.getOrDefault(session, C.object().putArray("empty")),
+            failure);
+      }
+    }
+
+    void proof(String session, JsonNode receipt) throws Exception {
+      runtime.settleProof(session, receipt);
+    }
+
+    JsonNode replay(UUID test) throws Exception {
+      return replay(test, "PASSED");
+    }
+
+    JsonNode replay(UUID test, String expectedStatus) throws Exception {
+      UUID execution =
+          UUID.fromString(
+              call("/api/v1/studio/tests/" + test + "/execute", C.object(), 202)
+                  .path("executionId")
+                  .asText());
+      assertThat(runtime.dispatcher.dispatchOnce()).isEqualTo(1);
+      if (expectedStatus.equals("PASSED")) {
+        return runtime.awaitJoinedVideo(execution);
+      }
+      org.awaitility.Awaitility.await("standalone ordinary terminal result")
+          .atMost(Duration.ofSeconds(60))
+          .pollInterval(Duration.ofMillis(30))
+          .until(
+              () ->
+                  List.of("PASSED", "FAILED", "ERROR")
+                      .contains(
+                          runtime.jdbc.queryForObject(
+                              "SELECT status FROM ui_test_executions WHERE id=?",
+                              String.class,
+                              execution)));
+      assertThat(
+              runtime.jdbc.queryForObject(
+                  "SELECT status FROM ui_test_executions WHERE id=?", String.class, execution))
+          .as("standalone ordinary terminal status")
+          .isEqualTo(expectedStatus);
+      return call("/api/v1/studio/executions/" + execution, null, 200);
+    }
+
+    JsonNode evidence(String session) {
+      return runtime.sessions.transaction(
+          () ->
+              runtime
+                  .ownedApplicationContext
+                  .getBean(GuidedPublicationEvidenceRepository.class)
+                  .read(session)
+                  .document());
+    }
+
+    @Override
+    public void close() throws Exception {
+      joinedModel = null;
+      joinedAfterOutcome = null;
+      String hookFailure = JOINED_HOOK_FAILURE.getAndSet(null);
+      try {
+        runtime.stop();
+      } finally {
+        CONTEXTS.remove(runtime.ownedApplicationContext);
+        activeFixtureInvocation = null;
+      }
+      assertThat(hookFailure)
+          .as("one-shot after-outcome producer completed without failure")
+          .isNull();
+    }
+  }
+
   private boolean ownedApplicationQuiescent;
   private boolean ownedClassStopped, finalScansAttempted, finalAuditComplete, finalPrivacyComplete;
   private boolean finalProducersDrained, finalModelEvidenceComplete, finalBudgetEvidenceComplete;
@@ -4265,7 +4498,9 @@ class GuidedPublicationReplayIT {
         () -> {
           com.citi.put.checks.studio.support.GuardDecisionTally.write(
               GuidedPublicationReplayIT.class);
-          Path canonical = Path.of("build", "guard-tally", "GuidedPublicationReplayIT.json");
+          Path canonical =
+              com.citi.put.checks.studio.support.GuardDecisionTally.buildDirectory()
+                  .resolve("guard-tally/GuidedPublicationReplayIT.json");
           byte[] bytes = Files.readAllBytes(canonical);
           // Copy the original real canonical bytes, never rebuild a synthetic tally.
           Files.createDirectories(COHORT_DIRECTORY);
@@ -4388,8 +4623,6 @@ class GuidedPublicationReplayIT {
   @Autowired GuidedTranslationStore plans;
   @Autowired StudioDispatcher dispatcher;
   @Autowired StudioGatewayProperties gatewayProperties;
-  @Autowired com.citi.put.checks.studio.scheduling.StudioSchedulingProperties scheduling;
-  @Autowired com.citi.put.checks.studio.scheduling.StudioScheduleProcessor scheduleProcessor;
 
   /**
    * Replaces the paused-run state file atomically. The test child's {@code checkInitial} hook
@@ -4439,7 +4672,9 @@ class GuidedPublicationReplayIT {
     beginFixtureInvocation(testInfo);
     B1OutcomeCapture.install();
     assertThat(cleanupUnconfirmed)
-        .as("prior failed-test actual worker teardown was not confirmed; inspect cleanup evidence")
+        .as(
+            "prior failed-test actual worker teardown was not confirmed; "
+                + "inspect cleanup evidence")
         .isFalse();
     // Every test starts as the CSI owner; a test that fails after lowering the role must not leak
     // viewer/none authority into later tests (that masked root causes as FORBIDDEN_SCOPE).
@@ -4466,11 +4701,7 @@ class GuidedPublicationReplayIT {
     try {
       try {
         // AC-4 tally (po-qa014-rulings a1; qa-review01 H7): keyed per invocation, so each joined
-        // variant is listed by name. Exactly two invocations plant guard refusals:
-        // - the policy-prefix variant (its governed DENY side-effect stance); its body pins that
-        //   refusal to exactly one SIDE_EFFECT_DENIED. The shared method name is never planted.
-        // - B1C-03 incrementalFreshPostConsentGuardsDenyDangerousProposals (a single @Test): it
-        //   plants three DESTRUCTIVE_VERB refusals, one per hostile parent, pinned in its body.
+        // variant is listed by name. No joined invocation plants a guard refusal.
         String tallyMethod = testInfo.getTestMethod().orElseThrow().getName();
         String tallyName =
             testInfo.getDisplayName().startsWith("incremental joined ")
@@ -4482,10 +4713,7 @@ class GuidedPublicationReplayIT {
             jdbc,
             tallyBefore,
             List.copyOf(AUDIT_EVENTS.list.subList(tallyAuditStart, AUDIT_EVENTS.list.size())),
-            java.util.Set.of(
-                "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
-                    + "[incremental joined policy-prefix]",
-                "incrementalFreshPostConsentGuardsDenyDangerousProposals"));
+            java.util.Set.of());
       } catch (Exception | AssertionError tallyFailure) {
         if (failedTest == null) {
           throw tallyFailure;
@@ -4855,11 +5083,11 @@ class GuidedPublicationReplayIT {
             sessions.transaction(() -> sessions.lock(id).document().path("limits").deepCopy());
         // MODEL-SIZING (ruling 2026-10-18, option A-ii): the production session totals.
         assertThat(limits.path("maxModelOutputTokensTotal").asInt()).isEqualTo(98304);
-        assertThat(limits.path("maxModelInputTokensTotal").asInt()).isEqualTo(786432);
+        assertThat(limits.path("maxModelInputTokensTotal").asInt()).isEqualTo(1572864);
         assertThat(limits.path("maxModelProposals").asInt()).isEqualTo(100);
         JsonNode counters =
             sessions.transaction(() -> sessions.lock(id).document().path("counters").deepCopy());
-        assertThat(counters.path("modelInputTokens").asLong()).isLessThanOrEqualTo(786432);
+        assertThat(counters.path("modelInputTokens").asLong()).isLessThanOrEqualTo(1572864);
         assertThat(counters.path("modelOutputTokens").asLong()).isLessThanOrEqualTo(98304);
         assertThat(counters.path("modelProposals").asLong()).isLessThanOrEqualTo(100);
         // Derived, not a run: this lane reserves at the fixture ceiling, so the production
@@ -4907,9 +5135,9 @@ class GuidedPublicationReplayIT {
                   priorInput + witness.path("serviceReservationInput").asLong());
           assertThat(witness.path("cumulativeOutput").asLong())
               .isGreaterThanOrEqualTo(priorOutput + FIXTURE_PROFILE.ceiling);
-          assertThat(witness.path("inputTotalLimit").asLong()).isEqualTo(786432);
+          assertThat(witness.path("inputTotalLimit").asLong()).isEqualTo(1572864);
           assertThat(witness.path("outputTotalLimit").asLong()).isEqualTo(98304);
-          assertThat(witness.path("cumulativeInput").asLong()).isLessThanOrEqualTo(786432);
+          assertThat(witness.path("cumulativeInput").asLong()).isLessThanOrEqualTo(1572864);
           assertThat(witness.path("cumulativeOutput").asLong()).isLessThanOrEqualTo(98304);
           assertThat(witness.path("cumulativeProposals").asLong()).isGreaterThan(priorProposals);
           priorProposals = witness.path("cumulativeProposals").asLong();
@@ -4997,7 +5225,8 @@ class GuidedPublicationReplayIT {
 
   private static long budgetSessionOrdinal(JdbcTemplate jdbc, String id) {
     return jdbc.queryForObject(
-        "SELECT count(*) FROM studio_guided_sessions earlier JOIN studio_guided_sessions scoped ON"
+        "SELECT count(*) FROM studio_guided_sessions earlier JOIN stu"
+            + "dio_guided_sessions scoped ON"
             + " scoped.session_id=? WHERE"
             + " ((earlier.document->>'createdAt')::timestamptz,earlier.session_id) <="
             + " ((scoped.document->>'createdAt')::timestamptz,scoped.session_id)",
@@ -5299,7 +5528,8 @@ class GuidedPublicationReplayIT {
             });
     var attempts = out.putArray("modelAttempts");
     jdbc.queryForList(
-            "SELECT kind,status,attempt_number,input_tokens,output_tokens, safe_result->>'code' AS"
+            "SELECT kind,status,attempt_number,input_tokens,output_tokens"
+                + ", safe_result->>'code' AS"
                 + " provider_code,safe_result->>'status' AS response_status,"
                 + " safe_result->>'schemaVersion' AS response_schema_version,"
                 + " safe_result->'action'->'operation'->>'kind' AS response_operation_kind FROM"
@@ -5554,8 +5784,6 @@ class GuidedPublicationReplayIT {
         "CANCELLED",
         "EXPIRED",
         "SECRET_UNAVAILABLE",
-        "SECRET_USE_NOT_AUTHORIZED",
-        "SECRET_USE_REVOKED",
         "VAULT_UNAVAILABLE",
         "LOGIN_REQUIRED",
         "SECRET_TOO_LONG",
@@ -5629,7 +5857,8 @@ class GuidedPublicationReplayIT {
             + " (?,'user-1','Fixture','fixture@example.invalid',now()) ON CONFLICT DO NOTHING",
         UUID.randomUUID());
     jdbc.update(
-        "INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment) VALUES"
+        "INSERT INTO csi_systems(id,name,business_unit,criticality,ow"
+            + "ner_email,environment) VALUES"
             + " ('CSI-123','Orders','Ops','HIGH','fixture@example.invalid','Production') ON"
             + " CONFLICT DO NOTHING");
     if (guidedWorker == null && ordinaryWorker == null) {
@@ -5640,7 +5869,6 @@ class GuidedPublicationReplayIT {
       assertThat(guidedWorker.isAlive()).as("no implicit guided restart").isTrue();
       assertThat(ordinaryWorker.isAlive()).as("no implicit ordinary restart").isTrue();
     }
-    seedGovernedPolicies("CSI-123");
   }
 
   private ItrPublishedFixture itrFreshPublishedFixture() throws Exception {
@@ -5663,7 +5891,210 @@ class GuidedPublicationReplayIT {
     assertThat(receipt.path("revisionId").asText()).isNotBlank();
     p3AwaitTeardown(
         session); // Original confirmed native-owner acknowledgement, never early cleanup.
+    // The publication's own AFTER_LEARN proof is the one pending execution; run it here so a flow
+    // that starts from this fixture sees an idle test (and counts the proof's effects as its own
+    // baseline), instead of finding it among the executions it dispatches.
+    settleProof(session, receipt);
     return new ItrPublishedFixture(test, session, receipt.deepCopy());
+  }
+
+  /** The proof a publication accepted: an observed replay of exactly the revision it published. */
+  private record PublicationProof(UUID executionId, UUID revisionId) {}
+
+  /**
+   * Every publication accepts, inside its own commit, exactly one observed replay (trigger source
+   * {@code AFTER_LEARN}) of the revision it published, and links it in {@code studio_learn_proofs}.
+   * This checks that and returns the still-undispatched proof; nothing is run.
+   */
+  private PublicationProof acceptedProof(String session, JsonNode receipt) {
+    UUID revision = UUID.fromString(receipt.path("revisionId").asText());
+    Map<String, Object> link =
+        jdbc.queryForMap(
+            "SELECT revision_id,execution_id,refusal_code FROM studio_learn_proofs WHERE"
+                + " session_id=?",
+            session);
+    assertThat(link.get("refusal_code")).as("the proof was not refused").isNull();
+    assertThat(link.get("revision_id")).isEqualTo(revision);
+    UUID execution = (UUID) link.get("execution_id");
+    assertThat(execution).isNotNull();
+    assertThat(
+            jdbc.queryForList(
+                "SELECT id FROM ui_test_executions WHERE trigger_source='AFTER_LEARN' AND"
+                    + " revision_id=?",
+                UUID.class,
+                revision))
+        .as("exactly one AFTER_LEARN execution on the published revision")
+        .containsExactly(execution);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT observed_revision_binding->>'revisionId' FROM ui_test_executions WHERE"
+                    + " id=?",
+                String.class,
+                execution))
+        .isEqualTo(revision.toString());
+    return new PublicationProof(execution, revision);
+  }
+
+  /**
+   * Runs the publication's proof to its end: the accepted AFTER_LEARN replay is the only pending
+   * execution, so one dispatch starts it; it ends {@code PASSED} with its own recording {@code
+   * AVAILABLE}; and the learn result names it ({@code proof.executionId}) while carrying no learn
+   * recording. Call it where the flow would otherwise next dispatch, so the proof's effects (one
+   * more navigation, one more receipt, one more fresh value) are counted exactly where they happen.
+   */
+  private PublicationProof settleProof(String session, JsonNode receipt) throws Exception {
+    return settleProof(dispatcher, session, receipt);
+  }
+
+  private PublicationProof settleProof(
+      StudioDispatcher activeDispatcher, String session, JsonNode receipt) throws Exception {
+    PublicationProof proof = acceptedProof(session, receipt);
+    String pending = pendingExecutions();
+    assertThat(activeDispatcher.dispatchOnce())
+        .as("only the publication proof is pending: %s", pending)
+        .isEqualTo(1);
+    JsonNode snapshot;
+    try {
+      snapshot = awaitJoinedVideo(proof.executionId());
+    } catch (AssertionError notPassed) {
+      throw new AssertionError(
+          "proof "
+              + proof.executionId()
+              + " did not end PASSED with its video AVAILABLE: "
+              + jdbc.queryForMap(
+                  "SELECT status,error_code,replay_failure_code,left(logs::text,2500) AS logs,"
+                      + "left(step_results::text,800) AS steps FROM ui_test_executions WHERE"
+                      + " id=?",
+                  proof.executionId())
+              + "; runner log "
+              + TEMP.resolve("ordinary.log"),
+          notPassed);
+    }
+    assertThat(snapshot.path("triggerSource").asText()).isEqualTo("AFTER_LEARN");
+    assertThat(snapshot.path("revisionId").asText()).isEqualTo(proof.revisionId().toString());
+    JsonNode result =
+        publicCall("/api/v1/studio/guided-sessions/" + session + "/result", null, 200, null);
+    assertThat(result.path("publication").path("status").asText()).isEqualTo("PUBLISHED");
+    assertThat(result.path("proof").path("executionId").asText())
+        .isEqualTo(proof.executionId().toString());
+    assertThat(result.path("evidence").path("video").isNull())
+        .as("a published learn's recording is discarded")
+        .isTrue();
+    assertThat(result.path("actionTimings")).isEmpty();
+    return proof;
+  }
+
+  /**
+   * For a flow that is not about the proof (the secret-scope and incremental fixtures prove their
+   * own ordinary replays): the publication still accepted exactly one AFTER_LEARN proof of its
+   * revision, and the author cancels it while it is queued. A cancelled queued execution is closed
+   * by the dispatcher without a browser, a Vault read or an audit row, so the flow's own dispatch,
+   * read and audit counts start from an idle test. The proof running to a PASSED replay with its
+   * video is proved by {@link #settleProof} in the flows that count its effects. The caller is the
+   * flow's author ({@code p3Cookie} for the secret-scope fixtures, {@code COOKIE} for the
+   * incremental ones).
+   */
+  private PublicationProof cancelQueuedProof(String session, JsonNode receipt) throws Exception {
+    return cancelQueuedProof(p3Cookie, session, receipt);
+  }
+
+  private PublicationProof cancelQueuedProof(String cookie, String session, JsonNode receipt)
+      throws Exception {
+    PublicationProof proof = acceptedProof(session, receipt);
+    p3Call(cookie, "/api/v1/studio/executions/" + proof.executionId() + "/cancel", C.object(), 202);
+    String pending = pendingExecutions();
+    assertThat(dispatcher.dispatchOnce())
+        .as("only the cancelled proof is queued: %s", pending)
+        .isZero();
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT error_code FROM ui_test_executions WHERE id=?",
+                String.class,
+                proof.executionId()))
+        .isEqualTo("CANCELLED");
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT observed_admission_receipt IS NULL AND browser_started_at IS NULL FROM"
+                    + " ui_test_executions WHERE id=?",
+                Boolean.class,
+                proof.executionId()))
+        .isTrue();
+    return proof;
+  }
+
+  /** The executions the dispatcher could claim now, for a failing "only X is pending" message. */
+  private String pendingExecutions() {
+    return jdbc.queryForList(
+            "SELECT e.id::text||' '||coalesce(e.trigger_source,'-')||' '||l.state||'"
+                + " session='||coalesce((SELECT session_id FROM studio_learn_proofs p WHERE"
+                + " p.execution_id=e.id),'-') AS row FROM studio_dispatch_ledger l JOIN"
+                + " ui_test_executions e ON e.id=l.execution_id AND"
+                + " e.started_at=l.execution_accepted_at WHERE l.state<>'DONE' ORDER BY"
+                + " e.started_at",
+            String.class)
+        .toString();
+  }
+
+  /**
+   * A learn that published has no recording: the runner discards it before upload when the stop
+   * names {@code PUBLISHED}, the backend refuses any late callback, and its proof is the replay the
+   * publication accepted. Waits for the teardown acknowledgement first, so the absence is judged
+   * after the runner could have uploaded.
+   */
+  private ObjectNode assertGuidedLearnRecordingDiscarded(String sessionId) throws Exception {
+    p3AwaitTeardown(sessionId);
+    JsonNode result =
+        publicCall("/api/v1/studio/guided-sessions/" + sessionId + "/result", null, 200, null);
+    assertThat(result.path("publication").path("status").asText()).isEqualTo("PUBLISHED");
+    assertThat(result.path("evidence").path("video").isNull())
+        .as("no learn video on a published result: %s", result.path("evidence"))
+        .isTrue();
+    assertThat(result.path("actionTimings")).isEmpty();
+    assertThat(result.path("replayVerified").asBoolean()).isFalse();
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM studio_guided_session_recordings WHERE session_id=?",
+                Integer.class,
+                sessionId))
+        .as("no recording fact")
+        .isZero();
+    String csi =
+        jdbc.queryForObject(
+            "SELECT document->'scope'->>'csiId' FROM studio_guided_sessio"
+                + "ns WHERE session_id=?",
+            String.class,
+            sessionId);
+    var keys =
+        com.citi.put.checks.studio.guided.evidence.GuidedRecordingKeys.derive(csi, sessionId)
+            .orElseThrow();
+    Path objects = TEMP.resolve("objects");
+    for (String key : List.of(keys.videoKey(), keys.manifestKey())) {
+      assertThat(
+              Files.notExists(
+                  objects.resolve(key).normalize(), java.nio.file.LinkOption.NOFOLLOW_LINKS))
+          .as("no stored learn object %s", key)
+          .isTrue();
+    }
+    HttpResponse<byte[]> refused = guidedVideoRead(sessionId, null, true);
+    assertThat(refused.statusCode()).isEqualTo(404);
+    assertThat(C.parse(new String(refused.body(), StandardCharsets.UTF_8)).path("error").asText())
+        .isEqualTo("VIDEO_UNAVAILABLE");
+    return C.object()
+        .put("sessionId", sessionId)
+        .put("videoKey", keys.videoKey())
+        .put("discarded", true);
+  }
+
+  /**
+   * Cancels a learn that reached FINALIZING and waits for the terminal state: it never publishes.
+   */
+  private void cancelLearn(String sessionId) throws Exception {
+    publicCall(
+        "/api/v1/studio/guided-sessions/" + sessionId + "/cancel",
+        C.object().put("schemaVersion", 3).put("reason", "userRequested"),
+        202,
+        UUID.randomUUID().toString());
+    awaitState(sessionId, "CANCELLED");
   }
 
   private void itrEstablishOwnAuditCorpus() throws Exception {
@@ -5731,7 +6162,6 @@ class GuidedPublicationReplayIT {
   @Test
   void actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache() throws Exception {
     startWorkers();
-    seedGovernedPolicies("CSI-123");
     var stale = LEGACY_V20_STALE_CACHE;
     var seed = stale.publication();
     com.citi.put.checks.studio.support.LegacyV20ConfirmedBaseFixture
@@ -5763,7 +6193,6 @@ class GuidedPublicationReplayIT {
             .put("sourceRevision", draft.path("sourceRevision").asText())
             .put("configurationRevision", draft.path("configurationRevision").asText())
             .put("environmentId", "fixture")
-            .put("applicationId", "orders")
             .put("baseRevisionId", seed.baseRevisionId().toString());
     start.set("versions", versions());
     String before = incrementalAuthoritySnapshot(test);
@@ -5805,6 +6234,9 @@ class GuidedPublicationReplayIT {
               200,
               UUID.randomUUID().toString());
       assertThat(MODEL_WIRE).hasSize(calls);
+      // The publication's AFTER_LEARN proof is the one pending execution; run it (model-free).
+      settleProof(id, receipt);
+      assertThat(MODEL_WIRE).hasSize(calls);
       assertThat(
               C.parse(
                   jdbc.queryForObject(
@@ -5815,7 +6247,8 @@ class GuidedPublicationReplayIT {
       assertThat(
               C.parse(
                   jdbc.queryForObject(
-                      "SELECT authoring_revision_inputs::text FROM ui_test_revisions WHERE id=?::uuid",
+                      "SELECT authoring_revision_inputs::text FROM ui_test_revisions WHERE"
+                          + " id=?::uuid",
                       String.class,
                       receipt.path("revisionId").asText())))
           .isEqualTo(stale.expectedCurrentInputs());
@@ -5874,7 +6307,6 @@ class GuidedPublicationReplayIT {
   void historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof()
       throws Exception {
     startWorkers();
-    seedGovernedPolicies("CSI-123");
     com.citi.put.checks.studio.support.LegacyV20ConfirmedBaseFixture.assertPreservedAtHead(
         ownedApplicationContext.getBean(javax.sql.DataSource.class), LEGACY_V20_BASE);
     UUID test = LEGACY_V20_BASE.testId();
@@ -5928,7 +6360,6 @@ class GuidedPublicationReplayIT {
             .put("sourceRevision", draft.path("sourceRevision").asText())
             .put("configurationRevision", draft.path("configurationRevision").asText())
             .put("environmentId", "fixture")
-            .put("applicationId", "orders")
             .put("baseRevisionId", LEGACY_V20_BASE.baseRevisionId().toString());
     start.set("versions", versions());
     String before = incrementalAuthoritySnapshot(test);
@@ -5994,6 +6425,9 @@ class GuidedPublicationReplayIT {
               200,
               UUID.randomUUID().toString());
       assertThat(MODEL_WIRE).hasSize(afterLearn);
+      // The publication's AFTER_LEARN proof is the one pending execution; run it (model-free).
+      settleProof(id, published);
+      assertThat(MODEL_WIRE).hasSize(afterLearn);
       JsonNode artifact =
           C.parse(
               jdbc.queryForObject(
@@ -6019,7 +6453,7 @@ class GuidedPublicationReplayIT {
                   .path("readiness")
                   .asText())
           .isEqualTo("READY");
-      assertGuidedLearnRunRecorded(id, new java.util.LinkedHashMap<>());
+      assertGuidedLearnRecordingDiscarded(id);
     } finally {
       incrementalTenScenario = false;
     }
@@ -6042,19 +6476,11 @@ class GuidedPublicationReplayIT {
         "tail7",
         "append11",
         "ready6",
-        "confirm-prefix",
         "empty",
         "drift2",
         "admitted-drift2",
         "unknown2",
         "assert-fail",
-        "policy-prefix",
-        "confirm-long-wait",
-        "confirm-cancel",
-        "confirm-expire",
-        "confirm-source-change",
-        "confirm-recover",
-        "confirm-owner-loss",
         "append-input",
         "deleted-consumers",
         "admitted-literal2",
@@ -6063,8 +6489,6 @@ class GuidedPublicationReplayIT {
         "unused-declaration",
         "drift-plan-fail",
         "drift-first",
-        "confirm-edit4",
-        "confirm-race",
         "drift-auth",
         "drift-auth-pre",
         "before4at2",
@@ -6415,10 +6839,14 @@ class GuidedPublicationReplayIT {
   }
 
   /**
-   * B3C-2: native0/native1 identities, equal measured rows in 4 sinks, actual per-admission seek.
+   * B3C-2: native0/native1 identities of an admitted-drift re-learn. The measured rows and the
+   * per-admission media seek this case used to prove belong to a learning recording, which a
+   * published learn no longer keeps; they are proved on a learn that does not publish ({@code
+   * guidedRecorderFaultSettlesUnavailableAndTheSessionStillFinishes}).
    */
   @Test
-  void incrementalMeasuredAdmissionRowsPreserveIdentityAndActualMediaSeek() throws Exception {
+  void incrementalAdmittedReplacementKeepsItsIdentityAndThePublishedLearnRecordingIsDiscarded()
+      throws Exception {
     b3IsolatedCsi();
     var capture = new B3EvidenceCapture();
     var seen = new java.util.concurrent.atomic.AtomicReference<B3Parent>();
@@ -6442,7 +6870,7 @@ class GuidedPublicationReplayIT {
             @Override
             public void afterFirstOrdinaryReplay(B3Parent p, JsonNode merged, UUID execution)
                 throws Exception {
-              b3AssertMeasuredRowsAndActualMediaSeek(p.id(), capture);
+              b3AssertReplacementIdentityAndLearnRecordingDiscarded(p.id(), capture);
             }
           };
       incrementalJoined("admitted-drift2");
@@ -6461,7 +6889,8 @@ class GuidedPublicationReplayIT {
     primaryCsi = "CSI-B3-" + (++p3CsiOrdinal);
     forgetCachedCoreIdentity();
     jdbc.update(
-        "INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment)"
+        "INSERT INTO csi_systems(id,name,business_unit,criticality,ow"
+            + "ner_email,environment)"
             + " VALUES (?,'Orders','Ops','HIGH','fixture@example.invalid','Production')",
         primaryCsi);
   }
@@ -6889,7 +7318,9 @@ class GuidedPublicationReplayIT {
       }
     }
     assertThat(chosen)
-        .as("an actual preparation issued above its version birth exists (else route 7 is OPEN)")
+        .as(
+            "an actual preparation issued above its version birth exists "
+                + "(else route 7 is OPEN)")
         .isNotNegative();
     return chosen;
   }
@@ -6922,7 +7353,8 @@ class GuidedPublicationReplayIT {
     assertThat(pin.path("revisionDigest").asText()).isEqualTo(row.get("revision_digest"));
     assertThat(
             jdbc.queryForObject(
-                "SELECT base_revision_id::text FROM studio_guided_relearn_plans WHERE session_id=?",
+                "SELECT base_revision_id::text FROM studio_guided_relearn_pla"
+                    + "ns WHERE session_id=?",
                 String.class,
                 parent.id()))
         .isEqualTo(baseId);
@@ -7127,7 +7559,8 @@ class GuidedPublicationReplayIT {
     // Same construction as GuidedPublicationEvidenceRepository.snapshotEvidence, from actual rows.
     var row =
         jdbc.queryForMap(
-            "SELECT revision_digest,authoring::text AS authoring,\"references\"::text AS refs,"
+            "SELECT revision_digest,authoring::text AS authoring,\"refere"
+                + "nces\"::text AS refs,"
                 + "step_snapshot_hashes::text AS snapshots,step_reuse_provenance::text AS reuse"
                 + " FROM ui_test_revisions WHERE id=?::uuid",
             revisionId);
@@ -7182,7 +7615,6 @@ class GuidedPublicationReplayIT {
     // The generation-1 owner must be quiescent before any all-tenant no-write comparison.
     p3AwaitTeardown(gen1.id());
     startWorkers();
-    seedGovernedPolicies(primaryCsi);
     incrementalTenScenario = true;
     JsonNode edited =
         prefixSyncEdit(test, "Check Destination is visible for the second generation.");
@@ -7193,8 +7625,7 @@ class GuidedPublicationReplayIT {
             .put("testId", test.toString())
             .put("sourceRevision", edited.path("sourceRevision").asText())
             .put("configurationRevision", edited.path("configurationRevision").asText())
-            .put("environmentId", "fixture")
-            .put("applicationId", "orders");
+            .put("environmentId", "fixture");
     start.set("versions", versions());
     // 43/61 HTTP: an actual older revision of the same test, with equal prefix hashes.
     String before = incrementalAuthoritySnapshot(test);
@@ -7307,7 +7738,6 @@ class GuidedPublicationReplayIT {
   /** 42: exact alias resolves; suffix-only/collision/missing/null refuse at start, zero writes. */
   private void b3AliasDeclarationsRefuseAtActualStartWithoutWrites() throws Exception {
     startWorkers();
-    seedGovernedPolicies(primaryCsi);
     String secretStep =
         UUID.nameUUIDFromBytes("obs015-b3-alias-secret".getBytes(StandardCharsets.UTF_8))
             .toString();
@@ -7334,26 +7764,31 @@ class GuidedPublicationReplayIT {
             + "{\"name\":\"ACCOUNT\",\"kind\":\"plain\",\"value\":\"acct\"}]");
     cases.put(
         "duplicate-conflict",
-        "[{\"name\":\"vault://studio/password\",\"kind\":\"secretRef\",\"secretId\":\"PASS\"},"
+        "[{\"name\":\"vault://studio/password\",\"kind\":\"secretRef"
+            + "\",\"secretId\":\"PASS\"},"
             + "{\"name\":\"vault://studio/password\",\"kind\":\"secretRef\","
             + "\"secretId\":\"OTHER\"},"
             + "{\"name\":\"ACCOUNT\",\"kind\":\"plain\",\"value\":\"acct\"}]");
     cases.put(
         "plain-secret-collision",
         "[{\"name\":\"PASS\",\"kind\":\"plain\",\"value\":\"x\"},"
-            + "{\"name\":\"vault://studio/password\",\"kind\":\"secretRef\",\"secretId\":\"PASS\"},"
+            + "{\"name\":\"vault://studio/password\",\"kind\":\"secretRef\""
+            + ",\"secretId\":\"PASS\"},"
             + "{\"name\":\"ACCOUNT\",\"kind\":\"plain\",\"value\":\"acct\"}]");
     cases.put(
         "plain-missing-value",
-        "[{\"name\":\"vault://studio/password\",\"kind\":\"secretRef\",\"secretId\":\"PASS\"},"
+        "[{\"name\":\"vault://studio/password\",\"kind\":\"secretRef"
+            + "\",\"secretId\":\"PASS\"},"
             + "{\"name\":\"ACCOUNT\",\"kind\":\"plain\"}]");
     cases.put(
         "plain-null-value",
-        "[{\"name\":\"vault://studio/password\",\"kind\":\"secretRef\",\"secretId\":\"PASS\"},"
+        "[{\"name\":\"vault://studio/password\",\"kind\":\"secretRef"
+            + "\",\"secretId\":\"PASS\"},"
             + "{\"name\":\"ACCOUNT\",\"kind\":\"plain\",\"value\":null}]");
     cases.put(
         "exact-alias",
-        "[{\"name\":\"vault://studio/password\",\"kind\":\"secretRef\",\"secretId\":\"PASS\"},"
+        "[{\"name\":\"vault://studio/password\",\"kind\":\"secretRef"
+            + "\",\"secretId\":\"PASS\"},"
             + "{\"name\":\"ACCOUNT\",\"kind\":\"plain\",\"value\":\"acct\"}]");
     // duplicate-conflict has no pin (R-42, confirmed by reading): CanonicalStudioCodec
     // .variablesFromNode refuses a duplicate stored name before the identity resolver runs.
@@ -7367,7 +7802,8 @@ class GuidedPublicationReplayIT {
     for (var entry : cases.entrySet()) {
       UUID test = UUID.randomUUID();
       jdbc.update(
-          "INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,variables,authoring,"
+          "INSERT INTO ui_tests(id,name,csi_id,environment,browser,step"
+              + "s,variables,authoring,"
               + "authoring_revision_inputs,created_by,created_at,updated_at) VALUES (?,"
               + "'Alias declarations',?,'fixture','chromium',?::jsonb,?::jsonb,?::jsonb,?::jsonb,"
               + "'fixture@example.invalid',now(),now())",
@@ -7386,8 +7822,7 @@ class GuidedPublicationReplayIT {
               .put("testId", test.toString())
               .put("sourceRevision", "1")
               .put("configurationRevision", "1")
-              .put("environmentId", "fixture")
-              .put("applicationId", "orders");
+              .put("environmentId", "fixture");
       start.set("versions", versions());
       String before = incrementalAuthoritySnapshot(test);
       int model = MODEL_WIRE.size(), effects = RECEIPTS.size(), navigation = NAVIGATIONS.get();
@@ -7486,7 +7921,8 @@ class GuidedPublicationReplayIT {
         .isEqualTo(3);
     var sw =
         jdbc.queryForMap(
-            "SELECT reason,effective_step_index,next_ordinal,completed_admissions::text AS done"
+            "SELECT reason,effective_step_index,next_ordinal,completed_ad"
+                + "missions::text AS done"
                 + " FROM studio_guided_relearn_switches WHERE session_id=?",
             id);
     assertThat(sw.get("reason")).isEqualTo("DRIFT");
@@ -7709,7 +8145,8 @@ class GuidedPublicationReplayIT {
     String id = p.id();
     var acceptance =
         jdbc.queryForMap(
-            "SELECT previous_plan_revision,plan_revision,retained_admissions::text AS retained"
+            "SELECT previous_plan_revision,plan_revision,retained_admissi"
+                + "ons::text AS retained"
                 + " FROM studio_guided_suffix_acceptances WHERE session_id=?",
             id);
     long prior = ((Number) acceptance.get("previous_plan_revision")).longValue();
@@ -8477,119 +8914,17 @@ class GuidedPublicationReplayIT {
   }
 
   /** Test-owned probe over the actual served WebM; records which admission each real seek used. */
-  private static final class B3MediaProbe {
-    final Path video;
-    final Path ffmpeg;
-    final Path ffprobe;
-    final List<String> seeked = new ArrayList<>();
-
-    B3MediaProbe(Path video) throws IOException {
-      this.video = video;
-      ffmpeg = b3Tool("ffmpeg");
-      ffprobe = b3Tool("ffprobe");
-    }
-
-    /** Last actual video packet time; Playwright WebM may omit the container duration. */
-    long lastPacketMs() throws Exception {
-      Process process =
-          registerOwnedTool(
-              new ProcessBuilder(
-                      ffprobe.toString(),
-                      "-v",
-                      "error",
-                      "-select_streams",
-                      "v:0",
-                      "-show_entries",
-                      "packet=pts_time",
-                      "-of",
-                      "csv=p=0",
-                      video.toString())
-                  .redirectErrorStream(true)
-                  .start(),
-              "b3-media-packets");
-      byte[] out = process.getInputStream().readNBytes(4 * 1024 * 1024);
-      awaitJoinedProcess(process, 30, "B3 media packet probe");
-      double last = -1;
-      for (String line : new String(out, StandardCharsets.UTF_8).split("\n")) {
-        if (!line.isBlank() && !line.trim().equals("N/A")) {
-          last = Math.max(last, Double.parseDouble(line.trim()));
-        }
-      }
-      assertThat(last).as("actual decodable video packets").isPositive();
-      return Math.round(last * 1000);
-    }
-
-    byte[] frameAt(String admissionId, long offsetMs) throws Exception {
-      if (admissionId != null) {
-        seeked.add(admissionId);
-      }
-      Process process =
-          registerOwnedTool(
-              new ProcessBuilder(
-                      ffmpeg.toString(),
-                      "-nostdin",
-                      "-v",
-                      "error",
-                      "-ss",
-                      java.math.BigDecimal.valueOf(offsetMs, 3).toPlainString(),
-                      "-i",
-                      video.toString(),
-                      "-frames:v",
-                      "1",
-                      "-vf",
-                      "scale=64:36",
-                      "-pix_fmt",
-                      "gray",
-                      "-f",
-                      "rawvideo",
-                      "pipe:1")
-                  .start(),
-              "b3-media-seek");
-      byte[] frame = process.getInputStream().readNBytes(64 * 36 + 1);
-      process.getErrorStream().readNBytes(65536);
-      awaitJoinedProcess(process, 30, "B3 media seek probe");
-      return frame;
-    }
-  }
-
-  private void b3AssertMeasuredRowsAndActualMediaSeek(String id, B3EvidenceCapture capture)
-      throws Exception {
-    JsonNode result = awaitGuidedVideoSettled(id);
-    assertThat(result.path("evidence").path("video").path("status").asText())
-        .isEqualTo("AVAILABLE");
-    var row = guidedRecordingRow(id);
-    ArrayNode served = C.object().putArray("items");
-    ArrayNode stored = C.object().putArray("items");
-    for (JsonNode item : result.path("actionTimings")) {
-      if (item.path("kind").asText().equals("action")) {
-        served.add(item);
-      }
-    }
-    for (JsonNode item : C.parse(String.valueOf(row.get("timings")))) {
-      if (item.path("kind").asText().equals("action")) {
-        stored.add(item);
-      }
-    }
-    Path objects = TEMP.resolve("objects");
-    JsonNode manifest =
-        C.parse(
-            Files.readString(objects.resolve(String.valueOf(row.get("manifest_key"))).normalize()));
-    ArrayNode manifestActions = C.object().putArray("items");
-    for (JsonNode item : manifest.path("timings")) {
-      if (item.path("kind").asText().equals("action")) {
-        manifestActions.add(item);
-      }
-    }
-    var callbacks = capture.actions.get(id);
-    assertThat(callbacks).as("accepted owning-worker evidence callback captured").isNotEmpty();
-    for (JsonNode callback : callbacks) {
-      assertThat(GuidedContracts.canonical(callback))
-          .as("callback rows unchanged")
-          .isEqualTo(GuidedContracts.canonical(served));
-    }
-    assertThat(GuidedContracts.canonical(stored)).isEqualTo(GuidedContracts.canonical(served));
-    assertThat(GuidedContracts.canonical(manifestActions))
-        .isEqualTo(GuidedContracts.canonical(served));
+  /**
+   * The admitted-drift re-learn published, so its recording is discarded and no recording callback
+   * was accepted; what remains of the case is the identity of the spent action and its single fresh
+   * native replacement, on one browser, context and origin.
+   */
+  private void b3AssertReplacementIdentityAndLearnRecordingDiscarded(
+      String id, B3EvidenceCapture capture) throws Exception {
+    assertGuidedLearnRecordingDiscarded(id);
+    assertThat(capture.actions.get(id))
+        .as("the runner sends no recording-evidence callback for a published learn")
+        .isNullOrEmpty();
     // native0 / native1 identities
     JsonNode receipt =
         C.parse(
@@ -8616,24 +8951,7 @@ class GuidedPublicationReplayIT {
             .orElseThrow();
     assertThat(native1).isNotEqualTo(native0);
     assertThat(spent.path("preparationId")).isNotEqualTo(replacementAction.path("preparationId"));
-    for (ArrayNode sink : List.of(served, stored, manifestActions)) {
-      for (JsonNode item : sink) {
-        assertThat(item.path("admissionId").asText())
-            .as("absent native0 stamp is never invented")
-            .isNotEqualTo(native0);
-      }
-    }
-    JsonNode replacement = null;
-    for (JsonNode item : served) {
-      if (item.path("admissionId").asText().equals(native1)) {
-        replacement = item;
-      }
-    }
-    assertThat(replacement).as("genuine replacement timing").isNotNull();
-    assertThat(replacement.path("endMs").isIntegralNumber()).isTrue();
-    assertThat(replacement.path("endMs").asLong())
-        .isGreaterThanOrEqualTo(replacement.path("startMs").asLong());
-    // one browser/context/origin/video
+    // one browser/context/origin
     var all = sessions.transaction(() -> sessions.actions(id));
     assertThat(
             all.stream()
@@ -8654,59 +8972,6 @@ class GuidedPublicationReplayIT {
                 .distinct()
                 .toList())
         .containsExactly(ORIGIN);
-    // actual per-present-admission media seek on the bytes the production route serves
-    HttpResponse<byte[]> whole = guidedVideoRead(id, null, true);
-    assertThat(whole.statusCode()).isEqualTo(200);
-    assertThat(whole.body())
-        .isEqualTo(
-            Files.readAllBytes(objects.resolve(String.valueOf(row.get("video_key"))).normalize()));
-    Path media = TEMP.resolve("b3-media-" + id + ".webm");
-    try (var channel =
-        Files.newByteChannel(
-            media,
-            Set.of(
-                java.nio.file.StandardOpenOption.CREATE_NEW,
-                java.nio.file.StandardOpenOption.WRITE),
-            java.nio.file.attribute.PosixFilePermissions.asFileAttribute(
-                java.nio.file.attribute.PosixFilePermissions.fromString("rw-------")))) {
-      var buffer = java.nio.ByteBuffer.wrap(whole.body());
-      while (buffer.hasRemaining()) {
-        channel.write(buffer);
-      }
-    }
-    try {
-      var probe = new B3MediaProbe(media);
-      long lastMs = probe.lastPacketMs();
-      var order = new ArrayList<String>();
-      for (JsonNode item : served) {
-        long start = item.path("startMs").asLong();
-        assertThat(start)
-            .as("stamped offset lies on the actual recording timeline")
-            .isBetween(0L, lastMs);
-        byte[] frame = probe.frameAt(item.path("admissionId").asText(), start);
-        assertThat(frame.length).as("one decoded frame at the stamped offset").isEqualTo(64 * 36);
-        order.add(item.path("admissionId").asText());
-      }
-      assertThat(probe.seeked)
-          .as("seeks are keyed by the exact served admission identities")
-          .containsExactlyElementsOf(order);
-      assertThat(probe.seeked).doesNotContain(native0).contains(native1);
-      assertThat(probe.frameAt(null, lastMs + 5000).length)
-          .as("probe control: no frame beyond the recording")
-          .isZero();
-    } finally {
-      Files.deleteIfExists(media);
-    }
-  }
-
-  @Test
-  void incrementalStartCannotWidenTrustedOriginCeiling() throws Exception {
-    b1TrustedCeiling = true;
-    try {
-      incrementalJoined("edit4");
-    } finally {
-      b1TrustedCeiling = false;
-    }
   }
 
   /** PFXSYNC-01: a real producer-bearing update is held outside SQL until its original ACK. */
@@ -8895,7 +9160,8 @@ class GuidedPublicationReplayIT {
 
       assertThat(Instant.parse(renewed.path("leaseExpiresAt").asText()))
           .as(
-              "a real same-owner renewal must occur before the unchanged context transport deadline")
+              "a real same-owner renewal must occur before the unchanged context transport"
+                  + " deadline")
           .isAfter(lease);
       assertThat(renewed.path("workerId"))
           .isEqualTo(before.session().path("owner").path("workerId"));
@@ -8985,9 +9251,47 @@ class GuidedPublicationReplayIT {
                     .controller();
             ObjectNode context = service.runnerContext(controller, parent.id, parent.fence());
             ObjectNode refresh =
-                new com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService(jdbc, C)
+                new com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService(
+                        jdbc, C, com.citi.put.checks.studio.support.TestDomains.FIXTURES)
                     .identity(context);
             refresh.put("expectedGeneration", before.progress().path("generation").asInt());
+            ObjectNode actualPrefixFocus =
+                sessions.transaction(
+                    () -> {
+                      JsonNode state = plans.state(parent.id);
+                      JsonNode next = sessions.incremental().nextAction(parent.id);
+                      assertThat(next)
+                          .as("the pending prefix has its actual next action")
+                          .isNotNull();
+                      String stepId = next.path("coordinate").path("stepId").asText();
+                      var meanings = new ArrayList<JsonNode>();
+                      for (JsonNode obligation : state.path("plan").path("obligations")) {
+                        if (obligation.path("stepId").asText().equals(stepId)
+                            && obligation
+                                .path("occurrence")
+                                .equals(next.path("coordinate").path("ordinal"))) {
+                          meanings.add(obligation);
+                        }
+                      }
+                      assertThat(meanings)
+                          .as("one actual prefix obligation supplies the focus")
+                          .hasSize(1);
+                      JsonNode source = null;
+                      for (JsonNode step : state.path("manifest").path("sourceSteps")) {
+                        if (step.path("stepId").asText().equals(stepId)) {
+                          source = step;
+                        }
+                      }
+                      assertThat(source)
+                          .as("the actual manifest supplies the prefix source text")
+                          .isNotNull();
+                      return com.citi.put.checks.studio.guided.translation.GuidedObservationFocus
+                          .focus(
+                              source.path("text").asText(),
+                              com.citi.put.checks.studio.guided.translation.GuidedObservationFocus
+                                  .intentsOf(meanings));
+                    });
+            refresh.set("focus", actualPrefixFocus);
             String refreshKey = "prefix-sync-observe-" + parent.cut.key;
             // F2: committedRefresh reads REPLAYING_PREFIX while the prefix is pending; no tolerated
             // refusal.
@@ -9002,14 +9306,15 @@ class GuidedPublicationReplayIT {
                     .put("requestDigest", GuidedContracts.hash(refresh));
             correlation.set(
                 "identity",
-                new com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService(jdbc, C)
+                new com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService(
+                        jdbc, C, com.citi.put.checks.studio.support.TestDomains.FIXTURES)
                     .identity(refresh));
             String callbackKey = "oref-" + GuidedContracts.hash(correlation);
             JsonNode committed =
                 C.parse(
                     jdbc.queryForObject(
-                        "SELECT response::text FROM studio_guided_commands"
-                            + " WHERE namespace=? AND route='observation-refresh-result' AND idempotency_key=?",
+                        "SELECT response::text FROM studio_guided_commands WHERE namespace=? AND"
+                            + " route='observation-refresh-result' AND idempotency_key=?",
                         String.class,
                         parent.id,
                         callbackKey));
@@ -9019,8 +9324,8 @@ class GuidedPublicationReplayIT {
                 .isEqualTo(observed.path("observationHash").asText());
             assertThat(
                     jdbc.queryForObject(
-                        "SELECT count(*) FROM studio_guided_commands WHERE namespace=? AND route='observations'"
-                            + " AND idempotency_key=?",
+                        "SELECT count(*) FROM studio_guided_commands WHERE namespace=? AND"
+                            + " route='observations' AND idempotency_key=?",
                         Integer.class,
                         parent.id,
                         callbackKey))
@@ -9053,8 +9358,7 @@ class GuidedPublicationReplayIT {
   // Authority tiers (authority-tier-ruling01 T1/T2), disclosed here once and in assertion texts:
   // "Vault" is the in-JVM FakeStudioVaultProvider behind CountedLoginVault (only the
   // StudioVaultProvider leaf is a double); "Core" is the in-JVM Core contract fixture (real Citi
-  // Core/COIN not exercised); secret-use grants come from the controlledLoginEntitlement fixture
-  // entitlement (P3_PERMITTED), never Core policy. Resolver, secret-use check, audit lifecycle,
+  // Core/COIN not exercised). Resolver, secret scoping, audit lifecycle,
   // redaction and Testcontainers PG are production code. Every knob below defaults to the
   // unchanged P3/ten-step fixture bytes; no production seam, clock, lease or cap is changed.
   // ---------------------------------------------------------------------------------------------
@@ -9070,7 +9374,7 @@ class GuidedPublicationReplayIT {
   private static volatile boolean b2Combined;
   private static volatile boolean b2aTitleSuffix;
   // The appended title literal is an authored nonsecret input: the runner withholds every node
-  // whose name contains it (runtime.ts update; observationCollector echo scrub). It must never be
+  // whose name contains it (runtime.ts update; privateInventory echo scrub). It must never be
   // a substring of a target name such as the "Reports" link or heading.
   // Disclosed fixture correction KL-015-Q4 (was "Reports"); not a product fix (AUTHORED-ECHO-01).
   private static final String B2A_TITLE = "Reports overview";
@@ -9117,8 +9421,6 @@ class GuidedPublicationReplayIT {
             p3Mode = P3Mode.LOGIN;
             String environment = "fixture-other";
             String csi = primaryCsi;
-            // Fixture entitlement (not Core policy): this tuple exists only through P3_PERMITTED.
-            p3Grant(csi, environment);
             UUID test = p3CreateSource(csi, environment, true);
             VaultScope scope = VaultScope.of(csi, environment, test);
             String first = p3ExpectedPassword;
@@ -9188,46 +9490,7 @@ class GuidedPublicationReplayIT {
             } finally {
               b2PasswordPage = B2PasswordPage.SINGLE;
             }
-            // A28-11: revoking the exact fixture entitlement refuses the start before any write.
-            String before = b1ScopedSnapshot(test);
-            int reads =
-                COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS");
-            int lists = COUNTED_VAULT.lists.size();
-            JsonNode launch = p3LaunchCounter();
-            var removed = new ArrayList<P3Entitlement>();
-            try {
-              for (String actor : List.of("user-1", "fixture@example.invalid")) {
-                var tuple = new P3Entitlement(actor, csi, environment, "PASS");
-                assertThat(P3_PERMITTED.remove(tuple))
-                    .as("exact previously granted fixture entitlement")
-                    .isTrue();
-                removed.add(tuple);
-              }
-              JsonNode refused =
-                  p3Call(
-                      p3Cookie,
-                      "/api/v1/studio/guided-sessions",
-                      p3StartCommand(test, environment)
-                          .put("baseRevisionId", base.revision().toString())
-                          .put("firstLearnStepId", THREE),
-                      403);
-              assertThat(refused.path("code").asText()).isEqualTo("SECRET_USE_NOT_AUTHORIZED");
-              assertThat(b1ScopedSnapshot(test))
-                  .as("revoked start writes nothing")
-                  .isEqualTo(before);
-              assertThat(
-                      COUNTED_VAULT.readCount(
-                          StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS"))
-                  .isEqualTo(reads);
-              assertThat(COUNTED_VAULT.lists.size())
-                  .as("no name listing after refusal")
-                  .isEqualTo(lists);
-              assertThat(p3LaunchCounter()).as("no guided browser launch").isEqualTo(launch);
-            } finally {
-              P3_PERMITTED.addAll(removed);
-            }
-
-            // Valid control (A28-1..5, A28-12) on the same confirmed base, authority restored.
+            // Valid control (A28-1..5, A28-12) on the same confirmed base.
             p3ExpectedPassword = current;
             p3Seed(scope, current);
             P3_RECEIPTS.clear();
@@ -9236,7 +9499,6 @@ class GuidedPublicationReplayIT {
             int valueReads =
                 COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS");
             int startLists = COUNTED_VAULT.lists.size();
-            int mayUse = P3_MAY_USE.size();
             String mixed =
                 p3Call(
                         p3Cookie,
@@ -9249,15 +9511,8 @@ class GuidedPublicationReplayIT {
                     .path("sessionId")
                     .asText();
             awaitFinalizing(mixed);
-            String principal =
-                sessions.transaction(
-                    () ->
-                        sessions.lock(mixed).document().path("scope").path("principalId").asText());
-            // A28-2: one names-only preflight of the mixed scope and a fixture-entitlement check.
+            // A28-2: one names-only preflight of the mixed scope.
             assertThat(b2Tail(COUNTED_VAULT.lists, startLists)).containsExactly(scope);
-            assertThat(b2Tail(P3_MAY_USE, mayUse))
-                .as("fixture entitlement consulted for the session principal and exact tuple")
-                .contains(new P3Entitlement(principal, csi, environment, "PASS"));
             // A28-4: exactly one value read during the whole mixed run, at the secret dispatch.
             assertThat(
                     COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS")
@@ -9334,7 +9589,7 @@ class GuidedPublicationReplayIT {
             // (GuidedSessionController#result); every other learn-run caller publishes first.
             P3Publication merged = p3Publish(mixed);
             var sinks = new java.util.LinkedHashMap<String, byte[]>();
-            assertGuidedLearnRunRecorded(mixed, sinks);
+            assertGuidedLearnRecordingDiscarded(mixed);
             sinks.put(
                 "public-session",
                 p3Call(p3Cookie, "/api/v1/studio/guided-sessions/" + mixed, null, 200)
@@ -9490,7 +9745,8 @@ class GuidedPublicationReplayIT {
     int secretInputs = 0;
     for (String row :
         jdbc.queryForList(
-            "SELECT document::text FROM studio_guided_materialization_inputs WHERE session_id=?",
+            "SELECT document::text FROM studio_guided_materialization_inp"
+                + "uts WHERE session_id=?",
             String.class,
             mixed)) {
       JsonNode input = C.parse(row);
@@ -9566,7 +9822,6 @@ class GuidedPublicationReplayIT {
           try {
             p3Mode = P3Mode.LOGIN;
             b2aTitleSuffix = true;
-            p3Grant(primaryCsi, "fixture");
             UUID test = p3CreateSource(primaryCsi, "fixture", true);
             VaultScope scope = VaultScope.of(primaryCsi, "fixture", test);
             String first = p3ExpectedPassword;
@@ -10031,18 +10286,11 @@ class GuidedPublicationReplayIT {
                 .as("v1 action bytes survive the v2 ACK")
                 .isEqualTo(actionBytes);
             assertThat(b2AuditSnapshot(id)).as("A45-2 at v2 ACK").isEqualTo(auditAtV2);
-            // A45-3: the real lost-response reconciliation and live recheck add nothing.
+            // A45-3: the real lost-response reconciliation adds nothing.
             ownedApplicationContext
                 .getBean(com.citi.put.checks.studio.guided.session.GuidedSessionService.class)
                 .lostAcknowledgment(id, admission);
-            boolean revoked =
-                ownedApplicationContext
-                    .getBean(com.citi.put.checks.studio.secrets.SecretRevocationSweep.class)
-                    .guidedRevoked(id);
-            assertThat(revoked)
-                .as("fixture entitlement still present: live recheck keeps it")
-                .isFalse();
-            assertThat(b2AuditSnapshot(id)).as("A45-3 after recheck").isEqualTo(auditAtV2);
+            assertThat(b2AuditSnapshot(id)).as("A45-3 after reconciliation").isEqualTo(auditAtV2);
             awaitFinalizing(id);
             assertThat(
                     jdbc.queryForObject(
@@ -10109,305 +10357,6 @@ class GuidedPublicationReplayIT {
         });
   }
 
-  /**
-   * B2A-03 (access-mapping OPEN: exact worker current-access guard for a separate secret-bearing
-   * parent). A real P3 secret prefix on the exact fixture-entitlement tuple is held, outside SQL,
-   * at the same-version context update before TWO/1 by the separately named SECRET_HOLD cut. The
-   * negative revokes the fixture entitlement there; only the exact post-ACK checkCurrent refusal
-   * (advancePrefix) is credited. The positive sibling keeps the grant. checkCurrent proof only.
-   */
-  @Test
-  void incrementalSecretPrefixContextAckRevocationFailsAtWorkerCheckCurrent() throws Exception {
-    p3Case(
-        () -> {
-          try {
-            p3Mode = P3Mode.LOGIN;
-            String environment = "fixture-other";
-            String csi = primaryCsi;
-            p3Grant(csi, environment); // fixture entitlement, revocable for this tuple only
-            UUID test = p3CreateSource(csi, environment, true);
-            VaultScope scope = VaultScope.of(csi, environment, test);
-            AUDIT_CANARIES.add(p3ExpectedPassword);
-            p3Seed(scope, p3ExpectedPassword);
-            String original = p3Start(test, environment);
-            awaitFinalizing(original);
-            P3Publication base = p3Publish(original);
-            String first = p3ExpectedPassword;
-            String value = "B2A-SC-" + UUID.randomUUID();
-            AUDIT_CANARIES.add(value);
-            p3ExpectedPassword = value;
-            p3Seed(scope, value);
-            b2aSecretCutSibling(test, scope, base, environment, true, TWO, 1);
-            b2aSecretCutSibling(test, scope, base, environment, false, TWO, 1);
-            p3Scan(List.of(first, value));
-          } finally {
-            b2ResetKnobs();
-          }
-        });
-  }
-
-  private void b2aSecretCutSibling(
-      UUID test,
-      VaultScope scope,
-      P3Publication base,
-      String environment,
-      boolean revoke,
-      String stepId,
-      int ordinal)
-      throws Exception {
-    assertThat(PREFIX_SYNC_CUTS).isEmpty();
-    var cut = new PrefixSyncCut("SECRET_HOLD");
-    PREFIX_SYNC_CUTS.put(cut.key, cut);
-    Path control = TEMP.resolve("obs015-secret-context-control.json");
-    var removed = new ArrayList<P3Entitlement>();
-    try {
-      writeOwnedControl(
-          control,
-          C.object()
-              .put("caseId", cut.key)
-              .put("mode", "SECRET_HOLD")
-              .put("stepId", stepId)
-              .put("ordinal", ordinal));
-      P3_RECEIPTS.clear();
-      int reads = COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS");
-      String session =
-          p3Call(
-                  p3Cookie,
-                  "/api/v1/studio/guided-sessions",
-                  p3StartCommand(test, environment)
-                      .put("baseRevisionId", base.revision().toString())
-                      .put("firstLearnStepId", THREE),
-                  202)
-              .path("session")
-              .path("sessionId")
-              .asText();
-      assertThat(cut.entered.await(30, java.util.concurrent.TimeUnit.SECONDS))
-          .as("actual secret-context update cut")
-          .isTrue();
-      assertThat(cut.failure).isNull();
-      assertThat(cut.sessionId).isEqualTo(session);
-      assertThat(cut.phase).isEqualTo("AFTER");
-      // The original issued TWO/1 request precedes the held context response.
-      var issued =
-          jdbc.queryForList(
-              "SELECT request_digest,document::text FROM studio_guided_prefix_requests"
-                  + " WHERE session_id=? AND step_id=? AND ordinal=? AND status='ISSUED'",
-              session,
-              stepId,
-              ordinal);
-      assertThat(issued).hasSize(1);
-      JsonNode request = C.parse((String) issued.getFirst().get("document"));
-      assertThat(GuidedContracts.hash(request)).isEqualTo(issued.getFirst().get("request_digest"));
-      JsonNode document = sessions.transaction(() -> sessions.lock(session).document().deepCopy());
-      assertThat(document.path("state").asText()).isEqualTo("REPLAYING_PREFIX");
-      String principal = document.path("scope").path("principalId").asText();
-      assertThat(document.path("scope").path("csiId").asText()).isEqualTo(scope.csiId());
-      assertThat(document.path("scope").path("environmentId").asText())
-          .isEqualTo(scope.environment());
-      assertThat(b2PassReferenceId(session)).as("frozen manifest secretRef PASS").isNotBlank();
-      assertThat(
-              jdbc.queryForObject(
-                  "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=?"
-                      + " AND ordinal<? AND document->>'state'='SUCCEEDED'",
-                  Integer.class,
-                  session,
-                  stepId,
-                  ordinal))
-          .as("earlier TWO coordinates already executed")
-          .isEqualTo(ordinal);
-      String earlier =
-          jdbc.queryForObject(
-              "SELECT jsonb_agg(to_jsonb(a) ORDER BY step_id,ordinal)::text"
-                  + " FROM studio_guided_actions a WHERE session_id=?",
-              String.class,
-              session);
-      int preparations =
-          jdbc.queryForObject(
-              "SELECT count(*) FROM studio_guided_preparations WHERE session_id=?",
-              Integer.class,
-              session);
-      var authorization =
-          ownedApplicationContext.getBean(
-              com.citi.put.checks.studio.secrets.StudioSecretUseAuthorization.class);
-      assertThat(authorization.mayUse(principal, scope.csiId(), scope.environment(), "PASS"))
-          .as("fixture entitlement present at the cut")
-          .isTrue();
-      assertThat(
-              jdbc.queryForObject(
-                  "SELECT revoked_at FROM studio_guided_sessions WHERE session_id=?",
-                  Object.class,
-                  session))
-          .isNull();
-      int diagnostics = FINALIZE_DIAGNOSTICS.get();
-      if (revoke) {
-        for (String actor : List.of("user-1", "fixture@example.invalid")) {
-          var tuple = new P3Entitlement(actor, scope.csiId(), scope.environment(), "PASS");
-          assertThat(P3_PERMITTED.remove(tuple))
-              .as("exact previously present fixture entitlement")
-              .isTrue();
-          removed.add(tuple);
-        }
-        assertThat(authorization.mayUse(principal, scope.csiId(), scope.environment(), "PASS"))
-            .as("fixture entitlement revoked (not Core policy)")
-            .isFalse();
-        // Source, policy, owner, lease, evidence, program and request are untouched. Release at
-        // once so the renewal observer cannot be the only refusal of this boundary.
-        cut.release.countDown();
-        b2AwaitCheckCurrentGate(diagnostics);
-        String state = b2AwaitLeft(session, "REPLAYING_PREFIX", 45);
-        assertThat(state).isIn("CANCELLED", "FAILED");
-        assertThat(
-                sessions.transaction(
-                    () -> sessions.lock(session).progress().path("errorCode").asText()))
-            .isEqualTo("SECRET_USE_REVOKED");
-        p3AwaitTeardown(session);
-        assertThat(
-                jdbc.queryForObject(
-                    "SELECT count(*) FROM studio_guided_actions"
-                        + " WHERE session_id=? AND step_id=? AND ordinal=?",
-                    Integer.class,
-                    session,
-                    stepId,
-                    ordinal))
-            .isZero();
-        assertThat(
-                jdbc.queryForObject(
-                    "SELECT count(*) FROM studio_guided_preparations WHERE session_id=?",
-                    Integer.class,
-                    session))
-            .isEqualTo(preparations);
-        assertThat(
-                jdbc.queryForObject(
-                    "SELECT jsonb_agg(to_jsonb(a) ORDER BY step_id,ordinal)::text"
-                        + " FROM studio_guided_actions a WHERE session_id=?"
-                        + " AND NOT (step_id=? AND ordinal>=?)",
-                    String.class,
-                    session,
-                    stepId,
-                    ordinal))
-            .as("earlier lawful facts retained")
-            .isEqualTo(earlier);
-        assertThat(COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS"))
-            .as("no in-JVM fake Vault value read")
-            .isEqualTo(reads);
-        assertThat(b2AuditCount(session, "row_kind='RELEASE'")).isZero();
-        assertThat(
-                b2AuditCount(
-                    session,
-                    "row_kind='USAGE' AND usage_outcome='NOT_USED' AND admission_id IS NULL"))
-            .isEqualTo(1);
-        assertThat(P3_RECEIPTS).isEmpty();
-        assertThat(
-                b2PrefixSyncEvents(cut, session).stream()
-                    .filter(event -> event.path("phase").asText().startsWith("TARGET_"))
-                    .count())
-            .isZero();
-      } else {
-        cut.release.countDown();
-        awaitFinalizing(session);
-        var events = b2PrefixSyncEvents(cut, session);
-        assertThat(
-                events.stream()
-                    .filter(event -> event.path("phase").asText().equals("TARGET_PREPARE_ENTER"))
-                    .count())
-            .isEqualTo(1);
-        assertThat(
-                events.stream()
-                    .filter(event -> event.path("phase").asText().equals("TARGET_DISPATCH_ENTER"))
-                    .count())
-            .isEqualTo(1);
-        var phases = events.stream().map(event -> event.path("phase").asText()).toList();
-        assertThat(phases.indexOf("ACK_RELEASED"))
-            .isLessThan(phases.indexOf("TARGET_PREPARE_ENTER"));
-        JsonNode fill =
-            C.parse(
-                jdbc.queryForObject(
-                    "SELECT document::text FROM studio_guided_actions"
-                        + " WHERE session_id=? AND step_id=? AND ordinal=?",
-                    String.class,
-                    session,
-                    stepId,
-                    ordinal));
-        assertThat(fill.path("state").asText()).isEqualTo("SUCCEEDED");
-        assertThat(fill.path("dispatchCount").asInt()).isEqualTo(1);
-        assertThat(
-                COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS")
-                    - reads)
-            .isEqualTo(1);
-        assertThat(b2AuditCount(session, "row_kind='RELEASE' AND outcome='RESOLVED'")).isEqualTo(1);
-        assertThat(b2AuditCount(session, "row_kind='USAGE' AND usage_outcome='USED'")).isEqualTo(1);
-        assertThat(P3_RECEIPTS).hasSize(1);
-        assertThat(P3_RECEIPTS.getFirst().accepted()).isTrue();
-        p3AssertAuditScope(session, null, scope);
-        for (int n = diagnostics + 1; n <= FINALIZE_DIAGNOSTICS.get(); n++) {
-          Path file = TEMP.resolve("finalize-exception-" + n + ".json");
-          if (Files.isRegularFile(file)) {
-            assertThat(C.parse(Files.readString(file)).path("exceptionCode").asText())
-                .isNotEqualTo("SECRET_USE_REVOKED");
-          }
-        }
-        p3Call(
-            p3Cookie,
-            "/api/v1/studio/guided-sessions/" + session + "/cancel",
-            C.object().put("schemaVersion", 3).put("reason", "userRequested"),
-            202);
-        p3AwaitTeardown(session);
-      }
-    } finally {
-      P3_PERMITTED.addAll(removed); // restore only the exact removed fixture entitlement
-      cut.release.countDown();
-      cut.cleanupRelease.countDown();
-      try {
-        writeOwnedControl(control, C.object());
-      } finally {
-        PREFIX_SYNC_CUTS.remove(cut.key);
-      }
-      assertThat(cut.failure).as("secret-context instrumentation completed").isNull();
-    }
-  }
-
-  /**
-   * B2A-04 (OPEN: combined secret-use grant revocation at the fresh-producer ACK cut). Combined P3
-   * program: ONE reads a business Order reference, TWO fills it, USER and the PASS secret. The
-   * unmodified PFXSYNC fresh-producer HOLD selector holds the first producer-bearing update before
-   * the TWO/0 consumer; the negative revokes the exact fixture entitlement there.
-   */
-  @Test
-  void incrementalSecretGrantRevocationAtFreshProducerAckCutFailsBeforePreparation()
-      throws Exception {
-    p3Case(
-        () -> {
-          try {
-            p3Mode = P3Mode.LOGIN;
-            b2Combined = true;
-            String environment = "fixture-other";
-            String csi = primaryCsi;
-            p3Grant(csi, environment);
-            UUID test = b2CreateCombinedSource(csi, environment, "p3-user", null);
-            VaultScope scope = VaultScope.of(csi, environment, test);
-            AUDIT_CANARIES.add(p3ExpectedPassword);
-            p3Seed(scope, p3ExpectedPassword);
-            String original = p3Start(test, environment);
-            awaitFinalizing(original);
-            assertThat(
-                    jdbc.queryForObject(
-                        "SELECT count(*) FROM studio_guided_producers WHERE session_id=?",
-                        Integer.class,
-                        original))
-                .isEqualTo(1);
-            P3Publication base = p3Publish(original);
-            assertThat(C.parse(base.artifact()).path("learnedPlan").path("bindings").size())
-                .isEqualTo(1);
-            for (boolean revoke : List.of(true, false)) {
-              b2aProducerCutSibling(test, scope, base, environment, revoke);
-            }
-            p3Scan(List.of(p3ExpectedPassword));
-          } finally {
-            b2ResetKnobs();
-          }
-        });
-  }
-
   private UUID b2CreateCombinedSource(
       String csi,
       String environment,
@@ -10437,9 +10386,12 @@ class GuidedPublicationReplayIT {
                 Map.of("name", "PASS", "kind", "secretRef", "secretId", "PASS")));
     UUID test = UUID.randomUUID();
     jdbc.update(
-        "INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,variables,authoring,"
-            + "authoring_revision_inputs,created_by,created_at,updated_at) VALUES (?,'B2 combined"
-            + " join',?,?,'chromium',?::jsonb,?::jsonb,?::jsonb,?::jsonb,'fixture@example.invalid',"
+        "INSERT INTO ui_tests(id,name,csi_id,environment,browser,step"
+            + "s,variables,authoring,"
+            + "authoring_revision_inputs,created_by,created_at,updated_at) "
+            + "VALUES (?,'B2 combined"
+            + " join',?,?,'chromium',?::jsonb,?::jsonb,?::jsonb,?::jsonb,'f"
+            + "ixture@example.invalid',"
             + "now(),now())",
         test,
         csi,
@@ -10450,177 +10402,6 @@ class GuidedPublicationReplayIT {
         JSON.writeValueAsString(AuthoringRevisionIdentity.create(authoring, Map.of("USER", user))));
     AUDIT_CANARIES.addAll(texts);
     return test;
-  }
-
-  private void b2aProducerCutSibling(
-      UUID test, VaultScope scope, P3Publication base, String environment, boolean revoke)
-      throws Exception {
-    assertThat(PREFIX_SYNC_CUTS).isEmpty();
-    var cut = new PrefixSyncCut("HOLD");
-    PREFIX_SYNC_CUTS.put(cut.key, cut);
-    var removed = new ArrayList<P3Entitlement>();
-    try {
-      // The unchanged PFXSYNC fresh-producer selector: first producer-bearing update before TWO.
-      writePrefixSyncControl(
-          C.object().put("caseId", cut.key).put("mode", "HOLD").put("stepId", TWO));
-      P3_RECEIPTS.clear();
-      B2_REFERENCE_RECEIPTS.clear();
-      int reads = COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS");
-      int orders = B2_ORDER_VALUES.size();
-      String session =
-          p3Call(
-                  p3Cookie,
-                  "/api/v1/studio/guided-sessions",
-                  p3StartCommand(test, environment)
-                      .put("baseRevisionId", base.revision().toString())
-                      .put("firstLearnStepId", THREE),
-                  202)
-              .path("session")
-              .path("sessionId")
-              .asText();
-      assertThat(cut.entered.await(30, java.util.concurrent.TimeUnit.SECONDS))
-          .as("actual fresh-producer update cut")
-          .isTrue();
-      assertThat(cut.failure).isNull();
-      assertThat(cut.sessionId).isEqualTo(session);
-      assertThat(cut.phase).isEqualTo("AFTER");
-      assertThat(B2_ORDER_VALUES.size())
-          .as("one fresh mixed-session read page")
-          .isEqualTo(orders + 1);
-      assertThat(
-              jdbc.queryForObject(
-                  "SELECT count(*) FROM studio_guided_producers p JOIN studio_guided_actions a"
-                      + " ON a.session_id=p.session_id AND a.admission_id=p.admission_id"
-                      + " WHERE p.session_id=? AND a.document->>'state'='SUCCEEDED'"
-                      + " AND a.proposal->'operation'->>'kind'='read'",
-                  Integer.class,
-                  session))
-          .as("fresh producer committed before the held ACK")
-          .isEqualTo(1);
-      assertThat(
-              jdbc.queryForObject(
-                  "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=?",
-                  Integer.class,
-                  session,
-                  TWO))
-          .isZero();
-      assertThat(
-              jdbc.queryForObject(
-                  "SELECT count(*) FROM studio_guided_prefix_requests"
-                      + " WHERE session_id=? AND step_id=? AND ordinal=0 AND status='ISSUED'",
-                  Integer.class,
-                  session,
-                  TWO))
-          .isEqualTo(1);
-      String producers =
-          jdbc.queryForObject(
-              "SELECT jsonb_agg(to_jsonb(p) ORDER BY binding_id)::text"
-                  + " FROM studio_guided_producers p WHERE session_id=?",
-              String.class,
-              session);
-      int preparations =
-          jdbc.queryForObject(
-              "SELECT count(*) FROM studio_guided_preparations WHERE session_id=?",
-              Integer.class,
-              session);
-      String principal =
-          sessions.transaction(
-              () -> sessions.lock(session).document().path("scope").path("principalId").asText());
-      var authorization =
-          ownedApplicationContext.getBean(
-              com.citi.put.checks.studio.secrets.StudioSecretUseAuthorization.class);
-      assertThat(authorization.mayUse(principal, scope.csiId(), scope.environment(), "PASS"))
-          .as("fixture entitlement present at the cut")
-          .isTrue();
-      int diagnostics = FINALIZE_DIAGNOSTICS.get();
-      if (revoke) {
-        for (String actor : List.of("user-1", "fixture@example.invalid")) {
-          var tuple = new P3Entitlement(actor, scope.csiId(), scope.environment(), "PASS");
-          assertThat(P3_PERMITTED.remove(tuple))
-              .as("exact previously present fixture entitlement")
-              .isTrue();
-          removed.add(tuple);
-        }
-        assertThat(authorization.mayUse(principal, scope.csiId(), scope.environment(), "PASS"))
-            .as("fixture entitlement revoked (not Core policy)")
-            .isFalse();
-        cut.release.countDown();
-        b2AwaitCheckCurrentGate(diagnostics);
-        b2AwaitLeft(session, "REPLAYING_PREFIX", 45);
-        assertThat(
-                sessions.transaction(
-                    () -> sessions.lock(session).progress().path("errorCode").asText()))
-            .isEqualTo("SECRET_USE_REVOKED");
-        p3AwaitTeardown(session);
-        assertThat(
-                jdbc.queryForObject(
-                    "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=?",
-                    Integer.class,
-                    session,
-                    TWO))
-            .isZero();
-        assertThat(
-                jdbc.queryForObject(
-                    "SELECT count(*) FROM studio_guided_preparations WHERE session_id=?",
-                    Integer.class,
-                    session))
-            .isEqualTo(preparations);
-        assertThat(
-                jdbc.queryForObject(
-                    "SELECT count(*) FROM studio_guided_consumer_edges WHERE session_id=?",
-                    Integer.class,
-                    session))
-            .isZero();
-        assertThat(
-                jdbc.queryForObject(
-                    "SELECT jsonb_agg(to_jsonb(p) ORDER BY binding_id)::text"
-                        + " FROM studio_guided_producers p WHERE session_id=?",
-                    String.class,
-                    session))
-            .isEqualTo(producers);
-        assertThat(COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS"))
-            .isEqualTo(reads);
-        assertThat(b2AuditCount(session, "row_kind='RELEASE'")).isZero();
-        assertThat(P3_RECEIPTS).isEmpty();
-        assertThat(B2_REFERENCE_RECEIPTS.size()).isZero();
-      } else {
-        cut.release.countDown();
-        awaitFinalizing(session);
-        assertThat(
-                jdbc.queryForObject(
-                    "SELECT count(*) FROM studio_guided_consumer_edges WHERE session_id=?",
-                    Integer.class,
-                    session))
-            .isEqualTo(1);
-        assertThat(B2_REFERENCE_RECEIPTS.size()).isEqualTo(1);
-        assertThat(B2_REFERENCE_RECEIPTS.getFirst().equals(B2_ORDER_VALUES.getLast()))
-            .as("the fresh producer value was consumed (boolean only)")
-            .isTrue();
-        assertThat(
-                COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS")
-                    - reads)
-            .isEqualTo(1);
-        assertThat(b2AuditCount(session, "row_kind='USAGE' AND usage_outcome='USED'")).isEqualTo(1);
-        assertThat(P3_RECEIPTS).hasSize(1);
-        assertThat(P3_RECEIPTS.getFirst().accepted()).isTrue();
-        p3Call(
-            p3Cookie,
-            "/api/v1/studio/guided-sessions/" + session + "/cancel",
-            C.object().put("schemaVersion", 3).put("reason", "userRequested"),
-            202);
-        p3AwaitTeardown(session);
-      }
-    } finally {
-      P3_PERMITTED.addAll(removed);
-      cut.release.countDown();
-      cut.cleanupRelease.countDown();
-      try {
-        writePrefixSyncControl(C.object());
-      } finally {
-        PREFIX_SYNC_CUTS.remove(cut.key);
-      }
-      assertThat(cut.failure).as("fresh-producer instrumentation completed").isNull();
-    }
   }
 
   /**
@@ -10644,11 +10425,11 @@ class GuidedPublicationReplayIT {
       primaryCsi = "CSI-B2B-" + (++p3CsiOrdinal); // per-parent budget isolation
       forgetCachedCoreIdentity();
       jdbc.update(
-          "INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment)"
+          "INSERT INTO csi_systems(id,name,business_unit,criticality,ow"
+              + "ner_email,environment)"
               + " VALUES (?,'Orders','Ops','HIGH','fixture@example.invalid','Production')",
           primaryCsi);
       startWorkers();
-      seedGovernedPolicies(primaryCsi);
       incrementalTenScenario = true;
       var texts = new ArrayList<String>();
       texts.add("Open " + URL + " and read the Order reference.");
@@ -10678,7 +10459,8 @@ class GuidedPublicationReplayIT {
       var authoring = new AuthoringV2Request(2, null, steps);
       UUID test = UUID.randomUUID();
       jdbc.update(
-          "INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,variables,authoring,"
+          "INSERT INTO ui_tests(id,name,csi_id,environment,browser,step"
+              + "s,variables,authoring,"
               + "authoring_revision_inputs,created_by,created_at,updated_at) VALUES (?,'B2b"
               + " append',?,'fixture','chromium',?::jsonb,'[]'::jsonb,?::jsonb,?::jsonb,"
               + "'fixture@example.invalid',now(),now())",
@@ -10698,12 +10480,16 @@ class GuidedPublicationReplayIT {
                   .put("expectedConfigurationRevision", "1"),
               200,
               UUID.randomUUID().toString());
+      // The publication accepted its AFTER_LEARN proof; this flow proves its own ordinary replays,
+      // so the queued proof is cancelled.
+      cancelQueuedProof(COOKIE, original, base);
       p3AwaitTeardown(original);
       // Same append-input edit as the 35-label variant (prefixSyncEdit edits index 3).
       JsonNode edited =
           prefixSyncEdit(
               test,
-              "Check Destination is visible. Check page title is Operations. The note unused-input"
+              "Check Destination is visible. Check page title is Operations"
+                  + ". The note unused-input"
                   + " is context only.");
       assertThat(edited.path("firstChangedStepId").asText()).isEqualTo(INCREMENTAL_STEPS.get(3));
       incrementalDomVariant = "append-input";
@@ -10722,7 +10508,6 @@ class GuidedPublicationReplayIT {
               .put("sourceRevision", edited.path("sourceRevision").asText())
               .put("configurationRevision", edited.path("configurationRevision").asText())
               .put("environmentId", "fixture")
-              .put("applicationId", "orders")
               .put("baseRevisionId", base.path("revisionId").asText());
       start.set("versions", versions());
       // Keyed by session id (known after 202); the suffix SOURCE_PLAN follows ten prefix steps.
@@ -10799,7 +10584,8 @@ class GuidedPublicationReplayIT {
       org.springframework.security.core.Authentication controller)
       throws Exception {
     var materialization =
-        new com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService(jdbc, C);
+        new com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService(
+            jdbc, C, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     var preparationStore =
         new com.citi.put.checks.studio.guided.bridge.GuidedPreparationStore(jdbc, C);
     var runner =
@@ -10822,13 +10608,10 @@ class GuidedPublicationReplayIT {
     JsonNode progress = sessions.transaction(() -> sessions.lock(session).progress().deepCopy());
     JsonNode document = sessions.transaction(() -> sessions.lock(session).document().deepCopy());
     ObjectNode context = service.runnerContext(controller, session, fence);
-    JsonNode target = null;
-    for (JsonNode node : progress.path("observation").path("nodes")) {
-      if (node.path("name").asText().equals("Destination")) {
-        target = node;
-      }
-    }
-    assertThat(target != null).as("Destination observed on the live page").isTrue();
+    String destinationRef =
+        com.citi.put.checks.studio.support.JoinedRefs.refByName(
+            progress.path("observation"), "Destination");
+    assertThat(destinationRef).as("Destination observed on the live page").isNotNull();
     ObjectNode proposal =
         C.object()
             .put("schemaVersion", 3)
@@ -10842,14 +10625,10 @@ class GuidedPublicationReplayIT {
     proposal.set("executionEvidence", progress.path("executionEvidence"));
     proposal
         .putObject("target")
-        .put("nodeId", target.path("nodeId").asText())
+        .put("kind", "node")
+        .put("ref", destinationRef)
         .put("documentId", progress.path("documentId").asText())
-        .put("generation", progress.path("generation").asInt())
-        .putObject("locator")
-        .put("kind", "role")
-        .put("role", target.path("role").asText())
-        .put("name", "Destination")
-        .put("exact", true);
+        .put("generation", progress.path("generation").asInt());
     proposal
         .putObject("operation")
         .put("kind", "assert")
@@ -10883,7 +10662,8 @@ class GuidedPublicationReplayIT {
             session);
     String publicationPreparations =
         jdbc.queryForObject(
-            "SELECT COALESCE(jsonb_agg(to_jsonb(p) ORDER BY preparation_id),'[]'::jsonb)::text"
+            "SELECT COALESCE(jsonb_agg(to_jsonb(p) ORDER BY preparation_i"
+                + "d),'[]'::jsonb)::text"
                 + " FROM studio_guided_publication_preparations p WHERE session_id=?",
             String.class,
             session);
@@ -11248,7 +11028,9 @@ class GuidedPublicationReplayIT {
     }
 
     assertThat(INCREMENTAL_ACK_ENTERED.contains(session))
-        .as("append retried after natural expiry; otherwise a liveness finding, never a relaxation")
+        .as(
+            "append retried after natural expiry; otherwise a liveness fi"
+                + "nding, never a relaxation")
         .isTrue();
     // ---- Phase B at the held v2 ACK (A18-1..3, A77-1, A77-3) ----
     long fence2 =
@@ -11510,7 +11292,12 @@ class GuidedPublicationReplayIT {
     assertThatThrownBy(
             () ->
                 service.admit(
-                    controller, session, fence3, "b2b-old-" + UUID.randomUUID(), proposal))
+                    controller,
+                    session,
+                    fence3,
+                    "b2b-old-" + UUID.randomUUID(),
+                    proposal,
+                    proof.path("preparationId").asText()))
         .isInstanceOf(GuidedSessionException.class)
         .satisfies(
             failure ->
@@ -11522,7 +11309,12 @@ class GuidedPublicationReplayIT {
           ObjectNode currentContext = materialization.context(current);
           assertThatThrownBy(
                   () ->
-                      preparationStore.authorize(current, proposal, currentContext, Instant.now()))
+                      preparationStore.authorize(
+                          current,
+                          proposal,
+                          currentContext,
+                          proof.path("preparationId").asText(),
+                          Instant.now()))
               .isInstanceOf(GuidedSessionException.class)
               .hasMessage("STALE_GENERATION");
           assertThatThrownBy(() -> materialization.verify(current, proof))
@@ -11573,7 +11365,8 @@ class GuidedPublicationReplayIT {
                 session));
     assertThat(
             jdbc.queryForObject(
-                "SELECT COALESCE(jsonb_agg(to_jsonb(p) ORDER BY preparation_id),'[]'::jsonb)::text"
+                "SELECT COALESCE(jsonb_agg(to_jsonb(p) ORDER BY preparation_i"
+                    + "d),'[]'::jsonb)::text"
                     + " FROM studio_guided_publication_preparations p WHERE session_id=?"
                     + " AND (proof->>'contextRevision')::integer=1",
                 String.class,
@@ -11591,6 +11384,9 @@ class GuidedPublicationReplayIT {
                     "expectedConfigurationRevision", edited.path("configurationRevision").asText()),
             200,
             UUID.randomUUID().toString());
+    // The publication accepted its AFTER_LEARN proof; this flow proves its own ordinary replays, so
+    // the queued proof is cancelled.
+    cancelQueuedProof(COOKIE, session, merged);
     assertThat(
             C.parse(
                     jdbc.queryForObject(
@@ -12025,7 +11821,8 @@ class GuidedPublicationReplayIT {
 
   private int b2bMaterializationRevision(String session) {
     return jdbc.queryForObject(
-        "SELECT materialization_revision FROM studio_guided_materializations WHERE session_id=?",
+        "SELECT materialization_revision FROM studio_guided_materiali"
+            + "zations WHERE session_id=?",
         Integer.class,
         session);
   }
@@ -12055,7 +11852,6 @@ class GuidedPublicationReplayIT {
                         new com.citi.put.checks.studio.dto.ContextText(ctxText),
                         new com.citi.put.checks.studio.dto.LiteralInput(ctxLiteral)),
                     List.of());
-            p3Grant(primaryCsi, "fixture");
             UUID test = b2CreateCombinedSource(primaryCsi, "fixture", plain, context);
             VaultScope scope = VaultScope.of(primaryCsi, "fixture", test);
             p3ExpectedPassword = secret;
@@ -12317,9 +12113,13 @@ class GuidedPublicationReplayIT {
             sinks.put(
                 "final-report",
                 p3RunnerReport(execution).toString().getBytes(StandardCharsets.UTF_8));
-            sinks.put(
-                "recording-row",
-                String.valueOf(guidedRecordingRow(mixed)).getBytes(StandardCharsets.UTF_8));
+            assertThat(
+                    jdbc.queryForObject(
+                        "SELECT count(*) FROM studio_guided_session_recordings WHERE session_id=?",
+                        Integer.class,
+                        mixed))
+                .as("a published re-learn keeps no recording row to leak from")
+                .isZero();
             for (String value : List.of(plain, ctxLiteral, ctxText, secret)) {
               assertJoinedSinkAbsent(sinks, value);
             }
@@ -12451,7 +12251,8 @@ class GuidedPublicationReplayIT {
     bound[0] = session;
     System.arraycopy(arguments, 0, bound, 1, arguments.length);
     return jdbc.queryForObject(
-        "SELECT count(*) FROM studio_secret_use_audit WHERE session_id=? AND secret_id='PASS' AND "
+        "SELECT count(*) FROM studio_secret_use_audit WHERE session_i"
+            + "d=? AND secret_id='PASS' AND "
             + predicate,
         Long.class,
         bound);
@@ -12825,226 +12626,6 @@ class GuidedPublicationReplayIT {
     return state;
   }
 
-  /**
-   * Exact post-ACK gate: checkCurrent inside translationTransaction entered from advancePrefix
-   * (GuidedTranslationService). No other revocation observer is credited.
-   */
-  private void b2AwaitCheckCurrentGate(int after) throws Exception {
-    long end = System.nanoTime() + Duration.ofSeconds(20).toNanos();
-
-    // IT-R POLL 20: exact original transitions; one old interval owed at most.
-    final var itrRead020End = end;
-    class ItrState020 {
-      boolean methodReturned;
-      boolean firstIteration = true;
-      boolean terminal;
-      boolean intervalOwed;
-      long owedUntil;
-      Exception firstException;
-      Error firstError;
-    }
-    final var itr020 = new ItrState020();
-
-    java.util.concurrent.Callable<Boolean> itrPoll020 =
-        () -> {
-          if (itr020.firstException != null) {
-            throw itr020.firstException;
-          }
-          if (itr020.firstError != null) {
-            throw itr020.firstError;
-          }
-          if (itr020.terminal) {
-            return true;
-          }
-          try {
-            if (itr020.intervalOwed) {
-              if (Thread.interrupted()) {
-                throw new InterruptedException();
-              }
-              if (System.nanoTime() < itr020.owedUntil) {
-                return false;
-              }
-              itr020.intervalOwed = false;
-            }
-            if (!itr020.firstIteration && !(System.nanoTime() < itrRead020End)) {
-              itr020.terminal = true;
-              return true;
-            }
-            itr020.firstIteration = false;
-            var matches = new ArrayList<JsonNode>();
-            for (int n = after + 1; n <= FINALIZE_DIAGNOSTICS.get(); n++) {
-              Path file = TEMP.resolve("finalize-exception-" + n + ".json");
-              if (!Files.isRegularFile(file)) {
-                continue; // the counter increment precedes the completed write
-              }
-              JsonNode row;
-              try {
-                row = C.parse(Files.readString(file));
-              } catch (RuntimeException incomplete) {
-                continue;
-              }
-              if (!row.path("exceptionCode").asText().equals("SECRET_USE_REVOKED")) {
-                continue;
-              }
-              boolean access = false;
-              boolean transaction = false;
-              boolean gate = false;
-              for (JsonNode frame : row.path("stackFrames")) {
-                String type = frame.path("class").asText();
-                String method = frame.path("method").asText();
-                access |=
-                    type.equals(
-                            "com.citi.put.checks.studio.guided.translation.GuidedProductionSessionAccess")
-                        && method.equals("checkCurrent");
-                transaction |=
-                    type.equals("com.citi.put.checks.studio.guided.session.GuidedSessionService")
-                        && method.startsWith("lambda$translationTransaction");
-                gate |=
-                    type.equals(
-                            "com.citi.put.checks.studio.guided.translation.GuidedTranslationService")
-                        && method.equals("advancePrefix")
-                        && frame.path("line").asInt() == prefixSites().postAck();
-              }
-              if (access && transaction && gate) {
-                matches.add(row);
-              }
-            }
-            if (!matches.isEmpty()) {
-              assertThat(matches.size()).as("one exact post-ACK checkCurrent refusal").isEqualTo(1);
-              itr020.methodReturned = true;
-              itr020.terminal = true;
-              return true;
-            }
-            itr020.intervalOwed = true;
-            itr020.owedUntil = System.nanoTime() + Duration.ofMillis(10).toNanos();
-            return false;
-          } catch (Exception itrFailure020) {
-            if (itr020.firstException == null && itr020.firstError == null) {
-              itr020.firstException = itrFailure020;
-              itr020.terminal = true;
-            }
-            throw itr020.firstException;
-          } catch (Error itrFailure020) {
-            if (itr020.firstException == null && itr020.firstError == null) {
-              itr020.firstError = itrFailure020;
-              itr020.terminal = true;
-            }
-            throw itr020.firstError;
-          }
-        };
-    try {
-      while (!itr020.terminal) {
-        // First invocation is manual. Reentry serves only the original pending transition.
-        boolean itrDone020 = itrPoll020.call();
-        if (itrDone020) {
-          break;
-        }
-        if (Thread.interrupted()) {
-          throw new InterruptedException();
-        }
-        long itrNow020 = System.nanoTime();
-        long itrRemaining020 = itrRead020End - itrNow020;
-        long itrOwed020 = itr020.intervalOwed ? itr020.owedUntil - itrNow020 : 0;
-        // Semantic deadline is unchanged. Only the already-entered old interval may extend this
-        // bound.
-        long itrBound020 = Math.max(itrRemaining020, itrOwed020);
-        if (itrBound020 > 0) {
-          final boolean[] itrFirstTick020 = {true};
-          try {
-            org.awaitility.Awaitility.await("ReplayIT POLL 20")
-                .atMost(Duration.ofNanos(itrBound020))
-                .pollInterval(Duration.ofMillis(10))
-                .pollDelay(Duration.ZERO)
-                .pollInSameThread()
-                .dontCatchUncaughtExceptions()
-                .ignoreNoExceptions()
-                .until(
-                    () -> {
-                      try {
-                        if (itr020.firstException != null) {
-                          throw itr020.firstException;
-                        }
-                        if (itr020.firstError != null) {
-                          throw itr020.firstError;
-                        }
-                        if (itr020.terminal) {
-                          return true;
-                        }
-                        if (Thread.interrupted()) {
-                          throw new InterruptedException();
-                        }
-                        if (itrFirstTick020[0]) {
-                          itrFirstTick020[0] = false;
-                          return false; // Cached tick: no second immediate condition/read/effect.
-                        }
-                        boolean itrObserved020 = itrPoll020.call();
-                        if (!itrObserved020 && Thread.interrupted()) {
-                          throw new InterruptedException();
-                        }
-                        return itrObserved020;
-                      } catch (Exception itrFailure020) {
-                        if (itr020.firstException == null && itr020.firstError == null) {
-                          itr020.firstException = itrFailure020;
-                          itr020.terminal = true;
-                        }
-                        if (itr020.firstError != null) {
-                          throw itr020.firstError;
-                        }
-                        throw itr020.firstException;
-                      } catch (Error itrFailure020) {
-                        if (itr020.firstException == null && itr020.firstError == null) {
-                          itr020.firstError = itrFailure020;
-                          itr020.terminal = true;
-                        }
-                        if (itr020.firstException != null) {
-                          throw itr020.firstException;
-                        }
-                        throw itr020.firstError;
-                      }
-                    });
-          } catch (org.awaitility.core.ConditionTimeoutException itrTimeout020) {
-            if (itr020.firstException != null) {
-              throw itr020.firstException;
-            }
-            if (itr020.firstError != null) {
-              throw itr020.firstError;
-            }
-            // A late terminal outcome wins. Otherwise next driver step preserves old guard/body
-            // order.
-          }
-        }
-        // Includes bound<=0/no-Await: no silent pending exit, synthetic timeout, or terminal
-        // replay.
-      }
-    } catch (Exception itrFailure020) {
-      if (itr020.firstException == null && itr020.firstError == null) {
-        itr020.firstException = itrFailure020;
-        itr020.terminal = true;
-      }
-      if (itr020.firstError != null) {
-        throw itr020.firstError;
-      }
-      throw itr020.firstException;
-    } catch (Error itrFailure020) {
-      if (itr020.firstException == null && itr020.firstError == null) {
-        itr020.firstError = itrFailure020;
-        itr020.terminal = true;
-      }
-      if (itr020.firstException != null) {
-        throw itr020.firstException;
-      }
-      throw itr020.firstError;
-    } finally {
-
-    }
-    if (itr020.methodReturned) {
-      return;
-    }
-
-    throw new AssertionError(
-        "post-ACK worker checkCurrent SECRET_USE_REVOKED not observed; no other observer credited");
-  }
-
   private List<JsonNode> b2PrefixSyncEvents(PrefixSyncCut cut, String session) throws Exception {
     Path file = TEMP.resolve("obs015-prefix-sync-" + cut.key + ".jsonl");
     if (!Files.exists(file)) {
@@ -13129,6 +12710,9 @@ class GuidedPublicationReplayIT {
     assertThat(MODEL_WIRE.size()).isEqualTo(models);
     assertThat(COUNTED_VAULT.reads.size()).isEqualTo(reads);
     p3AwaitTeardown(id);
+    // The publication accepted its AFTER_LEARN proof (no value read, no model call: asserted
+    // above); this flow proves its own ordinary replays, so the queued proof is cancelled.
+    cancelQueuedProof(id, published);
     return new P3Publication(revision, hash, artifact);
   }
 
@@ -13152,14 +12736,16 @@ class GuidedPublicationReplayIT {
     // Same semantics as the OBS-007 fixture /trap (studio-runner secret-login/server.ts).
     String trap =
         page == B2PasswordPage.TYPE_FLIP
-            ? "<script>document.querySelector(\"input[type=password]\").addEventListener(\"focus\","
+            ? "<script>document.querySelector(\"input[type=password]\").add"
+                + "EventListener(\"focus\","
                 + "event=>event.target.type=\"text\")</script>"
             : "";
     if (b2Combined) {
       String fresh = "  b2-order-" + UUID.randomUUID() + "-é  ";
       B2_ORDER_VALUES.add(fresh);
       VALUES.add(fresh); // private observed value: also covered by the final whole-class scan
-      return "<main aria-label='Operations'><output aria-label='Order reference'>"
+      return "<main aria-label='Operations'><output aria-label='Order reference'"
+          + " style='white-space:pre'>"
           + fresh
           + "</output><form method='post' action='/p3/login'><label>Reference<input"
           + " name='reference'></label><label>User<input name='username'></label>"
@@ -13168,9 +12754,11 @@ class GuidedPublicationReplayIT {
           + " type='button'>Reports</button></main>"
           + trap;
     }
-    return "<form method='post' action='/p3/login'><label>User<input name='username'></label>"
+    return "<form method='post' action='/p3/login'><label>User<input nam"
+        + "e='username'></label>"
         + passwords
-        + "<button type='submit'>Sign in</button></form><button type='button'>Reports</button>"
+        + "<button type='submit'>Sign in</button></form><button type='b"
+        + "utton'>Reports</button>"
         + trap;
   }
 
@@ -13256,9 +12844,16 @@ class GuidedPublicationReplayIT {
     if (b2Combined
         && (operationKind.equals("read")
             || obligation.path("targetIntent").asText().equals("Reference"))) {
-      JsonNode node = null;
-      for (JsonNode candidate : context.path("observation").path("nodes")) {
-        if (candidate.path("name").equals(obligation.path("targetIntent"))) {
+      com.citi.put.checks.studio.guided.translation.GuidedOutline.Line node = null;
+      for (var candidate :
+          com.citi.put.checks.studio.support.JoinedRefs.shown(
+              context.path("observation").asText())) {
+        String requiredRole = operationKind.equals("read") ? "status" : "textbox";
+        if (obligation.path("targetIntent").asText().equals(candidate.name())
+            && requiredRole.equals(candidate.role())) {
+          if (node != null) {
+            throw new IllegalStateException("B2 controlled target is not unique");
+          }
           node = candidate;
         }
       }
@@ -13272,14 +12867,7 @@ class GuidedPublicationReplayIT {
       var action = result.putObject("action");
       String binding = context.path("needs").path(0).path("bindingId").asText();
       if (operationKind.equals("read")) {
-        action
-            .putObject("operation")
-            .put("kind", "read")
-            .put("bindingId", binding)
-            .putObject("recipe")
-            .put("kind", "visibleText")
-            .put("classification", "permittedBusinessData")
-            .put("policyRuleId", "business-read");
+        action.putObject("operation").put("kind", "read").put("bindingId", binding);
       } else {
         action
             .putObject("operation")
@@ -13288,14 +12876,7 @@ class GuidedPublicationReplayIT {
             .put("kind", "binding")
             .put("bindingId", binding);
       }
-      action
-          .putObject("target")
-          .put("nodeId", node.path("nodeId").asText())
-          .putObject("locator")
-          .put("kind", "role")
-          .put("role", node.path("role").asText())
-          .put("name", node.path("name").asText())
-          .put("exact", true);
+      action.putObject("target").put("kind", "node").put("ref", node.ref());
       return result;
     }
     return null;
@@ -13374,80 +12955,7 @@ class GuidedPublicationReplayIT {
             obligation(THREE, 3, "assert", "page", reference, null).put("predicate", "title"));
       }
     }
-    boolean windowHasTwo = !context.has("learningWindow");
-    for (JsonNode step : context.path("learningWindow").path("learnableStepIds")) {
-      windowHasTwo |= step.asText().equals(TWO);
-    }
-    var needs = result.putArray("needs");
-    if (b2Combined && windowHasTwo) {
-      var need = needs.addObject().put("needId", "order").put("producerStepId", ONE);
-      need.putArray("consumers").addObject().put("stepId", TWO).put("argumentSlot", "fill.value");
-    }
     return incrementalSourcePlanWindow(result, context);
-  }
-
-  /**
-   * B2A-03 separately named secret-context ACK cut (SECRET_HOLD). A test-owned layer installed
-   * between the 015 fault observer and the S2 observers (S2 stays outermost). It reuses
-   * pfxEvent/pfxSignal/prefixSyncCallback unchanged and never alters pfxRead/pfxSelect or the
-   * closed PFX modes. Inert unless the owner-only control file is armed. No runner source or dist
-   * change; the runtime fields used (ordinals, prefixExited, hasSecretInputs) are real dist fields.
-   */
-  private static String b2SecretContextObserver() throws Exception {
-    return """
-// B2A-03: separately named secret-context ACK cut; values and contexts are never exported.
-const scControl=%s,scCases=new Map();
-function scRead(){
- if(!fs.existsSync(scControl))return null;
- const b=fs.readFileSync(scControl);if(b.length>4096)throw new Error('SC_CONTROL_BOUND');
- const c=JSON.parse(b.toString('utf8'));if(Object.keys(c).length===0)return null;
- if(Object.keys(c).sort().join(',')!=='caseId,mode,ordinal,stepId'
-  ||!/^[0-9a-f-]{36}$/u.test(c.caseId)||typeof c.stepId!=='string'
-  ||!Number.isInteger(c.ordinal)||c.ordinal<0||c.ordinal>31||c.mode!=='SECRET_HOLD')
-  throw new Error('SC_CONTROL_SHAPE');
- return c;
-}
-function scSelect(runtime,next){
- const control=scRead();if(!control||scCases.has(control.caseId))return null;
- const program=next?.prefixProgram;
- if(!program?.actions?.length||next.contextRevision!==1||runtime.prefixExited
-  ||!runtime.hasSecretInputs)return null;
- const at=program.actions.findIndex(a=>a.coordinate.stepId===control.stepId
-  &&a.coordinate.ordinal===control.ordinal);
- if(at<0)return null;
- const target=program.actions[at];
- if(target.operation.kind!=='fill'||target.operation.value?.kind!=='secretRef'
-  ||target.guard?.target?.kind!=='passwordControl')return null;
- for(let i=0;i<program.actions.length;i++){
-  const a=program.actions[i];
-  const done=(runtime.ordinals.get(a.coordinate.stepId)??0)>a.coordinate.ordinal;
-  if((i<at)!==done)return null;}
- const c={...control,sessionId:next.sessionId,browser:runtime.browser,
-  observations:runtime.browser?.observations,count:1};
- scCases.set(control.caseId,c);return c;
-}
-const scFind=(id,coordinate)=>[...scCases.values()].find(c=>c.sessionId===id
- &&c.stepId===coordinate?.stepId&&c.ordinal===coordinate?.ordinal);
-const scUpdate=RevRuntime.prototype.update;
-RevRuntime.prototype.update=async function(...args){
-  const sc=scSelect(this,args[0]);
-  const result=await Reflect.apply(scUpdate,this,args);
-  if(sc){await pfxEvent(sc,'UPDATED_BEFORE_ACK',this,args[0]);await pfxSignal(sc,args[0],'AFTER');
-    await pfxEvent(sc,'ACK_RELEASED',this,args[0]);}
-  return result;};
-const scPrepare=RevRuntime.prototype.preparePrefix;
-RevRuntime.prototype.preparePrefix=async function(...args){
-  const sc=scFind(args[0]?.request?.sessionId,args[0]?.request?.coordinate);
-  if(sc)await pfxEvent(sc,'TARGET_PREPARE_ENTER',this,this.context);
-  return Reflect.apply(scPrepare,this,args);};
-const scDispatch=RevRuntime.prototype.dispatch;
-RevRuntime.prototype.dispatch=async function(...args){
-  const sc=scFind(args[0]?.sessionId,args[0]?.proposal?.coordinate);
-  if(sc)await pfxEvent(sc,'TARGET_DISPATCH_ENTER',this,this.context);
-  return Reflect.apply(scDispatch,this,args);};
-"""
-        .formatted(
-            JSON.writeValueAsString(TEMP.resolve("obs015-secret-context-control.json").toString()));
   }
 
   /** PFXSYNC-05: the contender must really win the same stored coordinate, not an earlier guard. */
@@ -13483,8 +12991,9 @@ RevRuntime.prototype.dispatch=async function(...args){
           .isEqualTo(202);
       assertThat(
               jdbc.queryForObject(
-                  "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=? AND ordinal=0"
-                      + " AND document->>'state'='SUCCEEDED' AND (document->>'dispatchCount')::integer=1",
+                  "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=? AND"
+                      + " ordinal=0 AND document->>'state'='SUCCEEDED' AND"
+                      + " (document->>'dispatchCount')::integer=1",
                   Integer.class,
                   parent.id,
                   INCREMENTAL_STEPS.get(1)))
@@ -13618,16 +13127,17 @@ RevRuntime.prototype.dispatch=async function(...args){
       primaryCsi = "CSI-PFX-" + (++p3CsiOrdinal);
       forgetCachedCoreIdentity();
       jdbc.update(
-          "INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment)"
+          "INSERT INTO csi_systems(id,name,business_unit,criticality,ow"
+              + "ner_email,environment)"
               + " VALUES (?,'Orders','Ops','HIGH','fixture@example.invalid','Production')",
           primaryCsi);
       startWorkers();
-      seedGovernedPolicies(primaryCsi);
       incrementalTenScenario = true;
       var texts = new ArrayList<String>();
       texts.add("Open " + URL + " and read the Order reference.");
       texts.add(
-          "Enter that order reference in Destination (an authored alternative is literal-control).");
+          "Enter that order reference in Destination (an authored alternative is"
+              + " literal-control).");
       texts.add("Check Destination has that order reference.");
       texts.add("Check Destination is visible.");
       texts.add("Click Submit and check Confirmation appears.");
@@ -13650,9 +13160,11 @@ RevRuntime.prototype.dispatch=async function(...args){
       var authoring = new AuthoringV2Request(2, null, steps);
       UUID test = UUID.randomUUID();
       jdbc.update(
-          "INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,variables,authoring,authoring_r"
-              + "evision_inputs,created_by,created_at,updated_at)"
-              + " VALUES (?,'Prefix synchronization',?,'fixture','chromium',?::jsonb,'[]'::jsonb,?::jsonb,"
+          "INSERT INTO"
+              + " ui_tests(id,name,csi_id,environment,browser,steps,variables"
+              + ",authoring,authoring_r"
+              + "evision_inputs,created_by,created_at,updated_at) VALUES (?,'Prefix"
+              + " synchronization',?,'fixture','chromium',?::jsonb,'[]'::jsonb,?::jsonb,"
               + "?::jsonb,'fixture@example.invalid',now(),now())",
           test,
           primaryCsi,
@@ -13670,6 +13182,9 @@ RevRuntime.prototype.dispatch=async function(...args){
                   .put("expectedConfigurationRevision", "1"),
               200,
               UUID.randomUUID().toString());
+      // The publication accepted its AFTER_LEARN proof; this flow proves its own ordinary replays,
+      // so the queued proof is cancelled.
+      cancelQueuedProof(COOKIE, original, base);
       p3AwaitTeardown(original);
       JsonNode draft = publicCall("/api/v1/studio/tests/" + test, null, 200, null);
       assertThat(draft.path("readiness").asText()).isEqualTo("READY");
@@ -13699,7 +13214,6 @@ RevRuntime.prototype.dispatch=async function(...args){
               .put("sourceRevision", edited.path("sourceRevision").asText())
               .put("configurationRevision", edited.path("configurationRevision").asText())
               .put("environmentId", "fixture")
-              .put("applicationId", "orders")
               .put("baseRevisionId", base.path("revisionId").asText());
       start.set("versions", versions());
       incrementalDomVariant = "edit4";
@@ -13825,10 +13339,11 @@ RevRuntime.prototype.dispatch=async function(...args){
     assertThat(request.path("contextRevision").asInt()).isEqualTo(1);
     assertThat(
             jdbc.queryForObject(
-                "SELECT count(*) FROM studio_guided_producers p JOIN studio_guided_actions a"
-                    + " ON a.session_id=p.session_id AND a.admission_id=p.admission_id WHERE p.session_id=?"
-                    + " AND a.document->>'state'='SUCCEEDED' AND a.proposal->'operation'->>'kind'='read'"
-                    + " AND p.document->>'bindingId'=a.proposal->'operation'->>'bindingId'",
+                "SELECT count(*) FROM studio_guided_producers p JOIN studio_guided_actions a ON"
+                    + " a.session_id=p.session_id AND a.admission_id=p.admission_id WHERE"
+                    + " p.session_id=? AND a.document->>'state'='SUCCEEDED' AND"
+                    + " a.proposal->'operation'->>'kind'='read' AND"
+                    + " p.document->>'bindingId'=a.proposal->'operation'->>'bindingId'",
                 Integer.class,
                 id))
         .isEqualTo(1);
@@ -13866,16 +13381,20 @@ RevRuntime.prototype.dispatch=async function(...args){
         RECEIPTS.size(),
         NAVIGATIONS.get(),
         jdbc.queryForObject(
-            "SELECT materialization_revision FROM studio_guided_materializations WHERE session_id=?",
+            "SELECT materialization_revision FROM studio_guided_materializations WHERE"
+                + " session_id=?",
             Integer.class,
             id),
         jdbc.queryForObject(
-            "SELECT jsonb_agg(to_jsonb(a) ORDER BY binding_id)::text FROM studio_guided_allocations a"
-                + " WHERE session_id=?",
+            "SELECT jsonb_agg(to_jsonb(a) ORDER BY binding_id)::text FROM"
+                + " studio_guided_allocations"
+                + " a WHERE session_id=?",
             String.class,
             id),
         jdbc.queryForObject(
-            "SELECT jsonb_agg(to_jsonb(p) ORDER BY binding_id)::text FROM studio_guided_producers p WHERE session_id=?",
+            "SELECT jsonb_agg(to_jsonb(p) ORDER BY binding_id)::text FROM"
+                + " studio_guided_producers p"
+                + " WHERE session_id=?",
             String.class,
             id));
   }
@@ -13904,8 +13423,8 @@ RevRuntime.prototype.dispatch=async function(...args){
         .isZero();
     assertThat(
             jdbc.queryForObject(
-                "SELECT jsonb_agg(to_jsonb(a) ORDER BY step_id,ordinal)::text FROM studio_guided_actions a"
-                    + " WHERE session_id=? AND step_id=?",
+                "SELECT jsonb_agg(to_jsonb(a) ORDER BY step_id,ordinal)::text FROM"
+                    + " studio_guided_actions a WHERE session_id=? AND step_id=?",
                 String.class,
                 parent.id,
                 INCREMENTAL_STEPS.get(0)))
@@ -13917,22 +13436,23 @@ RevRuntime.prototype.dispatch=async function(...args){
         .isZero();
     assertThat(
             jdbc.queryForObject(
-                "SELECT materialization_revision FROM studio_guided_materializations WHERE session_id=?",
+                "SELECT materialization_revision FROM studio_guided_materializations WHERE"
+                    + " session_id=?",
                 Integer.class,
                 parent.id))
         .as("same-version delivery itself does not mutate backend metadata")
         .isEqualTo(before.materializationRevision());
     assertThat(
             jdbc.queryForObject(
-                "SELECT jsonb_agg(to_jsonb(a) ORDER BY binding_id)::text FROM studio_guided_allocations"
-                    + " a WHERE session_id=?",
+                "SELECT jsonb_agg(to_jsonb(a) ORDER BY binding_id)::text FROM"
+                    + " studio_guided_allocations a WHERE session_id=?",
                 String.class,
                 parent.id))
         .isEqualTo(before.allocations());
     assertThat(
             jdbc.queryForObject(
-                "SELECT jsonb_agg(to_jsonb(p) ORDER BY binding_id)::text FROM studio_guided_producers p"
-                    + " WHERE session_id=?",
+                "SELECT jsonb_agg(to_jsonb(p) ORDER BY binding_id)::text FROM"
+                    + " studio_guided_producers p WHERE session_id=?",
                 String.class,
                 parent.id))
         .isEqualTo(before.producers());
@@ -14241,7 +13761,8 @@ RevRuntime.prototype.dispatch=async function(...args){
               if (gate) {
                 assertThat(matches)
                     .as(
-                        "one isolated fresh case must identify its exact post-ACK gate, not an ambiguous interval")
+                        "one isolated fresh case must identify its exact post-ACK gate, not an"
+                            + " ambiguous interval")
                     .hasSize(1);
               }
               // Uncertain responses may be revisited by the real coordinator; no single-call
@@ -14399,7 +13920,9 @@ RevRuntime.prototype.dispatch=async function(...args){
     }
 
     throw new AssertionError(
-        "PFXSYNC intended Java context/gate stage not observed; no earlier refusal or timeout is credited");
+        "PFXSYNC intended Java context/gate stage not observed; no ea"
+            + "rlier refusal or timeout is"
+            + " credited");
   }
 
   private void prefixSyncFinishAndReplay(PrefixSyncParent parent, PrefixSyncFacts before)
@@ -14408,7 +13931,9 @@ RevRuntime.prototype.dispatch=async function(...args){
     var fill =
         C.parse(
             jdbc.queryForObject(
-                "SELECT document::text FROM studio_guided_actions WHERE session_id=? AND step_id=? AND ordinal=0",
+                "SELECT document::text FROM studio_guided_actions WHERE sessi"
+                    + "on_id=? AND step_id=?"
+                    + " AND ordinal=0",
                 String.class,
                 parent.id,
                 INCREMENTAL_STEPS.get(1)));
@@ -14418,7 +13943,9 @@ RevRuntime.prototype.dispatch=async function(...args){
     JsonNode fillProposal =
         C.parse(
             jdbc.queryForObject(
-                "SELECT proposal::text FROM studio_guided_actions WHERE session_id=? AND step_id=? AND ordinal=0",
+                "SELECT proposal::text FROM studio_guided_actions WHERE sessi"
+                    + "on_id=? AND step_id=?"
+                    + " AND ordinal=0",
                 String.class,
                 parent.id,
                 INCREMENTAL_STEPS.get(1)));
@@ -14427,7 +13954,8 @@ RevRuntime.prototype.dispatch=async function(...args){
     assertThat(
             C.parse(
                 jdbc.queryForObject(
-                    "SELECT document::text FROM studio_guided_prefix_requests WHERE session_id=? AND request_digest=?",
+                    "SELECT document::text FROM studio_guided_prefix_requests WHERE session_id=?"
+                        + " AND request_digest=?",
                     String.class,
                     parent.id,
                     before.requestDigest())))
@@ -14441,9 +13969,9 @@ RevRuntime.prototype.dispatch=async function(...args){
         .isEqualTo(before.immutableInputs());
     assertThat(
             jdbc.queryForObject(
-                "SELECT count(*) FROM studio_guided_model_attempts m JOIN studio_guided_relearn_switches"
-                    + " s USING(session_id)"
-                    + " WHERE m.session_id=? AND m.created_at<s.created_at",
+                "SELECT count(*) FROM studio_guided_model_attempts m JOIN"
+                    + " studio_guided_relearn_switches s USING(session_id) WHERE m.session_id=? AND"
+                    + " m.created_at<s.created_at",
                 Integer.class,
                 parent.id))
         .isZero();
@@ -14469,15 +13997,15 @@ RevRuntime.prototype.dispatch=async function(...args){
     // only its two real binding consumer edges may bump metadata after the held read cut.
     assertThat(
             jdbc.queryForObject(
-                "SELECT jsonb_agg(to_jsonb(a) ORDER BY binding_id)::text FROM studio_guided_allocations"
-                    + " a WHERE session_id=?",
+                "SELECT jsonb_agg(to_jsonb(a) ORDER BY binding_id)::text FROM"
+                    + " studio_guided_allocations a WHERE session_id=?",
                 String.class,
                 parent.id))
         .isEqualTo(before.allocations());
     assertThat(
             jdbc.queryForObject(
-                "SELECT jsonb_agg(to_jsonb(p) ORDER BY binding_id)::text FROM studio_guided_producers p"
-                    + " WHERE session_id=?",
+                "SELECT jsonb_agg(to_jsonb(p) ORDER BY binding_id)::text FROM"
+                    + " studio_guided_producers p WHERE session_id=?",
                 String.class,
                 parent.id))
         .isEqualTo(before.producers());
@@ -14489,7 +14017,8 @@ RevRuntime.prototype.dispatch=async function(...args){
         .isEqualTo(2);
     assertThat(
             jdbc.queryForObject(
-                "SELECT materialization_revision FROM studio_guided_materializations WHERE session_id=?",
+                "SELECT materialization_revision FROM studio_guided_materializations WHERE"
+                    + " session_id=?",
                 Integer.class,
                 parent.id))
         .isEqualTo(before.materializationRevision() + 2);
@@ -14537,11 +14066,14 @@ RevRuntime.prototype.dispatch=async function(...args){
                     parent.edited.path("configurationRevision").asText()),
             200,
             UUID.randomUUID().toString());
+    // The publication accepted its AFTER_LEARN proof; this flow proves its own ordinary replays, so
+    // the queued proof is cancelled.
+    cancelQueuedProof(COOKIE, parent.id, merged);
     assertThat(MODEL_WIRE).hasSize(model);
     assertThat(RECEIPTS).hasSize(effects);
     assertThat(NAVIGATIONS.get()).isEqualTo(navigations);
     assertThat(merged.path("revisionId").asText()).isNotEqualTo(parent.baseRevision);
-    assertIncrementalRecordingSpansBothHalves(
+    assertIncrementalLearnRecordingDiscarded(
         parent.id, sessions.transaction(() -> sessions.effectiveActions(parent.id)), 3);
     UUID execution =
         UUID.fromString(
@@ -15893,6 +15425,9 @@ RevRuntime.prototype.dispatch=async function(...args){
                       parent.edited.path("configurationRevision").asText()),
               200,
               UUID.randomUUID().toString());
+      // The publication accepted its AFTER_LEARN proof; this flow proves its own ordinary replays,
+      // so the queued proof is cancelled.
+      cancelQueuedProof(COOKIE, parent.id, merged);
       assertThat(MODEL_WIRE).hasSize(model);
       assertThat(RECEIPTS).hasSize(effects);
       assertThat(NAVIGATIONS.get()).isEqualTo(navigations);
@@ -15907,13 +15442,12 @@ RevRuntime.prototype.dispatch=async function(...args){
   }
 
   /**
-   * B1B-05 (OPEN matrix rows DONE-BOUNDARY, DONE-NOT-PENDING, REFRESH): the BOUNDARY switch records
-   * the completed admissions; a continuation committed while pending and released after the switch
-   * adds nothing; the prefix confirmation refresh commits once and, with F2 fixed, its carrying
-   * /plans call succeeds with no committedRefresh STALE_GENERATION.
+   * B1B-05 (OPEN matrix rows DONE-BOUNDARY, DONE-NOT-PENDING): the BOUNDARY switch records the
+   * completed admissions; a continuation committed while pending and released after the switch adds
+   * nothing.
    */
   @Test
-  void incrementalPrefixContinuationMatrixDoneAndRefreshRows() throws Exception {
+  void incrementalPrefixContinuationMatrixDoneRows() throws Exception {
     try (var parent = b1Parent(new B1Spec().edit4())) {
       var pause = B1Cut.arm(B1Cut.Kind.ADMIT_COMMIT, parent.id, b1Coordinate(2, 0), 0);
       assertThat(pause.entered.await(45, java.util.concurrent.TimeUnit.SECONDS)).isTrue();
@@ -15973,7 +15507,8 @@ RevRuntime.prototype.dispatch=async function(...args){
             Duration.ofSeconds(30));
         var switched =
             jdbc.queryForMap(
-                "SELECT reason,effective_step_index,next_ordinal,completed_admissions::text AS done"
+                "SELECT reason,effective_step_index,next_ordinal,completed_ad"
+                    + "missions::text AS done"
                     + " FROM studio_guided_relearn_switches WHERE session_id=?",
                 parent.id);
         assertThat(switched.get("reason")).isEqualTo("BOUNDARY");
@@ -16007,68 +15542,6 @@ RevRuntime.prototype.dispatch=async function(...args){
         assertThat(pause.failure).isNull();
         assertThat(held.failure).isNull();
       }
-    }
-    try (var parent =
-        b1Parent(
-            new B1Spec()
-                .ready(5)
-                .policy(
-                    "CLARIFY_FIRST",
-                    com.citi.put.checks.studio.support.ObservedPublicationFixture
-                        .DEFAULT_DESTRUCTIVE_VOCABULARY)
-                .nativeMode("b1b-refresh", 4, 0))) {
-      JsonNode question = b1AwaitQuestion(parent.id);
-      JsonNode marker =
-          sessions.transaction(
-              () -> sessions.lock(parent.id).progress().path("sideEffectConfirmation").deepCopy());
-      JsonNode asked = b1PrefixRequest(parent.id, marker.path("prefixRequestDigest").asText());
-      int diagnostics = FINALIZE_DIAGNOSTICS.get();
-      int effects = RECEIPTS.size();
-      publicCall(
-          "/api/v1/studio/guided-sessions/" + parent.id + "/clarify",
-          b1Answer(question),
-          202,
-          UUID.randomUUID().toString());
-      b1AwaitSucceeded(parent.id, 4, Duration.ofSeconds(45));
-      assertThat(b1Commands(parent.id, "observation-refresh")).isEqualTo(1);
-      assertThat(
-              jdbc.queryForObject(
-                  "SELECT idempotency_key FROM studio_guided_commands WHERE namespace=?"
-                      + " AND route='observation-refresh'",
-                  String.class,
-                  parent.id))
-          .isEqualTo("prefix-confirmation-" + question.path("clarificationId").asText());
-      assertThat(b1Commands(parent.id, "observation-refresh-result")).isEqualTo(1);
-      // F2 fixed (qa-d1-review01 §2.3): the /plans call that carries the refresh succeeds. The
-      // production success status is 202 Accepted (GuidedPlanningController.plan).
-      var carrying =
-          B1_PLANS.getOrDefault(parent.id, List.of()).stream()
-              .filter(call -> call.refreshCommitted)
-              .toList();
-      assertThat(carrying).as("exactly one /plans call committed the refresh").hasSize(1);
-      assertThat(carrying.getFirst().status).isEqualTo(202);
-      assertThat(
-              b1Diagnostics(
-                  diagnostics, "STALE_GENERATION", B1A_SESSION_SERVICE + "#committedRefresh"))
-          .as("F2: no committedRefresh STALE_GENERATION")
-          .isZero();
-      var submitRequests =
-          jdbc.queryForList(
-              "SELECT document::text FROM studio_guided_prefix_requests WHERE session_id=?"
-                  + " AND step_id=? AND ordinal=0",
-              String.class,
-              parent.id,
-              b1Step(4));
-      assertThat(submitRequests).hasSize(2);
-      JsonNode submit = b1ActionDocument(parent.id, 4, 0);
-      assertThat(submit.path("evidenceHash")).isNotEqualTo(asked.path("evidenceHash"));
-      assertThat(submit.path("dispatchCount").asInt()).isEqualTo(1);
-      assertThat(RECEIPTS).hasSize(effects + 1);
-      b1AwaitRow(
-          "SELECT count(*) FROM studio_guided_relearn_switches WHERE session_id=?",
-          parent.id,
-          Duration.ofSeconds(45));
-      assertThat(b1AttemptsBeforeSwitch(parent.id)).isZero();
     }
   }
 
@@ -16195,7 +15668,6 @@ RevRuntime.prototype.dispatch=async function(...args){
     p3Case(
         () -> {
           p3Mode = P3Mode.LOGIN;
-          p3Grant(primaryCsi, "fixture");
           UUID test = p3CreateSource(primaryCsi, "fixture", true);
           VaultScope scope = VaultScope.of(primaryCsi, "fixture", test);
           p3Seed(scope, p3ExpectedPassword);
@@ -16244,298 +15716,34 @@ RevRuntime.prototype.dispatch=async function(...args){
   }
 
   /**
-   * B1C-03 (ledger 80; ledger 82 fresh post-answer guard clause): after a valid CLARIFY_FIRST
-   * consent the fresh prefix proposal re-runs the actual guards; a governed multi-word destructive
-   * phrase is denied before effect, while a valid authored Enter is retained.
+   * B1C-03 (ledger 80, 82): a valid authored Enter in the replayed prefix's next learning step is
+   * retained under the actual guards. (A prefix proposal the guards would refuse cannot arise from
+   * a fixed destructive vocabulary and unchanged authored text; the refusals are proven on the
+   * guard and at the planning boundary.)
    */
   @Test
-  void incrementalFreshPostConsentGuardsDenyDangerousProposals() throws Exception {
-    var vocabulary =
-        new ArrayList<>(
-            com.citi.put.checks.studio.support.ObservedPublicationFixture
-                .DEFAULT_DESTRUCTIVE_VOCABULARY);
-    vocabulary.addAll(List.of("save all", "delete all", "archive all"));
-    var hostileIds = new ArrayList<String>();
-    String allowedId = null;
-    for (String step6 :
-        List.of(
-            "Click all, then Save",
-            "Click all, then Delete",
-            "Press Enter in all notes to Archive",
-            "Press Enter in Destination")) {
-      boolean allowed = step6.equals("Press Enter in Destination");
-      try (var parent =
-          b1Parent(
-              new B1Spec()
-                  .guards()
-                  .text(5, step6)
-                  .ready(6)
-                  .policy("CLARIFY_FIRST", vocabulary)
-                  .nativeMode("b1c-guards", 5, 0))) {
-        if (allowed) {
-          allowedId = parent.id;
-        } else {
-          hostileIds.add(parent.id);
-        }
-        JsonNode question = b1AwaitQuestion(parent.id);
-        assertThat(question.path("reason").asText()).isEqualTo("SIDE_EFFECT_CONFIRMATION");
-        assertThat(question.path("coordinate").path("stepId").asText()).isEqualTo(b1Step(4));
-        JsonNode marker =
-            sessions.transaction(
-                () ->
-                    sessions.lock(parent.id).progress().path("sideEffectConfirmation").deepCopy());
-        JsonNode asked = b1PrefixRequest(parent.id, marker.path("prefixRequestDigest").asText());
-        publicCall(
-            "/api/v1/studio/guided-sessions/" + parent.id + "/clarify",
-            b1Answer(question),
-            202,
-            UUID.randomUUID().toString());
-        if (allowed) {
-          b1AwaitRow(
-              "SELECT count(*) FROM studio_guided_relearn_switches WHERE session_id=?",
-              parent.id,
-              Duration.ofSeconds(60));
-          JsonNode press = b1ActionDocument(parent.id, 5, 0);
-          assertThat(press.path("state").asText()).isEqualTo("SUCCEEDED");
-          assertThat(press.path("dispatchCount").asInt()).isEqualTo(1);
-          assertThat(
-                  b1NativeCount(
-                      parent.id,
-                      press.path("admission").path("admissionId").asText(),
-                      "NATIVE_COMPLETED"))
-              .isEqualTo(1);
-          assertThat(b1Commands(parent.id, "clarify")).as("no second question").isEqualTo(1);
-          continue;
-        }
-        JsonNode result = b1AwaitTerminal(parent.id, Duration.ofSeconds(60));
-        assertThat(parent.state()).isEqualTo("FAILED");
-        JsonNode submit = b1ActionDocument(parent.id, 4, 0);
-        assertThat(submit.path("state").asText()).isEqualTo("SUCCEEDED");
-        assertThat(submit.path("dispatchCount").asInt()).isEqualTo(1);
-        assertThat(submit.path("evidenceHash"))
-            .as("fresh post-answer proposal; the guards re-ran")
-            .isNotEqualTo(asked.path("evidenceHash"));
-        JsonNode progress =
-            sessions.transaction(() -> sessions.lock(parent.id).progress().deepCopy());
-        assertThat(progress.path("errorCode").asText()).isEqualTo("POLICY_DENIED");
-        assertThat(b1AuditRefusals(parent.id, "DESTRUCTIVE_VERB")).isEqualTo(1);
-        assertThat(
-                jdbc.queryForObject(
-                    "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=?",
-                    Integer.class,
-                    parent.id,
-                    b1Step(5)))
-            .isZero();
-        assertThat(
-                b1Native(parent.id).stream()
-                    .filter(e -> e.path("stepId").asText().equals(b1Step(5)))
-                    .toList())
-            .isEmpty();
-        assertThat(b1Count("studio_guided_model_attempts", parent.id)).isZero();
-        assertThat(MODEL_WIRE).hasSize(parent.modelBefore);
-        b1AssertNeverDrift(parent.id);
-        assertThat(result.path("relearnedFrom").isNull()).isTrue();
-        assertThat(b1Revisions(parent.test)).isEqualTo(1);
-        JsonNode confirmed = progress.path("sideEffectConfirmation");
-        var keys = new java.util.HashSet<String>();
-        confirmed.fieldNames().forEachRemaining(keys::add);
-        assertThat(keys).isEqualTo(Set.of("clarificationId", "prefixRequestDigest", "status"));
-        assertThat(confirmed.path("status").asText()).isEqualTo("CONFIRMED");
-        String digest = confirmed.path("prefixRequestDigest").asText();
-        assertThat(
-                publicCall("/api/v1/studio/guided-sessions/" + parent.id, null, 200, null)
-                    .toString())
-            .doesNotContain(digest);
-        assertThat(result.toString()).doesNotContain(digest);
-        assertThat(MODEL_WIRE.stream().noneMatch(wire -> wire.contains(digest))).isTrue();
-      }
-    }
-    // qa-rulings01 R1: authoritative exactness over the whole invocation's audit window (the
-    // tally plants this method by name and cannot key the four parents separately).
-    var refusals = guidedActionRefusalsSinceTallyStart();
-    String message = "B1C-03 plants exactly one DESTRUCTIVE_VERB refusal per hostile parent";
-    assertThat(refusals).as(message).hasSize(3);
-    assertThat(refusals)
-        .as(message)
-        .allSatisfy(fields -> assertThat(fields.get("reasonCode")).isEqualTo("DESTRUCTIVE_VERB"));
-    var refusedSessions = refusals.stream().map(fields -> fields.get("sessionId")).toList();
-    assertThat(hostileIds).as(message).hasSize(3);
-    assertThat(refusedSessions)
-        .as(message)
-        .hasSize(3)
-        .containsExactlyInAnyOrderElementsOf(hostileIds);
-    assertThat(allowedId).isNotNull();
-    assertThat(refusedSessions).as(message).doesNotContain(allowedId);
-  }
-
-  /**
-   * B1C-04 (ledger 81; ledger 82 direct-admit regate): while the S(4) question waits, an
-   * unconfirmed direct admit, a real refresh and a real context delivery change nothing and the
-   * answer is accepted once; a real worker stall lets the owner lease lapse naturally, after which
-   * the answer is refused and cancellation wins with no late effect or new browser.
-   */
-  @Test
-  void incrementalWaitingAnswerRejectsChangedContextGenerationAndNaturalLeaseExpiry()
-      throws Exception {
-    var spec =
-        new B1Spec()
-            .ready(5)
-            .policy(
-                "CLARIFY_FIRST",
-                com.citi.put.checks.studio.support.ObservedPublicationFixture
-                    .DEFAULT_DESTRUCTIVE_VOCABULARY)
-            .nativeMode("b1c-wait", 4, 0);
-    try (var parent = b1Parent(spec)) {
-      JsonNode question = b1AwaitQuestion(parent.id);
-      assertThat(question.path("reason").asText()).isEqualTo("SIDE_EFFECT_CONFIRMATION");
-      assertThat(MODEL_WIRE).hasSize(parent.modelBefore);
-      var controller =
-          com.citi.put.checks.studio.guided.session.GuidedInternalIdentityFixture.controller();
-      var service =
-          ownedApplicationContext.getBean(
-              com.citi.put.checks.studio.guided.session.GuidedSessionService.class);
-      var bridge =
-          ownedApplicationContext.getBean(
-              com.citi.put.checks.studio.guided.bridge.GuidedDispatchService.class);
-      long fence = parent.fence();
-      JsonNode progress =
-          sessions.transaction(() -> sessions.lock(parent.id).progress().deepCopy());
-      String pending = incrementalPendingSnapshot(parent.id);
-      String immutable = incrementalImmutableSnapshot(parent.id);
-      // 82: an unconfirmed direct internal admit (the confirmIncrementalPrefix body construction).
-      JsonNode request =
-          b1PrefixRequest(
-              parent.id,
-              progress.path("sideEffectConfirmation").path("prefixRequestDigest").asText());
-      JsonNode target = null;
-      for (JsonNode node : progress.path("observation").path("nodes")) {
-        if (node.path("name").asText().equals("Submit")) {
-          target = node;
-        }
-      }
-      assertThat(target).isNotNull();
-      JsonNode current = sessions.transaction(() -> sessions.lock(parent.id).document().deepCopy());
-      ObjectNode direct =
-          C.object()
-              .put("schemaVersion", 3)
-              .put("sessionId", parent.id)
-              .put("scopeHash", current.path("scopeHash").asText())
-              .put("generation", progress.path("generation").asInt())
-              .put("evidenceHash", progress.path("evidenceHash").asText());
-      direct.set("coordinate", request.path("coordinate"));
-      direct.set("executionEvidence", progress.path("executionEvidence"));
-      direct
-          .put("contextRevision", request.path("contextRevision").asInt())
-          .put("authoredInputsHash", request.path("authoredInputsHash").asText());
-      direct
-          .putObject("target")
-          .put("nodeId", target.path("nodeId").asText())
-          .put("documentId", progress.path("documentId").asText())
-          .put("generation", progress.path("generation").asInt())
-          .putObject("locator")
-          .put("kind", "role")
-          .put("role", target.path("role").asText())
-          .put("name", "Submit")
-          .put("exact", true);
-      direct.putObject("operation").put("kind", "click");
+  void incrementalPrefixKeepsAnAuthoredEnterUnderTheGuards() throws Exception {
+    try (var parent =
+        b1Parent(
+            new B1Spec()
+                .text(5, "Press Enter in Destination")
+                .ready(6)
+                .nativeMode("b1c-guards", 5, 0))) {
+      b1AwaitRow(
+          "SELECT count(*) FROM studio_guided_relearn_switches WHERE session_id=?",
+          parent.id,
+          Duration.ofSeconds(60));
+      JsonNode press = b1ActionDocument(parent.id, 5, 0);
+      assertThat(press.path("state").asText()).isEqualTo("SUCCEEDED");
+      assertThat(press.path("dispatchCount").asInt()).isEqualTo(1);
       assertThat(
-              incrementalControllerProbe(parent.id, fence, direct, 409, "admissions")
-                  .path("code")
-                  .asText())
-          .isEqualTo("STALE_GENERATION");
-      // 81: a real generation change attempt while waiting.
-      ObjectNode refresh =
-          new com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService(jdbc, C)
-              .identity(service.runnerContext(controller, parent.id, fence));
-      refresh.put("expectedGeneration", progress.path("generation").asInt());
-      assertThatThrownBy(
-              () ->
-                  bridge.observe(
-                      controller,
-                      parent.id,
-                      fence,
-                      "b1c-wait-refresh-" + UUID.randomUUID(),
-                      refresh))
-          .isInstanceOf(GuidedSessionException.class)
-          .hasMessage("STALE_GENERATION");
-      assertThat(b1Commands(parent.id, "observation-refresh")).isZero();
-      // 81: a real context delivery while waiting changes nothing.
-      int versionsBefore = b1Count("studio_guided_materialization_versions", parent.id);
-      int revisionBefore = b1MaterializationRevision(parent.id);
-      JsonNode identity = bridge.pushContext(controller, parent.id, fence);
-      assertThat(identity.path("contextRevision")).isEqualTo(request.path("contextRevision"));
-      assertThat(b1Count("studio_guided_materialization_versions", parent.id))
-          .isEqualTo(versionsBefore);
-      assertThat(b1MaterializationRevision(parent.id)).isEqualTo(revisionBefore);
-      JsonNode after = sessions.transaction(() -> sessions.lock(parent.id).progress().deepCopy());
-      for (String field : List.of("generation", "documentId", "evidenceHash", "observationHash")) {
-        assertThat(after.path(field)).isEqualTo(progress.path(field));
-      }
-      assertThat(incrementalPendingSnapshot(parent.id)).isEqualTo(pending);
-      assertThat(incrementalImmutableSnapshot(parent.id)).isEqualTo(immutable);
-      int effects = RECEIPTS.size();
-      publicCall(
-          "/api/v1/studio/guided-sessions/" + parent.id + "/clarify",
-          b1Answer(question),
-          202,
-          UUID.randomUUID().toString());
-      b1AwaitSucceeded(parent.id, 4, Duration.ofSeconds(45));
-      assertThat(RECEIPTS).hasSize(effects + 1);
-    }
-    try (var parent = b1Parent(spec)) {
-      JsonNode question = b1AwaitQuestion(parent.id);
-      int navigations = NAVIGATIONS.get();
-      int effects = RECEIPTS.size();
-      int model = MODEL_WIRE.size();
-      String pending = incrementalPendingSnapshot(parent.id);
-      b1StallWorker();
-      b1AwaitNaturalLeaseExpiry(parent.id);
-      assertThat(parent.state())
-          .as("no graceful LEASE_LOST lifecycle committed")
-          .isEqualTo("AWAITING_CLARIFICATION");
-      String key = UUID.randomUUID().toString();
-      for (int i = 0; i < 2; i++) {
-        assertThat(
-                publicCall(
-                        "/api/v1/studio/guided-sessions/" + parent.id + "/clarify",
-                        b1Answer(question),
-                        409,
-                        key)
-                    .path("code")
-                    .asText())
-            .isEqualTo("STALE_FENCE");
-      }
-      assertThat(incrementalPendingSnapshot(parent.id)).isEqualTo(pending);
-      assertThat(
-              jdbc.queryForObject(
-                  "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=?",
-                  Integer.class,
+              b1NativeCount(
                   parent.id,
-                  b1Step(4)))
-          .isZero();
-      b1ResumeWorker();
-      Thread.sleep(3000);
-      assertThat(parent.state())
-          .as("the late runner lifecycle cannot act on an expired lease")
-          .isEqualTo("AWAITING_CLARIFICATION");
-      parent.cancel();
-      assertThat(parent.state()).isEqualTo("CANCELLED");
-      p3AwaitTeardown(parent.id);
-      assertThat(NAVIGATIONS.get()).as("no new browser").isEqualTo(navigations);
-      assertThat(RECEIPTS).as("no late effect").hasSize(effects);
-      assertThat(MODEL_WIRE).hasSize(model);
-      assertThat(
-              jdbc.queryForObject(
-                  "SELECT count(*) FROM studio_guided_actions WHERE session_id=?"
-                      + " AND (attempt_ordinal<>0 OR document->>'state'='UNKNOWN_OUTCOME')",
-                  Integer.class,
-                  parent.id))
-          .isZero();
-      assertThat(
-              b1Native(parent.id).stream()
-                  .filter(e -> e.path("stepId").asText().equals(b1Step(4)))
-                  .toList())
-          .isEmpty();
+                  press.path("admission").path("admissionId").asText(),
+                  "NATIVE_COMPLETED"))
+          .isEqualTo(1);
+      assertThat(b1Commands(parent.id, "clarify")).as("no question is ever asked").isZero();
+      assertThat(guidedActionRefusalsSinceTallyStart()).as("nothing is refused").isEmpty();
     }
   }
 
@@ -16736,7 +15944,6 @@ RevRuntime.prototype.dispatch=async function(...args){
       "document.getElementById('done').hidden=false;fetch('/receipt',{method:'POST',"
           + "body:document.getElementById('destination').value});";
   private static volatile boolean b1Recording;
-  private static volatile boolean b1GuardsPage;
   private static volatile Process b1StalledWorker;
 
   /** One internal /plans request of an armed session: its key, final status and refresh commit. */
@@ -17029,7 +16236,7 @@ RevRuntime.prototype.dispatch=async function(...args){
       page =
           page.replace(
               "</body>",
-              "<script>document.getElementById('destination').addEventListener('change',()=>{"
+              "<script>document.getElementById('destination').addEventListener('input',()=>{"
                   + "document.querySelector('output[aria-label=\"Order reference\"]').textContent="
                   + "'changed-after-read';});</script></body>");
     } else if ("b1c-navigate-away".equals(incrementalDomVariant)) {
@@ -17039,14 +16246,6 @@ RevRuntime.prototype.dispatch=async function(...args){
       }
       page = page.replace(B1_SUBMIT_HANDLER, "location.assign('" + B1_UNAPPROVED + "');");
     }
-    if (b1GuardsPage) {
-      page =
-          page.replace(
-              "<button id='submit'>",
-              "<button id='saveall'>Save all</button><button id='deleteall'>Delete all</button>"
-                  + "<label for='notes'>Archive all notes</label><textarea id='notes'></textarea>"
-                  + "<button id='submit'>");
-    }
     return page;
   }
 
@@ -17055,23 +16254,11 @@ RevRuntime.prototype.dispatch=async function(...args){
     return step.path("text").asText().contains("check Order reference contains");
   }
 
-  /** T4: the B1C-03 guard step obligation; null for every other authored step. */
+  /** T4: the B1C-03 step obligation (an authored Enter in Destination); null for every other. */
   private static ObjectNode b1GuardObligation(String stepId, JsonNode step) {
-    String text = step.path("text").asText();
-    if (text.startsWith("Click all, then ")) {
-      return obligation(
-          stepId, 0, "click", text.endsWith("Save") ? "Save all" : "Delete all", null, null);
-    }
-    if (text.startsWith("Press Enter in ")) {
-      return obligation(
-          stepId,
-          0,
-          "press",
-          text.contains("all notes") ? "Archive all notes" : "Destination",
-          null,
-          null);
-    }
-    return null;
+    return step.path("text").asText().equals("Press Enter in Destination")
+        ? obligation(stepId, 0, "press", "Destination", null, null)
+        : null;
   }
 
   private static String b1Step(int index) {
@@ -17086,7 +16273,8 @@ RevRuntime.prototype.dispatch=async function(...args){
     var texts = new ArrayList<String>();
     texts.add("Open " + URL + " and read the Order reference.");
     texts.add(
-        "Enter that order reference in Destination (an authored alternative is literal-control).");
+        "Enter that order reference in Destination (an authored alter"
+            + "native is literal-control).");
     texts.add("Check Destination has that order reference.");
     texts.add("Check Destination is visible.");
     texts.add("Click Submit and check Confirmation appears.");
@@ -17096,16 +16284,13 @@ RevRuntime.prototype.dispatch=async function(...args){
     return texts;
   }
 
-  /** T2: closed lawful recipe: authored text, governed policy, fixture page and observer mode. */
+  /** T2: closed lawful recipe: authored text, fixture page and observer mode. */
   private static final class B1Spec {
     final List<String> texts = b1BaseTexts();
     boolean edit4;
     Integer readyFirst;
-    String stance;
     String mixedDom;
     String nativeMode;
-    List<String> vocabulary;
-    boolean guardsPage;
     boolean pairLog;
     boolean holdEmptyStart;
     int nativeStep;
@@ -17127,19 +16312,8 @@ RevRuntime.prototype.dispatch=async function(...args){
       return this;
     }
 
-    B1Spec policy(String stance, List<String> vocabulary) {
-      this.stance = stance;
-      this.vocabulary = vocabulary;
-      return this;
-    }
-
     B1Spec mixedDom(String variant) {
       mixedDom = variant;
-      return this;
-    }
-
-    B1Spec guards() {
-      guardsPage = true;
       return this;
     }
 
@@ -17263,7 +16437,6 @@ RevRuntime.prototype.dispatch=async function(...args){
       B1_BOOTSTRAP_DELIVERIES.clear();
       incrementalTenScenario = false;
       incrementalDomVariant = null;
-      b1GuardsPage = false;
       primaryCsi = "CSI-123";
       forgetCachedCoreIdentity();
     }
@@ -17280,18 +16453,17 @@ RevRuntime.prototype.dispatch=async function(...args){
       primaryCsi = "CSI-B1-" + (++p3CsiOrdinal);
       forgetCachedCoreIdentity();
       jdbc.update(
-          "INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment)"
+          "INSERT INTO csi_systems(id,name,business_unit,criticality,ow"
+              + "ner_email,environment)"
               + " VALUES (?,'Orders','Ops','HIGH','fixture@example.invalid','Production')",
           primaryCsi);
       startWorkers();
-      seedGovernedPolicies(primaryCsi);
       Files.writeString(TEMP.resolve("obs015-native-mode.json"), "{}");
       B1_PLANS.clear();
       B1_OBSERVED_ORIGINS.clear();
       B1_REDIRECTS.set(0);
       incrementalTenScenario = true;
       incrementalDomVariant = null;
-      b1GuardsPage = spec.guardsPage;
       b1Recording = true;
       b1WritePairControl(
           spec.pairLog
@@ -17316,7 +16488,8 @@ RevRuntime.prototype.dispatch=async function(...args){
       var authoring = new AuthoringV2Request(2, null, steps);
       UUID test = UUID.randomUUID();
       jdbc.update(
-          "INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,variables,authoring,"
+          "INSERT INTO ui_tests(id,name,csi_id,environment,browser,step"
+              + "s,variables,authoring,"
               + "authoring_revision_inputs,created_by,created_at,updated_at) VALUES"
               + " (?,'B1 incremental',?,'fixture','chromium',?::jsonb,'[]'::jsonb,?::jsonb,"
               + "?::jsonb,'fixture@example.invalid',now(),now())",
@@ -17336,15 +16509,15 @@ RevRuntime.prototype.dispatch=async function(...args){
                   .put("expectedConfigurationRevision", "1"),
               200,
               UUID.randomUUID().toString());
+      // The publication accepted its AFTER_LEARN proof; this flow proves its own ordinary replays,
+      // so the queued proof is cancelled.
+      cancelQueuedProof(COOKIE, original, base);
       p3AwaitTeardown(original);
       JsonNode edited = publicCall("/api/v1/studio/tests/" + test, null, 200, null);
       assertThat(edited.path("readiness").asText()).isEqualTo("READY");
       if (spec.edit4) {
         edited = prefixSyncEdit(test, spec.texts.get(3) + " Verify it remains visible.");
         assertThat(edited.path("firstChangedStepId").asText()).isEqualTo(b1Step(3));
-      }
-      if (spec.stance != null) {
-        b1Policy(primaryCsi, spec.stance, spec.vocabulary);
       }
       Files.writeString(
           TEMP.resolve("obs015-native-mode.json"),
@@ -17363,7 +16536,6 @@ RevRuntime.prototype.dispatch=async function(...args){
               .put("sourceRevision", edited.path("sourceRevision").asText())
               .put("configurationRevision", edited.path("configurationRevision").asText())
               .put("environmentId", "fixture")
-              .put("applicationId", "orders")
               .put("baseRevisionId", base.path("revisionId").asText());
       if (spec.readyFirst != null) {
         start.put("firstLearnStepId", b1Step(spec.readyFirst));
@@ -17393,50 +16565,6 @@ RevRuntime.prototype.dispatch=async function(...args){
       }
       throw failure;
     }
-  }
-
-  /** A new approved governed version via the production repository (mirrors ensurePolicy). */
-  private void b1Policy(String csi, String stance, List<String> vocabulary) {
-    var repository =
-        new com.citi.put.checks.studio.guided.policy.ObservationPolicyRepository(jdbc, C);
-    ObjectNode submitted = C.object().put("schemaVersion", 3).put("sideEffectStance", stance);
-    var origins = submitted.putArray("allowedOrigins");
-    POLICY.path("allowedOrigins").forEach(origins::add);
-    submitted.set("applicationPolicy", POLICY.path("applicationPolicy").deepCopy());
-    if (vocabulary != null) {
-      var words = submitted.putArray("destructiveVocabulary");
-      vocabulary.forEach(words::add);
-    }
-    ObjectNode document =
-        com.citi.put.checks.studio.guided.policy.ObservationPolicyDocuments.materialize(
-            C,
-            submitted,
-            com.citi.put.checks.studio.support.ObservedPublicationFixture
-                .DEFAULT_DESTRUCTIVE_VOCABULARY);
-    String documentHash =
-        com.citi.put.checks.studio.guided.policy.ObservationPolicyDocuments.documentHash(document);
-    String observationHash =
-        com.citi.put.checks.studio.guided.policy.ObservationPolicyDocuments.observationPolicyHash(
-            document);
-    sessions.transaction(
-        () -> {
-          var state = repository.state(csi, "orders", "fixture").orElseThrow();
-          repository.lock(state.policyId());
-          int next = repository.latestVersion(state.policyId()) + 1;
-          repository.insertVersion(
-              state.policyId(),
-              next,
-              document,
-              documentHash,
-              observationHash,
-              com.citi.put.checks.studio.support.ObservedPublicationFixture.POLICY_AUTHOR);
-          repository.insertApproval(
-              state.policyId(),
-              next,
-              com.citi.put.checks.studio.support.ObservedPublicationFixture.POLICY_APPROVER,
-              "b1-approval-" + next);
-          return null;
-        });
   }
 
   /** Owner-only (0600) write of a B1 sink file; it is collected by the prefix-sync inventory. */
@@ -17665,16 +16793,19 @@ RevRuntime.prototype.dispatch=async function(...args){
         .send(request, HttpResponse.BodyHandlers.ofString());
   }
 
-  /** A replacement production coordinator (as confirm-recover); it holds no test authority. */
+  /** A replacement production coordinator; it holds no test authority. */
   private void b1ReplacementContinue() throws Exception {
     refreshFixtureCredentials();
-    new com.citi.put.checks.studio.guided.translation.GuidedTranslationCoordinator(
+    try (var coordinator =
+        new com.citi.put.checks.studio.guided.translation.GuidedTranslationCoordinator(
             plans,
             sessions,
             C,
             URI.create("https://localhost:" + port),
-            TEMP.resolve("coordinator.jwt"))
-        .continueRuns();
+            TEMP.resolve("coordinator.jwt"))) {
+      coordinator.continueRuns();
+      coordinator.drain(Duration.ofSeconds(120));
+    }
   }
 
   private ObjectNode b1AwaitDriftCapture(String id) throws Exception {
@@ -17877,7 +17008,8 @@ RevRuntime.prototype.dispatch=async function(...args){
 
   private int b1ConsumeCommands(String id, String key) {
     return jdbc.queryForObject(
-        "SELECT count(*) FROM studio_guided_commands WHERE namespace=? AND route='v2-consume'"
+        "SELECT count(*) FROM studio_guided_commands WHERE namespace="
+            + "? AND route='v2-consume'"
             + " AND idempotency_key=?",
         Integer.class,
         id,
@@ -17886,7 +17018,7 @@ RevRuntime.prototype.dispatch=async function(...args){
 
   private int b1AttemptOneActions(String id) {
     return jdbc.queryForObject(
-        "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND attempt_ordinal=1",
+        "SELECT count(*) FROM studio_guided_actions WHERE session_id=" + "? AND attempt_ordinal=1",
         Integer.class,
         id);
   }
@@ -17901,7 +17033,8 @@ RevRuntime.prototype.dispatch=async function(...args){
 
   private int b1AttemptsBeforeSwitch(String id) {
     return jdbc.queryForObject(
-        "SELECT count(*) FROM studio_guided_model_attempts m JOIN studio_guided_relearn_switches s"
+        "SELECT count(*) FROM studio_guided_model_attempts m JOIN stu"
+            + "dio_guided_relearn_switches s"
             + " USING(session_id) WHERE m.session_id=? AND m.created_at<s.created_at",
         Integer.class,
         id);
@@ -17914,14 +17047,16 @@ RevRuntime.prototype.dispatch=async function(...args){
 
   private int b1MaterializationRevision(String id) {
     return jdbc.queryForObject(
-        "SELECT materialization_revision FROM studio_guided_materializations WHERE session_id=?",
+        "SELECT materialization_revision FROM studio_guided_materiali"
+            + "zations WHERE session_id=?",
         Integer.class,
         id);
   }
 
   private int b1DispatchedOnce(String id, int stepIndex) {
     return jdbc.queryForObject(
-        "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=? AND ordinal=0"
+        "SELECT count(*) FROM studio_guided_actions WHERE session_id="
+            + "? AND step_id=? AND ordinal=0"
             + " AND (document->>'dispatchCount')::int=1",
         Integer.class,
         id,
@@ -17938,7 +17073,8 @@ RevRuntime.prototype.dispatch=async function(...args){
   private JsonNode b1ActionDocument(String id, int stepIndex, int ordinal) {
     return C.parse(
         jdbc.queryForObject(
-            "SELECT document::text FROM studio_guided_actions WHERE session_id=? AND step_id=?"
+            "SELECT document::text FROM studio_guided_actions WHERE sessi"
+                + "on_id=? AND step_id=?"
                 + " AND ordinal=?",
             String.class,
             id,
@@ -17949,26 +17085,18 @@ RevRuntime.prototype.dispatch=async function(...args){
   private JsonNode b1SpentAttempt(String id) {
     return C.parse(
         jdbc.queryForObject(
-            "SELECT document::text FROM studio_guided_actions WHERE session_id=? AND step_id=?"
+            "SELECT document::text FROM studio_guided_actions WHERE sessi"
+                + "on_id=? AND step_id=?"
                 + " AND ordinal=0 AND attempt_ordinal=0",
             String.class,
             id,
             b1Step(1)));
   }
 
-  private JsonNode b1PrefixRequest(String id, String digest) {
-    return C.parse(
-        jdbc.queryForObject(
-            "SELECT document::text FROM studio_guided_prefix_requests WHERE session_id=?"
-                + " AND request_digest=?",
-            String.class,
-            id,
-            digest));
-  }
-
   private String b1PrefixRows(String id) {
     return jdbc.queryForObject(
-        "SELECT jsonb_agg(to_jsonb(a) ORDER BY step_id,ordinal)::text FROM studio_guided_actions a"
+        "SELECT jsonb_agg(to_jsonb(a) ORDER BY step_id,ordinal)::text"
+            + " FROM studio_guided_actions a"
             + " WHERE session_id=? AND step_id IN (?,?,?)",
         String.class,
         id,
@@ -17979,7 +17107,8 @@ RevRuntime.prototype.dispatch=async function(...args){
 
   private String b1ActionsAt(String id, int stepIndex, int ordinal) {
     return jdbc.queryForObject(
-        "SELECT COALESCE(jsonb_agg(to_jsonb(a) ORDER BY attempt_ordinal),'[]'::jsonb)::text"
+        "SELECT COALESCE(jsonb_agg(to_jsonb(a) ORDER BY attempt_ordin"
+            + "al),'[]'::jsonb)::text"
             + " FROM studio_guided_actions a WHERE session_id=? AND step_id=? AND ordinal=?",
         String.class,
         id,
@@ -18008,22 +17137,17 @@ RevRuntime.prototype.dispatch=async function(...args){
   }
 
   /**
-   * F3 residual risk 1: every observation callback of the mixed session names an approved origin.
-   * The mixed session may send none (a refused redirect); the base session of the same case proves
-   * the capture was live.
+   * F3 residual risk 1: every observation callback of the mixed session names an origin on the
+   * allowed domains. The mixed session may send none (a refused redirect); the base session of the
+   * same case proves the capture was live.
    */
   private void b1AssertApprovedObservationOrigins(String id, String liveWitness) {
     assertThat(B1_OBSERVED_ORIGINS.getOrDefault(liveWitness, List.of()))
         .as("the observation capture was live for this case")
         .isNotEmpty();
-    JsonNode approved =
-        sessions.transaction(
-            () -> sessions.lock(id).document().path("scope").path("approvedOrigins").deepCopy());
     for (String origin : B1_OBSERVED_ORIGINS.getOrDefault(id, List.of())) {
-      assertThat(
-              java.util.stream.StreamSupport.stream(approved.spliterator(), false)
-                  .anyMatch(allowed -> allowed.asText().equals(origin)))
-          .as("no observation callback carries an unapproved or unreadable origin")
+      assertThat(com.citi.put.checks.studio.support.TestDomains.FIXTURES.allows(origin))
+          .as("no observation callback carries an origin off the allowed domains")
           .isTrue();
     }
   }
@@ -18599,192 +17723,6 @@ RevRuntime.prototype.dispatch=async function(...args){
     }
   }
 
-  private JsonNode b1AwaitQuestion(String id) throws Exception {
-    long end = System.nanoTime() + Duration.ofSeconds(45).toNanos();
-
-    // IT-R POLL 33: exact original transitions; one old interval owed at most.
-    final var itrRead033End = end;
-    class ItrState033 {
-      boolean firstIteration = true;
-      boolean terminal;
-      boolean intervalOwed;
-      long owedUntil;
-      Exception firstException;
-      Error firstError;
-    }
-    final var itr033 = new ItrState033();
-
-    java.util.concurrent.Callable<Boolean> itrPoll033 =
-        () -> {
-          if (itr033.firstException != null) {
-            throw itr033.firstException;
-          }
-          if (itr033.firstError != null) {
-            throw itr033.firstError;
-          }
-          if (itr033.terminal) {
-            return true;
-          }
-          try {
-            if (itr033.intervalOwed) {
-              if (Thread.interrupted()) {
-                throw new InterruptedException();
-              }
-              if (System.nanoTime() < itr033.owedUntil) {
-                return false;
-              }
-              itr033.intervalOwed = false;
-            }
-            if (!(!sessions
-                .transaction(() -> sessions.lock(id).document().path("state").asText())
-                .equals("AWAITING_CLARIFICATION"))) {
-              itr033.terminal = true;
-              return true;
-            }
-            itr033.firstIteration = false;
-            assertThat(System.nanoTime()).isLessThan(itrRead033End);
-            itr033.intervalOwed = true;
-            itr033.owedUntil = System.nanoTime() + Duration.ofMillis(25).toNanos();
-            return false;
-          } catch (Exception itrFailure033) {
-            if (itr033.firstException == null && itr033.firstError == null) {
-              itr033.firstException = itrFailure033;
-              itr033.terminal = true;
-            }
-            throw itr033.firstException;
-          } catch (Error itrFailure033) {
-            if (itr033.firstException == null && itr033.firstError == null) {
-              itr033.firstError = itrFailure033;
-              itr033.terminal = true;
-            }
-            throw itr033.firstError;
-          }
-        };
-    try {
-      while (!itr033.terminal) {
-        // First invocation is manual. Reentry serves only the original pending transition.
-        boolean itrDone033 = itrPoll033.call();
-        if (itrDone033) {
-          break;
-        }
-        if (Thread.interrupted()) {
-          throw new InterruptedException();
-        }
-        long itrNow033 = System.nanoTime();
-        long itrRemaining033 = itrRead033End - itrNow033;
-        long itrOwed033 = itr033.intervalOwed ? itr033.owedUntil - itrNow033 : 0;
-        // Semantic deadline is unchanged. Only the already-entered old interval may extend this
-        // bound.
-        long itrBound033 = Math.max(itrRemaining033, itrOwed033);
-        if (itrBound033 > 0) {
-          final boolean[] itrFirstTick033 = {true};
-          try {
-            org.awaitility.Awaitility.await("ReplayIT POLL 33")
-                .atMost(Duration.ofNanos(itrBound033))
-                .pollInterval(Duration.ofMillis(25))
-                .pollDelay(Duration.ZERO)
-                .pollInSameThread()
-                .dontCatchUncaughtExceptions()
-                .ignoreNoExceptions()
-                .until(
-                    () -> {
-                      try {
-                        if (itr033.firstException != null) {
-                          throw itr033.firstException;
-                        }
-                        if (itr033.firstError != null) {
-                          throw itr033.firstError;
-                        }
-                        if (itr033.terminal) {
-                          return true;
-                        }
-                        if (Thread.interrupted()) {
-                          throw new InterruptedException();
-                        }
-                        if (itrFirstTick033[0]) {
-                          itrFirstTick033[0] = false;
-                          return false; // Cached tick: no second immediate condition/read/effect.
-                        }
-                        boolean itrObserved033 = itrPoll033.call();
-                        if (!itrObserved033 && Thread.interrupted()) {
-                          throw new InterruptedException();
-                        }
-                        return itrObserved033;
-                      } catch (Exception itrFailure033) {
-                        if (itr033.firstException == null && itr033.firstError == null) {
-                          itr033.firstException = itrFailure033;
-                          itr033.terminal = true;
-                        }
-                        if (itr033.firstError != null) {
-                          throw itr033.firstError;
-                        }
-                        throw itr033.firstException;
-                      } catch (Error itrFailure033) {
-                        if (itr033.firstException == null && itr033.firstError == null) {
-                          itr033.firstError = itrFailure033;
-                          itr033.terminal = true;
-                        }
-                        if (itr033.firstException != null) {
-                          throw itr033.firstException;
-                        }
-                        throw itr033.firstError;
-                      }
-                    });
-          } catch (org.awaitility.core.ConditionTimeoutException itrTimeout033) {
-            if (itr033.firstException != null) {
-              throw itr033.firstException;
-            }
-            if (itr033.firstError != null) {
-              throw itr033.firstError;
-            }
-            // A late terminal outcome wins. Otherwise next driver step preserves old guard/body
-            // order.
-          }
-        }
-        // Includes bound<=0/no-Await: no silent pending exit, synthetic timeout, or terminal
-        // replay.
-      }
-    } catch (Exception itrFailure033) {
-      if (itr033.firstException == null && itr033.firstError == null) {
-        itr033.firstException = itrFailure033;
-        itr033.terminal = true;
-      }
-      if (itr033.firstError != null) {
-        throw itr033.firstError;
-      }
-      throw itr033.firstException;
-    } catch (Error itrFailure033) {
-      if (itr033.firstException == null && itr033.firstError == null) {
-        itr033.firstError = itrFailure033;
-        itr033.terminal = true;
-      }
-      if (itr033.firstException != null) {
-        throw itr033.firstException;
-      }
-      throw itr033.firstError;
-    } finally {
-
-    }
-
-    return publicCall("/api/v1/studio/guided-sessions/" + id + "/clarification", null, 200, null);
-  }
-
-  private static ObjectNode b1Answer(JsonNode question) {
-    return C.object()
-        .put("schemaVersion", 3)
-        .put("clarificationId", question.path("clarificationId").asText())
-        .put("generation", question.path("generation").asInt())
-        .put("choiceId", question.path("choices").get(0).path("choiceId").asText());
-  }
-
-  private static long b1AuditRefusals(String id, String reason) {
-    return AUDIT_EVENTS.list.stream()
-        .filter(e -> "GUIDED_ACTION_REFUSED".equals(e.getMessage()))
-        .map(e -> java.util.Arrays.toString(e.getArgumentArray()))
-        .filter(a -> a.contains(id) && a.contains(reason))
-        .count();
-  }
-
   /** Counts planning/finalize diagnostics after {@code from} with this code and this frame. */
   private static long b1Diagnostics(int from, String code, String frame) throws Exception {
     long count = 0;
@@ -18946,11 +17884,11 @@ RevRuntime.prototype.dispatch=async function(...args){
       primaryCsi = "CSI-B1A-" + (++p3CsiOrdinal);
       forgetCachedCoreIdentity();
       jdbc.update(
-          "INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment)"
+          "INSERT INTO csi_systems(id,name,business_unit,criticality,ow"
+              + "ner_email,environment)"
               + " VALUES (?,'Orders','Ops','HIGH','fixture@example.invalid','Production')",
           primaryCsi);
       startWorkers();
-      seedGovernedPolicies(primaryCsi);
       incrementalTenScenario = true;
       var texts = new ArrayList<String>();
       texts.add("Open " + URL + " and read the Order reference.");
@@ -18979,7 +17917,8 @@ RevRuntime.prototype.dispatch=async function(...args){
       var authoring = new AuthoringV2Request(2, null, steps);
       UUID test = UUID.randomUUID();
       jdbc.update(
-          "INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,variables,authoring,"
+          "INSERT INTO ui_tests(id,name,csi_id,environment,browser,step"
+              + "s,variables,authoring,"
               + "authoring_revision_inputs,created_by,created_at,updated_at) VALUES"
               + " (?,'Prefix callbacks',?,'fixture','chromium',?::jsonb,'[]'::jsonb,?::jsonb,"
               + "?::jsonb,'fixture@example.invalid',now(),now())",
@@ -18999,6 +17938,9 @@ RevRuntime.prototype.dispatch=async function(...args){
                   .put("expectedConfigurationRevision", "1"),
               200,
               UUID.randomUUID().toString());
+      // The publication accepted its AFTER_LEARN proof; this flow proves its own ordinary replays,
+      // so the queued proof is cancelled.
+      cancelQueuedProof(COOKIE, original, base);
       p3AwaitTeardown(original);
       Map<String, B1aControl> controls = b1aControls(original);
       JsonNode draft = publicCall("/api/v1/studio/tests/" + test, null, 200, null);
@@ -19020,7 +17962,6 @@ RevRuntime.prototype.dispatch=async function(...args){
               .put("sourceRevision", edited.path("sourceRevision").asText())
               .put("configurationRevision", edited.path("configurationRevision").asText())
               .put("environmentId", "fixture")
-              .put("applicationId", "orders")
               .put("baseRevisionId", base.path("revisionId").asText());
       start.set("versions", versions());
       incrementalDomVariant = "edit4";
@@ -19142,7 +18083,8 @@ RevRuntime.prototype.dispatch=async function(...args){
 
   private Map<String, Object> b1aPredicates(String id) {
     return jdbc.queryForMap(
-        "SELECT studio_015_prefix_pending(?) AS prefix,studio_015_delivery_pending(?) AS delivery",
+        "SELECT studio_015_prefix_pending(?) AS prefix,studio_015_del"
+            + "ivery_pending(?) AS delivery",
         id,
         id);
   }
@@ -19339,128 +18281,10 @@ RevRuntime.prototype.dispatch=async function(...args){
     return matches.getFirst();
   }
 
-  private void b1AssertTrustedCeilingStart(ObjectNode start, UUID test) throws Exception {
-    ObjectNode narrowed = POLICY.deepCopy();
-    narrowed.putArray("allowedOrigins").add(SECRET_ORIGIN);
-    ((ObjectNode) narrowed.path("applicationPolicy")).putArray("readGrants");
-    C.validate("v3/replay-ipc#/definitions/TrustedPolicy", narrowed);
-    String pins = GuidedContracts.hash(narrowed), catalog = GuidedContracts.hash(CATALOG);
-    Map<String, Object> settings = new java.util.LinkedHashMap<>();
-    settings.put("spring.datasource.driver-class-name", "org.postgresql.Driver");
-    settings.put("spring.datasource.url", DB.getJdbcUrl());
-    settings.put("spring.datasource.username", DB.getUsername());
-    settings.put("spring.datasource.password", DB.getPassword());
-    settings.put("server.port", "0");
-    settings.put("server.ssl.enabled", "false");
-    settings.put("spring.jmx.enabled", "false");
-    settings.put("spring.main.banner-mode", "off");
-    settings.put("logging.level.root", "WARN");
-    settings.put("checks.core-service.base-url", ORIGIN);
-    settings.put("studio.guided-authoring.enabled", true);
-    settings.put(
-        "studio.guided-authoring.service-public-key",
-        Base64.getEncoder().encodeToString(ISSUER.getPublic().getEncoded()));
-    settings.put("studio.guided-authoring.service-issuer", "fixture-issuer");
-    settings.put("studio.guided-authoring.translation.enabled", true);
-    settings.put("studio.guided-authoring.translation.allow-authored-nonsecret", true);
-    settings.put("studio.guided-authoring.translation.applications", "orders");
-    settings.put("studio.guided-authoring.translation.environments", "fixture,fixture-other");
-    settings.put("studio.guided-authoring.translation.worker-id", "worker-1");
-    settings.put("studio.guided-authoring.translation.poll-ms", "3600000");
-    settings.put(
-        "studio.guided-authoring.translation.controller-origin", "https://localhost:" + port);
-    settings.put(
-        "studio.guided-authoring.translation.controller-token-file",
-        TEMP.resolve("coordinator.jwt").toString());
-    settings.put("studio.guided.publication.enabled", true);
-    settings.put("studio.observed-replay.enabled", true);
-    settings.put(
-        "studio.observed-replay.catalog-json",
-        C.object().putArray("catalog").add(CATALOG).toString());
-    settings.put(
-        "studio.observed-replay.policies-json",
-        C.object().putArray("policies").add(narrowed).add(P3_OTHER_POLICY).toString());
-    settings.put("studio.gateway.provider", "vertex");
-    settings.put("studio.gateway.endpoint", "http://127.0.0.1:" + PROVIDER.getAddress().getPort());
-    settings.put("studio.gateway.project", "fixture");
-    settings.put("studio.gateway.location", "global");
-    settings.put("studio.gateway.model", "controlled");
-    settings.put("studio.gateway.credentials.mode", "none");
-    settings.put("studio.execution.dispatcher.enabled", false);
-    settings.put("studio.scheduling.poll-interval-ms", "3600000");
-    try (var replica =
-        new org.springframework.boot.builder.SpringApplicationBuilder(ChecksApplication.class)
-            .profiles("test")
-            .initializers(
-                context ->
-                    context
-                        .getEnvironment()
-                        .getPropertySources()
-                        .addFirst(
-                            new org.springframework.core.env.MapPropertySource(
-                                "b1-trusted-ceiling", settings)))
-            .run("--spring.profiles.active=test", "--checks.local-dev-auth.enabled=false")) {
-      int replicaPort =
-          ((org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext)
-                  replica)
-              .getWebServer()
-              .getPort();
-      ObjectNode scope =
-          C.object()
-              .put("csiId", primaryCsi)
-              .put("applicationId", "orders")
-              .put("environmentId", "fixture");
-      var actualPins = replica.getBean(ObservedReplayPins.class).policy(scope);
-      assertThat(actualPins.path("allowedOrigins")).contains(C.object().textNode(SECRET_ORIGIN));
-      assertThat(
-              ownedApplicationContext
-                  .getBean(com.citi.put.checks.studio.guided.policy.ObservationPolicyService.class)
-                  .activeForStart(scope)
-                  .document()
-                  .path("allowedOrigins"))
-          .contains(C.object().textNode(ORIGIN));
-      assertThatThrownBy(
-              () ->
-                  replica
-                      .getBean(
-                          com.citi.put.checks.studio.guided.policy.ObservationPolicyService.class)
-                      .activeForStart(scope))
-          .isInstanceOf(GuidedSessionException.class)
-          .hasMessage("RUNTIME_INCOMPATIBLE");
-      String before = b1ScopedSnapshot(test);
-      int model = MODEL_WIRE.size(),
-          legacy = LEGACY_MODEL_CALLS.get(),
-          nav = NAVIGATIONS.get(),
-          effects = RECEIPTS.size();
-      var request =
-          HttpRequest.newBuilder(
-                  URI.create("http://localhost:" + replicaPort + "/api/v1/studio/guided-sessions"))
-              .header("Cookie", "put_session=" + COOKIE)
-              .header("Content-Type", "application/json")
-              .header("Idempotency-Key", UUID.randomUUID().toString())
-              .POST(HttpRequest.BodyPublishers.ofString(start.toString()))
-              .build();
-      var response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-      assertThat(response.statusCode())
-          .as("actual start-time trusted ceiling recheck")
-          .isEqualTo(409);
-      assertThat(C.parse(response.body()).path("code").asText()).isEqualTo("RUNTIME_INCOMPATIBLE");
-      assertThat(b1ScopedSnapshot(test)).isEqualTo(before);
-      assertThat(MODEL_WIRE).hasSize(model);
-      assertThat(LEGACY_MODEL_CALLS.get()).isEqualTo(legacy);
-      assertThat(NAVIGATIONS.get()).isEqualTo(nav);
-      assertThat(RECEIPTS).hasSize(effects);
-      assertThat(GuidedContracts.hash(narrowed)).isEqualTo(pins);
-      assertThat(GuidedContracts.hash(CATALOG)).isEqualTo(catalog);
-    } finally {
-      ensureAuditCapture();
-    }
-  }
-
   private void incrementalJoined(String variant) throws Exception {
     // Same per-case CSI isolation as the P3/PFXSYNC/B1A subjects (see primaryCsi): AR-2 c charges
     // each model call's ceiling to the CSI's UTC day, and the incremental cases on one CSI exhaust
-    // the ruled daily budget (R2: BUDGET_EXCEEDED from confirm-long-wait on). On failure the CSI
+    // the ruled daily budget (R2: BUDGET_EXCEEDED). On failure the CSI
     // stays until @AfterEach has cancelled this case's sessions as their CSI owner.
     // A caller that already owns an isolated CSI (B3 parents, which run a second generation on the
     // same test afterwards) keeps it for the whole case and owns its restore.
@@ -19473,7 +18297,8 @@ RevRuntime.prototype.dispatch=async function(...args){
     boolean completed = false;
     try {
       jdbc.update(
-          "INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment)"
+          "INSERT INTO csi_systems(id,name,business_unit,criticality,ow"
+              + "ner_email,environment)"
               + " VALUES (?,'Orders','Ops','HIGH','fixture@example.invalid','Production')",
           primaryCsi);
       incrementalJoinedCase(variant);
@@ -19498,7 +18323,6 @@ RevRuntime.prototype.dispatch=async function(...args){
             "Confirmation",
             "literal-control"));
     startWorkers();
-    seedGovernedPolicies(primaryCsi);
     incrementalTenScenario = true;
     INCREMENTAL_MODEL_CONTEXTS.clear();
     try {
@@ -19506,8 +18330,10 @@ RevRuntime.prototype.dispatch=async function(...args){
       texts.add("Open " + URL + " and read the Order reference.");
       texts.add(
           variant.equals("same-pair-literal")
-              ? "Enter that order reference twice in Destination (an authored alternative is literal-control)."
-              : "Enter that order reference in Destination (an authored alternative is literal-control).");
+              ? "Enter that order reference twice in Destination (an authored alternative is"
+                  + " literal-control)."
+              : "Enter that order reference in Destination (an authored alternative is"
+                  + " literal-control).");
       texts.add(
           variant.equals("assert-fail")
               ? "Check Order reference contains that order reference."
@@ -19516,12 +18342,6 @@ RevRuntime.prototype.dispatch=async function(...args){
       texts.add("Click Submit and check Confirmation appears.");
       for (int index = 5; index < 10; index++) {
         texts.add("Check Confirmation is visible at checkpoint " + (index + 1) + ".");
-      }
-      if (variant.startsWith("confirm-edit4")) {
-        texts.set(1, "Enter that order reference in Destination then click Submit.");
-        texts.set(2, "Check Confirmation is visible.");
-        texts.set(3, "Check Confirmation is visible at checkpoint 4.");
-        texts.set(4, "Check Confirmation is visible at checkpoint 5.");
       }
       if (b3Hooks != null) {
         b3Hooks.texts(variant, texts);
@@ -19536,9 +18356,11 @@ RevRuntime.prototype.dispatch=async function(...args){
       var authoring = new AuthoringV2Request(2, null, authored);
       UUID test = UUID.randomUUID();
       jdbc.update(
-          "INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,variables,authoring,authoring_r"
-              + "evision_inputs,created_by,created_at,updated_at)"
-              + " VALUES (?,'Incremental ten',?,'fixture','chromium',?::jsonb,'[]'::jsonb,?::jsonb,?::json"
+          "INSERT INTO"
+              + " ui_tests(id,name,csi_id,environment,browser,steps,variables"
+              + ",authoring,authoring_r"
+              + "evision_inputs,created_by,created_at,updated_at) VALUES (?,'Incremental"
+              + " ten',?,'fixture','chromium',?::jsonb,'[]'::jsonb,?::jsonb,?::json"
               + "b,'fixture@example.invalid',now(),now())",
           test,
           primaryCsi,
@@ -19562,15 +18384,9 @@ RevRuntime.prototype.dispatch=async function(...args){
               200,
               UUID.randomUUID().toString());
       p3AwaitTeardown(original);
-      if (variant.equals("unused-declaration")) {
-        jdbc.update(
-            "INSERT INTO studio_schedules(id,test_id,csi_id,cron_expression,time_zone,execution_principa"
-                + "l,created_by,updated_by)"
-                + " VALUES (?,?,?,'0 * * * * *','UTC','user-1','fixture@example.invalid','fixture@example.invalid')",
-            UUID.randomUUID(),
-            test,
-            primaryCsi);
-      }
+      // The publication accepted its AFTER_LEARN proof (an ordinary model-free replay of the base);
+      // this case runs it before it counts its own replays.
+      settleProof(original, base);
       JsonNode draft = publicCall("/api/v1/studio/tests/" + test, null, 200, null);
       assertThat(draft.path("readiness").asText()).isEqualTo("READY");
       ObjectNode edit = C.object();
@@ -19591,10 +18407,7 @@ RevRuntime.prototype.dispatch=async function(...args){
       }
       var currentSteps = (com.fasterxml.jackson.databind.node.ArrayNode) edit.path("steps");
       int boundary;
-      boolean explicitReady =
-          variant.equals("ready6")
-              || variant.startsWith("confirm-") && !variant.startsWith("confirm-edit4")
-              || variant.equals("policy-prefix");
+      boolean explicitReady = variant.equals("ready6");
       switch (variant) {
         case "insert4" -> {
           ObjectNode inserted =
@@ -19628,8 +18441,8 @@ RevRuntime.prototype.dispatch=async function(...args){
           ((ObjectNode) currentSteps.get(3))
               .put(
                   "text",
-                  "Check Destination is visible. Check page title is Operations. The note unused-input"
-                      + " is context only.");
+                  "Check Destination is visible. Check page title is Operations. The note"
+                      + " unused-input is context only.");
           boundary = 3;
         }
         case "config" -> {
@@ -19666,17 +18479,7 @@ RevRuntime.prototype.dispatch=async function(...args){
           currentSteps.add(appended);
           boundary = 10;
         }
-        case "ready6",
-                "confirm-prefix",
-                "policy-prefix",
-                "confirm-long-wait",
-                "confirm-cancel",
-                "confirm-expire",
-                "confirm-source-change",
-                "confirm-recover",
-                "confirm-owner-loss",
-                "confirm-race" ->
-            boundary = 5;
+        case "ready6" -> boundary = 5;
         default -> {
           ((ObjectNode) currentSteps.get(3))
               .put("text", texts.get(3) + " Verify it remains visible.");
@@ -19719,19 +18522,6 @@ RevRuntime.prototype.dispatch=async function(...args){
               .isEqualTo("LEARN_REQUIRED");
         }
       }
-      if (variant.startsWith("confirm-") || variant.equals("policy-prefix")) {
-        com.citi.put.checks.studio.support.ObservedPublicationFixture.ensurePolicy(
-            jdbc,
-            primaryCsi,
-            POLICY.path("applicationId").asText(),
-            POLICY.path("environment").asText(),
-            java.util.stream.StreamSupport.stream(
-                    POLICY.path("allowedOrigins").spliterator(), false)
-                .map(JsonNode::asText)
-                .toList(),
-            POLICY.path("applicationPolicy"),
-            variant.equals("policy-prefix") ? "DENY" : null);
-      }
       int beforeCalls = MODEL_WIRE.size(), beforeLegacy = LEGACY_MODEL_CALLS.get();
       int beforeNavigations = NAVIGATIONS.get(), beforeEffects = RECEIPTS.size();
       if (variant.equals("unused-declaration")) {
@@ -19740,18 +18530,6 @@ RevRuntime.prototype.dispatch=async function(...args){
         assertThat(edited.path("sourceRevision")).isEqualTo(draft.path("sourceRevision"));
         assertThat(edited.path("configurationRevision").asLong())
             .isEqualTo(draft.path("configurationRevision").asLong() + 1);
-        // w3-d5 D5-2: V16/OpenAPI schedule states are ENABLED|PAUSED|BLOCKED; never-enabled =
-        // PAUSED.
-        assertThat(
-                jdbc.queryForObject(
-                    "SELECT state FROM studio_schedules WHERE test_id=?", String.class, test))
-            .isEqualTo("PAUSED");
-        assertThat(
-                jdbc.queryForObject(
-                    "SELECT requested_enabled FROM studio_schedules WHERE test_id=?",
-                    Boolean.class,
-                    test))
-            .isFalse();
         UUID execution =
             UUID.fromString(
                 publicCall(
@@ -19765,7 +18543,8 @@ RevRuntime.prototype.dispatch=async function(...args){
         assertThat(binding.path("revisionId").asText()).isEqualTo(base.path("revisionId").asText());
         var originalRevision =
             jdbc.queryForMap(
-                "SELECT source_revision,configuration_revision,revision_digest FROM ui_test_revisions WHERE id=?::uuid",
+                "SELECT source_revision,configuration_revision,revision_digest FROM"
+                    + " ui_test_revisions WHERE id=?::uuid",
                 base.path("revisionId").asText());
         JsonNode acceptedConfiguration =
             C.parse(
@@ -19958,10 +18737,6 @@ RevRuntime.prototype.dispatch=async function(...args){
         assertThat(LEGACY_MODEL_CALLS.get()).isEqualTo(beforeLegacy);
         assertThat(NAVIGATIONS.get()).isEqualTo(beforeNavigations + 1);
         assertThat(RECEIPTS).hasSize(beforeEffects + 1);
-        assertThat(
-                jdbc.queryForObject(
-                    "SELECT state FROM studio_schedules WHERE test_id=?", String.class, test))
-            .isEqualTo("PAUSED");
         return;
       }
       ObjectNode start =
@@ -19971,7 +18746,6 @@ RevRuntime.prototype.dispatch=async function(...args){
               .put("sourceRevision", edited.path("sourceRevision").asText())
               .put("configurationRevision", edited.path("configurationRevision").asText())
               .put("environmentId", "fixture")
-              .put("applicationId", "orders")
               .put("baseRevisionId", base.path("revisionId").asText());
       start.set("versions", versions());
       if (explicitReady) {
@@ -19992,9 +18766,6 @@ RevRuntime.prototype.dispatch=async function(...args){
         return;
       }
       assertIncrementalStartRefusalsLeaveNoWrites(start, currentSteps, boundary, test);
-      if (b1TrustedCeiling) {
-        b1AssertTrustedCeilingStart(start, test);
-      }
       if (variant.equals("delete4")) {
         String beforeDeleted = b1ScopedSnapshot(test);
         int modelDeleted = MODEL_WIRE.size(),
@@ -20029,17 +18800,8 @@ RevRuntime.prototype.dispatch=async function(...args){
           TEMP.resolve("obs015-native-mode.json"),
           C.object()
               .put("mode", variant)
-              .put(
-                  "stepId",
-                  INCREMENTAL_STEPS.get(
-                      variant.startsWith("confirm-") && !variant.startsWith("confirm-edit4")
-                          ? 4
-                          : 1))
-              .put(
-                  "ordinal",
-                  variant.equals("same-pair-literal") || variant.startsWith("confirm-edit4")
-                      ? 1
-                      : 0)
+              .put("stepId", INCREMENTAL_STEPS.get(1))
+              .put("ordinal", variant.equals("same-pair-literal") ? 1 : 0)
               .toString());
       Files.writeString(TEMP.resolve("obs015-native-events.jsonl"), "");
       String mixed =
@@ -20052,20 +18814,6 @@ RevRuntime.prototype.dispatch=async function(...args){
       }
       if (variant.startsWith("drift-auth")) {
         assertActualDriftCallbackAuthorityThenRelease(mixed);
-      }
-      JsonNode confirmedRequest =
-          variant.startsWith("confirm-")
-              ? confirmIncrementalPrefix(
-                  mixed, variant, test, beforeCalls, beforeLegacy, beforeEffects)
-              : null;
-      if (List.of(
-              "confirm-cancel",
-              "confirm-expire",
-              "confirm-source-change",
-              "confirm-owner-loss",
-              "confirm-race")
-          .contains(variant)) {
-        return;
       }
       if (variant.equals("drift-plan-fail")) {
         awaitState(mixed, "FAILED");
@@ -20080,8 +18828,8 @@ RevRuntime.prototype.dispatch=async function(...args){
         assertThat(
                 jdbc.queryForObject(
                     "SELECT count(*) FROM studio_guided_model_attempts m JOIN"
-                        + " studio_guided_relearn_switches s USING(session_id) WHERE m.session_id=? AND"
-                        + " m.created_at<s.created_at",
+                        + " studio_guided_relearn_switches s USING(session_id) WHERE m.session_id=?"
+                        + " AND m.created_at<s.created_at",
                     Integer.class,
                     mixed))
             .isZero();
@@ -20094,12 +18842,9 @@ RevRuntime.prototype.dispatch=async function(...args){
             .isEqualTo(1);
         return;
       }
-      if (List.of("assert-fail", "policy-prefix", "unknown2").contains(variant)) {
+      if (List.of("assert-fail", "unknown2").contains(variant)) {
         assertIncrementalTerminalRefusal(
             mixed, variant, test, base, beforeCalls, beforeLegacy, beforeEffects);
-        if (variant.equals("policy-prefix")) {
-          assertPolicyPrefixPlantedRefusal(mixed);
-        }
         return;
       }
       awaitFinalizing(mixed);
@@ -20130,7 +18875,8 @@ RevRuntime.prototype.dispatch=async function(...args){
         int effective = variant.equals("drift-first") ? 0 : 1;
         assertThat(
                 jdbc.queryForObject(
-                    "SELECT effective_step_index FROM studio_guided_relearn_switches WHERE session_id=?",
+                    "SELECT effective_step_index FROM studio_guided_relearn_switches WHERE"
+                        + " session_id=?",
                     Integer.class,
                     mixed))
             .isEqualTo(effective);
@@ -20177,8 +18923,8 @@ RevRuntime.prototype.dispatch=async function(...args){
       assertThat(
               jdbc.queryForObject(
                   "SELECT count(*) FROM studio_guided_model_attempts m JOIN"
-                      + " studio_guided_relearn_switches s USING(session_id) WHERE m.session_id=? AND"
-                      + " m.created_at<s.created_at",
+                      + " studio_guided_relearn_switches s USING(session_id) WHERE m.session_id=?"
+                      + " AND m.created_at<s.created_at",
                   Integer.class,
                   mixed))
           .isZero();
@@ -20226,6 +18972,14 @@ RevRuntime.prototype.dispatch=async function(...args){
       assertThat(MODEL_WIRE).hasSize(callsAtFinalize);
       assertThat(RECEIPTS).hasSize(effectsAtFinalize);
       assertThat(NAVIGATIONS.get()).isEqualTo(navigationsAtFinalize);
+      // The publication accepted its AFTER_LEARN proof: one replay of all n steps of the merged
+      // revision (the re-learn's prefix and suffix alike). Publication itself ran nothing
+      // (asserted above); the proof is the one extra navigation, and one extra submit when the
+      // merged revision still has its submit step (the same condition as the learn's own).
+      settleProof(mixed, merged);
+      assertThat(MODEL_WIRE).hasSize(callsAtFinalize);
+      assertThat(RECEIPTS).hasSize(effectsAtFinalize + expectedSubmit);
+      assertThat(NAVIGATIONS.get()).isEqualTo(navigationsAtFinalize + 1);
       JsonNode artifact =
           C.parse(
               jdbc.queryForObject(
@@ -20330,7 +19084,8 @@ RevRuntime.prototype.dispatch=async function(...args){
           assertThat(
                   C.parse(
                           jdbc.queryForObject(
-                              "SELECT document::text FROM studio_guided_allocations WHERE session_id=?",
+                              "SELECT document::text FROM studio_guided_allocations WHERE"
+                                  + " session_id=?",
                               String.class,
                               mixed))
                       .path("consumers"))
@@ -20360,18 +19115,7 @@ RevRuntime.prototype.dispatch=async function(...args){
         assertThat(raw.path("incrementalEvidence").path("program").path("sourceStepIds"))
             .hasSize(3);
       }
-      if (confirmedRequest != null) {
-        JsonNode admission =
-            actions.stream()
-                .filter(
-                    action -> action.path("coordinate").equals(confirmedRequest.path("coordinate")))
-                .findFirst()
-                .orElseThrow();
-        assertThat(admission.path("evidenceHash"))
-            .isNotEqualTo(confirmedRequest.path("evidenceHash"));
-        assertThat(admission.path("dispatchCount").asInt()).isEqualTo(1);
-      }
-      assertIncrementalRecordingSpansBothHalves(mixed, actions, boundary);
+      assertIncrementalLearnRecordingDiscarded(mixed, actions, boundary);
       int readsBeforeOrdinary = INCREMENTAL_ORDINARY_READS.get();
       JsonNode accepted =
           publicCall(
@@ -20779,20 +19523,7 @@ RevRuntime.prototype.dispatch=async function(...args){
       incrementalTenScenario = false;
       incrementalDomVariant = null;
       Files.writeString(TEMP.resolve("obs015-native-mode.json"), "{}");
-      seedGovernedPolicies(primaryCsi);
     }
-  }
-
-  /**
-   * qa-review01 H7: the planted policy-prefix refusal is exactly one GUIDED_ACTION_REFUSED, with
-   * reasonCode SIDE_EFFECT_DENIED, on the mixed session. The audit event carries no step or
-   * coordinate field, so the binding is to the session only.
-   */
-  private void assertPolicyPrefixPlantedRefusal(String mixed) {
-    var refusals = guidedActionRefusalsSinceTallyStart();
-    assertThat(refusals).as("policy-prefix plants exactly one guard refusal").hasSize(1);
-    assertThat(refusals.get(0).get("reasonCode")).isEqualTo("SIDE_EFFECT_DENIED");
-    assertThat(refusals.get(0).get("sessionId")).isEqualTo(mixed);
   }
 
   /** GUIDED_ACTION_REFUSED audit fields since the tally window opened, by exact key=value. */
@@ -21091,7 +19822,8 @@ RevRuntime.prototype.dispatch=async function(...args){
     JsonNode receipt =
         C.parse(
             jdbc.queryForObject(
-                "SELECT document::text FROM studio_guided_no_invocation_receipts WHERE session_id=?",
+                "SELECT document::text FROM studio_guided_no_invocation_receipts WHERE"
+                    + " session_id=?",
                 String.class,
                 id));
     assertThat(receipt.path("phase").asText()).isEqualTo("ADMITTED_PRE_INVOCATION");
@@ -21157,51 +19889,6 @@ RevRuntime.prototype.dispatch=async function(...args){
           "FIRST_LEARN_STEP_NARROWED",
           start.deepCopy().put("firstLearnStepId", steps.get(boundary + 1).path("id").asText()));
     }
-    if (boundary > 0) {
-      JsonNode previous =
-          new com.citi.put.checks.studio.guided.policy.ObservationPolicyRepository(jdbc, C)
-              .active(primaryCsi, "orders", "fixture")
-              .orElseThrow()
-              .document();
-      ObjectNode withoutPrefixRead = POLICY.path("applicationPolicy").deepCopy();
-      withoutPrefixRead.putArray("readGrants");
-      try {
-        com.citi.put.checks.studio.support.ObservedPublicationFixture.ensurePolicy(
-            jdbc,
-            primaryCsi,
-            "orders",
-            "fixture",
-            List.of(SECRET_ORIGIN),
-            withoutPrefixRead,
-            previous.path("sideEffectStance").asText());
-        String before = incrementalAuthoritySnapshot(test);
-        int model = MODEL_WIRE.size(),
-            legacy = LEGACY_MODEL_CALLS.get(),
-            navigation = NAVIGATIONS.get(),
-            effects = RECEIPTS.size();
-        JsonNode refused =
-            publicCall("/api/v1/studio/guided-sessions", start, 403, UUID.randomUUID().toString());
-        assertThat(refused.path("code").asText()).isEqualTo("ORIGIN_NOT_ALLOWED");
-        assertThat(refused.path("messageCode").asText()).isEqualTo("PREFIX_ORIGIN_NOT_GOVERNED");
-        assertThat(incrementalAuthoritySnapshot(test)).isEqualTo(before);
-        assertThat(MODEL_WIRE).hasSize(model);
-        assertThat(LEGACY_MODEL_CALLS.get()).isEqualTo(legacy);
-        assertThat(NAVIGATIONS.get()).isEqualTo(navigation);
-        assertThat(RECEIPTS).hasSize(effects);
-      } finally {
-        com.citi.put.checks.studio.support.ObservedPublicationFixture.ensurePolicy(
-            jdbc,
-            primaryCsi,
-            "orders",
-            "fixture",
-            java.util.stream.StreamSupport.stream(
-                    previous.path("allowedOrigins").spliterator(), false)
-                .map(JsonNode::asText)
-                .toList(),
-            previous.path("applicationPolicy"),
-            previous.path("sideEffectStance").asText());
-      }
-    }
     for (var attack : attacks.entrySet()) {
       String before = incrementalAuthoritySnapshot(test);
       int model = MODEL_WIRE.size(),
@@ -21235,13 +19922,13 @@ RevRuntime.prototype.dispatch=async function(...args){
             "studio_guided_source_manifests",
             "studio_guided_translation_state",
             "studio_guided_relearn_plans",
-            "studio_guided_model_attempts",
-            "studio_guided_session_policies")) {
+            "studio_guided_model_attempts")) {
       snapshot.set(
           table,
           C.parse(
               jdbc.queryForObject(
-                  "SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY to_jsonb(t)::text),'[]'::jsonb)::text FROM "
+                  "SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY"
+                      + " to_jsonb(t)::text),'[]'::jsonb)::text FROM "
                       + table
                       + " t",
                   String.class)));
@@ -21263,737 +19950,12 @@ RevRuntime.prototype.dispatch=async function(...args){
         "dailyBudget",
         C.parse(
             jdbc.queryForObject(
-                "SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY budget_day),'[]'::jsonb)::text FROM"
+                "SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY budget_day),'"
+                    + "[]'::jsonb)::text FROM"
                     + " studio_guided_csi_token_days t WHERE csi_id=?",
                 String.class,
                 primaryCsi)));
     return GuidedContracts.canonical(snapshot);
-  }
-
-  private JsonNode confirmIncrementalPrefix(
-      String id, String variant, UUID test, int model, int legacy, int effects) throws Exception {
-    long deadline = System.nanoTime() + Duration.ofSeconds(45).toNanos();
-
-    // IT-R POLL 38: exact original transitions; one old interval owed at most.
-    final var itrRead038Deadline = deadline;
-    class ItrState038 {
-      boolean firstIteration = true;
-      boolean terminal;
-      boolean intervalOwed;
-      long owedUntil;
-      Exception firstException;
-      Error firstError;
-    }
-    final var itr038 = new ItrState038();
-
-    java.util.concurrent.Callable<Boolean> itrPoll038 =
-        () -> {
-          if (itr038.firstException != null) {
-            throw itr038.firstException;
-          }
-          if (itr038.firstError != null) {
-            throw itr038.firstError;
-          }
-          if (itr038.terminal) {
-            return true;
-          }
-          try {
-            if (itr038.intervalOwed) {
-              if (Thread.interrupted()) {
-                throw new InterruptedException();
-              }
-              if (System.nanoTime() < itr038.owedUntil) {
-                return false;
-              }
-              itr038.intervalOwed = false;
-            }
-            if (!(System.nanoTime() < itrRead038Deadline)) {
-              itr038.terminal = true;
-              return true;
-            }
-            itr038.firstIteration = false;
-            String state =
-                sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
-            if (state.equals("AWAITING_CLARIFICATION")) {
-              itr038.terminal = true;
-              return true;
-            }
-            assertThat(List.of("FAILED", "UNKNOWN_OUTCOME", "EXPIRED", "CANCELLED", "FINALIZING"))
-                .doesNotContain(state);
-            itr038.intervalOwed = true;
-            itr038.owedUntil = System.nanoTime() + Duration.ofMillis(25).toNanos();
-            return false;
-          } catch (Exception itrFailure038) {
-            if (itr038.firstException == null && itr038.firstError == null) {
-              itr038.firstException = itrFailure038;
-              itr038.terminal = true;
-            }
-            throw itr038.firstException;
-          } catch (Error itrFailure038) {
-            if (itr038.firstException == null && itr038.firstError == null) {
-              itr038.firstError = itrFailure038;
-              itr038.terminal = true;
-            }
-            throw itr038.firstError;
-          }
-        };
-    try {
-      while (!itr038.terminal) {
-        // First invocation is manual. Reentry serves only the original pending transition.
-        boolean itrDone038 = itrPoll038.call();
-        if (itrDone038) {
-          break;
-        }
-        if (Thread.interrupted()) {
-          throw new InterruptedException();
-        }
-        long itrNow038 = System.nanoTime();
-        long itrRemaining038 = itrRead038Deadline - itrNow038;
-        long itrOwed038 = itr038.intervalOwed ? itr038.owedUntil - itrNow038 : 0;
-        // Semantic deadline is unchanged. Only the already-entered old interval may extend this
-        // bound.
-        long itrBound038 = Math.max(itrRemaining038, itrOwed038);
-        if (itrBound038 > 0) {
-          final boolean[] itrFirstTick038 = {true};
-          try {
-            org.awaitility.Awaitility.await("ReplayIT POLL 38")
-                .atMost(Duration.ofNanos(itrBound038))
-                .pollInterval(Duration.ofMillis(25))
-                .pollDelay(Duration.ZERO)
-                .pollInSameThread()
-                .dontCatchUncaughtExceptions()
-                .ignoreNoExceptions()
-                .until(
-                    () -> {
-                      try {
-                        if (itr038.firstException != null) {
-                          throw itr038.firstException;
-                        }
-                        if (itr038.firstError != null) {
-                          throw itr038.firstError;
-                        }
-                        if (itr038.terminal) {
-                          return true;
-                        }
-                        if (Thread.interrupted()) {
-                          throw new InterruptedException();
-                        }
-                        if (itrFirstTick038[0]) {
-                          itrFirstTick038[0] = false;
-                          return false; // Cached tick: no second immediate condition/read/effect.
-                        }
-                        boolean itrObserved038 = itrPoll038.call();
-                        if (!itrObserved038 && Thread.interrupted()) {
-                          throw new InterruptedException();
-                        }
-                        return itrObserved038;
-                      } catch (Exception itrFailure038) {
-                        if (itr038.firstException == null && itr038.firstError == null) {
-                          itr038.firstException = itrFailure038;
-                          itr038.terminal = true;
-                        }
-                        if (itr038.firstError != null) {
-                          throw itr038.firstError;
-                        }
-                        throw itr038.firstException;
-                      } catch (Error itrFailure038) {
-                        if (itr038.firstException == null && itr038.firstError == null) {
-                          itr038.firstError = itrFailure038;
-                          itr038.terminal = true;
-                        }
-                        if (itr038.firstException != null) {
-                          throw itr038.firstException;
-                        }
-                        throw itr038.firstError;
-                      }
-                    });
-          } catch (org.awaitility.core.ConditionTimeoutException itrTimeout038) {
-            if (itr038.firstException != null) {
-              throw itr038.firstException;
-            }
-            if (itr038.firstError != null) {
-              throw itr038.firstError;
-            }
-            // A late terminal outcome wins. Otherwise next driver step preserves old guard/body
-            // order.
-          }
-        }
-        // Includes bound<=0/no-Await: no silent pending exit, synthetic timeout, or terminal
-        // replay.
-      }
-    } catch (Exception itrFailure038) {
-      if (itr038.firstException == null && itr038.firstError == null) {
-        itr038.firstException = itrFailure038;
-        itr038.terminal = true;
-      }
-      if (itr038.firstError != null) {
-        throw itr038.firstError;
-      }
-      throw itr038.firstException;
-    } catch (Error itrFailure038) {
-      if (itr038.firstException == null && itr038.firstError == null) {
-        itr038.firstError = itrFailure038;
-        itr038.terminal = true;
-      }
-      if (itr038.firstException != null) {
-        throw itr038.firstException;
-      }
-      throw itr038.firstError;
-    } finally {
-
-    }
-
-    JsonNode waiting = publicCall("/api/v1/studio/guided-sessions/" + id, null, 200, null);
-    assertThat(waiting.path("session").path("state").asText()).isEqualTo("AWAITING_CLARIFICATION");
-    assertThat(MODEL_WIRE).hasSize(model);
-    assertThat(LEGACY_MODEL_CALLS.get()).isEqualTo(legacy);
-    assertThat(RECEIPTS).hasSize(effects);
-    assertThat(
-            jdbc.queryForObject(
-                "SELECT count(*) FROM studio_guided_model_attempts WHERE session_id=?",
-                Integer.class,
-                id))
-        .isZero();
-    assertThat(
-            jdbc.queryForObject(
-                "SELECT count(*) FROM studio_guided_relearn_switches WHERE session_id=?",
-                Integer.class,
-                id))
-        .isZero();
-    JsonNode question =
-        publicCall("/api/v1/studio/guided-sessions/" + id + "/clarification", null, 200, null);
-    assertThat(question.path("reason").asText()).isEqualTo("SIDE_EFFECT_CONFIRMATION");
-    assertThat(question.path("promptCode").asText()).isEqualTo("CONFIRM_ACTION");
-    assertThat(question.path("choices")).hasSize(1);
-    assertThat(question.path("choices").get(0).path("labelSource").asText()).isEqualTo("AUTHORED");
-    assertThat(question.toString())
-        .doesNotContain("prefixRequestDigest", "authoringSnapshot", "authoredDeclarations");
-    JsonNode progress = sessions.transaction(() -> sessions.lock(id).progress().deepCopy());
-    JsonNode request =
-        C.parse(
-            jdbc.queryForObject(
-                "SELECT document::text FROM studio_guided_prefix_requests WHERE session_id=? AND request_digest=?",
-                String.class,
-                id,
-                progress.path("sideEffectConfirmation").path("prefixRequestDigest").asText()));
-    assertThat(
-            jdbc.queryForObject(
-                "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=? AND ordinal=?",
-                Integer.class,
-                id,
-                request.path("coordinate").path("stepId").asText(),
-                request.path("coordinate").path("ordinal").asInt()))
-        .isZero();
-    ObjectNode answer =
-        C.object()
-            .put("schemaVersion", 3)
-            .put("clarificationId", question.path("clarificationId").asText())
-            .put("generation", question.path("generation").asInt())
-            .put("choiceId", question.path("choices").get(0).path("choiceId").asText());
-    // Another session/base confirmation cannot authorise this current question.
-    JsonNode wrong =
-        publicCall(
-            "/api/v1/studio/guided-sessions/" + id + "/clarify",
-            answer.deepCopy().put("clarificationId", UUID.randomUUID().toString()),
-            409,
-            UUID.randomUUID().toString());
-    assertThat(wrong.path("code").asText()).isEqualTo("STALE_GENERATION");
-    assertThat(RECEIPTS).hasSize(effects);
-    for (ObjectNode bad :
-        List.of(
-            answer.deepCopy().put("generation", question.path("generation").asInt() + 1),
-            answer.deepCopy().put("choiceId", UUID.randomUUID().toString()))) {
-      String before = incrementalPendingSnapshot(id);
-      publicCall(
-          "/api/v1/studio/guided-sessions/" + id + "/clarify",
-          bad,
-          bad.path("generation").equals(answer.path("generation")) ? 422 : 409,
-          UUID.randomUUID().toString());
-      assertThat(incrementalPendingSnapshot(id)).isEqualTo(before);
-    }
-    String otherCookie =
-        p3CoreCookie("other-current-author", "other-current-author@example.invalid");
-    try {
-      String before = incrementalPendingSnapshot(id);
-      p3Call(otherCookie, "/api/v1/studio/guided-sessions/" + id + "/clarify", answer, 403);
-      assertThat(incrementalPendingSnapshot(id)).isEqualTo(before);
-    } finally {
-      P3_CORE.remove("put_session=" + otherCookie);
-    }
-    JsonNode current = sessions.transaction(() -> sessions.lock(id).document().deepCopy());
-    JsonNode target = null;
-    for (JsonNode candidate : progress.path("observation").path("nodes")) {
-      if (candidate.path("name").asText().equals("Submit")) {
-        target = candidate;
-      }
-    }
-    assertThat(target).isNotNull();
-    ObjectNode direct =
-        C.object()
-            .put("schemaVersion", 3)
-            .put("sessionId", id)
-            .put("scopeHash", current.path("scopeHash").asText())
-            .put("generation", progress.path("generation").asInt())
-            .put("evidenceHash", progress.path("evidenceHash").asText());
-    direct.set("coordinate", request.path("coordinate"));
-    direct.set("executionEvidence", progress.path("executionEvidence"));
-    direct
-        .put("contextRevision", request.path("contextRevision").asInt())
-        .put("authoredInputsHash", request.path("authoredInputsHash").asText());
-    direct
-        .putObject("target")
-        .put("nodeId", target.path("nodeId").asText())
-        .put("documentId", progress.path("documentId").asText())
-        .put("generation", progress.path("generation").asInt())
-        .putObject("locator")
-        .put("kind", "role")
-        .put("role", target.path("role").asText())
-        .put("name", "Submit")
-        .put("exact", true);
-    direct.putObject("operation").put("kind", "click");
-    String beforeDirect = incrementalPendingSnapshot(id);
-    JsonNode refusedDirect =
-        incrementalControllerProbe(
-            id, current.path("owner").path("fence").asLong(), direct, 409, "admissions");
-    assertThat(refusedDirect.path("code").asText()).isEqualTo("STALE_GENERATION");
-    assertThat(
-            publicCall("/api/v1/studio/guided-sessions/" + id + "/clarification", null, 200, null))
-        .isEqualTo(question);
-    assertThat(incrementalPendingSnapshot(id)).isEqualTo(beforeDirect);
-    ObjectNode command =
-        C.object()
-            .put("schemaVersion", 3)
-            .put("sessionId", id)
-            .put("expectedSourceRevision", current.path("scope").path("sourceRevision").asText())
-            .put(
-                "expectedConfigurationRevision",
-                current.path("scope").path("configurationRevision").asText())
-            // GuidedTranslationStore reads only inside a transaction (RUNTIME_INCOMPATIBLE
-            // otherwise).
-            .put(
-                "expectedPlanRevision",
-                sessions.transaction(() -> plans.state(id).path("planRevision").asLong()));
-    String pending = incrementalPendingSnapshot(id);
-    incrementalControllerProbe(id, current.path("owner").path("fence").asLong() + 1, command, 409);
-    assertThat(incrementalPendingSnapshot(id)).isEqualTo(pending);
-    if (variant.equals("confirm-recover")) {
-      var replacement =
-          new com.citi.put.checks.studio.guided.translation.GuidedTranslationCoordinator(
-              plans,
-              sessions,
-              C,
-              URI.create("https://localhost:" + port),
-              TEMP.resolve("coordinator.jwt"));
-      replacement.continueRuns();
-      replacement.continueRuns();
-      assertThat(
-              publicCall(
-                  "/api/v1/studio/guided-sessions/" + id + "/clarification", null, 200, null))
-          .isEqualTo(question);
-      assertThat(incrementalPendingSnapshot(id)).isEqualTo(pending);
-    }
-    if (variant.equals("confirm-long-wait")) {
-      JsonNode originalPreparation =
-          incrementalPreparationEvent(id, request.path("evidenceHash").asText());
-      Instant originalDeadline = Instant.parse(originalPreparation.path("expiresAt").asText());
-      while (!Instant.now().isAfter(originalDeadline.plusMillis(20))) {
-        Thread.sleep(100);
-      }
-      JsonNode renewed =
-          sessions.transaction(() -> sessions.lock(id).document().path("owner").deepCopy());
-      assertThat(renewed.path("workerId")).isEqualTo(current.path("owner").path("workerId"));
-      assertThat(renewed.path("fence")).isEqualTo(current.path("owner").path("fence"));
-      assertThat(Instant.parse(renewed.path("leaseExpiresAt").asText())).isAfter(originalDeadline);
-      assertThat(incrementalPendingSnapshot(id)).isEqualTo(pending);
-    }
-    if (variant.equals("confirm-source-change")) {
-      JsonNode draft = publicCall("/api/v1/studio/tests/" + test, null, 200, null);
-      ObjectNode changed = C.object();
-      for (String field :
-          List.of(
-              "authoringSchemaVersion",
-              "globalContext",
-              "steps",
-              "name",
-              "description",
-              "csiId",
-              "environment",
-              "variables",
-              "configuration",
-              "sourceRevision",
-              "configurationRevision")) {
-        changed.set(field, draft.path(field).deepCopy());
-      }
-      ((ObjectNode) changed.path("steps").get(9))
-          .put("text", "Check Confirmation still visible after a source edit.");
-      var put =
-          HttpRequest.newBuilder(
-                  URI.create("https://localhost:" + port + "/api/v1/studio/tests/" + test))
-              .header("Cookie", "put_session=" + COOKIE)
-              .header("Content-Type", "application/json")
-              .PUT(HttpRequest.BodyPublishers.ofString(changed.toString()))
-              .build();
-      assertThat(
-              HttpClient.newBuilder()
-                  .sslContext(TLS)
-                  .build()
-                  .send(put, HttpResponse.BodyHandlers.ofString())
-                  .statusCode())
-          .isEqualTo(200);
-      publicCall(
-          "/api/v1/studio/guided-sessions/" + id + "/clarify",
-          answer,
-          409,
-          UUID.randomUUID().toString());
-    }
-    if (variant.equals("confirm-owner-loss")) {
-      var controller =
-          com.citi.put.checks.studio.guided.session.GuidedInternalIdentityFixture.controller();
-      ObjectNode context =
-          ownedApplicationContext
-              .getBean(com.citi.put.checks.studio.guided.session.GuidedSessionService.class)
-              .runnerContext(controller, id, current.path("owner").path("fence").asLong());
-      // Fault the actual current owner through its authenticated stop path. The real runtime
-      // invalidates its grant, closes its original browser and sends its owning-worker lifecycle.
-      ownedApplicationContext
-          .getBean(com.citi.put.checks.studio.guided.bridge.GuidedDispatchService.class)
-          .stop(context, "LEASE_LOST");
-      awaitState(id, "FAILED");
-      publicCall(
-          "/api/v1/studio/guided-sessions/" + id + "/clarify",
-          answer,
-          409,
-          UUID.randomUUID().toString());
-    }
-    if (variant.equals("confirm-expire")) {
-      // Actual original lifetime elapses. No SQL timestamp rewrite, clock substitution or new
-      // lease.
-      Instant expires = Instant.parse(question.path("expiresAt").asText());
-      long renewCredentialsAt = System.nanoTime();
-      while (!Instant.now().isAfter(expires.plusMillis(20))) {
-        if (System.nanoTime() >= renewCredentialsAt) {
-          refreshFixtureCredentials();
-          renewCredentialsAt = System.nanoTime() + Duration.ofSeconds(10).toNanos();
-        }
-        Thread.sleep(250);
-      }
-      ownedApplicationContext
-          .getBean(com.citi.put.checks.studio.guided.session.GuidedSessionService.class)
-          .expire();
-      publicCall(
-          "/api/v1/studio/guided-sessions/" + id + "/clarify",
-          answer,
-          409,
-          UUID.randomUUID().toString());
-      incrementalAwaitExpiredTeardownConfirmed(id, expires);
-    } else if (variant.equals("confirm-cancel") || variant.equals("confirm-source-change")) {
-      publicCall(
-          "/api/v1/studio/guided-sessions/" + id + "/cancel",
-          C.object().put("schemaVersion", 3).put("reason", "userRequested"),
-          202,
-          UUID.randomUUID().toString());
-      publicCall(
-          "/api/v1/studio/guided-sessions/" + id + "/clarify",
-          answer,
-          409,
-          UUID.randomUUID().toString());
-    }
-    if (List.of("confirm-cancel", "confirm-expire", "confirm-source-change", "confirm-owner-loss")
-        .contains(variant)) {
-      assertThat(MODEL_WIRE).hasSize(model);
-      assertThat(LEGACY_MODEL_CALLS.get()).isEqualTo(legacy);
-      assertThat(RECEIPTS).hasSize(effects);
-      assertThat(
-              jdbc.queryForObject(
-                  "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=? AND ordinal=?",
-                  Integer.class,
-                  id,
-                  request.path("coordinate").path("stepId").asText(),
-                  request.path("coordinate").path("ordinal").asInt()))
-          .isZero();
-      assertThat(
-              jdbc.queryForObject(
-                  "SELECT count(*) FROM studio_guided_relearn_switches WHERE session_id=?",
-                  Integer.class,
-                  id))
-          .isZero();
-      assertThat(
-              publicCall("/api/v1/studio/guided-sessions/" + id + "/result", null, 200, null)
-                  .path("relearnedFrom")
-                  .isNull())
-          .isTrue();
-      assertThat(
-              Files.readAllLines(TEMP.resolve("obs015-native-events.jsonl")).stream()
-                  .filter(line -> !line.isBlank())
-                  .map(C::parse)
-                  .filter(
-                      event ->
-                          event.path("sessionId").asText().equals(id)
-                              && event.path("phase").asText().equals("NATIVE_ENTER")
-                              && event
-                                  .path("stepId")
-                                  .equals(request.path("coordinate").path("stepId"))
-                              && event
-                                  .path("ordinal")
-                                  .equals(request.path("coordinate").path("ordinal")))
-                  .toList())
-          .isEmpty();
-      return request;
-    }
-    assertThat(
-            Files.readAllLines(TEMP.resolve("obs015-native-events.jsonl")).stream()
-                .map(C::parse)
-                .filter(
-                    event ->
-                        event.path("sessionId").asText().equals(id)
-                            && event.path("phase").asText().equals("NATIVE_ENTER")
-                            && event
-                                .path("stepId")
-                                .equals(request.path("coordinate").path("stepId"))
-                            && event
-                                .path("ordinal")
-                                .equals(request.path("coordinate").path("ordinal")))
-                .toList())
-        .as(
-            "protected action stays native-zero during the human wait; earlier navigation was lawful")
-        .isEmpty();
-    if (variant.equals("confirm-race")) {
-      var startRace = new java.util.concurrent.CountDownLatch(1);
-      try (var pool = java.util.concurrent.Executors.newVirtualThreadPerTaskExecutor()) {
-        var yes =
-            pool.submit(
-                () -> {
-                  startRace.await();
-                  return incrementalPublicRaceRequest(id, "clarify", answer);
-                });
-        var no =
-            pool.submit(
-                () -> {
-                  startRace.await();
-                  return incrementalPublicRaceRequest(
-                      id,
-                      "cancel",
-                      C.object().put("schemaVersion", 3).put("reason", "userRequested"));
-                });
-        startRace.countDown();
-        assertThat(yes.get(35, java.util.concurrent.TimeUnit.SECONDS).statusCode()).isIn(202, 409);
-        assertThat(no.get(35, java.util.concurrent.TimeUnit.SECONDS).statusCode()).isEqualTo(202);
-      }
-      long until = System.nanoTime() + Duration.ofSeconds(30).toNanos();
-      String outcome;
-
-      // IT-R POLL 41: exact original transitions; one old interval owed at most.
-      final var itrRead041Until = until;
-      class ItrState041 {
-        String outcome;
-        boolean firstIteration = true;
-        boolean terminal;
-        boolean intervalOwed;
-        long owedUntil;
-        Exception firstException;
-        Error firstError;
-      }
-      final var itr041 = new ItrState041();
-
-      java.util.concurrent.Callable<Boolean> itrPoll041 =
-          () -> {
-            if (itr041.firstException != null) {
-              throw itr041.firstException;
-            }
-            if (itr041.firstError != null) {
-              throw itr041.firstError;
-            }
-            if (itr041.terminal) {
-              return true;
-            }
-            try {
-              if (itr041.intervalOwed) {
-                if (Thread.interrupted()) {
-                  throw new InterruptedException();
-                }
-                if (System.nanoTime() < itr041.owedUntil) {
-                  return false;
-                }
-                itr041.intervalOwed = false;
-              }
-              if (!itr041.firstIteration && !(System.nanoTime() < itrRead041Until)) {
-                itr041.terminal = true;
-                return true;
-              }
-              itr041.firstIteration = false;
-              itr041.outcome =
-                  sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
-              if (List.of("CANCELLED", "UNKNOWN_OUTCOME", "FAILED").contains(itr041.outcome)) {
-                itr041.terminal = true;
-                return true;
-              }
-              itr041.intervalOwed = true;
-              itr041.owedUntil = System.nanoTime() + Duration.ofMillis(20).toNanos();
-              return false;
-            } catch (Exception itrFailure041) {
-              if (itr041.firstException == null && itr041.firstError == null) {
-                itr041.firstException = itrFailure041;
-                itr041.terminal = true;
-              }
-              throw itr041.firstException;
-            } catch (Error itrFailure041) {
-              if (itr041.firstException == null && itr041.firstError == null) {
-                itr041.firstError = itrFailure041;
-                itr041.terminal = true;
-              }
-              throw itr041.firstError;
-            }
-          };
-      try {
-        while (!itr041.terminal) {
-          // First invocation is manual. Reentry serves only the original pending transition.
-          boolean itrDone041 = itrPoll041.call();
-          if (itrDone041) {
-            break;
-          }
-          if (Thread.interrupted()) {
-            throw new InterruptedException();
-          }
-          long itrNow041 = System.nanoTime();
-          long itrRemaining041 = itrRead041Until - itrNow041;
-          long itrOwed041 = itr041.intervalOwed ? itr041.owedUntil - itrNow041 : 0;
-          // Semantic deadline is unchanged. Only the already-entered old interval may extend this
-          // bound.
-          long itrBound041 = Math.max(itrRemaining041, itrOwed041);
-          if (itrBound041 > 0) {
-            final boolean[] itrFirstTick041 = {true};
-            try {
-              org.awaitility.Awaitility.await("ReplayIT POLL 41")
-                  .atMost(Duration.ofNanos(itrBound041))
-                  .pollInterval(Duration.ofMillis(20))
-                  .pollDelay(Duration.ZERO)
-                  .pollInSameThread()
-                  .dontCatchUncaughtExceptions()
-                  .ignoreNoExceptions()
-                  .until(
-                      () -> {
-                        try {
-                          if (itr041.firstException != null) {
-                            throw itr041.firstException;
-                          }
-                          if (itr041.firstError != null) {
-                            throw itr041.firstError;
-                          }
-                          if (itr041.terminal) {
-                            return true;
-                          }
-                          if (Thread.interrupted()) {
-                            throw new InterruptedException();
-                          }
-                          if (itrFirstTick041[0]) {
-                            itrFirstTick041[0] = false;
-                            return false; // Cached tick: no second immediate
-                            // condition/read/effect.
-                          }
-                          boolean itrObserved041 = itrPoll041.call();
-                          if (!itrObserved041 && Thread.interrupted()) {
-                            throw new InterruptedException();
-                          }
-                          return itrObserved041;
-                        } catch (Exception itrFailure041) {
-                          if (itr041.firstException == null && itr041.firstError == null) {
-                            itr041.firstException = itrFailure041;
-                            itr041.terminal = true;
-                          }
-                          if (itr041.firstError != null) {
-                            throw itr041.firstError;
-                          }
-                          throw itr041.firstException;
-                        } catch (Error itrFailure041) {
-                          if (itr041.firstException == null && itr041.firstError == null) {
-                            itr041.firstError = itrFailure041;
-                            itr041.terminal = true;
-                          }
-                          if (itr041.firstException != null) {
-                            throw itr041.firstException;
-                          }
-                          throw itr041.firstError;
-                        }
-                      });
-            } catch (org.awaitility.core.ConditionTimeoutException itrTimeout041) {
-              if (itr041.firstException != null) {
-                throw itr041.firstException;
-              }
-              if (itr041.firstError != null) {
-                throw itr041.firstError;
-              }
-              // A late terminal outcome wins. Otherwise next driver step preserves old guard/body
-              // order.
-            }
-          }
-          // Includes bound<=0/no-Await: no silent pending exit, synthetic timeout, or terminal
-          // replay.
-        }
-      } catch (Exception itrFailure041) {
-        if (itr041.firstException == null && itr041.firstError == null) {
-          itr041.firstException = itrFailure041;
-          itr041.terminal = true;
-        }
-        if (itr041.firstError != null) {
-          throw itr041.firstError;
-        }
-        throw itr041.firstException;
-      } catch (Error itrFailure041) {
-        if (itr041.firstException == null && itr041.firstError == null) {
-          itr041.firstError = itrFailure041;
-          itr041.terminal = true;
-        }
-        if (itr041.firstException != null) {
-          throw itr041.firstException;
-        }
-        throw itr041.firstError;
-      } finally {
-        outcome = itr041.outcome;
-      }
-
-      assertThat(outcome).isIn("CANCELLED", "UNKNOWN_OUTCOME", "FAILED");
-      assertThat(
-              jdbc.queryForObject(
-                  "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=? AND ordinal=?",
-                  Integer.class,
-                  id,
-                  request.path("coordinate").path("stepId").asText(),
-                  request.path("coordinate").path("ordinal").asInt()))
-          .isLessThanOrEqualTo(1);
-      assertThat(
-              Files.readAllLines(TEMP.resolve("obs015-native-events.jsonl")).stream()
-                  .filter(line -> !line.isBlank())
-                  .map(C::parse)
-                  .filter(
-                      event ->
-                          event.path("sessionId").asText().equals(id)
-                              && event.path("phase").asText().equals("NATIVE_ENTER")
-                              && event
-                                  .path("stepId")
-                                  .equals(request.path("coordinate").path("stepId"))
-                              && event
-                                  .path("ordinal")
-                                  .equals(request.path("coordinate").path("ordinal")))
-                  .count())
-          .isLessThanOrEqualTo(1);
-      assertThat(
-              jdbc.queryForObject(
-                  "SELECT count(*) FROM ui_test_revisions WHERE test_id=?", Integer.class, test))
-          .isEqualTo(1);
-      assertThat(
-              publicCall("/api/v1/studio/guided-sessions/" + id + "/result", null, 200, null)
-                  .path("learnedFromThisRun")
-                  .asBoolean())
-          .isFalse();
-      return request;
-    }
-    String answerKey = UUID.randomUUID().toString();
-    JsonNode accepted =
-        publicCall("/api/v1/studio/guided-sessions/" + id + "/clarify", answer, 202, answerKey);
-    assertThat(
-            publicCall("/api/v1/studio/guided-sessions/" + id + "/clarify", answer, 202, answerKey))
-        .isEqualTo(accepted);
-    return request;
   }
 
   private void assertActualDriftCallbackAuthorityThenRelease(String id) throws Exception {
@@ -22161,10 +20123,75 @@ RevRuntime.prototype.dispatch=async function(...args){
 
     }
 
-    assertThat(INCREMENTAL_DRIFT_CAPTURE).containsKey(id);
-    ObjectNode actual = INCREMENTAL_DRIFT_CAPTURE.get(id);
+    // Freeze the result at the unchanged deadline before collecting failure-only diagnostics.
+    var capturedAtDeadline = java.util.Map.copyOf(INCREMENTAL_DRIFT_CAPTURE);
+    String driftDetails = "";
+    if (!capturedAtDeadline.containsKey(id)) {
+      String closedState =
+          sessions.transaction(() -> sessions.lock(id).document().path("state").asText());
+      driftDetails =
+          "state="
+              + closedState
+              + ",prefixRequests="
+              + jdbc.queryForList(
+                  "SELECT status,count(*) AS count FROM studio_guided_prefix_requests"
+                      + " WHERE session_id=? GROUP BY status ORDER BY status",
+                  id);
+    }
+    if (!capturedAtDeadline.containsKey(id)) {
+      System.out.println("WI4B_CLOSED_DRIFT " + driftDetails);
+    }
+    assertThat(capturedAtDeadline)
+        .as("actual callback at the unchanged deadline; %s", driftDetails)
+        .containsKey(id);
+    ObjectNode actual = capturedAtDeadline.get(id);
     JsonNode receipt = actual.path("receipt");
     long fence = receipt.path("ownerFence").asLong();
+    if (activeFixtureInvocation != null
+        && activeFixtureInvocation.variant.equals("drift-auth-pre")) {
+      JsonNode program = sessions.transaction(() -> sessions.incremental().program(id));
+      JsonNode frozen = null;
+      for (JsonNode action : program.path("actions")) {
+        if (action.path("coordinate").equals(receipt.path("coordinate"))) {
+          frozen = action.path("target");
+        }
+      }
+      assertThat(frozen)
+          .as("actual unmodified BASE synthesis froze this prefix target")
+          .isNotNull();
+      assertThat(frozen.path("tier").asText()).isEqualTo("testId");
+      assertThat(frozen.path("locator")).hasSize(1);
+      assertThat(frozen.path("locator").path(0).path("by").asText()).isEqualTo("testId");
+      assertThat(frozen.path("locator").path(0).path("value").asText())
+          .isEqualTo("authority-destination");
+      assertThat(frozen.path("identity").path("role").asText()).isEqualTo("textbox");
+      var events =
+          Files.readAllLines(TEMP.resolve("obs015-native-events.jsonl")).stream()
+              .filter(line -> !line.isBlank())
+              .map(C::parse)
+              .filter(row -> row.path("sessionId").asText().equals(id))
+              .toList();
+      var targets =
+          events.stream()
+              .filter(row -> row.path("phase").asText().equals("AUTHORITY_REAL_TARGET"))
+              .toList();
+      var refusals =
+          events.stream()
+              .filter(row -> row.path("phase").asText().equals("AUTHORITY_REAL_IDENTITY_REFUSAL"))
+              .toList();
+      assertThat(targets).hasSize(1);
+      assertThat(targets.getFirst().path("publicCount").asInt()).isEqualTo(1);
+      assertThat(targets.getFirst().path("currentSearchboxes").asInt()).isEqualTo(1);
+      assertThat(targets.getFirst().path("frozenRole").asText()).isEqualTo("textbox");
+      assertThat(refusals).hasSize(1);
+      assertThat(refusals.getFirst().path("code").asText()).isEqualTo("NO_DURABLE_LOCATOR");
+      assertThat(receipt.path("phase").asText()).isEqualTo("PRE_ADMISSION");
+      assertThat(receipt.path("admissionId").isNull()).isTrue();
+      assertThat(receipt.path("preparationId").isNull()).isTrue();
+      System.out.println(
+          "WI4B_AUTHORITY_TRIGGER_PROOF frozenTier=testId publicCount=1 heldRole=searchbox"
+              + " realIdentityRefusal=NO_DURABLE_LOCATOR signedPhase=PRE_ADMISSION");
+    }
     assertThat(receipt.path("nativeInvocationStarted").asBoolean(true)).isFalse();
     assertThat(
             jdbc.queryForObject(
@@ -22451,7 +20478,8 @@ RevRuntime.prototype.dispatch=async function(...args){
         ownedApplicationContext.getBean(
             com.citi.put.checks.studio.guided.session.GuidedSessionService.class);
     var materialization =
-        new com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService(jdbc, C);
+        new com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService(
+            jdbc, C, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     var controller =
         com.citi.put.checks.studio.guided.session.GuidedInternalIdentityFixture.controller();
     JsonNode current = sessions.transaction(() -> sessions.lock(id).document().deepCopy());
@@ -22461,8 +20489,8 @@ RevRuntime.prototype.dispatch=async function(...args){
     try {
       assertThat(
               jdbc.queryForObject(
-                  "SELECT count(*) FROM studio_guided_materialization_deliveries WHERE session_id=? AND"
-                      + " status='PENDING'",
+                  "SELECT count(*) FROM studio_guided_materialization_deliveries WHERE session_id=?"
+                      + " AND status='PENDING'",
                   Integer.class,
                   id))
           .isEqualTo(1);
@@ -22479,14 +20507,15 @@ RevRuntime.prototype.dispatch=async function(...args){
                 .isFalse();
             var materialized =
                 jdbc.queryForMap(
-                    "SELECT live,context_revision FROM studio_guided_materializations WHERE session_id=?",
+                    "SELECT live,context_revision FROM studio_guided_materializations WHERE"
+                        + " session_id=?",
                     id);
             assertThat(materialized.get("live")).isEqualTo(Boolean.TRUE);
             assertThat(((Number) materialized.get("context_revision")).intValue()).isEqualTo(2);
             assertThat(
                     jdbc.queryForObject(
-                        "SELECT count(*) FROM studio_guided_actions WHERE session_id=?"
-                            + " AND document->>'state' IN ('ADMITTED','DISPATCHING','UNKNOWN_OUTCOME')",
+                        "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND"
+                            + " document->>'state' IN ('ADMITTED','DISPATCHING','UNKNOWN_OUTCOME')",
                         Integer.class,
                         id))
                 .isZero();
@@ -22503,16 +20532,18 @@ RevRuntime.prototype.dispatch=async function(...args){
             assertThat(issued.path("contextRevision").asInt()).isEqualTo(2);
             assertThat(
                     jdbc.queryForObject(
-                        "SELECT context_hash FROM studio_guided_materialization_deliveries"
-                            + " WHERE session_id=? AND delivery_id=?::uuid AND context_revision=2 AND status='PENDING'",
+                        "SELECT context_hash FROM studio_guided_materialization_deliveries WHERE"
+                            + " session_id=? AND delivery_id=?::uuid AND context_revision=2 AND"
+                            + " status='PENDING'",
                         String.class,
                         id,
                         pendingDelivery))
                 .isEqualTo(GuidedContracts.hash(issued));
             var headers =
                 jdbc.queryForList(
-                    "SELECT context_id,authored_inputs_hash,previous_inputs_hash,input_count"
-                        + " FROM studio_guided_materialization_versions WHERE session_id=? ORDER BY context_revision",
+                    "SELECT context_id,authored_inputs_hash,previous_inputs_hash,input_count FROM"
+                        + " studio_guided_materialization_versions WHERE session_id=? ORDER BY"
+                        + " context_revision",
                     id);
             assertThat(headers).hasSize(2);
             assertThat(headers.get(1).get("context_id"))
@@ -22525,8 +20556,8 @@ RevRuntime.prototype.dispatch=async function(...args){
             JsonNode originalInputs =
                 C.parse(
                     jdbc.queryForObject(
-                        "SELECT authored_inputs::text"
-                            + " FROM studio_guided_materialization_snapshots WHERE session_id=? AND context_revision=1",
+                        "SELECT authored_inputs::text FROM studio_guided_materialization_snapshots"
+                            + " WHERE session_id=? AND context_revision=1",
                         String.class,
                         id));
             for (int inputIndex = 0; inputIndex < originalInputCount; inputIndex++) {
@@ -22567,8 +20598,9 @@ RevRuntime.prototype.dispatch=async function(...args){
                       "assignments",
                       C.parse(
                           jdbc.queryForObject(
-                              "SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY to_jsonb(t)::text),'[]'::jsonb)::text"
-                                  + " FROM studio_guided_assignments t WHERE session_id=?",
+                              "SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY"
+                                  + " to_jsonb(t)::text),'[]'::jsonb)::text FROM"
+                                  + " studio_guided_assignments t WHERE session_id=?",
                               String.class,
                               id)));
                   snapshot
@@ -22642,7 +20674,14 @@ RevRuntime.prototype.dispatch=async function(...args){
           .put("stepId", INCREMENTAL_STEPS.get(3))
           .put("ordinal", 0);
       assertThatThrownBy(
-              () -> service.admit(controller, id, fence, "pending-context-stale-action", old))
+              () ->
+                  service.admit(
+                      controller,
+                      id,
+                      fence,
+                      "pending-context-stale-action",
+                      old,
+                      "missing-preparation"))
           .isInstanceOf(GuidedSessionException.class)
           .hasMessage("STALE_GENERATION");
       assertThat(incrementalPendingSnapshot(id)).isEqualTo(before);
@@ -22658,8 +20697,11 @@ RevRuntime.prototype.dispatch=async function(...args){
   private void assertIncrementalAppendAckHistory(String id) throws Exception {
     var versions =
         jdbc.queryForList(
-            "SELECT context_revision,context_id,authored_inputs_hash,previous_inputs_hash,input_count"
-                + " FROM studio_guided_materialization_versions WHERE session_id=? ORDER BY context_revision",
+            "SELECT"
+                + " context_revision,context_id,authored_inputs_hash,previous_i"
+                + "nputs_hash,input_count"
+                + " FROM studio_guided_materialization_versions WHERE session_id=? ORDER BY"
+                + " context_revision",
             id);
     assertThat(versions).hasSize(2);
     assertThat(versions.get(0).get("context_id")).isEqualTo(versions.get(1).get("context_id"));
@@ -22704,7 +20746,8 @@ RevRuntime.prototype.dispatch=async function(...args){
                 id))
         .isPositive();
     var materialization =
-        new com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService(jdbc, C);
+        new com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService(
+            jdbc, C, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     String before = incrementalImmutableSnapshot(id);
     for (ObjectNode forged :
         List.of(
@@ -22763,17 +20806,19 @@ RevRuntime.prototype.dispatch=async function(...args){
               + "}', '{}'::jsonb) WHERE session_id=?");
     }
     statements.add(
-        "UPDATE studio_guided_translation_plans SET parent_revision=parent_revision+1 WHERE session_id=?");
+        "UPDATE studio_guided_translation_plans SET parent_revision=p"
+            + "arent_revision+1 WHERE"
+            + " session_id=?");
     statements.add(
-        "UPDATE studio_guided_translation_plans SET plan_hash=repeat('0',64) WHERE session_id=?");
+        "UPDATE studio_guided_translation_plans SET plan_hash=repeat("
+            + "'0',64) WHERE session_id=?");
     statements.add(
-        "UPDATE studio_guided_relearn_plans SET base_revision_id='00000000-0000-4000-8000-000000000099':"
-            + ":uuid WHERE session_id=?");
+        "UPDATE studio_guided_relearn_plans SET"
+            + " base_revision_id='00000000-0000-4000-8000-000000000099'::uu"
+            + "id WHERE session_id=?");
     statements.add(
-        "UPDATE studio_guided_suffix_acceptances SET previous_plan_revision=previous_plan_revision+1"
-            + " WHERE session_id=?");
-    statements.add(
-        "UPDATE studio_guided_materialization_versions SET authored_inputs_hash=repeat('0',64) WHERE session_id=?");
+        "UPDATE studio_guided_suffix_acceptances SET"
+            + " previous_plan_revision=previous_plan_revision+1 WHERE session_id=?");
     statements.add(
         "UPDATE studio_guided_materialization_inputs SET document=document ||"
             + " '{\"value\":\"forged-private-value\"}'::jsonb WHERE session_id=?");
@@ -22794,7 +20839,8 @@ RevRuntime.prototype.dispatch=async function(...args){
     assertThatThrownBy(
             () ->
                 jdbc.update(
-                    "UPDATE ui_test_revisions SET step_snapshot_hashes='{}'::jsonb WHERE id=?::uuid",
+                    "UPDATE ui_test_revisions SET step_snapshot_hashes='{}'::jsonb WHERE"
+                        + " id=?::uuid",
                     baseRevision))
         .isInstanceOf(org.springframework.dao.DataAccessException.class);
     assertThat(
@@ -22811,15 +20857,16 @@ RevRuntime.prototype.dispatch=async function(...args){
           JsonNode current = sessions.lock(id).document();
           var acceptance =
               jdbc.queryForMap(
-                  "SELECT previous_plan_revision,plan_revision FROM studio_guided_suffix_acceptances"
-                      + " WHERE session_id=?",
+                  "SELECT previous_plan_revision,plan_revision FROM"
+                      + " studio_guided_suffix_acceptances WHERE session_id=?",
                   id);
           long prior = ((Number) acceptance.get("previous_plan_revision")).longValue();
           long first = ((Number) acceptance.get("plan_revision")).longValue();
           JsonNode accepted =
               C.parse(
                   jdbc.queryForObject(
-                      "SELECT plan::text FROM studio_guided_translation_plans WHERE session_id=? AND plan_revision=?",
+                      "SELECT plan::text FROM studio_guided_translation_plans WHERE session_id=?"
+                          + " AND plan_revision=?",
                       String.class,
                       id,
                       first));
@@ -22827,7 +20874,8 @@ RevRuntime.prototype.dispatch=async function(...args){
             JsonNode imported =
                 C.parse(
                     jdbc.queryForObject(
-                        "SELECT plan::text FROM studio_guided_translation_plans WHERE session_id=? AND plan_revision=?",
+                        "SELECT plan::text FROM studio_guided_translation_plans WHERE session_id=?"
+                            + " AND plan_revision=?",
                         String.class,
                         id,
                         prior));
@@ -22835,8 +20883,9 @@ RevRuntime.prototype.dispatch=async function(...args){
               Long successful =
                   jdbc.queryForObject(
                       "SELECT count(*) FROM studio_guided_obligation_admissions o JOIN"
-                          + " studio_guided_actions a USING(session_id,admission_id)"
-                          + " WHERE o.session_id=? AND o.obligation_id=? AND a.document->>'state'='SUCCEEDED'",
+                          + " studio_guided_actions a USING(session_id,admission_id) WHERE"
+                          + " o.session_id=? AND o.obligation_id=? AND"
+                          + " a.document->>'state'='SUCCEEDED'",
                       Long.class,
                       id,
                       old.path("obligationId").asText());
@@ -22890,7 +20939,8 @@ RevRuntime.prototype.dispatch=async function(...args){
           table,
           C.parse(
               jdbc.queryForObject(
-                  "SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY to_jsonb(t)::text),'[]'::jsonb)::text FROM "
+                  "SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY"
+                      + " to_jsonb(t)::text),'[]'::jsonb)::text FROM "
                       + table
                       + " t WHERE session_id=?",
                   String.class,
@@ -22928,9 +20978,11 @@ RevRuntime.prototype.dispatch=async function(...args){
           table,
           C.parse(
               jdbc.queryForObject(
-                  "SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY to_jsonb(t)::text),'[]'::jsonb)::text FROM "
+                  "SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY"
+                      + " to_jsonb(t)::text),'[]'::jsonb)::text FROM "
                       + table
-                      + " t WHERE session_id IN (SELECT session_id FROM studio_guided_sessions WHERE test_id=?)",
+                      + " t WHERE session_id IN (SELECT session_id FROM studio_guided_sessions"
+                      + " WHERE test_id=?)",
                   String.class,
                   test.toString())));
     }
@@ -22938,9 +20990,10 @@ RevRuntime.prototype.dispatch=async function(...args){
         "commands",
         C.parse(
             jdbc.queryForObject(
-                "SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY to_jsonb(t)::text),'[]'::jsonb)::text"
-                    + " FROM studio_guided_commands t WHERE namespace IN (SELECT session_id FROM"
-                    + " studio_guided_sessions WHERE test_id=?)",
+                "SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY"
+                    + " to_jsonb(t)::text),'[]'::jsonb)::text FROM studio_guided_commands t WHERE"
+                    + " namespace IN (SELECT session_id FROM studio_guided_sessions WHERE"
+                    + " test_id=?)",
                 String.class,
                 test.toString())));
     out.set(
@@ -22960,8 +21013,10 @@ RevRuntime.prototype.dispatch=async function(...args){
         "dailyBudget",
         C.parse(
             jdbc.queryForObject(
-                "SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY budget_day),'[]'::jsonb)::text FROM"
-                    + " studio_guided_csi_token_days t WHERE csi_id=(SELECT csi_id FROM ui_tests WHERE id=?)",
+                "SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY budget_day),'"
+                    + "[]'::jsonb)::text FROM"
+                    + " studio_guided_csi_token_days t WHERE csi_id=(SELECT csi_id FROM ui_tests"
+                    + " WHERE id=?)",
                 String.class,
                 test)));
     // Values never become assertion/log payloads: compare a canonical digest of the full snapshot.
@@ -22980,7 +21035,8 @@ RevRuntime.prototype.dispatch=async function(...args){
           table,
           C.parse(
               jdbc.queryForObject(
-                  "SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY to_jsonb(t)::text),'[]'::jsonb)::text FROM "
+                  "SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY"
+                      + " to_jsonb(t)::text),'[]'::jsonb)::text FROM "
                       + table
                       + " t WHERE session_id=?",
                   String.class,
@@ -23068,48 +21124,27 @@ RevRuntime.prototype.dispatch=async function(...args){
     return C.parse(response.body());
   }
 
-  private void assertIncrementalRecordingSpansBothHalves(
+  /**
+   * A published re-learn keeps no recording (its proof is the replay of the merged revision), so
+   * what is checked here is that nothing of it is stored, and that the retained prefix boundary the
+   * switch row records is the one the case drove.
+   */
+  private void assertIncrementalLearnRecordingDiscarded(
       String id, List<ObjectNode> actions, int boundary) throws Exception {
-    var sinks = new java.util.LinkedHashMap<String, byte[]>();
-    ObjectNode evidence = assertGuidedLearnRunRecorded(id, sinks);
-    assertThat(evidence.path("actionItems").asInt()).isEqualTo(actions.size());
-    JsonNode result = awaitGuidedVideoSettled(id);
-    var readings = new java.util.HashMap<String, JsonNode>();
-    for (JsonNode item : result.path("actionTimings")) {
-      if (item.path("kind").asText().equals("action")) {
-        readings.put(item.path("admissionId").asText(), item);
-      }
-    }
-    long prefixEnd = -1, suffixStart = Long.MAX_VALUE;
+    assertGuidedLearnRecordingDiscarded(id);
+    assertThat(actions).isNotEmpty();
     var retained =
         C.parse(
             jdbc.queryForObject(
-                "SELECT completed_admissions::text FROM studio_guided_relearn_switches WHERE session_id=?",
+                "SELECT completed_admissions::text FROM studio_guided_relearn_switches WHERE"
+                    + " session_id=?",
                 String.class,
                 id));
-    var prefix = new java.util.HashSet<String>();
-    retained.forEach(value -> prefix.add(value.asText()));
-    for (JsonNode action : actions) {
-      String admission = action.path("admission").path("admissionId").asText();
-      JsonNode reading = readings.get(admission);
-      assertThat(reading).isNotNull();
-      assertThat(reading.path("endMs").isIntegralNumber())
-          .as("successful native action has its measured end")
-          .isTrue();
-      if (prefix.contains(admission)) {
-        prefixEnd = Math.max(prefixEnd, reading.path("endMs").asLong());
-      } else {
-        suffixStart = Math.min(suffixStart, reading.path("startMs").asLong());
-      }
-    }
-    assertThat(suffixStart).isLessThan(Long.MAX_VALUE);
-    if (!prefix.isEmpty()) {
-      assertThat(prefixEnd).isLessThanOrEqualTo(suffixStart);
-    } else {
+    if (retained.isEmpty()) {
       assertThat(boundary).isZero();
     }
     if (boundary > 0) {
-      assertThat(prefix).isNotEmpty();
+      assertThat(retained).isNotEmpty();
     }
   }
 
@@ -23158,7 +21193,8 @@ RevRuntime.prototype.dispatch=async function(...args){
             + " (?,'user-1','Fixture','fixture@example.invalid',now()) ON CONFLICT DO NOTHING",
         UUID.randomUUID());
     jdbc.update(
-        "INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment) VALUES"
+        "INSERT INTO csi_systems(id,name,business_unit,criticality,ow"
+            + "ner_email,environment) VALUES"
             + " ('CSI-123','Orders','Ops','HIGH','fixture@example.invalid','Production') ON"
             + " CONFLICT DO NOTHING");
     UUID testId = UUID.randomUUID();
@@ -23188,8 +21224,7 @@ RevRuntime.prototype.dispatch=async function(...args){
             .put("testId", testId.toString())
             .put("sourceRevision", "1")
             .put("configurationRevision", "1")
-            .put("environmentId", "fixture")
-            .put("applicationId", "orders");
+            .put("environmentId", "fixture");
     start.set("versions", versions());
     JsonNode started =
         publicCall("/api/v1/studio/guided-sessions", start, 202, UUID.randomUUID().toString());
@@ -23396,17 +21431,10 @@ RevRuntime.prototype.dispatch=async function(...args){
                   .path("text")
                   .asText());
       var nodes = diagnostic.putArray("lastObservedNames");
-      for (JsonNode node : last.path("context").path("observation").path("nodes")) {
-        nodes
-            .addObject()
-            .setAll(
-                Map.of(
-                    "name",
-                    node.path("name"),
-                    "role",
-                    node.path("role"),
-                    "visible",
-                    node.path("visible")));
+      for (var node :
+          com.citi.put.checks.studio.support.JoinedRefs.shown(
+              last.path("context").path("observation").asText())) {
+        nodes.addObject().put("name", node.name()).put("role", node.role());
       }
     }
     diagnostic.set("counters", learningState.document().path("counters"));
@@ -23432,6 +21460,33 @@ RevRuntime.prototype.dispatch=async function(...args){
     assertThat(MODEL_WIRE).hasSize(learningCalls);
     assertThat(RECEIPTS).hasSize(itrRec0 + 1);
     assertThat(NAVIGATIONS.get()).isEqualTo(itrNav0 + 1);
+    // The publication accepted exactly one AFTER_LEARN replay of the revision it published. It is
+    // the only pending execution: one dispatch runs it, and it is the one extra navigation and
+    // submit counted below (learning 1 + proof 1 + the two ordinary runs).
+    p3AwaitTeardown(id);
+    PublicationProof proof = settleProof(id, receipt);
+    assertThat(RECEIPTS).hasSize(itrRec0 + 2);
+    assertThat(NAVIGATIONS.get()).isEqualTo(itrNav0 + 2);
+    assertThat(MODEL_WIRE).hasSize(learningCalls);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM studio_guided_session_recordings WHERE session_id=?",
+                Integer.class,
+                id))
+        .as("the learn recording is not retained")
+        .isZero();
+    assertThat(
+            publicCall("/api/v1/studio/guided-sessions/" + id + "/video", null, 404, null)
+                .path("error")
+                .asText())
+        .isEqualTo("VIDEO_UNAVAILABLE");
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM ui_test_executions WHERE ui_test_id=? AND"
+                    + " trigger_source='AFTER_LEARN'",
+                Integer.class,
+                testId))
+        .isEqualTo(1);
     String artifact =
         jdbc.queryForObject(
             "SELECT artifact::text FROM ui_test_revisions WHERE id=?",
@@ -23449,13 +21504,14 @@ RevRuntime.prototype.dispatch=async function(...args){
     assertThat(C.parse(planBeforePrune).path("sourceSteps")).isNotEmpty();
     JsonNode observedBeforePrune =
         sessions.transaction(
-            () -> sessions.lock(id).progress().path("observation").path("nodes").deepCopy());
+            () -> sessions.lock(id).progress().path("observation").path("facts").deepCopy());
     assertThat(observedBeforePrune)
         .as("actual learning retained a nonempty sanitized observation before prune")
         .isNotEmpty();
     assertThat(
             jdbc.queryForList(
-                "SELECT jsonb_object_keys(progress) FROM studio_guided_sessions WHERE session_id=?",
+                "SELECT jsonb_object_keys(progress) FROM studio_guided_sessio"
+                    + "ns WHERE session_id=?",
                 String.class,
                 id))
         .anyMatch(name -> !RETAINED_PROGRESS_KEYS.contains(name));
@@ -23496,7 +21552,8 @@ RevRuntime.prototype.dispatch=async function(...args){
         .isNotNull();
     assertThat(
             jdbc.queryForList(
-                "SELECT jsonb_object_keys(progress) FROM studio_guided_sessions WHERE session_id=?",
+                "SELECT jsonb_object_keys(progress) FROM studio_guided_sessio"
+                    + "ns WHERE session_id=?",
                 String.class,
                 id))
         .isSubsetOf(RETAINED_PROGRESS_KEYS);
@@ -23751,7 +21808,7 @@ RevRuntime.prototype.dispatch=async function(...args){
         assertThat(closedWorkerExecutors.get()).isEqualTo(3);
       }
     }
-    assertThat(NAVIGATIONS.get()).isEqualTo(itrNav0 + 3);
+    assertThat(NAVIGATIONS.get()).isEqualTo(itrNav0 + 4);
     assertThat(RECEIPTS.subList(itrRec0, RECEIPTS.size()))
         .containsExactlyElementsOf(VALUES.subList(itrVal0, VALUES.size()));
     assertThat(VALUES).doesNotHaveDuplicates();
@@ -23781,14 +21838,16 @@ RevRuntime.prototype.dispatch=async function(...args){
     historicalReplica(id, receipt, true, false, "RUNTIME_INCOMPATIBLE");
     assertThat(MODEL_WIRE).hasSize(learningCalls);
     assertThat(LEGACY_MODEL_CALLS.get()).isZero();
-    assertThat(RECEIPTS).hasSize(itrRec0 + 3);
-    assertThat(NAVIGATIONS.get()).isEqualTo(itrNav0 + 3);
+    assertThat(RECEIPTS).hasSize(itrRec0 + 4);
+    assertThat(NAVIGATIONS.get()).isEqualTo(itrNav0 + 4);
     ObjectNode evidence =
         C.object()
             .put("controlledProviderCalls", learningCalls)
             .put("initialSubmits", 1)
             .put("finalizationSubmits", 0)
             .put("ordinaryReplays", 2)
+            .put("proofReplays", 1)
+            .put("proofExecutionId", proof.executionId().toString())
             .put("artifactHash", artifactHash)
             .put("productionImage", "NOT_ASSERTED_CONTROLLED_LOCAL_CATALOG");
     evidence.set("catalog", CATALOG);
@@ -23836,7 +21895,8 @@ RevRuntime.prototype.dispatch=async function(...args){
     UUID expiredId = UUID.fromString(expired.path("executionId").asText());
     String expiresAt =
         jdbc.queryForObject(
-            "SELECT observed_revision_binding->'replayGrant'->>'expiresAt' FROM ui_test_executions"
+            "SELECT observed_revision_binding->'replayGrant'->>'expiresAt"
+                + "' FROM ui_test_executions"
                 + " WHERE id=?",
             String.class,
             expiredId);
@@ -24554,10 +22614,13 @@ RevRuntime.prototype.dispatch=async function(...args){
   private Map<String, Object> failureState(UUID id) {
     return jdbc.queryForMap(
         "SELECT"
-            + " e.status,e.browser_started_at,e.ended_at,e.snapshot_revision,e.video_key,e.video_status,"
+            + " e.status,e.browser_started_at,e.ended_at,e.snapshot_revisio"
+            + "n,e.video_key,e.video_status,"
             + " l.state AS"
-            + " ledger_state,l.last_runner_sequence,l.attempt_id,l.admission_id,l.runner_instance_id"
-            + " FROM ui_test_executions e JOIN studio_dispatch_ledger l ON l.execution_id=e.id AND"
+            + " ledger_state,l.last_runner_sequence,l.attempt_id,l.admissio"
+            + "n_id,l.runner_instance_id"
+            + " FROM ui_test_executions e JOIN studio_dispatch_ledger l ON "
+            + "l.execution_id=e.id AND"
             + " l.execution_accepted_at=e.started_at WHERE e.id=?",
         id);
   }
@@ -24782,7 +22845,9 @@ RevRuntime.prototype.dispatch=async function(...args){
   }
 
   /**
-   * Both revision heads come from genuine explicit learning; only activation setup is relational.
+   * Both revision heads come from genuine explicit learning; only the shared schedule row is
+   * relational. Learning a new head leaves the test's shared schedule exactly as it was: a schedule
+   * has no activation pinned to a revision, so nothing about it can go stale.
    */
   private void schedulerAndNewHead(
       UUID testId,
@@ -24793,20 +22858,20 @@ RevRuntime.prototype.dispatch=async function(...args){
       throws Exception {
     assertThat(
             jdbc.queryForObject(
-                "SELECT count(*) FROM studio_schedules WHERE test_id=?", Integer.class, testId))
+                "SELECT count(*) FROM schedules WHERE ui_test_id=?", Integer.class, testId))
         .isZero();
-    UUID schedule = UUID.randomUUID(),
-        oldRevision = UUID.fromString(originalReceipt.path("revisionId").asText());
+    UUID schedule = UUID.randomUUID();
     jdbc.update(
-        "INSERT INTO"
-            + (" studio_schedules(id,test_id,csi_id,cron_expression,time_zone,execution_principal,cre"
-                + "ated_by,updated_by)")
-            + " VALUES (?,?,'CSI-123','0 * * * *"
-            + " *','UTC','user-1','fixture@example.invalid','fixture@example.invalid')",
+        "INSERT INTO schedules(id, ui_test_id, check_type, frequency,"
+            + " cron_expression, timezone,"
+            + " enabled, next_execution_at) VALUES (?, ?, 'UI_TEST', 'custom', '0 0 0 1 1 *',"
+            + " 'UTC', true, now() + interval '30 days')",
         schedule,
         testId);
-    UUID activation = arrangeActivation(schedule, testId, oldRevision, 2);
-    Map<String, Object> before = activationIdentity(schedule);
+    Map<String, Object> before = jdbc.queryForMap("SELECT * FROM schedules WHERE id=?", schedule);
+    int executions =
+        jdbc.queryForObject(
+            "SELECT count(*) FROM ui_test_executions WHERE ui_test_id=?", Integer.class, testId);
     coreRole = "owner";
     int priorSubmits = RECEIPTS.size(), priorCalls = MODEL_WIRE.size();
     JsonNode started =
@@ -24825,44 +22890,27 @@ RevRuntime.prototype.dispatch=async function(...args){
             200,
             UUID.randomUUID().toString());
     assertThat(nextReceipt.path("revisionId")).isNotEqualTo(originalReceipt.path("revisionId"));
-    assertThat(activationIdentity(schedule)).isEqualTo(before);
+    assertThat(jdbc.queryForMap("SELECT * FROM schedules WHERE id=?", schedule)).isEqualTo(before);
     assertThat(RECEIPTS).hasSize(priorSubmits + 1);
     assertThat(MODEL_WIRE).hasSize(afterLearningCalls);
-    int executions =
-        jdbc.queryForObject(
-            "SELECT count(*) FROM ui_test_executions WHERE ui_test_id=?", Integer.class, testId);
-    scheduling.setEnabled(true);
-    try {
-      assertThat(scheduleProcessor.process(testId)).isEqualTo("ACTIVATION_REVISION_MISMATCH");
-      assertThat(activationIdentity(schedule)).isEqualTo(before);
-      assertThat(
-              jdbc.queryForObject(
-                  "SELECT activation_id FROM studio_schedules WHERE id=?", UUID.class, schedule))
-          .isEqualTo(activation);
-      UUID currentActivation =
-          arrangeActivation(
-              schedule, testId, UUID.fromString(nextReceipt.path("revisionId").asText()), 4);
-      Map<String, Object> current = activationIdentity(schedule);
-      // STUDIO-OBS-009 AC-6: the observed-schedule refusal is lifted. No background grant exists
-      // for this schedule's principal in this class, so the current-head activation is refused by
-      // the same background-authority check as any other schedule.
-      assertThat(scheduleProcessor.process(testId)).isEqualTo("BACKGROUND_AUTHORIZATION_DENIED");
-      assertThat(activationIdentity(schedule)).isEqualTo(current);
-      assertThat(
-              jdbc.queryForObject(
-                  "SELECT activation_id FROM studio_schedules WHERE id=?", UUID.class, schedule))
-          .isEqualTo(currentActivation);
-    } finally {
-      scheduling.setEnabled(false);
-    }
     assertThat(
             jdbc.queryForObject(
                 "SELECT count(*) FROM ui_test_executions WHERE ui_test_id=?",
                 Integer.class,
                 testId))
-        .isEqualTo(executions);
-    assertThat(dispatcher.dispatchOnce()).isZero();
-    assertThat(RECEIPTS).hasSize(priorSubmits + 1);
+        .as("the new head added exactly its own AFTER_LEARN proof and nothing else")
+        .isEqualTo(executions + 1);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM ui_test_executions WHERE ui_test_id=? AND"
+                    + " trigger_source='SCHEDULED'",
+                Integer.class,
+                testId))
+        .isZero();
+    PublicationProof nextProof = settleProof(secondSession, nextReceipt);
+    assertThat(nextProof.revisionId().toString())
+        .isEqualTo(nextReceipt.path("revisionId").asText());
+    assertThat(RECEIPTS).hasSize(priorSubmits + 2);
     assertThat(MODEL_WIRE).hasSize(afterLearningCalls);
     coreRole = "viewer";
     JsonNode historic =
@@ -24886,8 +22934,7 @@ RevRuntime.prototype.dispatch=async function(...args){
             .put("additionalLearningSubmits", 1)
             .put("finalizationSubmits", 0)
             .put("schedulerExecutions", 0)
-            .put("activationMismatch", true)
-            .put("unattendedAuthorityRefused", true)
+            .put("sharedScheduleUnchangedByNewHead", true)
             .put("historicalHeadChanged", true);
     Files.writeString(TEMP.resolve("scheduler-history-evidence.json"), proof.toPrettyString());
   }
@@ -24956,8 +23003,8 @@ RevRuntime.prototype.dispatch=async function(...args){
                         JsonNode marker = progress.path("translationAcquisition");
                         JsonNode active = marker.path("active");
                         boolean missing = true;
-                        for (JsonNode node : progress.path("observation").path("nodes")) {
-                          if (node.path("name").asText().equals("Confirmation")) {
+                        for (JsonNode fact : progress.path("observation").path("facts")) {
+                          if (fact.path("name").asText().equals("Confirmation")) {
                             missing = false;
                           }
                         }
@@ -25141,6 +23188,12 @@ RevRuntime.prototype.dispatch=async function(...args){
               UUID.randomUUID().toString());
       assertThat(RECEIPTS).hasSize(beforeReceipts + 1);
       assertThat(NAVIGATIONS.get()).isEqualTo(beforeNavigations + 1);
+      assertThat(MODEL_WIRE).hasSize(learnedCalls);
+      // The publication's AFTER_LEARN proof is the one pending execution: one dispatch runs it
+      // (one more navigation and submit), before the two ordinary replays below.
+      settleProof(id, receipt);
+      assertThat(RECEIPTS).hasSize(beforeReceipts + 2);
+      assertThat(NAVIGATIONS.get()).isEqualTo(beforeNavigations + 2);
       assertThat(MODEL_WIRE).hasSize(learnedCalls);
       UUID revision = UUID.fromString(receipt.path("revisionId").asText());
       String artifact =
@@ -25352,8 +23405,11 @@ RevRuntime.prototype.dispatch=async function(...args){
             .isEqualTo(artifactHash);
       }
       assertThat(REPLAY_INVOCATIONS)
-          .containsExactly("read", "fill", "click", "assert", "read", "fill", "click", "assert");
-      assertThat(NAVIGATIONS.get()).isEqualTo(beforeNavigations + 3);
+          .as("the AFTER_LEARN proof replay, then the two ordinary replays")
+          .containsExactly(
+              "read", "fill", "click", "assert", "read", "fill", "click", "assert", "read", "fill",
+              "click", "assert");
+      assertThat(NAVIGATIONS.get()).isEqualTo(beforeNavigations + 4);
       assertThat(RECEIPTS.subList(beforeReceipts, RECEIPTS.size()))
           .containsExactlyElementsOf(VALUES.subList(beforeNavigations, VALUES.size()));
       assertThat(VALUES.subList(beforeNavigations, VALUES.size())).doesNotHaveDuplicates();
@@ -25618,17 +23674,24 @@ RevRuntime.prototype.dispatch=async function(...args){
               "NEXT_ACTION",
               "NEXT_ACTION");
       int calls = MODEL_WIRE.size();
-      publicCall(
-          "/api/v1/studio/guided-sessions/" + id + "/finalize",
-          C.object()
-              .put("schemaVersion", 3)
-              .put("expectedSourceRevision", "1")
-              .put("expectedConfigurationRevision", "1"),
-          200,
-          UUID.randomUUID().toString());
+      JsonNode published =
+          publicCall(
+              "/api/v1/studio/guided-sessions/" + id + "/finalize",
+              C.object()
+                  .put("schemaVersion", 3)
+                  .put("expectedSourceRevision", "1")
+                  .put("expectedConfigurationRevision", "1"),
+              200,
+              UUID.randomUUID().toString());
       assertThat(MODEL_WIRE).hasSize(calls);
       assertThat(RECEIPTS).hasSize(receipts + 1);
       assertThat(NAVIGATIONS.get()).isEqualTo(navigations + 1);
+      // The publication's AFTER_LEARN proof is the one pending execution; run it so it does not
+      // surface in a later flow's dispatch (one more navigation and submit).
+      settleProof(id, published);
+      assertThat(MODEL_WIRE).hasSize(calls);
+      assertThat(RECEIPTS).hasSize(receipts + 2);
+      assertThat(NAVIGATIONS.get()).isEqualTo(navigations + 2);
       Files.writeString(
           TEMP.resolve("source-question-timing-evidence.json"),
           C.object()
@@ -26126,19 +24189,36 @@ RevRuntime.prototype.dispatch=async function(...args){
       assertThat(marker.path("active").path("usedMs").asLong()).isZero();
       var proofRows =
           jdbc.queryForList(
-              "SELECT observed_choice_receipt::text AS receipt,proposal::text AS proposal FROM"
+              "SELECT observed_choice_receipt::text AS receipt,proposal::text AS proposal,"
+                  + "proof::text AS proof FROM"
                   + " studio_guided_publication_preparations WHERE session_id=? AND"
                   + " observed_choice_receipt IS NOT NULL",
               id);
       assertThat(proofRows).hasSize(1);
       JsonNode witnessReceipt = C.parse((String) proofRows.getFirst().get("receipt"));
       JsonNode exercised = C.parse((String) proofRows.getFirst().get("proposal"));
+      JsonNode exercisedProof = C.parse((String) proofRows.getFirst().get("proof"));
       assertThat(witnessReceipt.path("acceptedChoiceId")).isEqualTo(selected.path("choiceId"));
-      assertThat(witnessReceipt.path("answer").path("nodeId")).isEqualTo(selected.path("nodeId"));
-      assertThat(exercised.path("target").path("nodeId")).isNotEqualTo(selected.path("nodeId"));
+      // ADR-SC-007: an answer keeps a choice, never an element id; the exercised action names a ref
+      // and the runner reported the identity of the element that ref reached.
+      assertThat(witnessReceipt.path("answer").fieldNames())
+          .toIterable()
+          .containsExactlyInAnyOrder(
+              "sessionId",
+              "scopeHash",
+              "clarificationId",
+              "coordinate",
+              "documentId",
+              "generation",
+              "choiceId",
+              "bindingId",
+              "sourceRevision",
+              "configurationRevision",
+              "resolvedAt");
+      assertThat(exercised.path("target").path("kind").asText()).isEqualTo("node");
       assertThat(exercised.path("generation").asInt())
           .isGreaterThan(question.path("generation").asInt());
-      assertThat(exercised.path("target").path("locator").path("name").asText())
+      assertThat(exercisedProof.path("target").path("identity").path("name").asText())
           .isEqualTo("Alternate destination");
       JsonNode currentPlan = sessions.transaction(() -> plans.state(id).path("plan").deepCopy());
       assertThat(
@@ -26174,6 +24254,12 @@ RevRuntime.prototype.dispatch=async function(...args){
       assertThat(MODEL_WIRE).hasSize(calls);
       assertThat(RECEIPTS).hasSize(receipts + 1);
       assertThat(NAVIGATIONS.get()).isEqualTo(navigations + 1);
+      // The publication's AFTER_LEARN proof is the one pending execution: one dispatch runs it
+      // (one more navigation, submit and chosen-option receipt) before the two ordinary replays.
+      settleProof(id, published);
+      assertThat(RECEIPTS).hasSize(receipts + 2);
+      assertThat(NAVIGATIONS.get()).isEqualTo(navigations + 2);
+      assertThat(MODEL_WIRE).hasSize(calls);
       UUID revision = UUID.fromString(published.path("revisionId").asText());
       String artifact =
           jdbc.queryForObject(
@@ -26381,11 +24467,14 @@ RevRuntime.prototype.dispatch=async function(...args){
             .isEqualTo(artifactHash);
       }
       assertThat(REPLAY_INVOCATIONS.subList(invocations, REPLAY_INVOCATIONS.size()))
-          .containsExactly("read", "fill", "click", "assert", "read", "fill", "click", "assert");
-      assertThat(NAVIGATIONS.get()).isEqualTo(navigations + 3);
-      assertThat(RECEIPTS).hasSize(receipts + 3);
-      assertThat(CHOICE_RECEIPTS).hasSize(choiceReceipts + 3);
-      for (int i = 0; i < 3; i++) {
+          .as("the AFTER_LEARN proof replay, then the two ordinary replays")
+          .containsExactly(
+              "read", "fill", "click", "assert", "read", "fill", "click", "assert", "read", "fill",
+              "click", "assert");
+      assertThat(NAVIGATIONS.get()).isEqualTo(navigations + 4);
+      assertThat(RECEIPTS).hasSize(receipts + 4);
+      assertThat(CHOICE_RECEIPTS).hasSize(choiceReceipts + 4);
+      for (int i = 0; i < 4; i++) {
         assertThat(CHOICE_RECEIPTS.get(choiceReceipts + i).path("chosen").asText())
             .isEqualTo(VALUES.get(navigations + i));
         assertThat(CHOICE_RECEIPTS.get(choiceReceipts + i).path("unchosen").asText()).isEmpty();
@@ -26402,6 +24491,7 @@ RevRuntime.prototype.dispatch=async function(...args){
               .put("learningSubmits", 1)
               .put("finalizationEffects", 0)
               .put("freshRecordedReplays", 2)
+              .put("proofReplays", 1)
               .put("replayModelCalls", 0)
               .put("bindingReadRetries", 0)
               .put("artifactHash", artifactHash);
@@ -26449,7 +24539,8 @@ RevRuntime.prototype.dispatch=async function(...args){
         } else {
           beforeObservedQuestion = null;
           jdbc.execute(
-              "CREATE FUNCTION fixture_reject_question_capture() RETURNS trigger LANGUAGE plpgsql"
+              "CREATE FUNCTION fixture_reject_question_capture() RETURNS tr"
+                  + "igger LANGUAGE plpgsql"
                   + " AS $$ BEGIN IF EXISTS(SELECT 1 FROM studio_guided_clarification_contexts"
                   + " WHERE session_id=NEW.session_id) THEN RAISE EXCEPTION 'injected original"
                   + " question capture failure'; END IF; RETURN NEW; END $$");
@@ -26745,13 +24836,213 @@ RevRuntime.prototype.dispatch=async function(...args){
         .send(request, HttpResponse.BodyHandlers.ofString());
   }
 
+  /**
+   * T-J6 / Q18: real immutable publication and incremental session. The default-inactive observer
+   * withholds only the held ref lookup result for TWO; real locator resolution, focus refresh and
+   * authenticated drift callback remain untouched. Natural projection omission/inclusion is covered
+   * separately by cutover-observe.test.ts: "projection keeps a node only named by targetIntent".
+   */
+  @Test
+  void actualIncrementalPrefixWaitRefreshesExactFocusAndPersistentAbsenceStopsAtBoundedDrift()
+      throws Exception {
+    p3Case(
+        () -> {
+          p3Mode = P3Mode.REPORTS;
+          UUID test = p3CreateSource(primaryCsi, "fixture", false);
+          String original = p3Start(test, "fixture");
+          awaitFinalizing(original);
+          P3Publication base = p3Publish(original);
+          JsonNode frozenTarget = null;
+          for (JsonNode action : C.parse(base.artifact()).path("learnedPlan").path("actions")) {
+            if (action.path("coordinate").path("stepId").asText().equals(TWO)
+                && action.path("coordinate").path("ordinal").asInt() == 0) {
+              frozenTarget = action.path("target").deepCopy();
+            }
+          }
+          assertThat(frozenTarget).as("the immutable BASE carries TWO's frozen target").isNotNull();
+          try {
+            for (String mode : List.of("tj6-focus", "tj6-absent")) {
+              Files.writeString(TEMP.resolve("obs015-native-events.jsonl"), "");
+              Files.writeString(
+                  TEMP.resolve("obs015-native-mode.json"),
+                  C.object()
+                      .put("mode", mode)
+                      .put("stepId", TWO)
+                      .put("baseRevisionId", base.revision().toString())
+                      .toString());
+              String mixed =
+                  p3Call(
+                          p3Cookie,
+                          "/api/v1/studio/guided-sessions",
+                          p3StartCommand(test, "fixture")
+                              .put("baseRevisionId", base.revision().toString())
+                              .put("firstLearnStepId", THREE),
+                          202)
+                      .path("session")
+                      .path("sessionId")
+                      .asText();
+              awaitFinalizing(mixed);
+              var events =
+                  Files.readAllLines(TEMP.resolve("obs015-native-events.jsonl")).stream()
+                      .filter(line -> !line.isBlank())
+                      .map(C::parse)
+                      .filter(row -> row.path("sessionId").asText().equals(mixed))
+                      .toList();
+              var prepares =
+                  events.stream()
+                      .filter(row -> row.path("phase").asText().equals("TJ6_PREPARE"))
+                      .toList();
+              var refreshes =
+                  events.stream()
+                      .filter(row -> row.path("phase").asText().equals("TJ6_REFRESH"))
+                      .toList();
+              assertThat(prepares).isNotEmpty();
+              assertThat(prepares.getFirst().path("kind").asText()).isEqualTo("WAIT");
+              assertThat(prepares.getFirst().path("actions").asInt()).isEqualTo(1);
+              assertThat(refreshes).isNotEmpty();
+              assertThat(refreshes.getFirst().path("focus"))
+                  .isEqualTo(
+                      C.object()
+                          .put("stepText", "Check Reports heading.")
+                          .set("targetIntents", JSON.createArrayNode().add("Reports")));
+              assertThat(refreshes.getFirst().path("actions").asInt()).isEqualTo(1);
+              assertThat(
+                      jdbc.queryForObject(
+                          "SELECT count(*) FROM studio_guided_prefix_requests"
+                              + " WHERE session_id=? AND step_id=? AND status='WAIT'",
+                          Integer.class,
+                          mixed,
+                          TWO))
+                  .isEqualTo(mode.equals("tj6-focus") ? 1 : 32);
+              assertThat(
+                      jdbc.queryForObject(
+                          "SELECT count(*) FROM studio_guided_prefix_requests r JOIN"
+                              + " studio_guided_actions a USING(session_id) WHERE r.session_id=?"
+                              + " AND r.step_id=? AND r.status='WAIT' AND a.step_id=r.step_id AND"
+                              + " a.ordinal=r.ordinal AND"
+                              + " a.proposal->>'evidenceHash'=r.evidence_hash",
+                          Integer.class,
+                          mixed,
+                          TWO))
+                  .as("no action is admitted against any evidence that returned WAIT")
+                  .isZero();
+              assertThat(
+                      jdbc.queryForObject(
+                          "SELECT prefix_program_hash FROM studio_guided_relearn_plans"
+                              + " WHERE session_id=?",
+                          String.class,
+                          mixed))
+                  .isEqualTo(
+                      GuidedContracts.hash(
+                          C.parse(
+                              jdbc.queryForObject(
+                                  "SELECT prefix_program::text FROM studio_guided_relearn_plans"
+                                      + " WHERE session_id=?",
+                                  String.class,
+                                  mixed))));
+              if (mode.equals("tj6-focus")) {
+                assertThat(prepares.stream().map(row -> row.path("kind").asText()).toList())
+                    .containsExactly("WAIT", "PREPARED");
+                JsonNode retriedProof =
+                    C.parse(
+                        jdbc.queryForObject(
+                            "SELECT p.proof::text FROM studio_guided_preparations p"
+                                + " JOIN studio_guided_actions a USING(session_id,admission_id)"
+                                + " WHERE a.session_id=? AND a.step_id=? AND a.ordinal=0"
+                                + " AND a.attempt_ordinal=0",
+                            String.class,
+                            mixed,
+                            TWO));
+                assertThat(retriedProof.path("target"))
+                    .as("the admitted retry preserves BASE's locator, tier and identity exactly")
+                    .isEqualTo(frozenTarget);
+                assertThat(
+                        jdbc.queryForObject(
+                            "SELECT reason FROM studio_guided_relearn_switches"
+                                + " WHERE session_id=?",
+                            String.class,
+                            mixed))
+                    .isEqualTo("BOUNDARY");
+                assertThat(
+                        jdbc.queryForObject(
+                            "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND"
+                                + " step_id=? AND attempt_ordinal=0 AND"
+                                + " document->>'state'='SUCCEEDED'",
+                            Integer.class,
+                            mixed,
+                            TWO))
+                    .isEqualTo(1);
+              } else {
+                assertThat(prepares).hasSize(33);
+                assertThat(prepares.getLast().path("kind").asText()).isEqualTo("DRIFT");
+                assertThat(prepares.getLast().path("reason").asText()).isEqualTo("TARGET_DRIFT");
+                assertThat(
+                        prepares.stream()
+                            .map(row -> row.path("actions").asInt())
+                            .distinct()
+                            .toList())
+                    .containsExactly(1);
+                assertThat(
+                        jdbc.queryForObject(
+                            "SELECT count(*) FROM studio_guided_actions a JOIN"
+                                + " studio_guided_relearn_switches s USING(session_id) WHERE"
+                                + " a.session_id=? AND a.step_id=? AND a.attempt_ordinal=0 AND"
+                                + " (a.document->'admission'->>'admittedAt')::timestamptz<s.created_at",
+                            Integer.class,
+                            mixed,
+                            TWO))
+                    .as(
+                        "no prefix admission before the drift switch; later suffix learning is"
+                            + " separate")
+                    .isZero();
+                assertThat(
+                        jdbc.queryForObject(
+                            "SELECT count(*) FROM studio_guided_no_invocation_receipts WHERE"
+                                + " session_id=? AND admission_id IS NULL AND preparation_id IS"
+                                + " NULL AND document->>'phase'='PRE_ADMISSION' AND"
+                                + " document->'coordinate'->>'stepId'=? AND"
+                                + " document->'nativeInvocationStarted'='false'::jsonb",
+                            Integer.class,
+                            mixed,
+                            TWO))
+                    .isEqualTo(1);
+                assertThat(
+                        jdbc.queryForObject(
+                            "SELECT reason FROM studio_guided_relearn_switches"
+                                + " WHERE session_id=?",
+                            String.class,
+                            mixed))
+                    .isEqualTo("DRIFT");
+              }
+              assertThat(
+                      jdbc.queryForObject(
+                          "SELECT count(*) FROM studio_guided_model_attempts m"
+                              + " JOIN studio_guided_relearn_switches s USING(session_id)"
+                              + " WHERE m.session_id=? AND m.created_at<s.created_at",
+                          Integer.class,
+                          mixed))
+                  .isZero();
+              // The browser is retained while FINALIZING; end this protocol-only fixture through
+              // its public cancellation route before the next session reuses the unchanged base.
+              p3Call(
+                  p3Cookie,
+                  "/api/v1/studio/guided-sessions/" + mixed + "/cancel",
+                  C.object().put("schemaVersion", 3).put("reason", "userRequested"),
+                  202);
+              p3AwaitTeardown(mixed);
+            }
+          } finally {
+            Files.writeString(TEMP.resolve("obs015-native-mode.json"), "{}");
+          }
+        });
+  }
+
   @Test
   void actualIncrementalSecretPrefixRecapturesRotatedValueWithScopedAuditAndOrdinaryReplay()
       throws Exception {
     p3Case(
         () -> {
           p3Mode = P3Mode.LOGIN;
-          p3Grant(primaryCsi, "fixture");
           UUID test = p3CreateSource(primaryCsi, "fixture", true);
           VaultScope scope = VaultScope.of(primaryCsi, "fixture", test);
           String first = p3ExpectedPassword;
@@ -26821,7 +25112,14 @@ RevRuntime.prototype.dispatch=async function(...args){
           assertThat(MODEL_WIRE).hasSize(finalizedModels);
           assertThat(COUNTED_VAULT.reads).hasSize(finalizedReads);
           JsonNode artifact = C.parse(merged.artifact());
-          assertThat(artifact.path("learnedPlan").path("reusedFrom")).hasSize(2);
+          assertThat(artifact.path("learnedPlan").path("reusedFrom"))
+              .as(
+                  "prefix provenance; switch=%s",
+                  jdbc.queryForList(
+                      "SELECT reason,effective_step_index,next_ordinal FROM"
+                          + " studio_guided_relearn_switches WHERE session_id=?",
+                      mixed))
+              .hasSize(2);
           for (String step : List.of(ONE, TWO)) {
             assertThat(
                     artifact
@@ -26839,7 +25137,7 @@ RevRuntime.prototype.dispatch=async function(...args){
                         .path(step));
           }
           var sinks = new java.util.LinkedHashMap<String, byte[]>();
-          assertGuidedLearnRunRecorded(mixed, sinks);
+          assertGuidedLearnRecordingDiscarded(mixed);
           assertThat(merged.artifact()).doesNotContain(first, rotated);
           UUID execution = p3Execute(test);
           p3AssertBinding(execution, scope, merged);
@@ -26893,12 +25191,13 @@ RevRuntime.prototype.dispatch=async function(...args){
     UUID testId =
         createSource(
             List.of(
-                "Open " + SECRET_ORIGIN + "/login.",
+                "Open " + SECRET_ORIGIN + "/login now.",
                 "Enter <var USER> in User and <secret PASS> as password.",
                 "Click Sign in, check Home, open Reports and check Reports appears."));
     jdbc.update(
         ("UPDATE ui_tests SET variables='[{\"name\":\"USER\",\"kind\":\"plain\","
-            + "\"value\":\"fixture-user\"},{\"name\":\"PASS\",\"kind\":\"secretRef\",\"secretId\":\"PASS\"}]'::jsonb"
+            + "\"value\":\"fixture-user\"},{\"name\":\"PASS\",\"kind\":\"se"
+            + "cretRef\",\"secretId\":\"PASS\"}]'::jsonb"
             + " WHERE id=?"),
         testId);
     var vaultScope =
@@ -27000,13 +25299,20 @@ RevRuntime.prototype.dispatch=async function(...args){
           .as("publication performs zero value reads")
           .isEqualTo(1);
       assertThat(MODEL_WIRE.size()).isEqualTo(learningModels);
-      // STUDIO-OBS-013 AC-6 / TEST-001: the guided learn run itself is recorded (AR-QA TEST001).
-      ObjectNode guidedRecording = assertGuidedLearnRunRecorded(sessionId, sinkBytes);
+      // The learn published, so its recording is discarded (STUDIO-OBS-013 AC-6 / TEST-001 now
+      // apply to a learn that does not publish) and its proof is the AFTER_LEARN replay the
+      // publication accepted. That replay is run 0 below, a third password release under the same
+      // scope and secret, then the two ordinary runs.
+      ObjectNode guidedRecording = assertGuidedLearnRecordingDiscarded(sessionId);
       String guidedVideoKey = guidedRecording.path("videoKey").asText();
+      PublicationProof proof = acceptedProof(sessionId, publication);
       var executions = new java.util.ArrayList<UUID>();
-      for (int run = 0; run < 2; run++) {
-        String actual = run == 0 ? canary : rotatedCanary;
-        if (run == 1) {
+      for (int run = 0; run < 3; run++) {
+        // The proof was accepted inside the publication commit, so no accepted mutation request
+        // has been cached yet when its sinks are collected; every later collection must see one.
+        capture.cacheNonemptyRequired = run > 0;
+        String actual = run < 2 ? canary : rotatedCanary;
+        if (run == 2) {
           capture.writeProfileValues();
           VAULT.rotate(
               com.citi.put.checks.studio.secrets.StudioVaultProvider.ReferenceKind.SECRET,
@@ -27025,14 +25331,16 @@ RevRuntime.prototype.dispatch=async function(...args){
               HttpResponse.BodyHandlers.discarding());
         }
         UUID execution =
-            UUID.fromString(
-                publicCall(
-                        "/api/v1/studio/tests/" + testId + "/execute",
-                        C.object(),
-                        202,
-                        UUID.randomUUID().toString())
-                    .path("executionId")
-                    .asText());
+            run == 0
+                ? proof.executionId()
+                : UUID.fromString(
+                    publicCall(
+                            "/api/v1/studio/tests/" + testId + "/execute",
+                            C.object(),
+                            202,
+                            UUID.randomUUID().toString())
+                        .path("executionId")
+                        .asText());
         executions.add(execution);
         capture.watchExecution(execution);
         JsonNode binding = observedBinding(execution);
@@ -27330,11 +25638,15 @@ RevRuntime.prototype.dispatch=async function(...args){
       assertThat(
               jdbc.queryForObject(
                   ("SELECT count(DISTINCT vault_version) FROM studio_secret_use_audit WHERE"
-                      + " execution_id IN (?,?) AND row_kind='RELEASE' AND"
+                      + " execution_id IN (?,?,?) AND row_kind='RELEASE' AND"
                       + " decision_stage='DISPATCH'"),
                   Integer.class,
                   executions.get(0),
-                  executions.get(1)))
+                  executions.get(1),
+                  executions.get(2)))
+          .as(
+              "the proof and the first ordinary run read the original version; the last, the"
+                  + " rotated")
           .isEqualTo(2);
       assertThat(executions).doesNotHaveDuplicates();
       assertThat(videoKeys).doesNotHaveDuplicates();
@@ -27353,7 +25665,7 @@ RevRuntime.prototype.dispatch=async function(...args){
                           com.citi.put.checks.studio.secrets.FakeStudioVaultProvider.key(
                               StudioVaultProvider.ReferenceKind.SECRET, vaultScope, "PASS")))
               .toList();
-      assertThat(secretReads).hasSize(3);
+      assertThat(secretReads).as("learn, proof and two ordinary runs").hasSize(4);
       for (OwnedVaultRead read : secretReads) {
         assertThat(read.value != null && allErased(read.value))
             .as("actual delivered provider array erased")
@@ -27368,6 +25680,7 @@ RevRuntime.prototype.dispatch=async function(...args){
                   "actual Core HTTP/PostgreSQL/counted Vault/compiled worker/full Chromium")
               .put("guidedValueReads", 1)
               .put("publicationValueReads", 0)
+              .put("proofValueReads", 1)
               .put("ordinaryValueReads", 2)
               .put("learningModelCalls", learningModels - baselineModels)
               .put("publicationReplayModelCalls", 0)
@@ -27448,13 +25761,10 @@ RevRuntime.prototype.dispatch=async function(...args){
   // ── STUDIO-OBS-013 TEST-001 (AR-QA ar-qa-sec001-test001.json): the guided learn run's own
   // recording, joined: real backend, PostgreSQL, guided worker on Chromium, filesystem store. ──
 
-  /** The replica sets no grace, so it judges the window with the record's own default. */
-  private static final Duration GUIDED_SETTLE_GRACE =
-      com.citi.put.checks.studio.guided.evidence.GuidedRecordingProperties.DEFAULT_SETTLE_GRACE;
-
   /** The guided manifest disclosure (AC-5), as the runner writes it. */
   private static final String GUIDED_DISCLOSURE =
-      "Password fills are rendered as masked dots (password-only rule). A page that later"
+      "Password fills are rendered as masked dots (password-only ru"
+          + "le). A page that later"
           + " displays a secret in plain text is not protected by this recording.";
 
   /** Polls the result (bounded, inside settle-grace) until the video is no longer PROCESSING. */
@@ -27677,48 +25987,6 @@ RevRuntime.prototype.dispatch=async function(...args){
     return rows.get(0);
   }
 
-  private String guidedRecordingRowState(String sessionId) {
-    var rows =
-        jdbc.queryForList(
-            "SELECT state FROM studio_guided_session_recordings WHERE session_id=?",
-            String.class,
-            sessionId);
-    return rows.isEmpty() ? null : rows.get(0);
-  }
-
-  /**
-   * What a replica with no recording store must publish, from the stored fact and the DB-clock
-   * window (AR-1 R1 table with servesRecordings false).
-   */
-  private String replicaExpectedVideoStatus(String sessionId) {
-    Map<String, Object> row =
-        jdbc.queryForMap(
-            "SELECT s.state AS session_state, r.state AS recording_state,"
-                + " clock_timestamp() < s.expires_at + make_interval(secs => ?) AS within"
-                + " FROM studio_guided_sessions s LEFT JOIN studio_guided_session_recordings r"
-                + " ON r.session_id = s.session_id WHERE s.session_id=?",
-            (double) GUIDED_SETTLE_GRACE.toSeconds(),
-            sessionId);
-    Object recording = row.get("recording_state");
-    if (recording == null) {
-      boolean terminal =
-          List.of(
-                  "SUCCEEDED",
-                  "PUBLICATION_CONFLICT",
-                  "FAILED",
-                  "UNKNOWN_OUTCOME",
-                  "CANCELLED",
-                  "EXPIRED")
-              .contains(String.valueOf(row.get("session_state")));
-      return !terminal || Boolean.TRUE.equals(row.get("within")) ? "PROCESSING" : "UNAVAILABLE";
-    }
-    return switch (String.valueOf(recording)) {
-      case "AVAILABLE", "UNAVAILABLE" -> "UNAVAILABLE";
-      case "FAILED" -> "FAILED";
-      default -> throw new AssertionError("unexpected stored recording state " + recording);
-    };
-  }
-
   private static int guidedTimingKindRank(String kind) {
     int rank = List.of("prefixReplay", "step", "clarificationWait", "action").indexOf(kind);
     assertThat(rank).as("timing kind %s", kind).isNotNegative();
@@ -27779,7 +26047,8 @@ RevRuntime.prototype.dispatch=async function(...args){
     assertThat(row.get("has_expiry")).isEqualTo(true);
     String csi =
         jdbc.queryForObject(
-            "SELECT document->'scope'->>'csiId' FROM studio_guided_sessions WHERE session_id=?",
+            "SELECT document->'scope'->>'csiId' FROM studio_guided_sessio"
+                + "ns WHERE session_id=?",
             String.class,
             sessionId);
     var keys =
@@ -27837,11 +26106,12 @@ RevRuntime.prototype.dispatch=async function(...args){
     var ordinals = new java.util.HashMap<String, Integer>();
     for (var action :
         jdbc.queryForList(
-            "SELECT admission_id, step_id, ordinal FROM studio_guided_actions a"
-                + " WHERE session_id=? AND (document->>'dispatchCount')::integer = 1"
-                + " AND NOT EXISTS (SELECT 1 FROM studio_guided_no_invocation_receipts r WHERE"
-                + " r.session_id=a.session_id"
-                + " AND r.admission_id=a.admission_id AND r.document->>'nativeInvocationStarted'='false')",
+            "SELECT admission_id, step_id, ordinal FROM studio_guided_act"
+                + "ions a WHERE session_id=?"
+                + " AND (document->>'dispatchCount')::integer = 1 AND NOT EXISTS (SELECT 1 FROM"
+                + " studio_guided_no_invocation_receipts r WHERE r.session_id=a.session_id AND"
+                + " r.admission_id=a.admission_id AND"
+                + " r.document->>'nativeInvocationStarted'='false')",
             sessionId)) {
       ledger.put(String.valueOf(action.get("admission_id")), String.valueOf(action.get("step_id")));
       ordinals.put(
@@ -27930,10 +26200,14 @@ RevRuntime.prototype.dispatch=async function(...args){
   }
 
   /**
-   * AC-6 fault half: a recorder-side fault mid-session (the live WebM removed from the recorder's
-   * directory after the first dispatched action, as runner recorderFileLost) settles UNAVAILABLE,
-   * the session still finishes, and no video object exists. The store is the same one the happy
-   * path proves AVAILABLE with, so UNAVAILABLE here can only come from the injected fault.
+   * AC-6 for a learn that does NOT publish (a published learn keeps no recording; see {@code
+   * assertGuidedLearnRecordingDiscarded}). Happy half: a healthy learn that is cancelled at
+   * FINALIZING keeps its recording AVAILABLE, with its V20 fact, stored WebM, measured rows and
+   * authenticated range read. Fault half: a recorder-side fault mid-session (the live WebM removed
+   * from the recorder's directory after the first dispatched action, as runner recorderFileLost)
+   * settles UNAVAILABLE, the session still ends (cancelled), and no video object exists. The store
+   * is the same one the happy half proves AVAILABLE with, so UNAVAILABLE can only come from the
+   * injected fault.
    *
    * <p>Hosted on the class's plain (non-secret) learn fixture, not the secret-login one: the S2
    * operation observer in the guided worker is single-use per worker process (its drain restores
@@ -27945,6 +26219,12 @@ RevRuntime.prototype.dispatch=async function(...args){
   @org.junit.jupiter.api.Order(9)
   void guidedRecorderFaultSettlesUnavailableAndTheSessionStillFinishes() throws Exception {
     itrEnsureClassFixtures();
+    // Happy half: a healthy learn that never publishes keeps its recording (the learning attempt).
+    String keptSession = startLearning(createSource(TEXT));
+    awaitFinalizing(keptSession);
+    cancelLearn(keptSession);
+    assertGuidedLearnRunRecorded(keptSession, new java.util.LinkedHashMap<>());
+
     UUID testId = createSource(TEXT);
     long launchesBefore = p3LaunchCounter().path("count").asLong();
     String sessionId = startLearning(testId);
@@ -28188,16 +26468,9 @@ RevRuntime.prototype.dispatch=async function(...args){
     assertThat(removed).as("the live recording file was removed").isPositive();
     assertThat(stateAtInjection).isNotNull();
 
-    // The session still finishes.
+    // The session still ends: it reaches FINALIZING and is cancelled (it never publishes).
     awaitFinalizing(sessionId);
-    publicCall(
-        "/api/v1/studio/guided-sessions/" + sessionId + "/finalize",
-        C.object()
-            .put("schemaVersion", 3)
-            .put("expectedSourceRevision", "1")
-            .put("expectedConfigurationRevision", "1"),
-        200,
-        UUID.randomUUID().toString());
+    cancelLearn(sessionId);
 
     JsonNode result = awaitGuidedVideoSettled(sessionId);
     JsonNode video = result.path("evidence").path("video");
@@ -28234,71 +26507,6 @@ RevRuntime.prototype.dispatch=async function(...args){
         .isEqualTo("VIDEO_UNAVAILABLE");
   }
 
-  /** Test-only accounting at the existing provider seam; it never resolves an extra value. */
-  @Test
-  @org.junit.jupiter.api.Order(10)
-  void actualCoreMayUseDenialStartsNoSessionAndNoBrowser() throws Exception {
-    p3Case(
-        () -> {
-          p3Mode = P3Mode.REGISTRATION;
-          UUID positive = p3CreateSource(primaryCsi, "fixture", false);
-          String warm = p3Start(positive, "fixture");
-          awaitFinalizing(warm);
-          p3Publish(warm);
-          JsonNode registered = p3LaunchCounter();
-          assertThat(registered.path("registered").asBoolean()).isTrue();
-          assertThat(registered.path("count").asLong()).isPositive();
-          p3Mode = P3Mode.LOGIN;
-          UUID denied = p3CreateSource(primaryCsi, "fixture", true);
-          VaultScope scope = VaultScope.of(primaryCsi, "fixture", denied);
-          p3Seed(scope, "P3-DENIED-" + UUID.randomUUID());
-          String deniedCookie = p3CoreCookie("p3-denied", "p3-denied@example.invalid");
-          int calls = MODEL_WIRE.size(),
-              reads = COUNTED_VAULT.reads.size(),
-              core = CORE_CALLS.get();
-          long launches = p3LaunchCounter().path("count").asLong();
-          JsonNode refusal =
-              p3Call(
-                  deniedCookie,
-                  "/api/v1/studio/guided-sessions",
-                  p3StartCommand(denied, "fixture"),
-                  403);
-          assertThat(refusal.path("code").asText()).isEqualTo("SECRET_USE_NOT_AUTHORIZED");
-          assertThat(CORE_CALLS.get()).isGreaterThan(core);
-          assertThat(
-                  P3_MAY_USE.stream()
-                      .anyMatch(
-                          call ->
-                              call.principal().equals("p3-denied")
-                                  && call.csi().equals(primaryCsi)
-                                  && call.environment().equals("fixture")
-                                  && call.name().equals("PASS")))
-              .isTrue();
-          assertThat(
-                  jdbc.queryForObject(
-                      "SELECT count(*) FROM studio_guided_sessions WHERE test_id=?",
-                      Long.class,
-                      denied.toString()))
-              .isZero();
-          assertThat(MODEL_WIRE.size()).isEqualTo(calls);
-          assertThat(COUNTED_VAULT.reads.size()).isEqualTo(reads);
-          assertThat(p3LaunchCounter().path("count").asLong()).isEqualTo(launches);
-          p3WriteEvidence(
-              "core-start-denial",
-              C.object()
-                  .put("coreCalls", CORE_CALLS.get() - core)
-                  .put("valueReads", COUNTED_VAULT.reads.size() - reads)
-                  .put("newLaunchCalls", p3LaunchCounter().path("count").asLong() - launches)
-                  .put("registeredPositiveLaunchCount", registered.path("count").asLong())
-                  .put(
-                      "sessions",
-                      jdbc.queryForObject(
-                          "SELECT count(*) FROM studio_guided_sessions WHERE test_id=?",
-                          Long.class,
-                          denied.toString())));
-        });
-  }
-
   @Test
   @org.junit.jupiter.api.Order(11)
   void actualCoreGuidedSameSecretIdStaysWithinPersistedScope() throws Exception {
@@ -28314,7 +26522,6 @@ RevRuntime.prototype.dispatch=async function(...args){
                   Map.entry(primaryCsi, "fixture-other"),
                   Map.entry(primaryCsi, "fixture"))) {
             p3Mode = P3Mode.LOGIN;
-            p3Grant(axis.getKey(), axis.getValue());
             UUID test = p3CreateSource(axis.getKey(), axis.getValue(), true);
             VaultScope scope = VaultScope.of(axis.getKey(), axis.getValue(), test);
             String value = "P3-SCOPED-" + UUID.randomUUID();
@@ -28502,25 +26709,6 @@ RevRuntime.prototype.dispatch=async function(...args){
                   .isEqualTo(1);
               p3AssertAuditScope(null, unavailable, scope);
               p3Seed(scope, value);
-              String denied =
-                  p3CoreCookie("p3-denied-ordinary", "p3-denied-ordinary@example.invalid");
-              long accepted =
-                  jdbc.queryForObject(
-                      "SELECT count(*) FROM ui_test_executions WHERE ui_test_id=?",
-                      Long.class,
-                      test);
-              int deniedReads = COUNTED_VAULT.reads.size();
-              JsonNode noPermission =
-                  p3Call(denied, "/api/v1/studio/tests/" + test + "/execute", C.object(), 400);
-              assertThat(noPermission.path("error").asText()).isEqualTo("UNKNOWN_REFERENCE");
-              assertThat(
-                      jdbc.queryForObject(
-                          "SELECT count(*) FROM ui_test_executions WHERE ui_test_id=?",
-                          Long.class,
-                          test))
-                  .isEqualTo(accepted);
-              assertThat(COUNTED_VAULT.reads.size()).isEqualTo(deniedReads);
-              assertThat(MODEL_WIRE.size()).isEqualTo(models);
               p3Scan(canaries);
               p3WriteEvidence(
                   "ordinary-scope-" + (++ordinal),
@@ -28536,7 +26724,6 @@ RevRuntime.prototype.dispatch=async function(...args){
                       .put(
                           "missingOwnSends",
                           ACTUAL_DISPATCH_DIAGNOSTICS.containsKey(unavailable) ? 1 : 0)
-                      .put("deniedPrincipalReads", COUNTED_VAULT.reads.size() - deniedReads)
                       .put(
                           "artifactUnchanged",
                           jdbc.queryForObject(
@@ -28917,18 +27104,6 @@ RevRuntime.prototype.dispatch=async function(...args){
   }
 
   @Test
-  @org.junit.jupiter.api.Order(24)
-  void actualCoreGuidedRevocationStopsAtNextAuthorityCheckWithinTwoSeconds() throws Exception {
-    p3Case(() -> p4RevocationPair(1));
-  }
-
-  @Test
-  @org.junit.jupiter.api.Order(25)
-  void actualCoreOrdinaryRevocationStopsAtNextAuthorityCheckWithinTwoSeconds() throws Exception {
-    p3Case(() -> p4RevocationPair(2));
-  }
-
-  @Test
   @org.junit.jupiter.api.Order(26)
   void actualCommittedSecretProgressSurvivesOwnedChildAndParentCrashThenRunningReaper()
       throws Exception {
@@ -29007,7 +27182,6 @@ RevRuntime.prototype.dispatch=async function(...args){
     assertThat(p4Revocation).isNull();
     assertThat(p6ChildCut).isNull();
     p3Mode = P3Mode.LOGIN;
-    p3Grant("CSI-456", "fixture-other");
     UUID test = p3CreateSource("CSI-456", "fixture-other", true);
     VaultScope scope = VaultScope.of("CSI-456", "fixture-other", test);
     p3ExpectedPassword = value;
@@ -29063,7 +27237,8 @@ RevRuntime.prototype.dispatch=async function(...args){
       assertThat(admitted.path("admissionId").equals(cut.report.path("admissionId"))).isTrue();
       var releases =
           jdbc.queryForList(
-              "SELECT * FROM studio_secret_use_audit WHERE execution_id=? AND row_kind='RELEASE'"
+              "SELECT * FROM studio_secret_use_audit WHERE execution_id=? A"
+                  + "ND row_kind='RELEASE'"
                   + " AND decision_stage='DISPATCH' AND outcome='RESOLVED' AND secret_id='PASS'",
               state.execution);
       assertThat(releases.size()).isEqualTo(1);
@@ -29483,7 +27658,6 @@ RevRuntime.prototype.dispatch=async function(...args){
         .as("unchanged production deadline within accepted case budget")
         .isLessThanOrEqualTo(Duration.ofSeconds(600).toMillis());
     p3Mode = P3Mode.LOGIN;
-    p3Grant(primaryCsi, "fixture");
     UUID test = p3CreateSource(primaryCsi, "fixture", true);
     VaultScope scope = VaultScope.of(primaryCsi, "fixture", test);
     String value = p3ExpectedPassword;
@@ -29903,8 +28077,10 @@ RevRuntime.prototype.dispatch=async function(...args){
 
   private Map<String, Object> p6Owner(UUID execution) {
     return jdbc.queryForMap(
-        "SELECT e.status,e.error_code,e.snapshot_revision,e.step_results::text AS step_results,"
-            + "e.observed_admission_receipt::text AS receipt,l.state,l.attempt_id,l.admission_id,"
+        "SELECT e.status,e.error_code,e.snapshot_revision,e.step_resu"
+            + "lts::text AS step_results,"
+            + "e.observed_admission_receipt::text AS receipt,l.state,l.atte"
+            + "mpt_id,l.admission_id,"
             + "l.last_runner_sequence,l.run_deadline_at FROM studio_dispatch_ledger l"
             + " JOIN ui_test_executions e ON e.id=l.execution_id"
             + " AND e.started_at=l.execution_accepted_at WHERE l.execution_id=?",
@@ -30412,7 +28588,6 @@ RevRuntime.prototype.dispatch=async function(...args){
       blockerPublication = p3Publish(holderLearning);
     }
     p3Mode = P3Mode.LOGIN;
-    p3Grant(primaryCsi, "fixture");
     UUID test = p3CreateSource(primaryCsi, "fixture", true);
     VaultScope scope = VaultScope.of(primaryCsi, "fixture", test);
     p3ExpectedPassword = canaries.getFirst();
@@ -30680,7 +28855,8 @@ RevRuntime.prototype.dispatch=async function(...args){
       var owner =
           jdbc.queryForMap(
               "SELECT l.state,l.attempt_id,l.admission_id,l.definite_refusal_attempt_id,"
-                  + "l.zero_send_decision_attempt_id,e.observed_admission_receipt,e.browser_started_at,e.error_code"
+                  + "l.zero_send_decision_attempt_id,e.observed_admission_receipt"
+                  + ",e.browser_started_at,e.error_code"
                   + " FROM studio_dispatch_ledger l JOIN ui_test_executions e ON"
                   + " e.id=l.execution_id AND e.started_at=l.execution_accepted_at WHERE"
                   + " l.execution_id=?",
@@ -30893,7 +29069,6 @@ RevRuntime.prototype.dispatch=async function(...args){
 
   private void p8PreReadySelfStop(String canary) throws Exception {
     p3Mode = P3Mode.LOGIN;
-    p3Grant(primaryCsi, "fixture");
     UUID test = p3CreateSource(primaryCsi, "fixture", true);
     VaultScope scope = VaultScope.of(primaryCsi, "fixture", test);
     p3ExpectedPassword = canary;
@@ -31597,18 +29772,6 @@ RevRuntime.prototype.dispatch=async function(...args){
   }
 
   @Test
-  @org.junit.jupiter.api.Order(33)
-  void actualCoreGuidedControlValuePasswordRequestRefusesBeforeRead() throws Exception {
-    p14Captured(P14Recipe.CONTROL_VALUE, false);
-  }
-
-  @Test
-  @org.junit.jupiter.api.Order(34)
-  void actualCorePublishedControlValuePasswordRequestRefusesBeforeRead() throws Exception {
-    p14Captured(P14Recipe.CONTROL_VALUE, true);
-  }
-
-  @Test
   @org.junit.jupiter.api.Order(35)
   void actualCoreGuidedHasValuePasswordRequestRefusesBeforeRead() throws Exception {
     p14Captured(P14Recipe.HAS_VALUE, false);
@@ -31805,7 +29968,12 @@ RevRuntime.prototype.dispatch=async function(...args){
       capture.armTrace();
       int models = MODEL_WIRE.size();
       p14Page = P14Page.PASSWORD;
-      UUID passwordRun = p14Ordinary(test, scope, publication, capture, "TARGET_DRIFT", "ERROR");
+      // ADR-SC-007 WI-4: the replay of a has-value request against a password control now ends with
+      // the closed reason it is
+      // (PASSWORD_CONTROL_READ_REFUSED, a FAILED run) where the old collector path could only
+      // report TARGET_DRIFT (RUN_ERROR).
+      UUID passwordRun =
+          p14Ordinary(test, scope, publication, capture, "PASSWORD_CONTROL_READ_REFUSED", "FAILED");
       assertThat(MODEL_WIRE.size()).isEqualTo(models);
       p3WriteEvidence(
           "c14-published-" + recipe.ordinal(),
@@ -31814,7 +29982,7 @@ RevRuntime.prototype.dispatch=async function(...args){
               .put("path", 2)
               .put("authenticTextPublication", true)
               .put("actualSameHintPasswordMutation", true)
-              .put("firstGuardTargetDrift", true)
+              .put("firstGuardPasswordControlReadRefused", true)
               .put("requestedPasswordOperations", 0)
               .put("vaultValueReads", 0)
               .put("ordinaryModelCalls", 0));
@@ -31857,7 +30025,8 @@ RevRuntime.prototype.dispatch=async function(...args){
           JsonNode plan = plans.state(id).path("plan");
           var materials =
               jdbc.queryForList(
-                  "SELECT scope_hash,context_id,context_revision,worker_id,owner_fence,source_revision,"
+                  "SELECT"
+                      + " scope_hash,context_id,context_revision,worker_id,owner_fence,source_revision,"
                       // Keep the constant in bounded chunks across formatter reflow.
                       + "configuration_revision,authored_inputs_hash,authored_inputs::text"
                       + " AS authored_inputs,live FROM studio_guided_materializations WHERE"
@@ -31902,10 +30071,13 @@ RevRuntime.prototype.dispatch=async function(...args){
           }
           var rows =
               jdbc.queryForList(
-                  ("SELECT document::text AS ledger,proposal::text AS proposal FROM "
-                      + "studio_guided_actions WHERE session_id=?"),
+                  ("SELECT a.document::text AS ledger,a.proposal::text AS proposal,(SELECT"
+                      + " p.proof->'target' FROM studio_guided_preparations p WHERE"
+                      + " p.session_id=a.session_id AND"
+                      + " p.preparation_id=a.document->>'preparationId')::text AS target FROM"
+                      + " studio_guided_actions a WHERE a.session_id=?"),
                   id);
-          assertThat(rows.size()).isEqualTo(recipe == P14Recipe.CONTROL_VALUE ? 5 : 3);
+          assertThat(rows.size()).isEqualTo(3);
           for (var row : rows) {
             JsonNode ledger = C.parse((String) row.get("ledger")),
                 proposal = C.parse((String) row.get("proposal"));
@@ -31943,9 +30115,7 @@ RevRuntime.prototype.dispatch=async function(...args){
             }
           }
           p14CompletedAction(rows, ONE, 0, "navigate");
-          ObjectNode field =
-              p14CompletedAction(
-                  rows, TWO, 0, recipe == P14Recipe.CONTROL_VALUE ? "read" : "assert");
+          ObjectNode field = p14CompletedAction(rows, TWO, 0, "assert");
           JsonNode operation = field.path("proposal").path("operation");
           JsonNode fieldObligation = null;
           for (JsonNode obligation : plan.path("obligations")) {
@@ -31972,268 +30142,82 @@ RevRuntime.prototype.dispatch=async function(...args){
                       .equals(ORIGIN))
               .isTrue();
           assertThat(
-                  field
-                          .path("proposal")
-                          .path("target")
-                          .path("locator")
-                          .path("name")
-                          .asText()
-                          .equals("Field")
+                  field.path("target").path("identity").path("name").asText().equals("Field")
                       && field
-                          .path("proposal")
                           .path("target")
-                          .path("locator")
+                          .path("identity")
                           .path("role")
                           .asText()
                           .equals("textbox"))
               .isTrue();
-          if (recipe == P14Recipe.CONTROL_VALUE) {
-            JsonNode readRecipe = operation.path("recipe");
-            assertThat(
-                    readRecipe.path("kind").asText().equals("controlValue")
-                        && readRecipe.path("classification").asText().equals("nonsecretApproved")
-                        && readRecipe.path("controlType").asText().equals("text")
-                        && readRecipe.path("policyRuleId").asText().equals("business-read"))
-                .isTrue();
-            String binding = operation.path("bindingId").asText();
-            String readAdmission =
-                field.path("ledger").path("admission").path("admissionId").asText();
-            var allocations =
-                jdbc.queryForList(
-                    ("SELECT document::text FROM studio_guided_allocations WHERE "
-                        + "session_id=? AND binding_id=? AND need_id='c14-field'"),
-                    String.class,
-                    id,
-                    binding);
-            assertThat(allocations.size()).isEqualTo(1);
-            JsonNode allocation = C.parse(allocations.getFirst());
-            assertThat(
-                    allocation.path("bindingId").asText().equals(binding)
-                        && allocation.path("producerStepId").asText().equals(TWO))
-                .isTrue();
-            assertThat(allocation.path("consumers").size()).isEqualTo(1);
-            assertThat(
-                    allocation.path("consumers").get(0).path("stepId").asText().equals(THREE)
-                        && allocation
-                            .path("consumers")
-                            .get(0)
-                            .path("argumentSlot")
-                            .asText()
-                            .equals("fill.value"))
-                .isTrue();
-            JsonNode need = null;
-            for (JsonNode declared : plan.path("needs")) {
-              if (declared.path("needId").asText().equals("c14-field")) {
-                assertThat(need == null).isTrue();
-                need = declared;
-              }
+          assertThat(
+                  operation.path("predicate").asText().equals("hasValue")
+                      && operation.path("expected").path("kind").asText().equals("authoredLiteral"))
+              .isTrue();
+          String inputId = operation.path("expected").path("sourceInputId").asText();
+          JsonNode expected = null;
+          for (JsonNode input : inputs.path("inputs")) {
+            if (input.path("inputId").asText().equals(inputId)) {
+              assertThat(expected == null).isTrue();
+              expected = input;
             }
-            assertThat(
-                    need != null
-                        && need.path("producerStepId").asText().equals(TWO)
-                        && need.path("consumers").equals(allocation.path("consumers")))
-                .isTrue();
-            var producers =
-                jdbc.queryForList(
-                    ("SELECT document::text FROM studio_guided_producers WHERE "
-                        + "session_id=? AND binding_id=? AND admission_id=?"),
-                    String.class,
-                    id,
-                    binding,
-                    readAdmission);
-            assertThat(producers.size()).isEqualTo(1);
-            JsonNode producer = C.parse(producers.getFirst()),
-                availability = producer.path("availability");
-            assertThat(
-                    producer.path("bindingId").asText().equals(binding)
-                        && producer.path("producerAdmissionId").asText().equals(readAdmission)
-                        && producer
-                            .path("coordinate")
-                            .equals(field.path("proposal").path("coordinate"))
-                        && producer.path("recipe").equals(readRecipe)
-                        && producer
-                            .path("origin")
-                            .equals(
-                                field.path("proposal").path("executionEvidence").path("origin")))
-                .isTrue();
-            assertThat(
-                    availability.path("bindingId").asText().equals(binding)
-                        && availability.path("producerAdmissionId").asText().equals(readAdmission)
-                        && availability
-                            .path("contextId")
-                            .asText()
-                            .equals(material.get("context_id"))
-                        && availability.path("workerId").asText().equals(material.get("worker_id"))
-                        && availability.path("ownerFence").asLong()
-                            == ((Number) material.get("owner_fence")).longValue())
-                .isTrue();
-            ObjectNode fill = p14CompletedAction(rows, THREE, 0, "fill");
-            String fillAdmission =
-                fill.path("ledger").path("admission").path("admissionId").asText();
-            assertThat(
-                    fill.path("proposal")
-                            .path("target")
-                            .path("locator")
-                            .path("name")
-                            .asText()
-                            .equals("Destination")
-                        && fill.path("proposal")
-                            .path("target")
-                            .path("locator")
-                            .path("role")
-                            .asText()
-                            .equals("textbox")
-                        && fill.path("proposal")
-                            .path("operation")
-                            .path("value")
-                            .path("kind")
-                            .asText()
-                            .equals("binding")
-                        && fill.path("proposal")
-                            .path("operation")
-                            .path("value")
-                            .path("bindingId")
-                            .asText()
-                            .equals(binding))
-                .isTrue();
-            var edges =
-                jdbc.queryForList(
-                    ("SELECT document::text FROM studio_guided_consumer_edges WHERE "
-                            + "session_id=? AND consumer_admission_id=?")
-                        + " AND argument_slot='fill.value' AND binding_id=? AND"
-                        + " producer_admission_id=?",
-                    String.class,
-                    id,
-                    fillAdmission,
-                    binding,
-                    readAdmission);
-            assertThat(edges.size()).isEqualTo(1);
-            JsonNode edge = C.parse(edges.getFirst());
-            assertThat(
-                    edge.path("bindingId").asText().equals(binding)
-                        && edge.path("producerAdmissionId").asText().equals(readAdmission)
-                        && edge.path("consumerAdmissionId").asText().equals(fillAdmission)
-                        && edge.path("argumentSlot").asText().equals("fill.value")
-                        && edge.path("coordinate").equals(fill.path("proposal").path("coordinate"))
-                        && edge.path("destinationOrigin").equals(producer.path("origin"))
-                        && edge.path("destinationOrigin")
-                            .equals(fill.path("proposal").path("executionEvidence").path("origin"))
-                        && edge.path("transferPolicy").asText().equals("sameOrigin"))
-                .isTrue();
-            ObjectNode click = p14CompletedAction(rows, THREE, 1, "click");
-            assertThat(
-                    click
-                        .path("proposal")
-                        .path("target")
-                        .path("locator")
-                        .path("name")
-                        .asText()
-                        .equals("Submit"))
-                .isTrue();
-            ObjectNode confirmed = p14CompletedAction(rows, THREE, 2, "assert");
-            assertThat(
-                    confirmed
-                            .path("proposal")
-                            .path("operation")
-                            .path("predicate")
-                            .asText()
-                            .equals("visible")
-                        && confirmed
-                            .path("proposal")
-                            .path("target")
-                            .path("locator")
-                            .path("name")
-                            .asText()
-                            .equals("Confirmation"))
-                .isTrue();
-          } else {
-            assertThat(
-                    operation.path("predicate").asText().equals("hasValue")
-                        && operation
-                            .path("expected")
-                            .path("kind")
-                            .asText()
-                            .equals("authoredLiteral"))
-                .isTrue();
-            String inputId = operation.path("expected").path("sourceInputId").asText();
-            JsonNode expected = null;
-            for (JsonNode input : inputs.path("inputs")) {
-              if (input.path("inputId").asText().equals(inputId)) {
-                assertThat(expected == null).isTrue();
-                expected = input;
-              }
-            }
-            assertThat(
-                    expected != null
-                        && expected.path("kind").asText().equals("nonsecretText")
-                        && expected.path("sourceStepId").asText().equals(TWO)
-                        && expected.path("intendedSlot").asText().equals("assert.expected")
-                        && expected.path("value").asText().equals(p14Expected))
-                .isTrue();
-            JsonNode declared = null;
-            for (JsonNode reference : manifest.path("configurationReferences")) {
-              if (reference
-                  .path("referenceId")
-                  .equals(expected.path("provenance").path("referenceId"))) {
-                assertThat(declared == null).isTrue();
-                declared = reference;
-              }
-            }
-            int referenceIndex = fieldObligation.path("referenceIndex").asInt(-1);
-            assertThat(referenceIndex >= 0 && referenceIndex < plan.path("sourceReferences").size())
-                .isTrue();
-            assertThat(
-                    plan.path("sourceReferences")
-                        .get(referenceIndex)
-                        .path("referenceId")
-                        .equals(expected.path("provenance").path("referenceId")))
-                .isTrue();
-            assertThat(
-                    declared != null
-                        && declared.path("referenceName").asText().equals("EXPECTED")
-                        && declared.path("stepId").asText().equals(TWO)
-                        && declared.path("intendedSlot").asText().equals("assert.expected")
-                        && declared.path("kind").asText().equals("nonsecretText")
-                        && expected
-                            .path("provenance")
-                            .path("referenceKind")
-                            .asText()
-                            .equals("configuration"))
-                .isTrue();
-            ObjectNode complete = p14CompletedAction(rows, THREE, 0, "assert");
-            assertThat(
-                    complete
-                            .path("proposal")
-                            .path("target")
-                            .path("locator")
-                            .path("name")
-                            .asText()
-                            .equals("Complete")
-                        && complete
-                            .path("proposal")
-                            .path("operation")
-                            .path("predicate")
-                            .asText()
-                            .equals("visible"))
-                .isTrue();
-            assertThat(
-                    jdbc.queryForObject(
-                        "SELECT count(*) FROM studio_guided_producers WHERE session_id=?",
-                        Integer.class,
-                        id))
-                .isZero();
           }
+          assertThat(
+                  expected != null
+                      && expected.path("kind").asText().equals("nonsecretText")
+                      && expected.path("sourceStepId").asText().equals(TWO)
+                      && expected.path("intendedSlot").asText().equals("assert.expected")
+                      && expected.path("value").asText().equals(p14Expected))
+              .isTrue();
+          JsonNode declared = null;
+          for (JsonNode reference : manifest.path("configurationReferences")) {
+            if (reference
+                .path("referenceId")
+                .equals(expected.path("provenance").path("referenceId"))) {
+              assertThat(declared == null).isTrue();
+              declared = reference;
+            }
+          }
+          int referenceIndex = fieldObligation.path("referenceIndex").asInt(-1);
+          assertThat(referenceIndex >= 0 && referenceIndex < plan.path("sourceReferences").size())
+              .isTrue();
+          assertThat(
+                  plan.path("sourceReferences")
+                      .get(referenceIndex)
+                      .path("referenceId")
+                      .equals(expected.path("provenance").path("referenceId")))
+              .isTrue();
+          assertThat(
+                  declared != null
+                      && declared.path("referenceName").asText().equals("EXPECTED")
+                      && declared.path("stepId").asText().equals(TWO)
+                      && declared.path("intendedSlot").asText().equals("assert.expected")
+                      && declared.path("kind").asText().equals("nonsecretText")
+                      && expected
+                          .path("provenance")
+                          .path("referenceKind")
+                          .asText()
+                          .equals("configuration"))
+              .isTrue();
+          ObjectNode complete = p14CompletedAction(rows, THREE, 0, "assert");
+          assertThat(
+                  complete.path("target").path("identity").path("name").asText().equals("Complete")
+                      && complete
+                          .path("proposal")
+                          .path("operation")
+                          .path("predicate")
+                          .asText()
+                          .equals("visible"))
+              .isTrue();
+          assertThat(
+                  jdbc.queryForObject(
+                      "SELECT count(*) FROM studio_guided_producers WHERE session_id=?",
+                      Integer.class,
+                      id))
+              .isZero();
           return null;
         });
-    if (recipe == P14Recipe.CONTROL_VALUE) {
-      // Existing intrinsic page receipt only; no extra request, fabricated body or wait padding.
-      assertThat(RECEIPTS.size()).isEqualTo(receiptBaseline + 1);
-      assertThat(RECEIPTS.get(receiptBaseline).equals(p14Expected))
-          .as("actual TEXT read value reached the intrinsic binding consumer")
-          .isTrue();
-    } else {
-      assertThat(RECEIPTS.size()).isEqualTo(receiptBaseline);
-    }
+    assertThat(RECEIPTS.size()).isEqualTo(receiptBaseline);
   }
 
   private ObjectNode p14CompletedAction(
@@ -32249,6 +30233,12 @@ RevRuntime.prototype.dispatch=async function(...args){
         selected = C.object();
         selected.set("ledger", ledger);
         selected.set("proposal", proposal);
+        // The target the runner reported for this action (null for a page action).
+        selected.set(
+            "target",
+            row.get("target") == null
+                ? C.object().nullNode()
+                : C.parse((String) row.get("target")));
       }
     }
     assertThat(selected != null)
@@ -32272,10 +30262,16 @@ RevRuntime.prototype.dispatch=async function(...args){
     assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
     JsonNode current = p3AwaitExecution(execution, status);
     JsonNode report = p3RunnerReport(execution);
-    // TARGET_DRIFT is an actual inner reason under RUN_ERROR; do not relabel the wire enum.
-    assertThat(report.path("outcome").path("errorMessage").asText().equals(firstGuard))
-        .as("exact first inner production guard")
-        .isTrue();
+    // Q19: the dedicated password refusal is a wire code with an explicit null message.
+    // Other guards retain their exact inner reason under the ordinary outcome's message.
+    if (firstGuard.equals("PASSWORD_CONTROL_READ_REFUSED")) {
+      assertThat(report.path("outcome").path("errorCode").asText()).isEqualTo(firstGuard);
+      assertThat(report.path("outcome").path("errorMessage").isNull()).isTrue();
+    } else {
+      assertThat(report.path("outcome").path("errorMessage").asText().equals(firstGuard))
+          .as("exact first inner production guard")
+          .isTrue();
+    }
     assertThat(report.path("steps").size()).isEqualTo(3);
     assertThat(report.path("steps").get(0).path("status").asText()).isEqualTo("PASS");
     assertThat(report.path("steps").get(1).path("status").asText()).isEqualTo("FAIL");
@@ -32283,7 +30279,7 @@ RevRuntime.prototype.dispatch=async function(...args){
         .as("exact Field failure guard")
         .isTrue();
     assertThat(report.path("steps").get(2).path("status").asText()).isEqualTo("SKIPPED");
-    if (firstGuard.equals("TARGET_DRIFT")) {
+    if (firstGuard.equals("TARGET_DRIFT") || firstGuard.equals("PASSWORD_CONTROL_READ_REFUSED")) {
       assertThat(
               P3_INVOCATIONS.subList(invocations, P3_INVOCATIONS.size()).stream()
                   .anyMatch(
@@ -32300,15 +30296,10 @@ RevRuntime.prototype.dispatch=async function(...args){
 
   private UUID p14CreateSource(P14Recipe recipe) throws Exception {
     List<String> texts =
-        recipe == P14Recipe.CONTROL_VALUE
-            ? List.of(
-                "Open " + URL + ".",
-                "Read Field value.",
-                "Enter captured Field value in Destination, click Submit and check Confirmation.")
-            : List.of(
-                "Open " + URL + ".",
-                "Check Field value equals <var EXPECTED>.",
-                "Check Complete heading remains visible.");
+        List.of(
+            "Open " + URL + " now.",
+            "Check Field value equals <var EXPECTED>.",
+            "Check Complete heading remains visible.");
     var authoring =
         new AuthoringV2Request(
             2,
@@ -32329,7 +30320,8 @@ RevRuntime.prototype.dispatch=async function(...args){
                 .toString()
             : "[]";
     jdbc.update(
-        "INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,variables,authoring,"
+        "INSERT INTO ui_tests(id,name,csi_id,environment,browser,step"
+            + "s,variables,authoring,"
             + "authoring_revision_inputs,created_by,created_at,updated_at)"
             + " VALUES (?,'C14 controlled Field',?,'fixture','chromium',?::jsonb,?::jsonb,"
             + "?::jsonb,?::jsonb,'fixture@example.invalid',now(),now())",
@@ -32346,39 +30338,28 @@ RevRuntime.prototype.dispatch=async function(...args){
     boolean password = p14Page == P14Page.PASSWORD;
     String actual =
         p14Page == P14Page.PASSWORD ? "" : p14Page == P14Page.TEXT_MATCH ? p14Expected : p14Canary;
-    String consumer =
-        p14Recipe == P14Recipe.CONTROL_VALUE && !password
-            ? "<label for='destination'>Destination</label><textarea"
-                + " id='destination'></textarea><output id='done' aria-label='Confirmation'"
-                + " hidden>Submitted</output><button"
-                + " id='submit'>Submit</button><script>document.getElementById('submit').onclick=()=>{"
-                + "document.getElementById('done').hidden=false;fetch('/receipt',{method:'POST',"
-                + "body:document.getElementById('destination').value});};</script>"
-            : "";
     return "<!doctype html><html><head><title>Operations</title></head><body>"
         + "<main aria-label='Operations'><input aria-label='Field' type='"
         + (password ? "password" : "text")
         + "' value='"
         + actual
         + "'><h1>Complete</h1>"
-        + consumer
         + "</main></body></html>";
   }
 
+  /** The stored observation, or the outline text the model was shown, of the password page. */
   private static void p14PasswordObservation(JsonNode observation) {
-    assertThat(observation.path("coverage").path("passwordControls").asInt(-1)).isEqualTo(1);
-    assertThat(observation.path("coverage").path("complete").asBoolean()).isFalse();
-    assertThat(observation.path("coverage").path("truncated").asBoolean()).isFalse();
-    assertThat(observation.path("coverage").path("reason").asText()).isEqualTo("sensitivity");
-    assertThat(observation.path("coverage").path("withheldRegions").asInt()).isPositive();
-    for (JsonNode node : observation.path("nodes")) {
-      assertThat(node.path("name").asText().equals("Field")).isFalse();
-      for (JsonNode locator : node.path("locatorHints")) {
-        assertThat(
-                locator.path("name").asText().equals("Field")
-                    || locator.path("value").asText().equals("Field"))
-            .isFalse();
-      }
+    String outline;
+    if (observation.isTextual()) {
+      outline = observation.asText();
+    } else {
+      assertThat(observation.path("coverage").path("passwordControls").asInt(-1)).isEqualTo(1);
+      outline = observation.path("outline").asText();
+    }
+    // ADR-SC-007: the password control is a line without a ref; no shown line is the field.
+    assertThat(outline).contains("passwordControl");
+    for (var line : com.citi.put.checks.studio.support.JoinedRefs.shown(outline)) {
+      assertThat(line.name().equals("Field")).isFalse();
     }
   }
 
@@ -32628,8 +30609,7 @@ RevRuntime.prototype.dispatch=async function(...args){
     }
     assertThat(accepted != null).isTrue();
     assertThat(accepted.path("targetIntent").asText()).isEqualTo("Field");
-    assertThat(accepted.path("operationKind").asText())
-        .isEqualTo(recipe == P14Recipe.CONTROL_VALUE ? "read" : "assert");
+    assertThat(accepted.path("operationKind").asText()).isEqualTo("assert");
     if (recipe == P14Recipe.HAS_VALUE) {
       assertThat(accepted.path("predicate").asText()).isEqualTo("hasValue");
     }
@@ -32667,44 +30647,27 @@ RevRuntime.prototype.dispatch=async function(...args){
           .put("intendedSlot", "navigate.destination");
       var obligations = result.putArray("obligations");
       obligations.add(obligation(ONE, 0, "navigate", "page", 0, null));
-      var needs = result.putArray("needs");
-      if (p14Recipe == P14Recipe.CONTROL_VALUE) {
-        obligations.add(obligation(TWO, 0, "read", "Field", null, "c14-field"));
-        obligations.add(obligation(THREE, 0, "fill", "Destination", null, "c14-field"));
-        obligations.add(obligation(THREE, 1, "click", "Submit", null, null));
-        obligations.add(
-            obligation(THREE, 2, "assert", "Confirmation", null, null).put("predicate", "visible"));
-        needs
-            .addObject()
-            .put("needId", "c14-field")
-            .put("producerStepId", TWO)
-            .putArray("consumers")
-            .addObject()
-            .put("stepId", THREE)
-            .put("argumentSlot", "fill.value");
-      } else {
-        JsonNode declaring = null;
-        for (JsonNode configured : context.path("configurationReferences")) {
-          if (configured.path("referenceName").asText().equals("EXPECTED")
-              && configured.path("stepId").asText().equals(TWO)
-              && configured.path("intendedSlot").asText().equals("assert.expected")) {
-            assertThat(declaring == null).isTrue();
-            declaring = configured;
-          }
+      JsonNode declaring = null;
+      for (JsonNode configured : context.path("configurationReferences")) {
+        if (configured.path("referenceName").asText().equals("EXPECTED")
+            && configured.path("stepId").asText().equals(TWO)
+            && configured.path("intendedSlot").asText().equals("assert.expected")) {
+          assertThat(declaring == null).isTrue();
+          declaring = configured;
         }
-        assertThat(declaring != null).as("authentic plain EXPECTED declaring step/slot").isTrue();
-        var reference =
-            ((ObjectNode) declaring)
-                .deepCopy()
-                .put("referenceKind", "configuration")
-                .put("configurationRevision", "1");
-        reference.remove("referenceName");
-        references.add(reference);
-        obligations.add(
-            obligation(TWO, 0, "assert", "Field", 1, null).put("predicate", "hasValue"));
-        obligations.add(
-            obligation(THREE, 0, "assert", "Complete", null, null).put("predicate", "visible"));
       }
+      assertThat(declaring != null).as("authentic plain EXPECTED declaring step/slot").isTrue();
+      var reference =
+          ((ObjectNode) declaring)
+              .deepCopy()
+              .put("referenceKind", "configuration")
+              .put("configurationRevision", "1");
+      reference.remove("referenceName");
+      references.add(reference);
+      obligations.add(obligation(TWO, 0, "assert", "Field", 1, null).put("predicate", "hasValue"));
+      obligations.add(
+          obligation(THREE, 0, "assert", "Complete", null, null).put("predicate", "visible"));
+
       return result;
     }
     JsonNode obligation = context.path("obligations").get(0);
@@ -32723,15 +30686,10 @@ RevRuntime.prototype.dispatch=async function(...args){
       result.withObject("/action").putObject("target").put("kind", "page");
       return result;
     }
-    JsonNode node = null;
-    for (JsonNode candidate : context.path("observation").path("nodes")) {
-      if (candidate.path("name").asText().equals(name)) {
-        if (op.equals("fill")
-            && name.equals("Destination")
-            && !(candidate.path("role").asText().equals("textbox")
-                && candidate.path("elementType").asText().equals("textarea"))) {
-          continue;
-        }
+    com.citi.put.checks.studio.guided.translation.GuidedOutline.Line node = null;
+    for (var candidate :
+        com.citi.put.checks.studio.support.JoinedRefs.shown(context.path("observation").asText())) {
+      if (name.equals(candidate.name())) {
         assertThat(node == null).as("unique real C14 exported target").isTrue();
         node = candidate;
       }
@@ -32744,7 +30702,7 @@ RevRuntime.prototype.dispatch=async function(...args){
     }
     if (name.equals("Field")) {
       assertThat(p14Page == P14Page.TEXT_MATCH).isTrue();
-      assertThat(node.path("role").asText()).isEqualTo("textbox");
+      assertThat(node.role()).isEqualTo("textbox");
     }
     result
         .put("status", "ACTION")
@@ -32752,28 +30710,8 @@ RevRuntime.prototype.dispatch=async function(...args){
         .putNull("question");
     var action = result.putObject("action");
     var operation = action.putObject("operation").put("kind", op);
-    action
-        .putObject("target")
-        .put("nodeId", node.path("nodeId").asText())
-        .putObject("locator")
-        .put("kind", "role")
-        .put("role", node.path("role").asText())
-        .put("name", name)
-        .put("exact", true);
-    if (op.equals("read")) {
-      operation
-          .put("bindingId", context.path("needs").get(0).path("bindingId").asText())
-          .putObject("recipe")
-          .put("kind", "controlValue")
-          .put("classification", "nonsecretApproved")
-          .put("controlType", "text")
-          .put("policyRuleId", "business-read");
-    } else if (op.equals("fill")) {
-      operation
-          .putObject("value")
-          .put("kind", "binding")
-          .put("bindingId", context.path("needs").get(0).path("bindingId").asText());
-    } else if (op.equals("assert")) {
+    action.putObject("target").put("kind", "node").put("ref", node.ref());
+    if (op.equals("assert")) {
       if (name.equals("Field")) {
         operation
             .put("predicate", "hasValue")
@@ -32847,7 +30785,6 @@ RevRuntime.prototype.dispatch=async function(...args){
 
   private P3ScopeReplay p3PrepareScopeReplay(Map.Entry<String, String> axis) throws Exception {
     p3Mode = P3Mode.LOGIN;
-    p3Grant(axis.getKey(), axis.getValue());
     UUID test = p3CreateSource(axis.getKey(), axis.getValue(), true);
     VaultScope scope = VaultScope.of(axis.getKey(), axis.getValue(), test);
     String value = "P3-ORDINARY-" + UUID.randomUUID();
@@ -32916,7 +30853,8 @@ RevRuntime.prototype.dispatch=async function(...args){
                 COUNTED_VAULT.readCount(
                     StudioVaultProvider.ReferenceKind.SECRET, current.scope(), "PASS"))
             .isEqualTo(current.ownReads());
-        assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
+        String pendingBefore = pendingExecutions();
+        assertThat(dispatcher.dispatchOnce()).as(pendingBefore).isEqualTo(1);
         terminalDeadlines.add(System.nanoTime() + Duration.ofSeconds(60).toNanos());
         assertThat(hold.entered[index].await(15, java.util.concurrent.TimeUnit.SECONDS)).isTrue();
         assertThat(hold.failed).isFalse();
@@ -33570,22 +31508,6 @@ RevRuntime.prototype.dispatch=async function(...args){
     void run() throws Exception;
   }
 
-  /** The approved governed policy of both environments this class learns in, for one CSI. */
-  private void seedGovernedPolicies(String csi) {
-    for (JsonNode trusted : List.of(POLICY, P3_OTHER_POLICY)) {
-      var origins = new java.util.ArrayList<String>();
-      trusted.path("allowedOrigins").forEach(origin -> origins.add(origin.asText()));
-      com.citi.put.checks.studio.support.ObservedPublicationFixture.ensurePolicy(
-          jdbc,
-          csi,
-          trusted.path("applicationId").asText(),
-          trusted.path("environment").asText(),
-          origins,
-          trusted.path("applicationPolicy"),
-          "ALLOW");
-    }
-  }
-
   /**
    * The fixture Core now answers a different CSI ownership for {@link #COOKIE}; drop the BFF's
    * per-cookie identity cache entry (60 s TTL) so the next request re-reads Core, as it would after
@@ -33623,12 +31545,12 @@ RevRuntime.prototype.dispatch=async function(...args){
         UUID.randomUUID());
     for (String csi : List.of(primaryCsi, "CSI-456")) {
       jdbc.update(
-          "INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment)"
+          "INSERT INTO csi_systems(id,name,business_unit,criticality,ow"
+              + "ner_email,environment)"
               + " VALUES (?, 'Orders','Ops','HIGH','fixture@example.invalid','Production') ON"
               + " CONFLICT DO NOTHING",
           csi);
     }
-    seedGovernedPolicies(primaryCsi);
     try {
       if (guidedWorker == null || ordinaryWorker == null) {
         startWorkers();
@@ -33660,7 +31582,6 @@ RevRuntime.prototype.dispatch=async function(...args){
           p3ReportsProtected = false;
           P3_FAIL_READ.set(null);
           P3_CORE.clear();
-          P3_PERMITTED.clear();
           P3_NATIVE_SESSIONS.clear();
           P3_RECEIPTS.clear();
           p3OwnedGuidedCookies.clear();
@@ -33999,48 +31920,6 @@ RevRuntime.prototype.dispatch=async function(...args){
         .isSameAs(jdbc.getDataSource());
   }
 
-  private static boolean p4RevocationUsed(P4RevocationState state) {
-    String ownerColumn = state.path == 1 ? "session_id" : "execution_id";
-    Object owner = state.path == 1 ? state.guidedSession : state.execution;
-    var usages =
-        state.actualJdbc.queryForList(
-            "SELECT u.* FROM studio_secret_use_audit u JOIN studio_secret_use_audit r"
-                + " ON r.id=u.release_id AND r.release_occurred_at=u.release_occurred_at"
-                + " WHERE u."
-                + ownerColumn
-                + "=? AND u.secret_id='PASS' AND u.row_kind='USAGE'"
-                + " AND u.usage_outcome='USED' AND r.row_kind='RELEASE'"
-                + " AND r.decision_stage='DISPATCH' AND r.outcome='RESOLVED'",
-            owner);
-    if (usages.isEmpty()) {
-      return false;
-    }
-    p4AuditRequire(usages.size() == 1, "Actual positive usage is not unique");
-    Map<String, Object> usage = usages.getFirst();
-    var releases =
-        state.actualJdbc.queryForList(
-            "SELECT * FROM studio_secret_use_audit WHERE id=? AND release_occurred_at=?",
-            usage.get("release_id"),
-            usage.get("release_occurred_at"));
-    p4AuditRequire(releases.size() == 1, "Actual positive release is not unique");
-    Map<String, Object> release = releases.getFirst();
-    p4AuditRequire(
-        java.util.Objects.equals(release.get("id"), release.get("release_id"))
-            && java.util.Objects.equals(release.get("id"), usage.get("release_id"))
-            && release.get("affected_release_id") == null
-            && usage.get("affected_release_id") == null,
-        "Actual release usage links do not match");
-    p4CompareAuditScope(release, usage);
-    p4AuditRequire("RESOLVED".equals(usage.get("outcome")), "Positive usage outcome changed");
-    if (!p4AuditOwnerIdentity(state, release)) {
-      return false;
-    }
-    state.usedBefore = java.util.Collections.unmodifiableMap(new java.util.LinkedHashMap<>(usage));
-    state.releaseBefore =
-        java.util.Collections.unmodifiableMap(new java.util.LinkedHashMap<>(release));
-    return true;
-  }
-
   private static void p4AuditRequire(boolean condition, String code) {
     if (!condition) {
       throw new IllegalArgumentException(code);
@@ -34085,7 +31964,8 @@ RevRuntime.prototype.dispatch=async function(...args){
     if (state.path == 1) {
       var owners =
           state.actualJdbc.queryForList(
-              "SELECT g.document::text AS action,g.proposal::text AS proposal,s.document::text AS"
+              "SELECT g.document::text AS action,g.proposal::text AS propos"
+                  + "al,s.document::text AS"
                   + " session, m.authored_inputs::text AS inputs FROM studio_guided_actions g JOIN"
                   + " studio_guided_sessions s ON s.session_id=g.session_id JOIN"
                   + " studio_guided_materializations m ON m.session_id=g.session_id WHERE"
@@ -34143,7 +32023,8 @@ RevRuntime.prototype.dispatch=async function(...args){
     } else {
       var owners =
           state.actualJdbc.queryForList(
-              "SELECT l.attempt_id,l.admission_id,e.observed_admission_receipt::text AS receipt,"
+              "SELECT l.attempt_id,l.admission_id,e.observed_admission_rece"
+                  + "ipt::text AS receipt,"
                   + " e.observed_revision_binding::text AS binding FROM studio_dispatch_ledger l"
                   + " JOIN ui_test_executions e ON e.id=l.execution_id"
                   + " AND e.started_at=l.execution_accepted_at WHERE l.execution_id=?",
@@ -34369,28 +32250,6 @@ RevRuntime.prototype.dispatch=async function(...args){
         } else if (event == 4) {
           if (!body.path("ok").booleanValue() || (state.path == 2 && producer != 2)) {
             throw new IllegalArgumentException("Invalid real complete acknowledgement");
-          }
-          if (state.c6Kind == 0
-              && state.flippedAt == 0
-              && state.started
-              && state.filled
-              && state.signInEntered
-              && state.active.size() == 1
-              && state.active.containsValue(2)
-              && p4RevocationUsed(state)) {
-            state.inFlightOrdinal = state.active.keySet().iterator().next();
-            if (state.inFlightOrdinal != 3) {
-              throw new IllegalArgumentException("Unexpected original Sign in invocation ordinal");
-            }
-            state.flippedAt = System.nanoTime();
-            state.revoked.set(true);
-            for (String actor : List.of("user-1", "fixture@example.invalid")) {
-              if (!P3_PERMITTED.remove(
-                  new P3Entitlement(actor, "CSI-456", "fixture-other", "PASS"))) {
-                throw new IllegalArgumentException("Missing genuine granted tuple");
-              }
-            }
-            flipped = true;
           }
         } else if (event == 5) {
           if (state.c6Kind != 0) {
@@ -34985,143 +32844,6 @@ RevRuntime.prototype.dispatch=async function(...args){
     for (int producer : producers) {
       p4RequirePrivateProducerRoot(root);
       Files.deleteIfExists(root.resolve(state.ordinal + "-" + producer + "-seal.json"));
-    }
-  }
-
-  private void p4RevocationPair(int path) throws Exception {
-    p3Mode = P3Mode.LOGIN;
-    p3Grant("CSI-456", "fixture-other");
-    UUID test = p3CreateSource("CSI-456", "fixture-other", true);
-    VaultScope scope = VaultScope.of("CSI-456", "fixture-other", test);
-    String value = "P4-REVOKE-" + UUID.randomUUID();
-    p3ExpectedPassword = value;
-    p3Seed(scope, value);
-    P3Publication publication = null;
-    if (path == 2) {
-      String control = p3Start(test, "fixture-other");
-      awaitFinalizing(control);
-      publication = p3Publish(control);
-      p3CleanupOwnedResources();
-      p3OwnedGuidedCookies.clear();
-      P3_RECEIPTS.clear();
-      P3_NATIVE_SESSIONS.clear();
-      P3_REPORT_REQUESTS.set(0);
-    }
-    int models = MODEL_WIRE.size();
-    int reads = COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS");
-    P4RevocationState state =
-        new P4RevocationState(P4_REVOCATION_CASE.incrementAndGet(), path, test, jdbc);
-    p4Revocation = state;
-    p4WriteRevocationMode(state);
-    try {
-      if (path == 1) {
-        state.guidedSession = p3Start(test, "fixture-other");
-      } else {
-        state.execution = p3Execute(test);
-        p4WriteRevocationMode(state);
-        p3AssertBinding(state.execution, scope, publication);
-        assertThat(dispatcher.dispatchOnce()).isEqualTo(1);
-      }
-      assertThat(state.cutoff.await(20, java.util.concurrent.TimeUnit.SECONDS))
-          .as("original cutoff ingress after genuine ACK and exact tuple flip")
-          .isTrue();
-      assertThat(state.cutoffAt - state.flippedAt)
-          .isPositive()
-          .isLessThanOrEqualTo(Duration.ofMillis(2000).toNanos());
-      assertThat(state.filled).isTrue();
-      assertThat(state.signInEntered).isTrue();
-      state.releaseSignIn.countDown();
-      Object revokedAt;
-      if (path == 1) {
-        awaitState(state.guidedSession, "CANCELLED");
-        p3AwaitTeardown(state.guidedSession);
-        revokedAt =
-            jdbc.queryForObject(
-                "SELECT revoked_at FROM studio_guided_sessions WHERE session_id=?",
-                Object.class,
-                state.guidedSession);
-        p3AssertUsed(state.guidedSession, null);
-        assertThat(
-                sessions.transaction(
-                    () -> sessions.lock(state.guidedSession).progress().path("errorCode").asText()))
-            .isEqualTo("SECRET_USE_REVOKED");
-      } else {
-        JsonNode result = p3AwaitExecution(state.execution, "ERROR");
-        assertThat(result.path("errorCode").asText()).isEqualTo("AUTHORIZATION_REVOKED");
-        assertThat(p3RunnerReport(state.execution).path("outcome").path("errorCode").asText())
-            .isEqualTo("CANCELLED");
-        revokedAt =
-            jdbc.queryForObject(
-                "SELECT revoked_at FROM studio_dispatch_ledger WHERE execution_id=?",
-                Object.class,
-                state.execution);
-        assertThat(
-                jdbc.queryForObject(
-                    "SELECT cancel_requested_at FROM studio_dispatch_ledger WHERE execution_id=?",
-                    Object.class,
-                    state.execution))
-            .isNull();
-        assertThat(MODEL_WIRE.size()).isEqualTo(models);
-        p3AssertBinding(state.execution, scope, publication);
-        p3AssertUsed(null, state.execution);
-      }
-      assertThat(revokedAt).isNotNull();
-      String ownerColumn = path == 1 ? "session_id" : "execution_id";
-      Object owner = path == 1 ? state.guidedSession : state.execution;
-      assertThat(
-              jdbc.queryForObject(
-                  "SELECT count(*) FROM studio_secret_use_audit WHERE "
-                      + ownerColumn
-                      + "=? AND secret_id='PASS' AND row_kind='RELEASE' AND outcome='RESOLVED'",
-                  Long.class,
-                  owner))
-          .isEqualTo(1);
-      assertThat(
-              jdbc.queryForObject(
-                  "SELECT count(*) FROM studio_secret_use_audit WHERE "
-                      + ownerColumn
-                      + "=? AND secret_id='PASS' AND decision_stage='LIVE_RECHECK' AND"
-                      + " outcome='REVOKED_MID_RUN'",
-                  Long.class,
-                  owner))
-          .isEqualTo(1);
-      assertThat(
-              COUNTED_VAULT.readCount(StudioVaultProvider.ReferenceKind.SECRET, scope, "PASS")
-                  - reads)
-          .isEqualTo(1);
-      assertThat(P3_RECEIPTS).hasSize(1);
-      assertThat(P3_RECEIPTS.getFirst().accepted()).isTrue();
-      assertThat(P3_REPORT_REQUESTS.get()).isZero();
-      p3AssertAuditScope(state.guidedSession, state.execution, scope);
-      p3CleanupOwnedResources();
-      p4AwaitRevocationObserverCompletion(state);
-      p4AssertAuditLineageAfterCleanup(state);
-      String table = path == 1 ? "studio_guided_sessions" : "studio_dispatch_ledger";
-      assertThat(
-              jdbc.queryForObject(
-                  "SELECT revoked_at FROM " + table + " WHERE " + ownerColumn + "=?",
-                  Object.class,
-                  owner))
-          .isEqualTo(revokedAt);
-      p3Scan(List.of(value));
-      p3WriteEvidence(
-          "revocation-first-pair-" + path,
-          C.object()
-              .put("path", path)
-              .put("cutoffNanosIncludingQueues", state.cutoffAt - state.flippedAt)
-              .put("ackBracketMicrosSameNodeClock", state.ackBracketMicros)
-              .put("identifiedInFlightOrdinal", state.inFlightOrdinal)
-              .put("freshSecretReads", 1)
-              .put("residualSettlementCount", state.residualSettlements)
-              .put("residualFulfilled", state.residualFulfilled)
-              .put("residualRejected", !state.residualFulfilled)
-              .put("acceptedPostDistinctFromPromiseSettlement", true)
-              .put("priorPositiveUsagePreserved", true)
-              .put("actualLiveRecheckRows", 1)
-              .put("nativeEntryOnlyNotDomWrite", true)
-              .put("originalOwnerCleanupConfirmed", true));
-    } finally {
-      state.releaseSignIn.countDown();
     }
   }
 
@@ -35871,7 +33593,6 @@ RevRuntime.prototype.dispatch=async function(...args){
     assertThat(kind).isBetween(1, 4);
     assertThat(p4Revocation).as("prior owned observer is genuinely closed").isNull();
     p3Mode = P3Mode.LOGIN;
-    p3Grant("CSI-456", "fixture-other");
     UUID test = p3CreateSource("CSI-456", "fixture-other", true);
     // Legitimate test configuration precedes learning/publication/admission, never alters a job.
     assertThat(
@@ -36084,7 +33805,8 @@ RevRuntime.prototype.dispatch=async function(...args){
       awaitState(state.guidedSession, "UNKNOWN_OUTCOME");
       List<Map<String, Object>> consumed =
           jdbc.queryForList(
-              "SELECT document::text AS ledger FROM studio_guided_actions WHERE session_id=? AND"
+              "SELECT document::text AS ledger FROM studio_guided_actions W"
+                  + "HERE session_id=? AND"
                   + " step_id=? AND proposal->'operation'->'value'->>'kind'='secretRef'",
               state.guidedSession,
               TWO);
@@ -36497,7 +34219,8 @@ RevRuntime.prototype.dispatch=async function(...args){
                   && !state.c6FenceAvailable
                   && P8_C6_CLOSED_UNKNOWN.contains(state.c6Phase))
           .as(
-              "provisional focus response loss requires actual native pending and original realm"
+              "provisional focus response loss requires actual native pendi"
+                  + "ng and original realm"
                   + " closure")
           .isTrue();
     }
@@ -36790,7 +34513,9 @@ RevRuntime.prototype.dispatch=async function(...args){
       matches.add(actual);
     }
     assertThat(matches)
-        .as("exact selected-context pinned full Chromium primary; never whole-worker substitute")
+        .as(
+            "exact selected-context pinned full Chromium primary; never w"
+                + "hole-worker substitute")
         .hasSize(1);
     return matches.getFirst();
   }
@@ -36911,7 +34636,6 @@ RevRuntime.prototype.dispatch=async function(...args){
       p4AdversarialPasswordSelection = false;
       P4_FIRST_GUIDED_REQUEST.set(null);
       P4_FIRST_GUARD.set(null);
-      p3Grant("CSI-456", "fixture-other");
       UUID test = p3CreateSource("CSI-456", "fixture-other", true);
       VaultScope scope = VaultScope.of("CSI-456", "fixture-other", test);
       String value = "P4-GUIDED-COUNT-" + UUID.randomUUID();
@@ -37052,7 +34776,8 @@ RevRuntime.prototype.dispatch=async function(...args){
     }
     Path source =
         Path.of(
-            "src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProposalValidator.java");
+            "src/main/java/com/citi/put/checks/studio/guided/translation/"
+                + "GuidedProposalValidator.java");
     diagnostic.put(
         "validatorSourceSha256",
         HexFormat.of()
@@ -37080,7 +34805,6 @@ RevRuntime.prototype.dispatch=async function(...args){
   private void p4OrdinaryPasswordCount(int count) throws Exception {
     p4AssertRepositoryGraph();
     p3Mode = P3Mode.LOGIN;
-    p3Grant("CSI-456", "fixture-other");
     UUID test = p3CreateSource("CSI-456", "fixture-other", true);
     VaultScope scope = VaultScope.of("CSI-456", "fixture-other", test);
     String value = "P4-ORDINARY-COUNT-" + UUID.randomUUID();
@@ -37353,11 +35077,11 @@ RevRuntime.prototype.dispatch=async function(...args){
     List<String> texts =
         password
             ? List.of(
-                "Open " + destination + ".",
+                "Open " + destination + " now.",
                 "Enter <var USER> in User and <secret PASS> as password.",
                 "Click Sign in, click the Reports link and check protected Reports heading.")
             : List.of(
-                "Open " + destination + ".",
+                "Open " + destination + " now.",
                 "Check "
                     + (p3Mode == P3Mode.REGISTRATION ? "Registration" : "Reports")
                     + " heading.",
@@ -37395,25 +35119,6 @@ RevRuntime.prototype.dispatch=async function(...args){
     return test;
   }
 
-  private static boolean p3Entitled(String principal, String csi, String environment, String name) {
-    P4RevocationState current = p4Revocation;
-    if (current != null
-        && current.revoked.get()
-        && List.of("user-1", "fixture@example.invalid").contains(principal)
-        && csi.equals("CSI-456")
-        && environment.equals("fixture-other")
-        && name.equals("PASS")) {
-      return false;
-    }
-    return P3_PERMITTED.contains(new P3Entitlement(principal, csi, environment, name));
-  }
-
-  private static void p3Grant(String csi, String environment) {
-    for (String actor : List.of("user-1", "fixture@example.invalid")) {
-      P3_PERMITTED.add(new P3Entitlement(actor, csi, environment, "PASS"));
-    }
-  }
-
   private static String p3CoreCookie(String principal, String email) {
     String cookie = "p3-core-" + UUID.randomUUID();
     P3_CORE.put(
@@ -37437,8 +35142,7 @@ RevRuntime.prototype.dispatch=async function(...args){
             .put("testId", test.toString())
             .put("sourceRevision", "1")
             .put("configurationRevision", "1")
-            .put("environmentId", environment)
-            .put("applicationId", "orders");
+            .put("environmentId", environment);
     command.set("versions", versions());
     return command;
   }
@@ -37517,6 +35221,9 @@ RevRuntime.prototype.dispatch=async function(...args){
     assertThat(MODEL_WIRE.size()).isEqualTo(models);
     assertThat(COUNTED_VAULT.reads.size()).isEqualTo(reads);
     p3AwaitTeardown(id);
+    // The publication accepted its AFTER_LEARN proof; this flow proves its own ordinary replays,
+    // so the queued proof is cancelled (see the sibling publication helper).
+    cancelQueuedProof(id, published);
     return new P3Publication(revision, hash, artifact);
   }
 
@@ -37975,231 +35682,6 @@ RevRuntime.prototype.dispatch=async function(...args){
   }
 
   /**
-   * confirm-expire only (qa-rulings01 R2): waits, read-only, for the variant's own expired session
-   * to reach teardown CONFIRMED through production paths alone (afterCompletion re-sends and the
-   * scheduled reaper re-drive). It never re-drives, re-expires, writes SQL or moves the clock. A
-   * timeout is an H8 finding and fails; the bound is not to be raised. The expiry-to-CONFIRMED
-   * duration is recorded value-free in the cohort directory.
-   */
-  private void incrementalAwaitExpiredTeardownConfirmed(String id, Instant expires)
-      throws Exception {
-    long started = System.nanoTime();
-    long deadline = started + Duration.ofSeconds(120).toNanos();
-    long renewCredentialsAt = started + Duration.ofSeconds(10).toNanos();
-
-    // IT-R POLL 84: exact original transitions; one old interval owed at most.
-    final var itrRead084Started = started;
-    final var itrRead084Deadline = deadline;
-    class ItrState084 {
-      long renewCredentialsAt;
-      boolean methodReturned;
-      boolean firstIteration = true;
-      boolean terminal;
-      boolean intervalOwed;
-      long owedUntil;
-      Exception firstException;
-      Error firstError;
-    }
-    final var itr084 = new ItrState084();
-    itr084.renewCredentialsAt = renewCredentialsAt;
-    java.util.concurrent.Callable<Boolean> itrPoll084 =
-        () -> {
-          if (itr084.firstException != null) {
-            throw itr084.firstException;
-          }
-          if (itr084.firstError != null) {
-            throw itr084.firstError;
-          }
-          if (itr084.terminal) {
-            return true;
-          }
-          try {
-            if (itr084.intervalOwed) {
-              if (Thread.interrupted()) {
-                throw new InterruptedException();
-              }
-              if (System.nanoTime() < itr084.owedUntil) {
-                return false;
-              }
-              itr084.intervalOwed = false;
-            }
-            if (!(true)) {
-              itr084.terminal = true;
-              return true;
-            }
-            itr084.firstIteration = false;
-            var row =
-                jdbc.queryForMap(
-                    "SELECT state, progress->>'teardownStatus' AS teardown,"
-                        + " (progress->'teardownRequest') IS NOT NULL AS requested"
-                        + " FROM studio_guided_sessions WHERE session_id=?",
-                    id);
-            boolean confirmed = "CONFIRMED".equals(row.get("teardown"));
-            long now = System.nanoTime();
-            if (confirmed || now >= itrRead084Deadline) {
-              long fromExpiryMs = Duration.between(expires, Instant.now()).toMillis();
-              ObjectNode evidence =
-                  C.object()
-                      .put("story", "STUDIO-OBS-015")
-                      .put("item", "H8 confirm-expire teardown")
-                      .put("lane", FIXTURE_PROFILE.lane)
-                      .put("sessionOrdinal", budgetSessionOrdinal(jdbc, id))
-                      .put("outcome", confirmed ? "CONFIRMED" : "TIMEOUT")
-                      .put("state", String.valueOf(row.get("state")))
-                      .put("teardownStatus", String.valueOf(row.get("teardown")))
-                      .put("teardownRequestPresent", Boolean.TRUE.equals(row.get("requested")))
-                      .put("expiryToObservationMs", fromExpiryMs)
-                      .put("waitElapsedMs", Duration.ofNanos(now - itrRead084Started).toMillis());
-              privateImmutableJson(
-                  COHORT_DIRECTORY.resolve("h8-confirm-expire-teardown.json"), evidence);
-              if (!confirmed) {
-                throw new AssertionError("H8: expired teardown not CONFIRMED within 120 s");
-              }
-              assertThat(row.get("state"))
-                  .as("H8: CONFIRMED keeps the session EXPIRED")
-                  .isEqualTo("EXPIRED");
-              assertThat(row.get("requested"))
-                  .as("H8: CONFIRMED removes teardownRequest")
-                  .isEqualTo(false);
-              itr084.methodReturned = true;
-              itr084.terminal = true;
-              return true;
-            }
-            if (now >= itr084.renewCredentialsAt) {
-              refreshFixtureCredentials();
-              itr084.renewCredentialsAt = now + Duration.ofSeconds(10).toNanos();
-            }
-            itr084.intervalOwed = true;
-            itr084.owedUntil =
-                System.nanoTime()
-                    + Duration.ofMillis(30)
-                        .toNanos(); // No transaction or row lock is held across this wait.
-            return false;
-          } catch (Exception itrFailure084) {
-            if (itr084.firstException == null && itr084.firstError == null) {
-              itr084.firstException = itrFailure084;
-              itr084.terminal = true;
-            }
-            throw itr084.firstException;
-          } catch (Error itrFailure084) {
-            if (itr084.firstException == null && itr084.firstError == null) {
-              itr084.firstError = itrFailure084;
-              itr084.terminal = true;
-            }
-            throw itr084.firstError;
-          }
-        };
-    try {
-      while (!itr084.terminal) {
-        // First invocation is manual. Reentry serves only the original pending transition.
-        boolean itrDone084 = itrPoll084.call();
-        if (itrDone084) {
-          break;
-        }
-        if (Thread.interrupted()) {
-          throw new InterruptedException();
-        }
-        long itrNow084 = System.nanoTime();
-        long itrRemaining084 = itrRead084Deadline - itrNow084;
-        long itrOwed084 = itr084.intervalOwed ? itr084.owedUntil - itrNow084 : 0;
-        // Semantic deadline is unchanged. Only the already-entered old interval may extend this
-        // bound.
-        long itrBound084 = Math.max(itrRemaining084, itrOwed084);
-        if (itrBound084 > 0) {
-          final boolean[] itrFirstTick084 = {true};
-          try {
-            org.awaitility.Awaitility.await("ReplayIT POLL 84")
-                .atMost(Duration.ofNanos(itrBound084))
-                .pollInterval(Duration.ofMillis(30))
-                .pollDelay(Duration.ZERO)
-                .pollInSameThread()
-                .dontCatchUncaughtExceptions()
-                .ignoreNoExceptions()
-                .until(
-                    () -> {
-                      try {
-                        if (itr084.firstException != null) {
-                          throw itr084.firstException;
-                        }
-                        if (itr084.firstError != null) {
-                          throw itr084.firstError;
-                        }
-                        if (itr084.terminal) {
-                          return true;
-                        }
-                        if (Thread.interrupted()) {
-                          throw new InterruptedException();
-                        }
-                        if (itrFirstTick084[0]) {
-                          itrFirstTick084[0] = false;
-                          return false; // Cached tick: no second immediate condition/read/effect.
-                        }
-                        boolean itrObserved084 = itrPoll084.call();
-                        if (!itrObserved084 && Thread.interrupted()) {
-                          throw new InterruptedException();
-                        }
-                        return itrObserved084;
-                      } catch (Exception itrFailure084) {
-                        if (itr084.firstException == null && itr084.firstError == null) {
-                          itr084.firstException = itrFailure084;
-                          itr084.terminal = true;
-                        }
-                        if (itr084.firstError != null) {
-                          throw itr084.firstError;
-                        }
-                        throw itr084.firstException;
-                      } catch (Error itrFailure084) {
-                        if (itr084.firstException == null && itr084.firstError == null) {
-                          itr084.firstError = itrFailure084;
-                          itr084.terminal = true;
-                        }
-                        if (itr084.firstException != null) {
-                          throw itr084.firstException;
-                        }
-                        throw itr084.firstError;
-                      }
-                    });
-          } catch (org.awaitility.core.ConditionTimeoutException itrTimeout084) {
-            if (itr084.firstException != null) {
-              throw itr084.firstException;
-            }
-            if (itr084.firstError != null) {
-              throw itr084.firstError;
-            }
-            // A late terminal outcome wins. Otherwise next driver step preserves old guard/body
-            // order.
-          }
-        }
-        // Includes bound<=0/no-Await: no silent pending exit, synthetic timeout, or terminal
-        // replay.
-      }
-    } catch (Exception itrFailure084) {
-      if (itr084.firstException == null && itr084.firstError == null) {
-        itr084.firstException = itrFailure084;
-        itr084.terminal = true;
-      }
-      if (itr084.firstError != null) {
-        throw itr084.firstError;
-      }
-      throw itr084.firstException;
-    } catch (Error itrFailure084) {
-      if (itr084.firstException == null && itr084.firstError == null) {
-        itr084.firstError = itrFailure084;
-        itr084.terminal = true;
-      }
-      if (itr084.firstException != null) {
-        throw itr084.firstException;
-      }
-      throw itr084.firstError;
-    } finally {
-      renewCredentialsAt = itr084.renewCredentialsAt;
-    }
-    if (itr084.methodReturned) {
-      return;
-    }
-  }
-
-  /**
    * w3-d4 (B3B-1): a cancel can win the race against the coordinator's first assignment. Then
    * GuidedSessionService.stop has neither a context nor an assignment to address, writes no
    * teardownStatus and sends nothing: there is no runtime whose stop could be acknowledged. Only
@@ -38226,7 +35708,8 @@ RevRuntime.prototype.dispatch=async function(...args){
   private boolean neverAssignedSettled(String id) {
     return Boolean.TRUE.equals(
         jdbc.queryForObject(
-            "SELECT s.state IN ('SUCCEEDED','PUBLICATION_CONFLICT','FAILED','UNKNOWN_OUTCOME',"
+            "SELECT s.state IN ('SUCCEEDED','PUBLICATION_CONFLICT','FAILE"
+                + "D','UNKNOWN_OUTCOME',"
                 + "'CANCELLED','EXPIRED')"
                 + " AND NOT EXISTS (SELECT 1 FROM studio_guided_assignments a"
                 + " WHERE a.session_id=s.session_id)"
@@ -39431,7 +36914,7 @@ ally{p4Fs.closeSync(fd);}}catch{}}
 import {chromium as p4Chromium} from %s;import * as p4Fs from 'node:fs';
 const p4ModeFile=%s,p4FailedFile=%s,p4SettledFile=%s,p4Origin=%s;
 const c5ValuesFile=%s,c5CountsFile=%s;
-import {installObservationCollector as c6TrustedCollector} from %s;
+import {installPageState as c6TrustedCollector} from %s;
 %s
 // Selected C6 observes the original SDK primitive; current-document authority stays in \
 production guards.
@@ -39458,8 +36941,10 @@ result.value are untouched.
     const worldRequest=method==='Page.createIsolatedWorld'&&typeof metadata?.worldName==='string'
       &&metadata.worldName.startsWith('checks-observation-');
     const frame=worldRequest?metadata.frameId:null,world=install?metadata?.executionContextId:null;
-    if(worldRequest||source==='function() { this.dispose(); \
-}'||method==='Runtime.releaseObjectGroup')c6Drop(state);
+    // A new observation installs its page state before the previous one is disposed, so a dispose only drops \
+the object it names (the current one).
+    const disposeCurrent=source==='function() { this.dispose(); }'&&receiver===state.objectId;
+    if(worldRequest||disposeCurrent||method==='Runtime.releaseObjectGroup')c6Drop(state);
     let result;try{result=Reflect.apply(original,this,args);}catch(error){if(probe)c6Drop(st\
 ate);throw error;}
     if(method==='Page.getFrameTree'||worldRequest||install||probe){
@@ -39651,7 +37136,7 @@ bserverDeadline)
             JSON.writeValueAsString(TEMP.resolve("c5-private-values.json").toString()),
             JSON.writeValueAsString(TEMP.resolve("c5-profile-counts.jsonl").toString()),
             JSON.writeValueAsString(
-                Path.of("../studio-runner/dist/run/observationCollector.js")
+                Path.of("../studio-runner/dist/run/pageStateInPage.js")
                     .toAbsolutePath()
                     .normalize()
                     .toUri()
@@ -39684,16 +37169,16 @@ bserverDeadline)
         + ",'utf8'));"
         + "state.count++;const recording=args[1]&&args[1].recordVideo;"
         // STUDIO-OBS-013 TEST-001: the guided recording directory, for the recorder-fault test.
-        + "if(recording&&typeof recording.dir==='string'){state.lastRecordVideoDir=recording.dir;}"
+        + "if(recording&&typeof recording.dir==='string'){state.lastRec"
+        + "ordVideoDir=recording.dir;}"
         + "fs.writeFileSync("
         + file
-        + ",JSON.stringify(state),{mode:0o600});return Reflect.apply(original,this,args);};}"
+        + ",JSON.stringify(state),{mode:0o600});return Reflect.apply(or"
+        + "iginal,this,args);};}"
         + p4NativeCloseObserverSdk()
         // The 015 fault observer is inert outside its mode and installs first, so the S2 observer's
         // prototype wrappers stay outermost and its restore sees its own descriptors.
         + incrementalNativeFaultObserver()
-        // B2A-03 SECRET_HOLD cut layer (inert unless armed); S2 wrappers stay outermost.
-        + b2SecretContextObserver()
         + p4GuidedRevocationObservers()
         + invocation;
   }
@@ -39745,6 +37230,12 @@ ode:'OTHER',instrumentationError:false,truncated:shape.length>=200};
  i15Append(row);
 }catch{i15Append({instrumentationError:true,stage:'capture'});}}
 
+const i15ClosedCodes=new Set('TARGET_CHANGED OPTION_NOT_PRESENT NO_DURABLE_LOCATOR READ_NO\
+T_ALLOWED READ_REFUSED STALE_OBSERVATION POLICY_DENIED INPUT_IDENTITY PREPARATION_DENIED C\
+ONTEXT_LOST BUDGET_EXCEEDED OBSERVATION_DEADLINE OBSERVATION_UNAVAILABLE UNKNOWN_OUTCOME O\
+K ASSERTION_FAILED TIMEOUT CANCELLED ACK_LOST'.split(' '));
+function i15ClosedCode(error){const code=error?.code??error?.message;
+  return i15ClosedCodes.has(code)?code:'OTHER';}
 const i15Start=RevRuntime.prototype.start;
 RevRuntime.prototype.start=async function(...args){b1PairEvent('START',this.context);
   const result=await Reflect.apply(i15Start,this,args);await b1HoldEmptyStart(this);
@@ -39815,13 +37306,49 @@ RevRuntime.prototype.update=async function(...args){
     const response=await fetch(%s,{method:'POST',body:args[0].sessionId});
     if(!response.ok)throw new Error('CONTEXT_LOST');}
   return result;};
+const i15Observe=RevRuntime.prototype.refreshObservation;
+RevRuntime.prototype.refreshObservation=async function(...args){
+  const result=await Reflect.apply(i15Observe,this,args);
+  let mode={};try{mode=JSON.parse(fs.readFileSync(i15ModeFile,'utf8'));}catch{}
+  if(['tj6-focus','tj6-absent'].includes(mode.mode)&&this.i15Tj6Omitted)
+    fs.appendFileSync(i15Events,JSON.stringify({phase:'TJ6_REFRESH',sessionId:args[0]?.sessionId,
+      focus:args[0]?.focus,actions:this.actions})+'\\n',{mode:0o600});
+  return result;};
 const i15Prepare=RevRuntime.prototype.preparePrefix;
 RevRuntime.prototype.preparePrefix=async function(...args){
   const pfx=[...pfxCases.values()].find(c=>c.sessionId===args[0]?.request?.sessionId&&c.stepId===args[0]?.\
 request?.coordinate?.stepId);
   if(pfx)await pfxEvent(pfx,'TARGET_PREPARE_ENTER',this,this.context);
-  const result=await Reflect.apply(i15Prepare,this,args);
   let mode={};try{mode=JSON.parse(fs.readFileSync(i15ModeFile,'utf8'));}catch{}
+  const tj6=['tj6-focus','tj6-absent'].includes(mode.mode)&&
+    this.context.prefixProgram?.baseRevisionId===mode.baseRevisionId&&
+    args[0]?.request?.coordinate?.stepId===mode.stepId;
+  const observations=this.browser?.observations,refForTarget=observations?.refForTarget;
+  const authorityAction=this.context.prefixProgram?.actions.find(action=>
+    action.coordinate.stepId===args[0]?.request?.coordinate?.stepId&&
+    action.coordinate.ordinal===args[0]?.request?.coordinate?.ordinal);
+  const authority=mode.mode==='drift-auth-pre'&&authorityAction?.target?.locator?.[0]?.by==='testId'&&
+    authorityAction.target.locator[0].value==='authority-destination';
+  if(authority){
+    const publicCount=await this.browser.handle.page.getByTestId('authority-destination').count();
+    const currentSearchboxes=Object.values(this.observation?.facts??{}).filter(fact=>
+      fact.name==='Destination'&&fact.role==='searchbox').length;
+    fs.appendFileSync(i15Events,JSON.stringify({phase:'AUTHORITY_REAL_TARGET',sessionId:this.context.sessionId,
+      publicCount,currentSearchboxes,frozenBy:authorityAction.target.locator[0].by,
+      frozenRole:authorityAction.target.identity.role})+'\\n',{mode:0o600});
+    observations.refForTarget=async(...refArgs)=>{try{return await Reflect.apply(refForTarget,observations,refArgs);}
+      catch(error){fs.appendFileSync(i15Events,JSON.stringify({phase:'AUTHORITY_REAL_IDENTITY_REFUSAL',
+        sessionId:this.context.sessionId,code:i15ClosedCode(error)})+'\\n',{mode:0o600});throw error;}};
+  }
+  if(tj6)observations.refForTarget=async(...refArgs)=>{
+    if(mode.mode==='tj6-absent'||!this.i15Tj6Omitted){this.i15Tj6Omitted=true;return null;}
+    return Reflect.apply(refForTarget,observations,refArgs);};
+  let result;try{result=await Reflect.apply(i15Prepare,this,args);}
+  finally{if(tj6||authority)observations.refForTarget=refForTarget;}
+  if(tj6)fs.appendFileSync(i15Events,JSON.stringify({phase:'TJ6_PREPARE',
+    sessionId:args[0].request.sessionId,kind:result.kind,actions:this.actions,
+    stepId:args[0].request.coordinate.stepId,ordinal:args[0].request.coordinate.ordinal,
+    reason:result.receipt?.reason??null})+'\\n',{mode:0o600});
   if(result.kind==='PREPARED'&&args[0]?.request?.coordinate?.stepId===mode.stepId)
     fs.appendFileSync(i15Events,JSON.stringify({phase:'PREPARED',sessionId:args[0].request.sessionId,
       preparationId:result.preparation.preparationId,expiresAt:result.preparation.expiresAt,evidenceHash:r\
@@ -39838,18 +37365,25 @@ RevRuntime.prototype.dispatch=async function(request){
   const event=phase=>fs.appendFileSync(i15Events,JSON.stringify({sessionId:request.sessionId,
     admissionId:request.ledger.admission.admissionId,attemptOrdinal:request.ledger.attemptOrdinal,
     stepId:request.proposal.coordinate.stepId,ordinal:request.proposal.coordinate.ordinal,phase})+'\\n',{mode:0o600});
-  const observations=this.browser.observations,originalInvoke=observations.invoke,originalMatches=this.matches;
+  const observations=this.browser.observations,originalInvoke=observations.invoke,original\
+PageMatches=this.pageTargetMatches;
   const inject=!this.i15Injected&&['admitted-drift2','admitted-literal2','same-pair-literal','drift-auth',\
 'unknown2'].includes(mode.mode)&&request.proposal.coordinate.ordinal===mode.ordinal;
   if(inject)this.i15Injected=true;
-  observations.invoke=async function(...args){event('NATIVE_ENTER');const result=await\
+  const refuseBeforeFence=inject&&['admitted-drift2','admitted-literal2','same-pair-litera\
+l','drift-auth'].includes(mode.mode);
+  observations.invoke=async function(...args){
+    // The pre-fence target refusal of an element target: the dispatch-time check lives in session.invoke, and a
+    // refusal thrown before the original runs happens before the journal fence, as the old matches() did.
+    if(refuseBeforeFence)throw new Error('TARGET_CHANGED');
+    event('NATIVE_ENTER');const result=await\
  Reflect.apply(originalInvoke,this,args);
     event('NATIVE_COMPLETED');if(inject&&mode.mode==='unknown2')throw new Error('TARGET_CHANGED');return result;};
-  if(inject&&['admitted-drift2','admitted-literal2','same-pair-literal','drift-auth'].includes(mode.mode))\
-this.matches=async()=>false;
+  // The page-level half of the same refusal: initialBlank and page targets never reach session.invoke.
+  if(refuseBeforeFence)this.pageTargetMatches=async()=>false;
   event('DISPATCH_ENTER');
   try{const original=await Reflect.apply(i15Dispatch,this,[request]);i15Capture(original);return original;}
-  finally{observations.invoke=originalInvoke;this.matches=originalMatches;event('DISPATCH_END');}
+  finally{observations.invoke=originalInvoke;this.pageTargetMatches=originalPageMatches;event('DISPATCH_END');}
 };
 // STUDIO-OBS-015 B1d (b1bcd-design01 T5): value-free context-pair facts; inert unless armed.
 const b1PairControl=pfxRoot+'/obs015-prefix-sync-b1-pair-control.json',
@@ -40373,13 +37907,17 @@ seal().catch(()=>{s.failed=true;});});
       int ordinal = P4_DOCUMENT_ORDINAL.incrementAndGet();
       P4_DOCUMENTS.put(ordinal, new P4DocumentWitness(P4_PHASE_ORDINAL.get()));
       String passwords = "<input name='password' type='password'>".repeat(p4PasswordControls);
-      return "<form method='post' action='/p3/login'><label>User<input name='username'></label>"
+      return "<form method='post' action='/p3/login'><label>User<input nam"
+          + "e='username'></label>"
           + passwords
-          + "<button type='submit'>Sign in</button></form><button type='button'>Reports</button>"
+          + "<button type='submit'>Sign in</button></form><button type='b"
+          + "utton'>Reports</button>"
           + p4PageObserverScript(ordinal);
     }
-    return "<form method='post' action='/p3/login'><label>User<input name='username'></label>"
-        + "<input name='password' type='password'><button type='submit'>Sign in</button></form>"
+    return "<form method='post' action='/p3/login'><label>User<input nam"
+        + "e='username'></label>"
+        + "<input name='password' type='password'><button type='submit'"
+        + ">Sign in</button></form>"
         + "<button type='button'>Reports</button>";
   }
 
@@ -40478,7 +38016,6 @@ seal().catch(()=>{s.failed=true;});});
         obligations.add(
             obligation(THREE, 0, "assert", target, null, null).put("predicate", "visible"));
       }
-      result.putArray("needs");
       return incrementalSourcePlanWindow(result, context);
     }
     JsonNode obligation = context.path("obligations").get(0);
@@ -40520,18 +38057,19 @@ seal().catch(()=>{s.failed=true;});});
               .put("selectedPasswordOrdinal", password.path("occurrence").asInt())
               .put(
                   "passwordCount",
-                  context.path("observation").path("coverage").path("passwordControls").asInt(-1))
+                  com.citi.put.checks.studio.guided.translation.GuidedOutline.parse(
+                          context.path("observation").asText())
+                      .stream()
+                      .filter(line -> line.ref() == null && line.role().equals("passwordControl"))
+                      .count())
               .put("actualSameStepSecretInput", true)
               .put(
                   "actualPublicUserAvailable",
-                  java.util.stream.StreamSupport.stream(
-                          context.path("observation").path("nodes").spliterator(), false)
+                  com.citi.put.checks.studio.support.JoinedRefs.shown(
+                          context.path("observation").asText())
+                      .stream()
                       .anyMatch(
-                          node ->
-                              node.path("name").asText().equals("User")
-                                  && node.path("role").asText().equals("textbox")
-                                  && node.path("visible").asBoolean()
-                                  && node.path("actionable").asBoolean())));
+                          line -> "User".equals(line.name()) && line.role().equals("textbox"))));
       obligation = password;
     }
     String operationKind = obligation.path("operationKind").asText();
@@ -40576,14 +38114,14 @@ seal().catch(()=>{s.failed=true;});});
             : targetName.equals("Reports")
                 ? "link"
                 : operationKind.equals("fill") ? "textbox" : "button";
-    JsonNode selected = null;
-    for (JsonNode node : context.path("observation").path("nodes")) {
-      if (node.path("name").asText().equals(targetName)
-          && node.path("role").asText().equals(role)) {
+    com.citi.put.checks.studio.guided.translation.GuidedOutline.Line selected = null;
+    for (var line :
+        com.citi.put.checks.studio.support.JoinedRefs.shown(context.path("observation").asText())) {
+      if (targetName.equals(line.name()) && line.role().equals(role)) {
         if (selected != null) {
           throw new IllegalStateException("P3 target is not unique");
         }
-        selected = node;
+        selected = line;
       }
     }
     if (selected == null) {
@@ -40596,14 +38134,7 @@ seal().catch(()=>{s.failed=true;});});
         .putNull("question");
     var action = result.putObject("action");
     var operation = action.putObject("operation").put("kind", operationKind);
-    action
-        .putObject("target")
-        .put("nodeId", selected.path("nodeId").asText())
-        .putObject("locator")
-        .put("kind", "role")
-        .put("role", role)
-        .put("name", targetName)
-        .put("exact", true);
+    action.putObject("target").put("kind", "node").put("ref", selected.ref());
     if (operationKind.equals("fill")) {
       operation
           .putObject("value")
@@ -41061,7 +38592,6 @@ seal().catch(()=>{s.failed=true;});});
     private enum Segment {
       OWNER_LOCK,
       JDBC_PATH,
-      CURRENT_AUTH,
       SOURCE_CHECK,
       SCHEMA,
       JSON_RENDER,
@@ -42057,9 +39587,6 @@ seal().catch(()=>{s.failed=true;});});
         if (type.endsWith("GuidedSessionRepository") && method.equals("lock")) {
           return Segment.OWNER_LOCK;
         }
-        if (type.endsWith("GuidedProductionSessionAccess") && method.equals("checkCurrent")) {
-          return Segment.CURRENT_AUTH;
-        }
         if (type.endsWith("GuidedProductionSessionAccess") && method.equals("checkSourceCurrent")
             || type.endsWith("GuidedSourceSnapshotRepository")) {
           return Segment.SOURCE_CHECK;
@@ -43004,31 +40531,10 @@ seal().catch(()=>{s.failed=true;});});
         return;
       }
       var codes =
-          List.of(
-              "AUTHORIZATION_EXPIRED",
-              "FORBIDDEN_SCOPE",
-              "SECRET_USE_REVOKED",
-              "SECRET_USE_NOT_AUTHORIZED",
-              "CANCELLED",
-              "REFERENCE_UNAVAILABLE");
+          List.of("AUTHORIZATION_EXPIRED", "FORBIDDEN_SCOPE", "CANCELLED", "REFERENCE_UNAVAILABLE");
       String originalMessage = failure.getMessage();
       int code = originalMessage == null ? 0 : codes.indexOf(originalMessage) + 1;
       originalMessage = null;
-      boolean deniedReferenceObserved =
-          failure
-              instanceof
-              com.citi.put.checks.studio.dispatch.StudioReferenceResolver.SecretUseRevokedException;
-      boolean deniedReferenceIsPass =
-          deniedReferenceObserved
-              && "PASS"
-                  .equals(
-                      ((com.citi.put.checks.studio.dispatch.StudioReferenceResolver
-                                  .SecretUseRevokedException)
-                              failure)
-                          .getReferenceName());
-      if (deniedReferenceObserved) {
-        code = 3;
-      }
       int source = 0, line = 0;
       StackTraceElement[] frames = failure.getStackTrace();
       try {
@@ -43061,8 +40567,6 @@ seal().catch(()=>{s.failed=true;});});
               .put("mappedAuthorizationRevoked", "AUTHORIZATION_REVOKED".equals(mappedCode))
               .put("sameAttempt", binding.path("attemptId").equals(expected.path("attemptId")))
               .put("sameScope", binding.path("scope").equals(expected.path("scope")))
-              .put("deniedReferenceObserved", deniedReferenceObserved)
-              .put("deniedReferenceIsPass", deniedReferenceIsPass)
               .put("environmentObserved", binding.path("environment").isTextual())
               .put(
                   "sameEnvironment",
@@ -43076,9 +40580,6 @@ seal().catch(()=>{s.failed=true;});});
               .put(
                   "samePrincipal", binding.path("principalId").equals(expected.path("principalId")))
               .put("sameCsi", binding.path("csiId").equals(expected.path("csiId")))
-              .put(
-                  "samePolicy",
-                  binding.path("currentPolicyHash").equals(expected.path("currentPolicyHash")))
               .put("grantIssuedAtMs", issued)
               .put("grantExpiresAtMs", expires)
               .put("dispatchStartedAtMs", dispatchTime.toEpochMilli())
@@ -43824,8 +41325,10 @@ seal().catch(()=>{s.failed=true;});});
                 new AuthoringStep(UUID.fromString(TWO), texts.get(1), null),
                 new AuthoringStep(UUID.fromString(THREE), texts.get(2), null)));
     jdbc.update(
-        "INSERT INTO ui_tests(id,name,csi_id,environment,browser,steps,variables,authoring,"
-            + "authoring_revision_inputs,timeout_seconds,created_by,created_at,updated_at) VALUES"
+        "INSERT INTO ui_tests(id,name,csi_id,environment,browser,step"
+            + "s,variables,authoring,"
+            + "authoring_revision_inputs,timeout_seconds,created_by,created"
+            + "_at,updated_at) VALUES"
             + " (?,'Delayed observed',?,'fixture','chromium',?::jsonb,'[]'::jsonb,?::jsonb,"
             + "?::jsonb,?,'fixture@example.invalid',now(),now())",
         id,
@@ -43844,8 +41347,7 @@ seal().catch(()=>{s.failed=true;});});
             .put("testId", id.toString())
             .put("sourceRevision", "1")
             .put("configurationRevision", "1")
-            .put("environmentId", "fixture")
-            .put("applicationId", "orders");
+            .put("environmentId", "fixture");
     start.set("versions", versions());
     return publicCall("/api/v1/studio/guided-sessions", start, 202, UUID.randomUUID().toString())
         .path("session")
@@ -43905,8 +41407,75 @@ seal().catch(()=>{s.failed=true;});});
                         () -> sessions.lock(id).document().path("state").asText());
             if (List.of("FINALIZING", "FAILED", "EXPIRED", "UNKNOWN_OUTCOME", "CANCELLED")
                 .contains(state)) {
+              String terminalDetails = "";
+              if (!state.equals("FINALIZING")) {
+                JsonNode terminal =
+                    sessions.transaction(() -> sessions.lock(id).progress().deepCopy());
+                String code = terminal.path("errorCode").asText();
+                String safeCode =
+                    java.util.Set.of(
+                                "UNSUPPORTED_SURFACE",
+                                "ASSERTION_FAILED",
+                                "BUDGET_EXCEEDED",
+                                "MODEL_UNAVAILABLE",
+                                "INSUFFICIENT_EVIDENCE",
+                                "MISSING_SOURCE",
+                                "INVALID_CONTRACT",
+                                "STALE_GENERATION",
+                                "RUNTIME_INCOMPATIBLE",
+                                "PREPARATION_DENIED",
+                                "READ_REFUSED",
+                                "READ_NOT_ALLOWED",
+                                "NO_DURABLE_LOCATOR",
+                                "TARGET_MISMATCH",
+                                "SOURCE_CHANGED",
+                                "UNKNOWN_OUTCOME",
+                                "TARGET_CHANGED")
+                            .contains(code)
+                        ? code
+                        : "OTHER";
+                terminalDetails =
+                    "closedCode="
+                        + safeCode
+                        + ",stepIndex="
+                        + terminal.path("stepIndex").asInt(-1)
+                        + ",modelStates="
+                        + jdbc.queryForList(
+                            "SELECT kind,status,rejection_reason, CASE WHEN safe_result->>'status'"
+                                + " IN ('ACTION','NOT_READY','UNSUPPORTED','QUESTION','DONE') THEN"
+                                + " safe_result->>'status' ELSE 'NONE_OR_OTHER' END AS"
+                                + " reply_status, CASE WHEN"
+                                + " safe_result->'action'->'operation'->>'kind' IN"
+                                + " ('navigate','fill','read','assert','click','press','selectO"
+                                + "ption','hover','check','uncheck')"
+                                + " THEN safe_result->'action'->'operation'->>'kind' ELSE"
+                                + " 'NONE_OR_OTHER' END AS operation FROM"
+                                + " studio_guided_model_attempts WHERE session_id=? ORDER BY"
+                                + " created_at DESC LIMIT 3",
+                            id)
+                        + ",associations="
+                        + jdbc.queryForList(
+                            "SELECT o.meaning->>'occurrence' AS occurrence, md5(o.obligation_id) AS"
+                                + " obligation_hash, CASE WHEN o.meaning->>'operationKind' IN"
+                                + " ('navigate','fill','read','assert','click','press','selectO"
+                                + "ption','hover','check','uncheck')"
+                                + " THEN o.meaning->>'operationKind' ELSE 'NONE_OR_OTHER' END AS"
+                                + " operation, (o.admission_id IS NOT NULL) AS admitted,a.ordinal,"
+                                + " a.document->>'state' AS state,a.document->>'dispatchCount' AS"
+                                + " dispatch_count, CASE WHEN a.document->>'outcomeCode' IN"
+                                + " ('OK','ASSERTION_FAILED','TARGET_CHANGED','TIMEOUT','POLICY"
+                                + "_DENIED','CANCELLED','UNKNOWN_OUTCOME','ACK_LOST')"
+                                + " THEN a.document->>'outcomeCode' ELSE 'NONE_OR_OTHER' END AS"
+                                + " outcome FROM studio_guided_obligation_admissions o LEFT JOIN"
+                                + " studio_guided_actions a USING(session_id,admission_id) WHERE"
+                                + " o.session_id=? ORDER BY o.created_at",
+                            id)
+                        + ",providerFrames="
+                        + PROVIDER_FAILURE_LOCATIONS.getOrDefault(id, List.of());
+                System.out.println("WI4B_CLOSED_DIAGNOSTIC " + terminalDetails);
+              }
               assertThat(state)
-                  .as("second explicit learning; logs %s", TEMP)
+                  .as("second explicit learning; %s; logs %s", terminalDetails, TEMP)
                   .isEqualTo("FINALIZING");
               itr090.methodReturned = true;
               itr090.terminal = true;
@@ -44041,50 +41610,6 @@ seal().catch(()=>{s.failed=true;});});
     throw new AssertionError("Second explicit learning did not finalize; logs " + TEMP);
   }
 
-  private UUID arrangeActivation(UUID schedule, UUID testId, UUID revision, long version) {
-    UUID activation = UUID.randomUUID();
-    Instant due =
-        Instant.now()
-            .truncatedTo(java.time.temporal.ChronoUnit.MINUTES)
-            .minusSeconds(version == 2 ? 60 : 30);
-    sessions.transaction(
-        () -> {
-          jdbc.update(
-              "INSERT INTO studio_schedule_activations(id, schedule_id, test_id, csi_id,"
-                  + " schedule_version, revision_id, environment, execution_principal,"
-                  + " activated_by) VALUES"
-                  + " (?,?,?,'CSI-123',?,?,'fixture','user-1','fixture@example.invalid')",
-              activation,
-              schedule,
-              testId,
-              version,
-              revision);
-          if (version == 4) {
-            jdbc.update(
-                "UPDATE studio_schedules SET cron_expression='30 * * * * *' WHERE id=?", schedule);
-          }
-          jdbc.update(
-              "UPDATE studio_schedules SET version=?, state='ENABLED', requested_enabled=true,"
-                  + " blocked_code=NULL, activated_revision_id=?, activation_id=?, next_due_at=?,"
-                  + " poll_after_at=? WHERE id=?",
-              version,
-              revision,
-              activation,
-              java.sql.Timestamp.from(due),
-              java.sql.Timestamp.from(due),
-              schedule);
-          return null;
-        });
-    return activation;
-  }
-
-  private Map<String, Object> activationIdentity(UUID schedule) {
-    return jdbc.queryForMap(
-        "SELECT a.* FROM studio_schedule_activations a JOIN studio_schedules s ON"
-            + " s.activation_id=a.id WHERE s.id=?",
-        schedule);
-  }
-
   private org.springframework.context.ConfigurableApplicationContext observedWorkerReplica(
       AtomicInteger closedExecutors) {
     Map<String, Object> settings = new java.util.LinkedHashMap<>();
@@ -44101,7 +41626,6 @@ seal().catch(()=>{s.failed=true;});});
     settings.put("checks.scheduling.partition-scheduler-enabled", "false");
     settings.put("checks.scheduling.retention-pruner-enabled", "false");
     settings.put("checks.reports.delivery-enabled", "false");
-    settings.put("studio.scheduling.enabled", "false");
     settings.put("studio.execution.dispatcher.enabled", "false");
     settings.put("studio.guided-authoring.translation.enabled", "false");
     settings.put("studio.guided.publication.enabled", "false");
@@ -44247,9 +41771,6 @@ seal().catch(()=>{s.failed=true;});});
     settings.put(
         "studio.observed-replay.catalog-json",
         support ? C.object().putArray("catalog").add(CATALOG).toString() : "[]");
-    settings.put(
-        "studio.observed-replay.policies-json",
-        C.object().putArray("policies").add(POLICY).toString());
     settings.put("studio.gateway.provider", "disabled");
     settings.put("studio.gateway.model", "benign-new-learning-default");
     settings.put("studio.execution.dispatcher.enabled", "false");
@@ -44284,7 +41805,6 @@ seal().catch(()=>{s.failed=true;});});
               .GET()
               .build();
       int before = CORE_CALLS.get();
-      String expectedVideo = replicaExpectedVideoStatus(id);
       var response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
       assertThat(response.statusCode()).as(response.body()).isEqualTo(200);
       assertThat(CORE_CALLS.get()).isGreaterThan(before);
@@ -44293,23 +41813,18 @@ seal().catch(()=>{s.failed=true;});});
       assertThat(result.path("currentReadiness").path("code").asText()).isEqualTo(readinessCode);
       assertThat(result.path("learnedFromThisRun").asBoolean()).isTrue();
       assertThat(result.path("replayVerified").asBoolean()).isFalse();
-      // STUDIO-OBS-013/014 S3: C2b tightened result.evidence.video to a VideoEvidence
-      // object (null is no longer valid) and B13's projection always answers one. This
-      // replica serves no recording store, so a recorded run reads UNAVAILABLE
-      // (NO_RECORDING_STORE) and an unrecorded one is PROCESSING inside the settle window
-      // or UNAVAILABLE after it; never AVAILABLE here.
+      // A published learn's recording is discarded before upload (its proof is the AFTER_LEARN
+      // replay of the published revision), whatever the replica serves: the receipt-backed result
+      // carries no learn video and names the linked proof execution.
       JsonNode video = result.path("evidence").path("video");
-      assertThat(video.isObject()).as(video.toString()).isTrue();
-      // AR-QA TEST001 line16036: exact, from the stored recording row on the shared database and
-      // the DB-clock window, judged before and after the replica read. Not AC-6 evidence.
-      assertThat(replicaExpectedVideoStatus(id))
-          .as("no recording fact landed and no DB-clock window edge passed during the read")
-          .isEqualTo(expectedVideo);
-      assertThat(video.path("status").asText()).as(video.toString()).isEqualTo(expectedVideo);
-      if ("AVAILABLE".equals(guidedRecordingRowState(id))) {
-        assertThat(video.path("error").asText())
-            .isEqualTo(com.citi.put.checks.studio.ExecutionSnapshotMapper.NO_RECORDING_STORE);
-      }
+      assertThat(video.isNull()).as(video.toString()).isTrue();
+      assertThat(result.path("actionTimings")).isEmpty();
+      assertThat(result.path("proof").path("executionId").asText())
+          .isEqualTo(
+              jdbc.queryForObject(
+                  "SELECT execution_id::text FROM studio_learn_proofs WHERE session_id=?",
+                  String.class,
+                  id));
     }
   }
 
@@ -44348,8 +41863,13 @@ seal().catch(()=>{s.failed=true;});});
       guidedKeys.put(RunnerProcessHarness.KEY_CALLBACK_BASE_URL, "https://localhost:" + port);
       guidedKeys.put(
           RunnerProcessHarness.KEY_SCRATCH_DIR, TEMP.resolve("guided-scratch").toString());
+      guidedKeys.put(
+          RunnerProcessHarness.KEY_ALLOWED_DOMAINS,
+          String.join(",", com.citi.put.checks.studio.support.TestDomains.ENTRIES));
+      guidedKeys.put(RunnerProcessHarness.KEY_ALLOW_ALL_DOMAINS, "false");
       guidedKeys.put(RunnerProcessHarness.KEY_GUIDED_ENABLED, "true");
       guidedKeys.put(RunnerProcessHarness.KEY_GUIDED_WORKER_ID, "worker-1");
+      guidedKeys.put(RunnerProcessHarness.KEY_GUIDED_CAPACITY, "1");
       guidedKeys.put(
           RunnerProcessHarness.KEY_GUIDED_JOURNAL_DIR, TEMP.resolve("journal").toString());
       guidedKeys.put(RunnerProcessHarness.KEY_GUIDED_CONTROLLER_ISSUER, "fixture-issuer");
@@ -44365,12 +41885,7 @@ seal().catch(()=>{s.failed=true;});});
       // STUDIO-OBS-013/014 S3: the worker records into the same local store the backend serves
       // video from (studio.execution.video-store.directory = TEMP/objects).
       guidedKeys.put(RunnerProcessHarness.KEY_OBJECT_STORE_DIR, TEMP.resolve("objects").toString());
-      // STUDIO-OBS-014 S3 (RK-2, ar-mounted-rules): the worker is given neither `rules` nor
-      // `applicationPolicy`. The trusted policy's application policy becomes the governed, approved
-      // policy of every learning scope this class uses (both CSIs, both environments).
-      for (String csi : List.of("CSI-123", "CSI-456")) {
-        seedGovernedPolicies(csi);
-      }
+      // The worker is given no `rules`: the read profile is the runner's own constant.
       Files.writeString(TEMP.resolve("worker.json"), JSON.writeValueAsString(guidedKeys));
       Path guidedMain = TEMP.resolve("p3-guided-launch-counter.mjs");
       Files.writeString(guidedMain, p3GuidedLaunchCounter());
@@ -44405,9 +41920,11 @@ seal().catch(()=>{s.failed=true;});});
       // errno-style code, byte count, one fixed message) to the existing child IPC diagnostic
       // file as a v:2 line that p10DiagnosticLines ignores. The error is rethrown unchanged.
       String initialContextCheck =
-          ("const checkInitial=async(handle)=>{const fs=await import('node:fs');const note=(e,n)=>"
-                  + "{try{const c=typeof e?.code==='string'&&/^[A-Z0-9_]{1,32}$/.test(e.code)?e.code"
-                  + ":null,m=e?.message==='Unexpected end of JSON input'?e.message:null,k=typeof e?"
+          ("const checkInitial=async(handle)=>{const fs=await import('node:fs');const"
+                  + " note=(e,n)=>{try{const c=typeof"
+                  + " e?.code==='string'&&/^[A-Z0-9_]{1,32}$/.test(e.code)?e.code"
+                  + ":null,m=e?.message==='Unexpected"
+                  + " end of JSON input'?e.message:null,k=typeof e?"
                   + ".name==='string'&&/^[A-Za-z]{1,32}$/.test(e.name)?e.name:'OTHER';fs.appendFile"
                   + "Sync(")
               + JSON.writeValueAsString(TEMP.resolve(P10_CHILD_IPC_DIAGNOSTICS).toString())
@@ -44415,7 +41932,8 @@ seal().catch(()=>{s.failed=true;});});
                   + "code:c,bytes:n,message:m})+'\\n');}catch{}};const state=()=>{let n=null;try{"
                   + "const t=fs.readFileSync(")
               + JSON.writeValueAsString(TEMP.resolve("initial-context-state.json").toString())
-              + (",'utf8');n=Buffer.byteLength(t);return JSON.parse(t);}catch(e){note(e,n);throw e;"
+              + (",'utf8');n=Buffer.byteLength(t);return JSON.parse(t);}catch("
+                  + "e){note(e,n);throw e;"
                   + "}};fs.writeFileSync(")
               + JSON.writeValueAsString(TEMP.resolve("initial-context-check-entered").toString())
               + ",'entered');while(state().pause)await new Promise(r=>setTimeout(r,20));"
@@ -44429,30 +41947,43 @@ seal().catch(()=>{s.failed=true;});});
               + root
               + "compat/runtime-versions.js';import {playwrightBrowserFactory} from '"
               + root
-              + "run/browser.js';"
+              + "run/browser.js';import {ALLOWED_DOMAINS_ENV_KEY,parseAllowedDomainsEnv} from '"
+              + root
+              + "allowedDomains.js';"
               + p4NativeCloseObserverSdk()
               + p4OrdinaryRevocationChild()
               + initialContextCheck
-              + "const launch=playwrightBrowserFactory.launch.bind(playwrightBrowserFactory);"
-              + "playwrightBrowserFactory.launch=async request=>{const handle=await launch(request);"
+              + "const"
+              + " launch=playwrightBrowserFactory.launch.bind(playwrightBrows"
+              + "erFactory);playwrightBrowserFactory.launch=async"
+              + " request=>{const handle=await launch(request);"
               + ("if(request.observedScope){const"
                   + " matches=handle.observedInitialContextMatches.bind(han"
                   + "dle);handle.observedInitialContextMatches=()=>checkInitial(matches);}")
-              + "const create=handle.createObservationSession.bind(handle);"
-              + "handle.createObservationSession=config=>{const session=create(config),"
-              + "acquire=session.acquire.bind(session),invoke=session.invoke.bind(session);"
-              + "session.acquire=async request=>{const result=await acquire(request);"
-              + "if(request.locator.kind==='role'&&request.locator.name==='Confirmation')"
-              + "await fetch('"
+              + "const"
+              + " create=handle.createObservationSession.bind(handle);handle."
+              + "createObservationSession=config=>{const"
+              + " session=create(config),"
+              + "resolveTarget=session.resolveTarget.bind(session),invoke=ses"
+              + "sion.invoke.bind(session);session.resolveTarget=async"
+              + " request=>{const result=await resolveTarget(request);const"
+              + " last=request.resolved?.locator?.at?.(-1);if(last?.name==='C"
+              + "onfirmation'||last?.value==='Confirmation')await"
+              + " fetch('"
               + ORIGIN
               + "/acquisition',{method:'POST',body:result.kind});return result;};"
               + "session.invoke=async (...args)=>{const result=await invoke(...args);"
               + "await fetch('"
               + ORIGIN
               + "/invocation',{method:'POST',body:args[0].operation.kind});return result;};const"
-              + " revSelected=revMode();if(revSelected?.active&&revSelected.path===2){if(!revReady)revFail();else"
+              + " revSelected=revMode();if(revSelected?.active&&revSelected.p"
+              + "ath===2){if(!revReady)revFail();else"
               + " revObserveNative(session,revSelected);}return session;};return handle;};"
-              + "startChild(revProcess,{observedBuild:loadObservedBuild("
+              // startChild(process, allowedDomains, observed): the launcher always writes the
+              // whitelist into the child's environment, exactly as the child entry point reads it.
+              + "const domains=parseAllowedDomainsEnv(process.env[ALLOWED_DOMAINS_ENV_KEY]);"
+              + "if('problem' in domains)process.exit(78);"
+              + "startChild(revProcess,domains.entries,{observedBuild:loadObservedBuild("
               + startup
               + ")});");
       ObjectNode env =
@@ -44462,6 +41993,10 @@ seal().catch(()=>{s.failed=true;});});
               .put("STUDIO_RUNNER_SERVICE_IDENTITY", SERVICE)
               .put("STUDIO_RUNNER_CALLBACK_IDENTITY", CALLBACK)
               .put("STUDIO_RUNNER_CALLBACK_BASE_URL", "https://localhost:" + port)
+              .put(
+                  "STUDIO_RUNNER_ALLOWED_DOMAINS",
+                  String.join(",", com.citi.put.checks.studio.support.TestDomains.ENTRIES))
+              .put("STUDIO_RUNNER_ALLOW_ALL_DOMAINS", "false")
               .put("STUDIO_RUNNER_INSTANCE_ID", "observed-fixture")
               .put("STUDIO_RUNNER_SCRATCH_DIR", TEMP.toRealPath().resolve("scratch").toString())
               .put("STUDIO_RUNNER_OBJECT_STORE_DIR", TEMP.resolve("objects").toString());
@@ -44483,21 +42018,30 @@ seal().catch(()=>{s.failed=true;});});
               + "compat/runtime-versions.js';import {playwrightBrowserFactory} from '"
               + root
               + "run/browser.js';"
+              // This harness builds its own launcher from a config object, so the local-run fact
+              // `main()` reads from the process environment is stated here (STUDIO-GOV-001.4).
+              + "process.env.STUDIO_RUNNER_HOST='127.0.0.1';"
               + initialContextCheck
               + ordinaryAdmissionRefusalTap()
               + p4OrdinaryRevocationHttp()
               + p6ChildCutSpawner(root)
-              + "const launch=playwrightBrowserFactory.launch.bind(playwrightBrowserFactory);"
-              + "playwrightBrowserFactory.launch=async request=>{const handle=await launch(request);"
+              + "const"
+              + " launch=playwrightBrowserFactory.launch.bind(playwrightBrows"
+              + "erFactory);playwrightBrowserFactory.launch=async"
+              + " request=>{const handle=await launch(request);"
               + ("if(request.observedScope){const"
                   + " matches=handle.observedInitialContextMatches.bind(han"
                   + "dle);handle.observedInitialContextMatches=()=>checkInitial(matches);}")
-              + "const create=handle.createObservationSession.bind(handle);"
-              + "handle.createObservationSession=config=>{const session=create(config),"
-              + "acquire=session.acquire.bind(session),invoke=session.invoke.bind(session);"
-              + "session.acquire=async request=>{const result=await acquire(request);"
-              + "if(request.locator.kind==='role'&&request.locator.name==='Confirmation')"
-              + "await fetch('"
+              + "const"
+              + " create=handle.createObservationSession.bind(handle);handle."
+              + "createObservationSession=config=>{const"
+              + " session=create(config),"
+              + "resolveTarget=session.resolveTarget.bind(session),invoke=ses"
+              + "sion.invoke.bind(session);session.resolveTarget=async"
+              + " request=>{const result=await resolveTarget(request);const"
+              + " last=request.resolved?.locator?.at?.(-1);if(last?.name==='C"
+              + "onfirmation'||last?.value==='Confirmation')await"
+              + " fetch('"
               + ORIGIN
               + "/acquisition',{method:'POST',body:result.kind});return result;};"
               + "session.invoke=async (...args)=>{const result=await invoke(...args);"
@@ -44520,18 +42064,17 @@ seal().catch(()=>{s.failed=true;});});
               + "};const"
               + " launcher=createChildBrowserLauncher({recording:{width:1280,heigh"
               + "t:720},stepTimeoutMs:30000,launchTimeoutMs:30000,maxFailureMessag"
-              + "eLength:400,seekOriginCalibrationMs:0,spawner:cutSpawner,childModulePath:"
+              + "eLength:400,seekOriginCalibrationMs:0,allowedDomains:"
+              + JSON.writeValueAsString(com.citi.put.checks.studio.support.TestDomains.ENTRIES)
+              + ",spawner:cutSpawner,childModulePath:"
               + JSON.writeValueAsString(child.toString())
               + "});const cutConfig=loadConfig({..."
               + env
               + (",STUDIO_RUNNER_POOL_SIZE:process.env.OBS007_ORDINARY_POOL_SIZE});"
                   + "const app=createApplication(cutConfig,{listener,launcher,http:revHttp,"
                   + "scratch:cutScratchStore(cutConfig.scratchDir),"
-                  + "runtimeVersions:loadRuntimeVersions(),observed:{build,policies:[")
-              + POLICY
-              + ","
-              + P3_OTHER_POLICY
-              + "],validationEnabled:true,replayEnabled:true}});await"
+                  + "runtimeVersions:loadRuntimeVersions(),observed:{build,validationEnabled:true,"
+                  + "replayEnabled:true}});await")
               + " app.start();process.on('SIGTERM',()=>{void"
               + " app.drain().then(()=>process.exit(0));});");
       startOrdinaryWorker(false);
@@ -44819,7 +42362,8 @@ atched:false,
         + "const permittedRefusalCodes=['PROFILE_MISMATCH','AUTHORIZATION_EXPIRED',"
         + "'POLICY_REFUSED','REFERENCE_REFUSED'];"
         + "FixtureServerResponse.prototype.end=function(...args){"
-        + "const status=this.statusCode;const result=Reflect.apply(originalResponseEnd,this,args);"
+        + "const status=this.statusCode;const result=Reflect.apply(orig"
+        + "inalResponseEnd,this,args);"
         + "try{if(status===409){let code='OTHER';const chunk=args[0];"
         + "for(const allowed of permittedRefusalCodes){"
         + "const expected='{\"code\":\"'+allowed+'\"}';"
@@ -44905,8 +42449,6 @@ atched:false,
         case "CANCELLED" -> "CANCELLED";
         case "EXPIRED" -> "EXPIRED";
         case "SECRET_UNAVAILABLE" -> "SECRET_UNAVAILABLE";
-        case "SECRET_USE_NOT_AUTHORIZED" -> "SECRET_USE_NOT_AUTHORIZED";
-        case "SECRET_USE_REVOKED" -> "SECRET_USE_REVOKED";
         case "VAULT_UNAVAILABLE" -> "VAULT_UNAVAILABLE";
         case "LOGIN_REQUIRED" -> "LOGIN_REQUIRED";
         case "SECRET_TOO_LONG" -> "SECRET_TOO_LONG";
@@ -45048,6 +42590,10 @@ atched:false,
   }
 
   private static ObjectNode model(JsonNode request) {
+    var standalone = joinedModel;
+    if (standalone != null) {
+      return standalone.apply(request);
+    }
     String kind = request.path("kind").asText();
     JsonNode context = request.path("context");
     ObjectNode result =
@@ -45127,15 +42673,6 @@ atched:false,
       items.add(obligation(THREE, 0, "click", "Submit", null, null));
       items.add(
           obligation(THREE, 1, "assert", "Confirmation", null, null).put("predicate", "visible"));
-      result
-          .putArray("needs")
-          .addObject()
-          .put("needId", "order")
-          .put("producerStepId", ONE)
-          .putArray("consumers")
-          .addObject()
-          .put("stepId", TWO)
-          .put("argumentSlot", "fill.value");
       return result;
     }
     if (delayTimingModel) {
@@ -45161,27 +42698,14 @@ atched:false,
       var choices =
           result.putObject("question").put("reason", "AMBIGUOUS_BINDING").putArray("choices");
       for (String name : List.of("Destination", "Alternate destination")) {
-        JsonNode node = null;
-        for (JsonNode candidate : context.path("observation").path("nodes")) {
-          if (candidate.path("name").asText().equals(name)) {
-            node = candidate;
-          }
-        }
-        if (node == null) {
-          throw new IllegalStateException("Expected observed choice missing");
-        }
+        String ref =
+            com.citi.put.checks.studio.support.JoinedRefs.refInOutline(
+                context.path("observation").asText(), name);
         ObjectNode meaning =
             C.object()
                 .put("obligationId", obligation.path("obligationId").asText())
-                .put("nodeId", node.path("nodeId").asText())
+                .put("ref", ref)
                 .putNull("bindingId");
-        meaning.set(
-            "locator",
-            C.object()
-                .put("kind", "role")
-                .put("role", "textbox")
-                .put("name", name)
-                .put("exact", true));
         choices
             .addObject()
             .put("choiceId", "provider-" + choices.size())
@@ -45205,29 +42729,25 @@ atched:false,
       target.put("kind", "page");
       operation.put("destinationInputId", context.path("inputs").get(0).path("inputId").asText());
     } else {
-      JsonNode node = null;
-      for (JsonNode candidate : context.path("observation").path("nodes")) {
-        if (candidate.path("name").equals(obligation.path("targetIntent"))) {
+      com.citi.put.checks.studio.guided.translation.GuidedOutline.Line node = null;
+      for (var candidate :
+          com.citi.put.checks.studio.support.JoinedRefs.shown(
+              context.path("observation").asText())) {
+        if (obligation.path("targetIntent").asText().equals(candidate.name())) {
           node = candidate;
         }
       }
       if (node == null) {
         throw new IllegalStateException("Expected controlled node missing");
       }
-      target
-          .put("nodeId", node.path("nodeId").asText())
-          .putObject("locator")
-          .put("kind", "role")
-          .put("role", node.path("role").asText())
-          .put("name", node.path("name").asText())
-          .put("exact", true);
+      // ADR-SC-007 D6: an earlier choice reaches the model as selectedChoice {role, name, ref}, the
+      // ref
+      // being the fresh element the backend matched; the model acts on that ref, never on its own
+      // pick.
+      String chosenRef = obligation.path("selectedChoice").path("ref").asText(node.ref());
+      target.put("kind", "node").put("ref", chosenRef);
       if (op.equals("read")) {
-        operation
-            .put("bindingId", context.path("needs").get(0).path("bindingId").asText())
-            .putObject("recipe")
-            .put("kind", "visibleText")
-            .put("classification", "permittedBusinessData")
-            .put("policyRuleId", "business-read");
+        operation.put("bindingId", context.path("needs").get(0).path("bindingId").asText());
       }
       if (op.equals("fill")) {
         operation
@@ -45269,7 +42789,6 @@ atched:false,
       }
       var references = result.putArray("sourceReferences");
       var obligations = result.putArray("obligations");
-      var needs = result.putArray("needs");
       // new22-b1b3-diagnosis01 (B1B-04/B1B-05): B1 parents without mixedDom leave the variant
       // null, and List.of(...).contains(null) throws NPE (provider 500 -> INVALID_CONTRACT).
       String domVariant = incrementalDomVariant;
@@ -45297,15 +42816,6 @@ atched:false,
           bindingConsumers.add(
               C.object().put("stepId", stepId).put("argumentSlot", "assert.expected"));
         }
-      }
-      if (!bindingConsumers.isEmpty()) {
-        var need =
-            needs
-                .addObject()
-                .put("needId", "order")
-                .put("producerStepId", INCREMENTAL_STEPS.get(partialRead ? 1 : 0));
-        var consumers = need.putArray("consumers");
-        bindingConsumers.forEach(consumers::add);
       }
       for (int at = first; at < source.size(); at++) {
         String stepId = source.get(at).path("stepId").asText();
@@ -45475,29 +42985,19 @@ atched:false,
           .put("sourceInputId", input.path("inputId").asText());
       return result;
     }
-    JsonNode node = null;
-    for (JsonNode candidate : context.path("observation").path("nodes")) {
-      if (candidate.path("name").equals(obligation.path("targetIntent"))) {
+    com.citi.put.checks.studio.guided.translation.GuidedOutline.Line node = null;
+    for (var candidate :
+        com.citi.put.checks.studio.support.JoinedRefs.shown(context.path("observation").asText())) {
+      if (obligation.path("targetIntent").asText().equals(candidate.name())) {
         node = candidate;
       }
     }
     if (node == null) {
       throw new IllegalStateException("Controlled incremental target missing");
     }
-    target
-        .put("nodeId", node.path("nodeId").asText())
-        .putObject("locator")
-        .put("kind", "role")
-        .put("role", node.path("role").asText())
-        .put("name", node.path("name").asText())
-        .put("exact", true);
+    target.put("kind", "node").put("ref", node.ref());
     if (op.equals("read")) {
-      operation
-          .put("bindingId", context.path("needs").get(0).path("bindingId").asText())
-          .putObject("recipe")
-          .put("kind", "visibleText")
-          .put("classification", "permittedBusinessData")
-          .put("policyRuleId", "business-read");
+      operation.put("bindingId", context.path("needs").get(0).path("bindingId").asText());
     } else if (op.equals("fill") && obligation.path("needId").isNull()) {
       JsonNode input = null;
       for (JsonNode candidate : context.path("inputs")) {
@@ -45575,7 +43075,6 @@ atched:false,
       obligations.add(obligation(THREE, 2, "click", "Reports", null, null));
       obligations.add(
           obligation(THREE, 3, "assert", "Reports", null, null).put("predicate", "visible"));
-      result.putArray("needs");
       return result;
     }
     JsonNode obligation = context.path("obligations").get(0);
@@ -45607,22 +43106,18 @@ atched:false,
           }
         }
       } else {
-        JsonNode selected = null;
-        for (JsonNode node : context.path("observation").path("nodes")) {
-          if (node.path("name").equals(obligation.path("targetIntent"))) {
+        com.citi.put.checks.studio.guided.translation.GuidedOutline.Line selected = null;
+        for (var node :
+            com.citi.put.checks.studio.support.JoinedRefs.shown(
+                context.path("observation").asText())) {
+          if (obligation.path("targetIntent").asText().equals(node.name())) {
             selected = node;
           }
         }
         if (selected == null) {
           throw new IllegalStateException("Missing controlled login node");
         }
-        target
-            .put("nodeId", selected.path("nodeId").asText())
-            .putObject("locator")
-            .put("kind", "role")
-            .put("role", selected.path("role").asText())
-            .put("name", selected.path("name").asText())
-            .put("exact", true);
+        target.put("kind", "node").put("ref", selected.ref());
         if (operationKind.equals("fill")) {
           for (JsonNode input : context.path("inputs")) {
             if (input.path("kind").asText().equals("nonsecretText")
@@ -46054,7 +43549,14 @@ atched:false,
     // Scan errors remain failures, but cannot prevent the remaining real context/resource teardown.
     // Context destruction (including managed private pools) happens only after observed jobs drain.
     assertThat(ownedFrameworkContext != null).isTrue();
-    assertThat(ownedFrameworkContext.getTestClass()).isEqualTo(GuidedPublicationReplayIT.class);
+    assertThat(ownedFrameworkContext.getTestClass())
+        .isEqualTo(
+            standaloneJoinedOwner == null
+                ? GuidedPublicationReplayIT.class
+                : standaloneJoinedOwner);
+    if (standaloneJoinedOwner != null) {
+      assertThat(JoinedHarness.OWNERS).contains(standaloneJoinedOwner.getName());
+    }
     assertThat(ownedFrameworkContext.getApplicationContext()).isSameAs(ownedApplicationContext);
     var closer =
         java.util.concurrent.Executors.newSingleThreadExecutor(

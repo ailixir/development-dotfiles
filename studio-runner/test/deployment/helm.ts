@@ -107,13 +107,25 @@ export const GUIDED_OVERLAY_FILE: string = (() => {
 })();
 
 /**
- * TEST VALUES ONLY: a syntactically valid, obviously fake catalog entry and trusted policy for the
- * `studioObserved` block (architect ruling OI-06, B5).
+ * The three guided token inputs only, for value sets that turn guided mode ON themselves.
  *
- * The chart commits neither: the catalog entry is specific to one runner image (CI generates it from
- * the pushed image) and the policies are reviewed per-environment configuration, so a real release
- * supplies both with `-f`, as this harness does. Every hash is a repeated placeholder digit so it
- * cannot be mistaken for a measurement. The chart checks the SHAPE (key set, 64 lower-case hex), not
+ * `values-uat.yaml` enables guided learning (one replica, capacity 3) but, like the controller pin
+ * and the observed catalog, commits no token input: the issuer, controller subject and public key
+ * come from the external token issuer at deploy time, and the render fails without them. Layered
+ * for every UAT render in this tier (see `guidedInputs`); the negative cases omit it.
+ */
+export const GUIDED_TOKEN_OVERLAY_FILE: string = writeValuesOverlay('guided-token-overlay.json', {
+  studioRunner: { guided: { token: GUIDED_FIXTURE } },
+});
+
+/**
+ * TEST VALUES ONLY: a syntactically valid, obviously fake catalog entry for the `studioObserved`
+ * block (architect ruling OI-06, B5).
+ *
+ * The chart does not commit it: the catalog entry is specific to one runner image (CI generates it
+ * from the pushed image), so a real release supplies it with `-f`, as this harness does. There is no
+ * policy to supply. Every hash is a repeated placeholder digit so it cannot be mistaken for a
+ * measurement. The chart checks the SHAPE (key set, 64 lower-case hex), not
  * that `profileHash` is the hash of `profile`; that equality is the runner's and the backend's.
  */
 export const OBSERVED_FIXTURE = {
@@ -127,19 +139,6 @@ export const OBSERVED_FIXTURE = {
       chromiumBuild: 'TEST-ONLY-chromium-0',
     },
   },
-  policies: [
-    {
-      version: 1,
-      policyId: 'test-only-policy',
-      policyVersion: '1',
-      applicationId: 'test-only-application',
-      environment: 'uat',
-      allowedOrigins: ['https://app.example.test'],
-      entryPolicyId: 'test-only-entry',
-      applicationPolicy: null,
-      rules: [],
-    },
-  ],
 } as const;
 
 /**
@@ -153,16 +152,16 @@ export function writeValuesOverlay(name: string, values: unknown): string {
 }
 
 /**
- * The fixture catalog and policies as a values overlay, with the flags untouched.
+ * The fixture catalog as a values overlay, with the flags untouched.
  *
- * `values-uat.yaml` turns observed replay ON and commits no catalog or policies on purpose (they come
- * at deploy time), so a UAT render fails by design without them. This is the deploy-time input every
+ * `values-uat.yaml` turns observed replay ON and commits no catalog on purpose (it comes at deploy
+ * time), so a UAT render fails by design without them. This is the deploy-time input every
  * UAT render in this tier is given, exactly as {@link TEST_PIN} is, so the criteria that are not
  * about observed replay keep rendering. The negative cases (`observedInputs: false`) prove that
  * dropping it still fails the render.
  */
 export const OBSERVED_OVERLAY_FILE: string = writeValuesOverlay('observed-overlay.json', {
-  studioObserved: { catalog: OBSERVED_FIXTURE.catalog, policies: OBSERVED_FIXTURE.policies },
+  studioObserved: { catalog: OBSERVED_FIXTURE.catalog },
 });
 
 /** Why `helm` cannot be used, or `null` when it can. Never a bare boolean: the reason is the test. */
@@ -232,18 +231,28 @@ export interface RenderOptions {
   readonly args?: readonly string[];
   /** Defaults to true: nothing renders without it and every criterion here is about the runner. */
   readonly enableRunner?: boolean;
-  /** Layers {@link GUIDED_OVERLAY_FILE} over the value set: guided mode on, one replica. */
+  /**
+   * `true` layers {@link GUIDED_OVERLAY_FILE} over the value set: guided mode on, one replica.
+   * `false` forces guided mode OFF, because `values-uat.yaml` ships it on (STUDIO-FLEX-001 item 5);
+   * every other shipped value set is off already. Left out, the value set is rendered as shipped.
+   */
   readonly guided?: boolean;
   /** Leaves the controller pin unset, to prove the render refuses without it. */
   readonly omitPin?: boolean;
   /** Turns observed replay ON (both flags) and supplies {@link OBSERVED_FIXTURE}. */
   readonly observed?: boolean;
   /**
-   * Layers {@link OBSERVED_OVERLAY_FILE} (the fixture catalog and policies, flags untouched).
+   * Layers {@link OBSERVED_OVERLAY_FILE} (the fixture catalog, flags untouched).
    * Defaults to true for `values-uat.yaml`, which enables observed replay without committing the
    * inputs, and for `observed: true`. Pass `false` to prove the render refuses without them.
    */
   readonly observedInputs?: boolean;
+  /**
+   * Layers {@link GUIDED_TOKEN_OVERLAY_FILE} (the three guided token inputs, nothing else).
+   * Defaults to true for `values-uat.yaml`, which turns guided learning on without committing the
+   * inputs. Pass `false` to prove the render refuses without them.
+   */
+  readonly guidedInputs?: boolean;
 }
 
 /**
@@ -262,10 +271,13 @@ export function renderOutcome(options: RenderOptions = {}): RenderOutcome {
   const observedInputs =
     options.observedInputs ?? (options.observed === true || options.valuesFile === 'values-uat.yaml');
   if (observedInputs) args.push('-f', OBSERVED_OVERLAY_FILE);
+  const guidedInputs = options.guidedInputs ?? options.valuesFile === 'values-uat.yaml';
+  if (guidedInputs && options.guided !== true) args.push('-f', GUIDED_TOKEN_OVERLAY_FILE);
   if (options.observed === true) {
     args.push('--set', 'studioObserved.validationEnabled=true', '--set', 'studioObserved.replayEnabled=true');
   }
   if (options.enableRunner !== false) args.push('--set', 'studioRunner.enabled=true');
+  if (options.guided === false) args.push('--set', 'studioRunner.guided.enabled=false');
   // Set BEFORE the caller's `--set`s so a test that supplies its own pin (or a bad one) wins. It is
   // `--set` and not `--set-string` on purpose: Helm applies every `--set-string` AFTER every `--set`
   // regardless of argument order, so a `--set-string` default would beat the caller's override.

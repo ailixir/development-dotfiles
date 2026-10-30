@@ -10,11 +10,12 @@ public final class LoginRequiredSignature {
     if (observation.path("coverage").path("passwordControls").asInt() < 1) {
       return false;
     }
-    for (JsonNode node : observation.path("nodes")) {
-      if (node.path("visible").asBoolean()
-          && node.path("actionable").asBoolean()
-          && (java.util.Set.of("button", "input").contains(node.path("elementType").asText())
-              || node.path("role").asText().equals("button"))) {
+    // ADR-SC-007: the facts carry a role but no visible or actionable flag; a page with a password
+    // control and a button is the login shape. (A page with only a disabled button is annotated
+    // too,
+    // a harmless widening of an annotation.)
+    for (JsonNode fact : observation.path("facts")) {
+      if (fact.path("role").asText().equals("button")) {
         return true;
       }
     }

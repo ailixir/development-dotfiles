@@ -1,3 +1,4 @@
+import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 // eslint-disable-next-line no-restricted-imports -- Actual fixed Chromium SDK witness; every intercepted call invokes its original.
 import {chromium} from 'playwright';
 import {createServer} from 'node:https';
@@ -82,7 +83,7 @@ it.each(modes)('uses actual mTLS and native focus for guided secret ownership: %
     if(route==='claim'){
       const command=validate<CommandsClaim>('commands',body,'claim');expect(command.sessionId).toBe(context.sessionId);expect(command.expectedFence).toBe(requestFacts.length===0?0:1);
       const fact={started:performance.now(),key:String(req.headers['idempotency-key'])};requestFacts.push(fact);activeClaims++;maxActiveClaims=Math.max(maxActiveClaims,activeClaims);let ended=false;res.once('close',()=>{if(!ended){ended=true;activeClaims--;}});
-      if(mode==='revoked'&&t0!==undefined){res.writeHead(409);res.end('{"code":"SECRET_USE_REVOKED"}');return;}
+      if(mode==='revoked'&&t0!==undefined){res.writeHead(403);res.end('{"code":"FORBIDDEN_SCOPE"}');return;}
       grant={...grant,owner:{...grant.owner,leaseExpiresAt:new Date(Math.min(Date.now()+30000,Date.parse(grant.expiresAt))).toISOString()}};
       const serialized=JSON.stringify(grant);
       if(mode==='lost-body-late-grant'&&t0!==undefined){
@@ -97,7 +98,7 @@ it.each(modes)('uses actual mTLS and native focus for guided secret ownership: %
   await new Promise<void>(r=>callbacks.listen(0,'127.0.0.1',r));const callbackAddress=callbacks.address();if(!callbackAddress||typeof callbackAddress==='string')throw Error('PORT');
   const client={baseUrl:'https://127.0.0.1:'+String(callbackAddress.port),tls:testTls,controllerCertificateFingerprint256:testFingerprint,token:()=>Promise.resolve(jwt({aud:'studio-guided-controller',role:'owning-worker',sub:context.workerId}))};
   const actualClaim=guidedClaimClient(client);
-  const app=createGuidedServer({workerId:context.workerId,capacity:1,journalDirectory:directory,tls:testTls,controllerJwt:jwtPolicy,controllerCertificateFingerprint256:testFingerprint,claim:async(command,key,timeout,signal)=>{
+  const app=createGuidedServer({workerId:context.workerId,capacity:1,allowedDomains:TEST_DOMAINS,journalDirectory:directory,tls:testTls,controllerJwt:jwtPolicy,controllerCertificateFingerprint256:testFingerprint,claim:async(command,key,timeout,signal)=>{
     const fact={started:performance.now(),timeoutMs:timeout,key};claimFacts.push(fact);
     try{const acknowledged=await actualClaim(command,key,timeout,signal);Object.assign(fact,{completed:performance.now()});if(focusAt!==undefined&&t0===undefined&&(mode==='revoked'||mode==='lost-body-late-grant'))t0=performance.now();return acknowledged;}
     catch(error){Object.assign(fact,{failed:performance.now()});throw error;}

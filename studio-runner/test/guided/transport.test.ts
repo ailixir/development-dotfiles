@@ -1,11 +1,13 @@
+import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 import { describe,it,expect,vi,afterEach } from 'vitest';
-import { createGuidedBridge, createGuidedServer, guidedCallback, verifyGuidedJwt, GUIDED_REFUSAL_CODES, GUIDED_REFUSAL_REASONS } from '../../src/guided/transport.js';
+import { createGuidedBridge, createGuidedServer, guidedCallback, guidedClaimClient, verifyGuidedJwt, GUIDED_REFUSAL_CODES, GUIDED_REFUSAL_REASONS, GUIDED_REASON_CODES } from '../../src/guided/transport.js';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import type { GuidedBrowser } from '../../src/run/guidedBrowser.js';
 import { GuidedLaunchFailure } from '../../src/run/guidedBrowser.js';
+import { GuidedRuntime } from '../../src/guided/runtime.js';
 import { createServer } from 'node:https';
 import type { AddressInfo } from 'node:net';
 import { sign, generateKeyPairSync } from 'node:crypto';
@@ -15,8 +17,76 @@ import { readFile } from 'node:fs/promises';
 import { validate,hash,identity,canonical,auditSchemaBundle } from '../../src/guided/contracts.js';
 import type { ObservationRefresh } from '../../src/guided/types.js';
 import { parseWireJson } from '../../src/guided/json.js';
-import { assignmentFor,guidedContext,ownershipSession,withContextPolicy } from '../helpers/guided.js';
+import { assignmentFor,guidedContext,ownershipSession, sessionStub, proposal, dispatch } from '../helpers/guided.js';
 afterEach(()=>{vi.restoreAllMocks();});
+describe('closed callback failure diagnostics',()=>{
+  const sentinel='PRIVATE-SENTINEL-MUST-NEVER-APPEAR';
+  it('records local schema refusal without credentials, free text or values',async()=>{
+    const lines:string[]=[];const token=vi.fn(()=>Promise.resolve(sentinel));
+    const send=guidedCallback({baseUrl:'https://127.0.0.1:9',tls:testTls,controllerCertificateFingerprint256:testFingerprint,token,diagnosticStderr:line=>{lines.push(line);}});
+    await expect(send('outcomes',{private:sentinel})).rejects.toThrow('SCHEMA');
+    expect(token).not.toHaveBeenCalled();
+    expect(lines).toEqual(['GUIDED_CALLBACK_FAILED '+JSON.stringify({route:'OUTCOME',phase:'SCHEMA',status:null,backendCode:'UNKNOWN'})+'\n']);
+    expect(lines.join('')).not.toContain(sentinel);
+  });
+  it.each([{code:'INVALID_CONTRACT',label:'allowlisted'},{code:sentinel,label:'unrecognized'}])('records only allowlisted HTTP problem codes ($label)',async({code})=>{
+    const lines:string[]=[];let posts=0;
+    const server=createServer({...testTls},(req,res)=>{posts++;req.resume();req.on('end',()=>{res.writeHead(409,{'content-type':'application/json'});res.end(JSON.stringify({code,message:sentinel,private:sentinel}));});});
+    await new Promise<void>(resolve=>{server.listen(0,'127.0.0.1',resolve);});
+    try {
+      const port=(server.address() as AddressInfo).port;
+      const send=guidedCallback({baseUrl:`https://127.0.0.1:${String(port)}`,tls:testTls,controllerCertificateFingerprint256:testFingerprint,token:()=>Promise.resolve(sentinel),diagnosticStderr:line=>{lines.push(line);}});
+      await expect(send('lifecycle',{...identity(guidedContext('https://example.test')),reason:'CANCELLED'})).rejects.toThrow('CALLBACK_DENIED');
+      expect(posts).toBe(1);
+      expect(lines).toEqual(['GUIDED_CALLBACK_FAILED '+JSON.stringify({route:'LIFECYCLE',phase:'HTTP',status:409,backendCode:code==='INVALID_CONTRACT'?code:'UNKNOWN'})+'\n']);
+      expect(lines.join('')).not.toContain(sentinel);
+    }finally{server.closeAllConnections();await new Promise<void>(resolve=>{server.close(()=>{resolve();});});}
+  });
+  it('records a deadline with one POST and preserves CALLBACK_DENIED',async()=>{
+    const lines:string[]=[];let posts=0;const deadline=new AbortController();
+    vi.spyOn(AbortSignal,'timeout').mockReturnValue(deadline.signal);
+    let received:()=>void=()=>{throw new Error('NOT_READY');};
+    const arrived=new Promise<void>(resolve=>{received=resolve;});
+    const server=createServer({...testTls},req=>{posts++;req.resume();received();});
+    await new Promise<void>(resolve=>{server.listen(0,'127.0.0.1',resolve);});
+    try {
+      const port=(server.address() as AddressInfo).port;
+      const send=guidedCallback({baseUrl:`https://127.0.0.1:${String(port)}`,tls:testTls,controllerCertificateFingerprint256:testFingerprint,token:()=>Promise.resolve(sentinel),diagnosticStderr:line=>{lines.push(line);}});
+      const pending=send('lifecycle',{...identity(guidedContext('https://example.test')),reason:'CANCELLED'});
+      const refused=expect(pending).rejects.toThrow('CALLBACK_DENIED');
+      await arrived;deadline.abort();await refused;
+      expect(posts).toBe(1);
+      expect(lines).toEqual(['GUIDED_CALLBACK_FAILED '+JSON.stringify({route:'LIFECYCLE',phase:'DEADLINE',status:null,backendCode:'UNKNOWN'})+'\n']);
+      expect(lines.join('')).not.toContain(sentinel);
+    }finally{server.closeAllConnections();await new Promise<void>(resolve=>{server.close(()=>{resolve();});});}
+  });
+  it('records a completed navigation callback refusal before teardown without retrying or rewriting its known outcome',async()=>{
+    const lines:string[]=[];const events:string[]=[];let posts=0;
+    const server=createServer({...testTls},(req,res)=>{posts++;req.resume();req.on('end',()=>{const refused=req.url?.endsWith('/outcomes')===true;res.writeHead(refused?409:202,{'content-type':'application/json'});res.end(refused?JSON.stringify({code:'INVALID_CONTRACT',message:sentinel}):'{}');});});
+    await new Promise<void>(resolve=>{server.listen(0,'127.0.0.1',resolve);});
+    const directory=await mkdtemp(join(tmpdir(),'closed-callback-'));
+    let runtime:GuidedRuntime|undefined;
+    try {
+      const context=guidedContext('https://example.test');const port=(server.address() as AddressInfo).port;
+      const write=(line:string)=>{lines.push(line);events.push(line.startsWith('GUIDED_COMPLETED_FAILED')?'completed':'callback');};
+      const callback=guidedCallback({baseUrl:`https://127.0.0.1:${String(port)}`,tls:testTls,controllerCertificateFingerprint256:testFingerprint,token:()=>Promise.resolve(sentinel),diagnosticStderr:write});
+      const evidence:GuidedBrowser['evidence']={kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:randomUUID(),documentId:randomUUID(),bootstrapId:randomUUID(),url:'about:blank',origin:null,generation:0};
+      const navigate=vi.fn(()=>Promise.resolve());
+      const browser:GuidedBrowser={evidence,blankMatches:()=>Promise.resolve(true),navigateBlank:navigate,close:()=>{events.push('close');return Promise.resolve();},terminate:()=>Promise.resolve(),orderlyClosed:()=>true,observations:sessionStub({withhold:()=>Promise.resolve(),observe:()=>Promise.reject(new Error(sentinel))})};
+      runtime=new GuidedRuntime(context,{workerId:context.workerId,allowedDomains:TEST_DOMAINS,journalDirectory:directory,launch:()=>Promise.resolve(browser),callback,diagnosticStderr:write});
+      await runtime.start();
+      const action=proposal(context,evidence,'nav',{kind:'navigate',destinationInputId:'input-nav'});
+      const proof=await runtime.prepare({...identity(context),proposal:action,requestDigest:hash(action),expiresAt:new Date(Date.now()+10_000).toISOString(),pressInheritance:null});
+      const outcome=await runtime.dispatch(dispatch(context,action,proof));
+      expect(outcome.ledger.state).toBe('SUCCEEDED');expect(outcome.ledger.outcomeCode).toBe('OK');
+      expect(navigate).toHaveBeenCalledOnce();expect(posts).toBe(3);expect(runtime.active).toBe(false);
+      expect(events).toEqual(['callback','completed','close']);
+      const facts={route:'OUTCOME',phase:'HTTP',status:409,backendCode:'INVALID_CONTRACT'};
+      expect(lines).toEqual(['GUIDED_CALLBACK_FAILED '+JSON.stringify(facts)+'\n','GUIDED_COMPLETED_FAILED '+JSON.stringify(facts)+'\n']);
+      expect(lines.join('')).not.toContain(sentinel);
+    }finally{await runtime?.stop('CANCELLED');server.closeAllConnections();await new Promise<void>(resolve=>{server.close(()=>{resolve();});});await rm(directory,{recursive:true,force:true});}
+  });
+});
 describe('guided strict identity and wire schemas',()=>{
   it('accepts only the designated RS256 service audience, role, issuer, subject and bounded time',()=>{
     expect(()=>{ verifyGuidedJwt(`Bearer ${jwt()}`,jwtPolicy,'studio-guided-runner','backend-controller'); }).not.toThrow();
@@ -98,11 +168,53 @@ describe('STUDIO-OBS-013 recording-evidence callback route (applied by R14 from 
     }finally{server.closeAllConnections();await new Promise<void>(resolve=>{server.close(()=>{resolve();});});}
   });
 });
-describe('STUDIO-OBS-014 AC-1 guided server configuration',()=>{
-  it('refuses an observation application policy supplied as server configuration',()=>{
-    const options:Parameters<typeof createGuidedServer>[0]={workerId:'worker-one',journalDirectory:'/nonexistent',tls:{},controllerJwt:jwtPolicy,controllerCertificateFingerprint256:'AA',launch:()=>Promise.reject(new Error('unused')),claim:()=>Promise.reject(new Error('unused')),callback:()=>Promise.resolve()};
-    expect(()=>createGuidedServer({...options,applicationPolicy:{policyRuleId:'structural',allowStructuralDiscovery:true,readGrants:[]}})).toThrow(/^CONFIGURATION_DENIED$/u);
-    // ar-mounted-rules: field rules are refused as a server option in every form, never silently dropped.
+describe('recording-evidence refusal of a published session (409 RECORDING_NOT_RETAINED)',()=>{
+  const answered=async(status:number,body:string|null)=>{
+    const id=identity(guidedContext('https://example.test'));const recording={...id,recordingId:'recording-1',state:'STORED',partial:false,timings:[]};
+    let hits=0;
+    const server=createServer({...testTls},(req,res)=>{hits++;req.resume();req.on('end',()=>{res.writeHead(status,{'content-type':'application/json'});res.end(body??'');});});
+    await new Promise<void>(resolve=>{server.listen(0,'127.0.0.1',resolve);});
+    try{
+      const port=(server.address() as AddressInfo).port;
+      const outcome=await guidedCallback({baseUrl:`https://127.0.0.1:${String(port)}`,tls:testTls,controllerCertificateFingerprint256:testFingerprint,token:()=>Promise.resolve('fixture-token')})('recording-evidence',recording as never,'recording-key-1').then(()=>'ACCEPTED',(error:unknown)=>error instanceof Error?error.message:'OTHER');
+      return {outcome,hits};
+    }finally{server.closeAllConnections();await new Promise<void>(resolve=>{server.close(()=>{resolve();});});}
+  };
+  it('names the definite refusal, and only for that code on that status',async()=>{
+    expect(await answered(409,'{"schemaVersion":3,"code":"RECORDING_NOT_RETAINED","requestId":"r-1","retryable":false}')).toEqual({outcome:'RECORDING_NOT_RETAINED',hits:1});
+    expect((await answered(409,'{"schemaVersion":3,"code":"STALE_FENCE","requestId":"r-1","retryable":false}')).outcome).toBe('CALLBACK_DENIED');
+    expect((await answered(409,null)).outcome).toBe('CALLBACK_DENIED');
+    expect((await answered(500,'{"code":"RECORDING_NOT_RETAINED"}')).outcome).toBe('CALLBACK_DENIED');
+    expect((await answered(202,null)).outcome).toBe('ACCEPTED');
+  });
+  it('accepts the PUBLISHED stop reason on the context and the assignment variants, and rejects it on lifecycle',()=>{
+    const context=guidedContext('https://example.test');
+    expect(()=>validate('bridge',{...identity(context),reason:'PUBLISHED'},'stop')).not.toThrow();
+    expect(()=>validate('bridge',{schemaVersion:3,kind:'assignment',assignment:assignmentFor(context),reason:'PUBLISHED'},'stop')).not.toThrow();
+    expect(()=>validate('bridge',{...identity(context),reason:'PUBLISHED'},'lifecycle')).toThrow();
+    expect(()=>validate('bridge',{schemaVersion:3,kind:'assignment',assignment:assignmentFor(context),reason:'PUBLISHED'},'lifecycle')).toThrow();
+  });
+});
+describe('the claim client',()=>{
+  const claim={schemaVersion:3,sessionId:'session-1',workerId:'worker-1',expectedFence:0,scopeHash:'a'.repeat(64)} as never;
+  const claimWith=async(status:number,body:string)=>{
+    const server=createServer({...testTls},(req,res)=>{req.resume();req.on('end',()=>{res.writeHead(status);res.end(body);});});
+    await new Promise<void>(resolve=>{server.listen(0,'127.0.0.1',resolve);});
+    try{
+      const port=(server.address() as AddressInfo).port;
+      return await guidedClaimClient({baseUrl:`https://127.0.0.1:${String(port)}`,tls:testTls,controllerCertificateFingerprint256:testFingerprint,token:()=>Promise.resolve('fixture-token')})(claim,randomUUID(),5_000,new AbortController().signal).then(()=>'GRANTED',(error:unknown)=>error instanceof Error?error.message:'OTHER');
+    }finally{server.closeAllConnections();await new Promise<void>(resolve=>{server.close(()=>{resolve();});});}
+  };
+  it('reads a 403 as the end of the worker\'s authority and every other refusal as an ordinary denial',async()=>{
+    expect(await claimWith(403,'{"code":"FORBIDDEN_SCOPE"}')).toBe('REVOKED');
+    expect(await claimWith(409,'{"code":"STALE_FENCE"}')).toBe('CLAIM_DENIED');
+  });
+});
+
+describe('guided server configuration',()=>{
+  it('refuses field rules supplied as server configuration',()=>{
+    const options:Parameters<typeof createGuidedServer>[0]={workerId:'worker-one',allowedDomains: TEST_DOMAINS, journalDirectory:'/nonexistent',tls:{},controllerJwt:jwtPolicy,controllerCertificateFingerprint256:'AA',launch:()=>Promise.reject(new Error('unused')),claim:()=>Promise.reject(new Error('unused')),callback:()=>Promise.resolve()};
+    // Field rules are refused as a server option in every form, never silently dropped.
     const readRule={testId:'source',name:'Business reference',policyRuleId:'reference-read',classification:'permittedBusinessData'};
     for(const rules of [[],[readRule]])expect(()=>createGuidedServer({...options,rules} as unknown as Parameters<typeof createGuidedServer>[0])).toThrow(/^CONFIGURATION_DENIED$/u);
     // Positive control: the same options without the key construct a (not yet listening) server.
@@ -110,15 +222,15 @@ describe('STUDIO-OBS-014 AC-1 guided server configuration',()=>{
   });
 });
 describe('STUDIO-OBS-009 AC-1 the bridge owns no listener',()=>{
-  const bridgeOptions:Parameters<typeof createGuidedBridge>[0]={workerId:'worker-one',journalDirectory:'/nonexistent',controllerJwt:jwtPolicy,controllerCertificateFingerprint256:testFingerprint,launch:()=>Promise.reject(new Error('unused')),claim:()=>Promise.reject(new Error('unused')),callback:()=>Promise.resolve(),diagnosticStderr:()=>undefined};
+  const bridgeOptions:Parameters<typeof createGuidedBridge>[0]={workerId:'worker-one',allowedDomains: TEST_DOMAINS, journalDirectory:'/nonexistent',controllerJwt:jwtPolicy,controllerCertificateFingerprint256:testFingerprint,launch:()=>Promise.reject(new Error('unused')),claim:()=>Promise.reject(new Error('unused')),callback:()=>Promise.resolve(),diagnosticStderr:()=>undefined};
   it('is a request handler and a session closer, with no server of its own, and refuses the same configuration the server variant refuses',async()=>{
     const bridge=createGuidedBridge(bridgeOptions);
     expect(Object.keys(bridge).sort()).toEqual(['closeSessions','handle']);
     expect(typeof bridge.handle).toBe('function');
     await expect(bridge.closeSessions()).resolves.toBeUndefined();
-    expect(()=>createGuidedBridge({...bridgeOptions,applicationPolicy:{policyRuleId:'structural',allowStructuralDiscovery:true,readGrants:[]}})).toThrow(/^CONFIGURATION_DENIED$/u);
     expect(()=>createGuidedBridge({...bridgeOptions,rules:[]} as unknown as Parameters<typeof createGuidedBridge>[0])).toThrow(/^CONFIGURATION_DENIED$/u);
-    expect(()=>createGuidedBridge({...bridgeOptions,capacity:2})).toThrow(/^CONFIGURATION_DENIED$/u);
+    // Capacity is the configured number of owned sessions (1..8), not a refused option.
+    expect(Object.keys(createGuidedBridge({...bridgeOptions,capacity:3})).sort()).toEqual(['closeSessions','handle']);
   });
   it('keeps its own peer pin: a client certificate the CA trusts but the pin does not name is AUTH_DENIED, whatever listener hosts it',async()=>{
     const context=guidedContext('https://example.test');
@@ -141,21 +253,29 @@ describe('STUDIO-OBS-014 AC-1 definite context refusal on the wire (AR-2 r14-sto
     const refusal=(schemas['bridge.schema.json'] as unknown as {definitions:{refusal:{properties:{code:{enum:string[]};reason:{enum:string[]}}}}}).definitions.refusal;
     expect(refusal.properties.code.enum).toEqual([...GUIDED_REFUSAL_CODES,'POLICY_DENIED']);
     expect(refusal.properties.reason.enum).toEqual([...GUIDED_REFUSAL_REASONS]);
+    const rule=(allOf:unknown[],reasons:string[])=>(allOf as {if:{properties:{reason:{enum?:string[];const?:string}}};then:{properties:{code:{const:string}}}}[]).find(entry=>JSON.stringify(entry.if.properties.reason.enum??[entry.if.properties.reason.const])===JSON.stringify(reasons));
+    const allOf=(schemas['bridge.schema.json'] as unknown as {definitions:{refusal:{allOf:unknown[]}}}).definitions.refusal.allOf;
+    // the reason -> code table is the schema's allOf, entry by entry
+    for(const reason of GUIDED_REFUSAL_REASONS){
+      const entry=allOf.map(item=>item as {if:{properties:{reason:{enum?:string[];const?:string}}};then:{properties:{code:{const:string}}}}).find(item=>(item.if.properties.reason.enum??[item.if.properties.reason.const]).includes(reason));
+      expect(entry?.then.properties.code.const,reason).toBe(GUIDED_REASON_CODES[reason]);
+    }
+    expect(rule(allOf,['OBSERVATION_DEADLINE'])).toBeDefined();
   });
-  it('answers a policy mismatch and a context without the policy fields with schema-valid 409 refusals and changes nothing on the worker',async()=>{
+  it('answers a context that differs from its grant and a context without the policy fields with schema-valid 409 refusals and changes nothing on the worker',async()=>{
     const directory=await mkdtemp(join(tmpdir(),'guided-refusal-'));
     const context=guidedContext('https://example.test');const grant=ownershipSession(context);const assignment=assignmentFor(context);
-    const browser:GuidedBrowser={evidence:{kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:randomUUID(),documentId:randomUUID(),bootstrapId:randomUUID(),url:'about:blank',origin:null,generation:0},blankMatches:()=>Promise.resolve(true),navigateBlank:()=>Promise.resolve(),close:()=>Promise.resolve(),terminate:vi.fn(()=>Promise.resolve()),orderlyClosed:()=>true,observations:{withhold:()=>Promise.resolve(),dispose:()=>Promise.resolve(),matches:()=>Promise.resolve(false),observe:()=>Promise.reject(new Error('unused'))}};
+    const browser:GuidedBrowser={evidence:{kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:randomUUID(),documentId:randomUUID(),bootstrapId:randomUUID(),url:'about:blank',origin:null,generation:0},blankMatches:()=>Promise.resolve(true),navigateBlank:()=>Promise.resolve(),close:()=>Promise.resolve(),terminate:vi.fn(()=>Promise.resolve()),orderlyClosed:()=>true,observations: sessionStub({withhold:()=>Promise.resolve(),dispose:()=>Promise.resolve(),observe:()=>Promise.reject(new Error('unused'))})};
     const launch=vi.fn(()=>Promise.resolve(browser));const callbacks:string[]=[];
-    const app=createGuidedServer({workerId:context.workerId,journalDirectory:directory,tls:testTls,controllerJwt:jwtPolicy,controllerCertificateFingerprint256:testFingerprint,launch,
+    const app=createGuidedServer({workerId:context.workerId,allowedDomains: TEST_DOMAINS, journalDirectory:directory,tls:testTls,controllerJwt:jwtPolicy,controllerCertificateFingerprint256:testFingerprint,launch,
       claim:()=>Promise.resolve({...structuredClone(grant),owner:{...grant.owner,leaseExpiresAt:new Date(Math.min(Date.now()+30_000,Date.parse(grant.expiresAt))).toISOString()}}),
       callback:route=>{callbacks.push(route);return Promise.resolve();}});
     await new Promise<void>(resolve=>{app.server.listen(0,'127.0.0.1',resolve);});
     try{
       const port=(app.server.address() as AddressInfo).port;const path=`/internal/v2/studio/guided-sessions/${context.sessionId}`;
       const owned=await post(port,`${path}/assign`,assignment,{fence:null,key:'assign-1'});expect(owned.status).toBe(200);
-      const forged=withContextPolicy(structuredClone(context),{policyRuleId:'structural',allowStructuralDiscovery:true,readGrants:[]});forged.applicationPolicy={policyRuleId:'widened',allowStructuralDiscovery:true,readGrants:[]} as unknown as typeof forged.applicationPolicy;
-      const missing=Object.fromEntries(Object.entries(structuredClone(context)).filter(([key])=>key!=='applicationPolicy'&&key!=='policyHash'));
+      const forged={...structuredClone(context),sourceStepIds:[...context.sourceStepIds].reverse()};
+      const missing=Object.fromEntries(Object.entries(structuredClone(context)).filter(([key])=>key!=='limits'));
       for(const [body,code,key] of [[forged,'IDENTITY_MISMATCH','context-forged'],[missing,'SCHEMA','context-missing']] as const){
         const reply=await post(port,`${path}/context`,body,{key});
         expect(reply.status).toBe(409);expect(reply.body).toEqual({code});expect(()=>validate('bridge',reply.body,'refusal')).not.toThrow();
@@ -177,7 +297,7 @@ describe('REL-001 a refused start-up says why on stderr and nowhere else',()=>{
     const context=guidedContext('https://example.test');const grant=ownershipSession(context);const assignment=assignmentFor(context);
     const privatePath='/Users/private-canary/checks-guided-profile';const lines:string[]=[];
     const exited=new Error(`browserType.launchPersistentContext: Target page, context or browser has been closed\n<process did exit: exitCode=null, signal=SIGABRT> ${privatePath}`);
-    const app=createGuidedServer({workerId:context.workerId,journalDirectory:directory,tls:testTls,controllerJwt:jwtPolicy,controllerCertificateFingerprint256:testFingerprint,
+    const app=createGuidedServer({workerId:context.workerId,allowedDomains: TEST_DOMAINS, journalDirectory:directory,tls:testTls,controllerJwt:jwtPolicy,controllerCertificateFingerprint256:testFingerprint,
       launch:()=>Promise.reject(new GuidedLaunchFailure(()=>Promise.resolve(),exited,'PROCESS')),
       claim:()=>Promise.resolve({...structuredClone(grant),owner:{...grant.owner,leaseExpiresAt:new Date(Math.min(Date.now()+30_000,Date.parse(grant.expiresAt))).toISOString()}}),
       callback:()=>Promise.resolve(),diagnosticStderr:text=>{lines.push(text);}});

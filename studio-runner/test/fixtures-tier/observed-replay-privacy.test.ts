@@ -1,3 +1,7 @@
+import { prepareBrowserProfile as compiledPrepareBrowserProfile } from '../../dist/run/scratchLayout.js';
+import { playwrightBrowserFactory as compiledBrowserFactory } from '../../dist/run/browser.js';
+import { prepareObservedAction as compiledPrepare, performPreparedObservedAction as compiledPerform } from '../../dist/run/observedReplayAdapter.js';
+import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 import { ObservedInvocationControl, ReplayAcquisitionBudget } from '../../src/executor/observedReplay.js';
 import { describe, it, expect } from 'vitest';
 import { createServer } from 'node:http';
@@ -6,8 +10,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { playwrightBrowserFactory } from './preparedBrowser.js';
 import { createObservedReplayAdapter } from '../../src/run/observedReplayAdapter.js';
-import { observationPolicy } from '../../src/validator/observedReferencePolicy.js';
-import type { Guard, ReplayAction, Scope, TrustedPolicy } from '../../src/executor/observedOperations.js';
+import { observationReadProfile } from '../../src/run/observationReadProfile.js';
+import type { Guard, ReplayAction, Scope } from '../../src/executor/observedOperations.js';
 import { untilMs } from './realRunner.js';
 describe('observed retained native/fixed primitive behavior', () => {
     it('preserves role-div click, CSS hover, native Tab/Arrow and fixed fill/select without legacy fallback', async () => {
@@ -26,12 +30,12 @@ describe('observed retained native/fixed primitive behavior', () => {
         const address = server.address();
         if (!address || typeof address === 'string')
             throw Error('port');
-        const origin = `http://127.0.0.1:${String(address.port)}`, dir = await mkdtemp(join(tmpdir(), 'observed-native-'));
-        const scope: Scope = { principalId: 'p', csiId: 'csi', environment: 'fixture', applicationId: 'app',  allowedOrigins: [origin], capabilities: ['navigate', 'click', 'hover', 'press', 'fill', 'check', 'uncheck', 'selectOption', 'read', 'assert'], policyId: 'policy', policyVersion: 'observed-4-full-chromium-1', entryPolicyId: 'entry', initialContext: { kind: 'initialBlank' } };
-        const policy: TrustedPolicy = { version: 1, policyId: 'policy', policyVersion: 'observed-4-full-chromium-1', applicationId: 'app', environment: 'fixture',  entryPolicyId: 'entry', allowedOrigins: [origin], rules: [], applicationPolicy: { policyRuleId: 'structural', allowStructuralDiscovery: true, readGrants: [{ policyRuleId: 'approved', origin, region: { kind: 'application' }, controlValue: { classification: 'nonsecretApproved', types: ['text', 'textarea'] } }] } };
-        const handle = await playwrightBrowserFactory.launch({ browser: 'chromium', viewport: { width: 1280, height: 720 }, recording: { width: 640, height: 480 }, scratchPath: dir, observedScope: scope });
-        const adapter = createObservedReplayAdapter(handle, scope, policy, 'run', () => undefined);
-        const probe = required(handle.createObservationSession?.bind(handle))({ sessionId: 'probe', scopeHash: 'a'.repeat(64), approvedOrigins: [origin], knownSecrets: [], ...observationPolicy(policy) });
+        const origin = `http://localhost:${String(address.port)}`, dir = await mkdtemp(join(tmpdir(), 'observed-native-'));
+        const scope: Scope = { principalId: 'p', csiId: 'csi', environment: 'fixture', capabilities: ['navigate', 'click', 'hover', 'press', 'fill', 'check', 'uncheck', 'selectOption', 'read', 'assert'], initialContext: { kind: 'initialBlank' } };
+        
+        const handle = await playwrightBrowserFactory.launch({ allowedDomains: TEST_DOMAINS, browser: 'chromium', viewport: { width: 1280, height: 720 }, recording: { width: 640, height: 480 }, scratchPath: dir, observedScope: scope });
+        const adapter = createObservedReplayAdapter(handle, scope, TEST_DOMAINS, 'run', () => undefined);
+        const probe = required(handle.createObservationSession?.bind(handle))({ sessionId: 'probe', scopeHash: 'a'.repeat(64), allowedDomains: TEST_DOMAINS, knownSecrets: [], readProfile: observationReadProfile(TEST_DOMAINS) });
         const budget = new ReplayAcquisitionBudget(), stepBudget = { extra: 0 };
         const invoke = (a: ReplayAction, g: Guard, value: string | null) => { const control = new ObservedInvocationControl({ now: () => performance.now() }, performance.now() + 10000, new AbortController().signal, budget, stepBudget); return control.run(() => adapter.perform(a, g, value, control)); };
         let ordinal = 0;
@@ -40,13 +44,15 @@ describe('observed retained native/fixed primitive behavior', () => {
             await invoke(action({ kind: 'navigate', destinationInputId: 'destination' }), { guardId: 'guard', origin: null, target: { kind: 'initialBlank' } }, origin + '/');
             const perform = async (name: string, operation: ReplayAction['operation'], value: string | null = null) => {
                 const o = await probe.observe();
-                const node = o.observation.nodes.find(n => n.name === name);
-                expect(node, name + ':' + o.observation.nodes.map(n => n.name).join(',')).toBeDefined();
-                const locator = required(node).locatorHints.find(l => l.kind === 'role');
-                expect(locator).toBeDefined();
-                const guard: Guard = { guardId: 'guard', origin, target: { kind: 'element', locator: required(locator), role: required(node).role, elementType: required(node).elementType, controlType: required(node).controlType, classification: required(node).classification, visible: required(node).visible, actionable: required(node).actionable, readRuleId: operation.kind === 'read' ? required(node).policyRuleId : null } };
+                const found = Object.entries(o.observation.facts).find(([, fact]) => fact.name === name);
+                expect(found, name + ':' + Object.values(o.observation.facts).map(f => f.name).join(',')).toBeDefined();
                 if (name === 'Div button' || name === 'Hover target')
-                    expect(required(node).actionable).toBe(false);
+                    expect(required(found)[1].role).toBe('button');
+                // The frozen target is what the runner derives at prepare for a ref the model names; a read of a field value is not preparable (the kept profile
+                // never grants it), so its target is prepared for a harmless assert and the read recipe is then replayed against it.
+                const prepareOperation: ReplayAction['operation'] = operation.kind === 'read' ? { kind: 'assert', predicate: 'visible', expected: null } : operation;
+                const resolved = await probe.prepareTarget({ ref: required(found)[0], documentId: o.observation.documentId, generation: o.observation.generation, origin: o.observation.origin, operation: prepareOperation, authoredLiteral: operation.kind === 'selectOption' ? value : null });
+                const guard: Guard = { guardId: 'guard', origin, target: { kind: 'element', locator: resolved.locator, tier: resolved.tier, identity: resolved.identity, readRuleId: operation.kind === 'read' ? o.observation.readRuleId : null } };
                 return invoke(action(operation), guard, value);
             };
             await perform('Div button', { kind: 'click' });
@@ -57,15 +63,16 @@ describe('observed retained native/fixed primitive behavior', () => {
             await perform('Toggle', { kind: 'check' });
             await perform('Toggle', { kind: 'uncheck' });
             await perform('Choice', { kind: 'selectOption', value: { kind: 'authoredLiteral', sourceInputId: 'choice' } }, 'option-beta');
-            const read = await perform('Source', { kind: 'read', bindingId: 'binding', recipe: { kind: 'controlValue', classification: 'nonsecretApproved', controlType: 'textarea', policyRuleId: 'approved' } });
-            expect(read.value).toBe('  private-é  ');
+            // The read profile grants visible text only: a field's value is never readable, whatever recipe asks for it.
+            await expect(perform('Source', { kind: 'read', bindingId: 'binding', recipe: { kind: 'controlValue', classification: 'nonsecretApproved', controlType: 'textarea', policyRuleId: 'approved' } })).rejects.toMatchObject({ code: 'READ_REFUSED' });
             await untilMs(() => events.some(e => e.kind === 'select'), 2000);
             expect(events).toContainEqual({ kind: 'div', trusted: true });
             expect(events).toContainEqual({ kind: 'hover', color: 'rgb(255, 0, 0)', trusted: true });
             expect(events).toContainEqual({ kind: 'key', key: 'Tab', trusted: true });
             expect(events).toContainEqual({ kind: 'key', key: 'ArrowDown', trusted: true });
             expect(events).toContainEqual({ kind: 'second-focus' });
-            expect(events).toContainEqual({ kind: 'fill', value: 'exact-value', trusted: false });
+            // The one executor fills through Playwright locator.fill (a trusted input event); the old in-page fill was untrusted.
+            expect(events).toContainEqual({ kind: 'fill', value: 'exact-value', trusted: true });
             expect(events).toContainEqual({ kind: 'select', value: 'option-beta', trusted: false });
             expect(events.filter(e => e.kind === 'toggle').map(e => e.checked)).toEqual([true, false]);
         }
@@ -84,72 +91,6 @@ function required<T>(value: T | null | undefined): T {
         throw new Error("Missing controlled fixture value");
     return value;
 }
-import type { AcquisitionRequest } from '../../src/run/observationTypes.js';
-import type { ServerResponse } from 'node:http';
-describe('real private acquisition without public observation widening', () => {
-    it.each(['visibility', 'duplicate', 'sensitive-descendant', 'hidden-sensitive', 'unresolved-name', 'wrong-type', 'private-property', 'replacement', 'absent'] as const)('classifies %s from the retained bounded inventory', async (mode) => {
-        let gate: ServerResponse | null = null, changed = false;
-        const server = createServer((req, res) => {
-            if (req.url === '/gate') {
-                gate = res;
-                return;
-            }
-            if (req.url === '/changed') {
-                changed = true;
-                res.end('OK');
-                return;
-            }
-            let target = mode === 'absent' ? '' : mode === 'wrong-type' ? '<div role="button" aria-label="Confirmation">Confirm</div>' : '<button aria-label="Confirmation"' + (mode === 'visibility' ? ' hidden' : '') + '>Confirm</button>';
-            if (mode === 'duplicate')
-                target += '<button hidden aria-label="Confirmation">Other</button>';
-            if (mode === 'sensitive-descendant')
-                target = '<button aria-label="Confirmation"><input type="password" value="PRIVATE-SUBTREE"></button>';
-            if (mode === 'hidden-sensitive')
-                target = '<section hidden data-sensitive><button aria-label="Confirmation">Sensitive</button></section>';
-            if (mode === 'unresolved-name')
-                target += '<button hidden aria-labelledby="missing">Unknown</button>';
-            res.setHeader('content-type', 'text/html; charset=utf-8');
-            res.end(`<main aria-label="Operations">${target}<input aria-label="Other field" value="INITIAL-PRIVATE"></main><script>fetch('/gate').then(()=>{${mode === 'visibility' ? "document.querySelector('button').hidden=false;" : mode === 'private-property' ? "document.querySelector('input').value='CHANGED-PRIVATE';" : mode === 'replacement' ? "const old=document.querySelector('button');old.replaceWith(old.cloneNode(true));" : ''}fetch('/changed');});</script>`);
-        });
-        await new Promise<void>(r => server.listen(0, '127.0.0.1', r));
-        const address = server.address();
-        if (!address || typeof address === 'string')
-            throw Error('port');
-        const origin = `http://127.0.0.1:${String(address.port)}`, dir = await mkdtemp(join(tmpdir(), 'observed-acquire-'));
-        const scope: Scope = { principalId: 'p', csiId: 'csi', environment: 'fixture', applicationId: 'app',  allowedOrigins: [origin], capabilities: ['navigate', 'click'], policyId: 'policy', policyVersion: 'observed-4-full-chromium-1', entryPolicyId: 'entry', initialContext: { kind: 'initialBlank' } };
-        const handle = await playwrightBrowserFactory.launch({ browser: 'chromium', viewport: { width: 1000, height: 600 }, recording: { width: 640, height: 480 }, scratchPath: dir, observedScope: scope });
-        const session = required(handle.createObservationSession?.bind(handle))({ sessionId: 'probe', scopeHash: 'b'.repeat(64), approvedOrigins: [origin], knownSecrets: [], rules: [], applicationPolicy: { policyRuleId: 'structural', allowStructuralDiscovery: true } });
-        try {
-            await required(handle.observedNavigateBlank?.bind(handle))(origin + '/');
-            await untilMs(() => gate !== null, 2000);
-            let observation = await session.observe();
-            const before = observation.json;
-            const request = (): AcquisitionRequest => ({ documentId: observation.observation.documentId, generation: observation.observation.generation, origin, locator: { kind: 'role', role: 'button', name: 'Confirmation', exact: true }, expected: { kind: 'element', locator: { kind: 'role', role: 'button', name: 'Confirmation', exact: true }, role: 'button', elementType: 'button', controlType: 'none', classification: 'structuralOnly', visible: true, actionable: true, readRuleId: null }, operation: { kind: 'click' } });
-            const first = await required(session.acquire?.bind(session))(request());
-            expect(first.kind).toBe(mode === 'visibility' ? 'VISIBILITY_PENDING' : (mode === 'private-property' || mode === 'replacement') ? 'READY' : mode === 'absent' ? 'ABSENT' : 'REFUSED');
-            expect(observation.json).toBe(before);
-            expect(before).not.toContain('INITIAL-PRIVATE');
-            expect(before).not.toContain('PRIVATE-SUBTREE');
-            required<ServerResponse>(gate).end('release');
-            await untilMs(() => changed, 2000);
-            if (mode === 'replacement' && first.kind === 'READY')
-                expect(await session.matches(first.target, { kind: 'role', role: 'button', name: 'Confirmation', exact: true })).toBe(false);
-            if (mode === 'private-property' || mode === 'replacement')
-                expect((await required(session.acquire?.bind(session))(request())).kind).toBe('REFUSED');
-            if (mode === 'visibility') {
-                observation = await session.observe();
-                expect((await required(session.acquire?.bind(session))(request())).kind).toBe('READY');
-            }
-        }
-        finally {
-            await session.dispose();
-            await handle.close();
-            server.closeAllConnections();
-            await new Promise<void>(r => server.close(() => { r(); }));
-            await rm(dir, { recursive: true, force: true });
-        }
-    }, 30000);
-});
 describe('actual retained native preparation and input fences', () => {
     it.each(['before-timeout', 'before-cancel', 'after-timeout', 'after-cancel'] as const)('stops %s without a later native input', async (mode) => {
         const events: string[] = [];
@@ -162,13 +103,14 @@ describe('actual retained native preparation and input fences', () => {
         const address = server.address();
         if (!address || typeof address === 'string')
             throw Error('port');
-        const origin = `http://127.0.0.1:${String(address.port)}`, dir = await mkdtemp(join(tmpdir(), 'native-fence-'));
-        const scope: Scope = { principalId: 'p', csiId: 'csi', environment: 'fixture', applicationId: 'app',  allowedOrigins: [origin], capabilities: ['click'], policyId: 'policy', policyVersion: 'observed-4-full-chromium-1', entryPolicyId: 'entry', initialContext: { kind: 'initialBlank' } };
-        const handle = await playwrightBrowserFactory.launch({ browser: 'chromium', viewport: { width: 1000, height: 600 }, recording: { width: 640, height: 480 }, scratchPath: dir, observedScope: scope });
-        const session = required(handle.createObservationSession?.bind(handle))({ sessionId: 'native', scopeHash: 'c'.repeat(64), approvedOrigins: [origin], knownSecrets: [], rules: [], applicationPolicy: { policyRuleId: 'structural', allowStructuralDiscovery: true } });
+        const origin = `http://localhost:${String(address.port)}`, dir = await mkdtemp(join(tmpdir(), 'native-fence-'));
+        const scope: Scope = { principalId: 'p', csiId: 'csi', environment: 'fixture', capabilities: ['click'], initialContext: { kind: 'initialBlank' } };
+        const handle = await playwrightBrowserFactory.launch({ allowedDomains: TEST_DOMAINS, browser: 'chromium', viewport: { width: 1000, height: 600 }, recording: { width: 640, height: 480 }, scratchPath: dir, observedScope: scope });
+        const session = required(handle.createObservationSession?.bind(handle))({ sessionId: 'native', scopeHash: 'c'.repeat(64), allowedDomains: TEST_DOMAINS, knownSecrets: [], readProfile: { policyRuleId: 'structural', allowStructuralDiscovery: true } });
         try {
             await required(handle.observedNavigateBlank?.bind(handle))(origin + '/');
-            const observation = await session.observe(), node = required(observation.observation.nodes.find(n => n.name === 'Commit')), locator = required(node.locatorHints.find(h => h.kind === 'role'));
+            const observation = await session.observe(), found = required(Object.entries(observation.observation.facts).find(([, fact]) => fact.name === 'Commit'));
+            const resolved = await session.prepareTarget({ ref: found[0], documentId: observation.observation.documentId, generation: observation.observation.generation, origin: observation.observation.origin, operation: { kind: 'click' }, authoredLiteral: null });
             let now = 0, checks = 0, tripped = false;
             const abort = new AbortController(), control = new ObservedInvocationControl({ now: () => now }, 1000, abort.signal, new ReplayAcquisitionBudget(), { extra: 0 }), originalCheck = control.check.bind(control);
             control.check = () => { checks++; if (!tripped && (mode.startsWith('before') ? checks === 4 : control.phase === 'INVOKING')) {
@@ -178,8 +120,8 @@ describe('actual retained native preparation and input fences', () => {
                 else
                     now = 1001;
             } originalCheck(); };
-            const invocation = { target: { documentId: node.documentId, generation: node.generation, nodeId: node.nodeId, locator }, origin, operation: { kind: 'click' } as const, resolvedValue: null, maxValueBytes: 4096 };
-            const invoke = required(session.invoke?.bind(session));
+            const invocation = { resolved, origin, operation: { kind: 'click' } as const, resolvedValue: null, maxValueBytes: 4096, readRuleId: null, profile: 'replay' as const };
+            const invoke = session.invoke.bind(session);
             await expect(control.run(() => invoke(invocation, control))).rejects.toThrow(mode.endsWith('cancel') ? 'CANCELLED' : mode.startsWith('before') ? 'TIMEOUT' : 'OUTCOME_UNKNOWN');
             if (mode.startsWith('after'))
                 await untilMs(() => events.includes('mousemove'), 2000);
@@ -200,10 +142,10 @@ describe('actual retained native preparation and input fences', () => {
 
 describe('actual initial-blank CDP acknowledgement fence',()=>{
   it.each(['timeout','cancel'] as const)('keeps held inner blank check PREPARING on %s and never navigates later',async reason=>{
-    let receipts=0;const server=createServer((_req,res)=>{receipts++;res.end('<main>Receipt</main>');});await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve));const address=server.address();if(!address||typeof address==='string')throw Error('port');const origin=`http://127.0.0.1:${String(address.port)}`,dir=await mkdtemp(join(tmpdir(),'blank-fence-'));
-    const scope:Scope={principalId:'p',csiId:'csi',environment:'fixture',applicationId:'app',allowedOrigins:[origin],capabilities:['navigate'],policyId:'policy',policyVersion:'observed-4-full-chromium-1',entryPolicyId:'entry',initialContext:{kind:'initialBlank'}};
-    const policy:TrustedPolicy={version:1,policyId:'policy',policyVersion:'observed-4-full-chromium-1',applicationId:'app',environment:'fixture',entryPolicyId:'entry',allowedOrigins:[origin],rules:[],applicationPolicy:{policyRuleId:'structural',allowStructuralDiscovery:true,readGrants:[]}};
-    const handle=await playwrightBrowserFactory.launch({browser:'chromium',viewport:{width:1000,height:600},recording:{width:640,height:480},scratchPath:dir,observedScope:scope});
+    let receipts=0;const server=createServer((_req,res)=>{receipts++;res.end('<main>Receipt</main>');});await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve));const address=server.address();if(!address||typeof address==='string')throw Error('port');const origin=`http://localhost:${String(address.port)}`,dir=await mkdtemp(join(tmpdir(),'blank-fence-'));
+    const scope:Scope={principalId:'p',csiId:'csi',environment:'fixture',capabilities:['navigate'],initialContext:{kind:'initialBlank'}};
+    
+    const handle=await playwrightBrowserFactory.launch({allowedDomains: TEST_DOMAINS, browser:'chromium',viewport:{width:1000,height:600},recording:{width:640,height:480},scratchPath:dir,observedScope:scope});
     // Observe/hold the real public CDPSession.send acknowledgement, never substitute a result.
     interface PublicSession {send(method:string,parameters?:Record<string,unknown>):Promise<unknown>;detach():Promise<void>}
     const page=handle.page as unknown as {context():{newCDPSession(page:unknown):Promise<PublicSession>}};
@@ -212,26 +154,48 @@ describe('actual initial-blank CDP acknowledgement fence',()=>{
     const original=prototype.send;
     let release=():void=>undefined,entered=():void=>undefined,checks=0,returned=false;const held=new Promise<void>(resolve=>{release=resolve;}),observed=new Promise<void>(resolve=>{entered=resolve;});
     prototype.send=async function(method,parameters){const result=await original.call(this,method,parameters);if(method==='Runtime.callFunctionOn'&&String(parameters?.functionDeclaration).includes('this === document && location.href')){checks++;if(checks===2){entered();await held;returned=true;}}return result;};
-    const adapter=createObservedReplayAdapter(handle,scope,policy,'blank-run',()=>undefined),abort=new AbortController(),control=new ObservedInvocationControl({now:()=>performance.now()},performance.now()+1000,abort.signal,new ReplayAcquisitionBudget(),{extra:0});
+    const adapter=createObservedReplayAdapter(handle, scope, TEST_DOMAINS,'blank-run',()=>undefined),abort=new AbortController(),control=new ObservedInvocationControl({now:()=>performance.now()},performance.now()+1000,abort.signal,new ReplayAcquisitionBudget(),{extra:0});
     const action:ReplayAction={coordinate:{stepId:'00000000-0000-4000-8000-000000000001',ordinal:0},guardId:'g0',operation:{kind:'navigate',destinationInputId:'url'}},guard:Guard={guardId:'g0',origin:null,target:{kind:'initialBlank'}};
     const work=control.run(()=>adapter.perform(action,guard,origin+'/',control)),stopped=expect(work).rejects.toThrow(reason==='cancel'?'CANCELLED':'TIMEOUT');
     try{await observed;expect(control.phase).toBe('PREPARING');if(reason==='cancel')abort.abort();await stopped;release();await untilMs(()=>returned,1000);expect(await required(handle.observedBlankMatches?.bind(handle))()).toBe(true);expect(receipts).toBe(0);expect(control.phase).toBe('POISONED');}finally{release();prototype.send=original;await session.detach();await adapter.dispose();await handle.close();server.closeAllConnections();await new Promise<void>(resolve=>server.close(()=>{resolve();}));await rm(dir,{recursive:true,force:true});}
   },30000);
 });
 
-it('poisons an expired real retained scroll before held cleanup can permit validation or input',async()=>{
-  const server=createServer((_req,res)=>{res.setHeader('content-type','text/html');res.end('<div style="height:2400px"></div><button aria-label="Commit" style="width:200px;height:60px">Commit</button>');});await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve));const address=server.address();if(!address||typeof address==='string')throw Error('port');const origin=`http://127.0.0.1:${String(address.port)}`,dir=await mkdtemp(join(tmpdir(),'reveal-fence-'));
-  const scope:Scope={principalId:'p',csiId:'csi',environment:'fixture',applicationId:'app',allowedOrigins:[origin],capabilities:['click'],policyId:'policy',policyVersion:'observed-4-full-chromium-1',entryPolicyId:'entry',initialContext:{kind:'initialBlank'}};
-  const handle=await playwrightBrowserFactory.launch({browser:'chromium',viewport:{width:1000,height:600},recording:{width:640,height:480},scratchPath:dir,observedScope:scope});const observationSession=required(handle.createObservationSession?.bind(handle))({sessionId:'reveal',scopeHash:'d'.repeat(64),approvedOrigins:[origin],knownSecrets:[],rules:[],applicationPolicy:{policyRuleId:'structural',allowStructuralDiscovery:true}});
-  await required(handle.observedNavigateBlank?.bind(handle))(origin+'/');const observation=await observationSession.observe(),node=required(observation.observation.nodes.find(n=>n.name==='Commit')),locator=required(node.locatorHints.find(h=>h.kind==='role'));
-  interface PublicSession {send(method:string,parameters?:Record<string,unknown>):Promise<unknown>;detach():Promise<void>}
-  const page=handle.page as unknown as {context():{newCDPSession(page:unknown):Promise<PublicSession>}},session=await page.context().newCDPSession(page),prototype=Object.getPrototypeOf(session) as PublicSession;
-  // eslint-disable-next-line @typescript-eslint/unbound-method -- Test interceptor forwards the actual CDP receiver through call(this).
-  const original=prototype.send;
-  let releaseScroll=():void=>undefined,releaseCleanup=():void=>undefined,scrolls=0,validations=0,inputs=0,scrollReturned=false,cleanupEntered=false,passes=0;
-  const scrollHold=new Promise<void>(resolve=>{releaseScroll=resolve;}),cleanupHold=new Promise<void>(resolve=>{releaseCleanup=resolve;});
-  prototype.send=async function(method,parameters){if(method==='Runtime.callFunctionOn'&&String(parameters?.functionDeclaration).startsWith('async function(invocation, element)'))validations++;if(method.startsWith('Input.dispatch'))inputs++;const result=await original.call(this,method,parameters);if(method==='DOM.scrollIntoViewIfNeeded'){scrolls++;await scrollHold;scrollReturned=true;}if(method==='Runtime.releaseObject'){cleanupEntered=true;await cleanupHold;}return result;};
-  const control=new ObservedInvocationControl({now:()=>performance.now()},performance.now()+10000,new AbortController().signal,new ReplayAcquisitionBudget(),{extra:0});
-  const invoke=required(observationSession.invoke?.bind(observationSession));const work=control.run(()=>invoke({target:{documentId:node.documentId,generation:node.generation,nodeId:node.nodeId,locator},origin,operation:{kind:'click'},resolvedValue:null,maxValueBytes:4096},control));void work.then(()=>{passes++;},()=>undefined);const stopped=expect(work).rejects.toThrow('OUTCOME_UNKNOWN');
-  try{await untilMs(()=>scrolls===1,2000);await untilMs(()=>cleanupEntered,2500);expect(control.phase).toBe('POISONED');releaseScroll();await untilMs(()=>scrollReturned,1000);await new Promise<void>(resolve=>setImmediate(resolve));expect(validations).toBe(0);expect(inputs).toBe(0);expect(passes).toBe(0);expect(scrolls).toBe(1);releaseCleanup();await stopped;}finally{releaseScroll();releaseCleanup();prototype.send=original;await session.detach();await observationSession.dispose();await handle.close();server.closeAllConnections();await new Promise<void>(resolve=>server.close(()=>{resolve();}));await rm(dir,{recursive:true,force:true});}
+it('combined physical replacement after prefix resolution dispatches zero Enter', async () => {
+  for (const phase of ['before-fence','after-focus'] as const) {
+    let enters = 0;
+    const server = createServer((req, res) => {
+      if (req.url === '/entered') { enters++; res.end('OK'); return; }
+      res.setHeader('content-type','text/html'); res.end('<input aria-label="Search"><button>Other</button><script>document.addEventListener("keydown",e=>{if(e.key==="Enter")fetch("/entered")});</script>');
+    });
+    await new Promise<void>(resolve => server.listen(0,'127.0.0.1',resolve));
+    const address = server.address(); if (!address || typeof address === 'string') throw Error('port');
+    const origin = `http://localhost:${String(address.port)}`, dir = await mkdtemp(join(tmpdir(),'prefix-physical-'));
+    compiledPrepareBrowserProfile(dir);
+    const scope: Scope = { principalId: 'p', csiId: 'csi', environment: 'fixture', capabilities: ['fill','press'], initialContext: { kind: 'initialBlank' } };
+    const handle = await compiledBrowserFactory.launch({ allowedDomains: TEST_DOMAINS, browser:'chromium', viewport:{width:1000,height:600}, recording:{width:640,height:480}, scratchPath:dir, observedScope:scope });
+    const session = required(handle.createObservationSession?.bind(handle))({ sessionId:'physical', scopeHash:'c'.repeat(64), allowedDomains:TEST_DOMAINS, knownSecrets:[], readProfile:{policyRuleId:'structural',allowStructuralDiscovery:true} });
+    // Only fixture DOM mutation; product resolution never executes this test seam.
+    const page = handle.page as { locator(selector:string): { evaluate(fn:(el:Element)=>void):Promise<void>; focus():Promise<void> } };
+    const control = () => new ObservedInvocationControl({now:()=>performance.now()},performance.now()+10000,new AbortController().signal,new ReplayAcquisitionBudget(),{extra:0});
+    try {
+      await required(handle.observedNavigateBlank?.bind(handle))(origin+'/');
+      const first = (await session.observe()).observation, ref = required(Object.entries(first.facts).find(([, f])=>f.name==='Search'))[0];
+      const fill = { kind:'fill' as const,value:{kind:'authoredLiteral' as const,sourceInputId:'fill'} };
+      const resolved = await session.prepareTarget({ref,documentId:first.documentId,generation:first.generation,origin,operation:fill,authoredLiteral:'fixture query'});
+      const identity = {admissionId:'fill-admission',requestDigest:'a'.repeat(64),operationHash:'b'.repeat(64),coordinate:{stepId:'00000000-0000-4000-8000-000000000001',ordinal:0},authority:'current-authenticated-source'};
+      const fillControl=control(); await fillControl.run(()=>session.invoke({resolved,operation:fill,resolvedValue:'fixture query',origin,maxValueBytes:4096,readRuleId:null,profile:'learn',expect:first,invocationIdentity:identity},fillControl));
+      session.commitInvocation?.(identity);
+      const observation = (await session.observe()).observation;
+      const guard: Guard = {guardId:'press',origin,target:{kind:'element',...resolved,readRuleId:null}}, action: ReplayAction = {coordinate:{stepId:'00000000-0000-4000-8000-000000000002',ordinal:0},guardId:'press',operation:{kind:'press',key:'Enter'}};
+      const prepared = await compiledPrepare(handle,session,action,guard,observation,observation); if(prepared.kind!=='PREPARED'||prepared.target.kind!=='node')throw Error('PREPARED');
+      const inherited={kind:'same-element-press' as const,predecessorAdmissionId:identity.admissionId,predecessorRequestDigest:identity.requestDigest,predecessorOperationHash:identity.operationHash,predecessorCoordinate:identity.coordinate,documentId:observation.documentId};
+      await session.prepareTarget({ref:prepared.target.ref,documentId:observation.documentId,generation:observation.generation,origin,operation:action.operation,authoredLiteral:null,frozen:resolved,pressInheritance:inherited,continuityAuthority:identity.authority});
+      if(phase==='before-fence')await page.locator('input').evaluate(el=>{el.replaceWith(el.cloneNode(true));});
+      else {await page.locator('button').focus();await page.locator('input').evaluate(el=>{el.addEventListener('focus',()=>{el.replaceWith(el.cloneNode(true));},{once:true});});}
+      const pressControl=control();
+      await expect(pressControl.run(()=>compiledPerform(handle,session,action,guard,prepared.target,null,pressControl,undefined,'domcontentloaded',10000,'learn',{invocationIdentity:{...identity,admissionId:'press-admission',coordinate:action.coordinate},pressInheritance:inherited}))).rejects.toMatchObject({code:phase==='before-fence'?'TARGET_DRIFT':'OUTCOME_UNKNOWN'});
+      expect(enters).toBe(0); expect(JSON.stringify({observation,guard,inherited})).not.toMatch(/backendNodeId|physicalId/u);
+    } finally {await session.dispose();await handle.close();server.closeAllConnections();await new Promise<void>(resolve=>server.close(()=>{ resolve(); }));await rm(dir,{recursive:true,force:true});}
+  }
 },30000);

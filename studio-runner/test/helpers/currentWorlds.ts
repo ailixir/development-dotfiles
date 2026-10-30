@@ -1,3 +1,4 @@
+import { TEST_DOMAINS } from './allowedDomains.js';
 import {createRequire} from 'node:module';
 import {readFileSync} from 'node:fs';
 import {deepStrictEqual,strictEqual} from 'node:assert';
@@ -6,7 +7,7 @@ import type {TestDocument} from './publicationFixture.js';
 import {parseDocumentJson} from './documentJson.js';
 import {deriveObservedArtifact,validateObservedJob} from '../../src/validator/observedReplay.js';
 import {hashObserved} from '../../src/validator/observedReferencePolicy.js';
-import type {AuthoredInputs,BuildIdentity,ObservedJob,TrustedPolicy} from '../../src/executor/observedOperations.js';
+import type {AuthoredInputs,BuildIdentity,ObservedJob } from '../../src/executor/observedOperations.js';
 type Reference=typeof publicationFixture.observedChoice;
 interface DeclaredWorld {name:'choice'|'control';privateSyntheticInputEnvelopeFixtureOnly:AuthoredInputs;snapshotEvidence:unknown}
 interface CurrentVectorFactory {ordinary(template:unknown,world:DeclaredWorld,options?:{control?:boolean;usedConfiguration?:boolean}):Reference}
@@ -40,11 +41,11 @@ export function currentJob(build:BuildIdentity,options:{now?:number;executionId?
   job.binding.requiredBuild={...build};job.binding.replayGrant.buildHash=hashObserved(build);
   job.binding.replayGrant.issuedAt=new Date(now-100).toISOString();job.binding.replayGrant.expiresAt=new Date(now+25000).toISOString();
   // Validate the unmutated baseline before applying caller-owned identity/runtime variations.
-  validateObservedJob(job,build,publicationFixture.trustedPolicy as TrustedPolicy,now);
+  validateObservedJob(job,build,TEST_DOMAINS,now);
   if(options.executionId!==undefined){job.binding.executionId=options.executionId;job.binding.replayGrant.executionId=options.executionId;}
   if(options.attemptId!==undefined){job.binding.attemptId=options.attemptId;job.binding.replayGrant.attemptId=options.attemptId;}
   if(options.totalRuntimeMs!==undefined)job.runtime.totalRuntimeMs=options.totalRuntimeMs;
-  return validateObservedJob(job,build,publicationFixture.trustedPolicy as TrustedPolicy,now);
+  return validateObservedJob(job,build,TEST_DOMAINS,now);
 }
 /** Mutable copy for deliberately adversarial tests, after baseline validation has succeeded. */
 export function mutableCurrentJob(build:BuildIdentity,now=Date.now()):TestDocument<ObservedJob> {return structuredClone(currentJob(build,{now})) as TestDocument<ObservedJob>;}

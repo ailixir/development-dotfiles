@@ -1,6 +1,6 @@
 import React from 'react';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, fireEvent, render, renderHook, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import fs from 'node:fs';
@@ -20,8 +20,7 @@ import {
 import type { TestDetailDto, TestDto } from '@/types/studio/studioTypes';
 import type { GuidedStartRefusal, GuidedStartRequest } from '@/types/studio/studioGuidedTypes';
 import { guidedCopy } from '@/components/studio/guided/guidedNarratives';
-import { RunControl, RUN_LABEL, type RunControlProps } from './RunControl';
-import { useRunGate } from './useRunGate';
+import { RunControl, RUN_CAPTION_MAX_WIDTH, RUN_LABEL, type RunControlProps } from './RunControl';
 import { EXECUTE_CONFLICT_NARRATIVES } from './executeRefusals';
 import { LEARNED_READY_LABEL } from './runEnablement';
 
@@ -66,7 +65,6 @@ function unexpectedRequests(): { method: string; url: string }[] {
   return observed.filter(
     (entry) =>
       !(entry.method === 'GET' && /\/tests\/[^/]+(\?.*)?$/u.test(entry.url)) &&
-      !(entry.method === 'GET' && entry.url.includes('/schedule/capabilities')) &&
       !(entry.method === 'GET' && /\/tests\/[^/]+\/capabilities$/u.test(entry.url)) &&
       !(entry.method === 'POST' && /\/tests\/[^/]+\/execute$/u.test(entry.url)),
   );
@@ -147,7 +145,6 @@ function contextOf(test: TestDto) {
     sourceRevision: String(test.sourceRevision),
     configurationRevision: String(test.configurationRevision),
     environmentId: test.environment,
-    applicationId: test.csiId,
     versions: { contract: 3 },
   };
 }
@@ -348,6 +345,10 @@ describe('STUDIO-OBS-008 AC-2: one Run, three modes, no hidden executions', () =
     expect(caption).toHaveTextContent('Nothing was started.');
     expect(caption).toHaveTextContent('Ask your Studio administrator');
     expect(screen.getByTestId('guided-start-feedback-code')).toHaveTextContent('Reference: RUNTIME_INCOMPATIBLE');
+    // STUDIO-UNIFY-001.6 AC-05: the caption wraps inside a bounded width. Pixels are asserted in the
+    // Playwright spec; here the bound itself and that the caption sits in the Run column are checked.
+    expect(caption).toHaveStyle({ maxWidth: `${RUN_CAPTION_MAX_WIDTH}px` });
+    expect(caption.parentElement).toBe(control.parentElement);
 
     // Run stays enabled (capabilities are read only after the press) and keeps its name (Harness B).
     expect(control).toBeEnabled();
@@ -407,6 +408,71 @@ describe('STUDIO-OBS-008 AC-2: one Run, three modes, no hidden executions', () =
     }
   });
 
+  describe('(g5) STUDIO-UNIFY-001.6 AC-05: the captions beside Run render in the page\'s caption slot when it gives one', () => {
+    const CAPTIONS = ['run-start-unavailable', 'run-not-permitted', 'run-blocked-reason'] as const;
+    let slot: HTMLElement;
+    beforeEach(() => {
+      slot = document.createElement('div');
+      document.body.appendChild(slot);
+    });
+    afterEach(() => slot.remove());
+
+    it('the refusal caption is in the container and not in place; text, testid, width bound and Run name are unchanged', async () => {
+      setGuidedStartCapability(unlearnedDraft.id, { available: false, code: 'RUNTIME_INCOMPATIBLE' });
+      const view = serve(fixtureDetail(unlearnedDraft), { captionContainer: slot });
+      const control = await settledControl();
+      await userEvent.click(control);
+
+      const caption = await waitFor(() => {
+        const found = slot.querySelector('[data-testid="run-start-unavailable"]');
+        expect(found).not.toBeNull();
+        return found as HTMLElement;
+      });
+      expect(caption).toHaveTextContent(guidedCopy('startUnavailableCaption'));
+      expect(caption).toHaveStyle({ maxWidth: `${RUN_CAPTION_MAX_WIDTH}px`, overflowWrap: 'anywhere' });
+      expect(view.container.querySelector('[data-testid="run-start-unavailable"]')).toBeNull();
+      expect(control).toHaveAccessibleName(RUN_LABEL);
+      // The refusal's Reference line is not a caption: it stays with the other alerts, in place here.
+      expect(screen.getByTestId('guided-start-feedback-code')).toHaveTextContent('Reference: RUNTIME_INCOMPATIBLE');
+    });
+
+    it('"Add a step" and the not-permitted reason go to the container too', async () => {
+      const view = serve({ ...fixtureDetail(unlearnedDraft), steps: [] }, { hasSteps: false, captionContainer: slot });
+      await settledControl();
+      expect(slot.querySelector('[data-testid="run-blocked-reason"]')).toHaveTextContent('Add a step to run this test.');
+      expect(screen.queryByTestId('run-blocked-reason')).toBeInTheDocument();
+      expect(view.container.querySelector('[data-testid="run-blocked-reason"]')).toBeNull();
+    });
+
+    it('without a container every caption renders in place, as before', async () => {
+      setGuidedStartCapability(unlearnedDraft.id, { available: false, code: 'RUNTIME_INCOMPATIBLE' });
+      const view = serve(fixtureDetail(unlearnedDraft));
+      const control = await settledControl();
+      await userEvent.click(control);
+
+      const caption = await screen.findByTestId('run-start-unavailable');
+      expect(view.container.contains(caption)).toBe(true);
+      expect(caption.parentElement).toBe(control.parentElement);
+      expect(slot.querySelector(CAPTIONS.map((id) => `[data-testid="${id}"]`).join(','))).toBeNull();
+    });
+
+    it('mounting with a caption container logs no prop-type warning attributed to RunControl (.5 AC-11)', async () => {
+      const errors = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+      try {
+        setGuidedStartCapability(unlearnedDraft.id, { available: false, code: 'RUNTIME_INCOMPATIBLE' });
+        serve(fixtureDetail(unlearnedDraft), { captionContainer: slot });
+        await userEvent.click(await settledControl());
+        await waitFor(() => expect(slot.querySelector('[data-testid="run-start-unavailable"]')).not.toBeNull());
+        const warnings = errors.mock.calls
+          .map((call) => call.map(String).join(' '))
+          .filter((line) => /Failed .*type|prop type/iu.test(line));
+        expect(warnings).toEqual([]);
+      } finally {
+        errors.mockRestore();
+      }
+    });
+  });
+
   it('(h) a start context that disagrees with the fresh read starts nothing (P6)', async () => {
     setGuidedStartCapability(unlearnedDraft.id, {
       available: true,
@@ -416,7 +482,6 @@ describe('STUDIO-OBS-008 AC-2: one Run, three modes, no hidden executions', () =
         sourceRevision: String(unlearnedDraft.sourceRevision + 1),
         configurationRevision: String(unlearnedDraft.configurationRevision),
         environmentId: unlearnedDraft.environment,
-        applicationId: unlearnedDraft.csiId as string,
         versions: { contract: 3 },
       },
     });
@@ -436,6 +501,7 @@ describe('STUDIO-OBS-008 AC-2: one Run, three modes, no hidden executions', () =
     const control = await settledControl();
     expect(control).toBeDisabled();
     expect(screen.getByTestId('run-blocked-reason')).toHaveTextContent('Add a step to run this test.');
+    expect(screen.getByTestId('run-blocked-reason')).toHaveStyle({ maxWidth: `${RUN_CAPTION_MAX_WIDTH}px` });
     await new Promise((resolve) => setTimeout(resolve, 50));
     expect(startLearn).not.toHaveBeenCalled();
     expect(capabilityReads()).toHaveLength(0);
@@ -803,99 +869,6 @@ describe('AC-3(a): client-generated Python is retired', () => {
   });
 });
 
-describe('Story 10.48 AC-10b: Run is disabled, with a reason, when the server says the caller may not run', () => {
-  const capabilityReads = () =>
-    observed.filter((entry) => entry.method === 'GET' && entry.url.includes('/schedule/capabilities'));
-
-  function serveCapabilities(response: () => Response | Promise<Response>) {
-    studioMockServer.use(
-      http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(readyDraft)),
-      http.get(`${STUDIO_BASE}/tests/:id/schedule/capabilities`, response),
-    );
-  }
-
-  const capabilities = (canManage: boolean) =>
-    HttpResponse.json({
-      enabled: false,
-      canManage,
-      availableExecutionPrincipals: [],
-      localAuthorizationOnly: true,
-      policy: null,
-    });
-
-  it('canManage false: Run stays visible, disabled, described by on-page text, and sends nothing', async () => {
-    serveCapabilities(() => capabilities(false));
-    render(<RunControl testId={readyDraft.id} />);
-
-    const reason = await screen.findByTestId('run-not-permitted');
-    const control = screen.getByRole('button', { name: RUN_LABEL });
-    expect(control).toBeVisible();
-    expect(control).toBeDisabled();
-    expect(reason).toBeVisible();
-    expect(reason.textContent).toMatch(/do not have permission to run tests for this CSI/i);
-    // Screen readers: the reason is the button's accessible description, not a tooltip.
-    expect(control).toHaveAttribute('aria-describedby', reason.id);
-    expect(control).toHaveAccessibleDescription(reason.textContent ?? '');
-
-    // Keyboard: tabbing and pressing Enter or Space reaches no execute.
-    await userEvent.tab();
-    await userEvent.keyboard('{Enter}');
-    await userEvent.keyboard(' ');
-    // A pointer click on the disabled control (MUI sets pointer-events: none, so dispatch it).
-    fireEvent.click(control);
-    await new Promise((resolve) => setTimeout(resolve, 50));
-    expect(executeRequests()).toHaveLength(0);
-    expect(unexpectedRequests()).toEqual([]);
-  });
-
-  it('canManage true: Run is enabled and carries no reason', async () => {
-    serveCapabilities(() => capabilities(true));
-    render(<RunControl testId={readyDraft.id} />);
-
-    const control = await screen.findByRole('button', { name: RUN_LABEL });
-    await waitFor(() => expect(capabilityReads()).toHaveLength(1));
-    await waitFor(() => expect(control).not.toBeDisabled());
-    expect(screen.queryByTestId('run-not-permitted')).toBeNull();
-    expect(control).not.toHaveAttribute('aria-describedby');
-  });
-
-  it('a failed capabilities read is unknown, never a denial: Run stays enabled', async () => {
-    serveCapabilities(() => HttpResponse.json({ error: 'BOOM', message: 'down' }, { status: 500 }));
-    render(<RunControl testId={readyDraft.id} />);
-
-    const control = await screen.findByRole('button', { name: RUN_LABEL });
-    await waitFor(() => expect(capabilityReads().length).toBeGreaterThan(0));
-    await waitFor(() => expect(control).not.toBeDisabled());
-    expect(screen.queryByTestId('run-not-permitted')).toBeNull();
-  });
-
-  it('a pending capabilities read does not disable Run', async () => {
-    serveCapabilities(() => new Promise<Response>(() => {}));
-    render(<RunControl testId={readyDraft.id} />);
-
-    const control = await screen.findByRole('button', { name: RUN_LABEL });
-    await waitFor(() => expect(control).not.toBeDisabled());
-    expect(screen.queryByTestId('run-not-permitted')).toBeNull();
-  });
-
-  it('reads the capability once per selected test, not once per render or refresh', async () => {
-    // Its own id, so a GET retry the failed-read case above leaves behind (apiClient retries 5xx
-    // GETs with backoff) cannot be counted here under load.
-    const selected = { ...readyDraft, id: 'a0000000-0000-0000-0000-00000000c4b1' };
-    studioMockServer.use(
-      http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(selected)),
-      http.get(`${STUDIO_BASE}/tests/:id/schedule/capabilities`, () => capabilities(false)),
-    );
-    const readsOfSelected = () => capabilityReads().filter((entry) => entry.url.includes(selected.id));
-    const view = render(<RunControl testId={selected.id} refreshToken={1} />);
-    await screen.findByTestId('run-not-permitted');
-    view.rerender(<RunControl testId={selected.id} refreshToken={2} />);
-    view.rerender(<RunControl testId={selected.id} refreshToken={3} isDirty />);
-    await waitFor(() => expect(screen.getByRole('button', { name: RUN_LABEL })).toBeDisabled());
-    expect(readsOfSelected()).toHaveLength(1);
-  });
-});
-
 /*
  * Story 10.51 RETIRED guard, relocated here from `review/diagnostics.test.tsx` by STUDIO-OBS-012B
  * (AC-1; cleanup inventory G7) before that file was deleted with `review/**`. Both modules below
@@ -986,106 +959,25 @@ describe('story 10.51 RETIRED guard (relocated by STUDIO-OBS-012B)', () => {
 
 
 /**
- * STUDIO-UNIFY-001.1, tasks 1.12 and 1.13 (DC-01, AC-29): the capabilities-settled signal and the
- * dedicated autorun request. `autorunRequest` is separate from `runRequest`, so "Run again" is
- * unchanged, and it is evaluated once: when the gate's own read has completed and the capabilities
- * read has settled (answered or failed), it is served if Run is runnable and dropped if not.
+ * STUDIO-UNIFY-001.1, tasks 1.12 and 1.13 (DC-01, AC-29): the dedicated autorun request.
+ * `autorunRequest` is separate from `runRequest`, so "Run again" is unchanged, and it is evaluated
+ * once: when the gate's own read has completed, it is served if Run is runnable and dropped if not.
  */
-describe('DC-01: capabilitiesSettled, and the autorun request evaluated once at the settle', () => {
-  const capabilitiesBody = (canManage: boolean) => ({
-    enabled: false,
-    canManage,
-    availableExecutionPrincipals: [],
-    localAuthorizationOnly: true,
-    policy: null,
-  });
-
-  /** A capabilities answer the test releases by hand, or one that fails. */
-  function serveCapabilities(kind: 'allowed' | 'denied' | 'fails', { held = false }: { held?: boolean } = {}) {
-    let release: () => void = () => undefined;
-    const gate = new Promise<void>((resolve) => {
-      release = resolve;
-    });
+describe('DC-01: the autorun request evaluated once when the gate has read the test', () => {
+  /** An execute the server accepts. */
+  function serveExecute() {
     studioMockServer.use(
-      http.get(`${STUDIO_BASE}/tests/:id/schedule/capabilities`, async () => {
-        if (held) await gate;
-        return kind === 'fails'
-          ? HttpResponse.json({ error: 'NOT_FOUND', message: 'No' }, { status: 404 })
-          : HttpResponse.json(capabilitiesBody(kind === 'allowed'));
-      }),
       http.post(`${STUDIO_BASE}/tests/:id/execute`, () =>
         HttpResponse.json({ executionId: '77777777-7777-7777-7777-777777777779', status: 'PENDING' }, { status: 202 }),
       ),
     );
-    return { release };
   }
 
   const request = (testId: string, token = 1) => ({ token, testId });
 
-  describe('useRunGate().capabilitiesSettled', () => {
-    it('is false while the capabilities read is pending and true once it answers', async () => {
-      const capabilities = serveCapabilities('allowed', { held: true });
-      studioMockServer.use(http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(fixtureDetail(readyDraft))));
-      const { result } = renderHook(() => useRunGate(readyDraft.id));
-
-      await waitFor(() => expect(result.current.readDone).toBe(true));
-      expect(result.current.capabilitiesSettled).toBe(false);
-      expect(result.current.executePermission).toBe('unknown');
-
-      await act(async () => capabilities.release());
-      await waitFor(() => expect(result.current.capabilitiesSettled).toBe(true));
-      expect(result.current.executePermission).toBe('allowed');
-    });
-
-    it('is true after a failed read too, with the permission still unknown', async () => {
-      serveCapabilities('fails');
-      studioMockServer.use(http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(fixtureDetail(readyDraft))));
-      const { result } = renderHook(() => useRunGate(readyDraft.id));
-
-      await waitFor(() => expect(result.current.capabilitiesSettled).toBe(true));
-      expect(result.current.executePermission).toBe('unknown');
-    });
-
-    it('is true when the answer says canManage false', async () => {
-      serveCapabilities('denied');
-      studioMockServer.use(http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(fixtureDetail(readyDraft))));
-      const { result } = renderHook(() => useRunGate(readyDraft.id));
-
-      await waitFor(() => expect(result.current.capabilitiesSettled).toBe(true));
-      expect(result.current.executePermission).toBe('denied');
-    });
-
-    it('resets when the test id changes, and is settled for the new id only when its read settles', async () => {
-      const capabilities = serveCapabilities('allowed');
-      studioMockServer.use(
-        http.get(`${STUDIO_BASE}/tests/:id`, ({ params }) =>
-          HttpResponse.json(fixtureDetail(params.id === unlearnedDraft.id ? unlearnedDraft : readyDraft)),
-        ),
-      );
-      const { result, rerender } = renderHook(({ id }) => useRunGate(id), { initialProps: { id: readyDraft.id } });
-      await waitFor(() => expect(result.current.capabilitiesSettled).toBe(true));
-
-      // The next id's capabilities answer is held, so a leftover `true` would show.
-      const second = serveCapabilities('allowed', { held: true });
-      rerender({ id: unlearnedDraft.id });
-      expect(result.current.capabilitiesSettled).toBe(false);
-      await waitFor(() => expect(result.current.readDone).toBe(true));
-      expect(result.current.capabilitiesSettled).toBe(false);
-      await act(async () => second.release());
-      await waitFor(() => expect(result.current.capabilitiesSettled).toBe(true));
-      capabilities.release();
-    });
-
-    it('is false with no test id', () => {
-      const { result } = renderHook(() => useRunGate(null));
-      expect(result.current.capabilitiesSettled).toBe(false);
-      expect(result.current.readDone).toBe(false);
-    });
-  });
-
   describe('RunControl autorunRequest', () => {
     it('is served once when the gate has settled and Run is runnable, and settles the page', async () => {
-      serveCapabilities('allowed');
+      serveExecute();
       const onAutorunSettled = vi.fn();
       const view = serve(fixtureDetail(readyDraft), { autorunRequest: request(readyDraft.id), onAutorunSettled });
 
@@ -1099,39 +991,8 @@ describe('DC-01: capabilitiesSettled, and the autorun request evaluated once at 
       expect(executeRequests()).toHaveLength(1);
     });
 
-    it('waits for the capabilities read: nothing is sent before it settles, one execute after', async () => {
-      const capabilities = serveCapabilities('allowed', { held: true });
-      serve(fixtureDetail(readyDraft), { autorunRequest: request(readyDraft.id) });
-
-      const control = await settledControl();
-      await waitFor(() => expect(control).not.toBeDisabled());
-      await new Promise((resolve) => setTimeout(resolve, 150));
-      expect(executeRequests()).toHaveLength(0);
-
-      await act(async () => capabilities.release());
-      await waitFor(() => expect(executeRequests()).toHaveLength(1));
-    });
-
-    it('a capabilities read that fails leaves the permission unknown and still runs, once', async () => {
-      serveCapabilities('fails');
-      serve(fixtureDetail(readyDraft), { autorunRequest: request(readyDraft.id) });
-
-      await waitFor(() => expect(executeRequests()).toHaveLength(1));
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      expect(executeRequests()).toHaveLength(1);
-    });
-
-    it('is dropped when canManage is false, and the existing caption explains why', async () => {
-      serveCapabilities('denied');
-      serve(fixtureDetail(readyDraft), { autorunRequest: request(readyDraft.id) });
-
-      expect(await screen.findByTestId('run-not-permitted')).toBeInTheDocument();
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      expect(executeRequests()).toHaveLength(0);
-    });
-
     it('is dropped for a LEARNING test and does not fire later when it becomes READY', async () => {
-      serveCapabilities('allowed');
+      serveExecute();
       const startLearn = startLearnSpy();
       let served: TestDetailDto = fixtureDetail(learningDraft);
       studioMockServer.use(http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(served)));
@@ -1158,7 +1019,7 @@ describe('DC-01: capabilitiesSettled, and the autorun request evaluated once at 
     });
 
     it('is dropped when the draft has no steps, and the first typed step does not fire it', async () => {
-      serveCapabilities('allowed');
+      serveExecute();
       const view = serve(fixtureDetail(readyDraft), { hasSteps: false, autorunRequest: request(readyDraft.id) });
       await settledControl();
       expect(await screen.findByTestId('run-blocked-reason')).toBeInTheDocument();
@@ -1174,7 +1035,7 @@ describe('DC-01: capabilitiesSettled, and the autorun request evaluated once at 
     });
 
     it('an UNLEARNED test with steps starts exactly one guided session and no execute', async () => {
-      serveCapabilities('allowed');
+      serveExecute();
       const startLearn = startLearnSpy();
       studioMockServer.use(http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(fixtureDetail(unlearnedDraft))));
       render(<RunControl testId={unlearnedDraft.id} startLearn={startLearn} autorunRequest={request(unlearnedDraft.id)} />);
@@ -1186,29 +1047,15 @@ describe('DC-01: capabilitiesSettled, and the autorun request evaluated once at 
     });
 
     it('waits while the request is armed for another test id', async () => {
-      serveCapabilities('allowed');
+      serveExecute();
       serve(fixtureDetail(readyDraft), { autorunRequest: request(unlearnedDraft.id) });
       await settledControl();
       await new Promise((resolve) => setTimeout(resolve, 150));
       expect(executeRequests()).toHaveLength(0);
     });
 
-    it('pressing Run before the settle drops it: one execute, none after the capabilities answer', async () => {
-      const capabilities = serveCapabilities('allowed', { held: true });
-      serve(fixtureDetail(readyDraft), { autorunRequest: request(readyDraft.id) });
-
-      const control = await settledControl();
-      await waitFor(() => expect(control).not.toBeDisabled());
-      await userEvent.click(control);
-      await waitFor(() => expect(executeRequests()).toHaveLength(1));
-
-      await act(async () => capabilities.release());
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      expect(executeRequests()).toHaveLength(1);
-    });
-
     it('"Run again" (runRequest) is unchanged: each new token runs once, with or without an autorun', async () => {
-      serveCapabilities('allowed');
+      serveExecute();
       const view = serve(fixtureDetail(readyDraft), { autorunRequest: request(readyDraft.id), isRunning: false });
       await waitFor(() => expect(executeRequests()).toHaveLength(1));
 

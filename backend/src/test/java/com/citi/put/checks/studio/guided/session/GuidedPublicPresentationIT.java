@@ -54,12 +54,6 @@ class GuidedPublicPresentationIT {
   @DynamicPropertySource
   static void configuration(DynamicPropertyRegistry registry) {
     ObservedPublicationFixture.register(registry);
-    registry.add(
-        "studio.guided-authoring.translation.applications",
-        () -> ObservedPublicationFixture.APPLICATION);
-    registry.add(
-        "studio.guided-authoring.translation.environments",
-        () -> String.join(",", ObservedPublicationFixture.ENVIRONMENTS));
     // The reaper would expire the seeded live sessions under the test.
     registry.add("studio.guided-authoring.reaper-delay-ms", () -> "3600000");
   }

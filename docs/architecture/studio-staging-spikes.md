@@ -1,6 +1,6 @@
 # Checks UI Studio — staging spikes (facts the architecture cannot establish locally)
 
-**Date:** 2026-09-10 · **Owner of this register:** @architect (Aria) · **Status:** all six spikes OPEN
+**Date:** 2026-09-10 · **Owner of this register:** @architect (Aria) · **Status:** SPK-01…SPK-06 OPEN; SPK-07 In progress (added 2026-10-26)
 
 [Studio architecture v2.1 §10](studio-execution.md#10-delivery-and-validation) lists facts that must be verified in staging before acceptance. This register turns each into a spike with a specific question, the evidence that closes it, an accountable owner, the stories it gates, and the design decisions it shapes earlier. The spikes map to the external dependencies `ED-01`…`ED-06` in [EPIC-10](../epics/EPIC-10-EXECUTION.yaml). Quoted story acceptance text comes from the retired Epic 10 markdown at commit 9425e7e7d and carries into the drafted stories.
 
@@ -18,6 +18,7 @@
 | SPK-04 | Chromium sandbox compatibility in-cluster | 10.18, 10.19 | 10.18 `securityContext`/seccomp values; ADR-001 §9 | Platform/SRE (cluster policy) | Runner dev + @devops | OPEN |
 | SPK-05 | Destination/DNS egress enforcement mechanism | 10.18, 10.19 | 10.17 destination-policy representation; 10.18 NetworkPolicy | Platform/SRE (network) with Security & Compliance | @devops + runner dev | OPEN |
 | SPK-06 | Measured video step-seek accuracy vs the 500 ms target | 10.16 (release claim), 10.19 | 10.12 timing-origin calibration method | @architect | Runner dev (phase A), @qa (phase B) | OPEN |
+| SPK-07 | Playwright-native perception and grounding (benchmark before implementation) | No story; it gates the per-stage go/no-go | ADR-SC-007 candidate; the Stage 1–4 stories | @architect | Harness: orchestrator with workstreams A–D; pre-registration: @architect | In progress |
 
 Owner names are roles from the BRD stakeholder table; the specific R2D2, Sonic and ingress teams are not named in any source and must be identified when the dependency tickets are opened.
 
@@ -164,3 +165,32 @@ Owner names are roles from the BRD stakeholder table; the specific R2D2, Sonic a
 **Fallback if negative.** Report the measured tolerance instead of 500 ms in the UI and BRD, and record the calibration limit; the step-seek feature remains, with the honest tolerance disclosed. No synthetic index-based mapping is reintroduced.
 
 **Result.** OPEN.
+
+## SPK-07 — Playwright-native perception and grounding (benchmark before implementation)
+
+**Added:** 2026-10-26 · **Owner:** @architect (Aria) · **Executes:** the orchestrator with harness workstreams A–D; @architect owns the pre-registration · **Status:** In progress
+
+**Why it is in this register.** This is not a staging fact. It is a measurement spike that has to finish before any implementation: the user asked for the proposal to be benchmarked first. The alpha real-site E2E on 2026-10-26 learned 0 of 6 real sites. It maps to no `ED-0N`. The closure rule above applies, except that there is no EPIC-10 entry to update: the Result line here and ADR-SC-007's citation stand in for it.
+
+**Question.** Does each proposed stage improve grounding of plain-English steps on real public sites enough to justify its cost, without breaking a recorded safety property? The stages are:
+- **S1:** compact outline rendering;
+- **S2:** a Stage-1 resolver on Playwright's own engine;
+- **S3:** sanitized AI-snapshot perception, where the model returns a ref and the runner synthesizes typed locators;
+- **S4:** S3 plus a value-masked Set-of-Marks screenshot.
+
+The comparisons, hard zeros and stage gates are pre-registered.
+
+**Evidence that closes it.** In `docs/qa/spikes/SPK-07/`:
+- [`preregistration.md`](../qa/spikes/SPK-07/preregistration.md), frozen before any S-arm model call;
+- [`f1-conformance.md`](../qa/spikes/SPK-07/f1-conformance.md), the engine feasibility check (recorded);
+- `report.md`, with the per-stage go/no-go and per-case outcomes with denominators.
+
+Raw runs stay in `studio-runner/evaluation/grounding/runs/` and are not committed unless asked.
+
+**Decision it informs.** The per-stage go/no-go, and the **ADR-SC-007 candidate** (written 2026-10-27: [ADR-SC-007](ADR-SC-007-snapshot-ref-grounding.md)), which would amend ADR-SC-004 and ADR-SC-005 for the stages that pass. After that come the implementation stories (SDC). No product code changes before the report. A Stage 4 go only takes S4 to an ADR amendment and Security & Compliance re-approval. U13 is still pending.
+
+**Evidence class.** SPK-07 outputs are **screening evidence, not ADR-SC-005 D-C evidence**: the harness calls the model directly, not through the deployed stack. The final acceptance gate is still D-C (STUDIO-OBS-016 AC-8), plus a rerun of the alpha real-site suite in Studio.
+
+**Fallback if negative.** A stage that fails stays out, and today's single observed path is unchanged. If a hard zero fires, that stage is blocked until it is root-caused and re-run. No recorded constraint is relaxed to make a stage pass: raw ARIA, screenshots to the model, model-authored selectors, self-healing replay and separate learn and replay resolvers all stay out.
+
+**Result.** In progress. F1 passed on 2026-10-26 with 0 mismatches over 2,294 elements and 1,669 hints on 8 live pages and 1 edge page, in same-session scope; see `f1-conformance.md`. The model runs have not started.

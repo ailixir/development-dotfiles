@@ -6,8 +6,9 @@
  * loopback `node:http` server, which exercises the real navigation path — a real socket, a real
  * response, a real DOM.
  *
- * It binds `127.0.0.1:0`, so there is **no DNS lookup at all** and nothing to resolve outside the
- * machine. That is what makes AC-19's "nothing left the machine" observable by counting
+ * It binds `127.0.0.1:0` and is reached as `localhost` (a whitelisted domain; an IP literal cannot be
+ * one), which Chromium resolves to loopback itself, so there is **no DNS lookup at all** and nothing to
+ * resolve outside the machine. That is what makes AC-19's "nothing left the machine" observable by counting
  * destinations rather than by arguing about them.
  *
  * `node:http`, as the internal server does (AC-24): this story adds no dependency, and a fixture
@@ -104,7 +105,7 @@ export function startPageServer(): Promise<PageServer> {
     server.listen(0, '127.0.0.1', () => {
       const address = server.address();
       const port = typeof address === 'object' && address !== null ? address.port : 0;
-      const baseUrl = `http://127.0.0.1:${String(port)}`;
+      const baseUrl = `http://localhost:${String(port)}`;
       resolve({
         baseUrl,
         port,

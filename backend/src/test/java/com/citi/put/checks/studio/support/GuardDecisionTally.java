@@ -25,8 +25,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
  *   <li><b>passed</b>: a translated click/press/check proposal the guard let through is reserved as
  *       one {@code studio_guided_obligation_admissions} row (only the translation path writes it;
  *       directly built ledger proposals never do).
- *   <li><b>confirmFirst</b>: a CLARIFY_FIRST question leaves {@code
- *       progress.sideEffectConfirmation} on the session.
  *   <li><b>refused</b>: every guard refusal emits one {@code GUIDED_ACTION_REFUSED} audit event at
  *       the decision (the only emitter is the guard), with its closed {@code reasonCode}.
  * </ul>
@@ -42,6 +40,19 @@ public final class GuardDecisionTally {
   private static final Map<String, List<ObjectNode>> RECORDS = new ConcurrentHashMap<>();
 
   private GuardDecisionTally() {}
+
+  /** The single output root supplied unconditionally by the owning Gradle Test task. */
+  public static Path buildDirectory() {
+    String configured = System.getProperty("checks.test.buildDirectory");
+    if (configured == null || configured.isBlank()) {
+      throw new IllegalStateException("Gradle test build directory missing");
+    }
+    Path root = Path.of(configured);
+    if (!root.isAbsolute()) {
+      throw new IllegalStateException("Gradle test build directory must be absolute");
+    }
+    return root.normalize();
+  }
 
   /** The session ids that exist now; pass the result to {@link #record} after the test. */
   public static Set<String> sessions(JdbcTemplate jdbc) {
@@ -68,7 +79,6 @@ public final class GuardDecisionTally {
     ObjectNode row = JSON.createObjectNode().put("test", testName).put("sessions", created.size());
     ObjectNode passed = row.putObject("passed");
     GUARDED_KINDS.forEach(kind -> passed.put(kind, 0));
-    int confirmFirst = 0;
     for (String session : created) {
       for (String kind :
           jdbc.queryForList(
@@ -80,15 +90,7 @@ public final class GuardDecisionTally {
           passed.put(kind, passed.path(kind).asInt() + 1);
         }
       }
-      Integer confirmations =
-          jdbc.queryForObject(
-              "SELECT count(*) FROM studio_guided_sessions WHERE session_id=? AND"
-                  + " progress->'sideEffectConfirmation' IS NOT NULL",
-              Integer.class,
-              session);
-      confirmFirst += confirmations == null ? 0 : confirmations;
     }
-    row.put("confirmFirst", confirmFirst);
     ObjectNode refused = row.putObject("refused");
     int refusals = 0;
     for (ILoggingEvent event : audit) {
@@ -119,7 +121,10 @@ public final class GuardDecisionTally {
         .isTrue();
   }
 
-  /** Writes the class's tally (every recorded test by name, and totals) under build/. */
+  /**
+   * Writes the class's tally (every recorded test by name, and totals) under the owning Gradle test
+   * build directory.
+   */
   public static void write(Class<?> testClass) throws Exception {
     List<ObjectNode> rows = List.copyOf(RECORDS.getOrDefault(testClass.getSimpleName(), List.of()));
     ObjectNode out = JSON.createObjectNode().put("class", testClass.getName());
@@ -129,7 +134,6 @@ public final class GuardDecisionTally {
     ObjectNode passed = totals.putObject("passed");
     GUARDED_KINDS.forEach(kind -> passed.put(kind, 0));
     ObjectNode refused = totals.putObject("refused");
-    int confirmFirst = 0;
     for (ObjectNode row : rows) {
       tests.add(row);
       row.path("passed")
@@ -141,10 +145,8 @@ public final class GuardDecisionTally {
           .forEachRemaining(
               e ->
                   refused.put(e.getKey(), refused.path(e.getKey()).asInt() + e.getValue().asInt()));
-      confirmFirst += row.path("confirmFirst").asInt();
     }
-    totals.put("confirmFirst", confirmFirst);
-    Path directory = Path.of("build", "guard-tally");
+    Path directory = buildDirectory().resolve("guard-tally");
     Files.createDirectories(directory);
     Files.writeString(
         directory.resolve(testClass.getSimpleName() + ".json"),

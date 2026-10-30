@@ -45,7 +45,6 @@ final class ObservedReplayBindingBuilder {
     ObjectNode scope = PublicationContracts.copy(verified.path("policy").path("scope"));
     scope.put("principalId", principal);
     String scopeHash = GuidedContracts.hash(scope);
-    ObjectNode policy = pins.policy(scope);
     ObjectNode supported = pins.supported(verified.path("artifact").path("profile"), null);
     if (!checkBeforePins) {
       ceiling = PublicationContracts.millisecond(ceiling);
@@ -65,7 +64,6 @@ final class ObservedReplayBindingBuilder {
             .put("scopeHash", scopeHash)
             .put("profileHash", GuidedContracts.hash(supported.path("profile")))
             .put("buildHash", GuidedContracts.hash(supported.path("build")))
-            .put("currentPolicyHash", GuidedContracts.hash(policy))
             .put("issuedAt", PublicationContracts.time(issued))
             .put("expiresAt", PublicationContracts.time(ceiling));
     ObjectNode binding =
@@ -93,7 +91,7 @@ final class ObservedReplayBindingBuilder {
     binding.set("requiredProfile", supported.path("profile"));
     binding.set("requiredBuild", supported.path("build"));
     binding.set("scope", scope);
-    binding.put("scopeHash", scopeHash).put("currentPolicyHash", GuidedContracts.hash(policy));
+    binding.put("scopeHash", scopeHash);
     binding.set("replayGrant", grant);
     contracts.validate("v3/replay-job#/definitions/ExecutionBinding", binding);
     return new ObservedReplayAuthorization.Prepared(binding);

@@ -2,9 +2,9 @@ import { http, HttpResponse } from 'msw';
 import { createAuthoringHandlers } from './authoringHandlers';
 import { resetAuthoringMocks, stepRefsOf } from './authoringState';
 import { createCapabilityHandlers, resetCapabilityMocks } from './capabilityHandlers';
-import { createGuidedHandlers, guidedSessionsForTest, resetGuidedMocks } from './guidedHandlers';
+import { createGuidedHandlers, guidedSessionPublished, guidedSessionsForTest, resetGuidedMocks } from './guidedHandlers';
 import { resetSecretsMocks, secretsHandlers } from './secretsHandlers';
-import { createSchedulingHandlers, resetSchedulingMocks } from './schedulingHandlers';
+import { createSchedulesHandlers, resetSchedulesMocks } from './schedulesHandlers';
 import {
   CANCELLED_ERROR_CODE,
   isTerminalExecutionStatus,
@@ -118,7 +118,7 @@ const acceptedExecutionReads = new Map<string, number>();
 const idempotency = new Map<string, string>();
 
 export function resetStudioMocks(): void {
-  resetSchedulingMocks();
+  resetSchedulesMocks();
   resetAuthoringMocks();
   resetGuidedMocks();
   resetCapabilityMocks();
@@ -213,7 +213,7 @@ function validateVariableReferences(
 
 /**
  * The run-gate corpus (`readinessFixtures.ts`). Reachable by id from `GET /tests/{id}` and the
- * scheduling handlers, and deliberately **not** folded into the list, so the list projection and
+ * schedule handlers, and deliberately **not** folded into the list, so the list projection and
  * the existing scoping fixtures keep their counts.
  */
 const readinessDraft = (id: unknown): TestDto | undefined =>
@@ -272,6 +272,53 @@ function readAcceptedReplay(execution: ExecutionSnapshot): ExecutionSnapshot {
   };
   acceptedExecutions = [next, ...acceptedExecutions.filter((candidate) => candidate.executionId !== next.executionId)];
   return next;
+}
+
+/**
+ * The PENDING snapshot of a replay the mock accepts for `test`'s confirmed revision. `triggerSource`
+ * is `MANUAL` for `POST /tests/{id}/execute` and `AFTER_LEARN` for the proof replay the finalize
+ * request accepts inside the publication commit.
+ */
+function pendingReplay(
+  test: TestDto,
+  executionId: string,
+  triggerSource: 'MANUAL' | 'AFTER_LEARN',
+): ExecutionSnapshot {
+  const acceptedAt = new Date().toISOString();
+  return {
+    executionId,
+    triggerSource,
+    testId: test.id,
+    csiId: test.csiId,
+    revisionId: test.confirmedRevisionId,
+    status: 'PENDING',
+    errorCode: null,
+    acceptedAt,
+    startedAt: null,
+    endedAt: null,
+    durationMs: null,
+    stepResults: test.steps.map((originalText, stepIndex) => ({
+      stepIndex,
+      originalText,
+      status: 'PENDING' as const,
+      offsetMs: null,
+      durationMs: null,
+      message: null,
+    })),
+    logs: [{ at: acceptedAt, level: 'INFO', message: 'Synthetic MSW replay accepted; no browser will run.' }],
+    logsTruncated: false,
+    video: { status: 'PROCESSING', error: null, expiresAt: null, partial: false },
+    videoPath: null,
+    runtime: {
+      playwright: null,
+      chromium: null,
+      validator: null,
+      executor: null,
+      image: null,
+    },
+    revision: 1,
+    streamComplete: false,
+  };
 }
 
 /** The server's batch name lookup: the live test's name, or `null` once it is deleted. */
@@ -396,8 +443,16 @@ function serveExecutionVideo(execution: ExecutionSnapshot | undefined, request: 
   });
 }
 
+/**
+ * The ordinary check schedule API, over the Studio test store (a UI test is scheduled through it). It
+ * is not a Studio route, so it is not in `studioHandlers`, whose handlers each map to a public
+ * operation of the Studio contract; every server that serves `studioHandlers` serves these as well.
+ */
+export const scheduleHandlers = createSchedulesHandlers({
+  getTest: (id) => allTests().find((test) => test.id === id) ?? readinessDraft(id),
+});
+
 export const studioHandlers = [
-  ...createSchedulingHandlers({ getTest: id => allTests().find(test => test.id === id) ?? readinessDraft(id), getExecutions: () => allExecutions() }),
   // The guided, capability and secrets mirrors (STUDIO-OBS-008 lanes L2b and L4), over the same
   // draft store the authoring routes write, so a draft created or saved here is the one they learn.
   ...createGuidedHandlers({
@@ -421,6 +476,13 @@ export const studioHandlers = [
       };
       created = [published, ...created.filter(test => test.id !== testId)];
       return true;
+    },
+    acceptProof: ({ testId }) => {
+      const test = allTests().find(candidate => candidate.id === testId);
+      if (!test) return null;
+      const executionId = crypto.randomUUID();
+      acceptedExecutions = [pendingReplay(test, executionId, 'AFTER_LEARN'), ...acceptedExecutions];
+      return executionId;
     },
   }),
   ...createCapabilityHandlers({ getTest: id => allTests().find(test => test.id === id) ?? readinessDraft(id) }),
@@ -533,41 +595,7 @@ export const studioHandlers = [
     if (key) {
       idempotency.set(key, executionId);
     }
-    const acceptedAt = new Date().toISOString();
-    const pendingExecution: ExecutionSnapshot = {
-        executionId,
-        triggerSource: 'MANUAL',
-        testId: test.id,
-        csiId: test.csiId,
-        revisionId: test.confirmedRevisionId,
-        status: 'PENDING',
-        errorCode: null,
-        acceptedAt,
-        startedAt: null,
-        endedAt: null,
-        durationMs: null,
-        stepResults: test.steps.map((originalText, stepIndex) => ({
-          stepIndex,
-          originalText,
-          status: 'PENDING' as const,
-          offsetMs: null,
-          durationMs: null,
-          message: null,
-        })),
-        logs: [{ at: acceptedAt, level: 'INFO', message: 'Synthetic MSW replay accepted; no browser will run.' }],
-        logsTruncated: false,
-        video: { status: 'PROCESSING', error: null, expiresAt: null, partial: false },
-        videoPath: null,
-        runtime: {
-          playwright: null,
-          chromium: null,
-          validator: null,
-          executor: null,
-          image: null,
-        },
-        revision: 1,
-        streamComplete: false,
-      };
+    const pendingExecution = pendingReplay(test, executionId, 'MANUAL');
     acceptedExecutions = [pendingExecution, ...acceptedExecutions];
     return HttpResponse.json({ executionId, status: 'PENDING' }, { status: 202 });
   }),
@@ -641,7 +669,8 @@ export const studioHandlers = [
 
   /**
    * `GET /guided-sessions/{id}/video` (`getGuidedSessionVideo`). The recording is the same fixture
-   * bytes and the same status, range and refusal rules as the execution video; a session the mirror
+   * bytes and the same status, range and refusal rules as the execution video (`404 VIDEO_UNAVAILABLE` for a
+   * session that published, whose proof is the replay); a session the mirror
    * never started, like an unreadable one, answers `403 STUDIO_FORBIDDEN`. The guided mirror's
    * `result.evidence.video.status` is what a client checks before it builds this path, so this
    * route serves the recording for every session it knows (a mirror simplification: it does not
@@ -649,6 +678,13 @@ export const studioHandlers = [
    */
   http.get(`${BASE}/guided-sessions/:id/video`, ({ params, request }) => {
     const sessionId = String(params.id);
+    // A published learn discards its recording; its proof is the replay execution (`result.proof`).
+    if (guidedSessionPublished(sessionId)) {
+      return HttpResponse.json(
+        { error: 'VIDEO_UNAVAILABLE', message: 'The learning recording of a published session is not retained.' },
+        { status: 404 },
+      );
+    }
     const known = [...allTests(), ...readinessDrafts].some((test) =>
       guidedSessionsForTest(test.id).includes(sessionId));
     const recorded = mockExecutions.find((execution) => execution.video.status === 'AVAILABLE');

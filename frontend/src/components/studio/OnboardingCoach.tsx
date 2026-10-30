@@ -61,7 +61,7 @@ const OnboardingCoach: React.FC<OnboardingCoachProps> = ({
   const msg = messages[step] || messages[0];
   return (
     <Fade in timeout={400}>
-      <Paper elevation={0} variant="outlined" sx={{ p: 2, borderStyle: 'dashed', bgcolor: 'background.paper' }}>
+      <Paper elevation={0} variant="outlined" sx={{ p: 2, mb: 2, borderStyle: 'dashed', bgcolor: 'background.paper' }}>
         <Box ref={anchorRef}>
           <Typography variant="subtitle1" fontWeight={700}>{msg.title}</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>{msg.body}</Typography>

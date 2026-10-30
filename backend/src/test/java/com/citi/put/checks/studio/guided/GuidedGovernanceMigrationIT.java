@@ -10,7 +10,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.AfterAll;
@@ -25,7 +24,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  *
  * <p>Covers the replaced guards column by column (AR-2 d attempt guard, AR-2 e publication guard),
  * the session prune guard and {@code studio_guided_prune_session} (AR-2 b), the per-CSI counters
- * (AR-2 c), the governed-policy chain (AR-2 h), and a V18 → head upgrade over populated rows.
+ * (AR-2 c), and a V18 → head upgrade over populated rows.
  *
  * <p>Seeding note: a prunable session needs {@code expires_at} at least one hour in the past, while
  * V15 capture refuses any copy once {@code expires_at <= clock_timestamp()}. The two can never hold
@@ -51,47 +50,19 @@ class GuidedGovernanceMigrationIT {
           "teardownStatus",
           "publicationRevisionId",
           "publicationRevisionDigest",
-          "evidenceRef");
+          "evidenceRef",
+          // ADR-SC-007 (V29): the runner-time gate that ended a run is a closed token like
+          // errorCode.
+          "refusalGate");
   private static final String FULL_PROGRESS =
       "{\"stepIndex\":2,\"errorCode\":\"LOGIN_REQUIRED\",\"detail\":{\"stepId\":\"s\","
           + "\"loginStepsPresent\":true},\"teardownStatus\":\"DONE\",\"evidenceRef\":\"e\","
+          + "\"refusalGate\":\"RUNNER_OPTION_NOT_PRESENT\","
           + "\"publicationRevisionId\":\"r\",\"publicationRevisionDigest\":\"d\","
           + "\"observation\":{\"nodes\":[{\"name\":\"Customer balance\"}]},"
           + "\"executionEvidence\":{\"kind\":\"page\"},\"clarification\":{\"q\":1},"
           + "\"modelReservations\":[1],\"origin\":\"https://a.test\",\"futureKey\":true}";
   private static final String HASH = "a".repeat(64);
-
-  /** A minimal document the C2b normative check accepts; both hashes are computed in SQL. */
-  private static final String POLICY_DOC =
-      "{\"schemaVersion\":3,\"allowedOrigins\":[\"https://a.test\"],"
-          + "\"applicationPolicy\":{\"policyRuleId\":\"app\",\"allowStructuralDiscovery\":true,"
-          + "\"readGrants\":[]},\"sideEffectStance\":\"ALLOW\",\"destructiveVocabulary\":[\"delete\"]}";
-
-  /**
-   * c2b-spec.json canonicalVectors.guidedPolicyDocumentVector (document, documentHash,
-   * observationPolicyHash). Transcribed because the contracts fixture key lands with C-int; the
-   * hashes are asserted against PostgreSQL's own studio_publication_hash.
-   */
-  private static final String VECTOR_DOC =
-      "{\"schemaVersion\":3,\"allowedOrigins\":[\"https://orders.example.test\","
-          + "\"https://status.example.test:8443\"],\"applicationPolicy\":{\"policyRuleId\":"
-          + "\"orders-app\",\"allowStructuralDiscovery\":true,\"readGrants\":[{\"policyRuleId\":"
-          + "\"orders-form-values\",\"origin\":\"https://orders.example.test\",\"region\":"
-          + "{\"kind\":\"application\"},\"controlValue\":{\"classification\":"
-          + "\"nonsecretApproved\",\"types\":[\"text\",\"email\"]}},{\"policyRuleId\":"
-          + "\"status-text\",\"origin\":\"https://status.example.test:8443\",\"region\":"
-          + "{\"kind\":\"role\",\"role\":\"region\",\"name\":\"Order status\",\"exact\":true},"
-          + "\"visibleText\":{\"classification\":\"permittedBusinessData\"},\"controlValue\":"
-          + "{\"classification\":\"nonsecretApproved\",\"types\":[\"search\"]}}]},"
-          + "\"sideEffectStance\":\"CLARIFY_FIRST\",\"destructiveVocabulary\":[\"cancel "
-          + "subscription\",\"close account\",\"confirm payment\",\"deactivate\",\"delete\","
-          + "\"destroy\",\"erase\",\"pay\",\"place order\",\"purge\",\"remove\",\"revoke\","
-          + "\"send money\",\"submit order\",\"transfer\"]}";
-
-  private static final String VECTOR_DOCUMENT_HASH =
-      "a9f1fb8a9652554d36a30128bcfaf542972f700ced7381e5db67ff35b8bdb67b";
-  private static final String VECTOR_OBSERVATION_HASH =
-      "8a3b7e830ca20b070b59fcbf05781fe3603cc860d64bbbbff611cf1a25cbf9f9";
 
   @BeforeAll
   static void migrate() throws SQLException {
@@ -107,7 +78,7 @@ class GuidedGovernanceMigrationIT {
   // ── AR-2 b: retained keys, session prune guard, prune function ─────────────────────────────
 
   @Test
-  void retainedKeysAreTheSevenKeyAllowlist() throws SQLException {
+  void retainedKeysAreTheEightKeyAllowlist() throws SQLException {
     try (Connection c = connect()) {
       assertThat(rows(c, "SELECT unnest(studio_guided_progress_retained_keys())"))
           .containsExactlyElementsOf(RETAINED);
@@ -256,7 +227,7 @@ class GuidedGovernanceMigrationIT {
 
   // ── AR-2 d: the replaced attempt guard ─────────────────────────────────────────────────────
 
-  /** The 17 columns other than safe_result, read from the head schema (never a kept list). */
+  /** The 20 columns other than safe_result, read from the head schema (never a kept list). */
   @Test
   void onAPrunedSessionEveryOtherAttemptColumnStaysImmutable() throws SQLException {
     try (Connection c = transaction()) {
@@ -285,6 +256,10 @@ class GuidedGovernanceMigrationIT {
               "input_tokens",
               "output_tokens",
               "rejection_reason",
+              // ADR-SC-007 (V29): the gate audit is as immutable as the rest.
+              "rejection_gate",
+              "intent_path",
+              "intent_fields",
               "created_at",
               "updated_at");
       List<String> accepted = new ArrayList<>();
@@ -735,275 +710,6 @@ class GuidedGovernanceMigrationIT {
     }
   }
 
-  // ── AR-2 h: governed policy chain ──────────────────────────────────────────────────────────
-
-  @Test
-  void versionsAreDenseImmutableAndApprovalActivatesWithAnAuditChain() throws SQLException {
-    try (Connection c = transaction()) {
-      UUID policy = policy(c, "C1");
-      reject(c, version(policy, 2, "author"), "sequence invalid");
-      exec(c, version(policy, 1, "author"));
-      reject(c, version(policy, 1, "author"), "sequence invalid");
-      reject(c, "UPDATE studio_guided_policy_versions SET created_by='x'", "immutable");
-      reject(c, "DELETE FROM studio_guided_policy_versions", "immutable");
-      reject(c, "UPDATE studio_guided_policies SET active_version=1", "requires approval");
-      reject(c, approve(policy, 1, "author"), "must not be the author");
-      exec(c, approve(policy, 1, "approver"));
-      assertThat(
-              scalar(
-                  c,
-                  "SELECT active_version FROM studio_guided_policies WHERE policy_id='"
-                      + policy
-                      + "'"))
-          .isEqualTo("1");
-      exec(c, version(policy, 2, "author"));
-      exec(c, approve(policy, 2, "approver"));
-      assertThat(
-              rows(
-                  c,
-                  "SELECT event||':'||COALESCE(version::text,'-')||':'||principal_id FROM"
-                      + " studio_guided_policy_audit WHERE policy_id='"
-                      + policy
-                      + "' ORDER BY audit_id"))
-          .containsExactly(
-              "POLICY_CREATED:-:author",
-              "VERSION_CREATED:1:author",
-              "VERSION_APPROVED:1:approver",
-              "VERSION_ACTIVATED:1:approver",
-              "VERSION_CREATED:2:author",
-              "VERSION_APPROVED:2:approver",
-              "VERSION_ACTIVATED:2:approver");
-      assertThat(
-              scalar(
-                  c,
-                  "SELECT count(*) FROM studio_guided_policy_audit WHERE policy_id='"
-                      + policy
-                      + "' AND version IS NOT NULL AND document_hash IS DISTINCT FROM"
-                      + " studio_publication_hash('"
-                      + POLICY_DOC
-                      + "'::jsonb)"))
-          .isEqualTo("0");
-      c.rollback();
-    }
-  }
-
-  @Test
-  void activationNeverRegressesAndIdentityIsImmutable() throws SQLException {
-    try (Connection c = transaction()) {
-      UUID policy = policy(c, "C1");
-      exec(c, version(policy, 1, "author"));
-      exec(c, version(policy, 2, "author"));
-      exec(c, approve(policy, 2, "approver"));
-      reject(c, approve(policy, 1, "approver"), "approval is stale");
-      reject(c, "UPDATE studio_guided_policies SET active_version=1", "cannot regress");
-      reject(c, "UPDATE studio_guided_policies SET active_version=NULL", "cannot regress");
-      reject(c, "UPDATE studio_guided_policies SET active_version=3", "requires approval");
-      for (String change :
-          List.of(
-              "csi_id='C9'",
-              "application_id='x'",
-              "environment_id='x'",
-              "created_by='x'",
-              "created_at=created_at-interval '1 day'",
-              "policy_id=gen_random_uuid()")) {
-        reject(c, "UPDATE studio_guided_policies SET " + change, "identity is immutable");
-      }
-      reject(c, "DELETE FROM studio_guided_policies", "immutable");
-      reject(c, "UPDATE studio_guided_policy_approvals SET approval_ref='x'", "immutable");
-      reject(c, "DELETE FROM studio_guided_policy_approvals", "immutable");
-      reject(
-          c,
-          "INSERT INTO studio_guided_policies(policy_id,csi_id,application_id,"
-              + "environment_id,created_by,active_version) VALUES (gen_random_uuid(),'C2','a','e',"
-              + "'author',1)",
-          "requires approval");
-      c.rollback();
-    }
-  }
-
-  @Test
-  void auditIsWrittenByTriggersOnlyAndIsImmutable() throws SQLException {
-    try (Connection c = transaction()) {
-      UUID policy = policy(c, "C1");
-      reject(
-          c,
-          "INSERT INTO studio_guided_policy_audit(policy_id,event,principal_id) VALUES ('"
-              + policy
-              + "','POLICY_CREATED','forger')",
-          "written by triggers only");
-      reject(c, "UPDATE studio_guided_policy_audit SET principal_id='x'", "audit is immutable");
-      reject(c, "DELETE FROM studio_guided_policy_audit", "audit is immutable");
-      c.rollback();
-    }
-  }
-
-  @Test
-  void sessionFreezeBindsOnlyTheApprovedActiveVersionForTheSessionCsi() throws SQLException {
-    try (Connection c = transaction()) {
-      UUID policy = policy(c, "C1");
-      exec(c, version(policy, 1, "author"));
-      String id = session(c, "PREPARING", "-10 minutes", "{}");
-      String hash = observationHash(c);
-      String freeze =
-          "INSERT INTO studio_guided_session_policies VALUES ('"
-              + id
-              + "','"
-              + policy
-              + "',%d,'%s')";
-      reject(c, freeze.formatted(1, hash), "not approved and active");
-      exec(c, approve(policy, 1, "approver"));
-      exec(c, version(policy, 2, "author"));
-      reject(c, freeze.formatted(2, hash), "not approved and active");
-      reject(c, freeze.formatted(1, "c".repeat(64)), "mismatch");
-      UUID other = policy(c, "C2");
-      exec(c, version(other, 1, "author"));
-      exec(c, approve(other, 1, "approver"));
-      reject(
-          c,
-          "INSERT INTO studio_guided_session_policies VALUES ('"
-              + id
-              + "','"
-              + other
-              + "',1,'"
-              + hash
-              + "')",
-          "mismatch");
-      exec(c, freeze.formatted(1, hash));
-      reject(c, "UPDATE studio_guided_session_policies SET policy_version=2", "immutable");
-      reject(c, "DELETE FROM studio_guided_session_policies", "immutable");
-      c.rollback();
-    }
-  }
-
-  @Test
-  void policyDocumentShapeIsClosed() throws SQLException {
-    try (Connection c = connect()) {
-      assertThat(scalar(c, "SELECT studio_guided_policy_document('" + POLICY_DOC + "')"))
-          .isEqualTo("t");
-      assertThat(scalar(c, "SELECT studio_guided_policy_document('" + VECTOR_DOC + "')"))
-          .isEqualTo("t");
-      String origins = "[\"https://a.test\"]";
-      String ten =
-          "["
-              + String.join(
-                  ",",
-                  java.util.stream.IntStream.rangeClosed(1, 10)
-                      .mapToObj(i -> "\"https://h" + i + ".test\"")
-                      .toList())
-              + "]";
-      String eleven = ten.replace("]", ",\"https://h11.test\"]");
-      assertThat(
-              scalar(
-                  c,
-                  "SELECT studio_guided_policy_document('"
-                      + POLICY_DOC.replace(origins, ten)
-                      + "')"))
-          .as("10 origins")
-          .isEqualTo("t");
-      assertThat(
-              scalar(
-                  c,
-                  "SELECT studio_guided_policy_document('"
-                      + POLICY_DOC.replace(origins, "[\"http://[::1]:8080\"]")
-                      + "')"))
-          .as("IPv6 origin")
-          .isEqualTo("t");
-      Map<String, String> invalid = new java.util.LinkedHashMap<>();
-      invalid.put("missing schemaVersion", POLICY_DOC.replace("\"schemaVersion\":3,", ""));
-      invalid.put(
-          "schemaVersion 2", POLICY_DOC.replace("\"schemaVersion\":3", "\"schemaVersion\":2"));
-      invalid.put("11 origins", POLICY_DOC.replace(origins, eleven));
-      invalid.put("no origins", POLICY_DOC.replace(origins, "[]"));
-      invalid.put("uppercase-host origin", POLICY_DOC.replace(origins, "[\"https://A.test\"]"));
-      invalid.put("origin with path", POLICY_DOC.replace(origins, "[\"https://a.test/x\"]"));
-      invalid.put(
-          "duplicate origin",
-          POLICY_DOC.replace(origins, "[\"https://a.test\",\"https://a.test\"]"));
-      invalid.put("readGrants absent", POLICY_DOC.replace(",\"readGrants\":[]", ""));
-      invalid.put(
-          "allowStructuralDiscovery false",
-          POLICY_DOC.replace(
-              "\"allowStructuralDiscovery\":true", "\"allowStructuralDiscovery\":false"));
-      invalid.put(
-          "extra applicationPolicy key",
-          POLICY_DOC.replace("\"readGrants\":[]", "\"readGrants\":[],\"extra\":1"));
-      invalid.put(
-          "33 readGrants",
-          POLICY_DOC.replace(
-              "\"readGrants\":[]",
-              "\"readGrants\":["
-                  + String.join(",", java.util.Collections.nCopies(33, "{}"))
-                  + "]"));
-      invalid.put(
-          "duplicate vocabulary", POLICY_DOC.replace("[\"delete\"]", "[\"delete\",\"delete\"]"));
-      invalid.put("uppercase vocabulary", POLICY_DOC.replace("[\"delete\"]", "[\"Delete\"]"));
-      invalid.put("empty vocabulary", POLICY_DOC.replace("[\"delete\"]", "[]"));
-      invalid.put(
-          "long phrase", POLICY_DOC.replace("[\"delete\"]", "[\"" + "d".repeat(65) + "\"]"));
-      invalid.put("stance", POLICY_DOC.replace("ALLOW", "MAYBE"));
-      invalid.put("missing stance", POLICY_DOC.replace(",\"sideEffectStance\":\"ALLOW\"", ""));
-      invalid.put(
-          "extra top-level key",
-          POLICY_DOC.replace("{\"schemaVersion\"", "{\"extra\":1,\"schemaVersion\""));
-      invalid.put(
-          "oversized",
-          POLICY_DOC.replace(
-              "\"policyRuleId\":\"app\"", "\"policyRuleId\":\"" + "p".repeat(65536) + "\""));
-      for (var entry : invalid.entrySet()) {
-        assertThat(scalar(c, "SELECT studio_guided_policy_document('" + entry.getValue() + "')"))
-            .as(entry.getKey())
-            .isEqualTo("f");
-      }
-    }
-  }
-
-  @Test
-  void versionInsertRequiresBothHashesToMatchPostgresCanonicalHash() throws SQLException {
-    try (Connection c = transaction()) {
-      assertThat(scalar(c, "SELECT studio_publication_hash('" + VECTOR_DOC + "'::jsonb)"))
-          .as("guidedPolicyDocumentVector documentHash")
-          .isEqualTo(VECTOR_DOCUMENT_HASH);
-      assertThat(
-              scalar(
-                  c,
-                  "SELECT studio_publication_hash('"
-                      + VECTOR_DOC
-                      + "'::jsonb->'applicationPolicy')"))
-          .as("guidedPolicyDocumentVector observationPolicyHash")
-          .isEqualTo(VECTOR_OBSERVATION_HASH);
-      UUID policy = policy(c, "C1");
-      String insert =
-          "INSERT INTO studio_guided_policy_versions(policy_id,version,document,document_hash,"
-              + "observation_policy_hash,created_by) VALUES ('"
-              + policy
-              + "',1,'"
-              + VECTOR_DOC
-              + "','%s','%s','author')";
-      // The spec's column-level hash CHECKs reference two columns, so PostgreSQL names them
-      // generically; resolve each name from its definition rather than assuming an order.
-      String documentCheck =
-          hashConstraint(c, "(document_hash)::text = studio_publication_hash(document)");
-      String observationCheck =
-          hashConstraint(
-              c, "(observation_policy_hash)::text = studio_publication_hash((document ->");
-      assertThat(documentCheck).isNotEqualTo(observationCheck);
-      reject(c, insert.formatted("0".repeat(64), VECTOR_OBSERVATION_HASH), documentCheck + "\"");
-      reject(c, insert.formatted(VECTOR_DOCUMENT_HASH, "0".repeat(64)), observationCheck + "\"");
-      reject(
-          c, insert.formatted(VECTOR_OBSERVATION_HASH, VECTOR_DOCUMENT_HASH), "check constraint");
-      exec(c, insert.formatted(VECTOR_DOCUMENT_HASH, VECTOR_OBSERVATION_HASH));
-      assertThat(
-              scalar(
-                  c,
-                  "SELECT document_hash||':'||observation_policy_hash FROM"
-                      + " studio_guided_policy_versions WHERE policy_id='"
-                      + policy
-                      + "'"))
-          .isEqualTo(VECTOR_DOCUMENT_HASH + ":" + VECTOR_OBSERVATION_HASH);
-      c.rollback();
-    }
-  }
-
   // ── Out of scope by ruling (S-1) and the V18 → head upgrade ────────────────────────────────
 
   @Test
@@ -1043,11 +749,12 @@ class GuidedGovernanceMigrationIT {
     flyway(url, null).migrate();
     flyway(url, null).validate();
     try (Connection c = connect(url)) {
-      assertThat(scalar(c, "SELECT max(version::int) FROM flyway_schema_history")).isEqualTo("23");
+      assertThat(scalar(c, "SELECT max(version::int) FROM flyway_schema_history")).isEqualTo("29");
       assertThat(
               scalar(
                   c,
-                  "SELECT (to_jsonb(s)-'pruned_at')::text||(to_jsonb(a)-'rejection_reason')::text FROM"
+                  "SELECT (to_jsonb(s)-'pruned_at')::text||(to_jsonb(a)-'rejection_reason'"
+                      + "-'rejection_gate'-'intent_path'-'intent_fields')::text FROM"
                       + " studio_guided_sessions s JOIN studio_guided_model_attempts a USING(session_id)"
                       + " WHERE session_id='"
                       + id
@@ -1243,9 +950,11 @@ class GuidedGovernanceMigrationIT {
             + "','documentId','doc','generation',0,'origin','https://a.test',"
             + "'scopeHash','"
             + h
-            + "','observedAt','t','coverage',jsonb_build_object('mode','semantic',"
-            + "'complete',true,'truncated',false,'withheldRegions',0,'reason','complete',"
-            + "'passwordControls',0),'nodes','[]'::jsonb),clock_timestamp())");
+            + "','observedAt','t','coverage',jsonb_build_object('withheldRegions',0,"
+            + "'unsupportedRegions',0,'passwordControls',0),'projection',"
+            + "jsonb_build_object('projected',false,'tier',NULL::text,'totalNodes',1,"
+            + "'shownNodes',1,'notShown',0,'outlineBytes',10),'readRuleId',NULL::text,"
+            + "'outline','- document','facts','{}'::jsonb),clock_timestamp())");
     String evidence = "jsonb_build_object('kind','page','documentId','doc','generation',0)";
     String proposal =
         "jsonb_build_object('schemaVersion',3,'sessionId','"
@@ -1277,7 +986,7 @@ class GuidedGovernanceMigrationIT {
             + "',"
             + "'authoredInputsHash','"
             + h
-            + "','expiresAt','t')";
+            + "','expiresAt','t','target','null'::jsonb)";
     exec(
         c,
         "INSERT INTO studio_guided_publication_preparations(session_id,preparation_id,"
@@ -1481,62 +1190,6 @@ class GuidedGovernanceMigrationIT {
       }
     }
     return accepted;
-  }
-
-  private static UUID policy(Connection c, String csi) throws SQLException {
-    UUID id = UUID.randomUUID();
-    exec(
-        c,
-        "INSERT INTO studio_guided_policies(policy_id,csi_id,application_id,environment_id,"
-            + "created_by) VALUES ('"
-            + id
-            + "','"
-            + csi
-            + "','app','env','author')");
-    return id;
-  }
-
-  private static String version(UUID policy, int version, String author) {
-    return "INSERT INTO studio_guided_policy_versions(policy_id,version,document,document_hash,"
-        + "observation_policy_hash,created_by) SELECT '"
-        + policy
-        + "',"
-        + version
-        + ",d,studio_publication_hash(d),studio_publication_hash(d->'applicationPolicy'),'"
-        + author
-        + "' FROM (SELECT '"
-        + POLICY_DOC
-        + "'::jsonb AS d) x";
-  }
-
-  /** The name of the single studio_guided_policy_versions CHECK whose definition contains text. */
-  private static String hashConstraint(Connection c, String definition) throws SQLException {
-    List<String> names =
-        rows(
-            c,
-            "SELECT conname FROM pg_constraint WHERE"
-                + " conrelid='studio_guided_policy_versions'::regclass AND contype='c'"
-                + " AND strpos(pg_get_constraintdef(oid),'"
-                + definition.replace("'", "''")
-                + "')>0");
-    assertThat(names).as(definition).hasSize(1);
-    return names.get(0);
-  }
-
-  private static String observationHash(Connection c) throws SQLException {
-    return scalar(
-        c, "SELECT studio_publication_hash('" + POLICY_DOC + "'::jsonb->'applicationPolicy')");
-  }
-
-  private static String approve(UUID policy, int version, String approver) {
-    return "INSERT INTO studio_guided_policy_approvals(policy_id,version,approved_by,approval_ref)"
-        + " VALUES ('"
-        + policy
-        + "',"
-        + version
-        + ",'"
-        + approver
-        + "','SEC-1')";
   }
 
   private static String prune(Connection c, String id, String window) throws SQLException {

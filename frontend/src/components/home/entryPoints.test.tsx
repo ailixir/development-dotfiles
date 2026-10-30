@@ -1,6 +1,6 @@
 import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { act, cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
@@ -12,7 +12,6 @@ import sourcesReducer, { fetchSources } from '@/store/slices/sourcesSlice';
 import featuresReducer, { fetchFeatures } from '@/store/slices/featuresSlice';
 import type { CheckSource } from '@/services/api/sourcesApi';
 import type { FeatureFlag, FeaturesResponse } from '@/services/api/featuresApi';
-import CommandPalette from './CommandPalette';
 import DashboardPage from '@/pages/DashboardPage/DashboardPage';
 
 // The Dashboard loads checks and upcoming executions on mount; these tests are about the entry points
@@ -71,32 +70,6 @@ function renderWith(availability: Availability, ui: React.ReactElement) {
 }
 
 afterEach(cleanup);
-
-describe('command palette UI tests entry', () => {
-  const palette = () => <CommandPalette open onClose={() => undefined} />;
-
-  it("opens /checks/all?type=UI_TEST when availability is 'on'", async () => {
-    renderWith('on', palette());
-    await userEvent.click(screen.getByText('UI tests'));
-    expect(screen.getByTestId('location')).toHaveTextContent('/checks/all?type=UI_TEST');
-  });
-
-  it.each<Availability>(['pending', 'off'])("is absent when availability is '%s'", (availability) => {
-    renderWith(availability, palette());
-    expect(screen.queryByText('UI tests')).not.toBeInTheDocument();
-    expect(screen.getByText('All Checks')).toBeInTheDocument();
-  });
-
-  it("appears once a 'pending' availability resolves to 'on'", () => {
-    const store = renderWith('pending', palette());
-    expect(screen.queryByText('UI tests')).not.toBeInTheDocument();
-    act(() => {
-      store.dispatch(fetchSources.fulfilled([source('UI_TEST', true)], ''));
-      store.dispatch(fetchFeatures.fulfilled({ sources: [], features: [feature('STUDIO', true)] }, ''));
-    });
-    expect(screen.getByText('UI tests')).toBeInTheDocument();
-  });
-});
 
 describe('dashboard Open UI tests quick action', () => {
   const name = /open ui tests/i;

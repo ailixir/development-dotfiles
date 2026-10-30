@@ -1,3 +1,4 @@
+import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 import {mutableCurrentJob} from '../helpers/currentWorlds.js';
 import {createFakeScheduler} from '../helpers/scheduler.js';
 import {until} from '../helpers/harness.js';
@@ -18,7 +19,7 @@ import { loadConfig } from '../../src/server/config.js';
 import { testFingerprint, testTls } from '../helpers/guidedTls.js';
 const listener = { tls: testTls, controllerCertificateFingerprint256: testFingerprint };
 import { createRecordingLogSink } from '../../src/server/logging.js';
-import type { TrustedPolicy } from '../../src/executor/observedOperations.js';
+import type { } from '../../src/executor/observedOperations.js';
 import { createFakeScratchStore } from '../helpers/runner.js';
 import type { HttpOutcome } from '../../src/reporting/httpClient.js';
 import { CONTROL_WINDOW_MARGIN_MS } from '../../src/server/runCoordinator.js';
@@ -36,7 +37,7 @@ describe('observed admission sends once and never confuses receipt with authorit
     it.each(['timeout', 'redirect', 'oversize', 'wrong-receipt', 'malformed'])('stops before scratch/browser on %s', async (mode) => {
         let sends = 0, launches = 0;
         const scratch = createFakeScratchStore();
-        const config = loadConfig({ STUDIO_RUNNER_SERVICE_IDENTITY: 'service', STUDIO_RUNNER_CALLBACK_IDENTITY: 'callback', STUDIO_RUNNER_CALLBACK_BASE_URL: 'https://backend.test' });
+        const config = loadConfig({ STUDIO_RUNNER_SERVICE_IDENTITY: 'service', STUDIO_RUNNER_CALLBACK_IDENTITY: 'callback', STUDIO_RUNNER_CALLBACK_BASE_URL: 'https://backend.test', STUDIO_RUNNER_ALLOWED_DOMAINS: TEST_DOMAINS.join(','), STUDIO_RUNNER_ALLOW_ALL_DOMAINS: 'false' });
         const app = createApplication(config, { listener, runtimeVersions: {}, scratch, launcher: { launch() { launches++; return Promise.reject(Error('unexpected')); } }, http: { send(request): Promise<HttpOutcome> {
                     sends++;
                     expect(request.maxResponseBytes).toBe(65536);
@@ -49,7 +50,7 @@ describe('observed admission sends once and never confuses receipt with authorit
                     if (mode === 'malformed')
                         return Promise.resolve({ kind: 'response', status: 200, body: '{"a":1,"a":2}' });
                     return Promise.resolve({ kind: 'response', status: 200, body: JSON.stringify(fixture.admissionReceipt) });
-                } }, observed: { build: currentBuild, policies: [fixture.trustedPolicy as TrustedPolicy],  validationEnabled: true, replayEnabled: true }, logSink: createRecordingLogSink() });
+                } }, observed: { build: currentBuild, validationEnabled: true, replayEnabled: true }, logSink: createRecordingLogSink() });
         const result = await required(app.coordinator.submitObserved?.bind(app.coordinator))(job());
         expect(result).toEqual({ status: 503, code: 'ADMISSION_NOT_ACKNOWLEDGED' });
         expect(sends).toBe(1);
@@ -59,7 +60,7 @@ describe('observed admission sends once and never confuses receipt with authorit
     it('disabled replay refuses locally and enabled replay reaches ordinary admission without an account provider', async () => {
         for (const enabled of [false, true]) {
             let sends = 0;
-            const app = createApplication(loadConfig({ STUDIO_RUNNER_SERVICE_IDENTITY: 'service', STUDIO_RUNNER_CALLBACK_IDENTITY: 'callback', STUDIO_RUNNER_CALLBACK_BASE_URL: 'https://backend.test' }), { listener, runtimeVersions: {}, scratch: createFakeScratchStore(), launcher: { launch() { return Promise.reject(Error('no browser')); } }, http: { send() { sends++; return Promise.resolve({ kind: 'timeout' }); } }, observed: { build: currentBuild, policies: [fixture.trustedPolicy as TrustedPolicy],  validationEnabled: true, replayEnabled: enabled }, logSink: createRecordingLogSink() });
+            const app = createApplication(loadConfig({ STUDIO_RUNNER_SERVICE_IDENTITY: 'service', STUDIO_RUNNER_CALLBACK_IDENTITY: 'callback', STUDIO_RUNNER_CALLBACK_BASE_URL: 'https://backend.test', STUDIO_RUNNER_ALLOWED_DOMAINS: TEST_DOMAINS.join(','), STUDIO_RUNNER_ALLOW_ALL_DOMAINS: 'false' }), { listener, runtimeVersions: {}, scratch: createFakeScratchStore(), launcher: { launch() { return Promise.reject(Error('no browser')); } }, http: { send() { sends++; return Promise.resolve({ kind: 'timeout' }); } }, observed: { build: currentBuild, validationEnabled: true, replayEnabled: enabled }, logSink: createRecordingLogSink() });
             expect((await required(app.coordinator.submitObserved?.bind(app.coordinator))(job())).code).toBe(enabled ? 'ADMISSION_NOT_ACKNOWLEDGED' : 'OBSERVED_REPLAY_DISABLED');
             expect(sends).toBe(enabled ? 1 : 0);
             expect(app.pool.inUse).toBe(0);
@@ -77,10 +78,10 @@ it('delivers pre-Ready FINAL from ADMITTED without an invalid PROGRESS transitio
     const scratch=createFakeScratchStore(),logs=createRecordingLogSink();
     const received:string[]=[];let state:'NEW'|'ADMITTED'|'RUNNING'|'FINAL'='NEW',admissions=0,launches=0;
     let final:Record<string,unknown>|null=null;
-    const app=createApplication(loadConfig({STUDIO_RUNNER_SERVICE_IDENTITY:'service',STUDIO_RUNNER_CALLBACK_IDENTITY:'callback',STUDIO_RUNNER_CALLBACK_BASE_URL:'https://backend.test'}),{ listener,
+    const app=createApplication(loadConfig({STUDIO_RUNNER_SERVICE_IDENTITY:'service',STUDIO_RUNNER_CALLBACK_IDENTITY:'callback',STUDIO_RUNNER_CALLBACK_BASE_URL:'https://backend.test', STUDIO_RUNNER_ALLOWED_DOMAINS: TEST_DOMAINS.join(','), STUDIO_RUNNER_ALLOW_ALL_DOMAINS: 'false'}),{ listener,
         runtimeVersions:{},scratch,logSink:logs,
         launcher:{launch(){launches++;return Promise.reject(new ObservedPreReadyFailure('ACCOUNT_UNKNOWN',{path:null,bytes:null,error:null,state:'UNAVAILABLE',partial:false}));}},
-        observed:{build:currentBuild,policies:[fixture.trustedPolicy as TrustedPolicy],validationEnabled:true,replayEnabled:true},
+        observed:{build:currentBuild,validationEnabled:true,replayEnabled:true},
         http:{send(request):Promise<HttpOutcome>{
             if(request.method==='GET')return Promise.resolve({kind:'response',status:200,body:'{"cancelRequested":false}'});
             const body=JSON.parse(request.body) as Record<string,unknown>;
@@ -107,43 +108,43 @@ it('delivers pre-Ready FINAL from ADMITTED without an invalid PROGRESS transitio
 
 const CONTROL_WINDOW_CANARY='control-window-unit-only';
 const controlWindowStepId=(index:number)=>'00000000-0000-4000-8000-'+String(301+index).padStart(12,'0');
-function controlWindowJob(origin:string,build:BuildIdentity,timeoutSeconds=10):{job:ObservedJob;policy:TrustedPolicy}{
+function controlWindowJob(origin:string,build:BuildIdentity,timeoutSeconds=10):{job:ObservedJob}{
   const job=structuredClone(fixture.job) as ObservedJob;
-  const scope:Scope={...job.binding.scope,allowedOrigins:[origin],policyVersion:'observed-4-full-chromium-1',initialContext:{kind:'initialBlank'}};
-  const policy:TrustedPolicy={...fixture.trustedPolicy as TrustedPolicy,allowedOrigins:[origin],policyVersion:scope.policyVersion,rules:[],applicationPolicy:{policyRuleId:'structural',allowStructuralDiscovery:true,readGrants:[]}};
+  const scope:Scope={...job.binding.scope,initialContext:{kind:'initialBlank'}};
+  
   const configuration={...job.configuration,timeoutSeconds,waitStrategy:'domcontentloaded' as const,viewport:{width:800,height:600}};
   const inputRecipes:Artifact3['inputRecipes']=[{inputId:'nav',stepId:controlWindowStepId(0),kind:'destination',intendedSlot:'navigate.destination',provenance:{kind:'sourceSpan',start:0,end:1,sourceHash:job.artifact.sourceHash}},...(['PASS','NEXT'] as const).map((referenceName,index)=>({inputId:referenceName.toLowerCase(),stepId:controlWindowStepId(index+1),kind:'secretRef' as const,intendedSlot:'fill.value' as const,provenance:{kind:'configuration' as const,referenceId:'reference-'+referenceName,referenceName}}))];
   const steps:Artifact3['steps']=[{stepIndex:0,stepId:controlWindowStepId(0),operations:[{coordinate:{stepId:controlWindowStepId(0),ordinal:0},guardId:'g0',operation:{kind:'navigate',destinationInputId:'nav'}}]},...(['pass','next'] as const).map((input,index)=>({stepIndex:index+1,stepId:controlWindowStepId(index+1),operations:[{coordinate:{stepId:controlWindowStepId(index+1),ordinal:0},guardId:'g'+String(index+1),operation:{kind:'fill' as const,value:{kind:'secretRef' as const,sourceInputId:input}}}]})),{stepIndex:3,stepId:controlWindowStepId(3),operations:[{coordinate:{stepId:controlWindowStepId(3),ordinal:0},guardId:'g3',operation:{kind:'click'}}]}];
-  const guards:Artifact3['guards']=[{guardId:'g0',origin:null,target:{kind:'initialBlank'}},{guardId:'g1',origin,target:{kind:'passwordControl'}},{guardId:'g2',origin,target:{kind:'passwordControl'}},{guardId:'g3',origin,target:{kind:'element',locator:{kind:'role',role:'button',name:'Continue',exact:true},role:'button',elementType:'button',controlType:'none',classification:'structuralOnly',visible:true,actionable:true,readRuleId:null}}];
+  const guards:Artifact3['guards']=[{guardId:'g0',origin:null,target:{kind:'initialBlank'}},{guardId:'g1',origin,target:{kind:'passwordControl'}},{guardId:'g2',origin,target:{kind:'passwordControl'}},{guardId:'g3',origin,target:{kind:'element',locator:[{by:'role',role:'button',name:'Continue',exact:true}],tier:'role',identity:{role:'button',name:'Continue'},readRuleId:null}}];
   const {principalId,...requirements}=scope;
   const actions:Artifact3['learnedPlan']['actions']=steps.flatMap(step=>step.operations.map(action=>{
     const guard=guards.find(g=>g.guardId===action.guardId);if(!guard)throw Error('GUARD');
     if(guard.origin===null){
       if(action.operation.kind!=='navigate'||action.coordinate.ordinal!==0)throw Error('BLANK_ACTION');
-      const projection={coordinate:{stepId:action.coordinate.stepId,ordinal:0 as const},origin:null,locator:null,operation:action.operation};
+      const projection={coordinate:{stepId:action.coordinate.stepId,ordinal:0 as const},origin:null,target:null,operation:action.operation};
       return {...projection,admissionId:'control-admission-'+String(step.stepIndex),operationHash:hashObserved(projection)};
     }
-    const projection={coordinate:action.coordinate,origin:guard.origin,locator:guard.target.kind==='element'?guard.target.locator:null,operation:action.operation};
+    const projection={coordinate:action.coordinate,origin:guard.origin,target:guard.target.kind==='element'?{locator:guard.target.locator,tier:guard.target.tier,identity:guard.target.identity}:null,operation:action.operation};
     return {...projection,admissionId:'control-admission-'+String(step.stepIndex),operationHash:hashObserved(projection)};
   }));
   const learnedPlan={...job.artifact.learnedPlan,sourceSteps:steps.map(s=>s.stepId),actions,bindings:[]};
   const learnedPlanHash=hashObserved(learnedPlan),configurationHash=hashObserved(configuration);
   const artifact:Artifact3={...job.artifact,configurationHash,learnedPlan,learnedPlanHash,inputRecipes,steps,guards,replayPolicy:{...job.artifact.replayPolicy,learnedPlanHash,scope:requirements,inputs:inputRecipes,bindings:[],transfers:[]}};
-  const now=Date.now(),scopeHash=hashObserved(scope),currentPolicyHash=hashObserved(policy);
-  const binding={...job.binding,artifactHash:hashObserved(artifact),configurationHash,learnedPlanHash,referencePolicyHash:hashObserved(artifact.replayPolicy),publicationEvidenceHash:artifact.replayPolicy.publicationEvidenceHash,requiredBuild:build,requiredProfile:OBSERVED_PROFILE,scope,scopeHash,currentPolicyHash,principalId,startedAt:new Date(now).toISOString(),replayGrant:{...job.binding.replayGrant,scopeHash,currentPolicyHash,profileHash:hashObserved(OBSERVED_PROFILE),buildHash:hashObserved(build),issuedAt:new Date(now).toISOString(),expiresAt:new Date(now+30000).toISOString()}};
-  return {policy,job:{...job,binding,artifact,configuration,inputs:[{inputId:'nav',value:origin+'/login'}],secrets:{PASS:CONTROL_WINDOW_CANARY,NEXT:CONTROL_WINDOW_CANARY+'-next'},secretOrigins:{PASS:[origin],NEXT:[origin]},runtime:{stepTimeoutMs:timeoutSeconds*1000,totalRuntimeMs:20000},recording:{width:800,height:600}}};
+  const now=Date.now(),scopeHash=hashObserved(scope);
+  const binding={...job.binding,artifactHash:hashObserved(artifact),configurationHash,learnedPlanHash,referencePolicyHash:hashObserved(artifact.replayPolicy),publicationEvidenceHash:artifact.replayPolicy.publicationEvidenceHash,requiredBuild:build,requiredProfile:OBSERVED_PROFILE,scope,scopeHash,principalId,startedAt:new Date(now).toISOString(),replayGrant:{...job.binding.replayGrant,scopeHash,profileHash:hashObserved(OBSERVED_PROFILE),buildHash:hashObserved(build),issuedAt:new Date(now).toISOString(),expiresAt:new Date(now+30000).toISOString()}};
+  return {job:{...job,binding,artifact,configuration,inputs:[{inputId:'nav',value:origin+'/login'}],secrets:{PASS:CONTROL_WINDOW_CANARY,NEXT:CONTROL_WINDOW_CANARY+'-next'},secretOrigins:{PASS:[origin],NEXT:[origin]},runtime:{stepTimeoutMs:timeoutSeconds*1000,totalRuntimeMs:20000},recording:{width:800,height:600}}};
 }
 
 // STUDIO-OBS-015 G (aria-g-ruling01): every contract-valid timeoutSeconds reaches ordinary admission
 // under the default runner configuration. Before the ceiling fix, 31 and 120 were refused locally
 // (400 LIMIT_EXCEEDED, no admission send).
 it.each([30,31,120])('admits an authored step timeout of %i s under the default runner configuration',async timeoutSeconds=>{
-  const {job:timedJob,policy}=controlWindowJob('https://unit-timeout.test',currentBuild as BuildIdentity,timeoutSeconds);
+  const {job:timedJob}=controlWindowJob('https://unit-timeout.example.test',currentBuild as BuildIdentity,timeoutSeconds);
   let sends=0,launches=0;
-  const app=createApplication(loadConfig({STUDIO_RUNNER_SERVICE_IDENTITY:'service',STUDIO_RUNNER_CALLBACK_IDENTITY:'callback',STUDIO_RUNNER_CALLBACK_BASE_URL:'https://backend.test'}),{ listener,
+  const app=createApplication(loadConfig({STUDIO_RUNNER_SERVICE_IDENTITY:'service',STUDIO_RUNNER_CALLBACK_IDENTITY:'callback',STUDIO_RUNNER_CALLBACK_BASE_URL:'https://backend.test', STUDIO_RUNNER_ALLOWED_DOMAINS: TEST_DOMAINS.join(','), STUDIO_RUNNER_ALLOW_ALL_DOMAINS: 'false'}),{ listener,
     runtimeVersions:{},scratch:createFakeScratchStore(),logSink:createRecordingLogSink(),
     launcher:{launch(){launches++;return Promise.reject(Error('unexpected'));}},
-    observed:{build:currentBuild as BuildIdentity,policies:[policy],validationEnabled:true,replayEnabled:true},
+    observed:{build:currentBuild as BuildIdentity,validationEnabled:true,replayEnabled:true},
     http:{send():Promise<HttpOutcome>{sends++;return Promise.resolve({kind:'timeout'});}},
   });
   expect(await required(app.coordinator.submitObserved?.bind(app.coordinator))(timedJob)).toEqual({status:503,code:'ADMISSION_NOT_ACKNOWLEDGED'});
@@ -153,20 +154,20 @@ it.each([30,31,120])('admits an authored step timeout of %i s under the default 
 
 it.each(['late-tick','expired-tick','late-valid-response'] as const)('keeps a secret control read inside its original absolute window: %s',async mode=>{
   const controlClock=createFakeScheduler();let lateness=0;
-  const {job:secretJob,policy}=controlWindowJob('https://unit-control.test',currentBuild as BuildIdentity);
+  const {job:secretJob}=controlWindowJob('https://unit-control.example.test',currentBuild as BuildIdentity);
   const requests:{timeoutMs:number;started:number}[]=[];
   const reports:Record<string,unknown>[]=[];
   let launches=0,aborts=0,releaseLaunch:()=>void=()=>undefined,resolveControl:(outcome:HttpOutcome)=>void=()=>undefined;
   const neverBody=new Promise<HttpOutcome>(resolve=>{resolveControl=resolve;});
   const logs=createRecordingLogSink();
-  const app=createApplication(loadConfig({STUDIO_RUNNER_SERVICE_IDENTITY:'service',STUDIO_RUNNER_CALLBACK_IDENTITY:'callback',STUDIO_RUNNER_CALLBACK_BASE_URL:'https://backend.test'}),{ listener,
+  const app=createApplication(loadConfig({STUDIO_RUNNER_SERVICE_IDENTITY:'service',STUDIO_RUNNER_CALLBACK_IDENTITY:'callback',STUDIO_RUNNER_CALLBACK_BASE_URL:'https://backend.test', STUDIO_RUNNER_ALLOWED_DOMAINS: TEST_DOMAINS.join(','), STUDIO_RUNNER_ALLOW_ALL_DOMAINS: 'false'}),{ listener,
     runtimeVersions:{},scratch:createFakeScratchStore(),logSink:logs,
     now:()=>controlClock.now()+lateness,controlTimers:controlClock,
     launcher:{launch(request){launches++;return new Promise<never>((_resolve,reject)=>{
       releaseLaunch=()=>{reject(new ObservedPreReadyFailure('CONTEXT_LOST',{path:null,bytes:null,error:null,state:'UNAVAILABLE',partial:false}));};
       request.signal?.addEventListener('abort',()=>{aborts++;releaseLaunch();},{once:true});
     });}},
-    observed:{build:currentBuild as BuildIdentity,policies:[policy],validationEnabled:true,replayEnabled:true},
+    observed:{build:currentBuild as BuildIdentity,validationEnabled:true,replayEnabled:true},
     http:{send(request):Promise<HttpOutcome>{
       if(request.method==='GET'){
         requests.push({timeoutMs:request.timeoutMs,started:controlClock.now()+lateness});
@@ -265,7 +266,7 @@ type ControlAnswer=(executionId:string)=>HttpOutcome;
  */
 function strictPreReadyRun(options:{launchReason:string;rejectOnAbort:boolean;control?:ControlAnswer;launcher?:BrowserLauncher;scratch?:ScratchStore}){
   const controlClock=createFakeScheduler();
-  const {job:secretJob,policy}=controlWindowJob('https://unit-control.test',currentBuild as BuildIdentity);
+  const {job:secretJob}=controlWindowJob('https://unit-control.example.test',currentBuild as BuildIdentity);
   const sourceCount=secretJob.artifact.steps.length;
   const logs=createRecordingLogSink();
   const backend={cancelRecorded:false,finals:[] as {body:Record<string,unknown>;status:number}[],controlReads:0};
@@ -274,10 +275,10 @@ function strictPreReadyRun(options:{launchReason:string;rejectOnAbort:boolean;co
     state.release=()=>{reject(new ObservedPreReadyFailure(options.launchReason,{path:null,bytes:null,error:null,state:'UNAVAILABLE',partial:false}));};
     request.signal?.addEventListener('abort',()=>{state.aborts++;if(options.rejectOnAbort)state.release();},{once:true});
   });}};
-  const app=createApplication(loadConfig({STUDIO_RUNNER_SERVICE_IDENTITY:'service',STUDIO_RUNNER_CALLBACK_IDENTITY:'callback',STUDIO_RUNNER_CALLBACK_BASE_URL:'https://backend.test'}),{ listener,
+  const app=createApplication(loadConfig({STUDIO_RUNNER_SERVICE_IDENTITY:'service',STUDIO_RUNNER_CALLBACK_IDENTITY:'callback',STUDIO_RUNNER_CALLBACK_BASE_URL:'https://backend.test', STUDIO_RUNNER_ALLOWED_DOMAINS: TEST_DOMAINS.join(','), STUDIO_RUNNER_ALLOW_ALL_DOMAINS: 'false'}),{ listener,
     runtimeVersions:{},scratch:options.scratch??createFakeScratchStore(),logSink:logs,
     now:()=>controlClock.now()+state.lateness,controlTimers:controlClock,launcher,
-    observed:{build:currentBuild as BuildIdentity,policies:[policy],validationEnabled:true,replayEnabled:true},
+    observed:{build:currentBuild as BuildIdentity,validationEnabled:true,replayEnabled:true},
     http:{send(request):Promise<HttpOutcome>{
       if(request.method==='GET'){
         backend.controlReads++;

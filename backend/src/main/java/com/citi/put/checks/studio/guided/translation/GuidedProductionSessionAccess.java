@@ -4,11 +4,11 @@ import static com.citi.put.checks.studio.guided.session.GuidedSessionException.r
 
 import com.citi.put.checks.security.BffAuthenticationToken;
 import com.citi.put.checks.security.CsiOwnershipEvaluator;
-import com.citi.put.checks.studio.dispatch.StudioReferenceResolver.SecretUseNotAuthorizedException;
 import com.citi.put.checks.studio.dispatch.StudioReferenceResolver.UnknownReferenceException;
 import com.citi.put.checks.studio.guided.bridge.GuidedSourceReferenceValidator;
 import com.citi.put.checks.studio.guided.session.GuidedSessionAccess;
 import com.citi.put.checks.studio.guided.session.GuidedSessionService;
+import com.citi.put.checks.studio.navigation.AllowedDomains;
 import com.citi.put.checks.studio.secrets.VaultProviderUnavailableException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -25,9 +25,8 @@ public final class GuidedProductionSessionAccess
   private final GuidedTranslationStore store;
   private final GuidedStepVerifier verifier;
   private final CsiOwnershipEvaluator ownership;
-  private final com.citi.put.checks.studio.guided.publication.ObservedReplayPins pins;
+  private final AllowedDomains domains;
   private final com.citi.put.checks.studio.dispatch.StudioReferenceResolver references;
-  private final com.citi.put.checks.studio.secrets.StudioSecretUseAuthorization secretUse;
 
   public GuidedProductionSessionAccess(
       GuidedSourceSnapshotRepository snapshots,
@@ -36,18 +35,16 @@ public final class GuidedProductionSessionAccess
       GuidedTranslationStore store,
       GuidedStepVerifier verifier,
       CsiOwnershipEvaluator ownership,
-      com.citi.put.checks.studio.guided.publication.ObservedReplayPins pins,
-      com.citi.put.checks.studio.dispatch.StudioReferenceResolver references,
-      com.citi.put.checks.studio.secrets.StudioSecretUseAuthorization secretUse) {
+      AllowedDomains domains,
+      com.citi.put.checks.studio.dispatch.StudioReferenceResolver references) {
     this.snapshots = snapshots;
     this.classifier = classifier;
     this.resolver = resolver;
     this.store = store;
     this.verifier = verifier;
     this.ownership = ownership;
-    this.pins = pins;
+    this.domains = domains;
     this.references = references;
-    this.secretUse = secretUse;
   }
 
   @Override
@@ -60,15 +57,12 @@ public final class GuidedProductionSessionAccess
             csi -> require(ownership.canExecute(user, csi), "FORBIDDEN_SCOPE", 403));
     require(ownership.canExecute(user, current.path("csiId").asText()), "FORBIDDEN_SCOPE", 403);
     ObjectNode scope = com.fasterxml.jackson.databind.node.JsonNodeFactory.instance.objectNode();
-    for (String key :
-        List.of("sourceRevision", "configurationRevision", "environmentId", "applicationId")) {
+    for (String key : List.of("sourceRevision", "configurationRevision", "environmentId")) {
       scope.set(key, request.path(key));
     }
     scope.set("csiId", current.path("csiId"));
     scope.put("modelDataPolicyId", "INPUT-POLICY-01-A").putNull("valueTransferPolicyId");
     scope.put("principalId", ((BffAuthenticationToken) user).getPrincipal().userId());
-    JsonNode policy = pins.policy(scope);
-    scope.set("approvedOrigins", policy.path("allowedOrigins"));
     scope
         .putArray("capabilities")
         .add("observe")
@@ -83,6 +77,11 @@ public final class GuidedProductionSessionAccess
         .add("read")
         .add("assert");
     JsonNode manifest = classifier.classify(current, scope);
+    // A test that names no URL cannot be learned, and its first URL (step order) must be on the
+    // deployment's allowed domains. Any later URL is checked when a step uses it as a destination.
+    String startUrl = AuthoredUrls.first(current.path("authoring"), current.path("variables"));
+    require(startUrl != null, "NO_APPLICATION_URL", 422);
+    require(domains.allows(startUrl), "ORIGIN_NOT_ALLOWED", 403);
     var ids = new java.util.LinkedHashSet<String>();
     for (JsonNode reference : manifest.path("configurationReferences")) {
       if (reference.path("kind").asText().equals("secretRef")) {
@@ -97,9 +96,6 @@ public final class GuidedProductionSessionAccess
           scope.path("principalId").asText(),
           new com.citi.put.checks.studio.dispatch.ReferenceDeclarations(
               List.of(), List.copyOf(ids)));
-    } catch (SecretUseNotAuthorizedException failure) {
-      throw new com.citi.put.checks.studio.guided.session.GuidedSessionException(
-          "SECRET_USE_NOT_AUTHORIZED", 403);
     } catch (UnknownReferenceException failure) {
       throw new com.citi.put.checks.studio.guided.session.GuidedSessionException(
           "SECRET_UNAVAILABLE", 404);
@@ -115,31 +111,7 @@ public final class GuidedProductionSessionAccess
   }
 
   @Override
-  public void checkCurrent(JsonNode session) {
-    JsonNode scope = session.path("scope");
-    classifier.requireCurrentPolicy(scope);
-    if (store.exists(session.path("sessionId").asText())) {
-      for (JsonNode reference :
-          store
-              .currentManifest(session.path("sessionId").asText())
-              .path("configurationReferences")) {
-        if (reference.path("kind").asText().equals("secretRef")) {
-          require(
-              secretUse.mayUse(
-                  scope.path("principalId").asText(),
-                  scope.path("csiId").asText(),
-                  scope.path("environmentId").asText(),
-                  reference.path("referenceName").asText()),
-              "SECRET_USE_REVOKED",
-              409);
-        }
-      }
-    }
-  }
-
-  @Override
   public void checkSourceCurrent(JsonNode session) {
-    classifier.requireCurrentPolicy(session.path("scope"));
     JsonNode current = snapshots.lockCurrent(UUID.fromString(session.path("testId").asText()));
     JsonNode scope = session.path("scope");
     require(

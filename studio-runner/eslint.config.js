@@ -22,6 +22,8 @@ export default tseslint.config(
       'coverage/**',
       'node_modules/**',
       'test-results/**',
+      // Generated, hash-pinned copy of the production collector used by the SPK-07 spike (never hand-edited).
+      'evaluation/grounding/generated/**',
       // Deliberate violations used as lint-rule fixtures; asserted by test/lint-boundary.test.ts.
       'fixtures/lint/**',
     ],
@@ -114,7 +116,23 @@ export default tseslint.config(
     rules: { '@typescript-eslint/dot-notation': 'off' },
   },
   {
-    files: ['**/*.js', '**/*.mjs'],
+    // SPK-07 spike harness (not shipped, untracked tooling): untyped .mjs whose in-world programs are
+    // sent to a page as strings, so page globals and the Function-based source decoder appear in it.
+    // Scoped to this one directory; no rule is relaxed for src/ or test/.
+    files: ['evaluation/grounding/**/*.mjs'],
+    linterOptions: { reportUnusedDisableDirectives: 'off' },
+    rules: { 'no-undef': 'off', 'no-restricted-syntax': 'off', 'no-new-func': 'off' },
+  },
+  {
+    // CommonJS fixtures (the committed verbatim copy of the spike gate functions and its facts helper): Node's module globals.
+    files: ['**/*.cjs'],
+    languageOptions: {
+      sourceType: 'commonjs',
+      globals: { module: 'writable', require: 'readonly', exports: 'writable', Buffer: 'readonly' },
+    },
+  },
+  {
+    files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
     extends: [tseslint.configs.disableTypeChecked],
     languageOptions: {
       globals: { process: 'readonly', console: 'readonly', URL: 'readonly' },

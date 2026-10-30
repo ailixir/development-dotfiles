@@ -100,7 +100,8 @@ class GuidedSessionEvidenceTest {
         new GuidedSessionEvidenceService(
             sessions,
             evidence,
-            new GuidedMaterializationService(jdbc, contracts),
+            new GuidedMaterializationService(
+                jdbc, contracts, com.citi.put.checks.studio.support.TestDomains.FIXTURES),
             contracts,
             new GuidedRecordingProperties(null),
             new StudioExecutionProperties(

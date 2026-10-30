@@ -4,6 +4,7 @@ import static com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTes
 import static com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.hash;
 
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
+import com.citi.put.checks.studio.support.ObservationFixtures;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -247,13 +248,14 @@ final class IncrementalBoundaryFixture {
         observations.addObject().put("observationHash", freshHash).set("observation", fresh);
         execution = execution(sessionId, fresh, freshHash);
         proposal.put("generation", 2 * index);
-        ObjectNode target =
-            proposal
-                .putObject("target")
-                .put("nodeId", nodeId(index, true, 0))
-                .put("documentId", "document-1")
-                .put("generation", 2 * index);
-        target.set("locator", locator(index, 0));
+        // ADR-SC-007: the model names a ref; the runner reports the locator and identity.
+        proposal
+            .putObject("target")
+            .put("kind", "node")
+            .put("ref", "e1")
+            .put("documentId", "document-1")
+            .put("generation", 2 * index);
+        proof.set("target", resolved(index, 0));
         proposal.putObject("operation").put("kind", "click");
         preparation.put("observationHash", freshHash);
         ObjectNode witness =
@@ -294,7 +296,7 @@ final class IncrementalBoundaryFixture {
       ObjectNode operation = C.object();
       operation.set("coordinate", coordinate);
       operation.set("origin", execution.path("origin"));
-      operation.set("locator", index == 0 ? C.object().nullNode() : locator(index, 0));
+      operation.set("target", index == 0 ? C.object().nullNode() : resolved(index, 0));
       operation.set("operation", proposal.path("operation"));
       ledger.put("operationHash", hash(operation));
       ObjectNode decision =
@@ -337,19 +339,14 @@ final class IncrementalBoundaryFixture {
         .put("scopeHash", scopeHash)
         .put("generation", generation)
         .put("observedAt", INSTANT);
-    ArrayNode nodes = observation.putArray("nodes");
-    for (int choice = 0; choice < 2; choice++) {
-      ObjectNode node = template.path("nodes").get(0).deepCopy();
-      node.put("nodeId", nodeId(index, fresh, choice))
-          .put("generation", generation)
-          .put("role", "button")
-          .put("name", choice == 0 ? "Proceed" : "Continue")
-          .put("elementType", "button")
-          .put("controlType", "none")
-          .put("classification", "nonsecretApproved")
-          .put("policyRuleId", "nonsecret-form");
-      node.putArray("locatorHints").add(locator(index, choice));
-      nodes.add(node);
+    // ADR-SC-007: two shown buttons, "Proceed" (e1) and "Continue" (e2), as an outline plus facts.
+    ObjectNode shown =
+        ObservationFixtures.observation()
+            .element("e1", "button", "Proceed")
+            .element("e2", "button", "Continue")
+            .build();
+    for (String field : List.of("projection", "readRuleId", "outline", "facts")) {
+      observation.set(field, shown.path(field).deepCopy());
     }
     return observation;
   }
@@ -403,10 +400,7 @@ final class IncrementalBoundaryFixture {
       object.set("coordinate", coordinate);
       object.put("documentId", "document-1").put("generation", 2 * index - 1);
     }
-    answer
-        .put("choiceId", choiceId)
-        .put("nodeId", nodeId(index, false, 0))
-        .put("resolvedAt", INSTANT);
+    answer.put("choiceId", choiceId).put("resolvedAt", INSTANT);
     capture
         .put("attemptId", "boundary-attempt-" + index)
         .put("requestId", "boundary-request-" + index)
@@ -449,15 +443,16 @@ final class IncrementalBoundaryFixture {
           .put("labelSource", "PAGE")
           .put("role", "button")
           .putNull("region")
-          .put("nodeId", nodeId(index, false, choice))
           .putNull("bindingId");
       ObjectNode meaning =
           C.object()
               .put("obligationId", obligationId(index))
-              .put("nodeId", nodeId(index, false, choice))
+              .put("ref", "e" + (choice + 1))
               .putNull("bindingId");
-      meaning.set("locator", locator(index, choice));
-      meanings.addObject().put("choiceId", id).set("meaning", meaning);
+      String name = choice == 0 ? "Proceed" : "Continue";
+      ObjectNode mapping = meanings.addObject().put("choiceId", id);
+      mapping.set("meaning", meaning);
+      mapping.putObject("selection").put("role", "button").put("name", name).put("evidence", name);
       providerChoices
           .addObject()
           .put("choiceId", "boundary-provider-" + index + "-" + choice)
@@ -529,7 +524,7 @@ final class IncrementalBoundaryFixture {
       } else {
         action.put("origin", "https://orders.example.test");
       }
-      action.set("locator", index == 0 ? C.object().nullNode() : locator(index, 0));
+      action.set("target", index == 0 ? C.object().nullNode() : resolved(index, 0));
       action.set("operation", operation);
       ObjectNode operationIdentity = action.deepCopy();
       action
@@ -540,15 +535,11 @@ final class IncrementalBoundaryFixture {
       ObjectNode target =
           guard.putObject("target").put("kind", index == 0 ? "initialBlank" : "element");
       if (index > 0) {
-        target.set("locator", locator(index, 0));
-        target
-            .put("role", "button")
-            .put("elementType", "button")
-            .put("controlType", "none")
-            .put("classification", "nonsecretApproved")
-            .put("visible", true)
-            .put("actionable", true)
-            .putNull("readRuleId");
+        ObjectNode reported = resolved(index, 0);
+        target.set("locator", reported.path("locator"));
+        target.set("tier", reported.path("tier"));
+        target.set("identity", reported.path("identity"));
+        target.putNull("readRuleId");
       }
       ObjectNode step = steps.addObject().put("stepIndex", index).put("stepId", id);
       ObjectNode executable = step.putArray("operations").addObject().put("guardId", "g" + index);
@@ -672,15 +663,22 @@ final class IncrementalBoundaryFixture {
     return hashes;
   }
 
-  private static ObjectNode locator(int index, int choice) {
-    return C.object()
-        .put("kind", "testId")
-        .put("value", "proceed-" + index + "-" + choice)
-        .put("exact", true);
-  }
-
-  private static String nodeId(int index, boolean fresh, int choice) {
-    return "button-" + index + "-" + (fresh ? "fresh" : "old") + "-" + choice;
+  /**
+   * The ResolvedTarget the runner reports for the {@code choice}th button of step {@code index}.
+   */
+  private static ObjectNode resolved(int index, int choice) {
+    ObjectNode target = C.object();
+    target
+        .putArray("locator")
+        .addObject()
+        .put("by", "testId")
+        .put("value", "proceed-" + index + "-" + choice);
+    target.put("tier", "testId");
+    target
+        .putObject("identity")
+        .put("role", "button")
+        .put("name", choice == 0 ? "Proceed" : "Continue");
+    return target;
   }
 
   private static String stepId(int index) {

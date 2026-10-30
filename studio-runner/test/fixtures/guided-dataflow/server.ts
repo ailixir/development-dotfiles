@@ -10,5 +10,5 @@ export async function startGuidedDataflowFixture(mode:'exact'|'regionVisible'|'r
     else {let html=`<label>Destination<textarea data-testid="destination" aria-label="Destination"></textarea></label><button data-testid="submit">Submit</button><button>${canary}</button><button>PRIVATE-INPUT-064</button><button>UNREAD_PASSWORD_004_QA</button><button>UNREAD_INPUT_004_QA</button><script>document.querySelector('[data-testid=submit]').onclick=()=>fetch('/receipt',{method:'POST',body:document.querySelector('textarea').value});</script>`;if(mode!=='exact'&&mode!=='mixedVisible')html=html.replace(/ data-testid="(?:destination|submit)"/gu,'').replace("document.querySelector('[data-testid=submit]')","document.querySelector('button')");res.end(html);}
   });
   await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve)); const address=server.address(); if(!address||typeof address==='string') throw new Error('PORT');
-  return {origin:`http://127.0.0.1:${String(address.port)}`,receipts,sourceRequests:()=>sourceRequests,close:async()=>{server.closeAllConnections();await new Promise<void>(resolve=>server.close(()=>{ resolve(); }));}};
+  return {origin:`http://localhost:${String(address.port)}`,receipts,sourceRequests:()=>sourceRequests,close:async()=>{server.closeAllConnections();await new Promise<void>(resolve=>server.close(()=>{ resolve(); }));}};
 }

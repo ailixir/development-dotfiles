@@ -171,17 +171,7 @@ frontend:
 studioRunner:
   enabled: false
   replicaCount: 2
-  resources:
-    requests:
-      cpu: "1"
-      memory: 2Gi
-    limits:
-      cpu: "2"
-      memory: 4Gi
-  devShm:
-    sizeLimit: 2Gi
-  scratch:
-    sizeLimit: 8Gi
+  # Pod sizes (resources, /dev/shm, scratch) come from `values.yaml`: a pod runs two browsers.
   # STUDIO-OBS-009: the TLS listener's inputs. Secret NAMES are per environment; the fingerprint is
   # NOT here, deliberately: it is the SHA-256 of this environment's backend client certificate,
   # which this repository does not know. It is required, has no default, and the render fails
@@ -190,25 +180,15 @@ studioRunner:
     secretName: checks-studio-runner-tls-prod
   backendTls:
     secretName: checks-studio-backend-runner-tls-prod
-  # Guided mode is OFF here, as in every shipped values file. Enabling it is a per-environment
-  # decision that also needs `replicaCount: 1` and the token issuer (register U21). When it is on,
-  # the pod runs one replay browser plus one guided browser: these resources and /dev/shm replace
-  # the single-browser ones above. STARTING VALUES, UNMEASURED (GA plan G-4).
+  # Guided mode is OFF here. Enabling it is a per-environment decision that also needs
+  # `replicaCount: 1`, a `capacity` and the token issuer (register U21); its pod resources come from
+  # `values.yaml` (STARTING VALUES, UNMEASURED, GA plan G-4).
   guided:
     enabled: false
     callbackToken:
       secretName: checks-studio-guided-callback-token-prod
     backendTokens:
       secretName: checks-studio-guided-controller-tokens-prod
-    resources:
-      requests:
-        cpu: "2"
-        memory: 4Gi
-      limits:
-        cpu: "4"
-        memory: 8Gi
-    devShm:
-      sizeLimit: 4Gi
   seccompProfile:
     type: RuntimeDefault
   callbackBaseUrl: ""

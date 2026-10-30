@@ -65,10 +65,6 @@ class GuidedResultPublicationDisabledIT {
   @DynamicPropertySource
   static void configuration(DynamicPropertyRegistry registry) {
     ObservedPublicationFixture.register(registry);
-    registry.add(
-        "studio.guided-authoring.translation.applications",
-        () -> ObservedPublicationFixture.APPLICATION);
-    registry.add("studio.guided-authoring.translation.environments", () -> "Production");
   }
 
   @Autowired private MockMvc mvc;
@@ -94,7 +90,6 @@ class GuidedResultPublicationDisabledIT {
     var fixtures = new StudioExecutionFixtures(jdbc);
     fixtures.seedUser(OWNER);
     fixtures.seedCsi(CSI, OWNER);
-    ObservedPublicationFixture.seedApprovedPolicies(jdbc, CSI);
     owner = StudioExecutionFixtures.identity(OWNER, CSI, "owner");
     startSession();
   }
@@ -103,7 +98,10 @@ class GuidedResultPublicationDisabledIT {
     var fixtures = new StudioExecutionFixtures(jdbc);
     UUID testId =
         fixtures.seedTest(
-            "Disabled publication " + UUID.randomUUID(), CSI, OWNER, List.of("Open the home page"));
+            "Disabled publication " + UUID.randomUUID(),
+            CSI,
+            OWNER,
+            List.of("Open the home page at https://orders.example.test/home now"));
     ObjectNode start =
         contracts
             .object()
@@ -111,7 +109,6 @@ class GuidedResultPublicationDisabledIT {
             .put("testId", testId.toString())
             .put("sourceRevision", "1")
             .put("configurationRevision", "1")
-            .put("applicationId", ObservedPublicationFixture.APPLICATION)
             .put("environmentId", "Production");
     start.putObject("versions").put("contract", 3);
     JsonNode started =
@@ -190,7 +187,12 @@ class GuidedResultPublicationDisabledIT {
     // default. It uses the real installed presentation and evidence, with the real repository.
     var manual =
         new GuidedSessionService(
-            repository, contracts, access, sessionProperties, Clock.systemUTC());
+            repository,
+            contracts,
+            access,
+            sessionProperties,
+            com.citi.put.checks.studio.support.TestDomains.FIXTURES,
+            Clock.systemUTC());
     manual.installPresentation(presentation);
     manual.installEvidence(evidence);
     MockMvc fallback = MockMvcBuilders.standaloneSetup(new GuidedSessionController(manual)).build();
@@ -376,7 +378,12 @@ class GuidedResultPublicationDisabledIT {
   private GuidedSessionService manualFallback() {
     var manual =
         new GuidedSessionService(
-            repository, contracts, access, sessionProperties, Clock.systemUTC());
+            repository,
+            contracts,
+            access,
+            sessionProperties,
+            com.citi.put.checks.studio.support.TestDomains.FIXTURES,
+            Clock.systemUTC());
     manual.installPresentation(presentation);
     manual.installEvidence(evidence);
     return manual;

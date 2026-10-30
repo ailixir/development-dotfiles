@@ -15,13 +15,15 @@
       "$ref": "https://checks.citi.example/contracts/observed/v3/assignment.schema.json"
     },
     "reason": {
+      "description": "PUBLISHED is the stop of a session whose learn published a revision: the runner discards the session recording before upload (no object, no manifest, no recording-evidence callback). It is emitted only from the publication commit; every other path keeps its reason and keeps the recording.",
       "enum": [
         "CANCELLED",
         "EXPIRED",
         "UNKNOWN_OUTCOME",
         "LEASE_LOST",
         "CONTEXT_LOST",
-        "REVOKED"
+        "REVOKED",
+        "PUBLISHED"
       ]
     }
   },

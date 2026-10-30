@@ -1,4 +1,3 @@
-import { createPasswordControl } from './passwordControl.js';
 import type {InvocationControl} from '../executor/observedReplay.js';
 /**
  * **The only module in this package that imports Playwright** (AC-1).
@@ -31,9 +30,7 @@ import type {InvocationControl} from '../executor/observedReplay.js';
  * context creation** with an explicit size (§6.1) and is never attached per page.
  */
 
-import { PrivateObservationInventory } from './observationInventory.js';
-import { dispatchNativeInput } from './nativeInput.js';
-import type { NativePoint } from './nativeInput.js';
+import { domainAllowed, OriginNotAllowed } from '../allowedDomains.js';
 import { GuidedLaunchFailure, GUIDED_START_BUDGET_MS, GUIDED_START_RESERVE_MS, guidedCloseStages, launchFailureCause } from './guidedBrowser.js';
 import type { GuidedBrowser, GuidedLaunchPhase, GuidedLossReason, GuidedRecordingRequest, GuidedStartup } from './guidedBrowser.js';
 import { killLaunchTree, survivorsOf } from './tree.js';
@@ -49,9 +46,11 @@ import {BrowserStartupCleanupFailure} from './browserFactory.js';
 import {BootstrapPageGuard,boundedStartup,isAbsoluteStartupTimeout} from './observedBootstrap.js';
 import {readVersionPaths} from './versionProbe.js';
 import {validateAppVideoPath} from './appVideoOwnership.js';
-import { installObservationCollector } from './observationCollector.js';
-import { observationOptions, exportObservation } from './observationSanitizer.js';
-import type { ObservationConfig, ObservationSession, Observation, GuidedInvocationResult, AcquisitionResult } from './observationTypes.js';
+import { createObservationFlow } from './observationFlow.js';
+import { ClosedActionError, closedPageStep } from './closedError.js';
+import { loadInjectedSource } from './playwrightEngine.js';
+import type { BoundElement, PageLike } from './targetAction.js';
+import type { ObservationConfig, ObservationSession } from './observationTypes.js';
 import { SCRATCH_SUBDIRECTORIES, prepareBrowserProfile, requireBrowserPreferences,assertEffectiveBrowserPreferences,browserProfileConfinement,releaseBrowserProfile } from './scratchLayout.js';
 import type {BrowserPreferenceEvidence} from './scratchLayout.js';
 
@@ -74,6 +73,39 @@ async function verifyBrowserPreferences(page:Page,profile:string):Promise<Browse
 function mainDocumentTransition(page: Page): Promise<boolean> {
   const loaded = (): Promise<void> => page.waitForLoadState('domcontentloaded', {timeout: 30000});
   return page.waitForEvent('framenavigated', {predicate: frame => frame === page.mainFrame(), timeout: 30000}).then(loaded).then(() => true, () => false);
+}
+
+/**
+ * How long the main frame may stay on a host outside the whitelist (an SSO hop, say) before the work
+ * that needs the page gives up: learning ends `ORIGIN_NOT_ALLOWED`, a replay step `POLICY_REFUSED`.
+ * Replay's own step deadline bounds it further. Nothing is observed or done while the page is away.
+ */
+export const RETURN_WINDOW_MS = 15_000;
+
+/** The host of the main frame when it is an http(s) page outside the whitelist; `null` when nothing is off-list. */
+function offListHost(url: string, allowedDomains: readonly string[]): string | null {
+  if (!/^https?:/iu.test(url) || domainAllowed(allowedDomains, url)) return null;
+  try { return new URL(url).hostname; } catch { return null; }
+}
+
+/**
+ * Waits until the main frame is on a whitelisted host again, at most {@link RETURN_WINDOW_MS}.
+ * Page-initiated navigations, redirect chains, iframes and subresources may use any host; only the
+ * moment the runner needs the page (an observation, a step's guard) requires it back on the list.
+ * @throws OriginNotAllowed (host only) when the window ends with the page still off-list.
+ */
+async function awaitWhitelistedMainFrame(page: Page, allowedDomains: readonly string[], windowMs = RETURN_WINDOW_MS): Promise<void> {
+  const deadline = Date.now() + windowMs;
+  let waited = false;
+  for (;;) {
+    const host = offListHost(page.url(), allowedDomains);
+    if (host === null) break;
+    if (Date.now() >= deadline) throw new OriginNotAllowed(host);
+    waited = true;
+    await new Promise<void>(resolve => { setTimeout(resolve, Math.min(100, Math.max(1, deadline - Date.now()))); });
+  }
+  // Back on the list: let the document settle before anything reads it.
+  if (waited) await page.waitForLoadState('domcontentloaded', { timeout: Math.max(1, deadline - Date.now()) }).catch(() => undefined);
 }
 
 /** Bounded so an adversarial page cannot grow the observation set without limit (AC-19). */
@@ -167,11 +199,6 @@ export const playwrightBrowserFactory: BrowserFactory = {
     let blankObject: string | null = null;
     if (observedScope) {
       const initializeBlank=async():Promise<void>=>{
-      await context.route('**/*', async route => {
-        let allowed = false;
-        try { allowed = observedScope.allowedOrigins.includes(new URL(route.request().url()).origin); } catch { /* fail closed */ }
-        if (allowed) await route.continue().catch(() => undefined); else await route.abort().catch(() => undefined);
-      });
       blankConnection = await context.newCDPSession(page);
       const tree = await blankConnection.send('Page.getFrameTree');
       const world = await blankConnection.send('Page.createIsolatedWorld', {frameId:tree.frameTree.frame.id,worldName:`checks-replay-blank-${randomUUID()}`,grantUniveralAccess:false});
@@ -187,7 +214,7 @@ export const playwrightBrowserFactory: BrowserFactory = {
     };
     const approvedDestination = (destination:string):void => {
       const url = new URL(destination);
-      if (!observedScope?.allowedOrigins.includes(url.origin) || url.username || url.password) throw new Error('POLICY_REFUSED');
+      if (!domainAllowed(request.allowedDomains, destination) || url.username || url.password) throw new Error('POLICY_REFUSED');
     };
     const hosts = new Set<string>();
     context.on('request', (request_) => {
@@ -221,8 +248,8 @@ export const playwrightBrowserFactory: BrowserFactory = {
         observedStartupReady(){return guard?.ready(page,context.pages())===true;},
         observedAppVideoPath(){guard?.check();if(!appVideo||!guard?.ready(page,context.pages()))throw new Error('RECORDING_FAILED');appVideoPath??=boundedStartup(()=>appVideo.path(),startupDeadline,request.startup?.signal).then(path=>validateAppVideoPath(request.scratchPath,path));return appVideoPath;},
         async observedInitialContextMatches(){guard?.check();return observedScope.initialContext.kind==='initialBlank'?blankMatches():new URL(page.url()).origin===observedScope.initialContext.origin;},
-        async observedWait(strategy:'load'|'domcontentloaded'|'networkidle',timeoutMs:number){await page.waitForLoadState(strategy,{timeout:timeoutMs});},
-        async observedNavigateBlank(destination:string, control?:InvocationControl) {
+        async observedWait(strategy:'load'|'domcontentloaded'|'networkidle',timeoutMs:number){await closedPageStep(()=>page.waitForLoadState(strategy,{timeout:timeoutMs}));},
+        observedNavigateBlank(destination:string, control?:InvocationControl) { return closedPageStep(async function (): Promise<void> {
           const reached = mainDocumentTransition(page);
           control?.check();
           approvedDestination(destination);
@@ -234,7 +261,7 @@ export const playwrightBrowserFactory: BrowserFactory = {
           if (r.exceptionDetails) throw new Error('TARGET_DRIFT');
           if (!await reached) throw new Error('TARGET_DRIFT');
           control?.check();
-        },
+        }); },
       } : {}),
 
       onExtraPage(listener: () => void): void {
@@ -275,251 +302,83 @@ export const playwrightBrowserFactory: BrowserFactory = {
 };
 
 /**
- * Dedicated Chromium isolated world: application scripts cannot inspect policy/secrets or replace
- * the collector's builtins/DOM getters. All evaluation sources below are fixed trusted code.
- * Actual Elements and exact-hint resolution stay together in that world; nothing is stamped on
- * the application DOM, and no probe event is dispatched into the application.
+ * The observation session of a guided or replay page: the Playwright side only. Everything that observes, prepares, resolves or
+ * acts is `observationFlow.ts` (no Playwright import, unit-tested with fakes); this file supplies the real Page, a CDP session on it,
+ * the main-frame navigation counter and the whitelist wait. The page-state program and WI-2's engine run in the same dedicated
+ * isolated world `checks-observation-<uuid>`: application scripts cannot inspect policy or secrets, and nothing is stamped on the
+ * application DOM.
  */
 export function createBrowserObservationSession(page: Page, config: ObservationConfig): ObservationSession {
-  const options = observationOptions(config);
-  let cdp: CDPSession | null = null;
-  let objectId: string | null = null;
-  let generation = 0;
-  let closed = false;
-  let busy = false;
-  let navigation = 0;
-  let observedNavigation = -1;
-  const privateInventory = new PrivateObservationInventory();
-  const assertSessionOpen = (): void => { if (closed) throw new Error('CONTEXT_LOST'); };
-  let acquisitionObservation:Observation|null=null;
-  const worldName = `checks-observation-${randomUUID()}`;
-  const navigated = (frame: Frame) => { if (frame === page.mainFrame()) navigation++; };
-  page.on('framenavigated', navigated);
-  const initialize = async (): Promise<void> => {
-    cdp ??= await page.context().newCDPSession(page);
-    if (objectId) {
-      try {
-        await cdp.send('Runtime.callFunctionOn', { objectId, functionDeclaration: 'function() { return true; }', returnByValue: true });
-        return;
-      } catch { objectId = null; }
-    }
-    const tree = await cdp.send('Page.getFrameTree');
-    const world = await cdp.send('Page.createIsolatedWorld', { frameId: tree.frameTree.frame.id, worldName, grantUniveralAccess: false });
-    const installed = await cdp.send('Runtime.callFunctionOn', {
-      executionContextId: world.executionContextId,
-      functionDeclaration: installObservationCollector.toString(),
-      arguments: [{ value: options }, { value: privateInventory.snapshot() }], returnByValue: false, objectGroup: worldName,
-    });
-    if (installed.exceptionDetails || !installed.result.objectId) throw new Error('OBSERVATION_UNAVAILABLE');
-    objectId = installed.result.objectId;
-  };
-  const session: ObservationSession = {
-    async observe(maxBytes = options.limits.bytes) {
-      if (closed || busy) throw new Error('STALE_OBSERVATION');
-      privateInventory.assertLive();
-      if (!Number.isInteger(maxBytes) || maxBytes<1 || maxBytes>options.limits.bytes) throw new Error('BUDGET_EXCEEDED');
-      if (generation >= 2147483647) throw new Error('BUDGET_EXCEEDED');
-      busy = true;
-      const before = navigation;
-      try {
-        await initialize();
-        if (!cdp || !objectId) throw new Error('OBSERVATION_UNAVAILABLE');
-        const result = await cdp.send('Runtime.callFunctionOn', {
-          objectId, functionDeclaration: 'function(identity) { const observation = this.collect(identity); return { observation, inventory: this.privateInventory() }; }',
-          arguments: [{ value: { documentId: randomUUID(), generation: ++generation, observedAt: new Date().toISOString(), maxBytes } }], returnByValue: true,
-        });
-        if (result.exceptionDetails) {
-          // Preserve only our data-free codes; CDP exception text never becomes a public error.
-          const description = result.exceptionDetails.exception?.description ?? '';
-          throw new Error(description.includes('INVALID_UNICODE') ? 'INVALID_UNICODE' : description.includes('SCOPE_DENIED') ? 'SCOPE_DENIED' : 'OBSERVATION_UNAVAILABLE');
-        }
-        if (before !== navigation) throw new Error('STALE_OBSERVATION');
-        observedNavigation = navigation;
-        const collected = result.result.value as { observation: Observation; inventory: [string, boolean][] };
-        assertSessionOpen();
-        privateInventory.merge(collected.inventory);
-        const exported=exportObservation(collected.observation,maxBytes);acquisitionObservation=exported.observation;return exported;
-      } catch (error) {
-        privateInventory.fail();
-        const code=error instanceof Error ? error.message : '';
-        throw new Error(['INVALID_UNICODE','SCOPE_DENIED','BUDGET_EXCEEDED','STALE_OBSERVATION','CONTEXT_LOST'].includes(code)?code:'OBSERVATION_UNAVAILABLE');
-      } finally { busy = false; }
+  return createObservationFlow({
+    // A Playwright Page satisfies PageLike except for the parameter type of Locator.and (a real Locator); targetAction only ever passes
+    // locators built from this same page, so the structural type is kept narrow and the one difference is bridged here.
+    page: page as unknown as PageLike,
+    newCdp: () => page.context().newCDPSession(page),
+    inspectBoundElement: bound => inspectCapturedElement(page, bound),
+    onNavigation(listener) {
+      const navigated = (frame: Frame): void => { if (frame === page.mainFrame()) listener(); };
+      page.on('framenavigated', navigated);
+      return () => { page.off('framenavigated', navigated); };
     },
-    ...createPasswordControl({
-      current: () => ({closed, busy, generation, observedNavigation, navigation, documentId: acquisitionObservation?.documentId, available: cdp !== null && objectId !== null}),
-      async call(method, values) {
-        if (!cdp || !objectId) throw new Error('TARGET_CHANGED');
-        const functionDeclaration = method === 'preparePassword' ? 'function(target, origin) { return this.preparePasswordResult(target, origin); }' : 'function(target, origin, allowedOrigins, value) { return this.fillPasswordResult(target, origin, allowedOrigins, value); }';
-        return cdp.send('Runtime.callFunctionOn', {objectId, functionDeclaration, arguments: values.map(value => ({value})), returnByValue: true});
-      },
-    }, assertSessionOpen, values => session.withhold?.(values) ?? Promise.resolve()),
-    async acquire(request):Promise<AcquisitionResult>{
-      const refused:AcquisitionResult={kind:'REFUSED',code:'TARGET_DRIFT'};
-      if(closed||busy||!cdp||!objectId||observedNavigation!==navigation||request.generation!==generation||!acquisitionObservation||request.documentId!==acquisitionObservation.documentId||request.origin!==acquisitionObservation.origin)return refused;
-      const before=navigation;
-      try{
-        const result=await cdp.send('Runtime.callFunctionOn',{objectId,functionDeclaration:'function(request) { return this.acquire(request); }',arguments:[{value:request}],returnByValue:true});
-        assertSessionOpen();if(result.exceptionDetails||before!==navigation)return refused;
-        const value:unknown=result.result.value;
-        if(typeof value!=='object'||value===null||Array.isArray(value))return refused;const r=value as Record<string,unknown>,keys=Object.keys(r).sort().join(',');
-        if((r.kind==='ABSENT'||r.kind==='VISIBILITY_PENDING')&&keys==='kind')return {kind:r.kind};
-        if(r.kind==='REFUSED'&&keys==='code,kind'&&['TARGET_DRIFT','READ_REFUSED','POLICY_REFUSED'].includes(String(r.code)))return {kind:'REFUSED',code:r.code as 'TARGET_DRIFT'|'READ_REFUSED'|'POLICY_REFUSED'};
-        if(r.kind!=='READY'||keys!=='kind,target'||typeof r.target!=='object'||r.target===null||Array.isArray(r.target))return refused;
-        const target=r.target as Record<string,unknown>;
-        if(Object.keys(target).sort().join(',')!=='documentId,generation,nodeId'||target.documentId!==request.documentId||target.generation!==request.generation||typeof target.nodeId!=='string'||!acquisitionObservation.nodes.some(n=>n.nodeId===target.nodeId))return refused;
-        return {kind:'READY',target:{documentId:request.documentId,generation:request.generation,nodeId:target.nodeId}};
-      }catch{return refused;}
-    },
-    async matches(target, hint) {
-      if (closed || busy || !cdp || !objectId || target.generation !== generation || observedNavigation !== navigation) return false;
-      const before = navigation;
-      try {
-        const result = await cdp.send('Runtime.callFunctionOn', {
-          objectId, functionDeclaration: 'function(target, hint) { return this.matches(target, hint); }',
-          arguments: [{ value: target }, { value: hint }], returnByValue: true,
-        });
-        return !result.exceptionDetails && result.result.value === true && before === navigation;
-      } catch { return false; }
-    },
-    async withhold(values) {
-      assertSessionOpen();
-      try {
-        privateInventory.merge([...options.knownSecrets,...values].map(value=>[value,true]));
-        options.knownSecrets = [...new Set([...options.knownSecrets, ...values])];
-        if (cdp && objectId) {
-          const result=await cdp.send('Runtime.callFunctionOn', { objectId, functionDeclaration: 'function(values) { this.withhold(values); }', arguments: [{ value: values }], returnByValue: true });
-          if(result.exceptionDetails)throw new Error('CONTEXT_LOST');
-          assertSessionOpen();
-        }
-      } catch { privateInventory.fail(); throw new Error('CONTEXT_LOST'); }
-    },
-    async navigate(target, origin, destination) {
-      const reached = mainDocumentTransition(page);
-      if (closed || busy || !cdp || !objectId || observedNavigation !== navigation) throw new Error('TARGET_CHANGED');
-      const result = await cdp.send('Runtime.callFunctionOn', { objectId, functionDeclaration: 'function(target, origin, destination) { this.navigate(target, origin, destination); }', arguments: [{ value: target }, { value: origin }, { value: destination }], returnByValue: true });
-      if (result.exceptionDetails) throw new Error('TARGET_CHANGED');
-      if (!await reached) throw new Error('TARGET_CHANGED');
-    },
-    async assertPage(target, origin, predicate, expected) {
-      if (closed || busy || !cdp || !objectId || observedNavigation !== navigation) throw new Error('TARGET_CHANGED');
-      const result = await cdp.send('Runtime.callFunctionOn', { objectId, functionDeclaration: 'function(target, origin, predicate, expected) { return this.assertPage(target, origin, predicate, expected); }', arguments: [{ value: target }, { value: origin }, { value: predicate }, { value: expected }], returnByValue: true });
-      if (result.exceptionDetails) throw new Error('TARGET_CHANGED');
-      return result.result.value === true;
-    },
-    async pageMatches(target, origin) {
-      if (closed || busy || !cdp || !objectId || observedNavigation !== navigation) return false;
-      try {
-        const result = await cdp.send('Runtime.callFunctionOn', { objectId, functionDeclaration: 'function(target, origin) { return this.pageMatches(target, origin); }', arguments: [{ value: target }, { value: origin }], returnByValue: true });
-        return !result.exceptionDetails && result.result.value === true;
-      } catch { return false; }
-    },
-    async validateInvocation(invocation) {
-      if (closed || busy || !cdp || !objectId || observedNavigation !== navigation) return false;
-      try {
-        const result = await cdp.send('Runtime.callFunctionOn', { objectId, functionDeclaration: 'function(invocation) { return this.validateInvocation(invocation); }', arguments: [{ value: invocation }], returnByValue: true });
-        if (result.exceptionDetails && (result.exceptionDetails.exception?.description ?? '').includes('PASSWORD_CONTROL_READ_REFUSED')) throw new Error('PASSWORD_CONTROL_READ_REFUSED');
-        return !result.exceptionDetails && result.result.value === true;
-      } catch (error) { if (error instanceof Error && error.message === 'PASSWORD_CONTROL_READ_REFUSED') throw error; return false; }
-    },
-    async invoke(invocation, control) {
-      control?.check();
-      const live = (): void => { assertSessionOpen(); control?.check(); };
-      const begin = (): void => { live(); if (control?.phase === 'PREPARING') control.beginInvocation(); };
-      if (closed || busy || !cdp || !objectId || observedNavigation !== navigation) throw new Error('TARGET_CHANGED');
-      const kind = invocation.operation.kind;
-      if (kind === 'click' || kind === 'check' || kind === 'uncheck' || kind === 'hover' || kind === 'press') {
-        // The retained element lives in the private isolated world. No selector is re-resolved.
-        const native = await cdp.send('Runtime.callFunctionOn', { objectId, functionDeclaration: 'function(invocation) { return this.nativeTarget(invocation); }', arguments: [{ value: invocation }], returnByValue: false });
-        live();
-        if (native.exceptionDetails || !native.result.objectId) throw new Error('TARGET_CHANGED');
-        const expectedNavigation = await cdp.send('Runtime.callFunctionOn', {objectId, functionDeclaration: 'function(invocation) { return this.navigationExpected(invocation); }', arguments: [{value: invocation}], returnByValue: true});
-        const settleNavigation = async (): Promise<boolean> => { await page.waitForLoadState('domcontentloaded', {timeout: 30000}); return true; };
-        const navigationWait = !expectedNavigation.exceptionDetails && expectedNavigation.result.value === true ? page.waitForEvent('framenavigated', {predicate: frame => frame === page.mainFrame(), timeout: 30000}).then(settleNavigation, () => false) : null;
-        const elementId = native.result.objectId;
-        const connection = cdp; const collectorId = objectId;
-        try {
-          await dispatchNativeInput(invocation.operation, {
-            async inspect() {
-              live();
-              const state = await connection.send('Runtime.callFunctionOn', { objectId: collectorId, functionDeclaration: 'function(invocation, element) { if (this.nativeTarget(invocation) !== element) throw new Error("TARGET_CHANGED"); return this.nativeState(invocation); }', arguments: [{ value: invocation }, { objectId: elementId }], returnByValue: true });
-              live();
-              if (state.exceptionDetails) throw new Error('TARGET_CHANGED');
-              return state.result.value as { alreadyChecked: boolean; requiresReveal: boolean };
-            },
-            async revealAndValidate() {
-              const assertOpen = (): void => { live(); };
-              assertOpen();
-              // One public retained-node scroll, bounded together with two frame checks. No
-              // selector lookup, alternate target, repeat scroll or native input retry occurs.
-              const reveal = async (): Promise<void> => {
-                begin();
-                await connection.send('DOM.scrollIntoViewIfNeeded', { objectId: elementId });
-                assertOpen();
-                const guard = await connection.send('Runtime.callFunctionOn', {
-                  objectId: collectorId,
-                  functionDeclaration: 'async function(invocation, element) { await new Promise(resolve => requestAnimationFrame(resolve)); if (!this.acceptReveal(invocation, element)) return false; await new Promise(resolve => requestAnimationFrame(resolve)); return this.nativeTarget(invocation) === element; }',
-                  arguments: [{ value: invocation }, { objectId: elementId }], returnByValue: true, awaitPromise: true,
-                });
-                assertOpen();
-                if (guard.exceptionDetails || guard.result.value !== true) throw new Error('UNKNOWN_OUTCOME');
-              };
-              let timer: ReturnType<typeof setTimeout> | undefined;
-              const timeout = new Promise<never>((_resolve,reject) => { timer = setTimeout(() => { control?.poison('TIMEOUT'); reject(new Error('UNKNOWN_OUTCOME')); },1000); });
-              try { await Promise.race([reveal(),timeout]); } finally { if(timer)clearTimeout(timer); }
-            },
-            async focusAndValidate() {
-              live();
-              begin();
-              await connection.send('DOM.focus', { objectId: elementId });
-              live();
-              const guard = await connection.send('Runtime.callFunctionOn', { objectId: collectorId, functionDeclaration: 'function(invocation, element) { return this.nativeTarget(invocation) === element && element.getRootNode().activeElement === element; }', arguments: [{ value: invocation }, { objectId: elementId }], returnByValue: true });
-              live();
-              if (guard.exceptionDetails || guard.result.value !== true) throw new Error('UNKNOWN_OUTCOME');
-            },
-            async point() {
-              live();
-              const guard = await connection.send('Runtime.callFunctionOn', { objectId: collectorId, functionDeclaration: 'function(invocation, element) { if (this.nativeTarget(invocation) !== element) throw new Error("TARGET_CHANGED"); return this.nativePoint(invocation); }', arguments: [{ value: invocation }, { objectId: elementId }], returnByValue: true });
-              live();
-              if (guard.exceptionDetails) throw new Error('TARGET_CHANGED');
-              return guard.result.value as NativePoint;
-            },
-            async confirmToggle() {
-              live();
-              const guard = await connection.send('Runtime.callFunctionOn', { objectId: collectorId, functionDeclaration: 'function(invocation, element) { return this.confirmToggle(invocation, element); }', arguments: [{ value: invocation }, { objectId: elementId }], returnByValue: true });
-              assertSessionOpen();
-              live();
-              if (guard.exceptionDetails || guard.result.value !== true) throw new Error('UNKNOWN_OUTCOME');
-            },
-            async mouse(input) { begin(); await connection.send('Input.dispatchMouseEvent', input); live(); },
-            async key(input) { begin(); await connection.send('Input.dispatchKeyEvent', input); live(); },
-          });
-          begin(); // An already-satisfied toggle is one completed no-op invocation.
-          if (navigationWait) {
-            let proceeds = true;
-            try { const check = await connection.send('Runtime.callFunctionOn', {objectId: collectorId, functionDeclaration: 'function() { return this.navigationProceed(); }', returnByValue: true}); proceeds = check.exceptionDetails !== undefined || check.result.value === true; } catch { /* A committed navigation destroys the old isolated world. */ }
-            if (proceeds && !await navigationWait) throw new Error('UNKNOWN_OUTCOME');
-          }
-          live(); return {};
-        } finally { await connection.send('Runtime.releaseObject', { objectId: elementId }).catch(() => undefined); }
+    awaitWhitelistedMainFrame: allowedDomains => awaitWhitelistedMainFrame(page, allowedDomains),
+  }, config);
+}
+
+type RecordLike = Record<string, unknown>;
+const record = (value: unknown): RecordLike => {
+  if (typeof value !== 'object' || value === null) throw new ClosedActionError('TARGET_CHANGED');
+  return value as RecordLike;
+};
+const callable = (value: unknown): ((...args: unknown[]) => unknown) => {
+  if (typeof value !== 'function') throw new ClosedActionError('TARGET_CHANGED');
+  return value as (...args: unknown[]) => unknown;
+};
+
+/** No public ElementHandle.evaluate/getProperty, adoption, DOM mutation, query or action. */
+export async function inspectCapturedElement(
+  page: unknown,
+  captured: BoundElement,
+): Promise<number> {
+  try {
+    // Verify the unchanged exact bundle/version before touching the trusted private mapping.
+    loadInjectedSource();
+    const apiPage = record(page), apiHandle = record(captured);
+    const connection = record(apiPage._connection);
+    if (apiHandle._connection !== connection) throw new ClosedActionError('TARGET_CHANGED');
+    const toImpl = callable(connection.toImpl);
+    const implPage = record(toImpl.call(connection, page));
+    const mainFrame = callable(apiPage.mainFrame);
+    const apiFrame = mainFrame.call(page);
+    const implFrame = record(toImpl.call(connection, apiFrame));
+    const implHandle = record(toImpl.call(connection, captured));
+    const context = record(implHandle._context);
+    const delegate = record(context.delegate), client = record(delegate._client);
+    const send = callable(client.send), currentContext = callable(implFrame.existingContext);
+    const objectId = implHandle._objectId;
+    if (typeof objectId !== 'string' || objectId.length === 0) throw new ClosedActionError('TARGET_CHANGED');
+    const live = (): void => {
+      if (apiPage._connection !== connection || apiHandle._connection !== connection
+        || toImpl.call(connection, page) !== implPage || toImpl.call(connection, captured) !== implHandle
+        || mainFrame.call(page) !== apiFrame || toImpl.call(connection, apiFrame) !== implFrame
+        || implHandle.__elementhandle !== true || implHandle._disposed !== false
+        || implHandle._page !== implPage || implHandle._frame !== implFrame
+        || implHandle._context !== context || currentContext.call(implFrame, 'main') !== context
+        || implHandle._objectId !== objectId || context.delegate !== delegate || delegate._client !== client) {
+        throw new ClosedActionError('TARGET_CHANGED');
       }
-      begin();
-      const result = await cdp.send('Runtime.callFunctionOn', {
-        objectId, functionDeclaration: 'function(invocation) { return this.invoke(invocation); }', arguments: [{ value: invocation }], returnByValue: true,
-      }).catch(() => { throw new Error('UNKNOWN_OUTCOME'); });
-      live();
-      if (result.exceptionDetails) { const description = result.exceptionDetails.exception?.description ?? ''; throw new Error(description.includes('PASSWORD_CONTROL_READ_REFUSED') ? 'PASSWORD_CONTROL_READ_REFUSED' : description.includes('POST_FOCUS_CHANGED') ? 'UNKNOWN_OUTCOME' : 'TARGET_CHANGED'); }
-      return result.result.value as GuidedInvocationResult;
-    },
-    async dispose() {
-      closed = true; options.knownSecrets = []; privateInventory.dispose();
-      page.off('framenavigated', navigated);
-      if (cdp && objectId) await cdp.send('Runtime.callFunctionOn', { objectId, functionDeclaration: 'function() { this.dispose(); }' }).catch(() => undefined);
-      await cdp?.send('Runtime.releaseObjectGroup', { objectGroup: worldName }).catch(() => undefined);
-      await cdp?.detach().catch(() => undefined);
-      cdp = null; objectId = null;
-    },
-  };
-  return session;
+    };
+    live();
+    const response = record(await send.call(client, 'DOM.describeNode', { objectId }));
+    live();
+    const backendNodeId = record(response.node).backendNodeId;
+    if (typeof backendNodeId !== 'number' || !Number.isSafeInteger(backendNodeId) || backendNodeId <= 0) {
+      throw new ClosedActionError('TARGET_CHANGED');
+    }
+    return backendNodeId;
+  } catch {
+    // Neither raw protocol errors, page text, attributes, object IDs nor causes escape.
+    throw new ClosedActionError('TARGET_CHANGED');
+  }
 }
 
 /** How long the hard teardown waits for an abandoned launch that has already left a process behind to settle. */
@@ -600,12 +459,6 @@ export async function launchGuidedBrowser(config: ObservationConfig, contextId: 
   context.on('page', extra => { if (extra !== page) { void extra.close().catch(() => undefined); extraPageListener?.(); onLost('EXTRA_PAGE'); } });
   page.on('crash', () => { if (!closed) onLost('PAGE_CRASH'); });
   browser?.on('disconnected', () => { if (!closed) onLost('BROWSER_DISCONNECTED'); });
-  phase = 'ROUTING';
-  await bounded(() => live.route('**/*', async route => {
-    let allowed = false;
-    try { allowed = config.approvedOrigins.includes(new URL(route.request().url()).origin); } catch { /* deny */ }
-    try { if (allowed) await route.continue(); else await route.abort(); } catch { if (!closed) onLost('ROUTE_FAILURE'); }
-  }));
   const hosts = new Set<string>();
   context.on('request', request_ => { if (hosts.size >= MAX_OBSERVED_HOSTS) return; const host = hostOf(request_.url()); if (host !== null) hosts.add(host); });
   phase = 'BLANK_DOCUMENT';
@@ -625,17 +478,17 @@ export async function launchGuidedBrowser(config: ObservationConfig, contextId: 
   const blankMatches = async (): Promise<boolean> => {
     try { const result = await cdp.send('Runtime.callFunctionOn', { objectId: blankId, functionDeclaration: 'function() { return this === document && location.href === "about:blank" && location.origin === "null"; }', returnByValue: true }); return !result.exceptionDetails && result.result.value === true; } catch { return false; }
   };
-  const navigateBlank = async (destination: string, control?: InvocationControl): Promise<void> => {
+  const navigateBlank = (destination: string, control?: InvocationControl): Promise<void> => closedPageStep(async function (): Promise<void> {
     const reached = mainDocumentTransition(page);
     control?.check();
-    if (!config.approvedOrigins.includes(new URL(destination).origin)) throw new Error('POLICY_DENIED');
+    if (!domainAllowed(config.allowedDomains, destination)) throw new Error('POLICY_DENIED');
     control?.beginInvocation();
     const result = await cdp.send('Runtime.callFunctionOn', { objectId: blankId, functionDeclaration: 'function(destination) { if (this !== document || location.href !== "about:blank" || location.origin !== "null") throw new Error("TARGET_CHANGED"); location.assign(destination); }', arguments: [{ value: destination }], returnByValue: true });
     control?.check();
     if (result.exceptionDetails) throw new Error('TARGET_CHANGED');
     if (!await reached) throw new Error('TARGET_CHANGED');
     control?.check();
-  };
+  });
   const close = stages.close;
   // The recorder outlives the hard stage on purpose (see `hardTeardown`). Wait for it to exit by itself, bounded; past the bound it is killed.
   const finalizeRecording = async (boundMs: number): Promise<boolean> => {
@@ -653,7 +506,7 @@ export async function launchGuidedBrowser(config: ObservationConfig, contextId: 
     observedBlankMatches: blankMatches,
     observedInitialContextMatches: blankMatches,
     observedStartupReady: () => !closed,
-    async observedWait(strategy, timeoutMs) { await page.waitForLoadState(strategy, { timeout: timeoutMs }); },
+    async observedWait(strategy, timeoutMs) { await closedPageStep(() => page.waitForLoadState(strategy, { timeout: timeoutMs })); },
     observedNavigateBlank: navigateBlank,
     onExtraPage(listener) { extraPageListener = listener; },
     observedHosts: () => [...hosts].sort(),

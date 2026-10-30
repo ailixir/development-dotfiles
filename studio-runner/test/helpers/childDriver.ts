@@ -1,3 +1,4 @@
+import { TEST_DOMAINS } from './allowedDomains.js';
 /**
  * A **real** launcher over a fake spawn seam, driven message by message (10.13).
  *
@@ -76,7 +77,7 @@ export function createChildDriver(
 
   const launcher = createChildBrowserLauncher({
     recording: { width: 1280, height: 720 },
-    seekOriginCalibrationMs: 0,
+    seekOriginCalibrationMs: 0, allowedDomains: TEST_DOMAINS,
     stepTimeoutMs: 30_000,
     launchTimeoutMs: 60,
     maxFailureMessageLength: 400,

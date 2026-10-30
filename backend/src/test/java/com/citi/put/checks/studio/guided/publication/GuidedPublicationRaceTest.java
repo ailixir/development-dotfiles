@@ -38,29 +38,13 @@ class GuidedPublicationRaceTest {
                   + " studio_guided_source_manifests WHERE session_id='session'",
               id);
           db.jdbc.update("INSERT INTO studio_guided_translation_state(session_id) VALUES (?)", id);
-          // V19: the evidence fixture reads the session's immutable governed policy.
-          db.jdbc.update(
-              "INSERT INTO"
-                  + " studio_guided_session_policies(session_id,policy_id,policy_version,"
-                  + "observation_policy_hash) SELECT ?,policy_id,policy_version,"
-                  + "observation_policy_hash FROM studio_guided_session_policies"
-                  + " WHERE session_id='session'",
-              id);
         });
     return document;
   }
 
   static PublicationContracts.Base capture(
       GuidedPublicationMigrationTest.Database db, JsonNode session) {
-    var requirements =
-        C.object()
-            .put("csiId", "CSI")
-            .put("environment", "Development")
-            .put("applicationId", "app")
-            .put("policyId", "policy")
-            .put("policyVersion", "1")
-            .put("entryPolicyId", "entry");
-    requirements.putArray("allowedOrigins").add("https://orders.example.test");
+    var requirements = C.object().put("csiId", "CSI").put("environment", "Development");
     requirements.putArray("capabilities").add("navigate");
     requirements.putObject("initialContext").put("kind", "initialBlank");
     return db.tx.execute(

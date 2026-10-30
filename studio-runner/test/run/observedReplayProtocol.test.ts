@@ -1,3 +1,4 @@
+import { FIXTURE_ORIGIN, TEST_DOMAINS } from '../helpers/allowedDomains.js';
 import {ObservedInvocationControl,ReplayAcquisitionBudget} from '../../src/executor/observedReplay.js';
 import { describe, it, expect } from 'vitest';
 import wireJson from '../../../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json' with { type: 'json' };
@@ -9,12 +10,11 @@ import { validateObservedExecute } from '../../src/executor/observedReplay.js';
 import type { Scope } from '../../src/executor/observedOperations.js';
 describe('source-free observed IPC family', () => {
     // STUDIO-OBS-012A AC-3: the artifact-1 parsers this case also refused the frames in are deleted.
-    it('accepts composed closed launch/execute frames', () => { expect(validateObserved('replay-ipc#/definitions/Launch3', wire.launch, OBSERVED_LIMITS.launch)).toEqual(wire.launch); expect(validateObservedExecute(wire.execute, wire.job.binding.scope)).toEqual(wire.execute); });
-    it.each(['artifact', 'source', 'originalText', 'code', 'callbackUrl', 'module', 'contextId', 'nodeId', 'ownerFence', 'valueStore'])('rejects %s in Execute3', key => { expect(() => validateObservedExecute({ ...wire.execute, [key]: 'PRIVATE' }, wire.job.binding.scope)).toThrow(); });
+    it('accepts composed closed launch/execute frames', () => { expect(validateObserved('replay-ipc#/definitions/Launch3', wire.launch, OBSERVED_LIMITS.launch)).toEqual(wire.launch); expect(validateObservedExecute(wire.execute, wire.job.binding.scope, TEST_DOMAINS)).toEqual(wire.execute); });
+    it.each(['artifact', 'source', 'originalText', 'code', 'callbackUrl', 'module', 'contextId', 'nodeId', 'ownerFence', 'valueStore'])('rejects %s in Execute3', key => { expect(() => validateObservedExecute({ ...wire.execute, [key]: 'PRIVATE' }, wire.job.binding.scope, TEST_DOMAINS)).toThrow(); });
     it('keeps historical receipt/recipe provenance out of child bindings/inputs', () => {
         const text = JSON.stringify(wire.execute);
-        for (const name of ['admissionId', 'producerAdmissionId', 'sourceSpan', 'referenceName', 'sourceRevision', 'nodeId'])
-            expect(text).not.toContain('"' + name + '"');
+        for (const name of ['admissionId', 'producerAdmissionId', 'sourceSpan', 'referenceName', 'sourceRevision', 'nodeId']) expect(text).not.toContain('"' + name + '"');
     });
     it('applies whole-frame byte bounds and depth before traversal', () => {
         expect(() => validateObserved('replay-ipc#/definitions/Launch3', { ...wire.launch, scratchPath: 'a'.repeat(OBSERVED_LIMITS.launch) }, OBSERVED_LIMITS.launch)).toThrow();
@@ -89,10 +89,10 @@ describe('actual observed launcher protocol enforcement', () => {
       (job.artifact as {guards:unknown}).guards=[job.artifact.guards[0],job.artifact.guards[1],{...literalGuard,guardId:'g2'}];
       (job.artifact.replayPolicy as {bindings:unknown;transfers:unknown}).bindings=[];(job.artifact.replayPolicy as {transfers:unknown}).transfers=[];
       (job.artifact.inputRecipes as unknown[]).push({inputId:'pass',stepId:step.stepId,kind:'secretRef',intendedSlot:'fill.value',provenance:{kind:'configuration',referenceId:'pass-ref',referenceName:'PASS'}});
-      (job as {secrets:unknown}).secrets={PASS:'receipt-canary',UNREACHED:'no-effect'};(job as {secretOrigins:unknown}).secretOrigins={PASS:[job.binding.scope.allowedOrigins[0]]};
+      (job as {secrets:unknown}).secrets={PASS:'receipt-canary',UNREACHED:'no-effect'};(job as {secretOrigins:unknown}).secretOrigins={PASS:[FIXTURE_ORIGIN]};
       const admission={...wire.admissionReceipt,startDeadlineAt:new Date(Date.now()+10000).toISOString(),runDeadlineAt:new Date(Date.now()+20000).toISOString()} as AdmissionReceipt;
-      const launcher=createChildBrowserLauncher({recording:{width:640,height:480},stepTimeoutMs:10000,launchTimeoutMs:100,maxFailureMessageLength:400,seekOriginCalibrationMs:0,stopTimeoutMs:20,spawner:child.spawner});
-      try{const session=await launcher.launch({browser:'chromium',viewport:job.configuration.viewport,totalRuntimeMs:30,stepTimeoutMs:10000,scratchPath:dir,observed:{job,admission,policy:wire.trustedPolicy}});const result=await required(session.run).execute({reporter:{stepStarted(){return;},stepFinished(){return;}}});
+      const launcher=createChildBrowserLauncher({recording:{width:640,height:480},stepTimeoutMs:10000,launchTimeoutMs:100,maxFailureMessageLength:400,seekOriginCalibrationMs:0, allowedDomains: TEST_DOMAINS,stopTimeoutMs:20,spawner:child.spawner});
+      try{const session=await launcher.launch({browser:'chromium',viewport:job.configuration.viewport,totalRuntimeMs:30,stepTimeoutMs:10000,scratchPath:dir,observed:{job,admission}});const result=await required(session.run).execute({reporter:{stepStarted(){return;},stepFinished(){return;}}});
         expect(result.secretUse).toEqual(mode==='started-secret-lost'||mode==='lost-result'||mode==='ipc-backpressure-loss'?{UNREACHED:'NOT_USED'}:{PASS:'USED',UNREACHED:'NOT_USED'});
         if(mode==='ipc-backpressure-loss'){expect(child.possibleEffects()).toBe(1);expect(child.kills()).toBeGreaterThan(0);expect(result.secretUse).not.toHaveProperty('PASS');}
         expect(result.ok).toBe(mode==='sparse-final');if(mode==='contradictory-final')expect(result.failureMessage).toBe('INVALID_CONTRACT');await session.close();
@@ -105,9 +105,9 @@ describe('actual observed launcher protocol enforcement', () => {
         const child = virtualChild(mode, path);
         const admission = { ...wire.admissionReceipt, startDeadlineAt: new Date(Date.now() + 10000).toISOString(), runDeadlineAt: new Date(Date.now() + 20000).toISOString() } as AdmissionReceipt;
         let logs = 0;
-        const launcher = createChildBrowserLauncher({ recording: { width: 640, height: 480 }, stepTimeoutMs: 10000, launchTimeoutMs: 100, maxFailureMessageLength: 400, seekOriginCalibrationMs: 0, stopTimeoutMs: 20, spawner: child.spawner });
+        const launcher = createChildBrowserLauncher({ recording: { width: 640, height: 480 }, stepTimeoutMs: 10000, launchTimeoutMs: 100, maxFailureMessageLength: 400, seekOriginCalibrationMs: 0, allowedDomains: TEST_DOMAINS, stopTimeoutMs: 20, spawner: child.spawner });
         try {
-            const promise = launcher.launch({ browser: 'chromium', viewport: wire.job.configuration.viewport, totalRuntimeMs: 30, stepTimeoutMs: 10000, scratchPath: dir, observed: { job: wire.job, admission, policy: wire.trustedPolicy }, diagnostics: { redact: t => t, write() { logs++; } } });
+            const promise = launcher.launch({ browser: 'chromium', viewport: wire.job.configuration.viewport, totalRuntimeMs: 30, stepTimeoutMs: 10000, scratchPath: dir, observed: { job: wire.job, admission}, diagnostics: { redact: t => t, write() { logs++; } } });
             if (mode === 'pre-ready-result' || mode === 'outside-recording') {
                 // The approved sequential startup never admits pre-Ready video as app evidence.
                 // Keep both owned-path and outside-path negative cases; neither may fall back.
@@ -145,16 +145,18 @@ function required<T>(value: T | null | undefined): T {
 
 import {createObservedReplayAdapter} from '../../src/run/observedReplayAdapter.js';
 import type {BrowserHandle} from '../../src/run/browserFactory.js';
-import type {ObservationSession,Observation} from '../../src/run/observationTypes.js';
+import type {ObservationSession} from '../../src/run/observationTypes.js';
+import type {Observation} from '../../src/guided/types.js';
+import {sessionStub} from '../helpers/guided.js';
 import type {ReplayAction,Guard} from '../../src/executor/observedOperations.js';
 describe('observed page/blank authority refusal boundaries',()=>{
   it.each(['navigate','assert','stale-page','uncertain-navigation','blank-refusal','blank-unknown'] as const)('preserves %s semantics without element fallback',async mode=>{
-    let calls=0;const origin=wire.job.binding.scope.allowedOrigins[0]??'';
+    let calls=0;const origin=FIXTURE_ORIGIN;
     const scope={...wire.job.binding.scope,initialContext:mode.startsWith('blank')?{kind:'initialBlank'}:{kind:'observedDocument',origin}} as Scope;
-    const observations:ObservationSession={acquire(){return Promise.resolve({kind:'REFUSED',code:'TARGET_DRIFT'});},observe(){return Promise.resolve({observation:{...wire.basis.observations[0]?.observation,schemaVersion:3} as Observation,json:'',bytes:0,observationHash:'a'.repeat(64)});},matches(){return Promise.resolve(false);},pageMatches(){return Promise.resolve(mode!=='stale-page');},navigate(){calls++;return mode==='uncertain-navigation'?Promise.reject(Error('PRIVATE')):Promise.resolve();},assertPage(){calls++;return Promise.resolve(true);},dispose(){return Promise.resolve();}};
+    const observations:ObservationSession=sessionStub({resolveTarget(){return Promise.resolve({kind:'REFUSED',code:'TARGET_DRIFT'});},observe(){return Promise.resolve({observation:{...wire.basis.observations[0]?.observation,schemaVersion:3} as Observation,json:'',bytes:0,observationHash:'a'.repeat(64)});},pageMatches(){return Promise.resolve(mode!=='stale-page');},navigate(){calls++;return mode==='uncertain-navigation'?Promise.reject(Error('PRIVATE')):Promise.resolve();},assertPage(){calls++;return Promise.resolve(true);},dispose(){return Promise.resolve();}});
     const handle={createObservationSession:()=>observations,observedBlankMatches:()=>Promise.resolve(mode!=='blank-refusal'),observedNavigateBlank(){calls++;return Promise.reject(Error('PRIVATE'));}} as unknown as BrowserHandle;
     const blank=mode.startsWith('blank');
-    const adapter=createObservedReplayAdapter(handle,scope,wire.trustedPolicy,'run',()=>undefined);
+    const adapter=createObservedReplayAdapter(handle, scope, TEST_DOMAINS,'run',()=>undefined);
     const guard:Guard={guardId:'g0',origin:blank?null:origin,target:{kind:blank?'initialBlank':'page'}};
     const operation:ReplayAction['operation']=mode==='assert'?{kind:'assert',predicate:'url',expected:{kind:'authoredLiteral',sourceInputId:'url'}}:{kind:'navigate',destinationInputId:'url'};
     const action:ReplayAction={coordinate:{stepId:wire.execute.steps[0]?.stepId??'',ordinal:0},guardId:'g0',operation};
@@ -167,8 +169,8 @@ describe('observed page/blank authority refusal boundaries',()=>{
 it('supports an empty learned binding graph without importing historical value rights',()=>{
   const step=wire.execute.steps[0],guard=wire.execute.guards[0],input=wire.execute.inputs[0];if(!step||!guard||!input)throw Error('fixture');
   const frame={...wire.execute,steps:[step],guards:[guard],inputs:[input],bindings:[],transfers:[]};
-  expect(validateObservedExecute(frame,wire.job.binding.scope)).toEqual(frame);
-  expect(()=>validateObservedExecute({...frame,availability:[{bindingId:'old',contextId:'historic'}]},wire.job.binding.scope)).toThrow();
+  expect(validateObservedExecute(frame,wire.job.binding.scope, TEST_DOMAINS)).toEqual(frame);
+  expect(()=>validateObservedExecute({...frame,availability:[{bindingId:'old',contextId:'historic'}]},wire.job.binding.scope,TEST_DOMAINS)).toThrow();
 });
 
 // STUDIO-OBS-012A AC-3: one family remains; the artifact-1 parser half of this case is deleted.

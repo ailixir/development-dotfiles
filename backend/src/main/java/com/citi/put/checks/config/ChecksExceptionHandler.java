@@ -159,20 +159,6 @@ public class ChecksExceptionHandler {
     return unknownReference(ex.getReferenceName(), ex.getMessage());
   }
 
-  /**
-   * The principal is not entitled to use a declared secret (§9.2, AC-4).
-   *
-   * <p>Deliberately the same code and the same wording as an unknown reference. They are different
-   * facts internally, and telling them apart on the wire would let an unentitled caller learn
-   * whether a secret exists — <em>"Secret reference names alone grant no permission"</em> cuts both
-   * ways.
-   */
-  @ExceptionHandler(StudioReferenceResolver.SecretUseNotAuthorizedException.class)
-  public ResponseEntity<Map<String, String>> handleSecretUseNotAuthorized(
-      StudioReferenceResolver.SecretUseNotAuthorizedException ex) {
-    return unknownReference(ex.getReferenceName(), ex.getMessage());
-  }
-
   private static ResponseEntity<Map<String, String>> unknownReference(
       String reference, String message) {
     return ResponseEntity.badRequest()

@@ -162,9 +162,6 @@
         "origin": {
           "type": "null"
         },
-        "locator": {
-          "type": "null"
-        },
         "operation": {
           "$ref": "https://checks.citi.example/contracts/observed/v3/action.schema.json#/properties/operation/oneOf/4"
         },
@@ -176,12 +173,15 @@
         "operationHash": {
           "type": "string",
           "pattern": "^[a-f0-9]{64}$"
+        },
+        "target": {
+          "type": "null"
         }
       },
       "required": [
         "coordinate",
         "origin",
-        "locator",
+        "target",
         "operation",
         "admissionId",
         "operationHash"
@@ -200,16 +200,6 @@
           "pattern": "^https?://(?:[a-z0-9.-]+|\\[[0-9a-f:]+\\])(?::[1-9][0-9]{0,4})?$",
           "maxLength": 256
         },
-        "locator": {
-          "oneOf": [
-            {
-              "$ref": "https://checks.citi.example/contracts/observed/v3/action.schema.json#/properties/target/oneOf/0/properties/locator"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
         "operation": {
           "$ref": "https://checks.citi.example/contracts/observed/v3/action.schema.json#/properties/operation"
         },
@@ -221,12 +211,22 @@
         "operationHash": {
           "type": "string",
           "pattern": "^[a-f0-9]{64}$"
+        },
+        "target": {
+          "oneOf": [
+            {
+              "$ref": "https://checks.citi.example/contracts/observed/v3/locator.schema.json#/definitions/ResolvedTarget"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
         "coordinate",
         "origin",
-        "locator",
+        "target",
         "operation",
         "admissionId",
         "operationHash"
@@ -267,7 +267,7 @@
           "then": {
             "type": "object",
             "properties": {
-              "locator": {
+              "target": {
                 "type": "null"
               }
             }

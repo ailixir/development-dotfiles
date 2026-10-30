@@ -16,8 +16,8 @@ import { GuidedClarification, expiryWarning } from './GuidedClarification';
  *
  * The base question is the landed `contracts/v3/fixtures.json` `labelledQuestion` (two PAGE
  * choices), varied field by field. What is asserted: the AC-3 wording, page-derived labels rendered
- * as untrusted text with role and region, "None of these" calling back instead of answering, the
- * side-effect confirmation, and expiry warnings measured from `expiresAt`.
+ * as untrusted text with role and region, "None of these" calling back instead of answering, and
+ * expiry warnings measured from `expiresAt`.
  */
 
 const REPO_ROOT = path.resolve(__dirname, '../../../../..');
@@ -104,7 +104,6 @@ describe('page-derived labels are untrusted text (AC-3, security)', () => {
     labelSource: 'PAGE',
     role: '<b>button</b>',
     region: '<script>alert(2)</script>',
-    nodeId: 'node-x',
     bindingId: null,
   };
 
@@ -140,50 +139,14 @@ describe('page-derived labels are untrusted text (AC-3, security)', () => {
 
   it('AUTHORED and SAVED_INPUT labels are never decorated as page-derived', () => {
     const plain: GuidedChoice[] = [
-      { choiceId: 'a', safeLabel: 'Order number', labelSource: 'AUTHORED', nodeId: null, bindingId: null },
-      { choiceId: 's', safeLabel: 'ORDER_REF', labelSource: 'SAVED_INPUT', nodeId: null, bindingId: 'b-1' },
+      { choiceId: 'a', safeLabel: 'Order number', labelSource: 'AUTHORED', bindingId: null },
+      { choiceId: 's', safeLabel: 'ORDER_REF', labelSource: 'SAVED_INPUT', bindingId: 'b-1' },
     ];
     const { container } = renderQuestion(question({ expiresAt: FAR_FUTURE, choices: plain }));
     expect(screen.queryByTestId('page-derived-label')).toBeNull();
     expect(container).not.toHaveTextContent(GUIDED_COPY.pageDerived.template);
     expect(container.querySelector('[data-label-source="AUTHORED"]')).toHaveTextContent('Order number');
     expect(container.querySelector('[data-label-source="SAVED_INPUT"]')).toHaveTextContent('ORDER_REF');
-  });
-});
-
-describe('inherited OBS-014 item b: a side-effect confirmation is a confirmation, not a disambiguation', () => {
-  const confirmation = (): GuidedClarificationQuestion =>
-    question({
-      expiresAt: FAR_FUTURE,
-      reason: 'SIDE_EFFECT_CONFIRMATION',
-      promptCode: 'CONFIRM_ACTION',
-      choices: [
-        { choiceId: 'confirm-1', safeLabel: step.text, labelSource: 'AUTHORED', nodeId: null, bindingId: null },
-      ],
-    });
-
-  it('asks to confirm the action, never "Which one did you mean?"', () => {
-    renderQuestion(confirmation());
-    expect(screen.getByTestId('guided-confirmation')).toHaveTextContent('Confirm this action before it runs.');
-    expect(screen.getByTestId('guided-question')).toHaveTextContent(
-      "Step 1 says: 'Type the order number into the reference box'. Continue with this action?",
-    );
-    expect(screen.queryByText(/Which one did you mean\?/u)).toBeNull();
-    expect(screen.queryByRole('radio')).toBeNull();
-  });
-
-  it('Continue answers with the one choice; declining calls back like "None of these"', async () => {
-    const { onAnswer, onNoneOfThese, unmount } = renderQuestion(confirmation());
-    await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
-    expect(onAnswer).toHaveBeenCalledTimes(1);
-    expect(onAnswer).toHaveBeenCalledWith('confirm-1');
-    unmount();
-    const declined = renderQuestion(confirmation());
-    await userEvent.click(screen.getByRole('button', { name: "None of these — I'll edit step 1" }));
-    expect(declined.onNoneOfThese).toHaveBeenCalledTimes(1);
-    expect(declined.onNoneOfThese).toHaveBeenCalledWith(STEP_1);
-    expect(declined.onAnswer).not.toHaveBeenCalled();
-    expect(onNoneOfThese).not.toHaveBeenCalled();
   });
 });
 

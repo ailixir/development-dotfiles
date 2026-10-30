@@ -152,17 +152,20 @@ and sharing an account with the API is how "nothing" silently becomes "whatever 
 `ACCEPTED_KEYS` loader (`studio-runner/src/server/config.ts`); a rendered name that is not one
 would be a startup failure in the pod, and a values key that is not one fails the render below.
 
-Deliberately a subset: the loader accepts fifty-seven keys and this list names fifty-three of
-them. The other four (`INSTANCE_ID`, `SERVICE_IDENTITY`, `CALLBACK_IDENTITY`, `CALLBACK_BASE_URL`)
-are rendered directly by the runner Deployment or left to the runner, and are not reachable through
-`runnerEnv`. The five `STUDIO_RUNNER_OBSERVED_*` keys are on the list because the Deployment renders
-them (from `studioObserved.*`); they are chart-managed below, so no `runnerEnv` value reaches them.
+Deliberately a subset: the loader accepts four more keys than this list names (`INSTANCE_ID`,
+`SERVICE_IDENTITY`, `CALLBACK_IDENTITY`, `CALLBACK_BASE_URL`); they are rendered directly by the
+runner Deployment or left to the runner, and are not reachable through `runnerEnv`. The
+`STUDIO_RUNNER_OBSERVED_*` keys, `STUDIO_RUNNER_GUIDED_CAPACITY`, `STUDIO_RUNNER_ALLOWED_DOMAINS` and
+`STUDIO_RUNNER_ALLOW_ALL_DOMAINS` are on the list because the Deployment renders them (from
+`studioObserved.*`, `studioRunner.guided.capacity`, `studioNavigation.allowedDomains` and
+`studioNavigation.allowAllDomains`); they are chart-managed below,
+so no `runnerEnv` value reaches them.
 What matters is that the list is closed at both ends —
 `PLAYWRIGHT_BROWSERS_PATH` and `HOME` are on neither side, and there is no chart path that emits
 them.
 */}}
 {{- define "put-checks.studioRunner.acceptedEnvKeys" -}}
-STUDIO_RUNNER_PORT STUDIO_RUNNER_HOST STUDIO_RUNNER_POOL_SIZE STUDIO_RUNNER_SCRATCH_DIR STUDIO_RUNNER_OBJECT_STORE_DIR STUDIO_RUNNER_OBJECT_STORE_PROVIDER STUDIO_RUNNER_OBJECT_STORE_ENDPOINT STUDIO_RUNNER_OBJECT_STORE_REGION STUDIO_RUNNER_OBJECT_STORE_BUCKET STUDIO_RUNNER_OBJECT_STORE_FORCE_PATH_STYLE STUDIO_RUNNER_OBJECT_STORE_ACCESS_KEY_ID_FILE STUDIO_RUNNER_OBJECT_STORE_SECRET_ACCESS_KEY_FILE STUDIO_RUNNER_OBJECT_STORE_MAX_ATTEMPTS STUDIO_RUNNER_OBJECT_STORE_WINDOW_MS STUDIO_RUNNER_OBJECT_STORE_BACKOFF_MS STUDIO_RUNNER_ADMISSION_TIMEOUT_MS STUDIO_RUNNER_TERMINAL_DELIVERY_WINDOW_MS STUDIO_RUNNER_TERMINAL_DELIVERY_MAX_ATTEMPTS STUDIO_RUNNER_TERMINAL_DELIVERY_BACKOFF_MS STUDIO_RUNNER_VALIDATE_TIMEOUT_MS STUDIO_RUNNER_MAX_REQUEST_BODY_BYTES STUDIO_RUNNER_RETRY_AFTER_SECONDS STUDIO_RUNNER_DRAIN_TIMEOUT_MS STUDIO_RUNNER_RECORDING_WIDTH STUDIO_RUNNER_RECORDING_HEIGHT STUDIO_RUNNER_BROWSER_LAUNCH_TIMEOUT_MS STUDIO_RUNNER_STEP_TIMEOUT_MS STUDIO_RUNNER_BROWSER_STOP_TIMEOUT_MS STUDIO_RUNNER_SEEK_ORIGIN_CALIBRATION_MS STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS STUDIO_RUNNER_MAX_STEP_TIMEOUT_MS STUDIO_RUNNER_MAX_REPORT_STEPS STUDIO_RUNNER_MAX_REPORT_LOG_ENTRIES STUDIO_RUNNER_MAX_REPORT_LOG_ENTRY_LENGTH STUDIO_RUNNER_MAX_REPORT_BODY_BYTES STUDIO_RUNNER_OBJECT_STORE_CREDENTIALS_DIRECTORY STUDIO_RUNNER_TLS_KEY_FILE STUDIO_RUNNER_TLS_CERT_FILE STUDIO_RUNNER_TLS_CA_FILE STUDIO_RUNNER_CONTROLLER_CERTIFICATE_FINGERPRINT256 STUDIO_RUNNER_GUIDED_ENABLED STUDIO_RUNNER_GUIDED_WORKER_ID STUDIO_RUNNER_GUIDED_JOURNAL_DIR STUDIO_RUNNER_GUIDED_CONTROLLER_ISSUER STUDIO_RUNNER_GUIDED_CONTROLLER_SUBJECT STUDIO_RUNNER_GUIDED_CONTROLLER_PUBLIC_KEY_FILE STUDIO_RUNNER_GUIDED_CALLBACK_BASE_URL STUDIO_RUNNER_GUIDED_CALLBACK_TOKEN_FILE STUDIO_RUNNER_OBSERVED_VALIDATION_ENABLED STUDIO_RUNNER_OBSERVED_REPLAY_ENABLED STUDIO_RUNNER_OBSERVED_CATALOG_FILE STUDIO_RUNNER_OBSERVED_POLICY_FILE STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST
+STUDIO_RUNNER_PORT STUDIO_RUNNER_HOST STUDIO_RUNNER_POOL_SIZE STUDIO_RUNNER_SCRATCH_DIR STUDIO_RUNNER_OBJECT_STORE_DIR STUDIO_RUNNER_OBJECT_STORE_PROVIDER STUDIO_RUNNER_OBJECT_STORE_ENDPOINT STUDIO_RUNNER_OBJECT_STORE_REGION STUDIO_RUNNER_OBJECT_STORE_BUCKET STUDIO_RUNNER_OBJECT_STORE_FORCE_PATH_STYLE STUDIO_RUNNER_OBJECT_STORE_ACCESS_KEY_ID_FILE STUDIO_RUNNER_OBJECT_STORE_SECRET_ACCESS_KEY_FILE STUDIO_RUNNER_OBJECT_STORE_MAX_ATTEMPTS STUDIO_RUNNER_OBJECT_STORE_WINDOW_MS STUDIO_RUNNER_OBJECT_STORE_BACKOFF_MS STUDIO_RUNNER_ADMISSION_TIMEOUT_MS STUDIO_RUNNER_TERMINAL_DELIVERY_WINDOW_MS STUDIO_RUNNER_TERMINAL_DELIVERY_MAX_ATTEMPTS STUDIO_RUNNER_TERMINAL_DELIVERY_BACKOFF_MS STUDIO_RUNNER_VALIDATE_TIMEOUT_MS STUDIO_RUNNER_MAX_REQUEST_BODY_BYTES STUDIO_RUNNER_RETRY_AFTER_SECONDS STUDIO_RUNNER_DRAIN_TIMEOUT_MS STUDIO_RUNNER_RECORDING_WIDTH STUDIO_RUNNER_RECORDING_HEIGHT STUDIO_RUNNER_BROWSER_LAUNCH_TIMEOUT_MS STUDIO_RUNNER_STEP_TIMEOUT_MS STUDIO_RUNNER_BROWSER_STOP_TIMEOUT_MS STUDIO_RUNNER_SEEK_ORIGIN_CALIBRATION_MS STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS STUDIO_RUNNER_MAX_STEP_TIMEOUT_MS STUDIO_RUNNER_MAX_REPORT_STEPS STUDIO_RUNNER_MAX_REPORT_LOG_ENTRIES STUDIO_RUNNER_MAX_REPORT_LOG_ENTRY_LENGTH STUDIO_RUNNER_MAX_REPORT_BODY_BYTES STUDIO_RUNNER_OBJECT_STORE_CREDENTIALS_DIRECTORY STUDIO_RUNNER_TLS_KEY_FILE STUDIO_RUNNER_TLS_CERT_FILE STUDIO_RUNNER_TLS_CA_FILE STUDIO_RUNNER_CONTROLLER_CERTIFICATE_FINGERPRINT256 STUDIO_RUNNER_GUIDED_ENABLED STUDIO_RUNNER_GUIDED_WORKER_ID STUDIO_RUNNER_GUIDED_JOURNAL_DIR STUDIO_RUNNER_GUIDED_CONTROLLER_ISSUER STUDIO_RUNNER_GUIDED_CONTROLLER_SUBJECT STUDIO_RUNNER_GUIDED_CONTROLLER_PUBLIC_KEY_FILE STUDIO_RUNNER_GUIDED_CALLBACK_BASE_URL STUDIO_RUNNER_GUIDED_CALLBACK_TOKEN_FILE STUDIO_RUNNER_GUIDED_CAPACITY STUDIO_RUNNER_ALLOWED_DOMAINS STUDIO_RUNNER_ALLOW_ALL_DOMAINS STUDIO_RUNNER_OBSERVED_VALIDATION_ENABLED STUDIO_RUNNER_OBSERVED_REPLAY_ENABLED STUDIO_RUNNER_OBSERVED_CATALOG_FILE STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST
 {{- end }}
 
 {{/*
@@ -185,12 +188,22 @@ deployment can be repointed with — so the deployment must refuse it loudly.
 {{- if or (hasPrefix "STUDIO_RUNNER_GUIDED_" $key) (hasPrefix "STUDIO_RUNNER_TLS_" $key) (eq $key "STUDIO_RUNNER_CONTROLLER_CERTIFICATE_FINGERPRINT256") }}
 {{- fail (printf "%s is managed by the chart; use studioRunner.tls.* or studioRunner.guided.* values instead" $key) }}
 {{- end }}
-{{- /* The observed-replay keys are chart-managed as well (B5 item 3): the flags, the catalog and policy
-       files and the image digest are single-sourced from `studioObserved.*`, which also feeds the
+{{- /* The observed-replay keys are chart-managed as well (B5 item 3): the flags, the catalog file
+       and the image digest are single-sourced from `studioObserved.*`, which also feeds the
        backend. A `runnerEnv` value would be a second, hand-maintained copy of the catalog. Prefix
        test, so a future observed key is covered. */ -}}
 {{- if hasPrefix "STUDIO_RUNNER_OBSERVED_" $key }}
 {{- fail (printf "%s is managed by the chart; use studioObserved.* values instead" $key) }}
+{{- end }}
+{{- /* The domain whitelist is single-sourced from `studioNavigation.allowedDomains`, which also feeds
+       the backend: a second copy here is how the two images would come to disagree. */ -}}
+{{- if eq $key "STUDIO_RUNNER_ALLOWED_DOMAINS" }}
+{{- fail "STUDIO_RUNNER_ALLOWED_DOMAINS is managed by the chart; use studioNavigation.allowedDomains (one list for the runner and the backend)" }}
+{{- end }}
+{{- /* Likewise the allow-all option: one value for both images, or the backend could admit a
+       navigation the runner refuses. */ -}}
+{{- if eq $key "STUDIO_RUNNER_ALLOW_ALL_DOMAINS" }}
+{{- fail "STUDIO_RUNNER_ALLOW_ALL_DOMAINS is managed by the chart; use studioNavigation.allowAllDomains (one switch for the runner and the backend)" }}
 {{- end }}
 {{- /* The exec probe always dials 127.0.0.1 (launch contract section 5). A HOST that is neither
        0.0.0.0 nor 127.0.0.1 would leave the pod Running and never Ready. */ -}}
@@ -214,7 +227,7 @@ period behind — which kills admitted work mid-run and is strictly worse than n
 */}}
 {{- define "put-checks.studioRunner.derivedGraceSeconds" -}}
 {{- $env := .Values.studioRunner.runnerEnv -}}
-{{- $runtime := div (int (default 120000 (get $env "STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS"))) 1000 -}}
+{{- $runtime := div (int (default 300000 (get $env "STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS"))) 1000 -}}
 {{- $stop := div (int (default 5000 (get $env "STUDIO_RUNNER_BROWSER_STOP_TIMEOUT_MS"))) 1000 -}}
 {{- $delivery := div (int (default 30000 (get $env "STUDIO_RUNNER_TERMINAL_DELIVERY_WINDOW_MS"))) 1000 -}}
 {{- $upload := div (int (default 15000 (get $env "STUDIO_RUNNER_OBJECT_STORE_WINDOW_MS"))) 1000 -}}
@@ -321,6 +334,10 @@ to 1 as well. The default is deliberately not changed.
 {{- fail "studioRunner.guided.enabled requires studioRunner.shareProcessNamespace: true (PID-1 b): without it node is PID 1 in the pod, the launch-tree guard refuses the guided start (CONFIGURATION_DENIED) and the pod crash-loops" -}}
 {{- end -}}
 {{- $_ := required "studioRunner.guided.workerId is required" $g.workerId -}}
+{{- $capacity := toString $g.capacity -}}
+{{- if or (not (regexMatch "^[1-8]$" $capacity)) -}}
+{{- fail (printf "studioRunner.guided.capacity must be a whole number from 1 to 8 (got %v): it is the runner's STUDIO_RUNNER_GUIDED_CAPACITY and the backend's studio.guided-authoring.max-concurrent-sessions" $g.capacity) -}}
+{{- end -}}
 {{- $_ := required "studioRunner.guided.token.issuer is required when guided mode is on: it is the iss the runner and the backend both pin (rotation input)" $g.token.issuer -}}
 {{- $_ := required "studioRunner.guided.token.controllerSubject is required when guided mode is on" $g.token.controllerSubject -}}
 {{- $key := required "studioRunner.guided.token.publicKey is required when guided mode is on: the pinned RSA public key (PEM) that verifies the guided tokens" $g.token.publicKey -}}
@@ -351,11 +368,78 @@ to 1 as well. The default is deliberately not changed.
 
 {{/*
 ------------------------------------------------------------------------------------------------
+Studio navigation: the domain whitelist (STUDIO-FLEX-001 item 1). One list,
+`studioNavigation.allowedDomains`, feeds BOTH images: the backend's `studio.navigation.allowed-domains` and the runner's
+`STUDIO_RUNNER_ALLOWED_DOMAINS`. Empty denies every navigation. One boolean,
+`studioNavigation.allowAllDomains` (default false), feeds both images the same way: the backend's
+`studio.navigation.allow-all-domains` and the runner's `STUDIO_RUNNER_ALLOW_ALL_DOMAINS`.
+------------------------------------------------------------------------------------------------
+*/}}
+
+{{/* The allow-all switch as the string both images read: "true" or "false". Unset (the key removed) is
+     "true", the same default `values.yaml` ships (ON for now, user decision 2026-10-25). */}}
+{{- define "put-checks.studioNavigation.allowAllDomains" -}}
+{{- $nav := .Values.studioNavigation | default dict -}}
+{{- if and (hasKey $nav "allowAllDomains") (not (kindIs "invalid" $nav.allowAllDomains)) -}}
+{{- if not (kindIs "bool" $nav.allowAllDomains) -}}
+{{- fail (printf "studioNavigation.allowAllDomains must be the boolean true or false, not %s %q" (kindOf $nav.allowAllDomains) (toString $nav.allowAllDomains)) -}}
+{{- end -}}
+{{- end -}}
+{{- if or (not (hasKey $nav "allowAllDomains")) (kindIs "invalid" $nav.allowAllDomains) -}}
+true
+{{- else -}}
+{{- ternary "true" "false" $nav.allowAllDomains -}}
+{{- end -}}
+{{- end }}
+
+{{/* The list as the comma-separated string both images read. Empty list, empty string. */}}
+{{- define "put-checks.studioNavigation.allowedDomains" -}}
+{{- $nav := .Values.studioNavigation | default dict -}}
+{{- join "," ($nav.allowedDomains | default list) -}}
+{{- end }}
+
+{{/*
+Fails the render on an entry the backend and the runner would refuse at start-up, so a bad list dies
+with the entry named instead of as a crash-looping pod: not a lower-case ASCII (punycode) domain name
+(this covers wildcards, schemes, ports, paths, trailing dots, upper case and IPv6 literals), an IPv4
+literal or any name ending in an all-digit label, more than 32 entries, and overlapping entries (one
+equal to, or a subdomain of, another: exactly one read grant must match a page). Called from the API
+Deployment (it renders without a runner) and from the runner Deployment.
+*/}}
+{{- define "put-checks.studioNavigation.guard" -}}
+{{- $nav := .Values.studioNavigation | default dict -}}
+{{- $_ := include "put-checks.studioNavigation.allowAllDomains" . -}}
+{{- $domains := $nav.allowedDomains | default list -}}
+{{- if not (kindIs "slice" $domains) -}}
+{{- fail "studioNavigation.allowedDomains must be a list of domain names (an empty list denies every navigation)" -}}
+{{- end -}}
+{{- if gt (len $domains) 32 -}}
+{{- fail (printf "studioNavigation.allowedDomains has %d entries; at most 32 are accepted" (len $domains)) -}}
+{{- end -}}
+{{- range $i, $entry := $domains -}}
+{{- if not (kindIs "string" $entry) -}}
+{{- fail (printf "studioNavigation.allowedDomains[%d] must be a string, not %s" $i (kindOf $entry)) -}}
+{{- end -}}
+{{- if or (gt (len $entry) 253) (not (regexMatch "^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?[.])*[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$" $entry)) -}}
+{{- fail (printf "studioNavigation.allowedDomains[%d] %q is not an accepted entry: use a lower-case domain name (punycode for IDN) with no wildcard, scheme, port, path, trailing dot or IP literal" $i $entry) -}}
+{{- end -}}
+{{- if regexMatch "(^|[.])[0-9]+$" $entry -}}
+{{- fail (printf "studioNavigation.allowedDomains[%d] %q ends in an all-digit label, which is how an IP literal looks: IP literals are not accepted" $i $entry) -}}
+{{- end -}}
+{{- range $j, $other := $domains -}}
+{{- if and (ne $i $j) (or (eq $entry $other) (hasSuffix (printf ".%s" $other) $entry)) -}}
+{{- fail (printf "studioNavigation.allowedDomains[%d] %q overlaps [%d] %q: no entry may equal or be a subdomain of another (list only the shorter one)" $i $entry $j $other) -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- end }}
+
+{{/*
+------------------------------------------------------------------------------------------------
 Observed replay (STUDIO-OBS-009 residue; architect ruling OI-06, B5). One top-level `studioObserved`
-block feeds BOTH images, because the backend and the runner must hold the SAME catalog entry and
-policies: the runner's `STUDIO_RUNNER_OBSERVED_*` keys, and the backend's
-`studio.observed-replay.catalog-json` / `policies-json`. Without it a chart-deployed runner answers
-503 to every Studio run and the backend answers 409 RUNTIME_INCOMPATIBLE to every publication.
+block feeds BOTH images, because the backend and the runner must hold the SAME catalog entry: the
+runner's `STUDIO_RUNNER_OBSERVED_*` keys, and the backend's `studio.observed-replay.catalog-json`.
+Without it a chart-deployed runner answers 503 to every Studio run and the backend answers 409 RUNTIME_INCOMPATIBLE to every publication.
 ------------------------------------------------------------------------------------------------
 */}}
 
@@ -364,8 +448,7 @@ policies: the runner's `STUDIO_RUNNER_OBSERVED_*` keys, and the backend's
 {{- if or .Values.studioObserved.validationEnabled .Values.studioObserved.replayEnabled -}}true{{- end -}}
 {{- end }}
 
-{{/* The ConfigMap that carries the runner's catalog.json and policies.json (public hashes and trust
-     policy, not secrets). */}}
+{{/* The ConfigMap that carries the runner's catalog.json (public hashes, not secrets). */}}
 {{- define "put-checks.studioObserved.configMapName" -}}
 {{ include "put-checks.fullname" . }}-studio-observed-trust
 {{- end }}
@@ -400,12 +483,12 @@ Hashes must be YAML STRINGS: an all-digit hash written unquoted is a number, and
 
 {{/*
 Lists, one per line, every key in a (possibly nested) map whose normalised spelling is one of the
-backend's observed catalog/policy inputs. Same normalisation as `springConfig.validateProperties`
+backend's observed catalog input. Same normalisation as `springConfig.validateProperties`
 (lower-case, alphanumerics only), so relaxed spellings and nested maps are caught. Both the Spring
 property names and the environment aliases `application.yml` reads are reserved.
 */}}
 {{- define "put-checks.studioObserved.overrideHits" -}}
-{{- $reserved := list "studioobservedreplaycatalogjson" "studioobservedreplaypoliciesjson" "studioobservedcatalogjson" "studioobservedpoliciesjson" -}}
+{{- $reserved := list "studioobservedreplaycatalogjson" "studioobservedcatalogjson" -}}
 {{- range $key, $value := .values -}}
 {{- $path := printf "%s.%s" $.path $key | trimPrefix "." -}}
 {{- $normalized := regexReplaceAll "[^a-z0-9]" (lower $path) "" -}}
@@ -419,18 +502,17 @@ property names and the environment aliases `application.yml` reads are reserved.
 {{- end }}
 
 {{/*
-**The four observed-replay render guards** (B5 item 8), called first from the API Deployment (so
+**The observed-replay render guards** (B5 item 8), called first from the API Deployment (so
 `enabled` with the runner off cannot silently render nothing) and from the runner Deployment. Each
 is a `fail` naming the key and what to set.
 
 - G-O1: either flag on requires `studioRunner.enabled`.
 - G-O2: either flag on requires a well-formed `catalog` (exactly `build` and `profile`; the
   BuildIdentity shape), and well-formed `additionalBackendCatalog` entries.
-- G-O3: either flag on requires non-empty `policies` within the BACKEND's bounds
-  (`ObservedReplayPins`: at most 16 entries, at most 65,536 bytes of JSON), which are tighter than
-  the runner's (32 entries, 2 MiB). The same bounds apply to the catalog list the backend reads.
-- G-O4: either flag on forbids a second source for the backend's catalog or policies in
-  `configOverrides` or `env` on either component, so the two images cannot drift apart.
+- G-O3: the catalog list the backend reads stays within the BACKEND's bounds (`ObservedReplayPins`:
+  at most 16 entries, at most 65,536 bytes of JSON).
+- G-O4: either flag on forbids a second source for the backend's catalog in `configOverrides` or
+  `env` on either component, so the two images cannot drift apart.
 
 Before the four, and always: the flags must be real booleans. `--set-string` would give the string
 "false", which is truthy in a template and would switch the feature on while the manifest said off.
@@ -470,18 +552,6 @@ Before the four, and always: the flags must be real booleans. `--set-string` wou
 {{- include "put-checks.studioObserved.buildGuard" (dict "build" $entry.build "path" $where) -}}
 {{- end -}}
 {{- /* G-O3 */ -}}
-{{- if not (kindIs "slice" $o.policies) -}}
-{{- fail "studioObserved.policies must be a list of TrustedPolicy entries" -}}
-{{- end -}}
-{{- if eq (len $o.policies) 0 -}}
-{{- fail "studioObserved.policies must not be empty while observed replay is on: the backend refuses every policy lookup with 409 RUNTIME_INCOMPATIBLE and the runner has no policy to apply (supply the reviewed per-environment policy file)" -}}
-{{- end -}}
-{{- if gt (len $o.policies) 16 -}}
-{{- fail (printf "studioObserved.policies has %d entries; the backend accepts at most 16 (ObservedReplayPins)" (len $o.policies)) -}}
-{{- end -}}
-{{- if gt (len (toJson $o.policies)) 65536 -}}
-{{- fail (printf "studioObserved.policies is %d bytes as JSON; the backend accepts at most 65536 (ObservedReplayPins)" (len (toJson $o.policies))) -}}
-{{- end -}}
 {{- $backendCatalog := prepend $o.additionalBackendCatalog $catalog -}}
 {{- if gt (len $backendCatalog) 16 -}}
 {{- fail (printf "studioObserved.catalog plus additionalBackendCatalog is %d entries; the backend accepts at most 16 (ObservedReplayPins)" (len $backendCatalog)) -}}
@@ -493,7 +563,7 @@ Before the four, and always: the flags must be real booleans. `--set-string` wou
 {{- range $label, $map := dict "backend.configOverrides" (.Values.backend.configOverrides | default dict) "worker.configOverrides" (.Values.worker.configOverrides | default dict) "backend.env" (.Values.backend.env | default dict) "worker.env" (.Values.worker.env | default dict) -}}
 {{- $hits := include "put-checks.studioObserved.overrideHits" (dict "values" $map "path" "") | trim -}}
 {{- if $hits -}}
-{{- fail (printf "%s sets %s while studioObserved is on: the backend's catalog and policies are rendered from studioObserved.catalog, additionalBackendCatalog and policies (one source for the backend and the runner). Remove it from %s" $label (replace "\n" ", " $hits) $label) -}}
+{{- fail (printf "%s sets %s while studioObserved is on: the backend's catalog is rendered from studioObserved.catalog and additionalBackendCatalog (one source for the backend and the runner). Remove it from %s" $label (replace "\n" ", " $hits) $label) -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}
@@ -577,7 +647,17 @@ worker only calls out (runner dispatch, stop re-drives, the translation coordina
 {{- $root := .root -}}
 {{- $component := ternary $root.Values.backend $root.Values.worker (eq .role "api") -}}
 {{- $props := deepCopy ($component.configOverrides | default dict) -}}
+{{- /* The domain whitelist, rendered in every deployment (empty string = deny all) from the one list
+       the runner also reads. */ -}}
+{{- $_ := set $props "studio.navigation.allowed-domains" (include "put-checks.studioNavigation.allowedDomains" $root) -}}
+{{- $_ := set $props "studio.navigation.allow-all-domains" (include "put-checks.studioNavigation.allowAllDomains" $root) -}}
 {{- if $root.Values.studioRunner.enabled -}}
+{{- /* The replay run deadline is the runner's own value: one fact, read back out of `runnerEnv` (the
+       map the runner Deployment renders its environment from), never restated. */ -}}
+{{- $runnerEnv := $root.Values.studioRunner.runnerEnv | default dict -}}
+{{- if hasKey $runnerEnv "STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS" -}}
+{{- $_ := set $props "studio.execution.total-runtime" (printf "%dms" (int64 (get $runnerEnv "STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS"))) -}}
+{{- end -}}
 {{- $t := $root.Values.studioRunner.backendTls -}}
 {{- $mount := trimSuffix "/" $t.mountPath -}}
 {{- $_ := set $props "studio.runner.tls.key-store" (printf "%s/%s" $mount $t.keyStoreKey) -}}
@@ -595,6 +675,7 @@ worker only calls out (runner dispatch, stop re-drives, the translation coordina
 {{- $_ := set $props "studio.guided-authoring.translation.controller-token-file" (printf "%s/%s" $tokens $g.backendTokens.translationTokenKey) -}}
 {{- $_ := set $props "studio.guided-authoring.translation.controller-origin" (include "put-checks.studioRunner.guidedCallbackBaseUrl" $root) -}}
 {{- $_ := set $props "studio.guided-authoring.translation.worker-id" $g.workerId -}}
+{{- $_ := set $props "studio.guided-authoring.max-concurrent-sessions" (int $g.capacity) -}}
 {{- if eq $.role "api" -}}
 {{- $_ := set $props "studio.guided-authoring.service-issuer" $g.token.issuer -}}
 {{- $_ := set $props "studio.guided-authoring.service-public-key" $g.token.publicKey -}}
@@ -608,7 +689,6 @@ worker only calls out (runner dispatch, stop re-drives, the translation coordina
        artifacts. The runner never sees `additionalBackendCatalog`. */ -}}
 {{- $o := $root.Values.studioObserved -}}
 {{- $_ := set $props "studio.observed-replay.catalog-json" (toJson (prepend $o.additionalBackendCatalog $o.catalog)) -}}
-{{- $_ := set $props "studio.observed-replay.policies-json" (toJson $o.policies) -}}
 {{- end -}}
 {{- toYaml $props -}}
 {{- end }}
@@ -683,6 +763,17 @@ nginx.ingress.kubernetes.io/use-regex nginx.ingress.kubernetes.io/proxy-bufferin
 {{/* Environment selectors are reserved too: they can bypass the validated mounted source. */}}
 {{- define "put-checks.springConfig.validateEnvironmentKey" -}}
 {{- $normalized := regexReplaceAll "[^a-z0-9]" (lower .) "" -}}
+{{- /* The mounted application.yaml outranks the packaged ${ENV_ALIAS:default} placeholders, so an env
+       value for these would be silently ignored: refuse it where the one source is named. */ -}}
+{{- if eq $normalized "studioalloweddomains" -}}
+{{- fail (printf "%s is managed by the chart; use studioNavigation.allowedDomains (one list for the backend and the runner)" .) -}}
+{{- end -}}
+{{- if eq $normalized "studioallowalldomains" -}}
+{{- fail (printf "%s is managed by the chart; use studioNavigation.allowAllDomains (one switch for the backend and the runner)" .) -}}
+{{- end -}}
+{{- if eq $normalized "studiototalruntime" -}}
+{{- fail (printf "%s is managed by the chart; it renders from studioRunner.runnerEnv.STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS (one run deadline for the runner and the backend)" .) -}}
+{{- end -}}
 {{- if or (hasPrefix "springprofiles" $normalized) (has $normalized (list "springapplicationjson" "springconfigimport" "springconfiglocation" "springconfigadditionallocation")) -}}
 {{- fail (printf "%s is managed by the chart; use dedicated profile values or configOverrides" .) -}}
 {{- end -}}
@@ -722,7 +813,8 @@ nginx.ingress.kubernetes.io/use-regex nginx.ingress.kubernetes.io/proxy-bufferin
   "studioguidedauthoringtranslationcontrollertokenfile" "studioguidedauthoringtranslationcontrollerorigin"
   "studioguidedauthoringtranslationworkerid" "studioguidedauthoringserviceissuer"
   "studioguidedauthoringservicepublickey" "studioguidedauthoringmtlsrequired"
-  "studioguidedauthoringconnectorport"
+  "studioguidedauthoringconnectorport" "studioguidedauthoringmaxconcurrentsessions"
+  "studionavigationalloweddomains" "studionavigationallowalldomains" "studioexecutiontotalruntime"
 -}}
 {{- range $key, $value := .values -}}
 {{- $path := printf "%s.%s" $.path $key | trimPrefix "." -}}

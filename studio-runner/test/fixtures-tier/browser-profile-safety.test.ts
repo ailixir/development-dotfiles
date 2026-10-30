@@ -1,3 +1,4 @@
+import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 // eslint-disable-next-line no-restricted-imports -- Prelaunch call-count fault oracle and actual full Chromium context.
 import {chromium} from 'playwright';
 import * as promises from 'node:fs/promises';
@@ -19,8 +20,8 @@ const corpus=corpusJson as unknown as PublicationDocument;
 const fault=vi.hoisted(()=>({unsafePreparation:false}));
 vi.mock('node:fs/promises',async importOriginal=>{const actual=await importOriginal<typeof PromiseFs>();return {...actual,async mkdtemp(prefix:string){const path=await actual.mkdtemp(prefix);if(fault.unsafePreparation&&prefix.endsWith('checks-guided-'))await actual.chmod(path,0o777);return path;}};});
 afterEach(()=>{fault.unsafePreparation=false;vi.restoreAllMocks();vi.unstubAllEnvs();});
-const config={sessionId:'00000000-0000-4000-8000-000000000099',scopeHash:'a'.repeat(64),approvedOrigins:['http://127.0.0.1'],rules:[],knownSecrets:[]};
-const scope={...corpus.job.binding.scope,policyVersion:'observed-4-full-chromium-1'} as Scope;
+const config={sessionId:'00000000-0000-4000-8000-000000000099',scopeHash:'a'.repeat(64),allowedDomains: TEST_DOMAINS,knownSecrets:[]};
+const scope={...corpus.job.binding.scope} as Scope;
 it.each(['preferences-symlink','default-symlink','preferences-replacement','preferences-hardlink','default-replacement'] as const)('refuses unsafe %s before invoking any browser launch',async kind=>{
  const scratch=await promises.mkdtemp(join(tmpdir(),'prelaunch-profile-')),outside=await promises.mkdtemp(join(tmpdir(),'prelaunch-external-')),profile=prepareBrowserProfile(scratch),pref=join(profile,'Default','Preferences');const launch=vi.spyOn(chromium,'launchPersistentContext');try{
   if(kind==='preferences-symlink'){await promises.writeFile(join(outside,'Preferences'),JSON.stringify(BROWSER_PREFERENCES),{mode:0o600});await promises.rm(pref);await promises.symlink(join(outside,'Preferences'),pref);}
@@ -28,7 +29,7 @@ it.each(['preferences-symlink','default-symlink','preferences-replacement','pref
   if(kind==='preferences-replacement'){await promises.rename(pref,pref+'.old');await promises.writeFile(pref,JSON.stringify(BROWSER_PREFERENCES),{mode:0o600});}
   if(kind==='preferences-hardlink')await promises.link(pref,join(outside,'linked'));
   if(kind==='default-replacement'){await promises.rename(join(profile,'Default'),join(outside,'Default'));await promises.mkdir(join(profile,'Default'),{mode:0o700});await promises.writeFile(pref,JSON.stringify(BROWSER_PREFERENCES),{mode:0o600});}
-  await expect(playwrightBrowserFactory.launch({browser:'chromium',viewport:{width:800,height:600},recording:{width:800,height:600},scratchPath:scratch,observedScope:scope})).rejects.toThrow('PROFILE_PREFERENCES_REQUIRED');expect(launch).not.toHaveBeenCalled();
+  await expect(playwrightBrowserFactory.launch({allowedDomains: TEST_DOMAINS, browser:'chromium',viewport:{width:800,height:600},recording:{width:800,height:600},scratchPath:scratch,observedScope:scope})).rejects.toThrow('PROFILE_PREFERENCES_REQUIRED');expect(launch).not.toHaveBeenCalled();
  }finally{await promises.rm(scratch,{recursive:true,force:true});await promises.rm(outside,{recursive:true,force:true});}
 });
 it.each(['preparation','initial-launch'] as const)('awaits actual scratch removal after guided %s rejection without an acquired context',async stage=>{

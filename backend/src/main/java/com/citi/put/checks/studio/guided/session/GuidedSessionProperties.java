@@ -14,12 +14,13 @@ public record GuidedSessionProperties(
     @DefaultValue("200") int maxActions,
     @DefaultValue("400") int maxObservations,
     @DefaultValue("100") int maxModelProposals,
-    @DefaultValue("786432") int maxModelInputTokensTotal,
+    // The field counts request BYTES (wire + 2,048 per call, charged at the ceiling, never
+    // refunded).
+    @DefaultValue("1572864") int maxModelInputTokensTotal,
     @DefaultValue("98304") int maxModelOutputTokensTotal,
-    @DefaultValue("32768") int maxObservationBytes,
-    @DefaultValue("500") int maxObservationNodes,
-    @DefaultValue("8") int maxObservationDepth,
-    @DefaultValue("1048576") int maxSanitizedEvidenceBytesTotal,
+    @DefaultValue("524288") int maxObservationBytes,
+    @DefaultValue("40000") int maxOutlineBytes,
+    @DefaultValue("4194304") int maxSanitizedEvidenceBytesTotal,
     @DefaultValue("32") int maxRuntimeValues,
     @DefaultValue("4096") int maxRuntimeValueBytes,
     @DefaultValue("65536") int maxRuntimeValuesBytesTotal,
@@ -36,12 +37,11 @@ public record GuidedSessionProperties(
         limits.getOrDefault("maxActions", 200),
         limits.getOrDefault("maxObservations", 400),
         limits.getOrDefault("maxModelProposals", 100),
-        limits.getOrDefault("maxModelInputTokensTotal", 786432),
+        limits.getOrDefault("maxModelInputTokensTotal", 1572864),
         limits.getOrDefault("maxModelOutputTokensTotal", 98304),
-        limits.getOrDefault("maxObservationBytes", 32768),
-        limits.getOrDefault("maxObservationNodes", 500),
-        limits.getOrDefault("maxObservationDepth", 8),
-        limits.getOrDefault("maxSanitizedEvidenceBytesTotal", 1048576),
+        limits.getOrDefault("maxObservationBytes", 524288),
+        limits.getOrDefault("maxOutlineBytes", 40000),
+        limits.getOrDefault("maxSanitizedEvidenceBytesTotal", 4194304),
         limits.getOrDefault("maxRuntimeValues", 32),
         limits.getOrDefault("maxRuntimeValueBytes", 4096),
         limits.getOrDefault("maxRuntimeValuesBytesTotal", 65536),
@@ -58,8 +58,7 @@ public record GuidedSessionProperties(
     out.put("maxModelInputTokensTotal", maxModelInputTokensTotal);
     out.put("maxModelOutputTokensTotal", maxModelOutputTokensTotal);
     out.put("maxObservationBytes", maxObservationBytes);
-    out.put("maxObservationNodes", maxObservationNodes);
-    out.put("maxObservationDepth", maxObservationDepth);
+    out.put("maxOutlineBytes", maxOutlineBytes);
     out.put("maxSanitizedEvidenceBytesTotal", maxSanitizedEvidenceBytesTotal);
     out.put("maxRuntimeValues", maxRuntimeValues);
     out.put("maxRuntimeValueBytes", maxRuntimeValueBytes);

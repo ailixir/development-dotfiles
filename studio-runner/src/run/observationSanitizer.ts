@@ -1,5 +1,12 @@
 import { createHash } from 'node:crypto';
-import type { CollectorOptions, Observation, ObservationConfig, ObservationExport } from './observationTypes.js';
+import { allowedDomainListProblem } from '../allowedDomains.js';
+import type { Observation } from '../guided/types.js';
+import { DEADLINE_CEILING_MS, OBSERVATION_DEADLINE_MS } from './observationDeadline.js';
+import type { ObservationConfig, ObservationExport, ObservationReadProfile } from './observationTypes.js';
+import { OUTLINE_BYTES } from './perceive.js';
+
+/** Schema limits.maxObservationBytes (v3 default and maximum): the canonical size cap of one observation. */
+export const MAX_OBSERVATION_BYTES = 524_288;
 
 /** canonical-v1, matching the frozen contract's non-ASCII vector. */
 export function canonicalObservation(value: unknown): string {
@@ -13,44 +20,50 @@ export function canonicalObservation(value: unknown): string {
   if (typeof value !== 'object' || Object.getPrototypeOf(value) !== Object.prototype) throw new Error('INVALID_CONTRACT');
   return `{${Object.entries(value).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0).map(([key, item]) => `${canonicalObservation(key)}:${canonicalObservation(item)}`).join(',')}}`;
 }
-export function observationOptions(config: ObservationConfig): CollectorOptions {
-  canonicalObservation(config);
-  const validText = (value: string) => value.length > 0 && Array.from(value).length <= 256;
-  if (!validText(config.sessionId) || !/^[a-f0-9]{64}$/u.test(config.scopeHash) || config.rules.length > 500 || config.knownSecrets.length > 64 || config.knownSecrets.some(secret => secret.length > 4096)) throw new Error('INVALID_CONTRACT');
-  if (!config.approvedOrigins.length || config.approvedOrigins.length > 64 || config.approvedOrigins.some(origin => {
-    try { const url = new URL(origin); return !['http:', 'https:'].includes(url.protocol) || url.origin !== origin || origin.length > 256; } catch { return true; }
-  })) throw new Error('INVALID_CONTRACT');
-  if (config.applicationPolicy && (!validText(config.applicationPolicy.policyRuleId) || !config.applicationPolicy.allowStructuralDiscovery)) throw new Error('INVALID_CONTRACT');
-  const grants = config.applicationPolicy?.readGrants ?? [];
+
+/** A validated, defaulted observation config. Dead options of the old in-page collector (rules, role regions, controlValue grants, workLimits, node and depth limits) are gone. */
+export interface ObservationOptions {
+  readonly sessionId: string;
+  readonly scopeHash: string;
+  readonly allowedDomains: readonly string[];
+  readonly knownSecrets: string[];
+  readonly readProfile: ObservationReadProfile;
+  readonly limits: { readonly outlineBytes: number; readonly bytes: number; readonly milliseconds: number };
+}
+
+export function observationOptions(config: ObservationConfig): ObservationOptions {
+  canonicalObservation({ sessionId: config.sessionId, scopeHash: config.scopeHash, allowedDomains: [...config.allowedDomains], knownSecrets: [...config.knownSecrets] });
+  const validText = (value: string): boolean => value.length > 0 && Array.from(value).length <= 256;
+  if (!validText(config.sessionId) || !/^[a-f0-9]{64}$/u.test(config.scopeHash) || config.knownSecrets.length > 64 || config.knownSecrets.some(secret => secret.length > 4096)) throw new Error('INVALID_CONTRACT');
+  if (allowedDomainListProblem(config.allowedDomains) !== null) throw new Error('INVALID_CONTRACT');
+  const profile = config.readProfile ?? { policyRuleId: 'observed-structure-v1', allowStructuralDiscovery: true, readGrants: [] };
+  if (!validText(profile.policyRuleId) || !profile.allowStructuralDiscovery) throw new Error('INVALID_CONTRACT');
+  const grants = profile.readGrants ?? [];
   if (grants.length > 32) throw new Error('INVALID_CONTRACT');
-  const grantIds = new Set<string>();
-  for (const grant of grants) {
-    if (!validText(grant.policyRuleId) || grantIds.has(grant.policyRuleId) || !config.approvedOrigins.includes(grant.origin) || (!grant.visibleText && !grant.controlValue)) throw new Error('INVALID_CONTRACT');
-    const closed = (value: object, keys: string[]) => Object.keys(value).every(key => keys.includes(key));
-    if (!closed(grant,['policyRuleId','origin','region','visibleText','controlValue']) || !closed(grant.region,grant.region.kind === 'role' ? ['kind','role','name','exact'] : ['kind']) || (grant.visibleText && !closed(grant.visibleText,['classification'])) || (grant.controlValue && !closed(grant.controlValue,['classification','types']))) throw new Error('INVALID_CONTRACT');
-    grantIds.add(grant.policyRuleId);
-    if (grant.region.kind === 'role' && (!['main','region','form'].includes(grant.region.role) || !validText(grant.region.name) || (grant.region as { exact: unknown }).exact !== true)) throw new Error('INVALID_CONTRACT');
-    if (!['application','role'].includes(grant.region.kind)) throw new Error('INVALID_CONTRACT');
-    if (grant.visibleText && (grant.visibleText as { classification: unknown }).classification !== 'permittedBusinessData') throw new Error('INVALID_CONTRACT');
-    if (grant.controlValue && ((grant.controlValue as { classification: unknown }).classification !== 'nonsecretApproved' || !grant.controlValue.types.length || grant.controlValue.types.length > 6 || new Set(grant.controlValue.types).size !== grant.controlValue.types.length || grant.controlValue.types.some(type => !['text','search','email','tel','url','textarea'].includes(type)))) throw new Error('INVALID_CONTRACT');
-  }
   const ids = new Set<string>();
-  for (const rule of config.rules) {
-    if (ids.has(rule.testId) || ![rule.testId, rule.name, rule.policyRuleId].every(validText) || (rule.accessibleName !== undefined && (!validText(rule.accessibleName) || rule.name !== rule.accessibleName)) || (rule.accessibleName === undefined && rule.classification !== 'permittedBusinessData') || !['structuralOnly', 'permittedBusinessData', 'nonsecretApproved'].includes(rule.classification)) throw new Error('INVALID_CONTRACT');
-    ids.add(rule.testId);
+  for (const grant of grants) {
+    const keysOf = (value: unknown): string => (typeof value === 'object' && value !== null ? Object.keys(value).sort().join(',') : '');
+    const closedShape = keysOf(grant) === 'domain,policyRuleId,region,visibleText' && keysOf(grant.region) === 'kind' && keysOf(grant.visibleText) === 'classification';
+    if (!closedShape || !validText(grant.policyRuleId) || ids.has(grant.policyRuleId) || !config.allowedDomains.includes(grant.domain)) throw new Error('INVALID_CONTRACT');
+    if ((grant.region as { kind: string }).kind !== 'application' || (grant.visibleText as { classification: string }).classification !== 'permittedBusinessData') throw new Error('INVALID_CONTRACT');
+    ids.add(grant.policyRuleId);
   }
-  const limit = (value: number | undefined, ceiling: number, minimum = 1) => {
+  const limit = (value: number | undefined, ceiling: number): number => {
     const resolved = value ?? ceiling;
-    if (!Number.isInteger(resolved) || resolved < minimum || resolved > ceiling) throw new Error('INVALID_CONTRACT');
+    if (!Number.isInteger(resolved) || resolved < 1 || resolved > ceiling) throw new Error('INVALID_CONTRACT');
     return resolved;
   };
-  return structuredClone({ ...config, workLimits: {
-    elements: limit(config.workLimits?.elements, 4096), depth: limit(config.workLimits?.depth, 64),
-  }, limits: {
-    nodes: limit(config.limits?.nodes, 500), depth: limit(config.limits?.depth, 8),
-    bytes: limit(config.limits?.bytes, 32768), milliseconds: limit(config.limits?.milliseconds, 50),
-  } });
+  return {
+    sessionId: config.sessionId, scopeHash: config.scopeHash, allowedDomains: [...config.allowedDomains], knownSecrets: [...config.knownSecrets],
+    readProfile: structuredClone(profile),
+    limits: {
+      outlineBytes: limit(config.limits?.outlineBytes, OUTLINE_BYTES),
+      bytes: limit(config.limits?.bytes, MAX_OBSERVATION_BYTES),
+      milliseconds: limit(config.limits?.milliseconds ?? OBSERVATION_DEADLINE_MS, DEADLINE_CEILING_MS),
+    },
+  };
 }
+
 export function exportObservation(observation: Observation, maxBytes: number): ObservationExport {
   const json = canonicalObservation(observation);
   const bytes = Buffer.byteLength(json, 'utf8');

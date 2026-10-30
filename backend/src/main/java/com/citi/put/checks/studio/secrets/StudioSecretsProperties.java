@@ -1,7 +1,6 @@
 package com.citi.put.checks.studio.secrets;
 
 import java.time.Duration;
-import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -12,10 +11,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * silently substituting a provider.
  *
  * @param vault which provider and its real transport configuration
- * @param entitlements development secret-use policy, {@code principal|csi|environment -> "A,B"}
  */
 @ConfigurationProperties(prefix = "studio.secrets")
-public record StudioSecretsProperties(Vault vault, Map<String, String> entitlements) {
+public record StudioSecretsProperties(Vault vault) {
 
   /**
    * @param provider the enumerated provider name; absent is a refusal to start
@@ -78,9 +76,5 @@ public record StudioSecretsProperties(Vault vault, Map<String, String> entitleme
 
   public Vault vaultOrEmpty() {
     return vault == null ? new Vault(null, null) : vault;
-  }
-
-  public Map<String, String> entitlementsOrEmpty() {
-    return entitlements == null ? Map.of() : entitlements;
   }
 }

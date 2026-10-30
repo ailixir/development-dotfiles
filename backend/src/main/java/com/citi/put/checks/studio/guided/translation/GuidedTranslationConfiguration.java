@@ -6,6 +6,7 @@ import com.citi.put.checks.studio.guided.bridge.GuidedDispatchService;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.guided.session.GuidedSessionRepository;
 import com.citi.put.checks.studio.guided.session.GuidedSessionService;
+import com.citi.put.checks.studio.navigation.AllowedDomains;
 import java.time.Clock;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -37,16 +38,13 @@ public class GuidedTranslationConfiguration {
 
   @Bean
   GuidedSourceClassifier guidedSourceClassifier(
-      GuidedContracts contracts,
-      GuidedTranslationProperties properties,
-      CredentialPatternScreen screen,
-      GuidedPromptAssembler prompts) {
-    return new GuidedSourceClassifier(contracts, properties, screen, prompts);
+      GuidedContracts contracts, CredentialPatternScreen screen, GuidedPromptAssembler prompts) {
+    return new GuidedSourceClassifier(contracts, screen, prompts);
   }
 
   @Bean
-  GuidedSourceInputResolver guidedSourceInputs(GuidedContracts contracts) {
-    return new GuidedSourceInputResolver(contracts);
+  GuidedSourceInputResolver guidedSourceInputs(GuidedContracts contracts, AllowedDomains domains) {
+    return new GuidedSourceInputResolver(contracts, domains);
   }
 
   @Bean
@@ -65,8 +63,8 @@ public class GuidedTranslationConfiguration {
   }
 
   @Bean
-  GuidedPromptAssembler guidedPromptAssembler(GuidedContracts contracts) {
-    return GuidedPromptAssembler.createForProductionFactory(contracts);
+  GuidedPromptAssembler guidedPromptAssembler(GuidedContracts contracts, AllowedDomains domains) {
+    return GuidedPromptAssembler.createForProductionFactory(contracts, domains);
   }
 
   @Bean
@@ -117,7 +115,7 @@ public class GuidedTranslationConfiguration {
    * ignored (it is a bean method, not a scanned component), so the gate sits here: scheduler role
    * only, the same expression as {@code SchedulingCoordinator} (STUDIO-OBS-009 AC-5, ruling A5). It
    * reaches the API over HTTP ({@code controller-origin}), so it does not need to share a pod with
-   * it.
+   * it. Spring closes it on shutdown, which interrupts the continuations it has in flight.
    */
   @Bean
   @Profile("!api | worker")
@@ -136,8 +134,15 @@ public class GuidedTranslationConfiguration {
               "${studio.guided-authoring.translation.controller-token-file:${stu"
                   + "dio.guided-authoring.controller-token-file:}}")
           String token,
-      StudioRunnerTls tls) {
+      StudioRunnerTls tls,
+      GuidedTranslationProperties properties) {
     return new GuidedTranslationCoordinator(
-        store, sessions, contracts, java.net.URI.create(origin), java.nio.file.Path.of(token), tls);
+        store,
+        sessions,
+        contracts,
+        java.net.URI.create(origin),
+        java.nio.file.Path.of(token),
+        tls,
+        properties);
   }
 }

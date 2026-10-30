@@ -101,10 +101,10 @@ data:
 {{- end }}
 {{- if include "put-checks.studioObserved.enabled" . }}
 ---
-# The runner's observed-replay trust inputs: its own {profile, build} catalog entry and the trusted
-# policies, mounted as files (STUDIO_RUNNER_OBSERVED_CATALOG_FILE / _POLICY_FILE). Rendered from the
-# SAME `studioObserved` values that become the backend's `studio.observed-replay.*-json`, so the two
-# images cannot be configured apart. Public hashes and trust policy, not secrets. `|-` keeps the JSON
+# The runner's observed-replay trust input: its own {profile, build} catalog entry, mounted as a file
+# (STUDIO_RUNNER_OBSERVED_CATALOG_FILE). Rendered from the SAME `studioObserved` values that become
+# the backend's `studio.observed-replay.catalog-json`, so the two images cannot be configured apart.
+# Public hashes, not secrets. `|-` keeps the JSON
 # byte-exact with no trailing newline. (toJson escapes &, < and > as \u0026, \u003c, \u003e: the same
 # JSON value, which both consumers parse.)
 apiVersion: v1
@@ -117,8 +117,6 @@ metadata:
 data:
   catalog.json: |-
     {{- toJson .Values.studioObserved.catalog | nindent 4 }}
-  policies.json: |-
-    {{- toJson .Values.studioObserved.policies | nindent 4 }}
 {{- end }}
 {{- $_ := include "put-checks.studioAuditSiem.guard" . }}
 {{- if .Values.studioAuditSiem.enabled }}

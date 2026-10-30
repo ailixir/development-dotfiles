@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -563,5 +564,81 @@ describe('the Node that actually ran (QA MED-2)', () => {
     expect(satisfiesRange('v22.11.0', '^22.11.0')).toBeNull();
     expect(satisfiesRange('v22.11.0', '')).toBeNull();
     expect(satisfiesRange('lts/jod', '>=22.11.0')).toBeNull();
+  });
+});
+
+/**
+ * ADR-SC-007 WI-2: the injected selector engine is private Playwright code inside `playwright-core/lib/coreBundle.js`. Its
+ * version and sha256 are pinned in `src/run/playwrightEnginePin.json` and asserted here and by `check:pins`.
+ */
+describe('Playwright engine pin (perception modules)', () => {
+  const BUNDLE = 'engine bundle stand-in';
+  const bundleSha = createHash('sha256').update(BUNDLE).digest('hex');
+
+  /** A throwaway root with a stand-in playwright / playwright-core install and a pin file. */
+  function engineRoot(options: { pinned?: string; pinnedSha?: string; coreVersion?: string; bundle?: string; omitCore?: boolean } = {}): string {
+    return makeRoot((root) => {
+      const pinned = options.pinned ?? '1.63.0';
+      mkdirSync(join(root, 'src', 'run'), { recursive: true });
+      writeFileSync(join(root, 'src', 'run', 'playwrightEnginePin.json'), JSON.stringify({ playwright: pinned, coreBundleSha256: options.pinnedSha ?? bundleSha }));
+      mkdirSync(join(root, 'node_modules', 'playwright'), { recursive: true });
+      writeFileSync(join(root, 'node_modules', 'playwright', 'package.json'), JSON.stringify({ name: 'playwright', version: '1.63.0' }));
+      if (options.omitCore === true) return;
+      mkdirSync(join(root, 'node_modules', 'playwright-core', 'lib'), { recursive: true });
+      writeFileSync(join(root, 'node_modules', 'playwright-core', 'package.json'), JSON.stringify({ name: 'playwright-core', version: options.coreVersion ?? '1.63.0' }));
+      writeFileSync(join(root, 'node_modules', 'playwright-core', 'lib', 'coreBundle.js'), options.bundle ?? BUNDLE);
+    });
+  }
+
+  it('is shipped by the real package, and the installed bundle matches it', () => {
+    const engine = collectPins(packageRoot).engine;
+    expect(engine).not.toBeNull();
+    expect(engine?.error).toBeNull();
+    expect(engine?.coreVersion).toBe(engine?.pin.playwright);
+    expect(engine?.coreBundleSha256).toBe(engine?.pin.coreBundleSha256);
+    expect(engine?.pin.playwright).toBe(collectPins(packageRoot).declared);
+  });
+
+  it('passes when pin, declared version and installed bundle agree', () => {
+    const result = checkPins(engineRoot());
+    expect(result.failures).toEqual([]);
+    expect(result.pins.engine?.coreBundleSha256).toBe(bundleSha);
+  });
+
+  it('is not asserted for a root that does not ship the pin file', () => {
+    expect(collectPins(makeRoot()).engine).toBeNull();
+  });
+
+  it('fails when one byte of the bundle changes', () => {
+    const result = checkPins(engineRoot({ bundle: `${BUNDLE}!` }));
+    expect(result.ok).toBe(false);
+    expect(result.failures.join('\n')).toContain('not the pinned engine bundle');
+  });
+
+  it('fails when the pinned sha256 is not the installed bundle', () => {
+    const result = checkPins(engineRoot({ pinnedSha: 'f'.repeat(64) }));
+    expect(result.failures.join('\n')).toContain('not the pinned engine bundle');
+  });
+
+  it('fails when playwright-core is not the pinned version', () => {
+    const result = checkPins(engineRoot({ coreVersion: '1.64.0' }));
+    expect(result.failures.join('\n')).toContain('playwright-core is 1.64.0 but');
+  });
+
+  it('fails when the pin file disagrees with the declared playwright version', () => {
+    const result = checkPins(engineRoot({ pinned: '1.64.0' }));
+    expect(result.failures.join('\n')).toContain('disagrees with package.json dependencies.playwright');
+  });
+
+  it('fails closed when playwright-core cannot be read through the declared playwright package', () => {
+    const result = checkPins(engineRoot({ omitCore: true }));
+    expect(result.ok).toBe(false);
+    expect(result.failures.join('\n')).toContain('could not be checked');
+  });
+
+  it('prints the engine pin line on success', () => {
+    const { status, output } = invoke(packageRoot);
+    expect(status).toBe(0);
+    expect(output).toContain('playwrightEnginePin.json bundle sha256');
   });
 });

@@ -109,8 +109,10 @@ this is treated conservatively as inaccessible).
   select the development fake to make remote deployment start.
 - **AWS S3:** the clients and deployment wiring are implemented and tested with local fixtures;
   bucket/IAM/lifecycle provisioning and a credentialed smoke test are deferred.
-- **Egress and browser image:** retain the existing target allowlist and sandbox requirements;
-  validate them in the target cluster before enabling executions.
+- **Navigation and browser image:** fill in the domain whitelist (`studioNavigation.allowedDomains`,
+  empty by default, which denies every navigation; `studioNavigation.allowAllDomains` is the switch that allows all domains, ON by default for now: set it `false` to enforce the list) and retain the sandbox requirements; target
+  addresses are open and firewalls own reachability (runner runbook §2). Validate both in the target
+  cluster before enabling executions.
 - **Spring configuration delivery:** story 10.27 repairs the dotted-key chart defect with a
   mounted `application.yaml` for backend and worker. Their previously ineffective pool,
   scheduler, and executor overrides now take effect; review target-environment values before

@@ -1,3 +1,4 @@
+import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 /**
  * STUDIO-OBS-013 AC-1, AC-2, AC-5, AC-6 (runner half) — the guided learn run is recorded, on real
  * Chromium, through the replay recording pipeline.
@@ -44,7 +45,7 @@ import { MIN_PLAYABLE_RECORDING_BYTES, WEBM_MAGIC } from '../../src/run/recordin
 import { systemOriginSource } from '../../src/run/timeline.js';
 import { createObservedReplayAdapter } from '../../src/run/observedReplayAdapter.js';
 import { executeObservedReplay } from '../../src/executor/observedReplay.js';
-import type { Execute3, Scope, TrustedPolicy } from '../../src/executor/observedOperations.js';
+import type { Execute3, Scope } from '../../src/executor/observedOperations.js';
 import { hashObserved, OBSERVED_PROFILE } from '../../src/validator/observedReferencePolicy.js';
 import publicationJson from '../../../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json' with { type: 'json' };
 import type {PublicationDocument} from '../helpers/publicationFixture.js';
@@ -109,7 +110,7 @@ function decodeRgb(video: string, seconds: number): Buffer {
 async function loginReference(size: { width: number; height: number }): Promise<Uint8Array> {
   const dir = await mkdtemp(join(tmpdir(), 'guided-reference-'));
   try {
-    const guided = await launchGuidedBrowser({ sessionId: 'reference', scopeHash: 'd'.repeat(64), approvedOrigins: [fixture.origin], rules: [], knownSecrets: [] }, 'reference-context', () => undefined, { dir, size, ready: () => undefined });
+    const guided = await launchGuidedBrowser({ sessionId: 'reference', scopeHash: 'd'.repeat(64), allowedDomains: TEST_DOMAINS, knownSecrets: [] }, 'reference-context', () => undefined, { dir, size, ready: () => undefined });
     try { await guided.navigateBlank(fixture.origin + '/login'); await new Promise(r => { setTimeout(r, 500); }); } finally { await guided.close(); }
     const video = await guided.recordedVideo?.(); if (!video) throw new Error('REFERENCE_VIDEO');
     return lastFrame(video, size);
@@ -151,7 +152,7 @@ function lastFrame(video: string, size: { width: number; height: number }): Uint
   return pixels.subarray(pixels.length - frameBytes);
 }
 
-async function guidedLearnRun(fault: 'none' | 'recorderFileLost') {
+async function guidedLearnRun(fault: 'none' | 'recorderFileLost' | 'published') {
   const root = await mkdtemp(join(tmpdir(), 'guided-recording-')); const objects = join(root, 'objects'), evidenceRoot = join(root, 'evidence'), journal = join(root, 'journal');
   const settings = loadEvidenceConfig({ STUDIO_RUNNER_OBJECT_STORE_DIR: objects, STUDIO_RUNNER_SCRATCH_DIR: join(root, 'scratch') });
   const configured = createConfiguredObjectStore(settings);
@@ -165,7 +166,7 @@ async function guidedLearnRun(fault: 'none' | 'recorderFileLost') {
   context.authoredInputsHash = hash(context.authoredInputs);
   const messages: { route: string; body: unknown; key?: string }[] = [];
   const launch = async (config: ObservationConfig, contextId: string, onLost: () => void, recording?: GuidedRecordingRequest): Promise<GuidedBrowser> => { request = recording; const browser = await launchGuidedBrowser(config, contextId, onLost, recording); scratch = browser.scratchDirectory; return browser; };
-  const runtime = new GuidedRuntime(context, { workerId: context.workerId, journalDirectory: journal, applicationPolicy: { policyRuleId: 'structural', allowStructuralDiscovery: true, readGrants: [] }, launch, recorder, csiId: 'fixture-csi', callback: (route, body, key) => { messages.push({ route, body, ...(key ? { key } : {}) }); return Promise.resolve(); } });
+  const runtime = new GuidedRuntime(context, { workerId: context.workerId, allowedDomains: TEST_DOMAINS, journalDirectory: journal, launch, recorder, csiId: 'fixture-csi', callback: (route, body, key) => { messages.push({ route, body, ...(key ? { key } : {}) }); return Promise.resolve(); } });
   const outcomes: BridgeOutcome[] = [];
   try {
     await runtime.start();
@@ -173,7 +174,7 @@ async function guidedLearnRun(fault: 'none' | 'recorderFileLost') {
     const latest = () => (messages.filter(m => m.route === 'observations').at(-1)?.body as BridgeObservation).observation;
     const act = async (step: string, operation: Action['operation'], target?: Action['target'], secret?: string) => {
       const p = proposal(context, evidence, step, operation, target);
-      const prepared = await runtime.prepare({ ...identity(context), proposal: p, requestDigest: hash(p), expiresAt: new Date(Date.now() + 10_000).toISOString() });
+      const prepared = await runtime.prepare({ pressInheritance: null, ...identity(context), proposal: p, requestDigest: hash(p), expiresAt: new Date(Date.now() + 10_000).toISOString() });
       const outcome = await runtime.dispatch({ ...dispatch(context, p, prepared), ...(secret ? { secret: { secretId: 'PASS', value: secret, versionId: 'fixture', allowedOrigins: [fixture.origin] } } : {}) });
       outcomes.push(outcome); const o = latest();
       evidence = { kind: 'observedDocument', sessionId: context.sessionId, contextId: context.contextId, documentId: o.documentId, generation: o.generation, origin: o.origin, observationHash: hash(o) };
@@ -186,13 +187,14 @@ async function guidedLearnRun(fault: 'none' | 'recorderFileLost') {
       // Recorder-side fault, not a store fault: the recorder's file disappears mid-session.
       const files = request ? await readdir(request.dir) : []; expect(files).toHaveLength(1); for (const file of files) await unlink(join(request?.dir ?? '', file));
     }
-    const signIn = latest().nodes.find(n => n.name === 'Sign in' && n.locatorHints.length > 0); if (!signIn?.locatorHints[0]) throw new Error('SIGN_IN');
-    expect((await act('submit', { kind: 'click' }, { nodeId: signIn.nodeId, documentId: signIn.documentId, generation: signIn.generation, locator: signIn.locatorHints[0] })).ledger.state).toBe('SUCCEEDED');
+    const seen = latest(), signIn = Object.entries(seen.facts).find(([, fact]) => fact.name === 'Sign in'); if (!signIn) throw new Error('SIGN_IN');
+    expect((await act('submit', { kind: 'click' }, { kind: 'node', ref: signIn[0], documentId: seen.documentId, generation: seen.generation })).ledger.state).toBe('SUCCEEDED');
     expect(fixture.receipts().at(-1)).toMatchObject({ accepted: true });
     // OBS-007 profile canary scan with recording on: the live profile and the evidence dir.
     expect(scratch && existsSync(scratch)).toBe(true); expect(await scan(scratch ?? '')).toEqual([]); expect(await scan(evidenceRoot)).toEqual([]);
-  } finally { await runtime.stop('CANCELLED'); }
-  expect(runtime.active).toBe(false); expect(messages.some(m => m.route === 'lifecycle')).toBe(true);
+  } finally { await runtime.stop(fault === 'published' ? 'PUBLISHED' : 'CANCELLED'); }
+  // PUBLISHED is a stop reason only: the runner reports no lifecycle for it.
+  expect(runtime.active).toBe(false); expect(messages.some(m => m.route === 'lifecycle')).toBe(fault !== 'published');
   await runtime.recordingSettled; configured.close();
   if (process.env.R13_PROBE_REPORT) process.stdout.write(`R13_PROBE ${JSON.stringify({ fault, evidence: messages.filter(m => m.route === 'recording-evidence'), ordering, objects: await Promise.all((await readdir(join(objects, 'studio', 'fixture-csi', 'guided')).catch(() => [])).map(async name => ({ name, bytes: (await readFile(join(objects, 'studio', 'fixture-csi', 'guided', name))).byteLength }))) })}\n`);
   return { root, objects, evidenceRoot, context, messages, outcomes, ordering, request, scratch };
@@ -255,6 +257,18 @@ describe('guided learn run recording on real Chromium (STUDIO-OBS-013)', () => {
     } finally { await rm(run.root, { recursive: true, force: true }); }
   });
 
+  it('discards the recording of a learn that published: no object, no manifest, no callback, no local file', async () => {
+    const run = await guidedLearnRun('published');
+    try {
+      expect(run.outcomes.map(o => o.ledger.state)).toEqual(['SUCCEEDED', 'SUCCEEDED', 'SUCCEEDED']);
+      expect(run.messages.some(m => m.route === 'recording-evidence')).toBe(false);
+      expect(await readdir(join(run.objects, 'studio', 'fixture-csi', 'guided')).catch(() => [])).toEqual([]);
+      expect(run.request && existsSync(run.request.dir)).toBe(false);
+      expect(run.scratch && existsSync(run.scratch)).toBe(false);
+      expect(await scan(run.evidenceRoot)).toEqual([]);
+    } finally { await rm(run.root, { recursive: true, force: true }); }
+  });
+
   it('settles a recorder-side fault as UNAVAILABLE without a fake video, and the session still terminates', async () => {
     const run = await guidedLearnRun('recorderFileLost');
     try {
@@ -272,7 +286,7 @@ describe('guided learn run recording on real Chromium (STUDIO-OBS-013)', () => {
     try {
       // A symlinked recording directory is refused only after the startup probe page has closed, so the real browser fails inside STARTUP_PAGE.
       const real = join(root, 'real'), link = join(root, 'link'); await mkdir(real); await symlink(real, link);
-      const config: ObservationConfig = { sessionId: 'phase', scopeHash: 'a'.repeat(64), approvedOrigins: [fixture.origin], rules: [], knownSecrets: [] };
+      const config: ObservationConfig = { sessionId: 'phase', scopeHash: 'a'.repeat(64), allowedDomains: TEST_DOMAINS, knownSecrets: [] };
       const failure = await launchGuidedBrowser(config, 'phase-context', () => undefined, { dir: link, size: { width: 640, height: 360 }, ready: () => undefined }).then(() => null, (error: unknown) => error);
       expect(failure).toBeInstanceOf(GuidedLaunchFailure);
       expect(failure).toMatchObject({ message: 'CONTEXT_LOST', phase: 'STARTUP_PAGE', cause: { message: 'RECORDING_FAILED' } });
@@ -281,17 +295,17 @@ describe('guided learn run recording on real Chromium (STUDIO-OBS-013)', () => {
   });
 
   it('produces no video for an unrecorded guided launch (the webm comes from recordVideo, not from a directory pick)', async () => {
-    const guided = await launchGuidedBrowser({ sessionId: 'unrecorded', scopeHash: 'f'.repeat(64), approvedOrigins: [fixture.origin], rules: [], knownSecrets: [] }, 'unrecorded-context', () => undefined);
+    const guided = await launchGuidedBrowser({ sessionId: 'unrecorded', scopeHash: 'f'.repeat(64), allowedDomains: TEST_DOMAINS, knownSecrets: [] }, 'unrecorded-context', () => undefined);
     await guided.close(); expect(await guided.recordedVideo?.()).toBeNull();
   });
 
   it('runs the observed replay adapter on the guided-mode recorded handle (AC-1 parity)', async () => {
     fixture.reset();
     const root = await mkdtemp(join(tmpdir(), 'guided-parity-'));
-    const scope: Scope = { ...publication.job.binding.scope, policyVersion: 'observed-4-full-chromium-1', allowedOrigins: [fixture.origin], initialContext: { kind: 'initialBlank' } };
-    const policy: TrustedPolicy = { ...publication.trustedPolicy, policyVersion: 'observed-4-full-chromium-1', allowedOrigins: [fixture.origin], rules: [], applicationPolicy: { policyRuleId: 'structural', allowStructuralDiscovery: true, readGrants: [] } };
+    const scope: Scope = { ...publication.job.binding.scope, initialContext: { kind: 'initialBlank' } };
+    
     let ready = 0;
-    const guided = await launchGuidedBrowser({ sessionId: 'parity', scopeHash: 'e'.repeat(64), approvedOrigins: [fixture.origin], rules: [], knownSecrets: [], applicationPolicy: { policyRuleId: 'structural', allowStructuralDiscovery: true } }, 'parity-context', () => undefined, { dir: root, size: { width: 1280, height: 720 }, ready: recording => { if (recording) ready++; } });
+    const guided = await launchGuidedBrowser({ sessionId: 'parity', scopeHash: 'e'.repeat(64), allowedDomains: TEST_DOMAINS, knownSecrets: [], readProfile: { policyRuleId: 'structural', allowStructuralDiscovery: true } }, 'parity-context', () => undefined, { dir: root, size: { width: 1280, height: 720 }, ready: recording => { if (recording) ready++; } });
     const handle = guided.handle; if (!handle) throw new Error('HANDLE');
     const id = (n: number) => '00000000-0000-4000-8000-' + String(300 + n).padStart(12, '0');
     const frame: Execute3 = { kind: 'execute', protocolVersion: 3, mode: 'observed', runId: publication.execute.runId, attemptId: publication.execute.attemptId, profileHash: hashObserved(OBSERVED_PROFILE), configurationHash: 'c'.repeat(64), waitStrategy: 'domcontentloaded', stepTimeoutMs: 5000,
@@ -303,13 +317,13 @@ describe('guided learn run recording on real Chromium (STUDIO-OBS-013)', () => {
         { stepIndex: 2, stepId: id(3), operations: [{ coordinate: { stepId: id(3), ordinal: 0 }, guardId: 'g2', operation: { kind: 'click' } }] },
         { stepIndex: 3, stepId: id(4), operations: [{ coordinate: { stepId: id(4), ordinal: 0 }, guardId: 'g3', operation: { kind: 'assert', predicate: 'url', expected: { kind: 'authoredLiteral', sourceInputId: 'home' } } }] },
       ],
-      guards: [{ guardId: 'g0', origin: null, target: { kind: 'initialBlank' } }, { guardId: 'g1', origin: fixture.origin, target: { kind: 'passwordControl' } }, { guardId: 'g2', origin: fixture.origin, target: { kind: 'element', locator: { kind: 'role', role: 'button', name: 'Sign in', exact: true }, role: 'button', elementType: 'button', controlType: 'none', classification: 'structuralOnly', visible: true, actionable: true, readRuleId: null } }, { guardId: 'g3', origin: fixture.origin, target: { kind: 'page' } }] };
-    const adapter = createObservedReplayAdapter(handle, scope, policy, 'guided-parity', () => undefined);
+      guards: [{ guardId: 'g0', origin: null, target: { kind: 'initialBlank' } }, { guardId: 'g1', origin: fixture.origin, target: { kind: 'passwordControl' } }, { guardId: 'g2', origin: fixture.origin, target: { kind: 'element', locator: [{ by: 'role', role: 'button', name: 'Sign in', exact: true }], tier: 'role', identity: { role: 'button', name: 'Sign in' }, readRuleId: null } }, { guardId: 'g3', origin: fixture.origin, target: { kind: 'page' } }] };
+    const adapter = createObservedReplayAdapter(handle, scope, TEST_DOMAINS, 'guided-parity', () => undefined);
     try {
       expect(ready).toBe(1);
       // AR-QA SEC-001 C: the handle drives the fresh app page, still blank before the first navigation.
       expect((handle.page as { url(): string }).url()).toBe('about:blank');
-      const result = await executeObservedReplay(frame, adapter, scope, { now: () => performance.now() }, { stepStarted() { return; }, stepFinished() { return; } }, new AbortController().signal);
+      const result = await executeObservedReplay(frame, adapter, scope, TEST_DOMAINS, { now: () => performance.now() }, { stepStarted() { return; }, stepFinished() { return; } }, new AbortController().signal);
       expect(result).toMatchObject({ ok: true, errorCode: null, secretUse: { PASS: 'USED' } });
       expect(fixture.receipts().at(-1)).toMatchObject({ accepted: true });
       // AR-QA SEC-001 C: before close, the only file in the recording dir is the app page's video.

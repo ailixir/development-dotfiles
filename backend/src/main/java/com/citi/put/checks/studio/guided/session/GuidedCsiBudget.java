@@ -6,7 +6,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * Per-CSI concurrent-session and daily model-token budgets (STUDIO-OBS-014 AC-8, rulings AR-2 c and
- * d), persisted in PostgreSQL so every replica sees the same counts.
+ * d) and the deployment-wide cap on concurrent learning sessions (STUDIO-FLEX-001), persisted in
+ * PostgreSQL so every replica sees the same counts.
  *
  * <p>Concurrency is counted under the CSI's guard-row lock and never kept as a counter, so there is
  * no decrement to lose when a session ends or expires. Daily tokens are charged by one conditional
@@ -24,20 +25,32 @@ public class GuidedCsiBudget {
       "GREATEST(1, CEIL(EXTRACT(EPOCH FROM ((date_trunc('day', clock_timestamp() AT TIME ZONE"
           + " 'UTC') + interval '1 day') - (clock_timestamp() AT TIME ZONE 'UTC')))))::int";
 
+  private static final String DEPLOYMENT_LOCK = "studio-guided-learning-capacity";
+
   private final JdbcTemplate jdbc;
   private final GuidedCsiBudgetProperties properties;
+  private final int maxConcurrentSessions;
 
-  public GuidedCsiBudget(JdbcTemplate jdbc, GuidedCsiBudgetProperties properties) {
+  /**
+   * @param maxConcurrentSessions the deployment-wide cap on live learning sessions, whichever CSI
+   *     started them
+   */
+  public GuidedCsiBudget(
+      JdbcTemplate jdbc, GuidedCsiBudgetProperties properties, int maxConcurrentSessions) {
     this.jdbc = jdbc;
     this.properties = properties;
+    this.maxConcurrentSessions = maxConcurrentSessions;
   }
 
   /**
-   * Admits one more learning session for the CSI, or refuses {@code 429 BUDGET_EXCEEDED} retryable
-   * with a {@code Retry-After}. Charges nothing. The guard row stays locked until the caller's
-   * start transaction ends, which serializes concurrent starts across replicas.
+   * Admits one more learning session for the CSI and the deployment, or refuses {@code 429
+   * BUDGET_EXCEEDED} retryable with a {@code Retry-After}. Charges nothing. A transaction-scoped
+   * advisory lock (taken first) and the CSI guard row stay held until the caller's start
+   * transaction ends, which serializes concurrent starts across replicas.
    */
   public void admitStart(String csiId) {
+    jdbc.queryForObject(
+        "SELECT pg_advisory_xact_lock(hashtextextended(?,0))", Object.class, DEPLOYMENT_LOCK);
     jdbc.update(
         "INSERT INTO studio_guided_csi_guards(csi_id) VALUES (?) ON CONFLICT DO NOTHING", csiId);
     jdbc.queryForList(
@@ -59,6 +72,21 @@ public class GuidedCsiBudget {
           "CSI_CONCURRENT_SESSIONS_EXHAUSTED",
           true,
           ((Number) live.get("retry")).intValue());
+    }
+    Map<String, Object> all =
+        jdbc.queryForMap(
+            "SELECT count(*) AS live, GREATEST(1, CEIL(EXTRACT(EPOCH FROM (min(expires_at) -"
+                + " clock_timestamp()))))::int AS retry FROM studio_guided_sessions WHERE state NOT"
+                + " IN "
+                + TERMINAL
+                + " AND expires_at > clock_timestamp()");
+    if (((Number) all.get("live")).intValue() >= maxConcurrentSessions) {
+      throw new GuidedSessionException(
+          "BUDGET_EXCEEDED",
+          429,
+          "LEARNING_CAPACITY_EXHAUSTED",
+          true,
+          ((Number) all.get("retry")).intValue());
     }
     List<Map<String, Object>> today =
         jdbc.queryForList(

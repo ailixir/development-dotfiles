@@ -1,3 +1,4 @@
+import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 /**
  * STUDIO-OBS-009 round 065: a guided recording whose close outlasts the 3 s grace is still finalized, not cut.
  *
@@ -34,7 +35,7 @@ describe.skipIf(!hasFfprobe)('a guided close that outlasts the grace still final
   it('slow recorder (ffmpeg stopped past the grace): close is not orderly, finalizeRecording waits, the webm has a finite Duration', async () => {
     const dir = await mkdtemp(join(tmpdir(), 'guided-r065-'));
     try {
-      const guided = await launchGuidedBrowser({ sessionId: 'r065', scopeHash: 'a'.repeat(64), approvedOrigins: [fixture.origin], rules: [], knownSecrets: [] }, 'r065-context', () => undefined, { dir, size: { width: 640, height: 360 }, ready: () => undefined });
+      const guided = await launchGuidedBrowser({ sessionId: 'r065', scopeHash: 'a'.repeat(64), allowedDomains: TEST_DOMAINS, knownSecrets: [] }, 'r065-context', () => undefined, { dir, size: { width: 640, height: 360 }, ready: () => undefined });
       await guided.navigateBlank(`${fixture.origin}/login`);
       await sleep(1_500);
       const recorders = recorderPids(dir);
@@ -58,7 +59,7 @@ describe.skipIf(!hasFfprobe)('a guided close that outlasts the grace still final
   it('a recorder that never finishes is killed at the finalize bound, and the result is reported as a salvaged prefix', async () => {
     const dir = await mkdtemp(join(tmpdir(), 'guided-r065-'));
     try {
-      const guided = await launchGuidedBrowser({ sessionId: 'r065b', scopeHash: 'a'.repeat(64), approvedOrigins: [fixture.origin], rules: [], knownSecrets: [] }, 'r065b-context', () => undefined, { dir, size: { width: 640, height: 360 }, ready: () => undefined });
+      const guided = await launchGuidedBrowser({ sessionId: 'r065b', scopeHash: 'a'.repeat(64), allowedDomains: TEST_DOMAINS, knownSecrets: [] }, 'r065b-context', () => undefined, { dir, size: { width: 640, height: 360 }, ready: () => undefined });
       await guided.navigateBlank(`${fixture.origin}/login`);
       await sleep(1_000);
       for (const pid of recorderPids(dir)) process.kill(pid, 'SIGSTOP');

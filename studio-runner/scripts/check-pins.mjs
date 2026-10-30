@@ -45,6 +45,7 @@ import {envBrowserRoot} from './write-runtime-versions.mjs';
  * disagreeing copies with their values.
  */
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -142,6 +143,7 @@ export function collectPins(root) {
   const nvmrc = existsSync(nvmrcPath) ? readFileSync(nvmrcPath, 'utf8').trim() : null;
 
   return {
+    engine: collectEnginePin(root),
     declared: pkg?.dependencies?.playwright ?? null,
     locked: lock?.packages?.['node_modules/playwright']?.version ?? null,
     image: imagePin,
@@ -151,6 +153,28 @@ export function collectPins(root) {
     runtime,
     runtimePresent: runtime !== null,
   };
+}
+
+/**
+ * The Playwright engine pin of the perception modules (ADR-SC-007 D7 item 4): `src/run/playwrightEnginePin.json` declares the
+ * exact playwright-core version and the sha256 of `playwright-core/lib/coreBundle.js`, the file that holds the injected selector
+ * engine. playwright-core is resolved through the DECLARED `playwright` package. Returns `null` when the root does not ship the
+ * pin file (the temporary roots of the drift tests), otherwise what was found; `error` explains anything that could not be read.
+ */
+export function collectEnginePin(root) {
+  const pinPath = join(root, 'src', 'run', 'playwrightEnginePin.json');
+  if (!existsSync(pinPath)) return null;
+  const pin = JSON.parse(readFileSync(pinPath, 'utf8'));
+  const found = { pin, coreVersion: null, coreBundleSha256: null, error: null };
+  try {
+    const playwrightRequire = createRequire(createRequire(join(root, 'package.json')).resolve('playwright/package.json'));
+    const corePackage = playwrightRequire.resolve('playwright-core/package.json');
+    found.coreVersion = JSON.parse(readFileSync(corePackage, 'utf8')).version ?? null;
+    found.coreBundleSha256 = createHash('sha256').update(readFileSync(join(dirname(corePackage), 'lib', 'coreBundle.js'))).digest('hex');
+  } catch {
+    found.error = 'playwright-core (through the declared playwright package) or its lib/coreBundle.js could not be read.';
+  }
+  return found;
 }
 
 /**
@@ -210,6 +234,30 @@ export function checkPins(root, options = {}) {
     failures.push(
       ['the Playwright pin disagrees across copies:', ...present.map(format)].join('\n      '),
     );
+  }
+
+  // ── Playwright engine pin (perception modules): version, declared version and bundle sha256 ──────
+  if (pins.engine !== null) {
+    const { pin, coreVersion, coreBundleSha256, error } = pins.engine;
+    if (error !== null) failures.push(`the Playwright engine pin could not be checked: ${error}`);
+    else {
+      if (pin.playwright !== pins.declared) {
+        failures.push(`src/run/playwrightEnginePin.json playwright = "${pin.playwright}" disagrees with package.json dependencies.playwright = "${String(pins.declared)}".`);
+      }
+      if (coreVersion !== pin.playwright) {
+        failures.push(`the installed playwright-core is ${String(coreVersion)} but src/run/playwrightEnginePin.json pins ${pin.playwright}.`);
+      }
+      if (coreBundleSha256 !== pin.coreBundleSha256) {
+        failures.push(
+          [
+            'playwright-core/lib/coreBundle.js is not the pinned engine bundle:',
+            `installed sha256 = ${String(coreBundleSha256)}`,
+            `pinned sha256    = ${pin.coreBundleSha256}`,
+            'The injected selector engine is private Playwright code; moving the pin needs the engine conformance test to pass first.',
+          ].join('\n      '),
+        );
+      }
+    }
   }
 
   // ── Node major: engines floor vs .nvmrc ─────────────────────────────────────────────────────
@@ -407,6 +455,7 @@ export function runCli(argv) {
     ['dist/runtime-versions.json playwright', recorded ?? '(not built)'],
     ['dist/runtime-versions.json node', result.pins.runtime?.node ?? '(not built)'],
     ['.nvmrc / engines.node floor', `${nvmrc} (${engines})`],
+    ['src/run/playwrightEnginePin.json bundle sha256', result.pins.engine?.pin.coreBundleSha256 ?? '(not shipped by this root)'],
   ]) {
     console.log(`  ${format(line)}`);
   }

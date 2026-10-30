@@ -14,7 +14,9 @@ class GuidedProviderSchemaCompatibilityTest {
 
   @Test
   void providerGrammarOmitsArrayCapsWhileRetainingRequiredShapeAndMinimumCardinality() {
-    var assembler = new GuidedPromptAssembler(contracts);
+    var assembler =
+        new GuidedPromptAssembler(
+            contracts, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     for (GuidedModelRequest.Kind kind : GuidedModelRequest.Kind.values()) {
       JsonNode schema = assembler.providerSchema(kind);
       assertThat(schema.toString()).doesNotContain("\"maxItems\"");
@@ -22,6 +24,8 @@ class GuidedProviderSchemaCompatibilityTest {
     }
     JsonNode plan = assembler.providerSchema(GuidedModelRequest.Kind.SOURCE_PLAN);
     assertThat(plan.at("/anyOf/0/properties/obligations/minItems").asInt()).isEqualTo(1);
+    assertThat(plan.at("/anyOf/0/properties").has("needs")).isFalse();
+    assertThat(plan.at("/anyOf/0/required").toString()).doesNotContain("needs");
   }
 
   @Test
@@ -34,30 +38,40 @@ class GuidedProviderSchemaCompatibilityTest {
         values.add(item.deepCopy());
       }
       contracts.validate("v3/source-selection", plan);
-      contracts.validate("v3/guided-model-response", response(plan));
+      // ADR-SC-007: needs belong to the server's plan shape only; a reply has none.
+      boolean modelWritten = !limit.getKey().equals("needs");
+      if (modelWritten) {
+        contracts.validate("v3/guided-model-response", response(plan));
+      }
       values.add(item.deepCopy());
       assertThatThrownBy(() -> contracts.validate("v3/source-selection", plan))
           .as("Authoritative cardinality for %s", limit.getKey())
           .hasMessage("INVALID_CONTRACT");
-      assertThatThrownBy(() -> contracts.validate("v3/guided-model-response", response(plan)))
-          .as("Response parser schema cardinality for %s", limit.getKey())
-          .hasMessage("INVALID_CONTRACT");
+      if (modelWritten) {
+        assertThatThrownBy(() -> contracts.validate("v3/guided-model-response", response(plan)))
+            .as("Response parser schema cardinality for %s", limit.getKey())
+            .hasMessage("INVALID_CONTRACT");
+      }
     }
   }
 
   @Test
-  void nextActionContractRequiresTheSameObservedLocatorHintAsRuntimeAdmission() {
+  void nextActionContractNamesTheOutlineRefAsTheOnlyNodeTargetAndNoLocator() {
+    // ADR-SC-007: the model copies a ref from the outline; the runner derives the locator.
     var request =
         GuidedGatewayPrivacyTest.classifiedRequest(GuidedModelRequest.Kind.NEXT_ACTION, 1);
     assertThat(request.outputContract())
         .contains(
-            "copy nodeId from the current observation",
-            "copy locator exactly from that node's locatorHints",
-            "cannot authorize a locator absent from locatorHints");
+            "{kind:\"node\",ref}",
+            "copy ref exactly from a line of the current outline",
+            "You never write a selector, locator, role expression or code",
+            "A ref that is not shown in the outline is refused")
+        .doesNotContain("locatorHints", "nodeId from the current observation");
   }
 
   private ObjectNode response(ObjectNode plan) {
     ObjectNode response = plan.deepCopy();
+    response.remove("needs");
     return response.put("schemaVersion", 3).put("kind", "SOURCE_PLAN").put("requestId", "bounded");
   }
 

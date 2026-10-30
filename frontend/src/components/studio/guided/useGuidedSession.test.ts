@@ -12,7 +12,7 @@ import {
   endsIn,
   guidedError,
   learnWithQuestion,
-  learnWithSettlingVideo,
+  LEARN_PROOF_REFUSED_SCENARIO,
   refusesStart,
 } from '@/services/mocks/studio/guidedFixtures';
 import {
@@ -26,6 +26,7 @@ import {
   resetGuidedMocks,
   setGuidedScenario,
 } from '@/services/mocks/studio/guidedHandlers';
+import { studioGuidedApi } from '@/services/api/studioGuidedApi';
 import { capabilityHandlers, resetCapabilityMocks } from '@/services/mocks/studio/capabilityHandlers';
 import { draftsByReadiness } from '@/services/mocks/studio/readinessFixtures';
 import { guidedSessionStorageKey } from '@/types/studio/studioGuidedTypes';
@@ -183,14 +184,35 @@ describe('a learn from start to published', () => {
     await runToSuccess(result);
   });
 
-  it('keeps reading the result while the recording is still PROCESSING', async () => {
-    setGuidedScenario(learnWithSettlingVideo(2));
+  it('a learn that did not publish keeps reading the result while its recording is still PROCESSING', async () => {
+    setGuidedScenario(endsIn('FAILED', { video: 'AVAILABLE', videoProcessingReads: 2 }));
     const { result } = mount();
     await act(async () => result.current.startLearn(await context()));
-    await waitFor(() => expect(result.current.result?.evidence.video.status).toBe('AVAILABLE'));
+    await waitFor(() => expect(result.current.result?.evidence.video?.status).toBe('AVAILABLE'));
     expect(guidedRequestCount('result')).toBe(3);
     await idle(40);
     expect(guidedRequestCount('result')).toBe(3);
+  });
+
+  it('a published learn settles at the first final result: no learning recording to wait for', async () => {
+    const { result } = mount();
+    await act(async () => result.current.startLearn(await context()));
+    await runToSuccess(result);
+    expect(result.current.result?.publication.status).toBe('PUBLISHED');
+    expect(result.current.result?.evidence.video).toBeNull();
+    expect(result.current.result?.actionTimings).toEqual([]);
+    const reads = guidedRequestCount('result');
+    await idle(40);
+    expect(guidedRequestCount('result')).toBe(reads);
+  });
+
+  it('exposes result.proof as null when the proof replay was not accepted', async () => {
+    setGuidedScenario(LEARN_PROOF_REFUSED_SCENARIO);
+    const { result } = mount();
+    await act(async () => result.current.startLearn(await context()));
+    await runToSuccess(result);
+    expect(result.current.result?.publication.status).toBe('PUBLISHED');
+    expect(result.current.result?.proof).toBeNull();
   });
 
   it('stops polling the session once the result has settled', async () => {
@@ -449,7 +471,7 @@ describe('StrictMode and racing instances', () => {
 
 describe('refusals and HTTP outcomes', () => {
   it.each([
-    ['POLICY_NOT_APPROVED_PENDING_VERSION' as const, 409, 'GUIDED_POLICY_PENDING_VERSION'],
+    ['FIRST_LEARN_STEP_NARROWED' as const, 409, 'FIRST_LEARN_STEP_NARROWED'],
     ['BASE_IDENTITY_INCOMPLETE' as const, 409, 'BASE_IDENTITY_INCOMPLETE'],
     ['RUNTIME_INCOMPATIBLE' as const, 409, 'RUNTIME_INCOMPATIBLE'],
     ['FORBIDDEN_SCOPE' as const, 403, 'ACCESS_DENIED'],
@@ -567,6 +589,20 @@ describe('refusals and HTTP outcomes', () => {
     expect(result.current.pending).toBe('REAUTHENTICATION_REQUIRED');
     expect(result.current.result?.publication?.status ?? 'NONE').not.toBe('PUBLISHED');
     expect(pointer()?.sessionId).toBe(result.current.view?.session.sessionId);
+  });
+
+  it('retryFinalize after a 401 on finalize sends finalize once more under the same key and the session finishes (E2E-012)', async () => {
+    failGuidedRequests('finalize', UNAUTHENTICATED_REFUSAL(), { times: 1 });
+    const { result } = mount();
+    await act(async () => result.current.startLearn(await context()));
+    await waitFor(() => expect(result.current.pending).toBe('REAUTHENTICATION_REQUIRED'));
+    await idle(40);
+    expect(guidedRequestCount('finalize')).toBe(1);
+
+    act(() => result.current.retryFinalize());
+    await runToSuccess(result);
+    expect(guidedRequestCount('finalize')).toBe(2);
+    expect(result.current.pending).toBeNull();
   });
 
   it('after a 401 on finalize, a reload resumes by GET and sends the same finalize key once more (tech gate L5b)', async () => {
@@ -753,4 +789,46 @@ describe('unreadable (F-L5b-3; W5-3)', () => {
     await idle(40);
     expect(guidedRequestLog().length).toBe(logged);
   });
+});
+
+describe('a long model wait (R9)', () => {
+  /** Every learn step and the plan call go through a slow model: a learn can sit in one state for minutes. */
+  const POLLS = 180;
+
+  it('keeps following a session that stays non-terminal for 180 polls: no timeout, no error, polling never stops', async () => {
+    const first = mount();
+    await act(async () => first.result.current.startLearn(await context()));
+    const started = first.result.current.view!;
+    first.unmount();
+    resetGuidedSessionRuntime();
+
+    const running = { ...started, session: { ...started.session, state: 'OBSERVING' as const } };
+    const readSession = vi.spyOn(studioGuidedApi, 'readSession').mockResolvedValue(running);
+    const readResult = vi.spyOn(studioGuidedApi, 'readResult');
+    vi.useFakeTimers();
+    try {
+      // Default poll interval (1 s): 180 polls is three minutes of waiting on one step.
+      const { result } = mount(TEST.id, { store: makeStore(), hook: {} });
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(POLLS * 1000);
+      });
+      expect(readSession.mock.calls.length).toBeGreaterThanOrEqual(POLLS);
+      expect(result.current.view?.session.state).toBe('OBSERVING');
+      expect(result.current.result).toBeNull();
+      expect(result.current.pending).toBeNull();
+      expect(result.current.unreadable).toBe(false);
+      expect(result.current.startRefusal).toBeNull();
+      expect(readResult).not.toHaveBeenCalled();
+      expect(pointer()?.sessionId).toBe(started.session.sessionId);
+
+      // Still alive after the long wait: it keeps polling.
+      const before = readSession.mock.calls.length;
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(5000);
+      });
+      expect(readSession.mock.calls.length).toBeGreaterThan(before);
+    } finally {
+      vi.useRealTimers();
+    }
+  }, 30000);
 });

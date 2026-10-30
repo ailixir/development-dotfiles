@@ -1,5 +1,5 @@
 {
-  "_comment": "GuidedSessionIT base documents (STUDIO-OBS-012A port). Exactly the documents the IT used before the v1 contract deletion, after its own v3 projection (schemaVersion 3, observation coverage.passwordControls 0, clarification phase observed, session without accountRef/authConnection, versions {contract:3}). The service validates every one against contracts/v3 at use. STUDIO-OBS-014 C2a: the clarification choice carries labelSource PAGE with role and region (AC-7).",
+  "_comment": "GuidedSessionIT base documents (STUDIO-OBS-012A port, re-based for ADR-SC-007). The observation is an outline string plus a facts table keyed by the refs the outline shows (one readable text element, e1, with the read grant reference-field-1); the action names that ref; the clarification choice carries labelSource PAGE with role and region and no element id. Tests project each document to v3 (schemaVersion 3, observation coverage.passwordControls 0, clarification phase observed, session without accountRef/authConnection, versions {contract:3}); the service validates every one against contracts/v3 at use.",
   "documents": {
     "session": {
       "schemaVersion": 3,
@@ -10,10 +10,6 @@
         "principalId": "user-1",
         "csiId": "CSI-123",
         "environmentId": "fixture",
-        "applicationId": "orders",
-        "approvedOrigins": [
-          "https://orders.example.test"
-        ],
         "sourceRevision": "1",
         "configurationRevision": "1",
         "modelDataPolicyId": "labels-only-1",
@@ -53,8 +49,6 @@
         "maxModelInputTokensTotal": 128000,
         "maxModelOutputTokensTotal": 32000,
         "maxObservationBytes": 32768,
-        "maxObservationNodes": 500,
-        "maxObservationDepth": 8,
         "maxSanitizedEvidenceBytesTotal": 1048576,
         "maxRuntimeValues": 32,
         "maxRuntimeValueBytes": 4096,
@@ -90,40 +84,36 @@
       "scopeHash": "2fec131b52b0144e082e963564fc3d114f068e5ef4d795a82c8f3b5653186861",
       "observedAt": "2026-10-08T03:00:01Z",
       "coverage": {
-        "mode": "semantic",
-        "complete": true,
-        "truncated": false,
         "withheldRegions": 0,
-        "reason": "complete",
+        "unsupportedRegions": 0,
         "passwordControls": 0
       },
-      "nodes": [
-        {
-          "nodeId": "node-0",
-          "documentId": "document-1",
-          "generation": 1,
+      "projection": {
+        "projected": false,
+        "tier": null,
+        "totalNodes": 2,
+        "shownNodes": 2,
+        "notShown": 0,
+        "outlineBytes": 39
+      },
+      "readRuleId": "reference-field-1",
+      "outline": "- document\n  - text \"Order number\" [e1]",
+      "facts": {
+        "e1": {
           "role": "text",
           "name": "Order number",
-          "elementType": "text",
-          "controlType": "none",
-          "classification": "permittedBusinessData",
-          "policyRuleId": "reference-field-1",
-          "visible": true,
-          "actionable": true,
-          "depth": 0,
-          "parentNodeId": null,
-          "regionId": null,
-          "formId": null,
-          "labelNodeIds": [],
-          "locatorHints": [
+          "editable": false,
+          "evidence": "Order number",
+          "evidenceSegments": [
             {
-              "kind": "testId",
-              "value": "order-reference",
-              "exact": true
+              "field": "name",
+              "start": 0,
+              "end": 12
             }
-          ]
+          ],
+          "text": "Order number"
         }
-      ]
+      }
     },
     "clarification": {
       "schemaVersion": 3,
@@ -145,7 +135,6 @@
           "labelSource": "PAGE",
           "role": "textbox",
           "region": null,
-          "nodeId": "node-1",
           "bindingId": null
         }
       ],
@@ -163,14 +152,10 @@
       "observationHash": "0c8751983e76247c5add39fc1dd7e3db6291588d530a7e8965cd90f79251c83c",
       "generation": 1,
       "target": {
-        "nodeId": "node-0",
+        "kind": "node",
+        "ref": "e1",
         "documentId": "document-1",
-        "generation": 1,
-        "locator": {
-          "kind": "testId",
-          "value": "order-reference",
-          "exact": true
-        }
+        "generation": 1
       },
       "operation": {
         "kind": "read",

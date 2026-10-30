@@ -28,8 +28,8 @@ export const MOCK_READABLE_CSIS: string[] = [...DEMO_CSIS];
  * Story 10.48 (ADR-002 O-22): readable CSIs on which the mock principal may **not** execute, as a
  * viewer or contributor would be. Empty by default, so the demo is unchanged; a test adds a CSI and
  * `resetStudioMocks()` clears it. The execute handler then answers the backend's own `403`, and the
- * scheduling capabilities handler answers `canManage: false`, because both are `canWrite` on the
- * server today.
+ * schedule handler refuses to create a UI test's schedule with `403`, because both need the caller
+ * to write the test's CSI on the server today.
  */
 export const MOCK_EXECUTE_DENIED_CSIS = new Set<string>();
 

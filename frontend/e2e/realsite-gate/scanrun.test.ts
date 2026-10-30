@@ -1,0 +1,14 @@
+import {recordUiText} from './ui-text.ts';
+import type {Canary} from './leakscan.ts';
+import assert from 'node:assert/strict';
+import {test} from 'node:test';
+import {mkdtempSync,mkdirSync,writeFileSync,readdirSync,rmSync} from 'node:fs';
+import {join} from 'node:path';
+import {tmpdir} from 'node:os';
+import {runScan} from './scanrun.ts';
+import {REQUIRED_SCAN_SOURCES,scanVerdict} from './leakscan.ts';
+import {scanCommandExit} from './gate-cli.ts';
+import type {CollectedScanInputs} from './scanrun.ts';
+test('actual injected collector covers all sinks and preserves every rescan attempt',()=>{const root=mkdtempSync(join(tmpdir(),'gate-collector-'));try{const canaries:Canary[]=[{label:'GATE_CANARY',value:'synthetic-private-canary',cls:'SECRET'}];const inputs:CollectedScanInputs={canaries,sources:REQUIRED_SCAN_SOURCES.map((name)=>{const dir=join(root,name);mkdirSync(dir);if(name==='ui')recordUiText(dir,'safe.txt','{}',canaries,'dry-20261027-1');else writeFileSync(join(dir,name==='gateway'?'0001.req.json':'safe.txt'),'{}');return{name,root:dir,mayCarryPageText:()=>false};}),db:{tables:1,rows:1,bytes:2},exercised:{}};
+const options={root,runId:'dry-20261027-1',includePlaywrightOutput:true,collect:()=>inputs};const initial=runScan(options);assert.equal(scanCommandExit(initial),0);assert.equal(initial.nextday,false);assert.deepEqual(initial.exercised,{});assert.equal(initial.scan.canaries.length,1);writeFileSync(join(root,'runner','safe.txt'),'synthetic-private-canary');const failed=runScan(options);assert.equal(scanVerdict(failed.scan).verdict,'FAIL');assert.equal(readdirSync(join(root,options.runId,'scan/history')).length,2);inputs.canaries=[];assert.equal(scanCommandExit(runScan(options)),1);inputs.canaries=canaries;writeFileSync(join(root,'runner','safe.txt'),'{}');inputs.sources=inputs.sources.filter((s)=>s.name!=='db');assert.equal(scanCommandExit(runScan(options)),1);
+}finally{rmSync(root,{recursive:true,force:true});}});

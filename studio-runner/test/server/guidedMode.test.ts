@@ -17,13 +17,14 @@ import type { IncomingHttpHeaders } from 'node:http';
 import { createServer as createHttpsServer } from 'node:https';
 import type { AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { domainAllowed, isAllowAll } from '../../src/allowedDomains.js';
 import { resetRuntimeVersionsCache } from '../../src/compat/index.js';
 import * as applicationModule from '../../src/server/application.js';
-import { main } from '../../src/main.js';
+import { main, NAVIGATION_ALL_DOMAINS_WARNING } from '../../src/main.js';
 import type { GuidedStartupSeams, MainResult } from '../../src/main.js';
 import {
   ACCEPTED_KEYS,
@@ -82,6 +83,8 @@ function runnerEnv(root: string): Record<string, string> {
     [`${P}TLS_CERT_FILE`]: tlsFile('cert'),
     [`${P}TLS_CA_FILE`]: tlsFile('cert'),
     [`${P}CONTROLLER_CERTIFICATE_FINGERPRINT256`]: testFingerprint,
+    // Allow-all is ON when unset (the default for now); these tests are about the list and the startup order.
+    [`${P}ALLOW_ALL_DOMAINS`]: 'false',
   };
 }
 
@@ -98,6 +101,7 @@ function guidedEnv(root: string, callbackBaseUrl = 'https://127.0.0.1:9'): Recor
     [`${P}GUIDED_CONTROLLER_PUBLIC_KEY_FILE`]: tlsFile('cert'),
     [`${P}GUIDED_CALLBACK_BASE_URL`]: callbackBaseUrl,
     [`${P}GUIDED_CALLBACK_TOKEN_FILE`]: join(root, 'token'),
+    [`${P}GUIDED_CAPACITY`]: '1',
   };
 }
 
@@ -109,6 +113,7 @@ const GUIDED_KEYS = [
   'GUIDED_CONTROLLER_PUBLIC_KEY_FILE',
   'GUIDED_CALLBACK_BASE_URL',
   'GUIDED_CALLBACK_TOKEN_FILE',
+  'GUIDED_CAPACITY',
 ] as const;
 
 function problemsOf(load: () => unknown): string[] {
@@ -179,6 +184,7 @@ describe('guided worker mounted configuration', () => {
       controllerPublicKeyFile: tlsFile('cert'),
       callbackBaseUrl: 'https://127.0.0.1:9',
       callbackTokenFile: join(root, 'token'),
+      capacity: 1,
     });
     // The listener half of the old file (host, port, TLS files, controller fingerprint) is the runner's own keys.
     expect(loadListenerConfig(env)).toEqual({
@@ -294,16 +300,17 @@ describe('AC-1 — one entry point, one image, one process', () => {
         if (entry.isDirectory()) walk(path);
         else if (path.endsWith('.ts')) {
           const text = readFileSync(path, 'utf8');
-          if (/import\s*\{[^}]*\bcreateServer\b[^}]*\}\s*from\s*'node:http'/u.test(text) || /\bhttp\.createServer\b/u.test(text)) offenders.push(path);
+          if (/import\s*\{[^}]*\bcreateServer\b[^}]*\}\s*from\s*'node:http'/u.test(text) || /\bhttp\.createServer\b/u.test(text)) offenders.push(relative(packageRoot, path));
         }
       }
     };
     walk(join(packageRoot, 'src'));
+    // There is no other listener in the package: the egress proxy is gone, so the browser connects directly.
     expect(offenders).toEqual([]);
   });
 
-  it('accepts 57 keys: the 45 of the replay runner, the four listener keys and the eight guided keys', () => {
-    expect(ACCEPTED_KEYS).toHaveLength(57);
+  it('accepts 59 keys: the 46 of the replay runner (the allowed-domains and allow-all keys among them), the four listener keys and the nine guided keys', () => {
+    expect(ACCEPTED_KEYS).toHaveLength(59);
     const added = [
       'TLS_KEY_FILE', 'TLS_CERT_FILE', 'TLS_CA_FILE', 'CONTROLLER_CERTIFICATE_FINGERPRINT256',
       'GUIDED_ENABLED', ...GUIDED_KEYS,
@@ -312,10 +319,15 @@ describe('AC-1 — one entry point, one image, one process', () => {
     expect(ACCEPTED_KEYS.filter((key) => key.startsWith(`${P}GUIDED_`)).sort()).toEqual([`${P}GUIDED_ENABLED`, ...GUIDED_KEYS.map((key) => `${P}${key}`)].sort());
   });
 
-  it('has no capacity key and no policy-hash key (rulings A2.3, A2.4): capacity is the constant 1 and the policy is context-bound', () => {
-    expect(ACCEPTED_KEYS.filter((key) => /CAPACITY|RULES|POLICY_HASH|GUIDED_POLICY/u.test(key))).toEqual([]);
+  it('has a bounded guided capacity key and no policy-hash key (ruling A2.4): the policy is context-bound', () => {
+    expect(ACCEPTED_KEYS.filter((key) => /CAPACITY|RULES|POLICY_HASH|GUIDED_POLICY/u.test(key))).toEqual([`${P}GUIDED_CAPACITY`]);
     const env = guidedEnv(scratchRoot());
-    for (const key of ['GUIDED_CAPACITY', 'GUIDED_POLICY_HASH', 'GUIDED_POLICY', 'CAPACITY']) {
+    for (const [value, accepted] of [['1', true], ['3', true], ['8', true], ['0', false], ['9', false], ['-1', false], ['two', false], ['', false]] as const) {
+      const attempt = (): unknown => loadGuidedConfig({ ...env, [`${P}GUIDED_CAPACITY`]: value });
+      if (accepted) expect(attempt(), value).toMatchObject({ enabled: true, capacity: Number(value) });
+      else expect(attempt, value).toThrow(ConfigurationError);
+    }
+    for (const key of ['GUIDED_POLICY_HASH', 'GUIDED_POLICY', 'CAPACITY']) {
       expect(problemsOf(() => loadGuidedConfig({ ...env, [`${P}${key}`]: '1' })).join('\n'), key).toContain(`${P}${key}`);
     }
   });
@@ -784,5 +796,110 @@ describe('startup is one value-free line per refusal', () => {
         expect(line).not.toContain('\n');
       }
     }
+  });
+});
+
+describe('the navigation whitelist and the guided capacity at startup', () => {
+  it.each(['Example.com', 'a.com, b.com', 'a.com,', '*.a.com', '127.0.0.1', 'https://a.com', 'a.com:8443', 'a.com,www.a.com', 'a.com,a.com', ' '])(
+    'refuses %j before anything listens (exit 78)',
+    async (value) => {
+      const root = scratchRoot();
+      const started = await start(root, { ...runnerEnv(root), [`${P}ALLOWED_DOMAINS`]: value }, seams());
+      expect(started.result.started).toBe(false);
+      expect(started.exit()).toBe(78);
+      expect(started.lines).toEqual([expect.stringMatching(new RegExp(`^configuration rejected: ${P}ALLOWED_DOMAINS is invalid: `, 'u'))]);
+    },
+  );
+
+  it('refuses more than 32 entries', async () => {
+    const root = scratchRoot();
+    const started = await start(root, { ...runnerEnv(root), [`${P}ALLOWED_DOMAINS`]: Array.from({ length: 33 }, (_, i) => `d${String(i)}.example`).join(',') }, seams());
+    expect(started.exit()).toBe(78);
+  });
+
+  it.each([undefined, ''])('treats %j as the empty list: the runner starts and denies every navigation', async (value) => {
+    const root = scratchRoot();
+    // Explicitly not allow-all (runnerEnv says so): this test is about the list.
+    const env: Record<string, string | undefined> = { ...runnerEnv(root), ...(value === undefined ? {} : { [`${P}ALLOWED_DOMAINS`]: value }) };
+    const started = await start(root, env, seams());
+    expect(started.result.started).toBe(true);
+    expect(started.result.application?.config.allowedDomains).toEqual([]);
+    await stop(started);
+  });
+
+  describe('the allow-all option (STUDIO_RUNNER_ALLOW_ALL_DOMAINS)', () => {
+    it.each(['TRUE', '1', 'yes', ' true', 'true ', 'maybe'])('refuses %j before anything listens (exit 78), without echoing it', async (value) => {
+      const root = scratchRoot();
+      const started = await start(root, { ...runnerEnv(root), [`${P}ALLOW_ALL_DOMAINS`]: value }, seams());
+      expect(started.result.started).toBe(false);
+      expect(started.exit()).toBe(78);
+      expect(started.lines).toEqual([`configuration rejected: ${P}ALLOW_ALL_DOMAINS is invalid: must be true or false (or unset).`]);
+    });
+
+    it('still refuses an invalid list when the option is on (the option does not hide a typo)', async () => {
+      const root = scratchRoot();
+      const started = await start(root, { ...runnerEnv(root), [`${P}ALLOWED_DOMAINS`]: '*.a.com', [`${P}ALLOW_ALL_DOMAINS`]: 'true' }, seams());
+      expect(started.exit()).toBe(78);
+      expect(started.lines).toEqual([expect.stringMatching(new RegExp(`^configuration rejected: ${P}ALLOWED_DOMAINS is invalid: `, 'u'))]);
+    });
+
+    it('is off for false: the list stands and nothing is warned', async () => {
+      const root = scratchRoot();
+      const started = await start(root, { ...runnerEnv(root), [`${P}ALLOWED_DOMAINS`]: 'example.com', [`${P}ALLOW_ALL_DOMAINS`]: 'false' }, seams());
+      expect(started.result.started).toBe(true);
+      expect(started.result.application?.config.allowedDomains).toEqual(['example.com']);
+      expect(started.lines.some((line) => line.includes('allow-all'))).toBe(false);
+      await stop(started);
+    });
+
+    it.each([undefined, ''])('is ON for %j (the default for now): every host is allowed, the list is ignored, and one WARN line says so', async (value) => {
+      const root = scratchRoot();
+      const base = Object.fromEntries(Object.entries(runnerEnv(root)).filter(([key]) => key !== `${P}ALLOW_ALL_DOMAINS`));
+      const env: Record<string, string | undefined> = { ...base, [`${P}ALLOWED_DOMAINS`]: 'example.com', ...(value === undefined ? {} : { [`${P}ALLOW_ALL_DOMAINS`]: value }) };
+      const started = await start(root, env, seams());
+      expect(started.result.started).toBe(true);
+      const effective = started.result.application?.config.allowedDomains ?? [];
+      expect(isAllowAll(effective)).toBe(true);
+      expect(domainAllowed(effective, 'https://anything.example/')).toBe(true);
+      expect(started.lines.filter((line) => line.includes('allow-all'))).toEqual([NAVIGATION_ALL_DOMAINS_WARNING]);
+      await stop(started);
+    });
+
+    it.each(['', 'example.com'])('is on for true with the list %j: every host is allowed, the list is ignored, and one WARN line says so', async (list) => {
+      const root = scratchRoot();
+      const started = await start(root, { ...runnerEnv(root), [`${P}ALLOWED_DOMAINS`]: list, [`${P}ALLOW_ALL_DOMAINS`]: 'true' }, seams());
+      expect(started.result.started).toBe(true);
+      const effective = started.result.application?.config.allowedDomains ?? [];
+      expect(isAllowAll(effective)).toBe(true);
+      expect(domainAllowed(effective, 'https://anything.example/')).toBe(true);
+      expect(started.lines.filter((line) => line.includes('allow-all'))).toEqual([NAVIGATION_ALL_DOMAINS_WARNING]);
+      expect(NAVIGATION_ALL_DOMAINS_WARNING).toBe('WARN navigation allowed to all domains (allow-all-domains=true)');
+      await stop(started);
+    });
+  });
+
+  it('logs the list at startup and hands it to the launcher and the guided bridge', async () => {
+    const root = scratchRoot();
+    const lines: string[] = [];
+    const write = vi.spyOn(process.stdout, 'write').mockImplementation((chunk: string | Uint8Array) => { lines.push(String(chunk)); return true; });
+    const created = vi.spyOn(applicationModule, 'createApplication');
+    let started: Started | undefined;
+    try {
+      started = await start(root, { ...guidedEnv(root), [`${P}GUIDED_CAPACITY`]: '3', [`${P}ALLOWED_DOMAINS`]: 'localhost,example.com,practicetestautomation.com' }, seams());
+    } finally { write.mockRestore(); }
+    expect(started.result.started).toBe(true);
+    const announced = lines.map((line) => JSON.parse(line) as Record<string, unknown>).find((line) => line.event === 'runner.started');
+    expect(announced).toMatchObject({ allowedDomains: 'localhost,example.com,practicetestautomation.com', guided: true });
+    expect(created.mock.calls[0]?.[0].allowedDomains).toEqual(['localhost', 'example.com', 'practicetestautomation.com']);
+    expect(created.mock.calls[0]?.[1].guided?.capacity).toBe(3);
+    await stop(started);
+  });
+
+  it('refuses a guided runner without a capacity (required when guided is on)', async () => {
+    const root = scratchRoot();
+    const withoutCapacity = Object.fromEntries(Object.entries(guidedEnv(root)).filter(([key]) => key !== `${P}GUIDED_CAPACITY`));
+    const started = await start(root, withoutCapacity, seams());
+    expect(started.exit()).toBe(78);
+    expect(started.lines).toContain(`configuration rejected: ${P}GUIDED_CAPACITY is required when ${P}GUIDED_ENABLED is true.`);
   });
 });

@@ -5,6 +5,8 @@
 {{- /* Observed replay (G-O1..G-O4) is checked here too, outside `backend.enabled`: `studioObserved`
        on with `studioRunner.enabled: false` would otherwise render nothing and be ignored. */ -}}
 {{- $_ := include "put-checks.studioObserved.guard" . }}
+{{- /* The domain whitelist feeds the API and worker properties whether or not a runner renders. */ -}}
+{{- $_ := include "put-checks.studioNavigation.guard" . }}
 {{- if .Values.backend.enabled }}
 {{- include "put-checks.springConfig.validate" (index .Values "backend") }}
 {{- $gatewayProvider := required "studioGateway.provider is required" .Values.studioGateway.provider -}}

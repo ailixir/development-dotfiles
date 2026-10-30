@@ -42,9 +42,7 @@ class GuidedCsiBudgetIT {
 
   private static final String ENV = "Development";
   private static final String[] REPLICA_PROPERTIES = {
-    "--studio.guided-authoring.csi-budget.max-concurrent-sessions=1",
-    "--studio.guided-authoring.translation.applications=" + ObservedPublicationFixture.APPLICATION,
-    "--studio.guided-authoring.translation.environments=" + ENV
+    "--studio.guided-authoring.csi-budget.max-concurrent-sessions=1"
   };
 
   @DynamicPropertySource
@@ -54,10 +52,6 @@ class GuidedCsiBudgetIT {
     // The default is unlimited (user decision 2026-10-23); these tests exercise the finite cap.
     registry.add("studio.guided-authoring.csi-budget.daily-model-input-tokens", () -> "5242880");
     registry.add("studio.guided-authoring.csi-budget.daily-model-output-tokens", () -> "640000");
-    registry.add(
-        "studio.guided-authoring.translation.applications",
-        () -> ObservedPublicationFixture.APPLICATION);
-    registry.add("studio.guided-authoring.translation.environments", () -> ENV);
   }
 
   @Autowired private GuidedSessionService sessions;
@@ -77,7 +71,6 @@ class GuidedCsiBudgetIT {
     var fixtures = new StudioExecutionFixtures(jdbc);
     fixtures.seedUser(owner);
     fixtures.seedCsi(csi, owner);
-    ObservedPublicationFixture.seedApprovedPolicies(jdbc, csi);
   }
 
   @Test
@@ -120,7 +113,6 @@ class GuidedCsiBudgetIT {
 
     String other = "B" + UUID.randomUUID().toString().substring(0, 12);
     new StudioExecutionFixtures(jdbc).seedCsi(other, owner);
-    ObservedPublicationFixture.seedApprovedPolicies(jdbc, other);
     assertThat(start(sessions, draft(other)).path("sessionId").asText())
         .as("a different CSI is unaffected")
         .isNotBlank();
@@ -140,7 +132,6 @@ class GuidedCsiBudgetIT {
 
     String exhausted = "B" + UUID.randomUUID().toString().substring(0, 12);
     new StudioExecutionFixtures(jdbc).seedCsi(exhausted, owner);
-    ObservedPublicationFixture.seedApprovedPolicies(jdbc, exhausted);
     jdbc.update(
         "INSERT INTO studio_guided_csi_token_days(csi_id,budget_day,input_tokens,output_tokens)"
             + " VALUES (?,(clock_timestamp() AT TIME ZONE 'UTC')::date,?,0)",
@@ -254,7 +245,7 @@ class GuidedCsiBudgetIT {
         spent,
         limits.dailyModelInputTokens() * 10,
         limits.dailyModelOutputTokens() * 10);
-    var open = new GuidedCsiBudget(jdbc, unlimited);
+    var open = new GuidedCsiBudget(jdbc, unlimited, 1000);
     var tx =
         new org.springframework.transaction.support.TransactionTemplate(
             new org.springframework.jdbc.datasource.DataSourceTransactionManager(dataSource));
@@ -262,7 +253,8 @@ class GuidedCsiBudgetIT {
     assertThat(charge(tx, () -> open.charge(spent, 1_000_000, 1_000_000)))
         .as("no gate, no cap: far past the finite default")
         .isTrue();
-    var capped = new GuidedCsiBudget(jdbc, new GuidedCsiBudgetProperties(3, 5_242_880, 640_000));
+    var capped =
+        new GuidedCsiBudget(jdbc, new GuidedCsiBudgetProperties(3, 5_242_880, 640_000), 1000);
     assertThatThrownBy(() -> tx.executeWithoutResult(s -> capped.admitStart(spent)))
         .as("the same day is refused under a finite cap")
         .isInstanceOf(GuidedSessionException.class);

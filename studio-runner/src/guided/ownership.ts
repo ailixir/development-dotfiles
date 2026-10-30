@@ -4,8 +4,6 @@ import { canonical, hash, identity, insist, sameIdentity, validate } from './con
 import { GuidedStartFailure } from './diagnostics.js';
 import { GuidedJournal } from './journal.js';
 import { GuidedRuntime } from './runtime.js';
-import { bindContextPolicy } from './policyHash.js';
-import type { PolicyBinding } from './policyHash.js';
 import type { GuidedRuntimeOptions } from './runtime.js';
 import type { Assignment, AssignmentReceipt, BridgeIdentity, BridgeStop, CommandsClaim, RunnerContext, Session, BridgeContextAcknowledgement } from './types.js';
 
@@ -15,8 +13,6 @@ interface OwnedAssignment {
   digest: string;
   grant: Session | null;
   runtime: GuidedRuntime | null;
-  /** STUDIO-OBS-014 AC-1: the hash-bound governed policy the runtime was started with. */
-  policy: PolicyBinding | null;
   contextStart: Promise<void> | null;
   stopped: boolean;
   unconfirmed: boolean;
@@ -124,7 +120,7 @@ export class GuidedOwnership {
     }
     insist(Date.parse(assignment.expiresAt)>Date.now() && Date.parse(assignment.expiresAt)-Date.now()<=600_000, 'EXPIRED');
     insist(this.entries.size<10000 && [...this.entries.values()].filter(item=>this.occupied(item)).length<(this.options.capacity??1),'CAPACITY');
-    entry={assignment:structuredClone(assignment),digest,grant:null,runtime:null,policy:null,contextStart:null,stopped:false,unconfirmed:false,epoch:0,initial:Promise.resolve(),renewal:null,expiry:null,inFlight:null,stopping:null};
+    entry={assignment:structuredClone(assignment),digest,grant:null,runtime:null,contextStart:null,stopped:false,unconfirmed:false,epoch:0,initial:Promise.resolve(),renewal:null,expiry:null,inFlight:null,stopping:null};
     this.entries.set(assignment.sessionId,entry);this.schedule(entry);entry.initial=this.acquire(entry);await entry.initial;this.live(entry);return this.receipt(entry);
   }
   private receipt(entry: OwnedAssignment): AssignmentReceipt {
@@ -154,15 +150,11 @@ export class GuidedOwnership {
   async context(value: unknown, deliveryId?: string): Promise<BridgeIdentity | BridgeContextAcknowledgement> {
     const context=validate<RunnerContext>('runner-context',value);const entry=this.entries.get(context.sessionId);insist(entry?.grant,'CONTEXT_LOST');this.live(entry);
     const grant=entry.grant, intent=entry.assignment;
-    insist(context.workerId===intent.workerId && context.ownerFence===grant.owner.fence && context.scopeHash===intent.scopeHash && context.sourceRevision===intent.sourceRevision && context.configurationRevision===intent.configurationRevision && context.expiresAt===intent.expiresAt && canonical(context.versions)===canonical(intent.versions) && canonical(context.approvedOrigins)===canonical(grant.scope.approvedOrigins) && canonical(context.sourceStepIds)===canonical(grant.sourceSteps.map(step=>step.stepId)) && canonical(context.limits)===canonical(grant.limits) && Date.parse(context.leaseExpiresAt)<=Date.parse(intent.expiresAt),'IDENTITY_MISMATCH');
-    // AR-2: the policy comes only from the backend-frozen context and is applied only if its hash
-    // matches, before the first observation; a later context cannot change it.
-    const policy=bindContextPolicy(context,entry.policy??undefined);
+    insist(context.workerId===intent.workerId && context.ownerFence===grant.owner.fence && context.scopeHash===intent.scopeHash && context.sourceRevision===intent.sourceRevision && context.configurationRevision===intent.configurationRevision && context.expiresAt===intent.expiresAt && canonical(context.versions)===canonical(intent.versions) && canonical(context.sourceStepIds)===canonical(grant.sourceSteps.map(step=>step.stepId)) && canonical(context.limits)===canonical(grant.limits) && Date.parse(context.leaseExpiresAt)<=Date.parse(intent.expiresAt),'IDENTITY_MISMATCH');
     // Context delivery races renewal: its timestamp is informational, never local authority.
     const authorized=structuredClone(context);
     if(entry.runtime){await entry.contextStart;this.live(entry);return entry.runtime.update(authorized, deliveryId);}
-    entry.policy=policy;
-    entry.runtime=new GuidedRuntime(authorized,{...this.options,applicationPolicy:policy.applicationPolicy,capabilities:grant.scope.capabilities,csiId:grant.scope.csiId,onStopping:()=>{this.invalidate(entry);}});
+    entry.runtime=new GuidedRuntime(authorized,{...this.options,capabilities:grant.scope.capabilities,csiId:grant.scope.csiId,onStopping:()=>{this.invalidate(entry);}});
     entry.runtime.setLiveLease(grant.owner.leaseExpiresAt);
     entry.contextStart=entry.runtime.start();this.schedule(entry);
     try{await entry.contextStart;this.live(entry);return identity(context);}catch(cause){const {phase,loss}=entry.runtime.startFailure;
@@ -171,11 +163,11 @@ export class GuidedOwnership {
   }
   private async stopEntry(entry: OwnedAssignment, reason: BridgeStop['reason']): Promise<void> {
     insist(!entry.unconfirmed,'CONTEXT_LOST');
-    if(entry.stopping)return entry.stopping;
+    if(entry.stopping){if(reason==='PUBLISHED')entry.runtime?.markPublished();return entry.stopping;}
     this.invalidate(entry);
     const stop=async():Promise<void>=>{
       if(entry.runtime)await entry.runtime.stop(reason);
-      else await this.options.callback('lifecycle',{schemaVersion:3,kind:'assignment',assignment:entry.assignment,reason}).catch(()=>undefined);
+      else if(reason!=='PUBLISHED')await this.options.callback('lifecycle',{schemaVersion:3,kind:'assignment',assignment:entry.assignment,reason}).catch(()=>undefined);
       // Keep only the value-free scoped receipt, not workflow snapshots or live context state.
     };
     entry.stopping=Promise.resolve().then(stop);return entry.stopping;
@@ -185,7 +177,7 @@ export class GuidedOwnership {
     if('kind' in message){
       const stop=message;insist(stop.assignment.workerId===this.options.workerId,'IDENTITY_MISMATCH');let entry=this.entries.get(stop.assignment.sessionId);
       if(!entry){
-        insist(this.entries.size<10000,'CAPACITY');entry={assignment:structuredClone(stop.assignment),digest:hash(stop.assignment),grant:null,runtime:null,policy:null,contextStart:null,stopped:true,unconfirmed:false,epoch:0,initial:Promise.resolve(),renewal:null,expiry:null,inFlight:null,stopping:null};this.entries.set(stop.assignment.sessionId,entry);
+        insist(this.entries.size<10000,'CAPACITY');entry={assignment:structuredClone(stop.assignment),digest:hash(stop.assignment),grant:null,runtime:null,contextStart:null,stopped:true,unconfirmed:false,epoch:0,initial:Promise.resolve(),renewal:null,expiry:null,inFlight:null,stopping:null};this.entries.set(stop.assignment.sessionId,entry);
         try{const marker=await GuidedJournal.open(join(this.options.journalDirectory,'assignments'),stop.assignment.sessionId);await marker.consume(stop.assignment);}catch{entry.unconfirmed=true;throw new Error('CONTEXT_LOST');}
       }
       insist(entry.digest===hash(stop.assignment),'IDENTITY_MISMATCH');await this.stopEntry(entry,stop.reason);return this.receipt(entry);

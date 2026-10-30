@@ -1,9 +1,12 @@
 import { http, HttpResponse, type HttpHandler } from 'msw';
 import type { StudioVariable, TestDto } from '@/types/studio/studioTypes';
 import {
+  GUIDED_LATEST_ATTEMPTS_MAX_TEST_IDS,
   isGuidedTerminalState,
   type GuidedClarification,
   type GuidedFailure,
+  type GuidedLatestAttempt,
+  type GuidedLatestAttempts,
   type GuidedPublication,
   type GuidedResult,
   type GuidedStartRequest,
@@ -20,6 +23,7 @@ import {
   GUIDED_START_REFUSALS,
   LEARN_SCENARIO,
   clarificationFor,
+  explanationFor,
   guidedError,
   publicSessionFor,
   receiptFor,
@@ -34,10 +38,10 @@ import {
 } from './guidedFixtures';
 
 /**
- * The guided-session MSW mirror (STUDIO-OBS-008 AC-1, lane L2b): the eight guided routes of
+ * The guided-session MSW mirror (STUDIO-OBS-008 AC-1, lane L2b): the nine guided routes of
  * `openapi.yaml` (`startGuidedSession`, `readGuidedSession`, `readGuidedResult`,
  * `readGuidedClarification`, `clarifyGuidedSession`, `cancelGuidedSession`,
- * `finalizeObservedPublication`; the video route is served by the existing video handler's pattern
+ * `finalizeObservedPublication`, and the latest-attempts read `readLatestGuidedAttempts`; the video route is served by the existing video handler's pattern
  * and is not mirrored here).
  *
  * It mirrors what the contract and the backend do, not what is convenient:
@@ -71,6 +75,11 @@ export interface GuidedMockEnvironment {
   stepsOf?(test: TestDto): GuidedStepRef[];
   /** Commit this synthetic receipt only if the saved draft still matches its frozen revisions. */
   publish?(publication: GuidedMockPublication): boolean;
+  /**
+   * The proof replay the backend accepts inside the publication commit: creates the `AFTER_LEARN`
+   * execution of the just-published revision and returns its id, or `null` when none is created.
+   */
+  acceptProof?(publication: GuidedMockPublication): string | null;
 }
 
 export interface GuidedMockPublication {
@@ -101,7 +110,8 @@ export type GuidedOperation =
   | 'clarification'
   | 'clarify'
   | 'cancel'
-  | 'finalize';
+  | 'finalize'
+  | 'latest';
 
 /** One request the mirror served, for the request-count assertions. */
 export interface GuidedLoggedRequest {
@@ -127,6 +137,8 @@ interface PendingFault {
 interface MockSession {
   sessionId: string;
   sequence: number;
+  /** The session's creation time, which the latest-attempts read reports as `startedAt`. */
+  createdAt: string;
   testId: string;
   csiId: string | null;
   request: GuidedStartRequest;
@@ -138,7 +150,13 @@ interface MockSession {
   cursor: number;
   reads: number;
   /** Set once a clarify, finalize or cancel moved the session out of the script. */
-  forced: { step: GuidedScriptStep; terminal: GuidedTerminal; receipt: PublicationReceipt | null } | null;
+  forced: {
+    step: GuidedScriptStep;
+    terminal: GuidedTerminal;
+    receipt: PublicationReceipt | null;
+    /** The `AFTER_LEARN` execution accepted with the publication; null when it was refused or none was made. */
+    proofExecutionId?: string | null;
+  } | null;
   question: GuidedClarification | null;
   resultReadsAfterTerminal: number;
 }
@@ -219,6 +237,11 @@ export function resetGuidedMocks(): void {
 /** The server-side session, for assertions that need more than the public view shows. */
 export function guidedSessionsForTest(testId: string): readonly string[] {
   return [...sessions.values()].filter((entry) => entry.testId === testId).map((entry) => entry.sessionId);
+}
+
+/** Whether the session published: its learning recording is discarded and `GET .../video` answers `404 VIDEO_UNAVAILABLE`. */
+export function guidedSessionPublished(sessionId: string): boolean {
+  return sessions.get(sessionId)?.forced?.receipt != null;
 }
 
 // ---------------------------------------------------------------------------
@@ -338,7 +361,6 @@ function isStartBody(value: unknown): value is GuidedStartRequest {
       'sourceRevision',
       'configurationRevision',
       'environmentId',
-      'applicationId',
       'versions',
       'baseRevisionId',
       'firstLearnStepId',
@@ -353,7 +375,6 @@ function isStartBody(value: unknown): value is GuidedStartRequest {
     boundedString(value.sourceRevision) &&
     boundedString(value.configurationRevision) &&
     boundedString(value.environmentId) &&
-    boundedString(value.applicationId) &&
     isRecord(versions) &&
     closedKeys(versions, ['contract']) &&
     versions.contract === 3 &&
@@ -476,8 +497,10 @@ function resultDocument(session: MockSession): { result: GuidedResult; status: 2
       errorCode: null,
       failure: null,
       detail: null,
-      video: settling ? 'PROCESSING' : (session.plan.video ?? 'AVAILABLE'),
+      // A published learn has no learning recording; its proof is the replay execution.
+      video: 'UNAVAILABLE',
       timedSteps: session.steps.length,
+      proof: session.forced?.proofExecutionId ? { executionId: session.forced.proofExecutionId } : null,
     });
     return { result, status: 200 };
   }
@@ -497,6 +520,86 @@ function resultDocument(session: MockSession): { result: GuidedResult; status: 2
   // The backend answers 202 for a pending publication, terminal session or not.
   return { result, status: ended.publicationStatus === 'PENDING' ? 202 : 200 };
 }
+
+// ---------------------------------------------------------------------------
+// Latest learning attempts (`readLatestGuidedAttempts`, STUDIO-UNIFY-001.6 AC-09, AC-10)
+// ---------------------------------------------------------------------------
+
+/**
+ * The seeded `UNLEARNED` UI test ("Statements download", source revision 5, one step) whose latest
+ * learning attempt failed at step 1 before any session exists. The unit tests and the Playwright
+ * msw project use it to see the "Last learning attempt failed" line without driving a learn. Any
+ * terminal session the mirror simulates for the test is newer than this attempt and replaces it.
+ */
+export const SEEDED_FAILED_ATTEMPT_TEST_ID = '11111111-1111-1111-1111-111111111112';
+
+/** The seeded attempt's session id; no simulated session ever has this shape. */
+export const SEEDED_FAILED_ATTEMPT_SESSION_ID = 'seeded-failed-attempt';
+
+/**
+ * The seeded attempt's `startedAt`. A fixed instant, so a snapshot of it never moves; far enough
+ * back that the pages show it as a date rather than an age.
+ */
+export const SEEDED_FAILED_ATTEMPT_STARTED_AT = '2026-10-02T09:30:00Z';
+
+/** The `sourceRevision` the seeded explanation was produced for: the fixture test's own. */
+export const SEEDED_FAILED_ATTEMPT_SOURCE_REVISION = '5';
+
+function seededFailedAttempt(): GuidedLatestAttempt {
+  const steps = defaultStepsOf(
+    fixtureTests().find((test) => test.id === SEEDED_FAILED_ATTEMPT_TEST_ID) as TestDto,
+  );
+  return {
+    testId: SEEDED_FAILED_ATTEMPT_TEST_ID,
+    sessionId: SEEDED_FAILED_ATTEMPT_SESSION_ID,
+    state: 'FAILED',
+    startedAt: SEEDED_FAILED_ATTEMPT_STARTED_AT,
+    errorCode: 'TARGET_MISMATCH',
+    explanation: explanationFor(
+      SEEDED_FAILED_ATTEMPT_SESSION_ID,
+      SEEDED_FAILED_ATTEMPT_SOURCE_REVISION,
+      '2',
+      steps,
+      { completed: 0, reusedBefore: 0, baseRevisionId: null, failedIndex: 0 },
+    ),
+  };
+}
+
+/**
+ * The attempt a simulated session stands for, or `null` while it is live. The state is read without
+ * moving the script on: the route writes nothing and a read of it never advances a session.
+ */
+function attemptOf(session: MockSession): GuidedLatestAttempt | null {
+  const state = stepAt(session).state;
+  const terminal = terminalOf(session);
+  if (!isGuidedTerminalState(state)) return null;
+  return {
+    testId: session.testId,
+    sessionId: session.sessionId,
+    state,
+    startedAt: session.createdAt,
+    errorCode: terminal?.failureCode ?? null,
+    explanation:
+      state === 'FAILED' && terminal
+        ? explanationFor(
+            session.sessionId,
+            session.request.sourceRevision,
+            session.request.configurationRevision,
+            session.steps,
+            {
+              completed: terminal.completed,
+              reusedBefore: session.boundaryIndex ?? 0,
+              baseRevisionId: session.baseRevisionId,
+              failedIndex: terminal.failedIndex,
+            },
+          )
+        : null,
+  };
+}
+
+/** The `400` of the route: no `testId`, more than 50, or one that is not a UUID. */
+const invalidLatestQuery = (message: string): Response =>
+  HttpResponse.json({ error: 'INVALID_QUERY', message }, { status: 400 });
 
 // ---------------------------------------------------------------------------
 // Handlers
@@ -644,6 +747,7 @@ export function createGuidedHandlers(environment: GuidedMockEnvironment): HttpHa
         const session: MockSession = {
           sessionId: `guided-session-${sessionSequence}`,
           sequence: sessionSequence,
+          createdAt: new Date().toISOString(),
           testId: test.id,
           csiId: test.csiId,
           request: body,
@@ -664,6 +768,51 @@ export function createGuidedHandlers(environment: GuidedMockEnvironment): HttpHa
         };
       }),
     ),
+
+    // `GET /guided-sessions/latest` is registered before `/:id`: MSW takes the first match, and
+    // `latest` is not a session id.
+    http.get(`${BASE}/latest`, async ({ request }) => {
+      const entry: GuidedLoggedRequest = {
+        operation: 'latest',
+        sessionId: null,
+        idempotencyKey: null,
+        status: 0,
+        replayed: false,
+      };
+      const finish = (response: Response): Response => {
+        entry.status = response.status;
+        log(entry);
+        return response;
+      };
+      const fault = takeFault('latest', 'before');
+      if (fault) return finish(faultResponse(fault));
+      await wait('latest');
+      const requested = new URL(request.url).searchParams.getAll('testId');
+      if (requested.length < 1 || requested.length > GUIDED_LATEST_ATTEMPTS_MAX_TEST_IDS) {
+        return finish(
+          invalidLatestQuery(`testId needs 1 to ${GUIDED_LATEST_ATTEMPTS_MAX_TEST_IDS} values`),
+        );
+      }
+      if (!requested.every((id) => UUID.test(id))) {
+        return finish(invalidLatestQuery('testId must be a UUID'));
+      }
+      const attempts: GuidedLatestAttempt[] = [];
+      for (const testId of new Set(requested)) {
+        // Unknown and unreadable tests are omitted, never refused (no `403`, no `404`).
+        if (!readableTest(testId)) continue;
+        const latest = [...sessions.values()]
+          .filter((session) => session.testId === testId && attemptOf(session) !== null)
+          .sort((left, right) => right.sequence - left.sequence)[0];
+        const attempt = latest
+          ? attemptOf(latest)
+          : testId === SEEDED_FAILED_ATTEMPT_TEST_ID
+            ? seededFailedAttempt()
+            : null;
+        if (attempt) attempts.push(attempt);
+      }
+      const body: GuidedLatestAttempts = { schemaVersion: 3, attempts };
+      return finish(HttpResponse.json(body as unknown as Json));
+    }),
 
     http.get(`${BASE}/:id`, ({ params }) =>
       read('read', String(params.id), (session) => {
@@ -815,10 +964,19 @@ export function createGuidedHandlers(environment: GuidedMockEnvironment): HttpHa
         })) {
           return { refusal: refuse('REVISION_CONFLICT', 409) };
         }
+        const publication: GuidedMockPublication = {
+          testId: session.testId,
+          sourceRevision: session.request.sourceRevision,
+          configurationRevision: session.request.configurationRevision,
+          receipt,
+        };
+        const proofExecutionId =
+          session.plan.proof === 'REFUSED' ? null : (environment.acceptProof?.(publication) ?? null);
         session.forced = {
           step: { state: 'SUCCEEDED', activeIndex: null },
           terminal: { publicationStatus: 'REFUSED', completed: session.steps.length, failedIndex: null },
           receipt,
+          proofExecutionId,
         };
         return { status: 200, body: receipt };
       });

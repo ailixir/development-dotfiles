@@ -96,12 +96,7 @@ public class ExecutionSnapshotMapper {
         streamComplete(status, video),
         execution.getTriggerSource(),
         execution.getScheduleId(),
-        execution.getScheduleVersion(),
-        execution.getOccurrenceId(),
         execution.getScheduledAt(),
-        execution.getActivationId(),
-        execution.getActivatedBy(),
-        execution.getActivatedAt(),
         replayFailure(execution));
   }
 

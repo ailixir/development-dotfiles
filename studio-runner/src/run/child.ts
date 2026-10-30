@@ -16,6 +16,7 @@ import { fileURLToPath } from 'node:url';
 import { attachChildRuntime } from './childRuntime.js';
 import type { ChildChannel } from './childRuntime.js';
 import { loadObservedBuild } from '../compat/runtime-versions.js';
+import { ALLOW_ALL_DOMAINS_ENV_KEY, ALLOWED_DOMAINS_ENV_KEY, resolveAllowedDomains } from '../allowedDomains.js';
 import { playwrightBrowserFactory } from './browser.js';
 import type { ObservedChildMessage } from './protocol.js';
 import type { ChildRuntimeDependencies } from './childRuntime.js';
@@ -27,7 +28,7 @@ export interface ChildProcessLike {
   exit(code?: number): never;
 }
 
-export function startChild(processLike: ChildProcessLike, observed: Pick<ChildRuntimeDependencies, 'observedBuild'|'publishAppVideoOwner'> = {}): void {
+export function startChild(processLike: ChildProcessLike, allowedDomains: readonly string[], observed: Pick<ChildRuntimeDependencies, 'observedBuild'|'publishAppVideoOwner'> = {}): void {
   const channel: ChildChannel = {
     onMessage(listener: (value: unknown) => void): void {
       processLike.on('message', listener);
@@ -40,7 +41,7 @@ export function startChild(processLike: ChildProcessLike, observed: Pick<ChildRu
       processLike.exit(code);
     },
   };
-  attachChildRuntime({ channel, browsers: { launch(request) { prepareBrowserProfile(request.scratchPath); return playwrightBrowserFactory.launch(request); } }, ...observed });
+  attachChildRuntime({ channel, allowedDomains, browsers: { launch(request) { prepareBrowserProfile(request.scratchPath); return playwrightBrowserFactory.launch(request); } }, ...observed });
 }
 
 // Not reachable under vitest: the module is imported by the fixtures tier, never invoked as the
@@ -48,6 +49,9 @@ export function startChild(processLike: ChildProcessLike, observed: Pick<ChildRu
 /* v8 ignore start */
 if (process.send !== undefined && process.argv[1] === fileURLToPath(import.meta.url)) {
   const build=loadObservedBuild();
-  startChild(process as unknown as ChildProcessLike,{...(build?{observedBuild:build}:{})});
+  // The launcher always writes the whitelist (empty denies everything) and the allow-all key (an unset key would mean on); a malformed value is a launcher fault, so the child does not start.
+  const domains=resolveAllowedDomains(process.env[ALLOWED_DOMAINS_ENV_KEY],process.env[ALLOW_ALL_DOMAINS_ENV_KEY]);
+  if('problem' in domains)process.exit(78);
+  startChild(process as unknown as ChildProcessLike,domains.entries,{...(build?{observedBuild:build}:{})});
 }
 /* v8 ignore stop */

@@ -250,6 +250,7 @@ describe('the one TLS listener', () => {
   async function guidedDependencies(root: string) {
     return {
       workerId: 'worker-one',
+      capacity: 1,
       journalDirectory: join(root, 'journal'),
       controllerJwt: { issuer: 'fixture-issuer', subject: 'controller', publicKey: testCert.toString() },
       callbackBaseUrl: 'https://127.0.0.1:9',

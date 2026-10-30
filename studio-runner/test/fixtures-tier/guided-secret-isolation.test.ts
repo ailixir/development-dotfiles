@@ -1,3 +1,4 @@
+import { LOCAL_DOMAIN, TEST_DOMAINS } from '../helpers/allowedDomains.js';
 // eslint-disable-next-line no-restricted-imports -- Test-local original SDK delegation; no alternate browser or password primitive.
 import {chromium,type BrowserContext} from 'playwright';
 import {createServer} from 'node:https';
@@ -10,17 +11,18 @@ import {join,resolve,dirname,basename} from 'node:path';
 import {expect,it,vi} from 'vitest';
 import {createGuidedServer,guidedClaimClient,guidedCallback,verifyGuidedJwt} from '../../src/guided/transport.js';
 import {GuidedRuntime} from '../../src/guided/runtime.js';
-import {PrivateObservationInventory} from '../../src/run/observationInventory.js';
+import {PrivateInventory} from '../../src/run/privateInventory.js';
 import {launchGuidedBrowser} from '../../src/run/browser.js';
 import {GuidedLaunchFailure} from '../../src/run/guidedBrowser.js';
 import {descendantsOf,isAlive} from '../../src/run/tree.js';
 import {hash,identity,validate} from '../../src/guided/contracts.js';
 import type {Action,ExecutionEvidence,BridgeBootstrap,BridgeObservation,BridgeOrdinaryOutcome as BridgeOutcome,BridgePreparation,CommandsClaim,Producer,ConsumerEdge} from '../../src/guided/types.js';
 import type {BrowserPreferenceEvidence} from '../../src/run/scratchLayout.js';
-import {guidedContext,ownershipSession,assignmentFor,proposal,dispatch,withContextPolicy} from '../helpers/guided.js';
+import {guidedContext,ownershipSession,assignmentFor,proposal,dispatch} from '../helpers/guided.js';
+import {readGrantId} from '../../src/run/observationReadProfile.js';
 import {testTls,testFingerprint,jwtPolicy,jwt,post} from '../helpers/guidedTls.js';
 import {startSecretLoginFixture} from '../fixtures/secret-login/server.js';
-import {startGuidedDataflowFixture,canary as publicReference} from '../fixtures/guided-dataflow/server.js';
+import {startGuidedDataflowFixture,canary as publicReference} from '../fixtures/guided-dataflow/visibleTextServer.js';
 import {untilMs} from './realRunner.js';
 
 // Only the HTTPS factory counter is mocked, and the proxy delegates the real factory.
@@ -136,13 +138,15 @@ async function harness(){
   const owner=(runtime:GuidedRuntime):string=>clients.get(runtime.currentIdentity.sessionId)?.label??'NONE';
   const inventoryOwners=new WeakMap<object,string>();
   const inventoryRecord=(receiver:object,stage:string):void=>{
-    const data=receiver as InventoryView;let label=inventoryOwners.get(receiver);if(!label){label=inventoryOwner;inventoryOwners.set(receiver,label);}
+    const data=inventoryView(receiver);let label=inventoryOwners.get(receiver);if(!label){label=inventoryOwner;inventoryOwners.set(receiver,label);}
     events.push({kind:'inventory',stage,label,tag:tag(receiver),at:performance.now(),size:data.values.size,bytes:data.bytes,disposed:data.disposed,failed:data.failed,containsA:data.values.has(A),containsB:data.values.has(B)});
   };
-  const originalSnapshot=Object.getOwnPropertyDescriptor(PrivateObservationInventory.prototype,'snapshot')?.value as (...args:unknown[])=>unknown;
+  const originalSnapshot=Object.getOwnPropertyDescriptor(PrivateInventory.prototype,'snapshot')?.value as (...args:unknown[])=>unknown;
   if(typeof originalSnapshot!=='function')throw Error('SNAPSHOT_METHOD');
-  for(const method of ['merge','snapshot','dispose'])restores.push(patchMethod(PrivateObservationInventory.prototype,method,(receiver,_args,invoke)=>{
-    inventoryRecord(receiver,'before-'+method);const returned=invoke();inventoryRecord(receiver,'after-'+method);
+  // The WI-2 inventory keeps its state private: its entries and byte count are read through the public snapshot(), a latched inventory (failed or disposed) reads as empty and disposed.
+  const inventoryView=(receiver:object):InventoryView=>{try{const entries=Reflect.apply(originalSnapshot,receiver,[]) as [string,boolean][];return {values:new Map(entries),bytes:entries.reduce((sum,[value])=>sum+Buffer.byteLength(value),0),failed:false,disposed:false};}catch{return {values:new Map(),bytes:0,failed:false,disposed:true};}};
+  for(const method of ['merge','withhold','snapshot','dispose'])restores.push(patchMethod(PrivateInventory.prototype,method,(receiver,_args,invoke)=>{
+    const stage=method==='withhold'?'merge':method;inventoryRecord(receiver,'before-'+stage);const returned=invoke();inventoryRecord(receiver,'after-'+stage);
     if(method==='dispose'){
       let refused=false;try{Reflect.apply(originalSnapshot,receiver,[]);}catch(error){refused=error instanceof Error&&error.message==='CONTEXT_LOST';}
       events.push({kind:'disposed-snapshot',label:inventoryOwners.get(receiver)??'NONE',refused,at:performance.now()});
@@ -191,8 +195,8 @@ async function harness(){
     void args;return returned;
   }));
   function client(label:string,csiId:string,initial:string):Client{
-    // STUDIO-OBS-014 AC-1: the governed policy rides in each session's hash-bound context, not on the server.
-    const context=withContextPolicy(guidedContext(F.origin),{policyRuleId:'app-structural',allowStructuralDiscovery:true,readGrants:[{policyRuleId:'region-read',origin:F.origin,region:{kind:'role',role:'main',name:'Operations',exact:true},visibleText:{classification:'permittedBusinessData'},controlValue:{classification:'nonsecretApproved',types:['text','textarea']}}]});context.approvedOrigins=[F.origin,S.origin];context.sourceStepIds=['login-nav','password-fill','login-submit','nav','read','next','fill','submit','reports'];
+    // The read profile is the runner's constant, derived from the approved origins of each session's context.
+    const context=guidedContext(F.origin);context.sourceStepIds=['login-nav','password-fill','login-submit','nav','read','next','fill','submit','reports'];
     for(let i=0;i<65;i++)context.authoredInputs.inputs.push({inputId:`private-${String(i)}`,sourceStepId:'fill',kind:'nonsecretText',value:`PRIVATE-INPUT-${String(i).padStart(3,'0')}`,intendedSlot:'fill.value',provenance:{referenceKind:'configuration',configurationRevision:context.configurationRevision,stepId:'fill',referenceId:`saved-${String(i)}`,kind:'nonsecretText',intendedSlot:'fill.value'}});
     for(const [id,step,value] of [['input-login','login-nav',initial],['input-reports','reports',S.origin+'/reports']] as const)context.authoredInputs.inputs.push({inputId:id,sourceStepId:step,kind:'destination',intendedSlot:'navigate.destination',value,provenance:{referenceKind:'sourceSpan',sourceRevision:context.sourceRevision,stepId:step,startUtf16:0,endUtf16:12,kind:'destination',intendedSlot:'navigate.destination'}});
     context.authoredInputs.inputs.push({inputId:'input-pass',sourceStepId:'password-fill',kind:'secretRef',intendedSlot:'fill.value',secretId:'PASS',provenance:{referenceKind:'configuration',configurationRevision:context.configurationRevision,stepId:'password-fill',referenceId:'reference-pass',referenceName:'PASS',kind:'secretRef',intendedSlot:'fill.value'}});
@@ -210,7 +214,7 @@ async function harness(){
   acquired.push({label:'callback-server',release:()=>{callbacks.closeAllConnections();return new Promise<void>((resolve,reject)=>callbacks.close(error=>{if(error)reject(error);else resolve();}));}});
   await new Promise<void>(r=>callbacks.listen(0,'127.0.0.1',r));const address=callbacks.address();if(!address||typeof address==='string')throw Error('PORT');
   const callbackOptions={baseUrl:'https://127.0.0.1:'+String(address.port),tls:testTls,controllerCertificateFingerprint256:testFingerprint,token:()=>Promise.resolve(jwt({aud:'studio-guided-controller',role:'owning-worker',sub:'worker-one'}))};
-  const options:Parameters<typeof createGuidedServer>[0]={workerId:'worker-one',capacity:1,journalDirectory:directory,tls:testTls,controllerJwt:jwtPolicy,controllerCertificateFingerprint256:testFingerprint,claim:guidedClaimClient(callbackOptions),callback:guidedCallback(callbackOptions),diagnosticStderr:text=>{output.observe('diagnostic',text);process.stderr.write(text);},launch:async(...args:Parameters<typeof launchGuidedBrowser>)=>{
+  const options:Parameters<typeof createGuidedServer>[0]={workerId:'worker-one',capacity:1,allowedDomains:TEST_DOMAINS,journalDirectory:directory,tls:testTls,controllerJwt:jwtPolicy,controllerCertificateFingerprint256:testFingerprint,claim:guidedClaimClient(callbackOptions),callback:guidedCallback(callbackOptions),diagnosticStderr:text=>{output.observe('diagnostic',text);process.stderr.write(text);},launch:async(...args:Parameters<typeof launchGuidedBrowser>)=>{
     const entry=clients.get(args[0].sessionId);if(!entry)throw Error('SESSION');launchingLabel=entry.label;inventoryOwner=entry.label;
     let browser:Awaited<ReturnType<typeof launchGuidedBrowser>>;
     try{browser=await launchGuidedBrowser(...args);}catch(original){
@@ -230,7 +234,7 @@ async function harness(){
   async function startWorker(){worker=createGuidedServer(options);await new Promise<void>(r=>worker?.server.listen(0,'127.0.0.1',r));const at=worker.server.address();if(!at||typeof at==='string')throw Error('PORT');workerPort=at.port;}
   async function assign(entry:Client,key:string){return post(workerPort,path(entry)+'/assign',entry.assignment,{fence:null,key});}
   async function context(entry:Client){const reply=await post(workerPort,path(entry)+'/context',entry.context,{key:'context-'+String(entry.context.materializationRevision)});if(reply.status===200){const bootstrap=messages.find(m=>m.label===entry.label&&m.route==='bootstrap-evidence')?.body as BridgeBootstrap|undefined;if(bootstrap&&!entry.evidence)entry.evidence=bootstrap.executionEvidence;}return reply;}
-  function target(entry:Client,name:string):Action['target']{const node=entry.observation?.nodes.find(n=>n.name===name&&n.locatorHints.length>0);if(!node?.locatorHints[0])throw Error('OBSERVED_TARGET');return {nodeId:node.nodeId,documentId:node.documentId,generation:node.generation,locator:node.locatorHints[0]};}
+  function target(entry:Client,name:string):Action['target']{const seen=entry.observation,found=seen&&Object.entries(seen.facts).find(([,fact])=>fact.name===name);if(!seen||!found)throw Error('OBSERVED_TARGET');return {kind:'node',ref:found[0],documentId:seen.documentId,generation:seen.generation};}
   async function act(entry:Client,step:string,operation:Action['operation'],target_?:Action['target'],secret?:string){
     if(!entry.evidence)throw Error('EVIDENCE');const p=proposal(entry.context,entry.evidence,step,operation,target_);
     const prepared=await post(workerPort,path(entry)+'/prepare',{...identity(entry.context),proposal:p,requestDigest:hash(p),expiresAt:entry.context.expiresAt},{key:'prepare-'+step});resultStatus(prepared,200);
@@ -286,11 +290,12 @@ async function harness(){
   }
 }
 
-it('ISO1 rejects mounted capacity2 before worker TLS, claim, browser or secret effects',async()=>{
+it('ISO1 accepts a configured capacity above one, and constructing it has no claim, browser or secret effect',async()=>{
   const h=await harness();let failed=false;try{
     for(const name of ['DEBUG','PWDEBUG','NODE_DEBUG','NODE_OPTIONS'])expect(Boolean(process.env[name])).toBe(false);
-    expect(tlsCounter.created).toBeGreaterThan(0);const before=tlsCounter.created;expect(()=>createGuidedServer({...h.options,capacity:2})).toThrow('CONFIGURATION_DENIED');
-    expect(tlsCounter.created-before).toBe(0);expect(h.launches).toBe(0);expect(h.claims.length).toBe(0);expect(h.messages.length).toBe(0);expect(h.S.receipts().length).toBe(0);expect(h.F.sourceRequests()).toBe(0);await h.record('ISO1');
+    const app=createGuidedServer({...h.options,capacity:2});
+    expect(app.server.listening).toBe(false);await app.close().catch(()=>undefined);
+    expect(h.launches).toBe(0);expect(h.claims.length).toBe(0);expect(h.messages.length).toBe(0);expect(h.S.receipts().length).toBe(0);expect(h.F.sourceRequests()).toBe(0);await h.record('ISO1');
   }catch(error){failed=true;throw error;}finally{await h.close('ISO1',failed);}
 },45000);
 
@@ -311,7 +316,7 @@ it('ISO3 isolates fresh CSI-B PASS from genuine A producer, cookie, masking and 
     expect(h.S.receipts().length).toBe(1);expect(h.S.receipts()[0]?.accepted===true&&h.S.receipts()[0]?.password===A).toBe(true);
     expect((await a.sdk?.deref()?.cookies(h.S.origin))?.some(cookie=>cookie.name==='fixture_session')).toBe(true);
     await h.act(a,'nav',{kind:'navigate',destinationInputId:'input-nav'});expect(h.F.sourceRequests()).toBe(1);
-    const recipe:Producer['recipe']={kind:'visibleText',classification:'permittedBusinessData',policyRuleId:'region-read'};
+    const recipe:Producer['recipe']={kind:'visibleText',classification:'permittedBusinessData',policyRuleId:readGrantId(LOCAL_DOMAIN)};
     const read=await h.act(a,'read',{kind:'read',bindingId:'binding-one',recipe},h.target(a,'Business reference'));expect(read.result.availability!==null).toBe(true);
     if(!read.result.availability||read.p.executionEvidence.kind!=='observedDocument')throw Error('PRODUCER');
     const producer:Producer={bindingId:'binding-one',producerAdmissionId:read.request.ledger.admission.admissionId,coordinate:read.p.coordinate,origin:read.p.executionEvidence.origin,recipe,availability:read.result.availability};a.producer=producer;a.context.producers=[producer];a.context.materializationRevision++;resultStatus(await h.context(a),200);

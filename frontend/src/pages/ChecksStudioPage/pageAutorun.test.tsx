@@ -28,8 +28,7 @@ import ChecksStudioPage from './ChecksStudioPage';
  *
  * The editor removes `autorun` from the history entry (a replace navigation) before it asks for
  * anything, arms one request once the route id's draft is in the editor, and `RunControl` serves or
- * drops that request exactly once, when the gate's own test read and the capabilities read have both
- * settled. Everything that counts is counted at the mock server (the `POST /execute` and the
+ * drops that request exactly once, when the gate's own test read has settled. Everything that counts is counted at the mock server (the `POST /execute` and the
  * `POST /guided-sessions` requests), never at a spy.
  */
 
@@ -56,31 +55,32 @@ const guidedStarts = () =>
   observed.filter((entry) => entry.method === 'POST' && /\/studio\/guided-sessions$/u.test(entry.path));
 const runStarts = () => [...executes(), ...guidedStarts()];
 
-type Capabilities = 'allowed' | 'denied' | 'fails';
-
 interface Served {
-  /** Resolves the held capabilities answer (only when `holdCapabilities` was set). */
+  /** Resolves the held gate read (only when `holdGateRead` was set). */
   release: () => void;
   /** The draft the test read and the list currently serve; replace it to change what a reload reads. */
   state: { current: TestDto };
 }
 
-/** Serves one draft as the list and as its single read, with the capabilities answer the case needs. */
+/**
+ * Serves one draft as the list and as its single read. The page reads the test first and the run gate
+ * reads it a second time; `holdGateRead` holds that second read, so the editor is usable while the gate
+ * has not settled.
+ */
 function serve(
   draft: TestDto,
   {
-    capabilities = 'allowed',
-    holdCapabilities = false,
+    holdGateRead = false,
     testRead = 'ok',
     executeAnswer = 'accepted',
   }: {
-    capabilities?: Capabilities;
-    holdCapabilities?: boolean;
+    holdGateRead?: boolean;
     testRead?: 'ok' | 'missing';
     executeAnswer?: 'accepted' | 'forbidden';
   } = {},
 ): Served {
   const state = { current: draft };
+  let reads = 0;
   let release: () => void = () => undefined;
   const held = new Promise<void>((resolve) => {
     release = resolve;
@@ -90,21 +90,12 @@ function serve(
     http.get(`${STUDIO_BASE}/tests`, () =>
       HttpResponse.json({ data: [state.current], page: 0, size: 20, totalElements: 1, totalPages: 1 }),
     ),
-    http.get(`${STUDIO_BASE}/tests/:id`, () =>
-      testRead === 'missing'
+    http.get(`${STUDIO_BASE}/tests/:id`, async () => {
+      reads += 1;
+      if (holdGateRead && reads === 2) await held;
+      return testRead === 'missing'
         ? HttpResponse.json({ error: 'NOT_FOUND', message: 'Gone' }, { status: 404 })
-        : HttpResponse.json(fixtureDetail(state.current)),
-    ),
-    http.get(`${STUDIO_BASE}/tests/:id/schedule/capabilities`, async () => {
-      if (holdCapabilities) await held;
-      if (capabilities === 'fails') return HttpResponse.json({ error: 'NOT_FOUND', message: 'No' }, { status: 404 });
-      return HttpResponse.json({
-        enabled: true,
-        canManage: capabilities === 'allowed',
-        availableExecutionPrincipals: ['studio-local'],
-        localAuthorizationOnly: true,
-        policy: null,
-      });
+        : HttpResponse.json(fixtureDetail(state.current));
     }),
     http.post(`${STUDIO_BASE}/tests/:id/execute`, () =>
       executeAnswer === 'forbidden'
@@ -224,8 +215,8 @@ describe('AC-29: ui-tests/{id}/studio?autorun=1 runs at most once, at the gate s
     expect(executes()).toHaveLength(0);
   }, TEST_TIMEOUT_MS);
 
-  it('a capabilities read that fails leaves the permission unknown: one execute, and a 403 shows the forbidden narrative', async () => {
-    serve(readyDraft, { capabilities: 'fails', executeAnswer: 'forbidden' });
+  it('a refused execute shows the forbidden narrative after exactly one request', async () => {
+    serve(readyDraft, { executeAnswer: 'forbidden' });
     renderAutorun(readyDraft.id);
 
     await waitFor(() => expect(executes()).toHaveLength(1), WAIT);
@@ -273,15 +264,6 @@ describe('AC-29: ui-tests/{id}/studio?autorun=1 runs at most once, at the gate s
     expect(runStarts()).toHaveLength(0);
   }, TEST_TIMEOUT_MS);
 
-  it('canManage false sends nothing and the existing caption explains why', async () => {
-    serve(readyDraft, { capabilities: 'denied' });
-    renderAutorun(readyDraft.id);
-
-    expect(await screen.findByTestId('run-not-permitted', {}, WAIT)).toBeInTheDocument();
-    await quiet();
-    expect(runStarts()).toHaveLength(0);
-  }, TEST_TIMEOUT_MS);
-
   it('a failed test read requests no run', async () => {
     serve(readyDraft, { testRead: 'missing' });
     renderAutorun(readyDraft.id);
@@ -292,12 +274,13 @@ describe('AC-29: ui-tests/{id}/studio?autorun=1 runs at most once, at the gate s
     expect(screen.getByRole('button', { name: 'Run Test' })).toBeDisabled();
   }, TEST_TIMEOUT_MS);
 
-  it('requests no run before the capabilities read has settled, then exactly one when it does', async () => {
-    const served = serve(readyDraft, { holdCapabilities: true });
+  it('requests no run before the gate has read the test, then exactly one when it has', async () => {
+    const served = serve(readyDraft, { holdGateRead: true });
     renderAutorun(readyDraft.id);
 
-    await settledControl();
+    // The editor has the draft; the gate's own read is held, so the control is still loading.
     await screen.findByRole('textbox', { name: 'Step 1' }, WAIT);
+    expect((await screen.findByRole('button', { name: 'Run Test' }, WAIT)).getAttribute('data-run-mode')).toBe('loading');
     await quiet();
     expect(runStarts()).toHaveLength(0);
 
@@ -308,9 +291,9 @@ describe('AC-29: ui-tests/{id}/studio?autorun=1 runs at most once, at the gate s
   }, TEST_TIMEOUT_MS);
 });
 
-describe('AC-29: author activity, a route change or Run before the gate settles drops the request', () => {
+describe('AC-29: author activity or a route change before the gate settles drops the request', () => {
   it('editing a step before the read completes sends nothing when it later completes', async () => {
-    const served = serve(readyDraft, { holdCapabilities: true });
+    const served = serve(readyDraft, { holdGateRead: true });
     renderAutorun(readyDraft.id);
 
     const step = await screen.findByRole('textbox', { name: 'Step 1' }, WAIT);
@@ -322,7 +305,7 @@ describe('AC-29: author activity, a route change or Run before the gate settles 
   }, TEST_TIMEOUT_MS);
 
   it('changing the environment before the read completes sends nothing when it later completes', async () => {
-    const served = serve(readyDraft, { holdCapabilities: true });
+    const served = serve(readyDraft, { holdGateRead: true });
     renderAutorun(readyDraft.id);
 
     await screen.findByRole('textbox', { name: 'Step 1' }, WAIT);
@@ -336,7 +319,7 @@ describe('AC-29: author activity, a route change or Run before the gate settles 
   }, TEST_TIMEOUT_MS);
 
   it('editing a variable before the read completes sends nothing when it later completes', async () => {
-    const served = serve(readyDraft, { holdCapabilities: true });
+    const served = serve(readyDraft, { holdGateRead: true });
     renderAutorun(readyDraft.id);
 
     await screen.findByRole('textbox', { name: 'Step 1' }, WAIT);
@@ -355,7 +338,7 @@ describe('AC-29: author activity, a route change or Run before the gate settles 
   }, TEST_TIMEOUT_MS);
 
   it('changing the route id before the read completes sends nothing, for either test', async () => {
-    const served = serve(readyDraft, { holdCapabilities: true });
+    const served = serve(readyDraft, { holdGateRead: true });
     const nav = { go: null as ((to: string) => void) | null };
     renderStudioAt(readyDraft.id, <ChecksStudioPage guidedOptions={GUIDED_OPTIONS} />, {
       search: '?autorun=1',
@@ -372,20 +355,6 @@ describe('AC-29: author activity, a route change or Run before the gate settles 
     served.release();
     await quiet(600);
     expect(runStarts()).toHaveLength(0);
-  }, TEST_TIMEOUT_MS);
-
-  it('pressing Run before the read completes runs once, and the dropped request does not run again', async () => {
-    const served = serve(readyDraft, { holdCapabilities: true });
-    renderAutorun(readyDraft.id);
-
-    const control = await settledControl();
-    await waitFor(() => expect(control).not.toBeDisabled(), WAIT);
-    await user().click(control);
-    await waitFor(() => expect(executes()).toHaveLength(1), WAIT);
-    served.release();
-    await screen.findByRole('button', { name: 'Run Test' }, WAIT);
-    await quiet();
-    expect(executes()).toHaveLength(1);
   }, TEST_TIMEOUT_MS);
 });
 

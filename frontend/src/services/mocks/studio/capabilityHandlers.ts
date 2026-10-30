@@ -23,8 +23,8 @@ import { readinessDrafts } from './readinessFixtures';
  * provider name, path, token or policy detail.
  *
  * What is a mock choice, since the contract leaves it to the server: `guidedStart.context` is
- * built from the draft's current revisions with `environmentId` = the draft's environment label and
- * `applicationId` = its CSI; a draft with no steps is `RUNTIME_INCOMPATIBLE` (ruling D-11, the same
+ * built from the draft's current revisions with `environmentId` = the draft's environment label;
+ * a draft with no steps is `RUNTIME_INCOMPATIBLE` (ruling D-11, the same
  * refusal the start route gives); a CSI the principal cannot execute on is `FORBIDDEN_SCOPE`.
  * `setGuidedStartCapability` overrides any of it per test.
  *
@@ -89,7 +89,6 @@ function guidedStartFor(test: TestDto): GuidedStartCapability {
       sourceRevision: String(test.sourceRevision),
       configurationRevision: String(test.configurationRevision),
       environmentId: test.environment,
-      applicationId: test.csiId ?? test.environment,
       versions: { contract: 3 },
     },
   };

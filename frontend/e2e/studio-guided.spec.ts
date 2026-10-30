@@ -117,9 +117,15 @@ async function guidedTally(request: APIRequestContext): Promise<GuidedTally> {
   };
 }
 
-/** Studio requests that no handler answered. `/api/v1/csi` and `/api/v1/features` are not Studio routes. */
+/**
+ * Studio requests that no handler answered. `/api/v1/csi` and `/api/v1/features` are not Studio routes.
+ * The proof replay of a published learn is followed over the execution stream, which the mock does not
+ * serve: the page falls back to `GET /executions/{id}`, which it does, so the stream request is not a gap.
+ */
 async function unhandledStudioPaths(request: APIRequestContext): Promise<string[]> {
-  return (await recorded(request, STUDIO)).filter((item) => !item.handled).map((item) => `${item.method} ${item.path}`);
+  return (await recorded(request, STUDIO))
+    .filter((item) => !item.handled && !/\/studio\/executions\/[^/]+\/events$/u.test(item.path))
+    .map((item) => `${item.method} ${item.path}`);
 }
 
 interface DraftStep {
@@ -174,8 +180,11 @@ const stepEditor = (page: Page, n: number) => page.getByRole('textbox', { name: 
 /**
  * The completion receipt. The same sentence is also shown, as history, in the plan explanation
  * (`plan-explanation-history`), so a bare text locator is ambiguous; the receipt is scoped by its id.
+ * A learn that published hands the screen to its proof replay, so its learned sentence is kept above the
+ * replay as `guided-proof-receipt`; any other ending stays in `guided-completion`.
  */
-const completion = (page: Page, text: string) => page.getByTestId('guided-completion').getByText(text);
+const completion = (page: Page, text: string) =>
+  page.getByTestId(/^guided-(completion|proof-receipt)$/u).getByText(text);
 const runButton = (page: Page) => page.getByRole('button', { name: 'Run Test', exact: true });
 const GUIDED_START = (candidate: Request) =>
   candidate.method() === 'POST' && new URL(candidate.url()).pathname === GUIDED;
@@ -255,7 +264,8 @@ test('author edits, adds and reorders steps with stable IDs, then a first Run le
   await page.getByRole('textbox', { name: 'Add a test step' }).fill(added);
   await page.getByRole('button', { name: 'Add step', exact: true }).click();
   await expect(stepEditor(page, 4)).toHaveValue(added);
-  await page.getByRole('button', { name: 'Move step 4 up' }).click();
+  await page.getByRole('button', { name: 'Actions for step 4' }).click();
+  await page.getByRole('menuitem', { name: 'Move up' }).click();
   await expect(stepEditor(page, 3)).toHaveValue(added);
   await expect(stepEditor(page, 4)).toHaveValue(editedThird);
   await page.getByRole('button', { name: 'Save', exact: true }).click();
@@ -361,7 +371,8 @@ test.describe('a focused clarification (proxy scenario guided-clarification-page
     expect(cancel.postDataJSON()).toMatchObject({ schemaVersion: 3, reason: 'userRequested' });
 
     // The session ends CANCELLED and shows the existing CANCELLED narrative, with no success claim.
-    await expect(page.getByText(COPY.cancelledTitle)).toBeVisible({ timeout: 45_000 });
+    // Scoped to the alert: the Logs tab repeats the outcome as "Learning ended: …" (STUDIO-UNIFY-001.6 AC-03).
+    await expect(completion(page, COPY.cancelledTitle)).toBeVisible({ timeout: 45_000 });
     await expect(page.getByText(COPY.completedLearned)).toHaveCount(0);
     // Focus moving to the step's editor row is part of the flow (ruling A3; ADR-SC-006 keeps it).
     await expect(stepEditor(page, 2)).toBeFocused();

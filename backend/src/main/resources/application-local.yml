@@ -28,11 +28,6 @@ checks:
   security:
     bypass:
       identity-headers: true
-  # The Studio pages render "not available in this environment" while the UI_TEST source is off,
-  # which it is by default everywhere (application.yml). `dev.sh` turns it on together with the
-  # studio-runner so that "Run Test" is reachable locally (Studio v1 WP2).
-  sources:
-    UI_TEST: ${CHECKS_SOURCE_UI_TEST:false}
   scheduling:
     dispatcher-enabled: true
   reports:
@@ -56,6 +51,15 @@ management:
       enabled: false
 
 studio:
+  # Local navigation allow-list (STUDIO-FLEX-001): the local fixtures, the guided example site and
+  # the practice login site. `localhost` replaces IP-literal targets, which no entry can name. The
+  # same list is in tools/studio-local-tls.mjs for the local runner.
+  navigation:
+    allowed-domains: ${STUDIO_ALLOWED_DOMAINS:localhost,example.com,practicetestautomation.com}
+    # Allow-all is on by default for now: local Studio navigates to every domain and the list above is
+    # ignored. To enforce the list, export STUDIO_ALLOW_ALL_DOMAINS=false before dev.sh: this backend reads
+    # it through application.yml (studio.navigation.allow-all-domains) and tools/studio-local-tls.mjs
+    # hands the same value to the local runner, so the two sides agree.
   # The local e2e path (Studio v1 WP2): one bootRun is both the API and the worker, so the
   # dispatcher and the reapers run here (their schedulers are gated `worker` or `local & !api`).
   # The runner side is NOT configured here on purpose: `studio.runner.base-url` and

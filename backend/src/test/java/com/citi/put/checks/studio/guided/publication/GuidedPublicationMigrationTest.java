@@ -57,7 +57,10 @@ public class GuidedPublicationMigrationTest {
     final GuidedPublicationRepository publications;
     final GuidedPublicationEvidenceRepository evidence;
     final GuidedSessionRepository sessions;
-    final UUID testId = UUID.randomUUID(), stepId = UUID.randomUUID();
+    final UUID testId;
+    final UUID stepId = UUID.randomUUID();
+    private UUID prefixWriteRevision;
+    private java.util.function.BiConsumer<JsonNode, JsonNode> directPreparationStore;
     final ObjectNode session;
     final String sourceText;
     private boolean ownsContainer = true;
@@ -66,6 +69,8 @@ public class GuidedPublicationMigrationTest {
     private ObjectNode sharedPrivateInputs;
     private List<com.citi.put.checks.studio.dto.StudioVariable> sharedVariables;
     private String fixtureSession = "session";
+    java.util.function.Consumer<ObjectNode> producerDocumentMutation;
+    java.util.function.Consumer<ObjectNode> obligationMeaningMutation;
 
     Database() {
       this(List.of());
@@ -76,6 +81,7 @@ public class GuidedPublicationMigrationTest {
      * V11/V18 upgrade assertions below retain their explicit targets.
      */
     Database(List<String> secretIds) {
+      testId = UUID.randomUUID();
       for (String id : secretIds) {
         if (!com.citi.put.checks.studio.secrets.StudioVaultProvider.isValidSecretName(id)) {
           throw new IllegalArgumentException("Invalid fixture declaration");
@@ -193,6 +199,19 @@ public class GuidedPublicationMigrationTest {
         TransactionTemplate sharedTransactions,
         String namespace,
         ObjectNode canonicalBasis) {
+      this(sharedJdbc, sharedTransactions, namespace, canonicalBasis, null, null);
+    }
+
+    /** Controlled replay fixture: reuse the real test and pin its already-published revision. */
+    Database(
+        JdbcTemplate sharedJdbc,
+        TransactionTemplate sharedTransactions,
+        String namespace,
+        ObjectNode canonicalBasis,
+        UUID existingTestId,
+        UUID prefixRevision) {
+      testId = existingTestId == null ? UUID.randomUUID() : existingTestId;
+      prefixWriteRevision = prefixRevision;
       if (namespace == null || !namespace.matches("[A-Za-z0-9_-]{1,100}")) {
         throw new IllegalArgumentException("Invalid fixture namespace");
       }
@@ -259,24 +278,26 @@ public class GuidedPublicationMigrationTest {
                   + "'Development') ON CONFLICT(id) DO NOTHING"),
           csi);
       try {
-        jdbc.update(
-            ("INSERT INTO ui_tests(id,name,csi_id,environment,browser,"
-                    + "viewport_width,viewport_height,timeout_seconds,wait_strategy,"
-                    + "steps,created_by,authoring,authoring_revision_inputs,variables) ")
-                + "VALUES (?,'Observed report fixture',?,?,?,"
-                + " ?,?,?,?,?::jsonb,'owner@example.test',?::jsonb,?::jsonb,?::jsonb)",
-            testId,
-            csi,
-            environment,
-            sharedBasis.path("configuration").path("browser").asText(),
-            sharedBasis.path("configuration").path("viewport").path("width").asInt(),
-            sharedBasis.path("configuration").path("viewport").path("height").asInt(),
-            sharedBasis.path("configuration").path("timeoutSeconds").asInt(),
-            sharedBasis.path("configuration").path("waitStrategy").asText(),
-            source.toString(),
-            mapper.writeValueAsString(authoring),
-            mapper.writeValueAsString(currentIdentity.inputs()),
-            mapper.writeValueAsString(sharedVariables));
+        if (existingTestId == null) {
+          jdbc.update(
+              ("INSERT INTO ui_tests(id,name,csi_id,environment,browser,"
+                      + "viewport_width,viewport_height,timeout_seconds,wait_strategy,"
+                      + "steps,created_by,authoring,authoring_revision_inputs,variables) ")
+                  + "VALUES (?,'Observed report fixture',?,?,?,"
+                  + " ?,?,?,?,?::jsonb,'owner@example.test',?::jsonb,?::jsonb,?::jsonb)",
+              testId,
+              csi,
+              environment,
+              sharedBasis.path("configuration").path("browser").asText(),
+              sharedBasis.path("configuration").path("viewport").path("width").asInt(),
+              sharedBasis.path("configuration").path("viewport").path("height").asInt(),
+              sharedBasis.path("configuration").path("timeoutSeconds").asInt(),
+              sharedBasis.path("configuration").path("waitStrategy").asText(),
+              source.toString(),
+              mapper.writeValueAsString(authoring),
+              mapper.writeValueAsString(currentIdentity.inputs()),
+              mapper.writeValueAsString(sharedVariables));
+        }
       } catch (java.io.IOException failure) {
         throw new IllegalStateException("Observed fixture source unavailable", failure);
       }
@@ -306,6 +327,18 @@ public class GuidedPublicationMigrationTest {
           .put("csiId", csi)
           .put("sourceRevision", "1")
           .put("configurationRevision", "1");
+      if (existingTestId != null) {
+        scope.put(
+            "sourceRevision",
+            jdbc.queryForObject(
+                "SELECT source_revision::text FROM ui_tests WHERE id=?", String.class, testId));
+        scope.put(
+            "configurationRevision",
+            jdbc.queryForObject(
+                "SELECT configuration_revision::text FROM ui_tests WHERE id=?",
+                String.class,
+                testId));
+      }
       session.set("scope", scope);
       session.put("scopeHash", GuidedContracts.hash(scope));
       sharedBasis.set("scope", scope.deepCopy());
@@ -328,6 +361,10 @@ public class GuidedPublicationMigrationTest {
                   .addObject()
                   .put("stepId", step.id().toString())
                   .put("requiresAssertion", false));
+      if (prefixWriteRevision != null) {
+        session.put("baseRevisionId", prefixWriteRevision.toString());
+        session.put("firstLearnStepId", authored.getLast().id().toString());
+      }
       tx.executeWithoutResult(
           status -> {
             completeSessionMetadata(session);
@@ -366,6 +403,12 @@ public class GuidedPublicationMigrationTest {
       // map its configuration references to exact classifier facts and hash the new before-image.
       sharedPrivateInputs =
           privateFixtureInputs(sharedBasis, fixtureSession, session.path("scopeHash").asText());
+      if (prefixWriteRevision != null) {
+        // Verify the original private hashes first; then rebind only version identity to the
+        // actual appended draft, before recomputing the fresh input document hashes below.
+        rebindFixtureRevisions(sharedBasis);
+        rebindFixtureRevisions(sharedPrivateInputs);
+      }
       rebindClassifiedReferences(sharedBasis, original.path("configurationReferences"), manifest);
       rebindClassifiedReferences(
           sharedPrivateInputs, original.path("configurationReferences"), manifest);
@@ -451,10 +494,11 @@ public class GuidedPublicationMigrationTest {
             proposal.path("executionEvidence").path("origin").isMissingNode()
                 ? com.fasterxml.jackson.databind.node.NullNode.instance
                 : proposal.path("executionEvidence").path("origin"));
+        // ADR-SC-007: the operation identity covers the target the runner reported on the proof.
         operation.set(
-            "locator",
-            proposal.path("target").has("locator")
-                ? proposal.path("target").path("locator")
+            "target",
+            preparation.path("proof").has("target")
+                ? preparation.path("proof").path("target")
                 : com.fasterxml.jackson.databind.node.NullNode.instance);
         operation.set("operation", proposal.path("operation"));
         ledger.put("operationHash", GuidedContracts.hash(operation));
@@ -558,6 +602,20 @@ public class GuidedPublicationMigrationTest {
               child -> rebindClassifiedReferences(child, originalDeclarations, manifest));
     }
 
+    private void rebindFixtureRevisions(JsonNode node) {
+      if (node.isArray()) {
+        node.forEach(this::rebindFixtureRevisions);
+      } else if (node.isObject()) {
+        var object = (ObjectNode) node;
+        for (String field : List.of("sourceRevision", "configurationRevision")) {
+          if (object.path(field).isTextual()) {
+            object.set(field, session.path("scope").path(field));
+          }
+        }
+        object.elements().forEachRemaining(this::rebindFixtureRevisions);
+      }
+    }
+
     private void rebindIdentities(
         JsonNode node, JsonNode original, java.util.Map<String, String> admissions) {
       if (node.isArray()) {
@@ -626,15 +684,7 @@ public class GuidedPublicationMigrationTest {
       return tx.execute(
           s -> {
             sessions.lock("session");
-            var r =
-                C.object()
-                    .put("csiId", "CSI")
-                    .put("environment", "Development")
-                    .put("applicationId", "app")
-                    .put("policyId", "policy")
-                    .put("policyVersion", "1")
-                    .put("entryPolicyId", "entry");
-            r.putArray("allowedOrigins").add("https://orders.example.test");
+            var r = C.object().put("csiId", "CSI").put("environment", "Development");
             r.putArray("capabilities")
                 .add("navigate")
                 .add("read")
@@ -672,6 +722,12 @@ public class GuidedPublicationMigrationTest {
           });
     }
 
+    /** Current-head fixture stages only the direct assertion through the production service. */
+    void prepareDirectObservation(java.util.function.BiConsumer<JsonNode, JsonNode> store) {
+      directPreparationStore = java.util.Objects.requireNonNull(store);
+      prepareSharedWorkflow(false);
+    }
+
     /** Actual stored preterminal authority case; never reverses a terminal action. */
     void preparePendingBindingConsumer() {
       if (sharedBasis == null) {
@@ -685,6 +741,28 @@ public class GuidedPublicationMigrationTest {
       tx.executeWithoutResult(
           status -> {
             sessions.lock(fixtureSession);
+            if (prefixWriteRevision != null) {
+              var ids = C.object().putArray("ids");
+              for (int i = 0; i < session.path("sourceSteps").size() - 1; i++) {
+                ids.add(session.path("sourceSteps").get(i).path("stepId"));
+              }
+              String program =
+                  jdbc.queryForObject(
+                      "SELECT studio_015_prefix_program(?,?::jsonb)::text",
+                      String.class,
+                      prefixWriteRevision,
+                      ids.toString());
+              jdbc.update(
+                  "INSERT INTO studio_guided_relearn_plans(session_id,base_revision_id,"
+                      + "initial_step_id,initial_step_index,prefix_program,prefix_program_hash)"
+                      + " VALUES (?,?,?,?,?::jsonb,?)",
+                  fixtureSession,
+                  prefixWriteRevision,
+                  session.path("firstLearnStepId").asText(),
+                  ids.size(),
+                  program,
+                  GuidedContracts.hash(C.parse(program)));
+            }
             var owner =
                 C.object()
                     .put("workerId", "worker")
@@ -697,6 +775,12 @@ public class GuidedPublicationMigrationTest {
                     + "session_id=?"),
                 owner.toString(),
                 fixtureSession);
+            if (prefixWriteRevision != null) {
+              jdbc.update(
+                  "UPDATE studio_guided_sessions SET state='REPLAYING_PREFIX',"
+                      + "document=jsonb_set(document,'{state}','\"REPLAYING_PREFIX\"') WHERE session_id=?",
+                  fixtureSession);
+            }
             JsonNode plan = sharedBasis.path("translationPlan");
             jdbc.update(
                 ("INSERT INTO studio_guided_translation_plans(session_id,"
@@ -706,15 +790,26 @@ public class GuidedPublicationMigrationTest {
                 plan.toString(),
                 GuidedContracts.hash(plan));
             jdbc.update(
-                "UPDATE studio_guided_translation_state SET plan_revision=1 WHERE session_id=?",
+                "UPDATE studio_guided_translation_state SET plan_revision=1,continuation=?"
+                    + " WHERE session_id=?",
+                prefixWriteRevision == null ? "SOURCE_PLAN" : "REPLAYING_PREFIX",
                 fixtureSession);
             persistSharedEvidence(pending);
-            jdbc.update(
-                "UPDATE studio_guided_sessions SET"
-                    + " state='FINALIZING',document=jsonb_set(document,'{state}','\"FINALIZING\"') WHERE"
-                    + " session_id=?",
-                fixtureSession);
+            if (prefixWriteRevision == null && directPreparationStore == null) {
+              jdbc.update(
+                  "UPDATE studio_guided_sessions SET"
+                      + " state='FINALIZING',document=jsonb_set(document,'{state}','\"FINALIZING\"')"
+                      + " WHERE session_id=?",
+                  fixtureSession);
+            }
           });
+    }
+
+    ObjectNode prefixSourceProof() {
+      if (prefixWriteRevision == null) {
+        throw new IllegalStateException("Not a prefix fixture");
+      }
+      return PublicationContracts.copy(sharedBasis.path("preparations").get(4).path("proof"));
     }
 
     private String selectPendingBindingConsumer() {
@@ -816,26 +911,30 @@ public class GuidedPublicationMigrationTest {
               .put("workerId", "worker")
               .put("expectedFence", 0);
       jdbc.update(
-          "INSERT INTO studio_guided_assignments(session_id,assignment_id,scope_hash,worker_id,expected_fence,intent)"
+          "INSERT INTO"
+              + " studio_guided_assignments(session_id,assignment_id,scope_hash,worker_id,expected_fence,intent)"
               + " VALUES (?,?,?,'worker',0,?::jsonb)",
           fixtureSession,
           fixtureSession + "-assignment",
           session.path("scopeHash").asText(),
           intent.toString());
       jdbc.update(
-          "INSERT INTO"
-              + " studio_guided_materializations(session_id,scope_hash,context_id,context_revision,"
-              + "materialization_revision,worker_id,owner_fence,source_revision,configuration_revision,"
-              + "authored_inputs_hash,authored_inputs) VALUES (?,?,?,1,?,'worker',1,'1','1',?,?::jsonb)",
+          "INSERT INTO studio_guided_materializations(session_id,scope_hash,conte"
+              + ("xt_id,context_revision,materialization_revision,worker_id,owner_fence,")
+              + ("source_revision,configuration_revision,authored_inputs_hash,authored_i")
+              + ("nputs) VALUES (?,?,?,1,?,'worker',1,?,?,?,?::jsonb)"),
           fixtureSession,
           session.path("scopeHash").asText(),
           context,
           header.path("birthMaterializationRevision").asInt(),
+          session.path("scope").path("sourceRevision").asText(),
+          session.path("scope").path("configurationRevision").asText(),
           GuidedContracts.hash(sharedPrivateInputs),
           sharedPrivateInputs.toString());
       for (JsonNode allocation : sharedBasis.path("allocations")) {
         jdbc.update(
-            "INSERT INTO studio_guided_allocations(session_id,binding_id,need_id,document) VALUES (?,?,?,?::jsonb)",
+            "INSERT INTO studio_guided_allocations(session_id,binding_id,need_id,document) VALUES"
+                + " (?,?,?,?::jsonb)",
             fixtureSession,
             allocation.path("bindingId").asText(),
             allocation.path("needId").asText(),
@@ -878,78 +977,15 @@ public class GuidedPublicationMigrationTest {
         JsonNode proposal = preparation.path("proposal"),
             proof = preparation.path("proof"),
             execution = preparation.path("executionEvidence");
+        if (directPreparationStore != null
+            && !proof.path("target").path("assertTextMode").asText().equals("DIRECT_PUBLIC")) {
+          continue;
+        }
         String preparationId = preparation.path("preparationId").asText(),
             observationHash =
                 preparation.path("observationHash").isNull()
                     ? null
                     : preparation.path("observationHash").asText();
-        // Keep the original context/ACK/receipt while later controlled observations advance.
-        ObjectNode progress = sessions.lock(fixtureSession).progress().deepCopy();
-        progress.set("executionEvidence", execution);
-        if (observationHash != null) {
-          JsonNode observation = observations.get(observationHash);
-          if (observation == null) {
-            throw new IllegalArgumentException("Missing fixture observation");
-          }
-          progress.set("observation", observation);
-          progress.put("observationHash", GuidedContracts.hash(observation));
-          jdbc.update(
-              "UPDATE studio_guided_sessions SET progress=?::jsonb WHERE session_id=?",
-              progress.toString(),
-              fixtureSession);
-          if (jdbc.queryForObject(
-                  "SELECT count(*) FROM studio_guided_publication_observations WHERE session_id=? AND"
-                      + " observation_hash=?",
-                  Integer.class,
-                  fixtureSession,
-                  observationHash)
-              == 0) {
-            jdbc.update(
-                "INSERT INTO"
-                    + " studio_guided_publication_observations(session_id,observation_hash,context_id,owner_fence,"
-                    + "document_id,generation,observation,captured_at) VALUES"
-                    + " (?,?,?,1,?,?,?::jsonb,clock_timestamp())",
-                fixtureSession,
-                observationHash,
-                context,
-                observation.path("documentId").asText(),
-                observation.path("generation").asInt(),
-                observation.toString());
-          }
-        } else {
-          jdbc.update(
-              "UPDATE studio_guided_sessions SET progress=?::jsonb WHERE session_id=?",
-              progress.toString(),
-              fixtureSession);
-        }
-        jdbc.update(
-            "INSERT INTO"
-                + " studio_guided_preparations(session_id,preparation_id,context_id,owner_fence,request_digest,proof,"
-                + "expires_at) VALUES (?,?,?,1,?,?::jsonb,?::timestamptz)",
-            fixtureSession,
-            preparationId,
-            context,
-            GuidedContracts.hash(proposal),
-            proof.toString(),
-            proof.path("expiresAt").asText());
-        jdbc.update(
-            "INSERT INTO"
-                + " studio_guided_publication_preparations(session_id,preparation_id,context_id,owner_fence,"
-                + "request_digest,evidence_hash,inputs_hash,materialization_revision,source_manifest_hash,"
-                + "observation_hash,execution_evidence,proposal,proof,captured_at) VALUES"
-                + " (?,?,?,1,?,?,?,?,?,?,?::jsonb,?::jsonb,?::jsonb,clock_timestamp())",
-            fixtureSession,
-            preparationId,
-            context,
-            GuidedContracts.hash(proposal),
-            GuidedContracts.hash(execution),
-            proof.path("authoredInputsHash").asText(),
-            preparation.path("materializationRevision").asInt(),
-            manifestHash,
-            observationHash,
-            execution.toString(),
-            proposal.toString(),
-            proof.toString());
         JsonNode fact = actions.get(preparationId);
         if (fact == null) {
           throw new IllegalArgumentException("Missing fixture action");
@@ -965,6 +1001,105 @@ public class GuidedPublicationMigrationTest {
               .putNull("assertionPassed");
           pendingCoordinate = ledger.path("coordinate");
         }
+        if (prefixWriteRevision != null && proof.has("assertSourceBinding")) {
+          // The source assertion remains unadmitted for a real PRE_ADMISSION drift receipt.
+          break;
+        }
+        String obligation = fact.path("obligationId").asText();
+        JsonNode meaning = null;
+        for (JsonNode item : sharedBasis.path("translationPlan").path("obligations")) {
+          if (item.path("obligationId").asText().equals(obligation)) {
+            meaning = item;
+          }
+        }
+        if (meaning == null) {
+          throw new IllegalArgumentException("Missing fixture obligation meaning");
+        }
+        ObjectNode storedMeaning = PublicationContracts.copy(meaning);
+        if (obligationMeaningMutation != null) {
+          obligationMeaningMutation.accept(storedMeaning);
+        }
+        jdbc.update(
+            "INSERT INTO studio_guided_obligation_admissions(session_id,obligation_"
+                + ("id,plan_revision,meaning,proposal,proposal_digest,admission_key,admiss")
+                + ("ion_id,attempt_ordinal) VALUES (?,?,1,?::jsonb,?::jsonb,?,?,NULL,0)"),
+            fixtureSession,
+            storedMeaning.path("obligationId").asText(),
+            storedMeaning.toString(),
+            proposal.toString(),
+            GuidedContracts.hash(proposal),
+            ledger.path("idempotencyKey").asText());
+        // Keep the original context/ACK/receipt while later controlled observations advance.
+        ObjectNode progress = sessions.lock(fixtureSession).progress().deepCopy();
+        progress.set("executionEvidence", execution);
+        if (observationHash != null) {
+          JsonNode observation = observations.get(observationHash);
+          if (observation == null) {
+            throw new IllegalArgumentException("Missing fixture observation");
+          }
+          progress.set("observation", observation);
+          progress.put("observationHash", GuidedContracts.hash(observation));
+          jdbc.update(
+              "UPDATE studio_guided_sessions SET progress=?::jsonb WHERE session_id=?",
+              progress.toString(),
+              fixtureSession);
+          if (directPreparationStore == null
+              && jdbc.queryForObject(
+                      "SELECT count(*) FROM studio_guided_publication_observations WHERE session_id=?"
+                          + " AND observation_hash=?",
+                      Integer.class,
+                      fixtureSession,
+                      observationHash)
+                  == 0) {
+            jdbc.update(
+                "INSERT INTO studio_guided_publication_observations(session_id,observat"
+                    + ("ion_hash,context_id,owner_fence,document_id,generation,observation,cap")
+                    + ("tured_at) VALUES (?,?,?,1,?,?,?::jsonb,clock_timestamp())"),
+                fixtureSession,
+                observationHash,
+                context,
+                observation.path("documentId").asText(),
+                observation.path("generation").asInt(),
+                observation.toString());
+          }
+        } else {
+          jdbc.update(
+              "UPDATE studio_guided_sessions SET progress=?::jsonb WHERE session_id=?",
+              progress.toString(),
+              fixtureSession);
+        }
+        if (directPreparationStore != null) {
+          directPreparationStore.accept(proposal, proof);
+          return;
+        }
+        jdbc.update(
+            "INSERT INTO studio_guided_preparations(session_id,preparation_id,conte"
+                + ("xt_id,owner_fence,request_digest,proof,expires_at) VALUES (?,?,?,1,?,?")
+                + ("::jsonb,?::timestamptz)"),
+            fixtureSession,
+            preparationId,
+            context,
+            GuidedContracts.hash(proposal),
+            proof.toString(),
+            proof.path("expiresAt").asText());
+        jdbc.update(
+            "INSERT INTO studio_guided_publication_preparations(session_id,preparat"
+                + ("ion_id,context_id,owner_fence,request_digest,evidence_hash,inputs_hash")
+                + (",materialization_revision,source_manifest_hash,observation_hash,execut")
+                + ("ion_evidence,proposal,proof,captured_at) VALUES (?,?,?,1,?,?,?,?,?,?,?")
+                + ("::jsonb,?::jsonb,?::jsonb,clock_timestamp())"),
+            fixtureSession,
+            preparationId,
+            context,
+            GuidedContracts.hash(proposal),
+            GuidedContracts.hash(execution),
+            proof.path("authoredInputsHash").asText(),
+            preparation.path("materializationRevision").asInt(),
+            manifestHash,
+            observationHash,
+            execution.toString(),
+            proposal.toString(),
+            proof.toString());
         C.validate("v3/ledger", ledger);
         jdbc.update(
             "INSERT INTO"
@@ -977,36 +1112,21 @@ public class GuidedPublicationMigrationTest {
             ledger.toString(),
             proposal.toString());
         jdbc.update(
-            "UPDATE studio_guided_preparations SET admission_id=? WHERE session_id=? AND preparation_id=?",
+            "UPDATE studio_guided_preparations SET admission_id=? WHERE session_id=? AND"
+                + " preparation_id=?",
             admission,
             fixtureSession,
             preparationId);
-        String obligation = fact.path("obligationId").asText();
-        JsonNode meaning = null;
-        for (JsonNode item : sharedBasis.path("translationPlan").path("obligations")) {
-          if (item.path("obligationId").asText().equals(obligation)) {
-            meaning = item;
-          }
-        }
-        if (meaning == null) {
-          throw new IllegalArgumentException("Missing fixture obligation meaning");
-        }
         jdbc.update(
-            "INSERT INTO"
-                + " studio_guided_obligation_admissions(session_id,obligation_id,plan_revision,meaning,proposal,"
-                + "proposal_digest,admission_key,admission_id,attempt_ordinal) VALUES"
-                + " (?,?,1,?::jsonb,?::jsonb,?,?,?,0)",
+            "UPDATE studio_guided_obligation_admissions SET admission_id=? WHERE session_id=? AND"
+                + " obligation_id=? AND admission_id IS NULL",
+            admission,
             fixtureSession,
-            obligation,
-            meaning.toString(),
-            proposal.toString(),
-            GuidedContracts.hash(proposal),
-            ledger.path("idempotencyKey").asText(),
-            admission);
+            obligation);
         jdbc.update(
-            "INSERT INTO"
-                + " studio_guided_publication_admissions(session_id,admission_id,preparation_id,obligation_id,"
-                + "proposal_hash,captured_at) VALUES (?,?,?,?,?,clock_timestamp())",
+            "INSERT INTO studio_guided_publication_admissions(session_id,admission_"
+                + ("id,preparation_id,obligation_id,proposal_hash,captured_at) VALUES (?,?")
+                + (",?,?,?,clock_timestamp())"),
             fixtureSession,
             admission,
             preparationId,
@@ -1014,21 +1134,25 @@ public class GuidedPublicationMigrationTest {
             GuidedContracts.hash(proposal));
         for (JsonNode producer : sharedBasis.path("producers")) {
           if (producer.path("producerAdmissionId").asText().equals(admission)) {
+            ObjectNode producerDocument = PublicationContracts.copy(producer);
+            if (producerDocumentMutation != null) {
+              producerDocumentMutation.accept(producerDocument);
+            }
             jdbc.update(
-                "INSERT INTO studio_guided_producers(session_id,binding_id,admission_id,document) VALUES"
-                    + " (?,?,?,?::jsonb)",
+                "INSERT INTO studio_guided_producers(session_id,binding_id,admission_id,document)"
+                    + " VALUES (?,?,?,?::jsonb)",
                 fixtureSession,
                 producer.path("bindingId").asText(),
                 admission,
-                producer.toString());
+                producerDocument.toString());
           }
         }
         for (JsonNode edge : sharedBasis.path("consumerEdges")) {
           if (edge.path("consumerAdmissionId").asText().equals(admission)) {
             jdbc.update(
-                "INSERT INTO"
-                    + " studio_guided_consumer_edges(session_id,consumer_admission_id,argument_slot,binding_id,"
-                    + "producer_admission_id,document) VALUES (?,?,?,?,?,?::jsonb)",
+                "INSERT INTO studio_guided_consumer_edges(session_id,consumer_admission"
+                    + ("_id,argument_slot,binding_id,producer_admission_id,document) VALUES (?")
+                    + (",?,?,?,?,?::jsonb)"),
                 fixtureSession,
                 admission,
                 edge.path("argumentSlot").asText(),
@@ -1074,12 +1198,12 @@ public class GuidedPublicationMigrationTest {
           .put(
               "sanitizedEvidenceBytes",
               jdbc.queryForObject(
-                  "SELECT coalesce(sum(octet_length(convert_to(observation::text,'UTF8'))),0)::int FROM"
-                      + " studio_guided_publication_observations WHERE session_id=?",
+                  "SELECT coalesce(sum(octet_length(convert_to(observation::text,'UTF8'))),0)::int"
+                      + " FROM studio_guided_publication_observations WHERE session_id=?",
                   Integer.class,
                   fixtureSession));
       sessions.save(completed);
-      if (!pending) {
+      if (!pending && prefixWriteRevision == null && directPreparationStore == null) {
         var builder = new GuidedPlanBuilder(C);
         exercisedBasis =
             builder.basis(
@@ -1105,25 +1229,48 @@ public class GuidedPublicationMigrationTest {
       if (pending) {
         assertThat(
                 jdbc.queryForObject(
-                    "SELECT count(*) FROM studio_guided_actions a JOIN studio_guided_preparations p ON"
-                        + " p.session_id=a.session_id AND p.preparation_id=a.document->>'preparationId' JOIN"
+                    "SELECT count(*) FROM studio_guided_actions a JOIN studio_guided_preparations p"
+                        + " ON p.session_id=a.session_id AND"
+                        + " p.preparation_id=a.document->>'preparationId' JOIN"
                         + " studio_guided_obligation_admissions o ON o.session_id=a.session_id AND"
                         + " o.admission_id=a.admission_id JOIN studio_guided_consumer_edges e ON"
-                        + " e.session_id=a.session_id AND e.consumer_admission_id=a.admission_id JOIN"
-                        + " studio_guided_producers r ON r.session_id=e.session_id AND"
+                        + " e.session_id=a.session_id AND e.consumer_admission_id=a.admission_id"
+                        + " JOIN studio_guided_producers r ON r.session_id=e.session_id AND"
                         + " r.admission_id=e.producer_admission_id JOIN studio_guided_actions"
                         + " producer ON producer.session_id=r.session_id AND"
                         + " producer.admission_id=r.admission_id WHERE a.session_id=? AND"
                         + " a.admission_id=? AND a.document->>'state'='ADMITTED' AND"
-                        + " a.document->>'dispatchCount'='0' AND"
-                        + " e.argument_slot='fill.value' AND"
+                        + " a.document->>'dispatchCount'='0' AND e.argument_slot='fill.value' AND"
                         + " p.request_digest=studio_publication_hash(a.proposal) AND"
-                        + " o.proposal_digest=p.request_digest AND producer.document->>'state'='SUCCEEDED' AND"
+                        + " o.proposal_digest=p.request_digest AND"
+                        + " producer.document->>'state'='SUCCEEDED' AND"
                         + " producer.document->>'dispatchCount'='1'",
                     Integer.class,
                     fixtureSession,
                     pendingAdmission))
             .isEqualTo(1);
+      } else if (prefixWriteRevision != null) {
+        assertThat(sharedBasis.path("actions").size()).isEqualTo(5);
+        assertThat(inserted).isEqualTo(4);
+        JsonNode consumer = sharedBasis.path("preparations").get(4);
+        assertThat(consumer.path("proof").has("assertSourceBinding")).isTrue();
+        assertThat(
+                jdbc.queryForObject(
+                    "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=?"
+                        + " AND ordinal=?",
+                    Integer.class,
+                    fixtureSession,
+                    consumer.path("proposal").path("coordinate").path("stepId").asText(),
+                    consumer.path("proposal").path("coordinate").path("ordinal").asInt()))
+            .isZero();
+        assertThat(
+                jdbc.queryForObject(
+                    "SELECT count(*) FROM studio_guided_preparations WHERE session_id=?"
+                        + " AND preparation_id=?",
+                    Integer.class,
+                    fixtureSession,
+                    consumer.path("preparationId").asText()))
+            .isZero();
       } else {
         assertThat(inserted).isEqualTo(sharedBasis.path("actions").size());
       }
@@ -1179,90 +1326,6 @@ public class GuidedPublicationMigrationTest {
       if (ownsContainer) {
         pg.stop();
       }
-    }
-  }
-
-  @Test
-  void installedScheduleCodeConstraintKeepsSchedulerVocabularyAndAddsOnlyObservedRefusal() {
-    try (var db = new Database()) {
-      String installed =
-          db.jdbc.queryForObject(
-              "SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE"
-                  + " conrelid='studio_schedule_occurrences'::regclass AND"
-                  + " conname='ck_studio_schedule_occurrences_code'",
-              String.class);
-      // Isolate the actual installed SQL predicate from unrelated activation/execution FKs.
-      // The joined real scheduler test separately exercises its complete original table/writers.
-      db.jdbc.execute(
-          "CREATE TABLE scheduler_code_probe(decision text NOT NULL,code text NOT NULL, "
-              + "CONSTRAINT scheduler_code_probe_check "
-              + installed
-              + ")");
-      // STUDIO-OBS-012A AC-2: LEARN_REQUIRED replaces COMPILE_REQUIRED; nothing else changes.
-      List<String> legacy =
-          List.of(
-              "ACCEPTED",
-              "LEARN_REQUIRED",
-              "ACTIVATION_REVISION_MISMATCH",
-              "RUNTIME_INCOMPATIBLE",
-              "STEP_LIMIT_EXCEEDED",
-              "TEST_DELETED",
-              "TEST_QUARANTINED",
-              "BACKGROUND_AUTHORIZATION_DENIED",
-              "REFERENCE_UNAVAILABLE",
-              "PENDING_QUOTA_EXCEEDED",
-              "BACKGROUND_AUTHORIZATION_UNAVAILABLE",
-              "VAULT_UNAVAILABLE",
-              "OVERLAP",
-              "MISFIRE",
-              "GRACE_EXPIRED",
-              "DISPATCH_DISABLED",
-              "UNCERTAIN_EXECUTION",
-              "SCHEDULE_PAUSED",
-              "SCHEDULE_UPDATED",
-              "SCHEDULE_REMOVED");
-      assertThat(legacy).hasSize(20);
-      for (String code : legacy) {
-        assertThat(
-                db.jdbc.update(
-                    "INSERT INTO scheduler_code_probe VALUES (?,?)",
-                    code.equals("ACCEPTED") ? "ACCEPTED" : "REFUSED",
-                    code))
-            .isEqualTo(1);
-        String invalidDecision = code.equals("ACCEPTED") ? "REFUSED" : "ACCEPTED";
-        assertThatThrownBy(
-                () ->
-                    db.jdbc.update(
-                        "INSERT INTO scheduler_code_probe VALUES (?,?)", invalidDecision, code))
-            .hasMessageContaining("scheduler_code_probe_check");
-      }
-      assertThat(
-              db.jdbc.update(
-                  "INSERT INTO scheduler_code_probe VALUES"
-                      + " ('REFUSED','OBSERVED_SCHEDULE_AUTH_REQUIRED')"))
-          .isEqualTo(1);
-      for (String decision : List.of("ACCEPTED", "DEFERRED", "SKIPPED")) {
-        assertThatThrownBy(
-                () ->
-                    db.jdbc.update(
-                        "INSERT INTO scheduler_code_probe VALUES"
-                            + " (?,'OBSERVED_SCHEDULE_AUTH_REQUIRED')",
-                        decision))
-            .hasMessageContaining("scheduler_code_probe_check");
-      }
-      assertThatThrownBy(
-              () ->
-                  db.jdbc.update(
-                      "INSERT INTO scheduler_code_probe VALUES ('REFUSED','UNDECLARED_AUTHORITY')"))
-          .hasMessageContaining("scheduler_code_probe_check");
-      assertThatThrownBy(
-              () ->
-                  db.jdbc.update(
-                      "INSERT INTO scheduler_code_probe VALUES ('REFUSED','COMPILE_REQUIRED')"))
-          .as("the retired compile refusal is not part of the installed vocabulary")
-          .hasMessageContaining("scheduler_code_probe_check");
-      assertThat(db.jdbc.queryForObject("SELECT count(*) FROM scheduler_code_probe", Integer.class))
-          .isEqualTo(21);
     }
   }
 
@@ -1334,7 +1397,7 @@ public class GuidedPublicationMigrationTest {
                   String.class))
           .containsExactly(
               "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16",
-              "17", "18", "19", "20", "21", "22", "23");
+              "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29");
       assertThat(Files.exists(Path.of("db/cutover"))).isFalse();
       assertThat(
               jdbc.queryForObject(
@@ -1476,11 +1539,9 @@ public class GuidedPublicationMigrationTest {
       assertThatThrownBy(
               () ->
                   db.jdbc.update(
-                      "INSERT INTO"
-                          + " studio_guided_publication_observations(session_id,observation_ha"
-                          + "sh,context_id,owner_fence,document_id,generation,observation,capt"
-                          + "ured_at)"
-                          + " VALUES ('session',?,'missing',1,'d',0,'{}',now())",
+                      "INSERT INTO studio_guided_publication_observations(session_id,observat"
+                          + ("ion_hash,context_id,owner_fence,document_id,generation,observation,cap")
+                          + ("tured_at) VALUES ('session',?,'missing',1,'d',0,'{}',now())"),
                       "a".repeat(64)))
           .isInstanceOf(org.springframework.dao.DataAccessException.class);
       db.finalizing();
@@ -1500,17 +1561,16 @@ public class GuidedPublicationMigrationTest {
                       status -> {
                         db.sessions.lock("session");
                         db.jdbc.update(
-                            "INSERT INTO"
-                                + " ui_test_revisions(id,test_id,csi_id,source_revision,configuration_revision,"
-                                + "source,source_hash,artifact,artifact_hash,artifact_schema_version,"
-                                + "configuration,\"references\",provenance,created_by,confirmed_by,"
-                                + "confirmed_at,confirmation_source,reference_policy,publication_kind,"
-                                + "guided_session_id,learned_plan_hash,revision_digest,"
-                                + "step_snapshot_hashes,step_reuse_provenance) VALUES"
-                                + " (?,?,'CSI',1,1,?::jsonb,?,?::jsonb,?,3,?::jsonb,?::jsonb,"
-                                + "'{}','owner@example.test','owner@example.test',"
-                                + "clock_timestamp(),'GUIDED_RUN',?::jsonb,"
-                                + "'GUIDED_RUN','session',?,?,?::jsonb,?::jsonb)",
+                            "INSERT INTO ui_test_revisions(id,test_id,csi_id,source_revision,config"
+                                + ("uration_revision,source,source_hash,artifact,artifact_hash,artifact_sc")
+                                + ("hema_version,configuration,\"references\",provenance,created_by,confirme")
+                                + ("d_by,confirmed_at,confirmation_source,reference_policy,publication_kin")
+                                + ("d,guided_session_id,learned_plan_hash,revision_digest,step_snapshot_ha")
+                                + ("shes,step_reuse_provenance) VALUES"
+                                    + " (?,?,'CSI',1,1,?::jsonb,?,?::jsonb,")
+                                + ("?,3,?::jsonb,?::jsonb,'{}','owner@example.test','owner@example.test',c")
+                                + ("lock_timestamp(),'GUIDED_RUN',?::jsonb,'GUIDED_RUN','session',?,?,?::j")
+                                + ("sonb,?::jsonb)"),
                             UUID.randomUUID(),
                             db.testId,
                             C.object().putArray("source").add(db.sourceText).toString(),
@@ -1774,7 +1834,8 @@ public class GuidedPublicationMigrationTest {
         String name = vector.path("name").asText();
         assertThat(
                 db.jdbc.queryForObject(
-                    "SELECT encode(convert_to(studio_publication_canonical(?::jsonb),'UTF8'),'hex')",
+                    "SELECT"
+                        + " encode(convert_to(studio_publication_canonical(?::jsonb),'UTF8'),'hex')",
                     String.class,
                     vector.path("input").toString()))
             .as(name)
@@ -1926,8 +1987,8 @@ public class GuidedPublicationMigrationTest {
         "Observed publisher",
         principal);
     jdbc.update(
-        "INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment)"
-            + " VALUES (?,'Observed fixture','unit','LOW',?,'Development') ON CONFLICT(id) DO NOTHING",
+        "INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment) VALUES"
+            + " (?,'Observed fixture','unit','LOW',?,'Development') ON CONFLICT(id) DO NOTHING",
         csiId,
         principal);
     try {
@@ -2026,15 +2087,7 @@ public class GuidedPublicationMigrationTest {
                 jdbc, tx, session);
           }
         });
-    var requirements =
-        C.object()
-            .put("csiId", csiId)
-            .put("environment", environment)
-            .put("applicationId", "app")
-            .put("policyId", "policy")
-            .put("policyVersion", "1")
-            .put("entryPolicyId", "entry");
-    requirements.putArray("allowedOrigins").add("https://orders.example.test");
+    var requirements = C.object().put("csiId", csiId).put("environment", environment);
     requirements
         .putArray("capabilities")
         .add("navigate")
@@ -2180,7 +2233,8 @@ public class GuidedPublicationMigrationTest {
           .hasMessageContaining("EVIDENCE_MISMATCH");
       assertThat(
               jdbc.queryForObject(
-                  "SELECT status FROM studio_guided_publication_attempts WHERE session_id=? AND attempt_id=?",
+                  "SELECT status FROM studio_guided_publication_attempts WHERE session_id=? AND"
+                      + " attempt_id=?",
                   String.class,
                   sessionId,
                   attempt.attemptId()))
@@ -2228,9 +2282,10 @@ public class GuidedPublicationMigrationTest {
       System.out.println(
           "[historical-v18-installed-authority] "
               + jdbc.queryForObject(
-                  "SELECT jsonb_agg(jsonb_build_object('function',proname,'definition',pg_get_functiondef(oid)) ORDER"
-                      + " BY proname)::text FROM pg_proc WHERE pronamespace=current_schema()::regnamespace AND"
-                      + " proname IN"
+                  "SELECT"
+                      + " jsonb_agg(jsonb_build_object('function',proname,'definition',pg_get_functiondef(oid))"
+                      + " ORDER BY proname)::text FROM pg_proc WHERE"
+                      + " pronamespace=current_schema()::regnamespace AND proname IN"
                       + " ('capture_ui_test_revision_authoring','ui_test_revisions_write_once',"
                       + "'studio_publication_receipt_guard','studio_publication_step_metadata_guard',"
                       + "'studio_execution_scope_immutable','studio_publication_epoch')",
@@ -2238,33 +2293,35 @@ public class GuidedPublicationMigrationTest {
       System.out.println(
           "[historical-v18-enabled-guards] "
               + jdbc.queryForObject(
-                  "SELECT jsonb_agg(jsonb_build_object('trigger',tgname,'enabled',tgenabled) ORDER BY tgname)::text"
-                      + " FROM pg_trigger WHERE NOT tgisinternal AND tgrelid IN"
+                  "SELECT jsonb_agg(jsonb_build_object('trigger',tgname,'enabled',tgenabled) ORDER"
+                      + " BY tgname)::text FROM pg_trigger WHERE NOT tgisinternal AND tgrelid IN"
                       + " ('ui_test_revisions'::regclass,'ui_test_executions'::regclass,"
                       + "'studio_guided_publications'::regclass,'studio_guided_publication_attempts'::regclass)",
                   String.class));
       System.out.println(
           "[historical-v18-constraints] "
               + jdbc.queryForObject(
-                  "SELECT jsonb_agg(jsonb_build_object('constraint',conname,'definition',pg_get_constraintdef(oid),"
-                      + "'validated',convalidated) ORDER BY conname)::text FROM pg_constraint WHERE conrelid IN"
-                      + " ('ui_test_revisions'::regclass,'ui_test_executions'::regclass,"
-                      + "'studio_guided_publications'::regclass,"
-                      + "'studio_guided_publication_attempts'::regclass)",
+                  "SELECT jsonb_agg(jsonb_build_object('constraint',conname,'definition',"
+                      + ("pg_get_constraintdef(oid),'validated',convalidated) ORDER BY conname):")
+                      + (":text FROM pg_constraint WHERE conrelid IN ('ui_test_revisions'::regcl")
+                      + ("ass,'ui_test_executions'::regclass,'studio_guided_publications'::regcl")
+                      + ("ass,'studio_guided_publication_attempts'::regclass)"),
                   String.class));
       System.out.println(
           "[historical-v18-flyway] "
               + jdbc.queryForObject(
-                  "SELECT jsonb_build_object('serverVersion',current_setting('server_version'),'migrations',(SELECT"
-                      + " jsonb_agg(jsonb_build_object('version',version,'description',description,'checksum',"
-                      + "checksum,'success',success) ORDER BY installed_rank) FROM flyway_schema_history))::text",
+                  "SELECT jsonb_build_object('serverVersion',current_setting('server_vers"
+                      + ("ion'),'migrations',(SELECT jsonb_agg(jsonb_build_object('version',vers")
+                      + ("ion,'description',description,'checksum',checksum,'success',success) O")
+                      + ("RDER BY installed_rank) FROM flyway_schema_history))::text"),
                   String.class));
       assertThat(
               jdbc.queryForObject(
-                  "SELECT count(*) FROM ui_test_revisions r JOIN studio_guided_publications p ON p.revision_id=r.id"
-                      + " AND p.session_id=r.guided_session_id JOIN studio_guided_publication_attempts a ON"
-                      + " a.session_id=p.session_id AND a.attempt_id=p.attempt_id AND a.claim_id=p.claim_id WHERE"
-                      + " r.id=? AND a.status='VALIDATED' AND p.snapshot_hash=? AND p.basis_hash=?",
+                  "SELECT count(*) FROM ui_test_revisions r JOIN studio_guided_publications p ON"
+                      + " p.revision_id=r.id AND p.session_id=r.guided_session_id JOIN"
+                      + " studio_guided_publication_attempts a ON a.session_id=p.session_id AND"
+                      + " a.attempt_id=p.attempt_id AND a.claim_id=p.claim_id WHERE r.id=? AND"
+                      + " a.status='VALIDATED' AND p.snapshot_hash=? AND p.basis_hash=?",
                   Integer.class,
                   command.revisionId(),
                   snapshot.hash(),
@@ -2273,7 +2330,8 @@ public class GuidedPublicationMigrationTest {
       assertThat(
               C.parse(
                       jdbc.queryForObject(
-                          "SELECT document::text FROM studio_guided_publications WHERE session_id=?",
+                          "SELECT document::text FROM studio_guided_publications WHERE"
+                              + " session_id=?",
                           String.class,
                           sessionId))
                   .path("publicReceipt")
@@ -2304,11 +2362,12 @@ public class GuidedPublicationMigrationTest {
 
   private static String historicalRows(JdbcTemplate jdbc, PublicationContracts.Commit c) {
     return jdbc.queryForObject(
-        "SELECT jsonb_build_object('draft',(SELECT to_jsonb(t) FROM ui_tests t WHERE id=?), 'session',(SELECT"
-            + " to_jsonb(s) FROM studio_guided_sessions s WHERE session_id=?), 'revision',(SELECT to_jsonb(r) FROM"
-            + " ui_test_revisions r WHERE id=?), 'receipt',(SELECT to_jsonb(p) FROM studio_guided_publications p"
-            + " WHERE session_id=?),'attempt',(SELECT to_jsonb(a) FROM studio_guided_publication_attempts a"
-            + " WHERE session_id=? AND attempt_id=?))::text",
+        "SELECT jsonb_build_object('draft',(SELECT to_jsonb(t) FROM ui_tests t WHERE id=?),"
+            + " 'session',(SELECT to_jsonb(s) FROM studio_guided_sessions s WHERE session_id=?),"
+            + " 'revision',(SELECT to_jsonb(r) FROM ui_test_revisions r WHERE id=?),"
+            + " 'receipt',(SELECT to_jsonb(p) FROM studio_guided_publications p WHERE"
+            + " session_id=?),'attempt',(SELECT to_jsonb(a) FROM studio_guided_publication_attempts"
+            + " a WHERE session_id=? AND attempt_id=?))::text",
         String.class,
         UUID.fromString(c.snapshot().identity().path("base").path("testId").asText()),
         c.sessionId(),
@@ -2457,13 +2516,16 @@ public class GuidedPublicationMigrationTest {
             "UPDATE ui_tests SET configuration_revision=configuration_revision+1 WHERE id=?",
             "UPDATE ui_tests SET confirmed_revision_id=NULL WHERE id=?",
             "UPDATE studio_guided_sessions SET"
-                + " state='OBSERVING',document=jsonb_set(document,'{state}','\"OBSERVING\"') WHERE session_id=?",
-            "UPDATE studio_guided_sessions SET document=jsonb_set(document,'{owner,workerId}','\"wrong-worker\"')"
-                + " WHERE session_id=?",
-            "UPDATE studio_guided_sessions SET document=jsonb_set(document,'{owner,fence}','2') WHERE session_id=?",
-            "UPDATE studio_guided_sessions SET"
-                + " document=jsonb_set(document,'{owner,leaseExpiresAt}','\"2000-01-01T00:00:00Z\"') WHERE"
+                + " state='OBSERVING',document=jsonb_set(document,'{state}','\"OBSERVING\"') WHERE"
                 + " session_id=?",
+            "UPDATE studio_guided_sessions SET"
+                + " document=jsonb_set(document,'{owner,workerId}','\"wrong-worker\"') WHERE"
+                + " session_id=?",
+            "UPDATE studio_guided_sessions SET document=jsonb_set(document,'{owner,fence}','2')"
+                + " WHERE session_id=?",
+            "UPDATE studio_guided_sessions SET"
+                + " document=jsonb_set(document,'{owner,leaseExpiresAt}','\"2000-01-01T00:00:00Z\"')"
+                + " WHERE session_id=?",
             "UPDATE studio_guided_sessions SET"
                 + " expires_at='2000-01-01',document=jsonb_set(document,'{expiresAt}','\"2000-01-01T00:00:00Z\"')"
                 + " WHERE session_id=?")) {
@@ -2518,14 +2580,15 @@ public class GuidedPublicationMigrationTest {
     JsonNode captured =
         C.parse(
             jdbc.queryForObject(
-                "SELECT document::text FROM studio_guided_publication_bases WHERE session_id=? FOR UPDATE",
+                "SELECT document::text FROM studio_guided_publication_bases WHERE session_id=? FOR"
+                    + " UPDATE",
                 String.class,
                 commit.sessionId()));
     var a =
         jdbc.queryForObject(
-            "SELECT attempt_id,claim_id,attempt_number,status,validation_deadline,identity::text,"
-                + "validator_receipt::text,failure_code FROM studio_guided_publication_attempts WHERE session_id=?"
-                + " AND attempt_id=? FOR UPDATE",
+            "SELECT attempt_id,claim_id,attempt_number,status,validation_deadline,i"
+                + ("dentity::text,validator_receipt::text,failure_code FROM studio_guided_")
+                + ("publication_attempts WHERE session_id=? AND attempt_id=? FOR UPDATE"),
             (rs, n) ->
                 new PublicationContracts.Attempt(
                     commit.sessionId(),
@@ -2577,8 +2640,9 @@ public class GuidedPublicationMigrationTest {
         new PublicationContracts.Base(captured), new PublicationContracts.CurrentSource(draft));
     require(
         jdbc.queryForObject(
-                "SELECT p.plan_hash FROM studio_guided_translation_state s JOIN studio_guided_translation_plans p"
-                    + " USING(session_id,plan_revision) WHERE s.session_id=?",
+                "SELECT p.plan_hash FROM studio_guided_translation_state s JOIN"
+                    + " studio_guided_translation_plans p USING(session_id,plan_revision) WHERE"
+                    + " s.session_id=?",
                 String.class,
                 commit.sessionId())
             .equals(a.identity().path("translationHash").asText()),
@@ -2592,8 +2656,8 @@ public class GuidedPublicationMigrationTest {
                     commit.sessionId())
                 == 0
             && jdbc.queryForObject(
-                    "SELECT count(*) FROM studio_guided_model_attempts WHERE session_id=? AND status IN"
-                        + " ('RESERVED','CALLING')",
+                    "SELECT count(*) FROM studio_guided_model_attempts WHERE session_id=? AND"
+                        + " status IN ('RESERVED','CALLING')",
                     Integer.class,
                     commit.sessionId())
                 == 0
@@ -2662,15 +2726,14 @@ public class GuidedPublicationMigrationTest {
     provenance.put("guidedSessionId", commit.sessionId()).put("publicationKind", "GUIDED_RUN");
     provenance.set("runAuthorization", base.path("runAuthorization"));
     jdbc.update(
-        "INSERT INTO"
-            + " ui_test_revisions(id,test_id,csi_id,source_revision,configuration_revision,"
-            + "source,source_hash,artifact,artifact_hash,artifact_schema_version,configuration,"
-            + "\"references\",provenance,created_by,confirmed_by,confirmed_at,confirmation_source,"
-            + "reference_policy,publication_kind,guided_session_id,learned_plan_hash,"
-            + "revision_digest,step_snapshot_hashes,step_reuse_provenance)"
-            + " VALUES"
-            + " (?,?,?,?,?,?::jsonb,?,?::jsonb,?,3,?::jsonb,?::jsonb,?::jsonb,?,"
-            + "?,?,'GUIDED_RUN',?::jsonb,'GUIDED_RUN',?,?,?,?::jsonb,?::jsonb)",
+        "INSERT INTO ui_test_revisions(id,test_id,csi_id,source_revision,config"
+            + ("uration_revision,source,source_hash,artifact,artifact_hash,artifact_sc")
+            + ("hema_version,configuration,\"references\",provenance,created_by,confirme")
+            + ("d_by,confirmed_at,confirmation_source,reference_policy,publication_kin")
+            + ("d,guided_session_id,learned_plan_hash,revision_digest,step_snapshot_ha")
+            + ("shes,step_reuse_provenance) VALUES (?,?,?,?,?,?::jsonb,?,?::jsonb,?,3,")
+            + ("?::jsonb,?::jsonb,?::jsonb,?,?,?,'GUIDED_RUN',?::jsonb,'GUIDED_RUN',?,")
+            + ("?,?,?::jsonb,?::jsonb)"),
         commit.revisionId(),
         UUID.fromString(base.path("testId").asText()),
         base.path("csiId").asText(),
@@ -2933,10 +2996,8 @@ public class GuidedPublicationMigrationTest {
   private static void ordinaryScope(ObjectNode scope, String environment) {
     scope
         .put("environmentId", environment)
-        .put("applicationId", "app")
         .put("modelDataPolicyId", "fixture-model-policy")
         .putNull("valueTransferPolicyId");
-    scope.putArray("approvedOrigins").add("https://orders.example.test");
     scope
         .putArray("capabilities")
         .add("observe")
@@ -3063,9 +3124,10 @@ public class GuidedPublicationMigrationTest {
       JsonNode configuration =
           C.parse(
               jdbc.queryForObject(
-                  "SELECT jsonb_build_object('browser',browser,'viewport',jsonb_build_object('width',viewport_width,"
-                      + "'height',viewport_height),'timeoutSeconds',timeout_seconds,'waitStrategy',wait_strategy,"
-                      + "'environment',environment)::text FROM ui_tests WHERE id=?",
+                  "SELECT jsonb_build_object('browser',browser,'viewport',jsonb_build_obj"
+                      + ("ect('width',viewport_width,'height',viewport_height),'timeoutSeconds',")
+                      + ("timeout_seconds,'waitStrategy',wait_strategy,'environment',environment")
+                      + (")::text FROM ui_tests WHERE id=?"),
                   String.class,
                   testId));
       if (!learned.has("actions")) {
@@ -3105,14 +3167,14 @@ public class GuidedPublicationMigrationTest {
       JdbcTemplate jdbc, UUID revisionId, UUID executionId, Instant startedAt, String principal) {
     var row =
         jdbc.queryForMap(
-            "SELECT r.test_id::text AS test_id,r.csi_id,r.revision_digest,r.artifact_hash,"
-                + "r.learned_plan_hash,studio_publication_hash(r.configuration) AS configuration_hash,"
-                + "studio_publication_hash(r.reference_policy) AS reference_policy_hash,"
-                + "r.configuration->>'environment' AS environment,"
-                + "(r.reference_policy->'scope')::text AS scope,(r.artifact->'profile')::text AS profile,"
-                + "p.document->>'publicationEvidenceHash' AS evidence"
-                + " FROM ui_test_revisions r JOIN studio_guided_publications p ON p.revision_id=r.id"
-                + " WHERE r.id=?",
+            "SELECT r.test_id::text AS test_id,r.csi_id,r.revision_digest,r.artifac"
+                + ("t_hash,r.learned_plan_hash,studio_publication_hash(r.configuration) AS")
+                + (" configuration_hash,studio_publication_hash(r.reference_policy) AS ref")
+                + ("erence_policy_hash,r.configuration->>'environment' AS environment,(r.r")
+                + ("eference_policy->'scope')::text AS scope,(r.artifact->'profile')::text")
+                + (" AS profile,p.document->>'publicationEvidenceHash' AS evidence FROM ui")
+                + ("_test_revisions r JOIN studio_guided_publications p ON p.revision_id=r")
+                + (".id WHERE r.id=?"),
             revisionId);
     var profile = C.parse(String.valueOf(row.get("profile")));
     var build = observedBuild(profile);
@@ -3134,7 +3196,6 @@ public class GuidedPublicationMigrationTest {
             .put("scopeHash", scopeHash)
             .put("profileHash", GuidedContracts.hash(profile))
             .put("buildHash", GuidedContracts.hash(build))
-            .put("currentPolicyHash", "f".repeat(64))
             .put("issuedAt", wire(issued))
             .put("expiresAt", wire(issued.plusSeconds(25)));
     var binding =
@@ -3149,7 +3210,6 @@ public class GuidedPublicationMigrationTest {
             .put("principalId", principal)
             .put("environment", String.valueOf(row.get("environment")))
             .put("scopeHash", scopeHash)
-            .put("currentPolicyHash", "f".repeat(64))
             .put("revisionDigest", String.valueOf(row.get("revision_digest")))
             .put("artifactHash", String.valueOf(row.get("artifact_hash")))
             .put("configurationHash", String.valueOf(row.get("configuration_hash")))
@@ -3190,7 +3250,6 @@ public class GuidedPublicationMigrationTest {
             .put("scopeHash", scopeHash)
             .put("profileHash", GuidedContracts.hash(profile))
             .put("buildHash", GuidedContracts.hash(build))
-            .put("currentPolicyHash", "f".repeat(64))
             .put("issuedAt", at)
             .put("expiresAt", expires);
     var binding =
@@ -3204,8 +3263,7 @@ public class GuidedPublicationMigrationTest {
             .put("csiId", "CSI")
             .put("principalId", "owner@example.test")
             .put("environment", "Development")
-            .put("scopeHash", scopeHash)
-            .put("currentPolicyHash", "f".repeat(64));
+            .put("scopeHash", scopeHash);
     for (String key :
         List.of(
             "revisionDigest",
@@ -3226,8 +3284,7 @@ public class GuidedPublicationMigrationTest {
             + "tion_ms,revision_id,csi_id,principal,environment,observed_revisio"
             + "n_binding)"
             + " VALUES (?,?,'PENDING',?,?,0,?,'CSI','owner@example.test','Development',?::jsonb)";
-    for (String key :
-        List.of("currentPolicyHash", "requiredBuild", "replayGrant", "attemptId", "scope")) {
+    for (String key : List.of("requiredBuild", "replayGrant", "attemptId", "scope")) {
       var invalid = binding.deepCopy();
       invalid.remove(key);
       assertThatThrownBy(
@@ -3332,8 +3389,7 @@ public class GuidedPublicationMigrationTest {
             "learnedPlanHash",
             "referencePolicyHash",
             "publicationEvidenceHash",
-            "scopeHash",
-            "currentPolicyHash")) {
+            "scopeHash")) {
       request.set(key, binding.path(key));
     }
     request.set("profile", profile);
@@ -3368,7 +3424,7 @@ public class GuidedPublicationMigrationTest {
         java.sql.Timestamp.from(started.plusSeconds(10)),
         java.sql.Timestamp.from(started.plusSeconds(120)));
     var incorrect = receipt.deepCopy();
-    ((ObjectNode) incorrect.path("request")).put("currentPolicyHash", "a".repeat(64));
+    ((ObjectNode) incorrect.path("request")).put("scopeHash", "a".repeat(64));
     assertThatThrownBy(
             () ->
                 db.jdbc.update(
@@ -3460,7 +3516,6 @@ public class GuidedPublicationMigrationTest {
             .put("documentId", "document")
             .put("generation", 1)
             .put("choiceId", "choice")
-            .put("nodeId", "node")
             .putNull("bindingId")
             .put("sourceRevision", "1")
             .put("configurationRevision", "1")
@@ -3476,26 +3531,25 @@ public class GuidedPublicationMigrationTest {
       Database db, String id, com.fasterxml.jackson.databind.JsonNode receipt) {
     db.sessions.lock("session");
     db.jdbc.update(
-        "INSERT INTO"
-            + " studio_guided_preparations(session_id,preparation_id,context_id,owner_fence,"
-            + "request_digest,proof,expires_at)"
-            + " SELECT"
-            + " session_id,?,context_id,owner_fence,request_digest,"
-            + "jsonb_set(proof,'{preparationId}',to_jsonb(?::text)),clock_timestamp()+interval"
-            + " '60 seconds' FROM studio_guided_publication_preparations WHERE"
-            + " observed_choice_receipt IS NULL ORDER BY preparation_id LIMIT 1",
+        "INSERT INTO studio_guided_preparations(session_id,preparation_id,conte"
+            + ("xt_id,owner_fence,request_digest,proof,expires_at) SELECT session_id,?")
+            + (",context_id,owner_fence,request_digest,jsonb_set(proof,'{preparationId")
+            + ("}',to_jsonb(?::text)),clock_timestamp()+interval '60 seconds' FROM stu")
+            + ("dio_guided_publication_preparations WHERE observed_choice_receipt IS N")
+            + ("ULL ORDER BY preparation_id LIMIT 1"),
         id,
         id);
     db.jdbc.update(
-        "INSERT INTO studio_guided_publication_preparations(session_id,preparation_id,context_id,"
-            + "owner_fence,request_digest,evidence_hash,inputs_hash,materialization_revision,"
-            + "source_manifest_hash,observation_hash,execution_evidence,proposal,proof,"
-            + "captured_at,observed_choice_receipt) SELECT"
-            + " session_id,?,context_id,owner_fence,request_digest,evidence_hash,inputs_hash,"
-            + "materialization_revision,source_manifest_hash,observation_hash,execution_evidence,"
-            + "proposal,jsonb_set(proof,'{preparationId}',to_jsonb(?::text)),clock_timestamp(),?::jsonb"
-            + " FROM studio_guided_publication_preparations WHERE observed_choice_receipt IS NULL"
-            + " ORDER BY preparation_id LIMIT 1",
+        "INSERT INTO studio_guided_publication_preparations(session_id,preparat"
+            + ("ion_id,context_id,owner_fence,request_digest,evidence_hash,inputs_hash")
+            + (",materialization_revision,source_manifest_hash,observation_hash,execut")
+            + ("ion_evidence,proposal,proof,captured_at,observed_choice_receipt) SELEC")
+            + ("T session_id,?,context_id,owner_fence,request_digest,evidence_hash,inp")
+            + ("uts_hash,materialization_revision,source_manifest_hash,observation_has")
+            + ("h,execution_evidence,proposal,jsonb_set(proof,'{preparationId}',to_jso")
+            + ("nb(?::text)),clock_timestamp(),?::jsonb FROM studio_guided_publication")
+            + ("_preparations WHERE observed_choice_receipt IS NULL ORDER BY preparati")
+            + ("on_id LIMIT 1"),
         id,
         id,
         receipt == null ? null : receipt.toString());
@@ -3709,8 +3763,7 @@ public class GuidedPublicationMigrationTest {
       }
       ObjectNode answer = large.withObject("/answer");
       for (String key :
-          List.of(
-              "sessionId", "clarificationId", "choiceId", "documentId", "nodeId", "bindingId")) {
+          List.of("sessionId", "clarificationId", "choiceId", "documentId", "bindingId")) {
         answer.put(key, String.valueOf((char) 1).repeat(256));
       }
       answer
@@ -3721,46 +3774,36 @@ public class GuidedPublicationMigrationTest {
           .put("generation", Integer.MAX_VALUE)
           .put("sourceRevision", "9223372036854775807")
           .put("configurationRevision", "9223372036854775807");
+      // ADR-SC-007: the answer lost its element id, so even with every id at its bound of 256
+      // scalars that each escape to six canonical bytes the receipt is 16,129 bytes: the ids can no
+      // longer reach the 16,384-byte cap the SQL function still enforces on the canonical form.
       int bytes = canonicalBytes(large);
-      assertThat(bytes).isGreaterThan(16384);
-      // Replace six-byte escaped scalars with one-byte ASCII, then remove up to
-      // four ASCII bytes from preparationId. All IDs remain individually bounded.
-      for (String pointer : List.of("/preparationId", "/answer/documentId")) {
-        int slash = pointer.lastIndexOf('/');
-        ObjectNode parent = (ObjectNode) large.at(pointer.substring(0, slash));
-        String field = pointer.substring(slash + 1);
-        String value = parent.path(field).asText();
-        while (bytes - 16384 >= 5 && value.indexOf((char) 1) >= 0) {
-          int index = value.indexOf((char) 1);
-          value = value.substring(0, index) + "a" + value.substring(index + 1);
-          parent.put(field, value);
-          bytes -= 5;
-        }
-      }
-      large.put("preparationId", large.path("preparationId").asText().substring(bytes - 16384));
-      assertThat(canonicalBytes(large)).isEqualTo(16384);
+      assertThat(bytes).isEqualTo(16129).isLessThan(16384);
       assertThat(
               db.jdbc.queryForObject(
                   "SELECT studio_publication_canonical(?::jsonb)", String.class, large.toString()))
           .isEqualTo(GuidedContracts.canonical(large));
       assertReceiptShape(db, large, true);
-      ObjectNode over = large.deepCopy();
-      over.put("preparationId", "\"" + over.path("preparationId").asText().substring(1));
-      assertThat(canonicalBytes(over)).isEqualTo(16385);
       assertThat(
               db.jdbc.queryForObject(
-                  "SELECT octet_length(convert_to(studio_publication_canonical(?::jsonb),'UTF8'))",
-                  Integer.class,
-                  over.toString()))
-          .isEqualTo(16385);
-      assertReceiptShape(db, over, false);
+                  "SELECT"
+                      + " pg_get_functiondef('studio_publication_observed_choice_receipt(jsonb)'::regprocedure)",
+                  String.class))
+          .contains("<=16384");
+      // The bound is on the canonical bytes, not on a count of keys: a closed shape with one more
+      // key is refused, and so is one id a scalar over its bound.
+      ObjectNode extra = large.deepCopy().put("padding", "x");
+      assertReceiptShape(db, extra, false);
+      ObjectNode longId = large.deepCopy();
+      longId.put("preparationId", String.valueOf((char) 1).repeat(257));
+      assertReceiptShape(db, longId, false);
       ObjectNode unicode = valid.deepCopy();
       for (String value : List.of("😀".repeat(256), "e\u0301".repeat(128), "x".repeat(256))) {
-        unicode.withObject("/answer").put("nodeId", value);
+        unicode.withObject("/answer").put("documentId", value);
         assertReceiptShape(db, unicode, true);
       }
       for (String value : List.of("😀".repeat(257), "e\u0301".repeat(129), "x".repeat(257), "")) {
-        unicode.withObject("/answer").put("nodeId", value);
+        unicode.withObject("/answer").put("documentId", value);
         assertReceiptShape(db, unicode, false);
       }
       ObjectNode zero = valid.deepCopy();
@@ -3771,6 +3814,246 @@ public class GuidedPublicationMigrationTest {
           .put("resolvedAt", "2026-10-09T13:00:00Z")
           .put("bindingId", "binding");
       assertReceiptShape(db, zero, true);
+    }
+  }
+
+  // ---- ADR-SC-007 V29: the observation is an outline plus a facts table ----
+
+  /** A valid new-shape observation for the fixture session, with {@code facts} shown elements. */
+  private static ObjectNode v29Observation(Database db, int generation, int facts) {
+    var shown = com.citi.put.checks.studio.support.ObservationFixtures.observation();
+    for (int i = 1; i <= facts; i++) {
+      shown.element("e" + i, "button", "Button " + i);
+    }
+    ObjectNode observation = shown.build();
+    observation
+        .put("sessionId", "session")
+        .put("documentId", "document-" + generation)
+        .put("generation", generation)
+        .put("scopeHash", db.session.path("scopeHash").asText())
+        .put("origin", "https://orders.example.test");
+    return observation;
+  }
+
+  /** Commits the row exactly as the capture path does: current in the session, then captured. */
+  private static void v29Insert(Database db, ObjectNode observation) {
+    db.tx.executeWithoutResult(
+        t -> {
+          db.sessions.lock("session");
+          db.jdbc.update(
+              "UPDATE studio_guided_sessions SET"
+                  + " progress=jsonb_set(progress,'{observation}',?::jsonb) WHERE"
+                  + " session_id='session'",
+              observation.toString());
+          db.jdbc.update(
+              "INSERT INTO studio_guided_publication_observations(session_id,observat"
+                  + ("ion_hash,context_id,owner_fence,document_id,generation,observation,cap")
+                  + ("tured_at) VALUES ('session',?,'context-1',1,?,?,?::jsonb,now())"),
+              GuidedContracts.hash(observation),
+              observation.path("documentId").asText(),
+              observation.path("generation").asInt(),
+              observation.toString());
+        });
+  }
+
+  private static Database v29Database() throws Exception {
+    var db = new Database();
+    db.capture();
+    GuidedPublicationEvidenceTest.setup(db);
+    return db;
+  }
+
+  private static int v29Rows(Database db) {
+    return db.jdbc.queryForObject(
+        "SELECT count(*) FROM studio_guided_publication_observations", Integer.class);
+  }
+
+  @Test
+  void v29ObservationAcceptsAValidNewShapeRow() throws Exception {
+    try (var db = v29Database()) {
+      ObjectNode observation = v29Observation(db, 1, 3);
+      v29Insert(db, observation);
+      assertThat(v29Rows(db)).isEqualTo(1);
+      assertThat(
+              db.jdbc.queryForObject(
+                  "SELECT observation->'facts'->'e2'->>'name' FROM"
+                      + " studio_guided_publication_observations",
+                  String.class))
+          .isEqualTo("Button 2");
+    }
+  }
+
+  @Test
+  void v29ObservationRejectsExtraFactKey() throws Exception {
+    try (var db = v29Database()) {
+      ObjectNode observation = v29Observation(db, 1, 2);
+      ((ObjectNode) observation.path("facts").path("e1")).put("value", "do-not-store");
+      assertThatThrownBy(() -> v29Insert(db, observation))
+          .hasMessageContaining("ck_publication_observation_shape");
+      assertThat(v29Rows(db)).isZero();
+    }
+  }
+
+  @Test
+  void v29ObservationRejectsABadFactKey() throws Exception {
+    try (var db = v29Database()) {
+      for (String key : List.of("node-1", "e0x", "E1", "e1234567", "")) {
+        ObjectNode observation = v29Observation(db, 1, 1);
+        ObjectNode facts = (ObjectNode) observation.path("facts");
+        facts.set(key, facts.remove("e1"));
+        assertThatThrownBy(() -> v29Insert(db, observation))
+            .as("fact key '%s'", key)
+            .hasMessageContaining("ck_publication_observation_shape");
+      }
+      assertThat(v29Rows(db)).isZero();
+    }
+  }
+
+  @Test
+  void v29ObservationRejectsABadSegmentField() throws Exception {
+    try (var db = v29Database()) {
+      ObjectNode observation = v29Observation(db, 1, 1);
+      ((ObjectNode) observation.path("facts").path("e1").path("evidenceSegments").get(0))
+          .put("field", "innerHtml");
+      assertThatThrownBy(() -> v29Insert(db, observation))
+          .hasMessageContaining("ck_publication_observation_shape");
+      ObjectNode inverted = v29Observation(db, 1, 1);
+      ((ObjectNode) inverted.path("facts").path("e1").path("evidenceSegments").get(0))
+          .put("start", 9)
+          .put("end", 3);
+      assertThatThrownBy(() -> v29Insert(db, inverted))
+          .hasMessageContaining("ck_publication_observation_shape");
+      assertThat(v29Rows(db)).isZero();
+    }
+  }
+
+  @Test
+  void v29ObservationRejectsAnOldNodesKey() throws Exception {
+    try (var db = v29Database()) {
+      ObjectNode observation = v29Observation(db, 1, 1);
+      observation.putArray("nodes");
+      assertThatThrownBy(() -> v29Insert(db, observation))
+          .hasMessageContaining("ck_publication_observation_closed");
+      ObjectNode withoutFacts = v29Observation(db, 1, 1);
+      withoutFacts.remove("facts");
+      assertThatThrownBy(() -> v29Insert(db, withoutFacts))
+          .hasMessageContaining("ck_publication_observation");
+      assertThat(v29Rows(db)).isZero();
+    }
+  }
+
+  /** The row is closed at 512 KiB of jsonb text; a valid shape over that is refused. */
+  @Test
+  void v29ObservationRejectsOversizeObservation() throws Exception {
+    try (var db = v29Database()) {
+      ObjectNode observation = v29Observation(db, 1, 1);
+      ObjectNode facts = (ObjectNode) observation.path("facts");
+      ObjectNode template = (ObjectNode) facts.path("e1");
+      var segments = template.putArray("evidenceSegments");
+      for (int i = 0; i < 128; i++) {
+        segments.addObject().put("field", "name").put("start", 0).put("end", 1);
+      }
+      for (int i = 2; i <= 200; i++) {
+        facts.set("e" + i, template.deepCopy());
+      }
+      int size =
+          db.jdbc.queryForObject(
+              "SELECT octet_length(convert_to(?::jsonb::text,'UTF8'))",
+              Integer.class,
+              observation.toString());
+      assertThat(size).isGreaterThan(524_288);
+      assertThatThrownBy(() -> v29Insert(db, observation))
+          .hasMessageContaining("ck_publication_observation_closed");
+      assertThat(v29Rows(db)).isZero();
+    }
+  }
+
+  /**
+   * The evidence guard counts 4 MiB of observation text per session: eight rows of just under 512
+   * KiB fit and the ninth is refused. (Under the earlier 1 MiB total the third would have been.)
+   */
+  @Test
+  void v29EvidenceGuardAllowsFourMiBAndRefusesMore() throws Exception {
+    try (var db = v29Database()) {
+      ObjectNode base = v29Observation(db, 1, 1);
+      ObjectNode facts = (ObjectNode) base.path("facts");
+      ObjectNode template = (ObjectNode) facts.path("e1");
+      var segments = template.putArray("evidenceSegments");
+      for (int i = 0; i < 128; i++) {
+        segments.addObject().put("field", "name").put("start", 0).put("end", 1);
+      }
+      int count = 1;
+      int size;
+      do {
+        facts.set("e" + ++count, template.deepCopy());
+        size =
+            db.jdbc.queryForObject(
+                "SELECT octet_length(convert_to(?::jsonb::text,'UTF8'))",
+                Integer.class,
+                base.toString());
+      } while (size + 5_000 < 524_288);
+      assertThat(size).isLessThanOrEqualTo(524_288).isGreaterThan(500_000);
+      for (int generation = 1; generation <= 8; generation++) {
+        ObjectNode row = base.deepCopy();
+        row.put("documentId", "document-" + generation).put("generation", generation);
+        v29Insert(db, row);
+      }
+      assertThat(v29Rows(db)).isEqualTo(8);
+      assertThat(
+              db.jdbc.queryForObject(
+                  "SELECT sum(octet_length(convert_to(observation::text,'UTF8'))) FROM"
+                      + " studio_guided_publication_observations",
+                  Long.class))
+          .isGreaterThan(1_048_576L)
+          .isLessThanOrEqualTo(4_194_304L);
+      ObjectNode ninth = base.deepCopy();
+      ninth.put("documentId", "document-9").put("generation", 9);
+      assertThatThrownBy(() -> v29Insert(db, ninth))
+          .hasMessageContaining("publication evidence limit");
+      assertThat(v29Rows(db)).isEqualTo(8);
+    }
+  }
+
+  /**
+   * The two observation checks and the preparation check are added NOT VALID (old rows are not
+   * scanned, new rows are enforced), and the constraints that named the retired node list are gone.
+   */
+  @Test
+  void v29NewConstraintsAreNotValidatedAndTheOldOnesAreGone() throws Exception {
+    try (var db = v29Database()) {
+      for (String name :
+          List.of(
+              "ck_publication_observation_closed",
+              "ck_publication_observation_identity",
+              "ck_publication_preparation_shape")) {
+        assertThat(
+                db.jdbc.queryForList(
+                    "SELECT convalidated FROM pg_constraint WHERE conname=? AND contype='c'",
+                    Boolean.class,
+                    name))
+            .as(name)
+            .containsExactly(false);
+      }
+      assertThat(
+              db.jdbc.queryForObject(
+                  "SELECT count(*) FROM pg_constraint WHERE"
+                      + " conrelid='studio_guided_publication_observations'::regclass AND"
+                      + " contype='c' AND pg_get_constraintdef(oid) LIKE '%nodes%'",
+                  Integer.class))
+          .isZero();
+      assertThat(
+              db.jdbc.queryForObject(
+                  "SELECT count(*) FROM pg_constraint WHERE"
+                      + " conrelid='studio_guided_publication_observations'::regclass AND"
+                      + " conname='ck_publication_observation_shape'",
+                  Integer.class))
+          .isEqualTo(1);
+      assertThat(
+              db.jdbc.queryForObject(
+                  "SELECT pg_get_functiondef('studio_publication_evidence_guard()'::regprocedure)",
+                  String.class))
+          .contains("4194304")
+          .doesNotContain("1048576");
     }
   }
 

@@ -355,11 +355,9 @@ class GuidedPlanBuilderTest {
       var operation = C.object();
       operation.set("coordinate", proposal.path("coordinate"));
       operation.set("origin", proposal.path("executionEvidence").path("origin"));
-      operation.set(
-          "locator",
-          proposal.path("target").has("locator")
-              ? proposal.path("target").path("locator")
-              : C.object().nullNode());
+      // ADR-SC-007: the identity covers the target the runner reported on the preparation proof
+      // (null for a page or password control), written here independently of the production helper.
+      operation.set("target", prep.path("proof").path("target"));
       operation.set("operation", proposal.path("operation"));
       ledger.put("operationHash", hash(operation));
       var decision = C.object();
@@ -367,6 +365,16 @@ class GuidedPlanBuilderTest {
       decision.set("preparation", prep.path("proof"));
       decision.put("requestDigest", digest);
       object(ledger, "admission").put("policyDecisionHash", hash(decision));
+    }
+
+    /** Changes a preparation proof and reseals everything that joins it (hashes, decision). */
+    void rewriteProof(int index, Consumer<ObjectNode> mutate) {
+      mutate.accept(object(at(raw, "preparations", index), "proof"));
+      rewriteProposal(
+          index,
+          p -> {
+            /* Only the dependent hashes are recomputed. */
+          });
     }
 
     void rewriteObservation(Consumer<ObjectNode> mutate) {
@@ -746,13 +754,50 @@ class GuidedPlanBuilderTest {
     }
   }
 
+  /**
+   * ADR-SC-007: current control values are never rendered, and a read is completed by the backend
+   * from the page's read grant as visible text. A control-value recipe is therefore not one this
+   * backend ever admits, and a basis that carries one is refused when its gates are replayed.
+   */
   @Test
-  void controlReadRejectsPasswordReplacementWithCoherentObservationAndAdmissionHashes()
-      throws Exception {
+  void aControlValueReadIsNotARecipeTheBackendEverAdmits() throws Exception {
     var f = new Original(fixture("control-value-reference").path("basis"));
-    assertThat(f.build()).as("unaltered control-value evidence").isEqualTo(f.expected);
-    f.rewriteObservation(o -> at(o, "nodes", 0).put("controlType", "password"));
-    assertThatThrownBy(f::build).isInstanceOf(GuidedSessionException.class);
+    assertThatThrownBy(f::build)
+        .isInstanceOfSatisfying(
+            GuidedSessionException.class,
+            // The fixture's element is a textbox whose facts carry no text to read: the read gate
+            // refuses first. (The recipe check that follows would refuse the recipe itself.)
+            refusal -> assertThat(refusal.getMessage()).isEqualTo("INVALID_CONTRACT"));
+  }
+
+  /**
+   * ADR-SC-007 D-7: the model writes no read recipe. The backend completes it from the read grant
+   * the runner reported for the page, so the recipe of a learned read is the observation's {@code
+   * readRuleId}, the producer carries the same rule, and an invented rule id does not publish.
+   */
+  @Test
+  void learnedReadPublishesWithTheBackendCompletedRecipe() throws Exception {
+    var f = new Original(fixture("fresh-order-reference").path("basis"));
+    JsonNode read = f.raw.path("preparations").get(1).path("proposal");
+    String rule = f.raw.path("observations").get(0).path("observation").path("readRuleId").asText();
+    assertThat(rule).isEqualTo("business-reference");
+    assertThat(read.path("operation").path("kind").asText()).isEqualTo("read");
+    assertThat(read.path("operation").path("recipe"))
+        .isEqualTo(
+            C.object()
+                .put("kind", "visibleText")
+                .put("classification", "permittedBusinessData")
+                .put("policyRuleId", rule));
+    ObjectNode built = f.build();
+    assertThat(built).isEqualTo(f.expected);
+    assertThat(f.raw.at("/producers/0/recipe/policyRuleId").asText()).isEqualTo(rule);
+    assertThat(built.at("/producers/0/recipe/policyRuleId").asText()).isEqualTo(rule);
+
+    var invented = new Original(fixture("fresh-order-reference").path("basis"));
+    invented.rewriteProposal(
+        1, p -> object(object(p, "operation"), "recipe").put("policyRuleId", "default"));
+    object(at(invented.raw, "producers", 0), "recipe").put("policyRuleId", "default");
+    assertThatThrownBy(invented::build).isInstanceOf(GuidedSessionException.class);
   }
 
   record Mutation(String name, Consumer<Original> change) {
@@ -830,16 +875,16 @@ class GuidedPlanBuilderTest {
               f.raw.put("translationHash", hash(f.raw.path("translationPlan")));
             }),
         new Mutation(
-            "coherent wrong locator",
+            "coherent wrong reported identity",
             f ->
-                f.rewriteProposal(
+                f.rewriteProof(
                     1,
-                    p -> object(object(p, "target"), "locator").put("value", "another-reference"))),
+                    proof ->
+                        object(object(proof, "target"), "identity")
+                            .put("name", "Another reference"))),
         new Mutation(
-            "original read target structural only",
-            f ->
-                f.rewriteObservation(
-                    o -> at(o, "nodes", 0).put("classification", "structuralOnly"))),
+            "original read target has no visible text",
+            f -> f.rewriteObservation(o -> object(object(o, "facts"), "e1").remove("text"))),
         new Mutation(
             "wrong original read policy",
             f -> {
@@ -901,25 +946,25 @@ class GuidedPlanBuilderTest {
   }
 
   @Test
-  void reconstructsIndependentObservedChoiceWithOriginalAndFreshNodes() throws Exception {
+  void reconstructsIndependentObservedChoiceWithOriginalAndFreshRefs() throws Exception {
     var original = choiceFixture();
     var f = new Original(original.path("basis"));
     assertThat(f.build()).isEqualTo(f.expected);
     var witness = f.witness();
-    assertThat(witness.path("receipt").path("answer").path("nodeId").asText())
-        .isEqualTo("backup-label-old");
+    // ADR-SC-007: an answer keeps a choice, never an element id; the accepted choice names the
+    // fresh ref of the element with the stored role, name and evidence.
+    assertThat(witness.path("receipt").path("answer").has("nodeId")).isFalse();
+    assertThat(witness.path("acceptedChoiceId").asText()).isEqualTo("choice-backup");
+    JsonNode accepted = witness.path("meanings").get(1);
+    assertThat(accepted.path("choiceId").asText()).isEqualTo("choice-backup");
+    assertThat(accepted.path("meaning").path("ref").asText()).isEqualTo("e3");
+    assertThat(accepted.path("selection").path("role").asText()).isEqualTo("textbox");
     assertThat(
-            f.raw
-                .path("preparations")
-                .get(3)
-                .path("proposal")
-                .path("target")
-                .path("nodeId")
-                .asText())
-        .isEqualTo("backup-label-fresh");
+            f.raw.path("preparations").get(3).path("proposal").path("target").path("ref").asText())
+        .isEqualTo("e3");
     assertThat(
             f.raw.path("translationPlan").path("obligations").get(3).path("targetIntent").asText())
-        .isEqualTo("label-input");
+        .isEqualTo("label");
     assertThat(f.build().path("observations").size()).isEqualTo(4);
   }
 
@@ -988,9 +1033,9 @@ class GuidedPlanBuilderTest {
         choiceText("answer question", "/receipt/answer/clarificationId", "another-question"),
         choiceText("answer old document", "/receipt/answer/documentId", "different-document"),
         choiceText(
-            "answer old node replaced by fresh node",
-            "/receipt/answer/nodeId",
-            "backup-label-fresh"),
+            "answer names another choice than the accepted one",
+            "/receipt/answer/choiceId",
+            "choice-original"),
         choiceText("answer binding override", "/receipt/answer/bindingId", "binding-reference"),
         choiceText("receipt preparation identity", "/receipt/preparationId", "preparation-2"),
         choiceText(
@@ -1033,59 +1078,39 @@ class GuidedPlanBuilderTest {
               at(w, "meanings", 0).set("meaning", meaning);
               at(object(object(w, "attempt"), "modelQuestion"), "choices", 0)
                   .set("meaning", meaning.deepCopy());
-              at(object(object(w, "context"), "question"), "choices", 0)
-                  .put("nodeId", "backup-label-old");
             }),
-        new Mutation(
-            "exact locator kind differs with same text",
-            f -> {
-              object(object(at(f.witness(), "meanings", 1), "meaning"), "locator")
-                  .put("kind", "label");
-              object(
-                      object(
-                          at(object(object(f.witness(), "attempt"), "modelQuestion"), "choices", 1),
-                          "meaning"),
-                      "locator")
-                  .put("kind", "label");
-              f.rewriteQuestionObservation(
-                  o -> at(at(o, "nodes", 2), "locatorHints", 0).put("kind", "label"));
-            }),
+        changedChoice(
+            "stored selection evidence differs from the question-time element",
+            w -> object(at(w, "meanings", 1), "selection").put("evidence", "Another label")),
         new Mutation(
             "missing original question observation", f -> array(f.raw, "observations").remove(3)),
         new Mutation(
-            "old selected node hidden with resealed original capture",
-            f -> f.rewriteQuestionObservation(o -> at(o, "nodes", 2).put("visible", false))),
+            "old selected element missing with resealed original capture",
+            f -> f.rewriteQuestionObservation(o -> object(o, "facts").remove("e3"))),
         new Mutation(
-            "old selected locator missing with resealed original capture",
+            "old selected element renamed with resealed original capture",
             f ->
                 f.rewriteQuestionObservation(
-                    o -> array(at(o, "nodes", 2), "locatorHints").removeAll())),
+                    o ->
+                        object(object(o, "facts"), "e3")
+                            .put("name", "Renamed")
+                            .put("evidence", "Renamed"))),
         new Mutation(
-            "old duplicate locator on hidden unrelated node",
+            "old question observation holds an identical second element",
             f ->
                 f.rewriteQuestionObservation(
-                    o -> {
-                      var node =
-                          copy(at(o, "nodes", 2))
-                              .put("nodeId", "old-hidden-duplicate")
-                              .put("visible", false);
-                      array(o, "nodes").add(node);
-                    })),
+                    o ->
+                        object(o, "facts").set("e4", object(object(o, "facts"), "e3").deepCopy()))),
         new Mutation(
-            "fresh duplicate locator on hidden unrelated node",
+            "fresh observation holds an identical second element",
             f ->
                 f.rewriteObservation(
                     1,
-                    o -> {
-                      var node =
-                          copy(at(o, "nodes", 2))
-                              .put("nodeId", "fresh-hidden-duplicate")
-                              .put("visible", false);
-                      array(o, "nodes").add(node);
-                    })),
+                    o ->
+                        object(o, "facts").set("e4", object(object(o, "facts"), "e3").deepCopy()))),
         new Mutation(
-            "fresh node replaced with original question node",
-            f -> f.rewriteProposal(3, p -> object(p, "target").put("nodeId", "backup-label-old"))),
+            "fresh ref replaced with another element of the same page",
+            f -> f.rewriteProposal(3, p -> object(p, "target").put("ref", "e2"))),
         new Mutation(
             "coherent changed operation",
             f ->
@@ -1142,18 +1167,7 @@ class GuidedPlanBuilderTest {
               object(f.witness(), "attempt").put("generation", 3);
               object(object(object(f.witness(), "context"), "questionCapture"), "executionEvidence")
                   .put("generation", 3);
-              f.rewriteQuestionObservation(
-                  o -> {
-                    o.put("generation", 3);
-                    o.path("nodes").forEach(node -> ((ObjectNode) node).put("generation", 3));
-                  });
-            }),
-        new Mutation(
-            "unapproved original question origin coherently resealed",
-            f -> {
-              object(object(object(f.witness(), "context"), "questionCapture"), "executionEvidence")
-                  .put("origin", "https://unapproved.example.test");
-              f.rewriteQuestionObservation(o -> o.put("origin", "https://unapproved.example.test"));
+              f.rewriteQuestionObservation(o -> o.put("generation", 3));
             }),
         new Mutation(
             "fresh observation scope coherently resealed",
@@ -1163,14 +1177,15 @@ class GuidedPlanBuilderTest {
             f -> at(f.raw, "preparations", 2).set("observedChoice", f.witness().deepCopy())),
         new Mutation(
             "receipt budget before malformed field rejection",
-            f -> object(object(f.witness(), "receipt"), "answer").put("nodeId", "a".repeat(16384))),
+            f ->
+                object(object(f.witness(), "receipt"), "answer").put("padding", "a".repeat(16384))),
         new Mutation(
             "composed witness budget before malformed field rejection",
             f ->
                 object(
                         at(object(object(f.witness(), "attempt"), "modelQuestion"), "choices", 0),
                         "meaning")
-                    .put("nodeId", "é".repeat(131073))),
+                    .put("padding", "é".repeat(131073))),
         new Mutation(
             "wrong context canonical hash",
             f -> object(f.witness(), "receipt").put("contextIdentityHash", "f".repeat(64))),
@@ -1257,5 +1272,1223 @@ class GuidedPlanBuilderTest {
     assertThat(result.path("preparations").get(3).path("proposal").path("operation").path("value"))
         .isEqualTo(C.object().put("kind", "authoredLiteral").put("sourceInputId", "input-label"));
     assertThat(result.path("translationPlan")).isEqualTo(f.expected.path("translationPlan"));
+  }
+
+  /**
+   * Controlled validator verdict only; this proves relational persistence, never native execution.
+   */
+  private static void commitSqlCandidate(
+      GuidedPublicationMigrationTest.Database db,
+      PublicationContracts.Base base,
+      PublicationContracts.Candidate candidate) {
+    String id = db.fixtureSession();
+    var raw = db.snapshot(base);
+    var identity = copy(raw.identity());
+    var profile = GuidedPublicationMigrationTest.currentProfile();
+    var build = GuidedPublicationMigrationTest.observedBuild(profile);
+    for (String field :
+        List.of(
+            "artifactHash",
+            "learnedPlanHash",
+            "referencePolicyHash",
+            "profileHash",
+            "operationEquivalenceHash",
+            "publicationEvidenceHash")) {
+      identity.set(field, candidate.hashes().path(field));
+    }
+    identity.put("validationBuildHash", GuidedContracts.hash(build));
+    var snapshot = new PublicationContracts.Snapshot(identity, raw.basis());
+    var attempt =
+        db.tx.execute(
+            status -> {
+              db.sessions.lock(id);
+              return db.publications.reserve(
+                  new PublicationContracts.Claim(id, "final", "d".repeat(64), snapshot),
+                  java.time.Instant.now());
+            });
+    db.tx.executeWithoutResult(
+        status -> {
+          db.sessions.lock(id);
+          db.publications.claim(
+              id, attempt.attemptId(), attempt.claimId(), snapshot.hash(), java.time.Instant.now());
+        });
+    var verdict =
+        C.object()
+            .put("schemaVersion", 3)
+            .put("ok", true)
+            .putNull("errorCode")
+            .put("attemptId", attempt.attemptId().toString())
+            .put("claimId", attempt.claimId().toString())
+            .put("snapshotHash", snapshot.hash())
+            .put("basisHash", identity.path("basisHash").asText());
+    for (String field :
+        List.of(
+            "artifactHash",
+            "learnedPlanHash",
+            "referencePolicyHash",
+            "operationEquivalenceHash",
+            "publicationEvidenceHash",
+            "admissionProvenanceHash")) {
+      verdict.set(field, candidate.hashes().path(field));
+    }
+    verdict.set("profile", profile);
+    verdict.set("build", build);
+    db.tx.executeWithoutResult(
+        status -> {
+          db.sessions.lock(id);
+          db.publications.finish(
+              id,
+              attempt.attemptId(),
+              attempt.claimId(),
+              snapshot.hash(),
+              PublicationContracts.AttemptStatus.VALIDATED,
+              verdict,
+              null,
+              java.time.Instant.now());
+        });
+    var command =
+        new PublicationContracts.Commit(
+            id,
+            java.util.UUID.randomUUID(),
+            attempt.attemptId(),
+            attempt.claimId(),
+            "final",
+            "d".repeat(64),
+            snapshot,
+            candidate,
+            new PublicationContracts.Grant(
+                id,
+                base.document().path("originalPrincipalId").asText(),
+                base.document().path("csiId").asText(),
+                snapshot.hash(),
+                attempt.validationDeadline()));
+    var receipt =
+        db.tx.execute(
+            status -> {
+              db.sessions.lock(id);
+              var actual = db.publications.commit(command, java.time.Instant.now());
+              db.jdbc.execute("SET CONSTRAINTS ALL IMMEDIATE");
+              return actual;
+            });
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM ui_test_revisions WHERE id=?",
+                Integer.class,
+                command.revisionId()))
+        .isEqualTo(1);
+    assertThat(receipt.document().path("revisionId").asText())
+        .isEqualTo(command.revisionId().toString());
+    assertThatThrownBy(
+            () ->
+                db.jdbc.update(
+                    "DELETE FROM studio_guided_publication_preparations WHERE session_id=?", id))
+        .hasMessageContaining("immutable");
+  }
+
+  private static ObjectNode sameReadSourceBasis() throws Exception {
+    ObjectNode basis = copy(fixture("fresh-order-reference").path("basis"));
+    var preparations = basis.withArray("preparations");
+    var read = (ObjectNode) preparations.get(1);
+    var consumer = (ObjectNode) preparations.get(preparations.size() - 1);
+    consumer.withObject("/proposal/operation").put("predicate", "containsText");
+    consumer
+        .withObject("/proposal/target")
+        .put("ref", read.path("proposal").path("target").path("ref").asText());
+    consumer.withObject("/proof").set("target", read.path("proof").path("target").deepCopy());
+    consumer.withObject("/proof/target").put("assertTextMode", "READ_BINDING_SOURCE");
+    consumer
+        .withObject("/proof")
+        .putObject("assertSourceBinding")
+        .put("bindingId", "binding-reference")
+        .put(
+            "producerAdmissionId",
+            basis.path("producers").get(0).path("producerAdmissionId").asText())
+        .put("producerPreparationId", read.path("preparationId").asText());
+    var obligation =
+        (ObjectNode) basis.withObject("/translationPlan").withArray("obligations").get(4);
+    obligation.put("predicate", "containsText").put("targetIntent", "reference");
+    String hash = consumer.path("observationHash").asText();
+    for (JsonNode row : basis.path("observations")) {
+      if (row.path("observationHash").asText().equals(hash)) {
+        ((ObjectNode) row.path("observation").path("facts").path("e1")).remove("text");
+      }
+    }
+    return basis;
+  }
+
+  @Test
+  void realMigratedSourceBindingRowsAndFrozenGuardsRejectIndependentCoherentMutations()
+      throws Exception {
+    try (var seed = new GuidedPublicationMigrationTest.Database()) {
+      var db =
+          new GuidedPublicationMigrationTest.Database(
+              seed.jdbc, seed.tx, "wi6-source", sameReadSourceBasis());
+      var base = db.capture();
+      db.finalizing();
+      JsonNode basis = db.snapshot(base).basis();
+      new GuidedBasisValidator(C).validate(basis);
+      var candidate =
+          new ObservedArtifactLowerer(C)
+              .lower(basis, GuidedPublicationMigrationTest.currentProfile());
+      assertThat(
+              candidate
+                  .artifact()
+                  .path("guards")
+                  .get(4)
+                  .path("target")
+                  .path("assertTextMode")
+                  .asText())
+          .isEqualTo("READ_BINDING_SOURCE");
+      assertThat(
+              db.jdbc.queryForObject(
+                  "SELECT studio_wi6_frozen_assertion_metadata(?::jsonb)",
+                  Boolean.class,
+                  candidate.artifact().toString()))
+          .isTrue();
+      var strippedArtifact = copy(candidate.artifact());
+      ((ObjectNode) strippedArtifact.path("learnedPlan").path("actions").get(4).path("target"))
+          .remove("assertTextMode");
+      ((ObjectNode) strippedArtifact.path("guards").get(4).path("target")).remove("assertTextMode");
+      assertThat(
+              db.jdbc.queryForObject(
+                  "SELECT studio_wi6_frozen_assertion_metadata(?::jsonb)",
+                  Boolean.class,
+                  strippedArtifact.toString()))
+          .isFalse();
+      var prefix = copy(candidate.learnedPlan().path("actions").get(4));
+      prefix.set("guard", candidate.artifact().path("guards").get(4));
+      var request = C.object();
+      request.set(
+          "assertSourceBinding",
+          basis.path("preparations").get(4).path("proof").path("assertSourceBinding"));
+      assertThat(
+              db.jdbc.queryForObject(
+                  "SELECT studio_wi6_prefix_source_identity(?::jsonb,?::jsonb)",
+                  Boolean.class,
+                  prefix.toString(),
+                  request.toString()))
+          .isTrue();
+      assertThat(
+              db.jdbc.queryForObject(
+                  "SELECT studio_wi6_prefix_source_identity(?::jsonb,'{}'::jsonb)",
+                  Boolean.class,
+                  prefix.toString()))
+          .isFalse();
+      var inventedPrefix = copy(prefix);
+      inventedPrefix.putObject("operation").put("kind", "click");
+      assertThat(
+              db.jdbc.queryForObject(
+                  "SELECT studio_wi6_prefix_source_identity(?::jsonb,?::jsonb)",
+                  Boolean.class,
+                  inventedPrefix.toString(),
+                  request.toString()))
+          .isFalse();
+      var strippedPrefix = copy(prefix);
+      strippedPrefix.withObject("/target").remove("assertTextMode");
+      strippedPrefix.withObject("/guard/target").remove("assertTextMode");
+      assertThat(
+              db.jdbc.queryForObject(
+                  "SELECT studio_wi6_prefix_source_identity(?::jsonb,?::jsonb)",
+                  Boolean.class,
+                  strippedPrefix.toString(),
+                  request.toString()))
+          .isFalse();
+
+      assertThat(
+              db.jdbc.queryForObject(
+                  "SELECT count(*) FROM studio_guided_publication_preparations WHERE session_id=?"
+                      + " AND jsonb_exists(proof,'assertSourceBinding')",
+                  Integer.class,
+                  db.fixtureSession()))
+          .isEqualTo(1);
+      String preparationId = basis.path("actions").get(4).path("preparationId").asText();
+      var proof =
+          (ObjectNode)
+              C.parse(
+                  db.jdbc.queryForObject(
+                      "SELECT proof::text FROM studio_guided_preparations WHERE session_id=? AND"
+                          + " preparation_id=?",
+                      String.class,
+                      db.fixtureSession(),
+                      preparationId));
+      var mutations =
+          java.util.List.<Consumer<ObjectNode>>of(
+              value -> value.putNull("assertSourceBinding"),
+              value ->
+                  value
+                      .withObject("/assertSourceBinding")
+                      .put("producerAdmissionId", "foreign-admission"),
+              value ->
+                  value
+                      .withObject("/assertSourceBinding")
+                      .put("producerPreparationId", "alternate-preparation"),
+              value -> value.withObject("/assertSourceBinding").put("bindingId", "other-binding"),
+              value -> value.withObject("/assertSourceBinding").putNull("bindingId"),
+              value -> value.withObject("/assertSourceBinding").put("backendNodeId", 1),
+              value -> value.withObject("/assertSourceBinding").put("bindingId", "x".repeat(257)),
+              value -> value.withObject("/target").remove("assertTextMode"),
+              value -> value.withObject("/target").put("assertTextMode", "DIRECT_PUBLIC"),
+              value -> value.put("contextRevision", 2),
+              value -> value.put("authoredInputsHash", "b".repeat(64)),
+              value -> {
+                value.remove("assertSourceBinding");
+                value.withObject("/target").remove("assertTextMode");
+              });
+      int index = 0;
+      for (Consumer<ObjectNode> mutation : mutations) {
+        var changed = proof.deepCopy().put("preparationId", "invalid-source-" + index++);
+        mutation.accept(changed);
+        assertThatThrownBy(
+                () ->
+                    db.jdbc.update(
+                        "INSERT INTO studio_guided_preparations(session_id,preparation_id,conte"
+                            + ("xt_id,owner_fence,request_digest,proof,expires_at) VALUES"
+                                + " (?,?,?,?,?,?")
+                            + ("::jsonb,?::timestamptz)"),
+                        db.fixtureSession(),
+                        changed.path("preparationId").asText(),
+                        changed.path("contextId").asText(),
+                        changed.path("ownerFence").asInt(),
+                        changed.path("requestDigest").asText(),
+                        changed.toString(),
+                        changed.path("expiresAt").asText()))
+            .isInstanceOf(org.springframework.dao.DataAccessException.class);
+      }
+      for (Consumer<ObjectNode> mutation : mutations) {
+        var changed = copy(basis);
+        var prepared = (ObjectNode) changed.path("preparations").get(4).path("proof");
+        mutation.accept(prepared);
+        assertThatThrownBy(() -> new GuidedBasisValidator(C).validate(changed))
+            .isInstanceOf(GuidedSessionException.class);
+      }
+      assertThat(
+              db.jdbc.queryForObject(
+                  "SELECT count(*) FROM studio_guided_preparations WHERE session_id=?",
+                  Integer.class,
+                  db.fixtureSession()))
+          .isEqualTo(5);
+      commitSqlCandidate(db, base, candidate);
+    }
+  }
+
+  /** Real inserts with production triggers installed; all browser outcomes remain controlled. */
+  private static void insertSourcePrefixRequest(
+      GuidedPublicationMigrationTest.Database db, ObjectNode request) {
+    db.jdbc.update(
+        "INSERT INTO studio_guided_prefix_requests(session_id,request_digest,step_id,ordinal,"
+            + "evidence_hash,document) VALUES (?,?,?,?,?,?::jsonb)",
+        db.fixtureSession(),
+        hash(request),
+        request.path("coordinate").path("stepId").asText(),
+        request.path("coordinate").path("ordinal").asInt(),
+        request.path("evidenceHash").asText(),
+        request.toString());
+  }
+
+  private static ObjectNode sourcePrefixReceipt(ObjectNode request, JsonNode frozenAction) {
+    var receipt =
+        request
+            .deepCopy()
+            .put("requestDigest", hash(request))
+            .putNull("admissionId")
+            .putNull("preparationId")
+            .put("attemptOrdinal", 0)
+            .put("operationHash", frozenAction.path("operationHash").asText())
+            .put("phase", "PRE_ADMISSION")
+            .put("nativeInvocationStarted", false)
+            .put("reason", "TARGET_DRIFT");
+    receipt.put("receiptHash", hash(receipt));
+    return receipt;
+  }
+
+  private static void insertSourcePrefixReceipt(
+      GuidedPublicationMigrationTest.Database db, ObjectNode receipt) {
+    db.jdbc.update(
+        "INSERT INTO studio_guided_no_invocation_receipts(session_id,request_digest,admission_id,"
+            + "preparation_id,receipt_hash,document) VALUES (?,?,NULL,NULL,?,?::jsonb)",
+        db.fixtureSession(),
+        receipt.path("requestDigest").asText(),
+        receipt.path("receiptHash").asText(),
+        receipt.toString());
+  }
+
+  private static ObjectNode sourcePrefixRequest(
+      GuidedPublicationMigrationTest.Database db, JsonNode program, JsonNode action) {
+    var proof = db.prefixSourceProof();
+    var request = C.object();
+    for (String field :
+        List.of(
+            "schemaVersion",
+            "sessionId",
+            "workerId",
+            "ownerFence",
+            "scopeHash",
+            "contextId",
+            "contextRevision",
+            "authoredInputsHash",
+            "sourceRevision",
+            "configurationRevision",
+            "pressInheritance",
+            "assertSourceBinding")) {
+      request.set(field, proof.path(field));
+    }
+    request.put("prefixProgramHash", hash(program)).put("evidenceHash", "e".repeat(64));
+    request.set("coordinate", action.path("coordinate"));
+    return request;
+  }
+
+  /**
+   * Append a real authored boundary; the frozen prefix continues to contain the source assertion.
+   */
+  private static ObjectNode appendPrefixWriteBoundary(GuidedPublicationMigrationTest.Database db)
+      throws Exception {
+    ObjectNode next = sameReadSourceBasis();
+    var mapper = new com.fasterxml.jackson.databind.ObjectMapper().findAndRegisterModules();
+    var authoringJson = copy(next.path("snapshotEvidence").path("current").path("authoring"));
+    String id = java.util.UUID.randomUUID().toString();
+    String text = "Verify the page contains \"Proof boundary\".";
+    authoringJson.withArray("steps").addObject().put("id", id).put("text", text).putNull("context");
+    var authoring =
+        mapper.treeToValue(authoringJson, com.citi.put.checks.studio.dto.AuthoringV2Request.class);
+    var variables =
+        com.citi.put.checks.studio.dto.CanonicalStudioCodec.parseVariables(
+            db.jdbc.queryForObject(
+                "SELECT variables::text FROM ui_tests WHERE id=?", String.class, db.testId));
+    var identity =
+        com.citi.put.checks.studio.authoring.IncrementalAuthoringIdentity.resolve(
+            authoring, variables);
+    var source = C.object().putArray("source");
+    authoring.steps().forEach(step -> source.add(step.text()));
+    db.jdbc.update(
+        "UPDATE ui_tests SET authoring=?::jsonb,authoring_revision_inputs=?::jsonb,steps=?::jsonb,"
+            + "source_revision=source_revision+1 WHERE id=?",
+        mapper.writeValueAsString(authoring),
+        mapper.writeValueAsString(identity.inputs()),
+        source.toString(),
+        db.testId);
+    next.withObject("/snapshotEvidence/current").set("authoring", mapper.valueToTree(authoring));
+    next.withArray("sourceSteps")
+        .addObject()
+        .put("stepId", id)
+        .put("ordinal", 3)
+        .put("source", text);
+    return next;
+  }
+
+  @Test
+  void persistedSourcePrefixRequestAndReceiptRejectCoherentMetadataMutations() throws Exception {
+    try (var seed = new GuidedPublicationMigrationTest.Database()) {
+      var original =
+          new GuidedPublicationMigrationTest.Database(
+              seed.jdbc, seed.tx, "wi6-prefix-base", sameReadSourceBasis());
+      var base = original.capture();
+      original.finalizing();
+      var candidate =
+          new ObservedArtifactLowerer(C)
+              .lower(
+                  original.snapshot(base).basis(), GuidedPublicationMigrationTest.currentProfile());
+      commitSqlCandidate(original, base, candidate);
+      var revision =
+          original.jdbc.queryForObject(
+              "SELECT id FROM ui_test_revisions WHERE guided_session_id=?",
+              java.util.UUID.class,
+              original.fixtureSession());
+      var next = appendPrefixWriteBoundary(original);
+      var replay =
+          new GuidedPublicationMigrationTest.Database(
+              seed.jdbc, seed.tx, "wi6-prefix-inserts", next, original.testId, revision);
+      replay.capture();
+      replay.finalizing();
+      var program =
+          C.parse(
+              replay.jdbc.queryForObject(
+                  "SELECT prefix_program::text FROM studio_guided_relearn_plans WHERE session_id=?",
+                  String.class,
+                  replay.fixtureSession()));
+      var action = program.path("actions").get(4);
+      assertThat(action.path("target").path("assertTextMode").asText())
+          .isEqualTo("READ_BINDING_SOURCE");
+      assertThat(
+              replay.jdbc.queryForObject(
+                  "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=? AND ordinal=?",
+                  Integer.class,
+                  replay.fixtureSession(),
+                  action.path("coordinate").path("stepId").asText(),
+                  action.path("coordinate").path("ordinal").asInt()))
+          .isZero();
+      var request = sourcePrefixRequest(replay, program, action);
+      var mutations =
+          List.<Consumer<ObjectNode>>of(
+              q -> q.remove("assertSourceBinding"),
+              q -> q.putNull("assertSourceBinding"),
+              q ->
+                  q.withObject("/assertSourceBinding").put("producerPreparationId", "foreign-prep"),
+              q ->
+                  q.withObject("/assertSourceBinding")
+                      .put("producerAdmissionId", "foreign-admission"),
+              q -> q.withObject("/assertSourceBinding").put("bindingId", "foreign-binding"),
+              q -> q.put("contextRevision", 2),
+              q -> q.put("authoredInputsHash", "b".repeat(64)));
+      for (Consumer<ObjectNode> mutation : mutations) {
+        var changed = request.deepCopy();
+        mutation.accept(changed);
+        // Reseal both request and receipt from the same changed identity, rather than leave stale
+        // hashes.
+        var receipt = sourcePrefixReceipt(changed, action);
+        assertThatThrownBy(
+                () ->
+                    replay.tx.executeWithoutResult(
+                        status -> {
+                          insertSourcePrefixRequest(replay, changed);
+                          insertSourcePrefixReceipt(replay, receipt);
+                          replay.jdbc.execute("SET CONSTRAINTS ALL IMMEDIATE");
+                        }))
+            .isInstanceOf(org.springframework.dao.DataAccessException.class);
+        assertThat(
+                replay.jdbc.queryForObject(
+                    "SELECT count(*) FROM studio_guided_prefix_requests WHERE session_id=?",
+                    Integer.class,
+                    replay.fixtureSession()))
+            .isZero();
+        assertThat(
+                replay.jdbc.queryForObject(
+                    "SELECT count(*) FROM studio_guided_no_invocation_receipts WHERE session_id=?",
+                    Integer.class,
+                    replay.fixtureSession()))
+            .isZero();
+      }
+      var invented = request.deepCopy();
+      invented.set("coordinate", program.path("actions").get(1).path("coordinate"));
+      assertThatThrownBy(() -> insertSourcePrefixRequest(replay, invented))
+          .isInstanceOf(org.springframework.dao.DataAccessException.class)
+          .hasStackTraceContaining("prefix source mode or operation invalid");
+      insertSourcePrefixRequest(replay, request);
+      for (Consumer<ObjectNode> mutation : mutations) {
+        var receipt = sourcePrefixReceipt(request, action);
+        receipt.remove("receiptHash");
+        mutation.accept(receipt);
+        receipt.put("receiptHash", hash(receipt));
+        assertThatThrownBy(() -> insertSourcePrefixReceipt(replay, receipt))
+            .isInstanceOf(org.springframework.dao.DataAccessException.class);
+        assertThat(
+                replay.jdbc.queryForObject(
+                    "SELECT count(*) FROM studio_guided_no_invocation_receipts WHERE session_id=?",
+                    Integer.class,
+                    replay.fixtureSession()))
+            .isZero();
+      }
+      var receipt = sourcePrefixReceipt(request, action);
+      replay.tx.executeWithoutResult(
+          status -> {
+            insertSourcePrefixReceipt(replay, receipt);
+            var current = replay.sessions.lock(replay.fixtureSession());
+            var incremental = replay.sessions.incremental();
+            incremental.settle(replay.fixtureSession(), hash(request), "DRIFT");
+            int index =
+                com.citi.put.checks.studio.guided.session.GuidedIncrementalStore.stepIndex(
+                    current.document(), receipt.path("coordinate").path("stepId").asText());
+            incremental.switchToLearning(
+                current.document(),
+                "DRIFT",
+                index,
+                receipt.path("coordinate").path("ordinal").asInt(),
+                receipt.path("receiptHash").asText());
+            current.progress().put("stepIndex", index);
+            current.document().put("state", "OBSERVING");
+            replay.sessions.save(current);
+            replay.jdbc.execute("SET CONSTRAINTS ALL IMMEDIATE");
+          });
+      assertThat(
+              replay.jdbc.queryForObject(
+                  "SELECT count(*) FROM studio_guided_prefix_requests WHERE session_id=? AND request_digest=?",
+                  Integer.class,
+                  replay.fixtureSession(),
+                  hash(request)))
+          .isEqualTo(1);
+      assertThat(
+              replay.jdbc.queryForObject(
+                  "SELECT document::text FROM studio_guided_no_invocation_receipts WHERE session_id=?",
+                  String.class,
+                  replay.fixtureSession()))
+          .satisfies(json -> assertThat(C.parse(json)).isEqualTo(receipt));
+      assertThat(
+              replay.jdbc.queryForObject(
+                  "SELECT jsonb_array_length(completed_admissions) FROM studio_guided_relearn_switches"
+                      + " WHERE session_id=? AND reason='DRIFT'",
+                  Integer.class,
+                  replay.fixtureSession()))
+          .isEqualTo(4);
+      assertThat(
+              replay.jdbc.queryForObject(
+                  "SELECT count(*) FROM studio_guided_actions WHERE session_id=?"
+                      + " AND proposal->'operation'->>'kind'='assert'",
+                  Integer.class,
+                  replay.fixtureSession()))
+          .isZero();
+    }
+  }
+
+  @Test
+  void persistedPrefixRequestRejectsMalformedActualProducerReceipt() throws Exception {
+    var mutations =
+        List.<Consumer<ObjectNode>>of(
+            p -> p.put("origin", "https://foreign.example.test"),
+            p -> p.withObject("/recipe").put("policyRuleId", "foreign-rule"),
+            p -> p.remove("availability"),
+            p -> p.withObject("/availability").put("contextId", "foreign-context"),
+            p -> p.withObject("/availability").put("workerId", "foreign-worker"),
+            p -> p.withObject("/availability").put("ownerFence", 2),
+            p -> p.withObject("/availability").put("bindingId", "foreign-binding"),
+            p -> p.withObject("/availability").put("producerAdmissionId", "foreign-admission"));
+    try (var seed = new GuidedPublicationMigrationTest.Database()) {
+      var original =
+          new GuidedPublicationMigrationTest.Database(
+              seed.jdbc, seed.tx, "wi6-prefix-producer-base", sameReadSourceBasis());
+      var base = original.capture();
+      original.finalizing();
+      var candidate =
+          new ObservedArtifactLowerer(C)
+              .lower(
+                  original.snapshot(base).basis(), GuidedPublicationMigrationTest.currentProfile());
+      commitSqlCandidate(original, base, candidate);
+      var revision =
+          original.jdbc.queryForObject(
+              "SELECT id FROM ui_test_revisions WHERE guided_session_id=?",
+              java.util.UUID.class,
+              original.fixtureSession());
+      var next = appendPrefixWriteBoundary(original);
+      int index = 0;
+      for (Consumer<ObjectNode> mutation : mutations) {
+        var replay =
+            new GuidedPublicationMigrationTest.Database(
+                seed.jdbc,
+                seed.tx,
+                "wi6-prefix-producer-" + index++,
+                next,
+                original.testId,
+                revision);
+        replay.producerDocumentMutation = mutation;
+        replay.capture();
+        replay.finalizing();
+        var program =
+            C.parse(
+                replay.jdbc.queryForObject(
+                    "SELECT prefix_program::text FROM studio_guided_relearn_plans WHERE session_id=?",
+                    String.class,
+                    replay.fixtureSession()));
+        var request = sourcePrefixRequest(replay, program, program.path("actions").get(4));
+        assertThatThrownBy(() -> insertSourcePrefixRequest(replay, request))
+            .isInstanceOf(org.springframework.dao.DataAccessException.class)
+            .hasStackTraceContaining("prefix producer receipt mismatch");
+        assertThat(
+                replay.jdbc.queryForObject(
+                    "SELECT count(*) FROM studio_guided_prefix_requests WHERE session_id=?",
+                    Integer.class,
+                    replay.fixtureSession()))
+            .isZero();
+      }
+    }
+  }
+
+  @Test
+  void persistedFrozenRevisionInsertRejectsCoherentModeStrippingAgainstSuccessfulPreparation()
+      throws Exception {
+    try (var seed = new GuidedPublicationMigrationTest.Database()) {
+      int index = 0;
+      for (var source : List.of(sameReadSourceBasis(), directParagraphBasis())) {
+        var db =
+            new GuidedPublicationMigrationTest.Database(
+                seed.jdbc, seed.tx, "wi6-frozen-strip-" + index++, source);
+        var base = db.capture();
+        db.finalizing();
+        var basis = db.snapshot(base).basis();
+        var candidate =
+            new ObservedArtifactLowerer(C)
+                .lower(basis, GuidedPublicationMigrationTest.currentProfile());
+        commitSqlCandidate(db, base, candidate);
+        var stripped = copy(candidate.artifact());
+        var action = (ObjectNode) stripped.path("learnedPlan").path("actions").get(4);
+        action.withObject("/target").remove("assertTextMode");
+        stripped.withArray("guards").get(4).withObject("/target").remove("assertTextMode");
+        var operationIdentity = C.object();
+        for (String field : List.of("coordinate", "origin", "target", "operation")) {
+          operationIdentity.set(field, action.path(field));
+        }
+        action.put("operationHash", hash(operationIdentity));
+        stripped.put("learnedPlanHash", hash(stripped.path("learnedPlan")));
+        var hashes = copy(candidate.hashes());
+        hashes
+            .put("learnedPlanHash", hash(stripped.path("learnedPlan")))
+            .put("artifactHash", hash(stripped));
+        var equivalence = C.object();
+        var operations = equivalence.putArray("operations");
+        stripped.path("steps").forEach(step -> step.path("operations").forEach(operations::add));
+        equivalence.set("guards", stripped.path("guards"));
+        equivalence.set("inputRecipes", stripped.path("inputRecipes"));
+        equivalence.set("bindings", basis.path("bindings"));
+        equivalence.set("transfers", basis.path("transfers"));
+        hashes.put("operationEquivalenceHash", hash(equivalence));
+        hashes.put(
+            "revisionDigest", hash(new ObservedArtifactLowerer(C).revisionIdentity(basis, hashes)));
+        // Reuse every other actual persisted column. BEFORE INSERT must reject against the
+        // successful preparation, before uniqueness or deferred publication receipt checks.
+        var replacement = C.object().put("id", java.util.UUID.randomUUID().toString());
+        replacement.set("artifact", stripped);
+        replacement.set("artifact_hash", hashes.path("artifactHash"));
+        replacement.set("learned_plan_hash", hashes.path("learnedPlanHash"));
+        replacement.set("revision_digest", hashes.path("revisionDigest"));
+        var provenance = copy(hashes);
+        provenance.set("profile", stripped.path("profile"));
+        provenance.put("guidedSessionId", db.fixtureSession()).put("publicationKind", "GUIDED_RUN");
+        provenance.set("runAuthorization", base.document().path("runAuthorization"));
+        replacement.set("provenance", provenance);
+        assertThatThrownBy(
+                () ->
+                    db.jdbc.update(
+                        "INSERT INTO ui_test_revisions SELECT (jsonb_populate_record(NULL::ui_test_revisions,"
+                            + " to_jsonb(r)||?::jsonb)).* FROM ui_test_revisions r WHERE guided_session_id=?",
+                        replacement.toString(),
+                        db.fixtureSession()))
+            .isInstanceOf(org.springframework.dao.DataAccessException.class)
+            .hasStackTraceContaining("frozen assertion metadata invalid");
+        assertThat(
+                db.jdbc.queryForObject(
+                    "SELECT count(*) FROM ui_test_revisions WHERE guided_session_id=?",
+                    Integer.class,
+                    db.fixtureSession()))
+            .isEqualTo(1);
+      }
+    }
+  }
+
+  static ObjectNode directParagraphBasis() throws Exception {
+    ObjectNode basis = copy(fixture("fresh-order-reference").path("basis"));
+    var obligations = basis.withObject("/translationPlan").withArray("obligations");
+    ((ObjectNode) obligations.get(3)).put("referenceIndex", 2);
+    var assertion = (ObjectNode) obligations.get(4);
+    assertion
+        .put("predicate", "containsText")
+        .put("targetIntent", "Café")
+        .put("referenceIndex", 1)
+        .putNull("needId");
+    ((ObjectNode) basis.path("translationPlan").path("sourceReferences").get(1))
+        .put("intendedSlot", "assert.expected");
+    var entry = (ObjectNode) basis.path("materializationEvidence").path("entries").get(1);
+    entry.withObject("/metadata").put("intendedSlot", "assert.expected");
+    entry.withObject("/metadata/provenance").put("intendedSlot", "assert.expected");
+    JsonNode span = entry.path("metadata").path("provenance");
+    String literal =
+        basis
+            .path("sourceSteps")
+            .get(2)
+            .path("source")
+            .asText()
+            .substring(span.path("startUtf16").asInt(), span.path("endUtf16").asInt());
+    entry.put(
+        "inputHash", GuidedContracts.hash(copy(entry.path("metadata")).put("value", literal)));
+    var preparations = basis.withArray("preparations");
+    ((ObjectNode) preparations.get(3))
+        .withObject("/proposal/operation/value")
+        .put("sourceInputId", "input-config");
+    var consumer = (ObjectNode) preparations.get(4);
+    var op = consumer.withObject("/proposal/operation").put("predicate", "containsText");
+    op.putObject("expected").put("kind", "authoredLiteral").put("sourceInputId", "input-label");
+    var target =
+        consumer
+            .withObject("/proof")
+            .putObject("target")
+            .put("tier", "testId")
+            .put("assertTextMode", "DIRECT_PUBLIC");
+    target.putArray("locator").addObject().put("by", "testId").put("value", "direct-paragraph");
+    target.putObject("identity").put("role", "paragraph").putNull("name");
+    String observationHash = consumer.path("observationHash").asText();
+    for (JsonNode row : basis.path("observations")) {
+      if (!row.path("observationHash").asText().equals(observationHash)) {
+        continue;
+      }
+      var observation = (ObjectNode) row.path("observation");
+      var fact =
+          observation
+              .withObject("/facts/e2")
+              .put("role", "paragraph")
+              .put("name", "")
+              .put("editable", false)
+              .put("evidence", literal)
+              .put("text", literal)
+              .put("ownTextComplete", true)
+              .put("directTextAssertion", true);
+      fact.putArray("evidenceSegments")
+          .addObject()
+          .put("field", "ownText")
+          .put("start", 0)
+          .put("end", literal.length());
+      observation
+          .withObject("/facts")
+          .putObject("e3")
+          .put("role", "caption")
+          .put("name", "Python")
+          .put("editable", false)
+          .put("evidence", "Python")
+          .put("nameComplete", true)
+          .put("ownTextComplete", true)
+          .putArray("evidenceSegments")
+          .addObject()
+          .put("field", "name")
+          .put("start", 0)
+          .put("end", 6);
+      observation
+          .withObject("/facts")
+          .putObject("e4")
+          .put("role", "link")
+          .put("name", "Designed by")
+          .put("editable", false)
+          .put("evidence", "Designed by")
+          .put("nameComplete", true)
+          .put("ownTextComplete", true)
+          .putArray("evidenceSegments")
+          .addObject()
+          .put("field", "name")
+          .put("start", 0)
+          .put("end", 11);
+      var readScope =
+          observation
+              .withObject("/facts/e1")
+              .putObject("readScope")
+              .put("relation", "SAME_ROW_LABEL")
+              .put("tableTitleRef", "e3");
+      readScope.putArray("sourceRefs").add("e3").add("e4");
+      String outline =
+          "- document\n"
+              + "  - text \"Reference\" [e1]\n"
+              + "  - paragraph [e2]\n"
+              + "  - caption \"Python\" [e3]\n"
+              + "  - link \"Designed by\" [e4]";
+      observation.put("outline", outline);
+      observation
+          .withObject("/projection")
+          .put("totalNodes", 4)
+          .put("shownNodes", 4)
+          .put("outlineBytes", outline.getBytes(StandardCharsets.UTF_8).length);
+    }
+    for (JsonNode need : basis.path("translationPlan").path("needs")) {
+      ((ArrayNode) need.path("consumers")).remove(1);
+    }
+    for (JsonNode allocation : basis.path("allocations")) {
+      ((ArrayNode) allocation.path("consumers")).remove(1);
+    }
+    ((ArrayNode) basis.path("consumerEdges")).remove(1);
+    ((ArrayNode) basis.path("transfers")).remove(1);
+    return basis;
+  }
+
+  @Test
+  void realMigratedDirectParagraphAndTitleObservationPersistAndRefuseModeNullAndSourceSwap()
+      throws Exception {
+    try (var seed = new GuidedPublicationMigrationTest.Database()) {
+      var db =
+          new GuidedPublicationMigrationTest.Database(
+              seed.jdbc, seed.tx, "wi6-direct", directParagraphBasis());
+      var base = db.capture();
+      db.finalizing();
+      JsonNode basis = db.snapshot(base).basis();
+      var candidate =
+          new ObservedArtifactLowerer(C)
+              .lower(basis, GuidedPublicationMigrationTest.currentProfile());
+      assertThat(
+              candidate
+                  .artifact()
+                  .path("guards")
+                  .get(4)
+                  .path("target")
+                  .path("assertTextMode")
+                  .asText())
+          .isEqualTo("DIRECT_PUBLIC");
+      assertThat(
+              db.jdbc.queryForObject(
+                  "SELECT studio_wi6_frozen_assertion_metadata(?::jsonb)",
+                  Boolean.class,
+                  candidate.artifact().toString()))
+          .isTrue();
+      var stripped = copy(candidate.artifact());
+      ((ObjectNode) stripped.path("learnedPlan").path("actions").get(4).path("target"))
+          .remove("assertTextMode");
+      ((ObjectNode) stripped.path("guards").get(4).path("target")).remove("assertTextMode");
+      assertThat(
+              db.jdbc.queryForObject(
+                  "SELECT studio_wi6_frozen_assertion_metadata(?::jsonb)",
+                  Boolean.class,
+                  stripped.toString()))
+          .isFalse();
+
+      assertThat(
+              db.jdbc.queryForObject(
+                  "SELECT count(*) FROM studio_guided_publication_observations WHERE session_id=?"
+                      + " AND jsonb_exists(observation->'facts'->'e1'->'readScope','tableTitleRef')",
+                  Integer.class,
+                  db.fixtureSession()))
+          .isEqualTo(1);
+      var prepared = basis.path("preparations").get(4);
+      var proof = copy(prepared.path("proof"));
+      var mutations =
+          java.util.List.<Consumer<ObjectNode>>of(
+              value -> value.withObject("/target").remove("assertTextMode"),
+              value -> value.withObject("/target").putNull("assertTextMode"),
+              value -> value.withObject("/target").put("assertTextMode", "READ_BINDING_SOURCE"),
+              value -> value.putNull("assertSourceBinding"));
+      int index = 0;
+      for (Consumer<ObjectNode> mutation : mutations) {
+        var changed = proof.deepCopy().put("preparationId", "invalid-direct-" + index++);
+        mutation.accept(changed);
+        assertThatThrownBy(
+                () ->
+                    db.jdbc.update(
+                        "INSERT INTO studio_guided_preparations(session_id,preparation_id,conte"
+                            + ("xt_id,owner_fence,request_digest,proof,expires_at) VALUES"
+                                + " (?,?,?,?,?,?")
+                            + ("::jsonb,?::timestamptz)"),
+                        db.fixtureSession(),
+                        changed.path("preparationId").asText(),
+                        changed.path("contextId").asText(),
+                        changed.path("ownerFence").asInt(),
+                        changed.path("requestDigest").asText(),
+                        changed.toString(),
+                        changed.path("expiresAt").asText()))
+            .isInstanceOf(org.springframework.dao.DataAccessException.class);
+      }
+      assertThat(
+              db.jdbc.queryForObject(
+                  "SELECT count(*) FROM studio_guided_preparations WHERE session_id=?",
+                  Integer.class,
+                  db.fixtureSession()))
+          .isEqualTo(5);
+      commitSqlCandidate(db, base, candidate);
+    }
+  }
+
+  @Test
+  void realProducerInsertCannotLaunderAvailabilityOriginOrRecipeIntoSourceAssertion()
+      throws Exception {
+    var mutations =
+        List.<Consumer<ObjectNode>>of(
+            producer -> producer.put("origin", "https://foreign.example.test"),
+            producer -> producer.withObject("/recipe").put("policyRuleId", "other-policy"),
+            producer -> producer.remove("availability"),
+            producer -> producer.putNull("availability"),
+            producer -> producer.withObject("/availability").put("contextId", "foreign-context"),
+            producer -> producer.withObject("/availability").put("workerId", "foreign-worker"),
+            producer -> producer.withObject("/availability").put("ownerFence", 2),
+            producer -> producer.withObject("/availability").put("bindingId", "foreign-binding"),
+            producer ->
+                producer
+                    .withObject("/availability")
+                    .put("producerAdmissionId", "foreign-admission"),
+            producer -> producer.withObject("/availability").put("backendNodeId", 123));
+    try (var seed = new GuidedPublicationMigrationTest.Database()) {
+      var good =
+          new GuidedPublicationMigrationTest.Database(
+              seed.jdbc, seed.tx, "wi6-receipt-good", sameReadSourceBasis());
+      var base = good.capture();
+      good.finalizing();
+      var basis = good.snapshot(base).basis();
+      var producer = basis.path("producers").get(0);
+      var prior = basis.path("actions").get(1).path("ledger");
+      var prepared = basis.path("preparations").get(1);
+      var source = basis.path("preparations").get(4).path("proof").path("assertSourceBinding");
+      assertThat(
+              seed.jdbc.queryForObject(
+                  "SELECT"
+                      + " studio_wi6_read_producer_metadata(?::jsonb,?::jsonb,?::jsonb,?::jsonb,?::jsonb)",
+                  Boolean.class,
+                  producer.toString(),
+                  prior.toString(),
+                  prepared.path("proposal").toString(),
+                  prepared.path("proof").toString(),
+                  source.toString()))
+          .isTrue();
+      int index = 0;
+      for (Consumer<ObjectNode> mutation : mutations) {
+        var malformed = copy(producer);
+        mutation.accept(malformed);
+        assertThat(
+                seed.jdbc.queryForObject(
+                    "SELECT"
+                        + " studio_wi6_read_producer_metadata(?::jsonb,?::jsonb,?::jsonb,?::jsonb,?::jsonb)",
+                    Boolean.class,
+                    malformed.toString(),
+                    prior.toString(),
+                    prepared.path("proposal").toString(),
+                    prepared.path("proof").toString(),
+                    source.toString()))
+            .isFalse();
+        var badBasis = copy(basis);
+        ((ArrayNode) badBasis.path("producers")).set(0, malformed);
+        assertThatThrownBy(
+                () -> new GuidedPlanBuilder(C).plan(badBasis, C.object().put("contract", 3)))
+            .isInstanceOf(GuidedSessionException.class);
+        var bad =
+            new GuidedPublicationMigrationTest.Database(
+                seed.jdbc, seed.tx, "wi6-receipt-bad-" + index++, sameReadSourceBasis());
+        bad.producerDocumentMutation = mutation;
+        bad.capture();
+        assertThatThrownBy(bad::finalizing)
+            .hasStackTraceContaining("assertion producer receipt mismatch");
+      }
+    }
+  }
+
+  @Test
+  void identicalReadAndEffectSourceArraysCannotGiveCaptionEffectAuthorityInSql() throws Exception {
+    var invalid = directParagraphBasis();
+    var observation = invalid.path("observations").get(2).path("observation");
+    ((ObjectNode) observation.path("facts").path("e1"))
+        .set(
+            "scopeRefs",
+            observation.path("facts").path("e1").path("readScope").path("sourceRefs").deepCopy());
+    assertThatThrownBy(
+            () ->
+                com.citi.put.checks.studio.guided.translation.GuidedGates.requireCoherentSources(
+                    observation.path("facts")))
+        .isInstanceOf(GuidedSessionException.class);
+    try (var seed = new GuidedPublicationMigrationTest.Database()) {
+      var bad =
+          new GuidedPublicationMigrationTest.Database(
+              seed.jdbc, seed.tx, "wi6-caption-effect", invalid);
+      bad.capture();
+      assertThatThrownBy(bad::finalizing)
+          .hasStackTraceContaining("ck_publication_observation_shape");
+    }
+  }
+
+  @Test
+  void exactSourceWithPublicFactTextCannotCoherentlyOmitReadModeInPersistedPreparation()
+      throws Exception {
+    var input = sameReadSourceBasis();
+    ((ObjectNode) input.path("observations").get(2).path("observation").path("facts").path("e1"))
+        .put("text", "Reference");
+    try (var seed = new GuidedPublicationMigrationTest.Database()) {
+      var db =
+          new GuidedPublicationMigrationTest.Database(
+              seed.jdbc, seed.tx, "wi6-public-source", input);
+      var base = db.capture();
+      db.finalizing();
+      var basis = db.snapshot(base).basis();
+      var stripped = copy(basis.path("preparations").get(4).path("proof"));
+      stripped.put("preparationId", "stripped-public-source").remove("assertSourceBinding");
+      stripped.withObject("/target").remove("assertTextMode");
+      assertThatThrownBy(
+              () ->
+                  db.jdbc.update(
+                      "INSERT INTO studio_guided_preparations(session_id,preparation_id,conte"
+                          + ("xt_id,owner_fence,request_digest,proof,expires_at) VALUES"
+                              + " (?,?,?,?,?,?")
+                          + ("::jsonb,?::timestamptz)"),
+                      db.fixtureSession(),
+                      stripped.path("preparationId").asText(),
+                      stripped.path("contextId").asText(),
+                      stripped.path("ownerFence").asInt(),
+                      stripped.path("requestDigest").asText(),
+                      stripped.toString(),
+                      stripped.path("expiresAt").asText()))
+          .hasStackTraceContaining("source assertion mode omitted");
+    }
+  }
+
+  @Test
+  void namedReceiverInNewDocumentMayReuseRefWithWithheldTextWithoutNewSourceMode()
+      throws Exception {
+    var input = sameReadSourceBasis();
+    var prepared = (ObjectNode) input.path("preparations").get(4);
+    prepared.withObject("/proof").remove("assertSourceBinding");
+    var target = prepared.withObject("/proof/target");
+    target.remove("assertTextMode");
+    target.putObject("identity").put("role", "heading").put("name", "Invoice");
+    target.putArray("locator").addObject().put("by", "testId").put("value", "invoice-receiver");
+    prepared.withObject("/proposal/target").put("documentId", "receiver-document");
+    prepared.withObject("/proposal/executionEvidence").put("documentId", "receiver-document");
+    prepared.withObject("/executionEvidence").put("documentId", "receiver-document");
+    ((ObjectNode) input.path("actions").get(4).path("ledger"))
+        .put("documentId", "receiver-document");
+    var observation = (ObjectNode) input.path("observations").get(2).path("observation");
+    observation.put("documentId", "receiver-document");
+    var fact =
+        observation
+            .withObject("/facts/e1")
+            .put("role", "heading")
+            .put("name", "Invoice")
+            .put("evidence", "Invoice");
+    fact.remove("text");
+    fact.putArray("evidenceSegments")
+        .addObject()
+        .put("field", "name")
+        .put("start", 0)
+        .put("end", 7);
+    String outline = "- document\n  - heading \"Invoice\" [e1]\n  - textbox \"Destination\" [e2]";
+    observation.put("outline", outline);
+    observation
+        .withObject("/projection")
+        .put("outlineBytes", outline.getBytes(StandardCharsets.UTF_8).length);
+    ((ObjectNode) input.path("translationPlan").path("obligations").get(4))
+        .put("targetIntent", "Invoice");
+    var sourceStep = (ObjectNode) input.path("sourceSteps").get(2);
+    sourceStep.put(
+        "source",
+        sourceStep.path("source").asText() + "; check that Invoice contains the copied reference");
+    ((ObjectNode)
+            input.path("snapshotEvidence").path("current").path("authoring").path("steps").get(2))
+        .put("text", sourceStep.path("source").asText());
+    try (var seed = new GuidedPublicationMigrationTest.Database()) {
+      var db =
+          new GuidedPublicationMigrationTest.Database(
+              seed.jdbc, seed.tx, "wi6-new-receiver", input);
+      var base = db.capture();
+      db.finalizing();
+      var basis = db.snapshot(base).basis();
+      var candidate =
+          new ObservedArtifactLowerer(C)
+              .lower(basis, GuidedPublicationMigrationTest.currentProfile());
+      assertThat(basis.path("preparations").get(4).path("proof").has("assertSourceBinding"))
+          .isFalse();
+      assertThat(candidate.artifact().path("guards").get(4).path("target").has("assertTextMode"))
+          .isFalse();
+      var foreign = copy(basis.path("preparations").get(4).path("proof"));
+      foreign.withObject("/target").put("assertTextMode", "READ_BINDING_SOURCE");
+      foreign
+          .putObject("assertSourceBinding")
+          .put("bindingId", "binding-reference")
+          .put(
+              "producerAdmissionId",
+              basis.path("producers").get(0).path("producerAdmissionId").asText())
+          .put(
+              "producerPreparationId",
+              basis.path("preparations").get(1).path("preparationId").asText());
+      foreign.put("preparationId", "foreign-mode-on-new-document");
+      assertThatThrownBy(
+              () ->
+                  db.jdbc.update(
+                      "INSERT INTO studio_guided_preparations(session_id,preparation_id,conte"
+                          + ("xt_id,owner_fence,request_digest,proof,expires_at) VALUES"
+                              + " (?,?,?,?,?,?")
+                          + ("::jsonb,?::timestamptz)"),
+                      db.fixtureSession(),
+                      foreign.path("preparationId").asText(),
+                      foreign.path("contextId").asText(),
+                      foreign.path("ownerFence").asInt(),
+                      foreign.path("requestDigest").asText(),
+                      foreign.toString(),
+                      foreign.path("expiresAt").asText()))
+          .hasStackTraceContaining("assertion producer mismatch");
+      commitSqlCandidate(db, base, candidate);
+      var history = C.object().putArray("history");
+      for (JsonNode action : basis.path("actions")) {
+        JsonNode prep =
+            GuidedPlanBuilder.unique(
+                basis.path("preparations"), "preparationId", action.path("preparationId").asText());
+        var row = history.addObject();
+        row.set("ledger", action.path("ledger"));
+        row.set("proposal", prep.path("proposal"));
+        row.set("proof", prep.path("proof"));
+      }
+      assertThatThrownBy(
+              () ->
+                  com.citi.put.checks.studio.guided.session.GuidedPreparationCrossCheck
+                      .verifySourceHistory(
+                          C,
+                          basis.path("translationPlan"),
+                          basis.path("preparations").get(4).path("proposal"),
+                          foreign,
+                          history,
+                          basis.path("producers")))
+          .hasMessage("EVIDENCE_MISMATCH");
+    }
+  }
+
+  @Test
+  void persistedDirectPreparationRejectsNegativeOutOfRangeAndForeignPlanMeaningPointers()
+      throws Exception {
+    try (var seed = new GuidedPublicationMigrationTest.Database()) {
+      int index = 0;
+      for (int invalid : List.of(-1, -2, Integer.MAX_VALUE)) {
+        var bad =
+            new GuidedPublicationMigrationTest.Database(
+                seed.jdbc, seed.tx, "wi6-direct-index-" + index++, directParagraphBasis());
+        bad.obligationMeaningMutation =
+            meaning -> {
+              if (meaning.path("operationKind").asText().equals("assert")) {
+                meaning.put("referenceIndex", invalid);
+              }
+            };
+        bad.capture();
+        assertThatThrownBy(bad::finalizing)
+            .hasStackTraceContaining("direct assertion reference index");
+      }
+      var duplicateCatalog = directParagraphBasis();
+      duplicateCatalog
+          .withObject("/translationPlan")
+          .withArray("sourceReferences")
+          .add(duplicateCatalog.path("translationPlan").path("sourceReferences").get(1).deepCopy());
+      var wrongPointer =
+          new GuidedPublicationMigrationTest.Database(
+              seed.jdbc, seed.tx, "wi6-direct-valid-index", duplicateCatalog);
+      wrongPointer.obligationMeaningMutation =
+          meaning -> {
+            if (meaning.path("operationKind").asText().equals("assert")) {
+              meaning.put("referenceIndex", 3);
+            }
+          };
+      wrongPointer.capture();
+      assertThatThrownBy(wrongPointer::finalizing)
+          .hasStackTraceContaining("direct assertion plan meaning mismatch");
+      var wrongObligation =
+          new GuidedPublicationMigrationTest.Database(
+              seed.jdbc, seed.tx, "wi6-direct-obligation", directParagraphBasis());
+      wrongObligation.obligationMeaningMutation =
+          meaning -> {
+            if (meaning.path("operationKind").asText().equals("assert")) {
+              meaning.put("obligationId", "foreign-direct-obligation");
+            }
+          };
+      wrongObligation.capture();
+      assertThatThrownBy(wrongObligation::finalizing)
+          .hasStackTraceContaining("direct assertion plan meaning mismatch");
+    }
+  }
+
+  @Test
+  void persistedCaptionNeedsPresentTitleRefAndNeverEffectScopeEvenForEqualArrays()
+      throws Exception {
+    try (var seed = new GuidedPublicationMigrationTest.Database()) {
+      var valid =
+          new GuidedPublicationMigrationTest.Database(
+              seed.jdbc, seed.tx, "wi6-caption-present", directParagraphBasis());
+      var base = valid.capture();
+      valid.finalizing();
+      var basis = valid.snapshot(base).basis();
+      commitSqlCandidate(
+          valid,
+          base,
+          new ObservedArtifactLowerer(C)
+              .lower(basis, GuidedPublicationMigrationTest.currentProfile()));
+      for (String variant : List.of("omitted", "null", "effect")) {
+        var invalid = directParagraphBasis();
+        var fact =
+            (ObjectNode)
+                invalid.path("observations").get(2).path("observation").path("facts").path("e1");
+        if (variant.equals("omitted")) {
+          fact.withObject("/readScope").remove("tableTitleRef");
+        }
+        if (variant.equals("null")) {
+          fact.withObject("/readScope").putNull("tableTitleRef");
+        }
+        if (variant.equals("effect")) {
+          fact.set("scopeRefs", fact.path("readScope").path("sourceRefs").deepCopy());
+        }
+        var bad =
+            new GuidedPublicationMigrationTest.Database(
+                seed.jdbc, seed.tx, "wi6-caption-" + variant, invalid);
+        bad.capture();
+        assertThatThrownBy(bad::finalizing)
+            .hasStackTraceContaining("ck_publication_observation_shape");
+      }
+    }
   }
 }

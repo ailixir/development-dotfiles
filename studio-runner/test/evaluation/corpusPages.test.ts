@@ -18,7 +18,7 @@ const post = (url: string, body: unknown): Promise<Response> => fetch(url, { met
 describe('corpus page host', () => {
   it('binds an ephemeral loopback port (no hard-coded port, no collision class)', () => {
     const url = new URL(host.origin);
-    expect(url.hostname).toBe('127.0.0.1');
+    expect(url.hostname).toBe('localhost');
     expect(Number(url.port)).toBeGreaterThan(1024);
     expect([4100, 4101, 4102]).not.toContain(Number(url.port));
   });

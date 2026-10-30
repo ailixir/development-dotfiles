@@ -10,8 +10,6 @@ public interface GuidedSessionAccess {
 
   Snapshot resolve(Authentication principal, JsonNode start);
 
-  void checkCurrent(JsonNode session);
-
   /** Lock the source/configuration row in the calling transaction and compare frozen revisions. */
   void checkSourceCurrent(JsonNode session);
 

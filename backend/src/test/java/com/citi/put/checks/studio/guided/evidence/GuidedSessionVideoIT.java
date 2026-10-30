@@ -244,6 +244,68 @@ class GuidedSessionVideoIT {
         .isEqualTo("INVALID_CONTRACT");
   }
 
+  @Test
+  void aPublishedLearnsRecordingIsRefusedRecordingNotRetainedAndNoRowIsWritten() throws Exception {
+    var s = seed.session("SUCCEEDED", 60, 1);
+    seed.markPublished(s.sessionId());
+    String body = body(s, "rec-pub", "STORED", false).toString();
+
+    MockHttpServletResponse refused = callback(s.sessionId(), 1, "k-pub", body, true);
+
+    assertThat(refused.getStatus()).isEqualTo(409);
+    JsonNode envelope = json.readTree(refused.getContentAsString());
+    assertThat(envelope.path("code").asText()).isEqualTo("RECORDING_NOT_RETAINED");
+    assertThat(envelope.path("retryable").asBoolean()).as("definite, never retried").isFalse();
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM studio_guided_session_recordings WHERE session_id=?",
+                Integer.class,
+                s.sessionId()))
+        .isZero();
+    // A resend gets the same definite answer.
+    assertThat(callback(s.sessionId(), 1, "k-pub", body, true).getStatus()).isEqualTo(409);
+  }
+
+  @Test
+  void aSucceededButUnpublishedLearnKeepsItsRecording() throws Exception {
+    // SUCCEEDED with the publication PENDING or REFUSED: no receipt row, so nothing is discarded.
+    var s = seed.session("SUCCEEDED", 60, 1);
+
+    assertThat(
+            callback(
+                    s.sessionId(),
+                    1,
+                    "k-keep",
+                    body(s, "rec-keep", "FAILED", false).toString(),
+                    true)
+                .getStatus())
+        .isEqualTo(202);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM studio_guided_session_recordings WHERE session_id=?",
+                Integer.class,
+                s.sessionId()))
+        .isEqualTo(1);
+    assertThat(result(s.sessionId()).path("evidence").path("video").path("status").asText())
+        .isEqualTo("FAILED");
+  }
+
+  @Test
+  void aPublishedLearnsVideoRouteIsNoEvidenceEvenWhenARowAndAnObjectExist() throws Exception {
+    // The row was written while the session was still finalizing; the publication then committed.
+    var s = recorded(recording(64));
+    assertThat(video(s.sessionId(), OWNER, null, "").getStatus()).isEqualTo(200);
+    seed.markPublished(s.sessionId());
+    org.mockito.Mockito.clearInvocations(store);
+
+    MockHttpServletResponse hidden = video(s.sessionId(), OWNER, null, "");
+
+    assertThat(hidden.getStatus()).isEqualTo(404);
+    assertThat(json.readTree(hidden.getContentAsString()).path("error").asText())
+        .isEqualTo("VIDEO_UNAVAILABLE");
+    org.mockito.Mockito.verifyNoInteractions(store);
+  }
+
   // ── the public video route ───────────────────────────────────────────────
 
   @Test

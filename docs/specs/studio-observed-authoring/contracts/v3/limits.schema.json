@@ -33,7 +33,7 @@
       "type": "integer",
       "minimum": 1,
       "maximum": 1572864,
-      "default": 786432
+      "default": 1572864
     },
     "maxModelOutputTokensTotal": {
       "type": "integer",
@@ -44,26 +44,14 @@
     "maxObservationBytes": {
       "type": "integer",
       "minimum": 1,
-      "maximum": 32768,
-      "default": 32768
-    },
-    "maxObservationNodes": {
-      "type": "integer",
-      "minimum": 1,
-      "maximum": 500,
-      "default": 500
-    },
-    "maxObservationDepth": {
-      "type": "integer",
-      "minimum": 1,
-      "maximum": 8,
-      "default": 8
+      "maximum": 524288,
+      "default": 524288
     },
     "maxSanitizedEvidenceBytesTotal": {
       "type": "integer",
       "minimum": 1,
-      "maximum": 1048576,
-      "default": 1048576
+      "maximum": 4194304,
+      "default": 4194304
     },
     "maxRuntimeValues": {
       "type": "integer",
@@ -94,6 +82,12 @@
       "minimum": 1,
       "maximum": 8,
       "default": 8
+    },
+    "maxOutlineBytes": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 40000,
+      "default": 40000
     }
   },
   "required": [
@@ -104,8 +98,7 @@
     "maxModelInputTokensTotal",
     "maxModelOutputTokensTotal",
     "maxObservationBytes",
-    "maxObservationNodes",
-    "maxObservationDepth",
+    "maxOutlineBytes",
     "maxSanitizedEvidenceBytesTotal",
     "maxRuntimeValues",
     "maxRuntimeValueBytes",

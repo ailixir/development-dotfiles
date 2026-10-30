@@ -113,24 +113,44 @@ public final class GuidedContracts {
   // limits.maxModelInputTokensTotal maximum/default moved 128000 -> 262144. MODEL-SIZING
   // (2026-10-18, ruling option A-ii) re-epochs session once more: limits.maxModelOutputTokensTotal
   // maximum/default 32000 -> 131072/98304 and limits.maxModelInputTokensTotal maximum/default
-  // 262144 -> 1572864/786432.
+  // 262144 -> 1572864/786432. STUDIO-GOV-001.4 re-epochs it once more: the session scope lost
+  // its application field (origins come from the test, not from a deployment application).
+  // STUDIO-FLEX-001 re-epochs it once more: the scope lost approvedOrigins (the deployment's
+  // allowed
+  // domains are read at use, never copied into a session).
+  // ADR-SC-007 (WI-3) re-epochs it once more: limits lost the observation node and depth ceilings,
+  // gained maxOutlineBytes (40,000), maxObservationBytes moved to 524,288, the evidence total to
+  // 4,194,304, and maxModelInputTokensTotal default 786,432 -> 1,572,864 (its existing maximum).
   private static final String SESSION_SCHEMA_EPOCH =
-      "dace2f2b43be2052997f7fff9c970b18e81b0f7b1931baba5ffd3a07f24f476b";
+      "26df4ab8ef285ba41721251365859b2a3f10bef2d4b2ba9f2820ffb1179bae83";
   // STUDIO-OBS-014 C2a re-epochs replay-validation: ObservedQuestionContext.question $refs
   // clarification.schema.json, which gained labelSource/role/region and two enum values.
   // STUDIO-OBS-009 round 057 re-epochs it again: every accepted-plan obligation gained the required
   // nullable scopeIntent (region-qualified step labels; user decision).
+  // STUDIO-GOV-001.3 re-epochs it once more: the clarification question lost the
+  // SIDE_EFFECT_CONFIRMATION reason and the CONFIRM_ACTION prompt code.
+  // STUDIO-GOV-001.4 re-epochs it again: the scope and the replay requirements lost their
+  // application, policy and entry-policy fields, and the runner context lost its observation policy
+  // and its hash.
+  // STUDIO-FLEX-001 re-epochs it again: the replay requirements lost allowedOrigins and the runner
+  // context lost approvedOrigins.
+  // ADR-SC-007 (WI-3) re-epochs it again: an observation is an outline plus a facts table, a target
+  // is a ref (the runner reports the locator, tier and identity), the Guard carries that
+  // ResolvedTarget, a clarification choice and an answer lose their node identifier, the witness
+  // meanings gain the
+  // semantic selection, and the read operation names no recipe.
+  // WI6: exact current expanded root gains fact/purpose/ordinal/scope and sealed source metadata.
   private static final String REPLAY_VALIDATION_SCHEMA_EPOCH =
-      "d4d60c1248a7bb4cb0338ce38de51da248b49ebb4bc94dc9d3964d81683fccdf";
+      "b9dd7b4281cb767f715cbe9ef9623bdc99680ddbefb8d53915d89d02868b03aa";
 
   private static final String LEDGER_SCHEMA_EPOCH =
       "b1a71bd543c51f4eaebd849f99139d077e475caf3ca90efa84a4c9d9d062b80d";
-  private static final String OBSERVATION_SCHEMA_EPOCH =
-      "9be57abe1679bafcf7dbbcf3452a515dab7032c999ad630a241c7cbb856ac2d2";
 
   // The only constraint of this frozen root is exactly one COMPLETE native alternative.
+  // WI6: prefix-drift receipts include required nullable press metadata and optional sealed source
+  // metadata. Pin the complete current root to retain independent native-branch validation.
   private static final String OUTCOME_SCHEMA_EPOCH =
-      "95f7878408ce7d089646898aef3d528bc2e3c62d7f2bf8f228134556dfe451e8";
+      "a9a4c23b11f47a2eac7651fb127ba4f67ddcca7035aa4cf9cd50c8995759cc3f";
 
   private record ArraySchema(JsonSchema shape, JsonSchema item, CompiledSchema itemObject) {
     ArraySchema(JsonSchema shape, JsonSchema item) {
@@ -220,9 +240,7 @@ public final class GuidedContracts {
             ? SESSION_SCHEMA_EPOCH
             : name.equals("v3/replay-validation")
                 ? REPLAY_VALIDATION_SCHEMA_EPOCH
-                : name.equals("v3/ledger")
-                    ? LEDGER_SCHEMA_EPOCH
-                    : name.equals("v3/observation") ? OBSERVATION_SCHEMA_EPOCH : null;
+                : name.equals("v3/ledger") ? LEDGER_SCHEMA_EPOCH : null;
     if (epoch == null) {
       return baseline;
     }
@@ -246,10 +264,6 @@ public final class GuidedContracts {
             root.properties(),
             Map.of("artifact", artifact, "validationBasis", basis),
             Map.of());
-      }
-      if (name.equals("v3/observation")) {
-        CompiledSchema observation = withObservationNodes(root);
-        return observation == null ? baseline : observation;
       }
       return root;
     } catch (RuntimeException unavailable) {
@@ -301,14 +315,6 @@ public final class GuidedContracts {
     return new CompiledSchema(original, Map.of(), Map.of(), Map.of(), compiled);
   }
 
-  private CompiledSchema withObservationNodes(CompiledSchema observation) {
-    ArraySchema nodes = compileArray(observation.properties().get("nodes"));
-    return nodes == null
-        ? null
-        : new CompiledSchema(
-            observation.shape(), observation.properties(), Map.of(), Map.of("nodes", nodes));
-  }
-
   /** Only the three original exercised-fact collections in the frozen replay request. */
   private CompiledSchema compileBasis(JsonSchema original) {
     CompiledSchema basis = compileProperties(original);
@@ -328,17 +334,12 @@ public final class GuidedContracts {
     }
     JsonSchema observed = observationFact.properties().get("observation");
     JsonSchema ledger = actionFact.properties().get("ledger");
-    if (!OBSERVATION_SCHEMA_EPOCH.equals(hash(observed.getSchemaNode()))
-        || !LEDGER_SCHEMA_EPOCH.equals(hash(ledger.getSchemaNode()))) {
+    if (!LEDGER_SCHEMA_EPOCH.equals(hash(ledger.getSchemaNode()))) {
       return null;
     }
     CompiledSchema observation = compileProperties(observed);
     CompiledSchema ledgerPlan = compileProperties(ledger);
     if (observation == null || ledgerPlan == null) {
-      return null;
-    }
-    observation = withObservationNodes(observation);
-    if (observation == null) {
       return null;
     }
     observationFact =
@@ -564,6 +565,11 @@ public final class GuidedContracts {
       }
     }
     return out.append('"').toString();
+  }
+
+  /** Exact canonical-v1 JSON identity across programmatic and wire integer node widths. */
+  public static boolean same(JsonNode left, JsonNode right) {
+    return canonical(left).equals(canonical(right));
   }
 
   public static String hash(JsonNode node) {

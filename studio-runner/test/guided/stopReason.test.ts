@@ -1,3 +1,4 @@
+import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -9,7 +10,7 @@ import { GuidedRuntime } from '../../src/guided/runtime.js';
 import type { GuidedBrowser } from '../../src/run/guidedBrowser.js';
 import type { RunnerContext } from '../../src/guided/types.js';
 import { hash } from '../../src/guided/contracts.js';
-import { guidedContext, ownershipSession, assignmentFor } from '../helpers/guided.js';
+import { guidedContext, ownershipSession, assignmentFor, sessionStub } from '../helpers/guided.js';
 
 /**
  * Why a session ends when its lease and its expiry coincide (STUDIO-OBS-007 hard-expiry).
@@ -28,7 +29,7 @@ function fireEarly(earlyMs: number | undefined): void {
 }
 
 function blankBrowser(context: RunnerContext): GuidedBrowser {
-  return { evidence: { kind: 'initialBlank', sessionId: context.sessionId, contextId: context.contextId, creationId: randomUUID(), documentId: randomUUID(), bootstrapId: randomUUID(), url: 'about:blank', origin: null, generation: 0 }, blankMatches: () => Promise.resolve(true), navigateBlank: vi.fn(() => Promise.resolve()), close: vi.fn(() => Promise.resolve()), terminate: vi.fn(() => Promise.resolve()), orderlyClosed: () => true, observations: { withhold: () => Promise.resolve(), dispose: () => Promise.resolve(), matches: () => Promise.resolve(false), observe: () => Promise.reject(new Error('NOT_USED')) } };
+  return { evidence: { kind: 'initialBlank', sessionId: context.sessionId, contextId: context.contextId, creationId: randomUUID(), documentId: randomUUID(), bootstrapId: randomUUID(), url: 'about:blank', origin: null, generation: 0 }, blankMatches: () => Promise.resolve(true), navigateBlank: vi.fn(() => Promise.resolve()), close: vi.fn(() => Promise.resolve()), terminate: vi.fn(() => Promise.resolve()), orderlyClosed: () => true, observations: sessionStub({ withhold: () => Promise.resolve(), dispose: () => Promise.resolve(), observe: () => Promise.reject(new Error('NOT_USED')) }) };
 }
 
 const lifecycleReason = (messages: { route: string; body: unknown }[]): unknown => (messages.filter(m => m.route === 'lifecycle').at(-1)?.body as { reason?: string } | undefined)?.reason;
@@ -46,7 +47,7 @@ async function ownedSession(options: { lifeMs: number; secret?: boolean; earlyMs
   const grant = ownershipSession(context); context.leaseExpiresAt = grant.owner.leaseExpiresAt;
   const assignment = assignmentFor(context), claims: { at: number; timeout: number }[] = [], messages: { route: string; body: unknown }[] = [];
   const ownershipOptions: OwnershipOptions = {
-    workerId: context.workerId, journalDirectory: directory, launch: vi.fn(() => Promise.resolve(blankBrowser(context))),
+    workerId: context.workerId, allowedDomains: TEST_DOMAINS, journalDirectory: directory, launch: vi.fn(() => Promise.resolve(blankBrowser(context))),
     callback: (route, body) => { messages.push({ route, body }); return Promise.resolve(); },
     claim: async (_command, _key, timeout) => {
       claims.push({ at: Date.now(), timeout });
@@ -68,7 +69,7 @@ async function startedRuntime(options: { lifeMs: number; leaseMs: number; earlyM
   const directory = await mkdtemp(join(tmpdir(), 'guided-stop-reason-')); clean.push(() => rm(directory, { recursive: true, force: true }));
   const context = guidedContext('https://example.test'), messages: { route: string; body: unknown }[] = [];
   context.expiresAt = new Date(Date.now() + options.lifeMs).toISOString(); context.leaseExpiresAt = new Date(Date.now() + options.leaseMs).toISOString();
-  const runtime = new GuidedRuntime(context, { workerId: context.workerId, journalDirectory: directory, launch: () => Promise.resolve(blankBrowser(context)), callback: (route, body) => { messages.push({ route, body }); return Promise.resolve(); } });
+  const runtime = new GuidedRuntime(context, { workerId: context.workerId, allowedDomains: TEST_DOMAINS, journalDirectory: directory, launch: () => Promise.resolve(blankBrowser(context)), callback: (route, body) => { messages.push({ route, body }); return Promise.resolve(); } });
   clean.push(() => runtime.stop('CANCELLED')); await runtime.start();
   return { messages, reason: () => lifecycleReason(messages) };
 }

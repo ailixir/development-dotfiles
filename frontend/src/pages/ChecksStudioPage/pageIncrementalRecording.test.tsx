@@ -1,10 +1,10 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { ReactNode } from 'react';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { http, HttpResponse } from 'msw';
-import type { TestDetailDto, TestDto } from '@/types/studio/studioTypes';
+import type { VideoEvidence } from '@/types/studio/studioTypes';
 import type { GuidedResult } from '@/types/studio/studioGuidedTypes';
 import { studioMockServer } from '@/services/mocks/studio/server';
 import { resetStudioMocks } from '@/services/mocks/studio/handlers';
@@ -12,8 +12,7 @@ import { fixtureDetail, fixtureStepId } from '@/services/mocks/studio/authoringS
 import { unlearnedDraft } from '@/services/mocks/studio/readinessFixtures';
 import { setGuidedScenario } from '@/services/mocks/studio/guidedHandlers';
 import {
-  learnWithSettlingVideo,
-  receiptFor,
+  endsIn,
   resultFor,
   timingsFor,
   type GuidedStepRef,
@@ -31,17 +30,17 @@ import { clearGuidedSession, setExecuting } from '@/store/slices/studioSlice';
 import ChecksStudioPage from './ChecksStudioPage';
 
 /**
- * STUDIO-OBS-009 round 065 (case436): a FULL guided learn, then an INCREMENTAL relearn on the same
- * mounted page, must end with the incremental recording's player on screen and its step seek
- * control usable.
+ * STUDIO-OBS-009 round 065 (case436), re-pointed by "proof = replay of the published revision": the
+ * recording the guided player shows is the recording of a learning attempt that did NOT publish. A
+ * published learn has none (its proof is the replay, `pageProofReplay.test.tsx`).
  *
- * Case436 on the real stack showed, for the incremental session only, three page result reads
- * (the recording was still `PROCESSING` on the first two), a single page video request, and then a
+ * Case436 on the real stack showed, for the second session only, three page result reads (the
+ * recording was still `PROCESSING` on the first two), a single page video request, and then a
  * harness expectation on the player that timed out. These tests pin what the page owns on that path,
- * with the same sequence in MSW: the poll re-reads while `PROCESSING`, mounts the player from the
- * incremental session's own id (not the FULL one), keeps no recording length from the FULL player,
- * and offers the seek for the step the relearn started from, whether or not the replayed prefix
- * steps carry stamps.
+ * with the same sequence in MSW: the poll re-reads while `PROCESSING`, labels the recording "Learning
+ * attempt", mounts the player from the second session's own id (not the first one's), keeps no
+ * recording length from the first player, and offers the seek for the steps the recording stamps,
+ * whether or not replayed prefix steps carry stamps.
  */
 
 const STUDIO_BASE = '*/api/v1/studio';
@@ -107,37 +106,21 @@ afterAll(() => {
 
 const StoreProvider = ({ children }: { children?: ReactNode }) => <Provider store={store}>{children}</Provider>;
 
-describe('FULL learn, then an incremental relearn on the same page', () => {
-  it('re-reads the PROCESSING recording, mounts the incremental session\'s own player and offers the edited step\'s seek', async () => {
+describe('a learn that does not publish, then another on the same page', () => {
+  it('labels the kept recording "Learning attempt", re-reads it while PROCESSING, and mounts each session\'s own player and seek', async () => {
     const draft = unlearnedDraft;
-    // Both sessions: the recording is still `PROCESSING` for the first two result reads.
-    setGuidedScenario(learnWithSettlingVideo(2), draft.id);
-
-    let phase: 'unlearned' | 'edited' = 'unlearned';
-    /** The test as the server reads it: unlearned, then (after the FULL publication) with step 2 changed. */
-    const current = (): TestDto => {
-      if (phase === 'unlearned') return draft;
-      const followed = store.getState().studio.guidedSessionByTestId[draft.id];
-      const receipt = followed ? store.getState().studio.guidedResultById[followed]?.publication.receipt : null;
-      return {
-        ...draft,
-        readiness: 'NEEDS_RELEARN',
-        firstChangedStepId: fixtureStepId(1),
-        confirmedRevisionId: receipt?.revisionId ?? null,
-      };
-    };
+    // Both sessions stop at step 2; the recording is still `PROCESSING` for the first two result reads.
+    setGuidedScenario(
+      endsIn('FAILED', { atStepIndex: 1, failureCode: 'ASSERTION_FAILED', video: 'AVAILABLE', videoProcessingReads: 2 }),
+      draft.id,
+    );
     studioMockServer.use(
       http.get(`${API_BASE}/checks/sources`, () => HttpResponse.json({ sources: [] })),
       http.get(`${API_BASE}/features`, () => HttpResponse.json({ sources: [], features: [] })),
       http.get(`${STUDIO_BASE}/tests`, () =>
-        HttpResponse.json({ data: [current()], page: 0, size: 20, totalElements: 1, totalPages: 1 }),
+        HttpResponse.json({ data: [draft], page: 0, size: 20, totalElements: 1, totalPages: 1 }),
       ),
-      http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(fixtureDetail(current()))),
-      // A Save answers with the test as the server now reads it.
-      http.put(`${STUDIO_BASE}/tests/:id`, async ({ request }) => {
-        const body = (await request.json()) as { steps: TestDetailDto['steps'] };
-        return HttpResponse.json({ ...fixtureDetail(current()), steps: body.steps });
-      }),
+      http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(fixtureDetail(draft))),
     );
     renderStudioAt(draft.id, <ChecksStudioPage guidedOptions={GUIDED_OPTIONS} />, { wrapper: StoreProvider });
     const runButton = async () => {
@@ -147,83 +130,70 @@ describe('FULL learn, then an incremental relearn on the same page', () => {
       return run;
     };
 
-    // FULL: its player is on screen, and its recording is short.
+    // First attempt: the recording is the learning attempt, not a proof.
     await userEvent.setup({ delay: null }).click(await runButton());
-    await waitFor(
-      () => expect(screen.getByTestId('guided-completion')).toHaveTextContent('Completed — learned from this run.'),
-      WAIT,
-    );
-    const fullPlayer = await screen.findByTestId('video-evidence-player', {}, WAIT);
-    const fullSessionId = store.getState().studio.guidedSessionByTestId[draft.id] as string;
-    expect(fullPlayer.getAttribute('src')).toBe(studioGuidedApi.videoPath(fullSessionId));
-    const fullRevisionId = store.getState().studio.guidedResultById[fullSessionId]?.publication.receipt?.revisionId;
-    expect(fullRevisionId).toBeTruthy();
-    mediaDuration = 2;
-    fireEvent(fullPlayer, new Event('loadedmetadata'));
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Seek to step 3' })).toBeDisabled(), WAIT);
+    await screen.findByTestId('learning-recording-in-logs', {}, WAIT);
+    const proof = screen.getByRole('tabpanel', { name: 'Proof' });
+    expect(within(proof).queryByTestId('video-evidence-player')).toBeNull();
+    expect(document.querySelector('video')).toBeNull();
+    await userEvent.setup({ delay: null }).click(screen.getByRole('tab', { name: 'Logs' }));
+    const firstPlayer = await screen.findByTestId('video-evidence-player', {}, WAIT);
+    expect(within(screen.getByRole('tabpanel', { name: 'Logs' })).getByTestId('video-evidence-player')).toBe(firstPlayer);
+    const firstSessionId = store.getState().studio.guidedSessionByTestId[draft.id] as string;
+    expect(firstPlayer.getAttribute('src')).toBe(studioGuidedApi.videoPath(firstSessionId));
+    expect(screen.getByTestId('guided-attempt-title')).toHaveTextContent('Learning attempt');
+    expect(screen.getByTestId('guided-attempt-note')).toHaveTextContent('It is not a proof');
+    expect(screen.queryByTestId('guided-proof-receipt')).toBeNull();
+    expect(screen.queryByTestId('guided-proof-notice')).toBeNull();
+    // The recording is 50 ms long: step 1 starts at 120 ms, past its end, so its seek is disabled.
+    mediaDuration = 0.05;
+    fireEvent(firstPlayer, new Event('loadedmetadata'));
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Seek to step 1' })).toBeDisabled(), WAIT);
+    // The poll stopped after the settled read: two PROCESSING reads and the AVAILABLE one.
+    expect(resultReads(firstSessionId)).toHaveLength(3);
 
-    // The edit: the server now reads NEEDS_RELEARN from step 2, on the FULL revision.
-    phase = 'edited';
+    // Second attempt, same mounted page.
     mediaDuration = Number.NaN; // a new element has no metadata yet
-    const editor = userEvent.setup({ delay: null });
-    await editor.type(screen.getByPlaceholderText('Add new test step...'), 'Click "Continue"{Control>}{Enter}{/Control}');
-    await editor.click(screen.getByRole('button', { name: 'Save' }));
-    await waitFor(() => expect(screen.getByTestId('guided-readiness-chip')).toHaveTextContent('Steps changed'), WAIT);
-    // Round 067 D3: "Steps as learned" follows the server's readiness instead of saying the steps are
-    // still ready to repeat, flags the changed step, and keeps the history fact.
-    await waitFor(
-      () =>
-        expect(screen.getByTestId('plan-explanation-current')).toHaveTextContent(
-          'Steps changed — next Run learns from step 2',
-        ),
-      WAIT,
-    );
-    expect(screen.getByTestId('plan-step-2')).toHaveTextContent('Changed since this run');
-    expect(screen.getAllByTestId('plan-step-changed')).toHaveLength(1);
-    expect(screen.getByTestId('plan-explanation')).not.toHaveTextContent('Learned · ready to repeat');
-    expect(screen.getByTestId('plan-explanation-history')).toHaveTextContent('Completed — learned from this run.');
     observed.length = 0;
-
-    // INCREMENTAL.
     await userEvent.setup({ delay: null }).click(await runButton());
     await waitFor(
-      () => expect(screen.getByTestId('guided-completion')).toHaveTextContent('learned again.'),
+      () => {
+        const id = store.getState().studio.guidedSessionByTestId[draft.id];
+        expect(id).toBeTruthy();
+        expect(id).not.toBe(firstSessionId);
+        expect(resultReads(id as string)).toHaveLength(3);
+      },
       WAIT,
     );
-    const incrementalSessionId = store.getState().studio.guidedSessionByTestId[draft.id] as string;
-    expect(incrementalSessionId).not.toBe(fullSessionId);
-    const start = observed.find((entry) => entry.method === 'POST' && entry.path.endsWith('/guided-sessions'));
-    expect(start?.body).toMatchObject({
-      baseRevisionId: fullRevisionId,
-      firstLearnStepId: fixtureStepId(1),
-    });
-
-    // The player is the incremental session's, mounted once the recording settled.
+    const secondSessionId = store.getState().studio.guidedSessionByTestId[draft.id] as string;
+    expect(document.querySelector('video')).toBeNull();
+    await userEvent.setup({ delay: null }).click(screen.getByRole('tab', { name: 'Logs' }));
     const player = await screen.findByTestId('video-evidence-player', {}, WAIT);
-    expect(player.getAttribute('src')).toBe(studioGuidedApi.videoPath(incrementalSessionId));
-    expect(player.getAttribute('src')).not.toBe(studioGuidedApi.videoPath(fullSessionId));
+    expect(player.getAttribute('src')).toBe(studioGuidedApi.videoPath(secondSessionId));
+    expect(player.getAttribute('src')).not.toBe(studioGuidedApi.videoPath(firstSessionId));
     expect(screen.getByTestId('video-evidence')).toHaveAttribute('data-evidence-kind', 'guided');
-    expect(screen.getByTestId('video-evidence')).toHaveAttribute('data-video-status', 'AVAILABLE');
-
-    // Two `PROCESSING` reads and the settled one; the poll then stops.
-    expect(resultReads(incrementalSessionId)).toHaveLength(3);
+    expect(resultReads(secondSessionId)).toHaveLength(3);
     await new Promise((resolve) => setTimeout(resolve, 150));
-    expect(resultReads(incrementalSessionId)).toHaveLength(3);
+    expect(resultReads(secondSessionId)).toHaveLength(3);
 
-    // The FULL player's 2 s length is not carried over: before the new element has metadata the
-    // edited step's seek is enabled, and it stays enabled once the new recording's length is known.
-    const stepSeek = await screen.findByRole('button', { name: 'Seek to step 2' }, WAIT);
+    // The first player's 50 ms length is not carried over: the seek is enabled before the new element
+    // has metadata, and stays enabled once the new recording's length is known.
+    const stepSeek = await screen.findByRole('button', { name: 'Seek to step 1' }, WAIT);
     expect(stepSeek).toBeEnabled();
-    expect(screen.getByRole('button', { name: 'Seek to step 3' })).toBeEnabled();
     mediaDuration = 330;
     fireEvent(player, new Event('loadedmetadata'));
-    expect(screen.getByRole('button', { name: 'Seek to step 3' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Seek to step 1' })).toBeEnabled();
     await userEvent.setup({ delay: null }).click(stepSeek);
-    expect((player as HTMLVideoElement).currentTime).toBe(1.12);
+    expect((player as HTMLVideoElement).currentTime).toBe(0.12);
+    expect(screen.getByRole('tab', { name: 'Logs' })).toHaveAttribute('aria-selected', 'true');
+    expect(within(screen.getByRole('tabpanel', { name: 'Logs' })).getByTestId('video-evidence-player')).toBe(player);
+    expect(player).toBeInTheDocument();
+    // A learning attempt is never followed by a proof replay.
+    expect(observed.filter((entry) => /\/studio\/executions\//u.test(entry.path))).toHaveLength(0);
   }, 90_000);
 });
 
-describe('an incremental result whose replayed prefix steps carry no stamps', () => {
+describe('an incremental attempt whose replayed prefix steps carry no stamps', () => {
   const SESSION = 'incremental-session';
   const steps: GuidedStepRef[] = Array.from({ length: 6 }, (_, index) => ({
     stepId: fixtureStepId(index),
@@ -231,19 +201,22 @@ describe('an incremental result whose replayed prefix steps carry no stamps', ()
   }));
   const BASE_REVISION = '22222222-2222-4222-8222-222222222222';
 
-  /** Six steps; 1-4 reused from the base revision, 5-6 learned; stamps only for what ran in this recording. */
+  /**
+   * Six steps; 1-4 reused from the base revision, 5-6 learned and the attempt stopped at step 6, so it
+   * did not publish and its recording is kept; stamps only for what ran in this recording.
+   */
   function incrementalResult(): GuidedResult {
     const result = resultFor({
       sessionId: SESSION,
       executionId: SESSION,
-      outcome: 'SUCCEEDED',
-      publication: { status: 'PUBLISHED', receipt: receiptFor(SESSION, 2, { stepId: fixtureStepId(4) }) },
+      outcome: 'FAILED',
+      publication: { status: 'REFUSED', receipt: null },
       steps,
       sourceRevision: '5',
       configurationRevision: '1',
-      explanation: { completed: 6, reusedBefore: 4, baseRevisionId: BASE_REVISION, failedIndex: null },
-      errorCode: null,
-      failure: null,
+      explanation: { completed: 5, reusedBefore: 4, baseRevisionId: BASE_REVISION, failedIndex: 5 },
+      errorCode: 'ASSERTION_FAILED',
+      failure: { code: 'ASSERTION_FAILED' },
       detail: null,
       relearnedFrom: { stepId: fixtureStepId(4) },
       video: 'AVAILABLE',
@@ -263,9 +236,13 @@ describe('an incremental result whose replayed prefix steps carry no stamps', ()
 
   function Surface({ result }: { result: GuidedResult }) {
     const { videoRef, seekToOffset, recordingDurationMs } = useVideoSeek();
+    const video = result.evidence.video as VideoEvidence;
     return (
       <>
-        <VideoEvidencePanel ref={videoRef} guided={{ sessionId: SESSION, result }} />
+        <VideoEvidencePanel
+          ref={videoRef}
+          guided={{ sessionId: SESSION, result: { executionId: result.executionId, evidence: { video } } }}
+        />
         <GuidedSeekControls result={result} recording={{ durationMs: recordingDurationMs }} onSeek={seekToOffset} />
       </>
     );

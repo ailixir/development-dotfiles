@@ -10,7 +10,6 @@ import {
   LockOutlined,
 } from '@mui/icons-material';
 import {
-  Grid,
   Card,
   CardContent,
   Typography,
@@ -144,7 +143,18 @@ const CheckTypeSelector: React.FC<CheckTypeSelectorProps> = ({
           </Typography>
           <Divider sx={{ mb: 2 }} />
 
-          <Grid container spacing={2}>
+          {/*
+            * A CSS grid, two columns from `sm`: Basic and Integrations (2 + 4) fill their rows, UI Test is the
+            * same width as its siblings, and `1fr` rows make every card in a group one height.
+            */}
+          <Box
+            sx={{
+              display: 'grid',
+              gap: 2,
+              gridTemplateColumns: { xs: 'minmax(0, 1fr)', sm: 'repeat(2, minmax(0, 1fr))' },
+              gridAutoRows: '1fr',
+            }}
+          >
             {category.types.map((type) => {
               const Icon = type.icon;
               const enabled = isEnabled(type.value);
@@ -152,98 +162,87 @@ const CheckTypeSelector: React.FC<CheckTypeSelectorProps> = ({
               const paletteColor = theme.palette[type.color].main;
 
               return (
-                <Grid
-                  item
+                <Card
                   key={type.value}
-                  xs={12}
-                  sm={category.label === 'UI Testing' ? 12 : 6}
-                  md={category.label === 'UI Testing' ? 12 : 4}
+                  onClick={enabled ? () => onSelect(type.value) : undefined}
+                  sx={{
+                    height: '100%',
+                    cursor: enabled ? 'pointer' : 'default',
+                    opacity: enabled ? 1 : 0.5,
+                    transition: 'all 0.2s ease',
+                    border: `1px solid ${selected ? paletteColor : theme.palette.divider}`,
+                    backgroundColor: selected
+                      ? alpha(paletteColor, 0.04)
+                      : theme.palette.background.paper,
+                    boxShadow: selected ? theme.shadows[3] : theme.shadows[0],
+                    '&:hover': enabled
+                      ? {
+                          boxShadow: theme.shadows[2],
+                          borderColor: selected ? paletteColor : alpha(paletteColor, 0.5),
+                        }
+                      : undefined,
+                  }}
                 >
-                  <Card
-                    onClick={enabled ? () => onSelect(type.value) : undefined}
+                  <CardContent
                     sx={{
-                      cursor: enabled ? 'pointer' : 'default',
-                      opacity: enabled ? 1 : 0.5,
-                      transition: 'all 0.2s ease',
-                      borderLeft: selected
-                        ? `2px solid ${paletteColor}`
-                        : `1px solid ${theme.palette.divider}`,
-                      borderRight: `1px solid ${selected ? 'transparent' : theme.palette.divider}`,
-                      borderTop: `1px solid ${selected ? 'transparent' : theme.palette.divider}`,
-                      borderBottom: `1px solid ${selected ? 'transparent' : theme.palette.divider}`,
-                      backgroundColor: selected
-                        ? alpha(paletteColor, 0.04)
-                        : theme.palette.background.paper,
-                      boxShadow: selected ? theme.shadows[3] : theme.shadows[0],
-                      '&:hover': enabled
-                        ? {
-                            boxShadow: theme.shadows[2],
-                            borderColor: alpha(paletteColor, 0.5),
-                          }
-                        : undefined,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      textAlign: 'center',
+                      py: 3,
                     }}
                   >
-                    <CardContent
-                      sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        textAlign: 'center',
-                        py: 3,
-                      }}
-                    >
-                      <Box sx={{ position: 'relative', mb: 2 }}>
+                    <Box sx={{ position: 'relative', mb: 2 }}>
+                      <Avatar
+                        sx={{
+                          width: 48,
+                          height: 48,
+                          bgcolor: paletteColor,
+                          color: '#fff',
+                        }}
+                      >
+                        <Icon />
+                      </Avatar>
+                      {!enabled && (
                         <Avatar
                           sx={{
                             width: 48,
                             height: 48,
-                            bgcolor: paletteColor,
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            bgcolor: alpha(theme.palette.common.black, 0.5),
                             color: '#fff',
                           }}
                         >
-                          <Icon />
+                          <LockOutlined />
                         </Avatar>
-                        {!enabled && (
-                          <Avatar
-                            sx={{
-                              width: 48,
-                              height: 48,
-                              position: 'absolute',
-                              top: 0,
-                              left: 0,
-                              bgcolor: alpha(theme.palette.common.black, 0.5),
-                              color: '#fff',
-                            }}
-                          >
-                            <LockOutlined />
-                          </Avatar>
-                        )}
-                      </Box>
-
-                      <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                        {type.label}
-                      </Typography>
-
-                      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                        {type.description}
-                      </Typography>
-
-                      {!enabled
-                        && !disabledTypes.includes(type.value)
-                        && !(type.value === 'UI_TEST' && uiTestAvailability === 'pending') && (
-                        <Chip
-                          label="Coming Soon"
-                          size="small"
-                          variant="outlined"
-                          sx={{ mt: 1.5 }}
-                        />
                       )}
-                    </CardContent>
-                  </Card>
-                </Grid>
+                    </Box>
+
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                      {type.label}
+                    </Typography>
+
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                      {type.description}
+                    </Typography>
+
+                    {!enabled
+                      && !disabledTypes.includes(type.value)
+                      && !(type.value === 'UI_TEST' && uiTestAvailability === 'pending') && (
+                      <Chip
+                        label="Coming Soon"
+                        size="small"
+                        variant="outlined"
+                        sx={{ mt: 1.5 }}
+                      />
+                    )}
+                  </CardContent>
+                </Card>
               );
             })}
-          </Grid>
+          </Box>
         </Box>
       ))}
     </Box>

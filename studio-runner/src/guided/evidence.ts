@@ -14,6 +14,16 @@
  * stop does not wait for any of it: teardown is "browser gone", and the backend accepts the fact
  * after the session is terminal, inside its settle grace (AR-1 R3 acceptance predicate 7-8).
  *
+ * ## Discard on `PUBLISHED`
+ *
+ * A learn that publishes keeps no recording: its proof is the observed replay of the published
+ * revision. The `PUBLISHED` stop reaches the runtime, which calls {@link GuidedSessionRecording.discard}
+ * instead of `settle` once the browser is gone: the local webm and scratch directory are removed,
+ * and nothing is uploaded, no manifest is written and no `recording-evidence` callback is sent. Every
+ * other stop reason settles as above. A backend that still receives a callback for a published
+ * session answers `409 RECORDING_NOT_RETAINED`, which the callback port surfaces as that message and
+ * which is settled, not retried.
+ *
  * ## Honest states on the guided wire (AR-1 R1/R3)
  *
  * `STORED` only after the store acknowledged the video. A recorder that produced no playable file,
@@ -106,6 +116,9 @@ export interface GuidedRecorder {
 }
 
 export const MAX_RECORDING_CALLBACK_ATTEMPTS = 3;
+
+/** The callback port's message for `409 error RECORDING_NOT_RETAINED`: a definite answer, so not a failure to retry. */
+export const RECORDING_NOT_RETAINED = 'RECORDING_NOT_RETAINED';
 
 export function createGuidedRecorder(ports: GuidedRecorderPorts): GuidedRecorder {
   let scratch: Promise<RecordingScratch> | undefined;
@@ -251,6 +264,21 @@ export class GuidedSessionRecording {
     return this.settlement;
   }
 
+  /**
+   * Drops the recording without uploading it: no object, no manifest, no callback; the evidence
+   * directory is removed. Shares the settlement with {@link settle}, so it is idempotent and
+   * whichever of the two is called first wins (a recording already being uploaded stays uploaded;
+   * the backend refuses the late callback). Never rejects.
+   */
+  discard(): Promise<void> {
+    this.settlement ??= this.drop().then((): GuidedRecordingState => 'UNAVAILABLE', (): GuidedRecordingState => 'UNAVAILABLE');
+    return this.settlement.then(() => undefined);
+  }
+
+  private async drop(): Promise<void> {
+    if (this.directory !== null) await (await this.scratch()).dispose(this.directory).catch(() => undefined);
+  }
+
   private async run(input: {
     readonly identity: BridgeIdentity; readonly videoPath: string | null; readonly orderlyClose: boolean;
     readonly callback: RecordingEvidenceCallback
@@ -304,7 +332,9 @@ export class GuidedSessionRecording {
     const attempts = Math.min(MAX_RECORDING_CALLBACK_ATTEMPTS, Math.max(1, this.ports.callbackAttempts ?? MAX_RECORDING_CALLBACK_ATTEMPTS));
     const key = `rec-${this.recordingId}`;
     for (let attempt = 1; attempt <= attempts; attempt++) {
-      try { await input.callback('recording-evidence', body, key); return; } catch {
+      try { await input.callback('recording-evidence', body, key); return; } catch (error) {
+        // The backend's definite refusal for a published session: settled, never retried.
+        if (error instanceof Error && error.message === RECORDING_NOT_RETAINED) return;
         if (attempt < attempts) await this.ports.sleep((this.ports.callbackBackoffMs ?? 1000) * attempt);
       }
     }

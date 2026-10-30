@@ -5,9 +5,9 @@ That guide supersedes the earlier Sonic/fake-store setup notes below; cloud prov
 
 | Field | Value |
 |---|---|
-| **Status** | **COMPLETE for V1, and assembled once.** 10.18a drafted the three pod sections; **story 10.18b drafted the edge sections and assembled them here**, as @po's split mandated — a runbook split into two halves is two half-runbooks. All seven subjects AC-24 names are covered: Chromium and the sandbox (§1), egress and approved destinations (§2), evidence expiry (§3), signals/drain/reaping (§4), stuck runs (§5), the kill switch (§6), SSE (§7) and manifest recovery (§8). §§9-11 carry the three open prerequisites this deployment must not be read without. **§12 (rollback) was added by story 10.19 (AC-9); the epic had never written one down.** |
+| **Status** | **COMPLETE for V1, and assembled once.** 10.18a drafted the three pod sections; **story 10.18b drafted the edge sections and assembled them here**, as @po's split mandated — a runbook split into two halves is two half-runbooks. All seven subjects AC-24 names are covered: Chromium and the sandbox (§1), egress and the domain whitelist (§2), evidence expiry (§3), signals/drain/reaping (§4), stuck runs (§5), the kill switch (§6), SSE (§7) and manifest recovery (§8). §§9-11 carry the three open prerequisites this deployment must not be read without. **§12 (rollback) was added by story 10.19 (AC-9); the epic had never written one down.** |
 | **Accountable owner** | **The Checks squad**, as the on-call owner. BRD §4: the Checks squad *"owns Studio execution, recovery, capacity and the runner runbook"*; **Platform/SRE supports** cluster, ingress, egress, sandbox and storage controls. BRD §8 makes this document a **launch exit criterion**. **Re-verified by story 10.19's audit (AC-8b), 2026-09-17: still named and still accurate** — `docs/brd/checks-ui-studio.brd.md:81` and BRD §8's on-call row |
-| **Sections from 10.18a** | §1 Chromium and the sandbox · §2 Egress and approved destinations · §3 Evidence storage and expiry · §4 Signals, drain and reaping |
+| **Sections from 10.18a** | §1 Chromium and the sandbox · §2 Egress and the domain whitelist · §3 Evidence storage and expiry · §4 Signals, drain and reaping |
 | **Sections from 10.18b** | §5 Stuck runs (reapers, ledger states, what an operator may and may not do by hand) · §6 The kill switch · §7 SSE · §8 Manifest recovery · §9 Identity (`ED-02`) · §10 CSRF · §11 Configuration delivery |
 | **Sections from 10.19** | **§12 Rollback** |
 | **Sections from STUDIO-OBS-009** | **§14 One entrypoint, TLS everywhere, the one-pod guard and the new Secrets** (written 2026-10-18 by @devops); the `CMD` paragraph of §4 is amended in the same change. §§1-3 and §5-13 were **not** re-audited by this change: §2 in particular still describes the `callback-api` class without the guided connector port (see §14.6) |
@@ -82,60 +82,8 @@ That guide supersedes the earlier Sonic/fake-store setup notes below; cloud prov
 
 ## 1. Chromium and the sandbox
 
-*Implements architecture §9.3 ("Run non-root … no privileged mode, restricted service-account
-access, CPU/memory limits, writable per-run scratch and `/dev/shm`"; "Prove sandbox startup in
-staging; do not disable it silently to make the image run") and ADR-001 §8.*
-
-**What current chart source configures.** Shipped runner values set `runAsNonRoot: true`,
-`allowPrivilegeEscalation: false`, dropped capabilities, `readOnlyRootFilesystem: true` and
-`seccompProfile.type: RuntimeDefault`. The template mounts writable scratch and in-memory
-`/dev/shm`; the `local` evidence provider adds its shared filesystem mount. Guided mode adds
-`/tmp` and its separate journal mount. TLS, trust and guided credential mounts are read-only.
-These are source settings, not proof of sandbox startup in a cluster.
-
-Operators can configure CPU/memory, scratch and `/dev/shm` sizes and the supported runner
-settings. `runnerEnv` is enumerated: unknown names including `HOME` and
-`PLAYWRIGHT_BROWSERS_PATH` fail rendering; chart-managed names must use their dedicated values.
-The template emits no container `command` or `args`; the image CMD ends with `exec node` (§4).
-With observed validation/replay on, the runner image is pinned to the catalog digest and its tag
-is ignored; image/catalog changes must follow §14.4.
-
-**Do not weaken the security settings.** An omitted seccomp type fails rendering, but an explicit
-`Unconfined` type and a writable root are detected by deployment-test assertions, **not refused by
-Helm itself** (`chart.test.ts` includes successful render mutations for both). The template has no
-generic command/args override. Passing a renderer is not proof that edited values preserve the
-sandbox, browser-path disjointness or one-container bound. Review those settings before rollout.
-
-**Why `readOnlyRootFilesystem` is a browser-integrity control and not tidiness.** @qa's SEC-2 attack
-builds a shim browser registry — every real file symlinked except `chrome-headless-shell`, which is
-replaced by a script that execs the real binary with a sandbox-disabling flag — and points the
-browser search path at it. **The historical 10.18a attack measurement succeeded.** In that measured writable container it
-succeeded at both `/ms-playwright` (which is world-writable in the base image) and `/home/pwuser`,
-and the renderer process comes up at `Seccomp=0` where a direct launch has it at `Seccomp=2`. With
-the measured root filesystem read-only and writable mounts disjoint from the browser path and
-`$HOME`, both writes were refused with `Read-only file system`. This dated measurement is not a
-retest of the current image; current-image and cluster proof remain owed to @devops/Platform/SRE.
-
-**Browser identity correction (2026-10-20).** The earlier runbook said nothing reads the running
-browser's identity and recorded a declined version-only check. That historical decision is not a
-complete description of current source: `assertObservedBrowserStartup` checks the installed full
-Chromium executable provenance hash and browser-launcher hash against build metadata;
-`verifyBrowserPreferences` reads `chrome://version/` and checks the real executable/profile paths
-and effective profile preferences. These checks do not establish cluster sandbox enforcement or
-protect against an adversary who can replace the pod spec/trust inputs. Incident review still needs
-the actual pod spec and image/catalog digest; a browser version string alone is insufficient.
-
-**Still open (`ED-05` / SPK-04).** That the sandbox actually *starts* under the cluster's
-PodSecurity level, on nodes with unprivileged user namespaces, under the selected seccomp profile,
-has **not** been proven — it cannot be proven outside a cluster. If it does not, the answer is a
-Platform-approved `Localhost` profile. **There is no fallback that disables the sandbox.**
-
----
-
-## 2. Egress and approved destinations
-
-*Implements architecture §9.3 ("Permit runner access to the callback API, Sonic, approved targets,
-and controlled DNS only") and ADR-001 §9.*
+*Implements architecture §9.3 and ADR-001 §9, as changed by STUDIO-FLEX-001 (user decisions of
+2026-10-25): the domain whitelist is the only navigation control, and all IP addresses are open.*
 
 **When both `studioRunner.enabled` and `studioRunner.networkPolicy.enabled` are true, the template emits** a `NetworkPolicy` selecting runner pods, naming **both**
 `Ingress` and `Egress` policy types — which isolates those directions subject to the policy's allow rules and the cluster CNI — with:
@@ -145,17 +93,44 @@ and controlled DNS only") and ADR-001 §9.*
 | Ingress | the **API and worker** pods, on the runner's Service port | Internal validation, replay and guided calls; the MFE never talks to the runner |
 | Egress | the **API** pods, on `backend.service.port`, plus `studioRunner.guided.tlsConnector.port` while guided mode is on | `callback-api`: replay admission/progress use the ordinary API port; guided claim/callbacks use the separate TLS connector (§14.2) |
 | Egress | the object store, port from a values key, with metadata/link-local/private ranges excepted | `object-store` |
-| Egress | the approved targets, **currently empty** | `target-page` — see below |
+| Egress | **any destination and port** (one empty, open rule) | `target-page` — see below |
 | Egress | `kube-dns` | Not a destination class. Without it every destination becomes a **silent hang** instead of a refusal |
 
 These three class names are the runner's own `PERMITTED_DESTINATIONS`, and the deployment test compares
 them against that production constant rather than against a list written in a test — so a fourth
 class cannot appear on one side alone.
 
-**The shipped `approvedTargets` list is empty, deliberately.** `ED-04` / SPK-05 has not ruled. An empty list adds no target-specific L3/L4 allow rule. It does **not** prove every unapproved
-host unreachable: the broad object-store rule permits public addresses on its configured port,
-and NetworkPolicy allows are additive. Current runner origin/policy checks are a separate control.
-Real destination, DNS, metadata and subresource denial proof remains ED-04/SPK-05.
+**Target pages are not filtered by address.** There is no per-target allow list in the chart, no runner egress
+proxy and no address deny list: firewalls own reachability. **Accepted risks (user decision):** the
+browser can reach internal endpoints, including cloud metadata; an identity-provider page can appear
+in the video evidence; apps reachable only by IP address cannot be authored; SSO in a popup does not
+work.
+
+**The domain whitelist is the navigation control.** Helm `studioNavigation.allowedDomains` is one
+list, rendered to the backend (`studio.navigation.allowed-domains`, API and worker) and to the runner
+(`STUDIO_RUNNER_ALLOWED_DOMAINS`, optional, comma-separated). It ships **empty, and an empty list
+denies every navigation**, so an environment must fill it in before any test can run. Entries are
+lowercase punycode domain names, matched by suffix on label boundaries (`citi.com` covers
+`www.citi.com` and not `evilciti.com`); wildcards, IP literals, schemes, ports, paths, trailing dots,
+uppercase, more than 32 entries and overlapping entries fail the render, and the backend and runner
+refuse them at start-up (the runner exits 78). Setting the list in `configOverrides`, `env` or
+`runnerEnv` fails the render. Author-directed navigations must land on a listed host. Hosts off the
+list may serve page assets and redirect hops only (SaaS SSO): page-initiated navigations, redirect
+chains, iframes and subresources load from any host, and when the main frame settles on an
+off-list host the runner waits up to 15 s for it to return before it observes or acts on anything.
+If it does not, learning ends FAILED `ORIGIN_NOT_ALLOWED` and a replay step fails `POLICY_REFUSED`.
+A change to the list takes effect on the next deployment of both images, with no re-learn.
+
+**Allow all domains (ON by default for now).** Helm `studioNavigation.allowAllDomains` (default `true`, user decision
+2026-10-25; set `false` to enforce the list above) lets Studio navigate to any http(s) URL whose host is a DNS name; the list
+is then ignored (it is still validated), so the empty shipped list denies nothing while the switch is on. It is per environment, like the list, and one value feeds both images (backend `studio.navigation.allow-all-domains`, runner
+`STUDIO_RUNNER_ALLOW_ALL_DOMAINS`), so the backend cannot admit what the runner refuses; setting either directly fails the
+render. Only the YAML booleans `true` and `false` are accepted, in the chart and in both images (a typo stops start-up, the
+runner exits 78); the chart always renders an explicit value, and an unset value means on in the runner and the backend
+property default. IP literals, userinfo and other schemes stay refused, and each image logs one WARN line at start-up while it
+is on. The NetworkPolicy does not change: its page egress is already open and is not derived from the list. Read recipes
+learned under a list are refused (`READ_REFUSED`) under allow-all and the reverse, as they are when a list loses an entry, so
+re-learn the affected tests after switching.
 
 **If a staging run hangs rather than failing**, check DNS first and the callback rule second. The
 architecture calls this out by name: an egress policy written without the callback and object-store
@@ -164,20 +139,14 @@ starts, and the terminal report never arrives. With the recovery scheduler enabl
 closure; an unavailable callback or store can still leave only an error/unknown result. A disabled
 dispatcher also disables scheduled recovery (§5).
 
-**The limit Security must accept explicitly (§9.3).** *"Standard Kubernetes NetworkPolicy operates
-at network layers, not URL paths."* If SPK-05 finds that only static L3/L4 policy is available,
-**per-run destination checks in the runner become the primary control** and that limitation needs
-an explicit acceptance from Security. It is not accepted today.
-
 **API connector ingress.** With guided mode and runner network policy enabled,
 `api-guided-tls-networkpolicy.yaml` permits the ordinary API port from all sources and the guided
 TLS connector from API-namespace runner/worker selectors. It does not enforce URL paths or
 establish CNI enforcement; the connector's client-certificate trust remains §14's external input.
 
 **Current observed authorization.** The job's `binding` carries `scope`, `scopeHash`,
-`currentPolicyHash` and `replayGrant`; `secretOrigins` accompanies the resolved secrets.
-`validateObservedJob` checks these bindings against the artifact and trusted policy before
-admission. The dispatch policy identity remains audit context; it does not replace these checks.
+and `replayGrant`; `secretOrigins` accompanies the resolved secrets.
+`validateObservedJob` checks these bindings against the artifact before admission. The dispatch policy identity remains audit context; it does not replace these checks.
 See `studio-runner/src/validator/observedReplay.ts` and `src/executor/observedOperations.ts`
 under the same runner directory.
 
@@ -272,6 +241,13 @@ plus the preStop flip and a configured headroom. **Raising `STUDIO_RUNNER_MAX_TO
 raises the grace period automatically.** If you ever find yourself setting the grace period by hand,
 the value you are overriding is the one keeping admitted work from being killed mid-run.
 
+**Shipped capacity values (STUDIO-FLEX-001 item 4; starting values, unmeasured):** a pod runs 2
+browsers (`STUDIO_RUNNER_POOL_SIZE`), a replay may run 300 s (`STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS`; the
+per-step timeout stays at most 120 s), the drain waits up to 360 s, and the derived grace period is
+395 s (300 + 15 stop + 30 delivery + 15 upload + 5 preStop + 30 headroom). Tests are limited to 100
+steps. A replay pod requests 1 CPU / 2Gi and is limited to 4 CPU / 4Gi, with a 2Gi `/dev/shm` and 8Gi
+of scratch.
+
 **Readiness and liveness mean different things and the probes must stay pointed where they are.** A
 **saturated** pod answers `429`/`503` with `Retry-After` and stays **ready** — removing it from the
 Service would deadlock the pool. A **draining** pod goes **not ready**. Readiness is `GET /ready`;
@@ -316,7 +292,7 @@ known manifest for an issued attempt, then closes as `DISPATCH_FAILED` (never is
 `DISPATCH_UNKNOWN` (issued, outcome ambiguous), subject to cancellation/conditional guards.
 `RunningReaper` reconciles before start-timeout, stale-run and cancel-margin closure and settles
 evidence without overwriting a known outcome. Reports do not extend the run deadline.
-Defaults are pending 600 s, browser-start 30 s, total browser runtime 120 s, run deadline 600 s;
+Defaults are pending 600 s, browser-start 30 s, total browser runtime 300 s (one value: the backend's `studio.execution.total-runtime` renders from `runnerEnv.STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS`), run deadline 600 s;
 these are separate budgets. The total runtime must be strictly inside the run deadline. Recovery
 polls every 5 s by default while its scheduler is enabled; deadlines are not exact wall-clock
 completion promises.
@@ -525,7 +501,8 @@ and is not the public BFF identity route.
    `ED-02`.
    **Every Studio secret needs an `allowedOrigins` key** (story 10.44, ADR-SC-003) beside its value
    in the KV v2 entry (a secret saved through Studio is written with one; §9.2): comma-separated `scheme://host[:port]` origins, http(s) only, at most 16.
-   The current password write checks the secret's origins **and** the session's approved origins,
+   Creating a secret refuses (400, nothing written to Vault) an origin that is not on the domain whitelist (§2).
+   The current password write checks the secret's origins **and** the whitelist,
    plus form-action origin before and after focus. Current refusals include `POLICY_DENIED`,
    `PASSWORD_FORM_ACTION_NOT_ALLOWED` and target-change/ambiguity codes; the historical
    `SECRET_ORIGIN_NOT_ALLOWED` wording in older comments is not the current observed runtime code. A missing, empty or malformed list binds the secret to no origin
@@ -622,10 +599,9 @@ endpoints or commands verified here; PUT Core/platform Vault owners must confirm
 CLI/version, permitted path and soft-delete/CAS behavior before using them. No current
 `UNKNOWN_REFERENCE` guarantee is inferred from that historical example.
 
-**Connecting Vault is not enough to run with a secret.** Secret use is still decided by the
-development entitlement map `studio.secrets.entitlements` (`principal|csi|environment -> ids`);
-the production secret-use policy is PUT Core's and not built (V6). A run whose principal is not
-entitled to a secret there is refused even when Vault holds it. A `503 VAULT_UNAVAILABLE` is
+**Secrets belong to one test.** There is no per-principal entitlement: whoever may run a test
+may use that test's secrets, and only those (the Vault path carries `{testId}`). A run that names
+a secret saved for another test is refused `SECRET_UNAVAILABLE` and sends nothing. A `503 VAULT_UNAVAILABLE` is
 logged at WARN as `Studio Vault call failed: …` with Vault's HTTP status, which is how a token
 missing `create` or `list` shows.
 
@@ -1125,11 +1101,18 @@ listener in any configuration. A runner that cannot read its TLS files does not 
 ### 14.3 The one-pod guard (A2.6)
 
 Guided mode runs on **exactly one runner pod**. The worker holds sessions in memory and refuses
-calls it does not own, so a second pod could only produce fail-closed refusals, and capacity is the
-constant 1. The chart enforces it at render; each of these fails `helm template` naming the key:
+calls it does not own, so a second pod could only produce fail-closed refusals. Several learning
+sessions share that one pod: `studioRunner.guided.capacity` (1 to 8, shipped 1, UAT 3) is rendered to
+the runner as `STUDIO_RUNNER_GUIDED_CAPACITY` and to the API and worker as the deployment-wide cap
+`studio.guided-authoring.max-concurrent-sessions`, so the two cannot differ. The (capacity+1)th start
+is refused `429 BUDGET_EXCEEDED` with message code `LEARNING_CAPACITY_EXHAUSTED` (retryable, with
+`Retry-After`) before any session row or charge; the runner's own `CAPACITY` refusal is the backstop.
+Several learning pods are deferred: they need per-pod routing. The chart enforces the one pod at render; each of these fails `helm template` naming the key:
 
-- guided on with `studioRunner.replicaCount` other than 1 (**every shipped values file sets 2**, so
-  an environment enabling guided mode must also set it to 1);
+- guided on with `studioRunner.replicaCount` other than 1 (**every shipped values file sets 2 except
+  `values-uat.yaml`, which sets 1**, so any other environment enabling guided mode must also set it to 1);
+- guided on with a `studioRunner.guided.capacity` that is not a whole number from 1 to 8, or with the
+  runner key or the backend property set anywhere but that value;
 - guided on with `studioRunner.autoscaling.enabled` true (a ScaledObject would own the count);
 - guided on with `studioRunner.shareProcessNamespace` not true (PID-1 b, below);
 - guided on with `studioRunner.enabled` false.
@@ -1158,7 +1141,9 @@ replica count, and do not delete the journal to "resume" a session.
 - **The guided token issuer is outside this repository (register U21).** Nothing in the chart or
   code mints the three guided token files (they live at most 300 s and the kubelet can lag behind a
   Secret update). **A guided-enabled shared environment is blocked until Platform/SRE delivers an
-  external issuer** that refreshes three audience-scoped files. The chart fails closed: an empty
+  external issuer** that refreshes three audience-scoped files. `values-uat.yaml` now ships guided mode on,
+  so a UAT release needs `studioRunner.guided.token.issuer`, `.controllerSubject` and `.publicKey`
+  at deploy time (they are never committed) or the render fails naming the first one missing. The chart fails closed: an empty
   token Secret name, issuer, subject or public key fails the render. The token files must be
   directory mounts (a `subPath` mount goes stale).
 
@@ -1188,7 +1173,7 @@ replica count, and do not delete the journal to "resume" a session.
   `callback-api`, with API and worker ingress matching the chart. This source recheck supplies
   no cluster/CNI enforcement evidence; the G-4/SPK-05 obligations remain.
 - The pod's resource sizing for two browsers, the `/tmp` and journal volume sizes, the liveness
-  threshold and the guided drain bound (about 63 s of the 215 s grace) are starting values with a
+  threshold and the guided drain bound (about 63 s of the 395 s grace) are starting values with a
   recorded basis (`d2/resource-basis.md`), **unmeasured** (G-4).
 - SIEM routing of the studio audit stream (`studioAuditSiem`, off by default) and the platform-neutral
   alert specification (`d2/r82-alert-spec.md`) are specified, not exercised; the sink and the alert

@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Alert, AlertTitle, Box, Button, CircularProgress, Stack, Typography } from '@mui/material';
 import { PlayArrow, Stop } from '@mui/icons-material';
@@ -28,11 +28,10 @@ export const STOPPING_LABEL = 'Stopping…';
 export const SAVING_LABEL = 'Saving…';
 export const STARTING_LABEL = 'Starting…';
 /**
- * Shown beside a disabled Run when the server said this caller may not run the test (story 10.48,
- * ADR-002 O-22). Visible text, tied to the button with `aria-describedby`, never a tooltip alone.
+ * The widest the captions beside Run may grow, in px. A caption wraps inside this width instead of
+ * widening the Run column and squeezing the editor header's title (STUDIO-UNIFY-001.6 AC-05, D6).
  */
-export const RUN_NOT_PERMITTED_REASON =
-  'You do not have permission to run tests for this CSI. Only its owners and authorized administrators can run them.';
+export const RUN_CAPTION_MAX_WIDTH = 280;
 
 export interface RunControlProps {
   /** The draft to run. Null while no scenario is selected. */
@@ -79,8 +78,8 @@ export interface RunControlProps {
   readonly runRequest?: number;
   /**
    * `?autorun=1`, as its own request so "Run again" (`runRequest`) is unchanged (STUDIO-UNIFY-001,
-   * DC-01). It is evaluated **once**, when the gate has read the test, its capabilities read has
-   * settled (answered or failed) and the page has armed it with the draft's steps known. At that
+   * DC-01). It is evaluated **once**, when the gate has read the test (answered or failed) and the
+   * page has armed it with the draft's steps known. At that
    * moment it is served if Run is runnable and dropped if not; it never waits for a later change
    * (a learn ending, a refresh, a first typed step). A press of Run or Stop, a learn-from or "Run
    * again" request before then drops it too. `testId` names the test it was armed for.
@@ -94,6 +93,13 @@ export interface RunControlProps {
    * gives it a full-width slot below the header. Without one the alerts render under the button.
    */
   readonly alertsContainer?: HTMLElement | null;
+  /**
+   * Where the three captions beside Run render: why a start was not made (`run-start-unavailable`),
+   * why Run is disabled (`run-not-permitted`) and "Add a step" (`run-blocked-reason`). They are as tall
+   * as the button again or more, so a header that must stay short gives them a slot of their own under
+   * it (STUDIO-UNIFY-001.6 AC-05). Without one they render under the button, as before.
+   */
+  readonly captionContainer?: HTMLElement | null;
   /**
    * Starts a guided learning session: the page's `useGuidedSession(testId).startLearn`
    * (STUDIO-OBS-008 AC-2). Without it, a draft that needs learning cannot be run from here.
@@ -138,6 +144,7 @@ export const RunControl: React.FC<RunControlProps> = ({
   autorunRequest = null,
   onAutorunSettled,
   alertsContainer,
+  captionContainer,
   startLearn,
   guidedStartRefusal = null,
   onOpenVariables,
@@ -156,9 +163,6 @@ export const RunControl: React.FC<RunControlProps> = ({
   const runnable = gate.canRun && hasSteps && !(sessionUnreadable && gate.mode !== 'replay');
   /** A learn-again request arrived while the stored session was unreadable: dropped, and said so. */
   const [learnBlocked, setLearnBlocked] = useState(false);
-  /** Story 10.48: the server said no, so Run is disabled and says why. Never hidden. */
-  const notPermitted = gate.executePermission === 'denied' && !isRunning;
-  const notPermittedId = `${useId()}-run-not-permitted`;
 
   /**
    * The readiness chip (AC-3, D-4): "Learned · ready to repeat", or the `NEEDS_RELEARN` sentence
@@ -221,8 +225,8 @@ export const RunControl: React.FC<RunControlProps> = ({
     if (autorunRequest === null || autorunRequest.token <= settledAutorun.current) return;
     // Armed for another test (the route moved on): the page drops it; nothing is consumed here.
     if (autorunRequest.testId !== testId) return;
-    // Not settled yet: the test read and the capabilities read must both have answered or failed.
-    if (gate.loading || !gate.readDone || !gate.capabilitiesSettled) return;
+    // Not settled yet: the test read must have answered or failed.
+    if (gate.loading || !gate.readDone) return;
     settledAutorun.current = autorunRequest.token;
     onAutorunSettledRef.current?.();
     if (!runnable || isRunning) return;
@@ -310,11 +314,37 @@ export const RunControl: React.FC<RunControlProps> = ({
     </>
   );
 
+  /** The captions beside Run: in place under the button, or in the page's caption slot. */
+  const captions = (
+    <>
+      {startUnavailable && (
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          data-testid="run-start-unavailable"
+          sx={{ display: 'block', mt: 1, maxWidth: RUN_CAPTION_MAX_WIDTH, overflowWrap: 'anywhere' }}
+        >
+          {guidedCopy('startUnavailableCaption')}
+        </Typography>
+      )}
+
+      {!isRunning && !hasSteps && (
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          data-testid="run-blocked-reason"
+          sx={{ display: 'block', mt: 1, maxWidth: RUN_CAPTION_MAX_WIDTH, overflowWrap: 'anywhere' }}
+        >
+          Add a step to run this test.
+        </Typography>
+      )}
+    </>
+  );
+
   return (
-    <Box>
+    <Box sx={{ maxWidth: { lg: RUN_CAPTION_MAX_WIDTH } }}>
       <Button
         aria-label={isRunning ? stopLabel : RUN_LABEL}
-        aria-describedby={notPermitted ? notPermittedId : undefined}
         variant="contained"
         size="medium"
         startIcon={
@@ -344,39 +374,8 @@ export const RunControl: React.FC<RunControlProps> = ({
         {isRunning ? stopLabel : (busyLabel ?? RUN_LABEL)}
       </Button>
 
-      {startUnavailable && (
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          data-testid="run-start-unavailable"
-          sx={{ display: 'block', mt: 1, overflowWrap: 'anywhere' }}
-        >
-          {guidedCopy('startUnavailableCaption')}
-        </Typography>
-      )}
-
-      {notPermitted && (
-        <Typography
-          id={notPermittedId}
-          variant="caption"
-          color="text.secondary"
-          data-testid="run-not-permitted"
-          sx={{ display: 'block', mt: 1 }}
-        >
-          {RUN_NOT_PERMITTED_REASON}
-        </Typography>
-      )}
-
-      {!isRunning && !hasSteps && (
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          data-testid="run-blocked-reason"
-          sx={{ display: 'block', mt: 1 }}
-        >
-          Add a step to run this test.
-        </Typography>
-      )}
+      {/* A portal is not a ReactNode to Box's `children` type; the Fragment keeps it one (.5 AC-11). */}
+      {captionContainer ? <>{createPortal(captions, captionContainer)}</> : captions}
 
       {sessionUnreadable && !isRunning && (gate.mode !== 'replay' || learnBlocked) && (
         <Typography
@@ -401,8 +400,20 @@ export const RunControl: React.FC<RunControlProps> = ({
       )}
 
       {chipTest !== null && (
-        <Box sx={{ mt: 1 }}>
-          <ReadinessChip test={chipTest} draftStepIds={chipTest.steps.map((step) => step.id)} />
+        // From `lg` the chip takes no width in the Run column: it hangs from the column's right edge
+        // and grows leftward, so it never moves Run or the buttons beside it. Below `lg` it flows.
+        <Box
+          sx={{
+            mt: 1,
+            display: 'flex',
+            justifyContent: { xs: 'flex-start', lg: 'flex-end' },
+            width: { xs: 'auto', lg: 0 },
+            ml: { lg: 'auto' },
+          }}
+        >
+          <Box sx={{ flexShrink: 0, width: { lg: 'max-content' }, maxWidth: { xs: '100%', lg: RUN_CAPTION_MAX_WIDTH } }}>
+            <ReadinessChip test={chipTest} draftStepIds={chipTest.steps.map((step) => step.id)} />
+          </Box>
         </Box>
       )}
 

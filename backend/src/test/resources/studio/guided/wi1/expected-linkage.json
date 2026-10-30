@@ -1,0 +1,21 @@
+{
+  "description": "Expected obligation kinds per step (1-based) and read-to-consumer edges for the four alpha checklists. An admitted plan whose kinds or edges differ is reported as ADMITTED_MISLINKED.",
+  "checklists": {
+    "wikipedia": {
+      "kinds": [[1, "navigate"], [2, "read"], [3, "fill"], [4, "press"], [5, "assert"], [6, "assert"]],
+      "edges": ["2>3:fill.value", "2>6:assert.expected"]
+    },
+    "hackernews": {
+      "kinds": [[1, "navigate"], [2, "click"], [3, "assert"], [4, "read"], [5, "click"], [6, "assert"]],
+      "edges": ["4>6:assert.expected"]
+    },
+    "pydocs-reuse": {
+      "kinds": [[1, "navigate"], [2, "read"], [3, "fill"]],
+      "edges": ["2>3:fill.value"]
+    },
+    "github": {
+      "kinds": [[1, "navigate"], [2, "read"], [3, "click"], [4, "fill"], [5, "press"], [6, "assert"]],
+      "edges": ["2>4:fill.value"]
+    }
+  }
+}

@@ -1,6 +1,11 @@
 package com.citi.put.checks.studio.guided.session;
 
+import com.citi.put.checks.studio.StudioListQuery;
+import com.citi.put.checks.studio.StudioValidationException;
 import com.fasterxml.jackson.databind.JsonNode;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -11,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/studio/guided-sessions")
 public class GuidedSessionController {
+  private static final int MAX_LATEST_TEST_IDS = 50;
   private final GuidedSessionService service;
   private com.citi.put.checks.studio.guided.publication.GuidedPublicationResultProjector
       publication;
@@ -26,6 +33,14 @@ public class GuidedSessionController {
   public void installPublicationProjection(
       com.citi.put.checks.studio.guided.publication.GuidedPublicationResultProjector projector) {
     publication = projector;
+  }
+
+  private GuidedLatestAttemptReader latestAttempts;
+
+  /** STUDIO-UNIFY-001.6 AC-09; without it the route is a composition fault, never a guess. */
+  @org.springframework.beans.factory.annotation.Autowired(required = false)
+  public void installLatestAttempts(GuidedLatestAttemptReader reader) {
+    latestAttempts = reader;
   }
 
   public GuidedSessionController(GuidedSessionService service) {
@@ -40,6 +55,34 @@ public class GuidedSessionController {
     JsonNode started = service.start(user, key, body);
     return ResponseEntity.accepted()
         .body(publication == null ? started : publication.started(started));
+  }
+
+  /** The caller's latest terminal learning attempt per test; the literal beats {@code /{id}}. */
+  @GetMapping("/latest")
+  public JsonNode latest(
+      Authentication user, @RequestParam(name = "testId", required = false) List<String> testIds) {
+    List<UUID> ids = latestTestIds(testIds);
+    GuidedSessionException.require(latestAttempts != null, "RUNTIME_INCOMPATIBLE", 409);
+    return latestAttempts.read(user, ids);
+  }
+
+  private static List<UUID> latestTestIds(List<String> testIds) {
+    if (testIds == null || testIds.isEmpty() || testIds.size() > MAX_LATEST_TEST_IDS) {
+      throw invalidLatestQuery("testId needs 1 to " + MAX_LATEST_TEST_IDS + " values");
+    }
+    var ids = new LinkedHashSet<UUID>();
+    for (String value : testIds) {
+      try {
+        ids.add(UUID.fromString(value));
+      } catch (IllegalArgumentException notUuid) {
+        throw invalidLatestQuery("testId must be a UUID");
+      }
+    }
+    return List.copyOf(ids);
+  }
+
+  private static StudioValidationException invalidLatestQuery(String message) {
+    return new StudioValidationException(StudioListQuery.INVALID_QUERY, message);
   }
 
   @GetMapping("/{id}")

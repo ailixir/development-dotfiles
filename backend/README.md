@@ -103,10 +103,21 @@ What `dev.sh` wires, and why each piece is needed:
 | `STUDIO_RUNNER_BASE_URL` | `http://127.0.0.1:8090` (`DEV_STUDIO_RUNNER_PORT`) | dispatch closes `ERROR`/`DISPATCH_FAILED` naming `studio.runner.base-url` |
 | `STUDIO_RUNNER_SERVICE_TOKEN` | generated per session; the runner gets the same value as `STUDIO_RUNNER_SERVICE_IDENTITY` | dispatch closes `ERROR`/`DISPATCH_FAILED` naming `studio.runner.service-identity-token` |
 | `STUDIO_CALLBACK_SERVICE_TOKEN` | generated per session; the runner gets it as `STUDIO_RUNNER_CALLBACK_IDENTITY` | the API refuses every runner callback (its callback chain has no token to accept), so nothing the runner reports is recorded |
-| `CHECKS_SOURCE_UI_TEST` | `true` | the Studio pages say "not available in this environment" |
 | `STUDIO_GATEWAY_PROVIDER` | `vertex` | plain-English steps cannot be compiled |
 | `STUDIO_GATEWAY_ENDPOINT`, `PROJECT`, `LOCATION`, `MODEL` | your Vertex deployment | startup refuses incomplete translation configuration |
 | `STUDIO_GATEWAY_CREDENTIALS_MODE` | `application-default` or `service-account-file` | Vertex authentication fails explicitly |
+
+**Allowed domains (STUDIO-FLEX-001).** Where Studio may navigate is one deployment list,
+`studio.navigation.allowed-domains` (`STUDIO_ALLOWED_DOMAINS`): comma-separated lowercase punycode host
+suffixes, no spaces, at most 32, none a suffix of another. A page is allowed when its host equals an
+entry or ends with `"." + entry`, on `http` or `https` and any port; an IP address can never be an entry.
+It ships empty, which denies every start (`403 ORIGIN_NOT_ALLOWED`) when allow-all is off, and an invalid value stops startup.
+The `local` profile defaults to `localhost,example.com,practicetestautomation.com`. The runner reads the
+same list from `STUDIO_RUNNER_ALLOWED_DOMAINS`. `studio.navigation.allow-all-domains` (`STUDIO_ALLOW_ALL_DOMAINS`, default
+`true` for now, user decision 2026-10-25; only exactly `true` or `false` is accepted) is the per-environment option that allows every http(s) URL whose host is a
+DNS name (still no userinfo or IP literal) and ignores the list; it logs one WARN line at startup, and the chart renders it
+to the runner (`STUDIO_RUNNER_ALLOW_ALL_DOMAINS`) from the same value. The deployment-wide cap on concurrent learning sessions is
+`studio.guided-authoring.max-concurrent-sessions` (default 1; the 429 is `LEARNING_CAPACITY_EXHAUSTED`).
 
 The `local` profile itself runs the Studio dispatcher and reapers (`studio.execution.dispatcher.enabled`
 defaults to `true` there; the schedulers are gated `worker` or `local & !api`), so one `bootRun` is

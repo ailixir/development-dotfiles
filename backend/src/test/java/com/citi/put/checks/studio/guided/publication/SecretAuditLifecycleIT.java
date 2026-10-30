@@ -427,9 +427,7 @@ class SecretAuditLifecycleIT {
           vaultScope,
           "PASS",
           "GUIDED-MULTI-" + UUID.randomUUID());
-      var resolver =
-          new com.citi.put.checks.studio.secrets.VaultStudioReferenceResolver(
-              vault, (principal, csi, environment, secret) -> true);
+      var resolver = new com.citi.put.checks.studio.secrets.VaultStudioReferenceResolver(vault);
       var lifecycle = new SecretAuditLifecycle(jdbc, new SecretUseAuditRecorder(jdbc));
       try (var resolved =
           resolver.resolve(

@@ -209,10 +209,6 @@
           "type": "string",
           "pattern": "^[a-f0-9]{64}$"
         },
-        "currentPolicyHash": {
-          "type": "string",
-          "pattern": "^[a-f0-9]{64}$"
-        },
         "replayGrant": {
           "$ref": "https://checks.citi.example/contracts/observed/v3/replay-job.schema.json#/definitions/ReplayGrant"
         }
@@ -237,7 +233,6 @@
         "requiredBuild",
         "scope",
         "scopeHash",
-        "currentPolicyHash",
         "replayGrant"
       ]
     },
@@ -305,10 +300,6 @@
           "type": "string",
           "pattern": "^[a-f0-9]{64}$"
         },
-        "currentPolicyHash": {
-          "type": "string",
-          "pattern": "^[a-f0-9]{64}$"
-        },
         "grantId": {
           "type": "string",
           "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
@@ -336,7 +327,6 @@
         "referencePolicyHash",
         "publicationEvidenceHash",
         "scopeHash",
-        "currentPolicyHash",
         "grantId",
         "profile",
         "build"
@@ -454,10 +444,6 @@
           "type": "string",
           "pattern": "^[a-f0-9]{64}$"
         },
-        "currentPolicyHash": {
-          "type": "string",
-          "pattern": "^[a-f0-9]{64}$"
-        },
         "issuedAt": {
           "type": "string",
           "format": "date-time",
@@ -481,7 +467,6 @@
         "scopeHash",
         "profileHash",
         "buildHash",
-        "currentPolicyHash",
         "issuedAt",
         "expiresAt"
       ]

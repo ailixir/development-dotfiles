@@ -10,7 +10,7 @@ package com.citi.put.checks.studio.gateway;
 public enum GatewayErrorCode {
   /** The gateway is disabled by configuration. */
   GATEWAY_UNAVAILABLE,
-  /** Bounded concurrency saturated; the caller should retry later rather than queue. */
+  /** Bounded concurrency stayed saturated for the caller's whole remaining budget. */
   GATEWAY_BUSY,
   /** The request deadline elapsed. */
   GATEWAY_TIMEOUT,

@@ -5,7 +5,7 @@ import static com.citi.put.checks.studio.guided.session.GuidedSessionException.r
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
-/** Trusted deployment catalog/policy JSON is configuration, never an artifact-supplied grant. */
+/** The trusted deployment catalog is configuration, never an artifact-supplied grant. */
 @ConfigurationProperties("studio.observed-replay")
 public record ObservedReplayProperties(
     @DefaultValue("true") boolean enabled,
@@ -14,7 +14,6 @@ public record ObservedReplayProperties(
     @DefaultValue("4194304") int maxJobBytes,
     @DefaultValue("2097152") int maxExecuteFrameBytes,
     @DefaultValue("[]") String catalogJson,
-    @DefaultValue("[]") String policiesJson,
     @DefaultValue("1280") int recordingWidth,
     @DefaultValue("720") int recordingHeight) {
   public ObservedReplayProperties {

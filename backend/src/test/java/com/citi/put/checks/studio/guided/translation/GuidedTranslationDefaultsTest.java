@@ -68,8 +68,6 @@ class GuidedTranslationDefaultsTest {
   @Test
   void defaultApplicationActuallyCreatesBothTranslationGatesAndPublicationReplayBeans() {
     assertThat(application.getBean(GuidedTranslationProperties.class).enabled()).isTrue();
-    assertThat(application.getBean(GuidedTranslationProperties.class).allowAuthoredNonsecret())
-        .isTrue();
     assertThat(application.getBean(GuidedPublicationProperties.class).enabled()).isTrue();
     assertThat(application.getBean(ObservedReplayProperties.class).enabled()).isTrue();
     assertThat(application.getBean(GuidedSessionProperties.class).enabled()).isTrue();
@@ -86,6 +84,9 @@ class GuidedTranslationDefaultsTest {
     var properties = application.getBean(GuidedTranslationProperties.class);
     assertThat(properties.sendTimeoutSeconds()).isEqualTo(50);
     assertThat(properties.callSeconds()).isEqualTo(60);
+    assertThat(properties.isCallBudgetCoveringSendCap()).isTrue();
+    // 3 attempts x (60 s call + 2 s settle) + 2 s + 4 s backoff = 192 s, plus a 30 s margin.
+    assertThat(properties.continuationTimeout()).isEqualTo(java.time.Duration.ofSeconds(222));
     assertThat(bindSendTimeout(null).sendTimeoutSeconds()).isEqualTo(50);
     assertThat(
             Files.readString(Path.of("src/main/resources/application.yml"))
@@ -136,8 +137,7 @@ class GuidedTranslationDefaultsTest {
               .put("testId", UUID.randomUUID().toString())
               .put("sourceRevision", "1")
               .put("configurationRevision", "1")
-              .put("environmentId", "fixture")
-              .put("applicationId", "orders");
+              .put("environmentId", "fixture");
       request.set("versions", fixture.path("documents").path("versions"));
       int before =
           offJdbc.queryForObject("SELECT count(*) FROM studio_guided_sessions", Integer.class);

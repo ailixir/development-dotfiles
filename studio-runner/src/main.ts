@@ -46,6 +46,7 @@ import { readFile } from 'node:fs/promises';
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { isAllowAll } from './allowedDomains.js';
 import { currentRuntimeVersions } from './compat/index.js';
 import { assertObservedBrowserStartup } from './compat/runtime-versions.js';
 import { canEnumerateProcessTree, createChildBrowserLauncher, readProcessTable } from './run/index.js';
@@ -106,6 +107,8 @@ export function createConfiguredLauncher(config: RunnerConfig): BrowserLauncher 
     maxFailureMessageLength: config.maxReportLogEntryLength,
     // ADR-002 §26.3: applied in the child's `takeRunOrigin`, carried there by the launch message.
     seekOriginCalibrationMs: config.seekOriginCalibrationMs,
+    // The child holds no runner configuration; it receives the whitelist in its environment.
+    allowedDomains: config.allowedDomains,
   };
   return createChildBrowserLauncher(options);
 }
@@ -157,6 +160,11 @@ export const PROCESS_TABLE_UNREADABLE =
 export const PROCESS_TABLE_EXIT_CODE = 69;
 /** `EX_CONFIG`: configuration rejected, or a guided refusal that only the deployment can fix. */
 export const CONFIG_EXIT_CODE = 78;
+/**
+ * The one line the runner writes at startup when `STUDIO_RUNNER_ALLOW_ALL_DOMAINS=true`. Value-free:
+ * it names the option, never a URL or a domain.
+ */
+export const NAVIGATION_ALL_DOMAINS_WARNING = 'WARN navigation allowed to all domains (allow-all-domains=true)';
 /** The closed reasons of a guided refusal (ruling Q2). Each is one value-free line. */
 export const CONFIGURATION_DENIED_DEBUG_ENV = 'CONFIGURATION_DENIED DEBUG_ENV';
 export const CONFIGURATION_DENIED_LAUNCH_TREE = 'CONFIGURATION_DENIED LAUNCH_TREE';
@@ -217,6 +225,9 @@ export async function main(options: MainOptions): Promise<MainResult> {
     options.setExitCode(CONFIG_EXIT_CODE);
     return { started: false };
   }
+
+  // The allow-all option is a deliberate widening of the only navigation control: say so once, early.
+  if (isAllowAll(config.allowedDomains)) options.write(NAVIGATION_ALL_DOMAINS_WARNING);
 
   // ── 2. The in-image `ps` guard (Studio v1 WP16). Checked before anything listens, so a pod on an
   // image that lost `procps` never becomes ready rather than serving runs it cannot stop. ────────
@@ -347,6 +358,7 @@ function guidedModeDependencies(
     callbackToken: async () => (await readFile(guided.callbackTokenFile, 'utf8')).trim(),
     launch,
     recordingScratch,
+    capacity: guided.capacity,
   };
 }
 

@@ -3,18 +3,228 @@ package com.citi.put.checks.studio.guided.publication;
 import static com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.C;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 
+import com.citi.put.checks.studio.guided.bridge.GuidedAssignmentStore;
+import com.citi.put.checks.studio.guided.bridge.GuidedBindingStore;
+import com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService;
 import com.citi.put.checks.studio.guided.bridge.GuidedPreparationStore;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
+import com.citi.put.checks.studio.guided.session.GuidedSessionAccess;
+import com.citi.put.checks.studio.guided.session.GuidedSessionException;
+import com.citi.put.checks.studio.guided.session.GuidedSessionProperties;
+import com.citi.put.checks.studio.guided.session.GuidedSessionService;
+import com.citi.put.checks.studio.guided.translation.GuidedClarificationContextStore;
+import com.citi.put.checks.studio.guided.translation.GuidedTranslationStore;
+import com.citi.put.checks.studio.support.TestDomains;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.core.Authentication;
 
 class GuidedPublicationEvidenceTest {
+  private static final List<String> PREPARATION_TABLES =
+      List.of(
+          "studio_guided_publication_observations",
+          "studio_guided_preparations",
+          "studio_guided_publication_preparations");
+
+  @Test
+  void serviceStoresDirectObservationAndBothPreparationsAtomicallyAndRetriesIdentically()
+      throws Exception {
+    try (var seed = new GuidedPublicationMigrationTest.Database();
+        var db =
+            new GuidedPublicationMigrationTest.Database(
+                seed.jdbc,
+                seed.tx,
+                "direct-service-commit",
+                GuidedPlanBuilderTest.directParagraphBasis())) {
+      db.capture();
+      Instant now = Instant.now();
+      var service = preparationService(db, Clock.fixed(now, ZoneOffset.UTC));
+      Authentication controller = preparationController();
+      var acceptedProposal = new AtomicReference<JsonNode>();
+      var acceptedProof = new AtomicReference<JsonNode>();
+      db.prepareDirectObservation(
+          (proposal, proof) -> {
+            assertPreparationRowCounts(db, 0);
+            assertThat(proof.path("target").path("assertTextMode").asText())
+                .isEqualTo("DIRECT_PUBLIC");
+            service.storePreparation(controller, db.fixtureSession(), 1, proposal, proof);
+            assertPreparationRowCounts(db, 1);
+            acceptedProposal.set(proposal.deepCopy());
+            acceptedProof.set(proof.deepCopy());
+          });
+      assertPreparationRowCounts(db, 1);
+      List<String> committedRows = preparationRowHashes(db);
+      // A later service instance must preserve every stored value, including capture timestamps.
+      preparationService(db, Clock.fixed(now.plusSeconds(1), ZoneOffset.UTC))
+          .storePreparation(
+              controller, db.fixtureSession(), 1, acceptedProposal.get(), acceptedProof.get());
+      assertPreparationRowCounts(db, 1);
+      assertThat(preparationRowHashes(db)).isEqualTo(committedRows);
+    }
+  }
+
+  @Test
+  void serviceRejectsTamperedDirectProofBeforeAnyPreparationEvidenceIsStored() throws Exception {
+    try (var seed = new GuidedPublicationMigrationTest.Database();
+        var db =
+            new GuidedPublicationMigrationTest.Database(
+                seed.jdbc,
+                seed.tx,
+                "direct-service-reject",
+                GuidedPlanBuilderTest.directParagraphBasis())) {
+      db.capture();
+      var service = preparationService(db, Clock.systemUTC());
+      Authentication controller = preparationController();
+      assertThatThrownBy(
+              () ->
+                  db.prepareDirectObservation(
+                      (proposal, proof) -> {
+                        assertPreparationRowCounts(db, 0);
+                        ObjectNode tampered = ((ObjectNode) proof).deepCopy();
+                        tampered.withObject("/target/identity").put("role", "button");
+                        try {
+                          service.storePreparation(
+                              controller, db.fixtureSession(), 1, proposal, tampered);
+                        } catch (GuidedSessionException failure) {
+                          // Check before the fixture transaction rolls back, while writes remain
+                          // visible: rollback alone must not conceal an early evidence insertion.
+                          assertPreparationRowCounts(db, 0);
+                          throw failure;
+                        }
+                      }))
+          .isInstanceOfSatisfying(
+              GuidedSessionException.class,
+              failure -> {
+                assertThat(failure.getMessage()).isEqualTo("EVIDENCE_MISMATCH");
+                assertThat(failure.status()).isEqualTo(422);
+              });
+      assertPreparationRowCounts(db, 0);
+    }
+  }
+
+  @Test
+  void outerRollbackRemovesDirectObservationAndBothSuccessfulServicePreparations()
+      throws Exception {
+    try (var seed = new GuidedPublicationMigrationTest.Database();
+        var db =
+            new GuidedPublicationMigrationTest.Database(
+                seed.jdbc,
+                seed.tx,
+                "direct-service-rollback",
+                GuidedPlanBuilderTest.directParagraphBasis())) {
+      db.capture();
+      var service = preparationService(db, Clock.systemUTC());
+      Authentication controller = preparationController();
+      assertThatThrownBy(
+              () ->
+                  db.tx.executeWithoutResult(
+                      status -> {
+                        db.prepareDirectObservation(
+                            (proposal, proof) -> {
+                              assertPreparationRowCounts(db, 0);
+                              service.storePreparation(
+                                  controller, db.fixtureSession(), 1, proposal, proof);
+                              assertPreparationRowCounts(db, 1);
+                            });
+                        assertPreparationRowCounts(db, 1);
+                        throw new IllegalStateException("controlled outer rollback");
+                      }))
+          .isInstanceOf(IllegalStateException.class)
+          .hasMessage("controlled outer rollback");
+      assertPreparationRowCounts(db, 0);
+    }
+  }
+
+  private static GuidedSessionService preparationService(
+      GuidedPublicationMigrationTest.Database db, Clock clock) {
+    var access = mock(GuidedSessionAccess.class);
+    doAnswer(
+            invocation -> {
+              JsonNode session = invocation.getArgument(0);
+              db.bases.requireCurrent(
+                  db.bases.find(session.path("sessionId").asText()).orElseThrow(),
+                  db.bases.lockCurrent(UUID.fromString(session.path("testId").asText())));
+              return null;
+            })
+        .when(access)
+        .checkSourceCurrent(any(JsonNode.class));
+    var service =
+        new GuidedSessionService(
+            db.sessions,
+            C,
+            access,
+            new GuidedSessionProperties(true, Map.of()),
+            TestDomains.FIXTURES,
+            clock);
+    var materialization = new GuidedMaterializationService(db.jdbc, C, TestDomains.FIXTURES);
+    service.installBridge(
+        materialization,
+        new GuidedPreparationStore(db.jdbc, C),
+        new GuidedBindingStore(db.jdbc, C, materialization),
+        new GuidedAssignmentStore(db.jdbc, C));
+    service.installTranslation(
+        new GuidedTranslationStore(db.jdbc, C), new GuidedClarificationContextStore(db.jdbc, C));
+    // The base is captured by the fixture before service use, so the start-only pins are unused.
+    new GuidedPublicationConfiguration()
+        .installPublicationEvidence(
+            service,
+            db.bases,
+            db.evidence,
+            new GuidedPublicationProperties(
+                true, 3, 15000, 5000, PublicationContracts.MAX_VALIDATION_BYTES),
+            mock(ObservedReplayPins.class))
+        .afterSingletonsInstantiated();
+    return service;
+  }
+
+  private static Authentication preparationController() throws ReflectiveOperationException {
+    var identity =
+        Class.forName("com.citi.put.checks.studio.guided.session.GuidedInternalSecurity$Identity")
+            .getDeclaredConstructor(String.class, String.class);
+    identity.setAccessible(true);
+    return (Authentication) identity.newInstance("controller-1", "backend-controller");
+  }
+
+  private static void assertPreparationRowCounts(
+      GuidedPublicationMigrationTest.Database db, int expected) {
+    for (String table : PREPARATION_TABLES) {
+      assertThat(
+              db.jdbc.queryForObject(
+                  "SELECT count(*) FROM " + table + " WHERE session_id=?",
+                  Integer.class,
+                  db.fixtureSession()))
+          .as("%s rows for this session", table)
+          .isEqualTo(expected);
+    }
+  }
+
+  private static List<String> preparationRowHashes(GuidedPublicationMigrationTest.Database db) {
+    return PREPARATION_TABLES.stream()
+        .map(
+            table ->
+                db.jdbc.queryForObject(
+                    "SELECT md5(to_jsonb(stored)::text) FROM "
+                        + table
+                        + " stored WHERE session_id=?",
+                    String.class,
+                    db.fixtureSession()))
+        .toList();
+  }
+
   static JsonNode setup(GuidedPublicationMigrationTest.Database db) throws Exception {
     JsonNode original =
         C.parse(
@@ -276,11 +486,6 @@ class GuidedPublicationEvidenceTest {
       var template = (ObjectNode) flow.path("observations").get(0);
       for (int index = 0; index < 400; index++) {
         var observation = template.deepCopy().put("generation", index);
-        observation
-            .path("nodes")
-            .forEach(
-                node ->
-                    ((ObjectNode) node).put("generation", observation.path("generation").asInt()));
         db.tx.executeWithoutResult(
             t -> {
               db.sessions.lock("session");
@@ -302,7 +507,6 @@ class GuidedPublicationEvidenceTest {
             });
       }
       var overflow = template.deepCopy().put("generation", 400);
-      overflow.path("nodes").forEach(node -> ((ObjectNode) node).put("generation", 400));
       assertThatThrownBy(
               () ->
                   db.tx.executeWithoutResult(
@@ -324,7 +528,8 @@ class GuidedPublicationEvidenceTest {
                       }))
           .hasMessageContaining("evidence limit");
       var privateField = template.deepCopy();
-      ((ObjectNode) privateField.path("nodes").get(0)).put("value", "do-not-store");
+      // A fact keeps role, name, editable, evidence, segments and visible text: no value field.
+      ((ObjectNode) privateField.path("facts").path("e1")).put("value", "do-not-store");
       assertThat(
               db.jdbc.queryForObject(
                   "SELECT studio_publication_observation_shape(?::jsonb)",
@@ -365,30 +570,29 @@ class GuidedPublicationEvidenceTest {
           var meanings = C.object().putArray("meanings");
           var choices = question.putArray("choices");
           for (int i = 0; i < 2; i++) {
-            String choiceId = questionId + "-" + i, nodeId = "old-node-" + i;
+            String choiceId = questionId + "-" + i;
+            String name = i == 0 ? targetName : "Alternative";
             choices
                 .addObject()
                 .put("choiceId", choiceId)
                 .put("safeLabel", "Observed candidate " + i)
-                // STUDIO-OBS-014 AC-7 (C2a): an observed-phase choice names a page node.
+                // STUDIO-OBS-014 AC-7 (C2a): an observed-phase choice names a page element.
                 .put("labelSource", "PAGE")
                 .put("role", "button")
                 .putNull("region")
-                .put("nodeId", nodeId)
                 .putNull("bindingId");
-            ObjectNode meaning =
-                C.object()
-                    .put("obligationId", "00000000-0000-0000-0000-000000000001")
-                    .put("nodeId", nodeId)
-                    .putNull("bindingId");
-            meaning.set(
-                "locator",
-                C.object()
-                    .put("kind", "role")
-                    .put("role", "button")
-                    .put("name", i == 0 ? targetName : "Alternative")
-                    .put("exact", true));
-            meanings.addObject().put("choiceId", choiceId).set("meaning", meaning);
+            // ADR-SC-007: a choice names a ref; the stored semantic selection is what is re-found.
+            ObjectNode mapping = meanings.addObject().put("choiceId", choiceId);
+            mapping
+                .putObject("meaning")
+                .put("obligationId", "00000000-0000-0000-0000-000000000001")
+                .put("ref", "e" + (i + 1))
+                .putNull("bindingId");
+            mapping
+                .putObject("selection")
+                .put("role", "button")
+                .put("name", name)
+                .put("evidence", name);
           }
           C.validate("v3/clarification", question);
           var contexts =
@@ -455,6 +659,41 @@ class GuidedPublicationEvidenceTest {
                       "UPDATE studio_guided_publication_preparations SET"
                           + " observed_choice_receipt='{}'::jsonb WHERE session_id='session'"))
           .hasMessageContaining("immutable");
+    }
+  }
+
+  /**
+   * ADR-SC-007 D-6: asking again for an obligation yields a second accepted observed clarification;
+   * only the latest accepted answer per obligation is part of the evidence basis. The earlier row
+   * stays in the database and is excluded, so it can neither be ambiguous against the latest nor
+   * stand in for a proof the latest lacks.
+   */
+  @Test
+  void supersededClarificationIsExcludedFromTheBasis() throws Exception {
+    try (var db = new GuidedPublicationMigrationTest.Database()) {
+      db.capture();
+      JsonNode flow = setup(db);
+      capture(db, flow, 0);
+      acceptOldObservedQuestion(db, "first-question", "Open");
+      acceptOldObservedQuestion(db, "second-question", "Alternate");
+      assertThat(
+              db.jdbc.queryForObject(
+                  "SELECT count(*) FROM studio_guided_clarification_contexts"
+                      + " WHERE session_id='session' AND accepted_choice IS NOT NULL",
+                  Integer.class))
+          .as("both answers stay in the database")
+          .isEqualTo(2);
+      List<ObjectNode> basis = db.tx.execute(t -> db.evidence.observedChoices("session"));
+      assertThat(basis).hasSize(1);
+      assertThat(basis.getFirst().path("context").path("clarificationId").asText())
+          .isEqualTo("second-question");
+      assertThat(basis.getFirst().toString()).doesNotContain("first-question");
+      // A third answer for the same obligation supersedes the second in turn.
+      acceptOldObservedQuestion(db, "third-question", "Open");
+      List<ObjectNode> latest = db.tx.execute(t -> db.evidence.observedChoices("session"));
+      assertThat(latest).hasSize(1);
+      assertThat(latest.getFirst().path("context").path("clarificationId").asText())
+          .isEqualTo("third-question");
     }
   }
 

@@ -102,7 +102,7 @@ public final class ExecutionReferences {
    * <p>Ruled {@code REFERENCE_UNAVAILABLE} by @po on 2026-09-11 on ADR-002 §15.3's axis — it is
    * <em>a fact about the draft and its environment</em>: the same principal attempting the same
    * draft fails identically and the remedy points at the author or at whoever restores the row.
-   * Nothing about the principal's entitlement has changed, which is what would have made it {@code
+   * Nothing about the principal's authority has changed, which is what would have made it {@code
    * AUTHORIZATION_REVOKED}. No ninth enum value, and the path stays dispatcher-side so {@code
    * x-assigned-by} stays true.
    *

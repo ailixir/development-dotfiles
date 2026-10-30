@@ -40,6 +40,7 @@ class GuidedCommittedRefreshStateTest {
             contracts,
             mock(GuidedSessionAccess.class),
             mock(GuidedSessionProperties.class),
+            com.citi.put.checks.studio.support.TestDomains.FIXTURES,
             Clock.systemUTC());
     committedRefresh =
         GuidedSessionService.class.getDeclaredMethod(

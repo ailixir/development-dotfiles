@@ -158,7 +158,9 @@ class GuidedEvidencePendingAppendIT {
         EMAIL);
     var transactions = new TransactionTemplate(new DataSourceTransactionManager(source));
     repository = new GuidedSessionRepository(jdbc, transactions, C);
-    materialization = new GuidedMaterializationService(jdbc, C);
+    materialization =
+        new GuidedMaterializationService(
+            jdbc, C, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     sessions = service();
     evidence = evidenceService();
   }
@@ -441,7 +443,6 @@ class GuidedEvidencePendingAppendIT {
                     .put("sourceRevision", "1")
                     .put("configurationRevision", "2")
                     .put("environmentId", "fixture")
-                    .put("applicationId", "orders")
                     .set("versions", documents.path("versions")))
             .path("sessionId")
             .asText();
@@ -597,6 +598,7 @@ class GuidedEvidencePendingAppendIT {
             C,
             new FixtureAccess(),
             new GuidedSessionProperties(true, Map.of("maxSessionSeconds", 600)),
+            com.citi.put.checks.studio.support.TestDomains.FIXTURES,
             Clock.systemUTC());
     service.installBridge(
         materialization,
@@ -605,8 +607,7 @@ class GuidedEvidencePendingAppendIT {
         new GuidedAssignmentStore(jdbc, C));
     service.installSecretAudit(new SecretAuditLifecycle(jdbc, new SecretUseAuditRecorder(jdbc)));
     // Every start needs an approved governed policy for its scope.
-    ObservedPublicationFixture.installGovernance(
-        service, jdbc, "CSI-123", "orders", "fixture", List.of(ORIGIN), null);
+    ObservedPublicationFixture.installCsiBudget(service, jdbc);
     return service;
   }
 
@@ -624,29 +625,14 @@ class GuidedEvidencePendingAppendIT {
           .put("principalId", "user-1")
           .put("csiId", "CSI-123")
           .put("environmentId", "fixture")
-          .put("applicationId", "orders")
           .put("sourceRevision", "1")
           .put("configurationRevision", "2");
       scope.remove("accountRef");
-      scope.putArray("approvedOrigins").add(ORIGIN);
       return new Snapshot(
           scope,
           C.object()
               .putArray("steps")
               .add(C.object().put("stepId", stepId).put("requiresAssertion", false)));
-    }
-
-    @Override
-    public void checkCurrent(JsonNode session) {
-      require(
-          jdbc.queryForObject(
-                  "SELECT count(*) FROM ui_tests WHERE id=? AND csi_id='CSI-123' "
-                      + "AND environment='fixture' AND deleted_at IS NULL",
-                  Integer.class,
-                  UUID.fromString(session.path("testId").asText()))
-              == 1,
-          "FORBIDDEN_SCOPE",
-          403);
     }
 
     @Override

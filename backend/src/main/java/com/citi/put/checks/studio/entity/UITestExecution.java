@@ -103,23 +103,8 @@ public class UITestExecution {
   @Column(name = "schedule_id", updatable = false)
   private UUID scheduleId;
 
-  @Column(name = "schedule_version", updatable = false)
-  private Long scheduleVersion;
-
-  @Column(name = "occurrence_id", updatable = false)
-  private UUID occurrenceId;
-
   @Column(name = "scheduled_at", updatable = false)
   private Instant scheduledAt;
-
-  @Column(name = "activation_id", updatable = false)
-  private UUID activationId;
-
-  @Column(name = "activated_by", updatable = false)
-  private String activatedBy;
-
-  @Column(name = "activated_at", updatable = false)
-  private Instant activatedAt;
 
   public String getTriggerSource() {
     return triggerSource;
@@ -137,52 +122,12 @@ public class UITestExecution {
     scheduleId = value;
   }
 
-  public Long getScheduleVersion() {
-    return scheduleVersion;
-  }
-
-  public void setScheduleVersion(Long value) {
-    scheduleVersion = value;
-  }
-
-  public UUID getOccurrenceId() {
-    return occurrenceId;
-  }
-
-  public void setOccurrenceId(UUID value) {
-    occurrenceId = value;
-  }
-
   public Instant getScheduledAt() {
     return scheduledAt;
   }
 
   public void setScheduledAt(Instant value) {
     scheduledAt = value;
-  }
-
-  public UUID getActivationId() {
-    return activationId;
-  }
-
-  public void setActivationId(UUID value) {
-    activationId = value;
-  }
-
-  public String getActivatedBy() {
-    return activatedBy;
-  }
-
-  public void setActivatedBy(String value) {
-    activatedBy = value;
-  }
-
-  public Instant getActivatedAt() {
-    return activatedAt;
-  }
-
-  public void setActivatedAt(Instant value) {
-    activatedAt = value;
   }
 
   @JdbcTypeCode(SqlTypes.JSON)

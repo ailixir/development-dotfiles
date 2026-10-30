@@ -56,17 +56,18 @@ public final class GuidedPreparationStore {
     return true;
   }
 
-  public JsonNode authorize(JsonNode session, JsonNode proposal, JsonNode context, Instant now) {
+  public JsonNode authorize(
+      JsonNode session, JsonNode proposal, JsonNode context, String preparationId, Instant now) {
     var found =
         jdbc.queryForList(
             "SELECT proof::text FROM studio_guided_preparations WHERE session_id=? AND "
-                + "request_digest=? AND admission_id IS NULL AND expires_at>? ORDER BY "
-                + "expires_at DESC,preparation_id",
+                + "preparation_id=? AND request_digest=? AND admission_id IS NULL AND expires_at>?",
             String.class,
             session.path("sessionId").asText(),
+            preparationId,
             GuidedContracts.hash(proposal),
             Timestamp.from(now));
-    require(!found.isEmpty(), "STALE_GENERATION", 409);
+    require(found.size() == 1, "STALE_GENERATION", 409);
     JsonNode proof = contracts.parse(found.getFirst());
     for (String field :
         java.util.List.of(
@@ -79,11 +80,62 @@ public final class GuidedPreparationStore {
             "configurationRevision",
             "versions",
             "authoredInputsHash")) {
-      require(proof.path(field).equals(context.path(field)), "STALE_FENCE", 409);
+      require(GuidedContracts.same(proof.path(field), context.path(field)), "STALE_FENCE", 409);
     }
     require(
         proof.path("evidenceHash").equals(proposal.path("evidenceHash")), "STALE_GENERATION", 409);
     return proof;
+  }
+
+  public JsonNode prefixSourceBinding(
+      String id, JsonNode plan, JsonNode action, JsonNode context, JsonNode observation) {
+    JsonNode history =
+        com.citi.put.checks.studio.guided.translation.GuidedPressInheritance.history(
+            jdbc, contracts, id);
+    JsonNode producer = null;
+    for (JsonNode row : history) {
+      if (row.path("proposal").path("operation").path("kind").asText().equals("read")
+          && row.path("proposal")
+              .path("operation")
+              .path("bindingId")
+              .equals(action.path("operation").path("expected").path("bindingId"))) {
+        require(producer == null, "EVIDENCE_MISMATCH", 422);
+        producer = row;
+      }
+    }
+    require(producer != null, "EVIDENCE_MISMATCH", 422);
+    var proposal = contracts.object();
+    proposal.set("coordinate", action.path("coordinate"));
+    proposal.set("operation", action.path("operation"));
+    proposal.set("target", producer.path("proposal").path("target"));
+    proposal.set("executionEvidence", producer.path("proposal").path("executionEvidence"));
+    require(
+        observation.path("documentId").equals(proposal.path("target").path("documentId")),
+        "EVIDENCE_MISMATCH",
+        422);
+    return com.citi.put.checks.studio.guided.session.GuidedPreparationCrossCheck.sourceBinding(
+        contracts, plan, proposal, context, history);
+  }
+
+  public JsonNode sourceBinding(String id, JsonNode plan, JsonNode proposal, JsonNode context) {
+    return com.citi.put.checks.studio.guided.session.GuidedPreparationCrossCheck.sourceBinding(
+        contracts,
+        plan,
+        proposal,
+        context,
+        com.citi.put.checks.studio.guided.translation.GuidedPressInheritance.history(
+            jdbc, contracts, id));
+  }
+
+  public JsonNode inheritance(
+      String id,
+      JsonNode manifest,
+      JsonNode plan,
+      JsonNode proposal,
+      JsonNode observation,
+      JsonNode context) {
+    return com.citi.put.checks.studio.guided.translation.GuidedPressInheritance.derive(
+        jdbc, contracts, id, manifest, plan, proposal, observation, context);
   }
 
   public void attach(JsonNode ledger) {

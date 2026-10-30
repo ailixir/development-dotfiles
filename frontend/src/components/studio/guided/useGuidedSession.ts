@@ -52,7 +52,7 @@ import {
  *
  * HTTP outcomes, each traced to `openapi.yaml`:
  *  - `401` (on a read or on finalize): `pending = REAUTHENTICATION_REQUIRED`, polling stops, the
- *    pointer is kept, and finalize is not resent by the poll (a reload sends it once more);
+ *    pointer is kept, and finalize is not resent by the poll (a reload, or `retryFinalize`, sends it once more);
  *  - `403` ("Current CSI/scope entitlement denied"): the pointer and all state are forgotten;
  *  - `503` ("Current authority or Vault unavailable"): `pending = NOT_READY`, polling continues;
  *  - `400`/`409` on a read: `pending = NOT_READY`, polling stops. If no view of the session had
@@ -100,6 +100,12 @@ export interface UseGuidedSessionResult {
   cancel: () => Promise<void>;
   /** Forgets the pointer, view, result and question for this test. Sends no request. */
   clear: () => void;
+  /**
+   * Sends a held finalize once more under the same persisted key and resumes polling. For a
+   * session stuck in `FINALIZING` after a `401` (sign in again), a refused finalize or a finalize
+   * that got no answer. Does nothing without a followed session.
+   */
+  retryFinalize: () => void;
 }
 
 /** Timing knobs. Tests pass small values; the defaults are for a person watching a run. */
@@ -168,8 +174,7 @@ export function readGuidedPointer(testId: string): GuidedSessionPointer | null {
       request.testId === testId &&
       isNonEmptyString(request.sourceRevision) &&
       isNonEmptyString(request.configurationRevision) &&
-      isNonEmptyString(request.environmentId) &&
-      isNonEmptyString(request.applicationId);
+      isNonEmptyString(request.environmentId);
     if (!valid) throw new Error('not a guided pointer');
     return {
       testId,
@@ -295,6 +300,8 @@ export function useGuidedSession(
   const [pending, setPending] = useState<GuidedPendingReason | null>(null);
   /** The followed session whose read was refused before any view of it loaded (F-L5b-3). */
   const [unreadableSessionId, setUnreadableSessionId] = useState<string | null>(null);
+  /** Bumped by `retryFinalize`; restarts the poll that a `401` on finalize stopped. */
+  const [pollEpoch, setPollEpoch] = useState(0);
 
   const optionsRef = useRef<UseGuidedSessionOptions | undefined>(options);
   optionsRef.current = options;
@@ -498,8 +505,14 @@ export function useGuidedSession(
         resultReads += 1;
         dispatch(setGuidedResult(read.result));
         safeSetPending(read.status === 'pending' ? 'PUBLICATION_PENDING' : null);
+        // A learn that published has no learning recording (its proof is the replay in `result.proof`),
+        // so it settles at `final`. A learn that did not publish keeps its recording: wait until that
+        // recording leaves `PROCESSING`, so it appears without a reload.
         const settled =
-          read.status === 'final' && read.result.evidence.video.status !== 'PROCESSING';
+          read.status === 'final' &&
+          (read.result.publication.status === 'PUBLISHED' ||
+            read.result.evidence.video === null ||
+            read.result.evidence.video.status !== 'PROCESSING');
         return settled || resultReads >= MAX_RESULT_READS ? 'stop' : 'continue';
       } catch (error) {
         if (stopped()) return 'stop';
@@ -544,7 +557,14 @@ export function useGuidedSession(
       run.active = false;
       if (timer) clearTimeout(timer);
     };
-  }, [testId, sessionId, dispatch, store, ensureFinalized, forget, safeSetPending, safeSetUnreadable]);
+  }, [testId, sessionId, pollEpoch, dispatch, store, ensureFinalized, forget, safeSetPending, safeSetUnreadable]);
+
+  const retryFinalize = useCallback((): void => {
+    if (!sessionId) return;
+    finalizeLatches.delete(sessionId);
+    safeSetPending(null);
+    setPollEpoch((epoch) => epoch + 1);
+  }, [sessionId, safeSetPending]);
 
   const startLearn = useCallback(
     async (input: GuidedStartRequest): Promise<void> => {
@@ -644,7 +664,7 @@ export function useGuidedSession(
 
   const unreadable = unreadableSessionId !== null && unreadableSessionId === sessionId && view === null;
 
-  return { view, result, clarification, startRefusal, pending, unreadable, startLearn, answer, cancel, clear };
+  return { view, result, clarification, startRefusal, pending, unreadable, startLearn, answer, cancel, clear, retryFinalize };
 }
 
 export default useGuidedSession;

@@ -89,6 +89,10 @@ class StudioServiceWriteAuthorizationTest {
             mock(com.citi.put.checks.studio.dispatch.StudioDispatchLedgerStatements.class));
     // Field-injected by @PersistenceContext in production, as in ProgressReportService.
     entityManager = mock(EntityManager.class);
+    // The soft delete removes the test's shared schedule with one native statement.
+    jakarta.persistence.Query statement = mock(jakarta.persistence.Query.class);
+    when(entityManager.createNativeQuery(any(String.class))).thenReturn(statement);
+    when(statement.setParameter(any(String.class), any())).thenReturn(statement);
     ReflectionTestUtils.setField(service, "entityManager", entityManager);
   }
 

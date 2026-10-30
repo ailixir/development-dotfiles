@@ -83,7 +83,14 @@ public class GuidedSessionVideoController {
     // (1) readGuidedSession's own decision; its body is not used.
     sessions.read(user, id, request);
 
-    // (2) The evidence state the result routes publish.
+    // (2) A published learn's recording was discarded before upload: nothing is served even if an
+    // object or a recording row exists (its proof is the replay execution). Keyed on the
+    // publication receipt, not on the session state.
+    if (evidence.published(id)) {
+      throw ExecutionVideoException.noEvidence();
+    }
+
+    // The evidence state the result routes publish.
     String status = projection.project(id, null).status();
     if (VideoEvidence.EXPIRED.equals(status)) {
       throw ExecutionVideoException.expired();

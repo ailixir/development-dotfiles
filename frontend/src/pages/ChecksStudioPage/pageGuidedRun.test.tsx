@@ -21,6 +21,7 @@ import {
   GUIDED_START_REFUSALS,
   PUBLICATION_CONFLICT_SCENARIO,
   guidedError,
+  LEARN_SCENARIO,
   endsIn,
   learnWithQuestion,
   loginRequired,
@@ -187,12 +188,14 @@ async function settle(ms = 60): Promise<void> {
 
 const COMPLETED_LEARNED = 'Completed — learned from this run.';
 
-/** The completion line, from the learned receipt (the plan explanation repeats it as history). */
+/**
+ * The learned receipt above the proof replay (the plan explanation repeats it as history). A published
+ * learn hands the screen to its proof replay, so the receipt is the stable end state, not the
+ * completion alert (which shows for one render).
+ */
 async function expectCompletedLearned(): Promise<void> {
   await waitFor(() => {
-    const completion = screen.getByTestId('guided-completion');
-    expect(completion).toHaveAttribute('data-kind', 'succeeded');
-    expect(completion).toHaveTextContent(COMPLETED_LEARNED);
+    expect(screen.getByTestId('guided-proof-receipt')).toHaveTextContent(COMPLETED_LEARNED);
   }, WAIT);
 }
 const user = () => userEvent.setup({ delay: null });
@@ -217,7 +220,6 @@ describe('AC-9: first guided Run, through the automatic finalize (AC-2, AC-3, AC
       sourceRevision: String(unlearnedDraft.sourceRevision),
       configurationRevision: String(unlearnedDraft.configurationRevision),
       environmentId: unlearnedDraft.environment,
-      applicationId: unlearnedDraft.csiId,
       versions: { contract: 3 },
     });
     expect(starts[0].key).toBeTruthy();
@@ -238,8 +240,15 @@ describe('AC-9: first guided Run, through the automatic finalize (AC-2, AC-3, AC
     const plan = screen.getByTestId('plan-explanation');
     expect(within(plan).getByText('Steps as learned')).toBeInTheDocument();
     expect(within(plan).getAllByText('Learned in this run').length).toBe(STEP_TEXTS.length);
-    // AC-7: the guided recording with named per-step seeks from the server's stamps.
-    expect(screen.getByRole('button', { name: 'Seek to step 1' })).toBeInTheDocument();
+    // Proof = replay of the published revision: the page follows the AFTER_LEARN execution the result
+    // names, never executes for it, and shows no learning recording (a published learn has none).
+    const sessionId = store.getState().studio.guidedSessionByTestId[unlearnedDraft.id] as string;
+    const proofId = store.getState().studio.guidedResultById[sessionId]?.proof?.executionId as string;
+    expect(proofId).toBeTruthy();
+    expect(requests('GET', /\/guided-sessions\/[^/]+\/video$/u)).toHaveLength(0);
+    expect(screen.queryByTestId('guided-attempt')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Seek to step 1' })).toBeNull();
+    expect(screen.queryByTestId('video-evidence-player')).toBeNull();
     expect(screen.queryByText(/Secrets can only be typed into a password box/)).toBeNull();
   }, TEST_TIMEOUT_MS);
 });
@@ -253,7 +262,10 @@ describe('AC-9: NEEDS_RELEARN starts a mixed-mode session (AC-2, AC-3, D-3, D-4)
     );
     const status = recordStatusLines();
     await user().click(await runButton());
-    expect(await screen.findByText('Completed — steps 2–4 learned again.', {}, WAIT)).toBeInTheDocument();
+    await waitFor(
+      () => expect(screen.getByTestId('guided-proof-receipt')).toHaveTextContent('Completed — steps 2–4 learned again.'),
+      WAIT,
+    );
     status.stop();
 
     const starts = requests('POST', STARTS);
@@ -322,21 +334,6 @@ describe('AC-9: one clarification, with an untrusted page-derived label (AC-3)',
     expect(requests('POST', CANCELS)).toHaveLength(0);
     expect(requests('POST', STARTS)).toHaveLength(1);
   }, TEST_TIMEOUT_MS);
-
-  it('inherited OBS-014 b: a side-effect confirmation is a confirmation, confirmed once, and the Run continues', async () => {
-    setGuidedScenario(learnWithQuestion('SIDE_EFFECT_CONFIRMATION', 1), unlearnedDraft.id);
-    serveDraft(unlearnedDraft);
-    renderPage();
-    await user().click(await runButton());
-
-    const confirmation = await screen.findByTestId('guided-confirmation', {}, WAIT);
-    expect(within(confirmation).getByText('Confirm this action before it runs.')).toBeInTheDocument();
-    expect(confirmation.textContent).not.toMatch(/Which one did you mean/);
-    await user().click(within(confirmation).getByRole('button', { name: 'Continue' }));
-    await expectCompletedLearned();
-    expect(requests('POST', CLARIFIES)).toHaveLength(1);
-    expect(requests('POST', CANCELS)).toHaveLength(0);
-  }, TEST_TIMEOUT_MS);
 });
 
 describe('AC-9: T0 ruling A3, "None of these" cancels, then focuses step N', () => {
@@ -360,23 +357,6 @@ describe('AC-9: T0 ruling A3, "None of these" cancels, then focuses step N', () 
     expect(requests('POST', CLARIFIES)).toHaveLength(0);
     // Never a new session on its own.
     expect(requests('POST', STARTS)).toHaveLength(1);
-  }, TEST_TIMEOUT_MS);
-
-  it('A3 declined side-effect confirmation: the same single cancel and no clarify, then focus on step N', async () => {
-    setGuidedScenario(learnWithQuestion('SIDE_EFFECT_CONFIRMATION', 1), unlearnedDraft.id);
-    serveDraft(unlearnedDraft);
-    renderPage();
-    await user().click(await runButton());
-
-    const confirmation = await screen.findByTestId('guided-confirmation', {}, WAIT);
-    await user().click(within(confirmation).getByRole('button', { name: "None of these — I'll edit step 2" }));
-
-    expect(await screen.findByText(EXECUTION_ERROR_NARRATIVES.CANCELLED.title, {}, WAIT)).toBeInTheDocument();
-    await waitFor(() => expect(document.activeElement).toBe(screen.getByRole('textbox', { name: 'Step 2' })), WAIT);
-    await settle();
-    expect(requests('POST', CANCELS)).toHaveLength(1);
-    expect(requests('POST', CANCELS)[0].body).toEqual({ schemaVersion: 3, reason: 'userRequested' });
-    expect(requests('POST', CLARIFIES)).toHaveLength(0);
   }, TEST_TIMEOUT_MS);
 
   it('A3 cancel/expiry race: the server answers with the session already EXPIRED; the page shows that, sends no second cancel, and still moves focus', async () => {
@@ -611,25 +591,7 @@ describe('AC-9: terminal outcomes that are not a success (AC-3)', () => {
     expect(guidedRequestCount('read')).toBe(0);
   }, TEST_TIMEOUT_MS);
 
-  it('inherited POLICY_NOT_APPROVED: the policy needs approval before learning, with no session, poll or finalize', async () => {
-    setGuidedScenario(refusesStart('POLICY_NOT_APPROVED_ABSENT'), unlearnedDraft.id);
-    serveDraft(unlearnedDraft);
-    renderPage();
-    await user().click(await runButton());
-
-    const feedback = await screen.findByTestId('guided-start-feedback', {}, WAIT);
-    expect(feedback).toHaveTextContent(
-      'Learning cannot start until the policy for this application and environment is approved. Ask the CSI owner to approve it.',
-    );
-    expect(feedback).toHaveTextContent('There is no policy for this application and environment yet.');
-    await settle(100);
-    expect(requests('POST', STARTS)).toHaveLength(1);
-    expect(guidedRequestCount('read')).toBe(0);
-    expect(guidedRequestCount('finalize')).toBe(0);
-    expect(document.body.textContent).not.toMatch(/Secrets can only be typed into a password box/);
-  }, TEST_TIMEOUT_MS);
-
-  it('inherited OBS-014 a: a governed POLICY_DENIED gets its own narrative, never the struck secret-fill copy', async () => {
+  it('inherited OBS-014 a: an action-guard POLICY_DENIED gets its own narrative, never the struck secret-fill copy', async () => {
     setGuidedScenario(endsIn('FAILED', { failureCode: 'INVALID_CONTRACT' }), unlearnedDraft.id);
     serveDraft(unlearnedDraft);
     const steps = fixtureDetail(unlearnedDraft).steps.map((step) => ({ stepId: step.id, text: step.text }));
@@ -661,7 +623,7 @@ describe('AC-9: terminal outcomes that are not a success (AC-3)', () => {
     const completion = await screen.findByTestId('guided-completion', {}, WAIT);
     expect(completion).toHaveAttribute('data-kind', 'policyDenied');
     expect(completion).toHaveTextContent('This action could not be run.');
-    expect(completion).toHaveTextContent('Studio stopped this run under the action safety settings.');
+    expect(completion).toHaveTextContent('Studio stopped this run because an action did not match the step wording.');
     expect(document.body.textContent).not.toMatch(/Secrets can only be typed into a password box/);
   }, TEST_TIMEOUT_MS);
 
@@ -688,6 +650,12 @@ describe('AC-9: terminal failures on a step with authored text', () => {
     storeAuthoring(unlearnedDraft.id, { authoringSchemaVersion: 2, steps: LITERAL_STEPS });
     serveDraft(unlearnedDraft, { steps: LITERAL_STEPS });
   }
+  /**
+   * STUDIO-UNIFY-001.6 AC-01. The mirror's explanation proves step 2 (step 1 completed, step 2 has the
+   * failed action), and the page passes its draft, whose `sourceRevision` is the result's, so the
+   * authored sentence of step 2 is quoted too.
+   */
+  const STOPPED_AT_STEP_2 = guidedCopy('stoppedAtStepWithText', { N: 2, text: LITERAL_STEPS[1].text });
 
   it('a target-not-found outcome shows the generic failure and the returned code', async () => {
     setGuidedScenario(endsIn('FAILED', { atStepIndex: 1, failureCode: 'TARGET_MISMATCH' }), unlearnedDraft.id);
@@ -698,12 +666,22 @@ describe('AC-9: terminal failures on a step with authored text', () => {
     const completion = await screen.findByTestId('guided-completion', {}, WAIT);
     expect(completion).toHaveAttribute('data-kind', 'failedUnnamed');
     expect(within(completion).getByTestId('guided-completion-code')).toHaveTextContent('TARGET_MISMATCH');
-    expect(completion.textContent).toBe(`${guidedCopy('failedUnnamed')}TARGET_MISMATCH`);
+    expect(completion.textContent).toBe(
+      `${guidedCopy('failedUnnamed')}${STOPPED_AT_STEP_2}TARGET_MISMATCH`,
+    );
   }, TEST_TIMEOUT_MS);
 
   it.each([
-    { failureCode: 'AMBIGUOUS_TARGET', kind: 'failedUnnamed', message: `${guidedCopy('failedUnnamed')}AMBIGUOUS_TARGET` },
-    { failureCode: 'ASSERTION_FAILED', kind: 'failed', message: guidedCopy('assertionFailed') },
+    {
+      failureCode: 'AMBIGUOUS_TARGET',
+      kind: 'failedUnnamed',
+      message: () => `${guidedCopy('failedUnnamed')}${STOPPED_AT_STEP_2}AMBIGUOUS_TARGET`,
+    },
+    {
+      failureCode: 'ASSERTION_FAILED',
+      kind: 'failed',
+      message: () => `${guidedCopy('assertionFailed')}${STOPPED_AT_STEP_2}`,
+    },
   ] as const)(
     '$failureCode keeps its appropriate failure narrative',
     async ({ failureCode, kind, message }) => {
@@ -714,10 +692,118 @@ describe('AC-9: terminal failures on a step with authored text', () => {
 
       const completion = await screen.findByTestId('guided-completion', {}, WAIT);
       expect(completion).toHaveAttribute('data-kind', kind);
-      expect(completion.textContent).toBe(message);
+      expect(completion.textContent).toBe(message());
     },
     TEST_TIMEOUT_MS,
   );
+});
+
+describe('STUDIO-UNIFY-001.6: a failed learn is marked in the editor, told in Logs, and left as a trace (AC-02, AC-03, AC-04)', () => {
+  const LITERAL_STEPS = [
+    { id: fixtureStepId(0), text: 'Go to "https://shop.example.test/orders"' },
+    { id: fixtureStepId(1), text: 'Check the heading says Order confirmed' },
+  ];
+  function serveLiteralDraft() {
+    storeAuthoring(unlearnedDraft.id, { authoringSchemaVersion: 2, steps: LITERAL_STEPS });
+    serveDraft(unlearnedDraft, { steps: LITERAL_STEPS });
+  }
+  const rowOf = (n: number) => screen.getByRole('textbox', { name: `Step ${n}` }).closest('li') as HTMLElement;
+  const marker = 'ErrorIcon';
+
+  /** Runs the literal draft to an ASSERTION_FAILED stop at step 2 and waits for the outcome. */
+  async function runToFailure() {
+    setGuidedScenario(endsIn('FAILED', { atStepIndex: 1, failureCode: 'ASSERTION_FAILED' }), unlearnedDraft.id);
+    serveLiteralDraft();
+    renderPage();
+    await user().click(await runButton());
+    await waitFor(() => expect(screen.getByTestId('guided-completion')).toHaveAttribute('data-kind', 'failed'), WAIT);
+  }
+
+  it('marks only the stopped step in the editor and in the plan, and no step before it', async () => {
+    await runToFailure();
+
+    expect(within(rowOf(2)).getByTestId(marker)).toBeInTheDocument();
+    expect(within(rowOf(1)).queryByTestId(marker)).toBeNull();
+    expect(within(screen.getByTestId('plan-step-2')).getByTestId('plan-step-stopped')).toBeInTheDocument();
+    expect(within(screen.getByTestId('plan-step-1')).queryByTestId('plan-step-stopped')).toBeNull();
+  }, TEST_TIMEOUT_MS);
+
+  it('the marker belongs to the step, not to its position: moving the step moves the marker', async () => {
+    await runToFailure();
+
+    await user().click(screen.getByRole('button', { name: 'Actions for step 2' }));
+    await user().click(await screen.findByRole('menuitem', { name: 'Move up' }));
+    expect(within(rowOf(1)).getByTestId(marker)).toBeInTheDocument();
+    expect(within(rowOf(2)).queryByTestId(marker)).toBeNull();
+  }, TEST_TIMEOUT_MS);
+
+  it('a step removed from the editor leaves nothing marked', async () => {
+    await runToFailure();
+
+    await user().click(screen.getByRole('button', { name: 'Actions for step 2' }));
+    await user().click(await screen.findByRole('menuitem', { name: 'Delete step' }));
+    await waitFor(() => expect(screen.queryByRole('textbox', { name: 'Step 2' })).toBeNull(), WAIT);
+    expect(screen.queryByTestId(marker)).toBeNull();
+  }, TEST_TIMEOUT_MS);
+
+  it('the marker is gone when the next Run learns the test', async () => {
+    await runToFailure();
+    expect(within(rowOf(2)).getByTestId(marker)).toBeInTheDocument();
+
+    setGuidedScenario(LEARN_SCENARIO, unlearnedDraft.id);
+    await user().click(await runButton());
+    await expectCompletedLearned();
+    expect(screen.queryByTestId(marker)).toBeNull();
+    expect(screen.queryByTestId('plan-step-stopped')).toBeNull();
+  }, TEST_TIMEOUT_MS);
+
+  it('the Logs tab lists each action by step with its outcome, then how learning ended', async () => {
+    await runToFailure();
+
+    await user().click(screen.getByRole('tab', { name: 'Logs' }));
+    const log = screen.getByTestId('guided-learning-log');
+    expect(within(log).getAllByTestId('guided-learning-log-line').map((line) => line.textContent)).toEqual([
+      'Step 1: Open page — done',
+      'Step 2: Click control — failed',
+      `Learning ended: ${guidedCopy('assertionFailed')}`,
+    ]);
+    expect(screen.queryByText('No logs are available.')).toBeNull();
+  }, TEST_TIMEOUT_MS);
+
+  it('a learn that succeeds reads in the Logs tab too, and ends with the learned sentence', async () => {
+    setGuidedScenario(LEARN_SCENARIO, unlearnedDraft.id);
+    serveDraft(unlearnedDraft);
+    renderPage();
+    await user().click(await runButton());
+    await expectCompletedLearned();
+
+    await user().click(screen.getByRole('tab', { name: 'Logs' }));
+    const lines = within(screen.getByTestId('guided-learning-log'))
+      .getAllByTestId('guided-learning-log-line')
+      .map((line) => line.textContent);
+    expect(lines[lines.length - 1]).toBe(`Learning ended: ${COMPLETED_LEARNED}`);
+  }, TEST_TIMEOUT_MS);
+
+  it('leaves a trace after the learn: "Last learning attempt failed (…, at step 2)", read once more when the session ends', async () => {
+    await runToFailure();
+
+    const note = await screen.findByTestId('last-learning-attempt', {}, WAIT);
+    expect(note.textContent).toMatch(/^Last learning attempt failed \(.+, at step 2\)$/u);
+    // One read when the editor opened (nothing yet) and one when the session ended; no polling.
+    expect(guidedRequestCount('latest')).toBe(2);
+    await settle(150);
+    expect(guidedRequestCount('latest')).toBe(2);
+  }, TEST_TIMEOUT_MS);
+
+  it('the line is gone after a later learn that succeeds', async () => {
+    await runToFailure();
+    await screen.findByTestId('last-learning-attempt', {}, WAIT);
+
+    setGuidedScenario(LEARN_SCENARIO, unlearnedDraft.id);
+    await user().click(await runButton());
+    await expectCompletedLearned();
+    await waitFor(() => expect(screen.queryByTestId('last-learning-attempt')).toBeNull(), WAIT);
+  }, TEST_TIMEOUT_MS);
 });
 
 describe('AC-9: terminal failures before an action is admitted', () => {
@@ -768,7 +854,12 @@ describe('AC-9: terminal failures before an action is admitted', () => {
 
     const completion = await screen.findByTestId('guided-completion', {}, WAIT);
     expect(completion).toHaveAttribute('data-kind', 'failed');
-    expect(completion.textContent).toBe(`${BUDGET_SENTENCE}${guidedCopy('nothingStartsOnItsOwn')}`);
+    // Step 1 completed and step 2 has no admitted action: the explanation proves the stop at step 2
+    // (STUDIO-UNIFY-001.6 AC-01), with its authored sentence and the hedged next step, before the
+    // "nothing starts again" line.
+    expect(completion.textContent).toBe(
+      `${BUDGET_SENTENCE}${guidedCopy('stoppedAtStepWithText', { N: 2, text: LITERAL_STEPS[1].text })}${guidedCopy('budgetNextStep', { N: 2 })}${guidedCopy('nothingStartsOnItsOwn')}`,
+    );
   }, TEST_TIMEOUT_MS);
 
   it('RUNTIME_INCOMPATIBLE shows the generic failure and the returned code', async () => {
@@ -779,7 +870,9 @@ describe('AC-9: terminal failures before an action is admitted', () => {
     const completion = await screen.findByTestId('guided-completion', {}, WAIT);
     expect(completion).toHaveAttribute('data-kind', 'failedUnnamed');
     expect(within(completion).getByTestId('guided-completion-code')).toHaveTextContent('RUNTIME_INCOMPATIBLE');
-    expect(completion.textContent).toBe(`${guidedCopy('failedUnnamed')}RUNTIME_INCOMPATIBLE`);
+    expect(completion.textContent).toBe(
+      `${guidedCopy('failedUnnamed')}${guidedCopy('stoppedAtStepWithText', { N: 2, text: LITERAL_STEPS[1].text })}RUNTIME_INCOMPATIBLE`,
+    );
   }, TEST_TIMEOUT_MS);
 });
 
@@ -821,7 +914,6 @@ describe('AC-2 / ADR-SC-006: a stored session whose read is refused (tech gate L
           sourceRevision: String(draft.sourceRevision),
           configurationRevision: String(draft.configurationRevision),
           environmentId: draft.environment,
-          applicationId: draft.csiId,
           versions: { contract: 3 },
         },
       }),
@@ -1068,10 +1160,10 @@ describe('AC-2: a finalize the server does not accept is not ready, never publis
     ['rejected validation (409)', () => ({ status: 409, body: guidedError('REVISION_CONFLICT') }), 1, 'NOT_READY'],
     ['unavailable Core (503)', () => GUIDED_START_REFUSALS.UNAVAILABLE(), 3, 'NOT_READY'],
     // Tech gate L5b: a persistent 401 is sent once, not once per poll (each 401 asks the platform to
-    // sign the person in again). The existing "not ready" sentence states it.
+    // sign the person in again). E2E-012: its sentence says the sign-in ended; Try again resends.
     ['an expired sign-in (401)', () => UNAUTHENTICATED_REFUSAL(), 1, 'REAUTHENTICATION_REQUIRED'],
   ] as const)(
-    'finalize refused by %s: the Run reads "Steps not ready to repeat.", never "Completed", and finalize is not sent again on its own',
+    'finalize refused by %s: the Run says it is held, never "Completed", and finalize is not sent again on its own',
     async (_case, refusal, attempts, pendingKind) => {
       failGuidedRequests('finalize', refusal(), { times: 10 });
       serveDraft(unlearnedDraft);
@@ -1079,8 +1171,13 @@ describe('AC-2: a finalize the server does not accept is not ready, never publis
       await user().click(await runButton());
 
       const pending = await screen.findByTestId('guided-pending', {}, WAIT);
-      expect(pending).toHaveTextContent('Steps not ready to repeat.');
+      expect(pending).toHaveTextContent(
+        pendingKind === 'REAUTHENTICATION_REQUIRED'
+          ? guidedCopy('signInToFinish')
+          : 'Steps not ready to repeat.',
+      );
       expect(pending).toHaveAttribute('data-pending', pendingKind);
+      expect(within(pending).getByTestId('guided-finalize-retry')).toHaveTextContent('Try again');
       await waitFor(() => expect(guidedRequestCount('finalize')).toBe(attempts), WAIT);
       await settle(150);
       expect(guidedRequestCount('finalize')).toBe(attempts);
@@ -1094,6 +1191,26 @@ describe('AC-2: a finalize the server does not accept is not ready, never publis
     },
     TEST_TIMEOUT_MS,
   );
+});
+
+describe('E2E-012: a finalize held by an ended sign-in can be sent again', () => {
+  it('a single 401 on finalize says to sign in again; Try again sends finalize under the same key and the Run completes', async () => {
+    failGuidedRequests('finalize', UNAUTHENTICATED_REFUSAL(), { times: 1 });
+    serveDraft(unlearnedDraft);
+    renderPage();
+    await user().click(await runButton());
+
+    const pending = await screen.findByTestId('guided-pending', {}, WAIT);
+    expect(pending).toHaveTextContent(guidedCopy('signInToFinish'));
+    await waitFor(() => expect(guidedRequestCount('finalize')).toBe(1), WAIT);
+
+    await user().click(within(pending).getByTestId('guided-finalize-retry'));
+
+    await expectCompletedLearned();
+    expect(screen.queryByTestId('guided-pending')).toBeNull();
+    expect(guidedRequestCount('finalize')).toBe(2);
+    expect(new Set(requests('POST', /\/finalize$/u).map((entry) => entry.key)).size).toBe(1);
+  }, TEST_TIMEOUT_MS);
 });
 
 describe('AC-9: reconnect without double-submit (AC-2)', () => {

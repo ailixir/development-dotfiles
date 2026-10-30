@@ -32,6 +32,15 @@ logging:
 # context with no studio.runner.tls. A test that talks TLS to a runner double supplies
 # studio.runner.tls.* from RunnerTestTls; the unconfigured identity is deny-all, never a JVM default.
 studio:
+  # STUDIO-FLEX-001: the fixtures' pages live on these domains (the .test, .example and .invalid
+  # reserved names, example.com, localhost). A test that needs a refusal names a host outside them
+  # or overrides the property; the shipped value is empty (deny all).
+  navigation:
+    allowed-domains: test,example,invalid,example.com,localhost,practicetestautomation.com
+  guided-authoring:
+    # Tests share one database across sessions that are never ended, so the deployment cap is
+    # lifted here; the capacity cap is exercised with an explicit value.
+    max-concurrent-sessions: 1000
   gateway:
     # Tests that exercise Vertex opt in explicitly with test credentials.
     provider: disabled

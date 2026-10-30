@@ -58,8 +58,7 @@ class ObservedTerminalSettlementIT {
     }
 
     void read() {
-      var resolver =
-          new VaultStudioReferenceResolver(vault, (principal, csi, environment, secret) -> true);
+      var resolver = new VaultStudioReferenceResolver(vault);
       try (var resolved =
           resolver.resolve(
               "CSI",
@@ -519,9 +518,7 @@ class ObservedTerminalSettlementIT {
   void realDispatchingCancelIsRequestOnlyAndKillSwitchCannotCloseIt() throws Exception {
     try (var c = context()) {
       c.claim();
-      var resolver =
-          new VaultStudioReferenceResolver(
-              c.vault(), (principal, csi, environment, secret) -> true);
+      var resolver = new VaultStudioReferenceResolver(c.vault());
       try (var resolved =
           resolver.resolve(
               "CSI",

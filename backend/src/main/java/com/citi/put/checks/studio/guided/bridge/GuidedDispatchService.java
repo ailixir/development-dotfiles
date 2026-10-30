@@ -3,8 +3,6 @@ package com.citi.put.checks.studio.guided.bridge;
 import static com.citi.put.checks.studio.guided.session.GuidedSessionException.require;
 
 import com.citi.put.checks.studio.dispatch.StudioReferenceResolver;
-import com.citi.put.checks.studio.dispatch.StudioReferenceResolver.SecretUseNotAuthorizedException;
-import com.citi.put.checks.studio.dispatch.StudioReferenceResolver.SecretUseRevokedException;
 import com.citi.put.checks.studio.dispatch.StudioReferenceResolver.UnknownReferenceException;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.guided.session.GuidedSessionService;
@@ -70,9 +68,6 @@ public final class GuidedDispatchService {
           scope.path("principalId").asText(),
           new com.citi.put.checks.studio.dispatch.ReferenceDeclarations(
               java.util.List.of(), java.util.List.of(input.path("secretId").asText())));
-    } catch (SecretUseNotAuthorizedException failure) {
-      throw new com.citi.put.checks.studio.guided.session.GuidedSessionException(
-          "SECRET_USE_REVOKED", 409);
     } catch (UnknownReferenceException failure) {
       throw new com.citi.put.checks.studio.guided.session.GuidedSessionException(
           "SECRET_UNAVAILABLE", 404);
@@ -127,6 +122,19 @@ public final class GuidedDispatchService {
       if (recovered != null) {
         return recovered;
       }
+      if (failure
+              instanceof com.citi.put.checks.studio.guided.session.GuidedSessionException refusal
+          && (refusal.getMessage().equals("ORIGIN_NOT_ALLOWED")
+              || refusal.getMessage().equals("UNSUPPORTED_SURFACE"))) {
+        // The learning page left the allowed domains and did not return, or the runner gave up
+        // collecting a page it cannot observe at its deadline (ADR-SC-007 D8): the session ends
+        // FAILED with that code.
+        try {
+          sessions.failTranslation(controller, id, fence, refusal.getMessage());
+        } catch (com.citi.put.checks.studio.guided.session.GuidedSessionException stale) {
+          // Never revive expired or replaced authority.
+        }
+      }
       throw failure;
     }
     return sessions.committedObservationRefresh(controller, id, fence, key, request, response);
@@ -154,11 +162,17 @@ public final class GuidedDispatchService {
     }
     ObjectNode request = materialization.identity(context);
     request.set("proposal", proposal);
+    request.set("pressInheritance", sessions.pressInheritance(controller, id, fence, proposal));
+    JsonNode sourceBinding = sessions.assertSourceBinding(controller, id, fence, proposal);
+    if (!sourceBinding.isNull()) {
+      request.set("assertSourceBinding", sourceBinding);
+    }
     request.put("requestDigest", GuidedContracts.hash(proposal));
     request.set("expiresAt", context.path("leaseExpiresAt"));
     JsonNode proof = runner.send("prepare", request);
     sessions.storePreparation(controller, id, fence, proposal, proof);
-    return sessions.admit(controller, id, fence, key, proposal);
+    return sessions.admit(
+        controller, id, fence, key, proposal, proof.path("preparationId").asText());
   }
 
   public JsonNode preparePrefix(JsonNode request) {
@@ -224,6 +238,7 @@ public final class GuidedDispatchService {
           String origin = won.proposal().path("executionEvidence").path("origin").asText();
           if (origins.isEmpty()
               || origins.size() > 16
+              || !sessions.allowedDomains().allows(origin)
               || metadata.path("versionId").asText().length() > 256
               || !resolved
                   .secretOrigins()
@@ -238,15 +253,6 @@ public final class GuidedDispatchService {
               metadata,
               resolved.secretValues().get(secretId),
               java.time.Instant.parse(session.path("expiresAt").asText()));
-        } catch (SecretUseRevokedException failure) {
-          sessions.recordSecretDecision(
-              id,
-              won.ledger(),
-              secretId,
-              null,
-              com.citi.put.checks.studio.secrets.SecretUseAuditRecorder.ResolutionOutcome.REVOKED);
-          throw new com.citi.put.checks.studio.guided.session.GuidedSessionException(
-              "SECRET_USE_REVOKED", 409);
         } catch (StudioReferenceResolver.ReferenceUnavailableException failure) {
           sessions.recordSecretDecision(
               id,

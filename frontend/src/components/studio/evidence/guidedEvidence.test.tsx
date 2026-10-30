@@ -3,7 +3,7 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import fs from 'node:fs';
 import path from 'node:path';
-import type { ExecutionSnapshot } from '@/types/studio/studioTypes';
+import type { ExecutionSnapshot, VideoEvidence } from '@/types/studio/studioTypes';
 import type { GuidedResult } from '@/types/studio/studioGuidedTypes';
 import { mockExecutions } from '@/services/mocks/studio/fixtures';
 import { studioGuidedApi } from '@/services/api/studioGuidedApi';
@@ -17,18 +17,24 @@ import { VIDEO_EVIDENCE_NARRATIVES, STOPPED_RUN_RECORDING_STATEMENTS } from './v
  * STUDIO-OBS-008 lane L5a: the guided recording and its seek (AC-7; D-2, D-10).
  *
  * The guided payload is the landed `contracts/v3/fixtures.json` `recordingResult`: an `AVAILABLE`
- * recording with one `kind: step` and one `kind: action` stamp for each of its two steps.
+ * recording with one `kind: step` and one `kind: action` stamp for each of its two steps. It is the
+ * recording of a learning attempt that did not publish (`FAILED`); a published learn has none
+ * (`evidence.video` is `null`), and the seek offers nothing for it.
  */
 
 const REPO_ROOT = path.resolve(__dirname, '../../../../..');
 const fixtures = JSON.parse(
   fs.readFileSync(path.join(REPO_ROOT, 'docs/specs/studio-observed-authoring/contracts/v3/fixtures.json'), 'utf8'),
 );
-const recordingResult = (): GuidedResult => structuredClone(fixtures.documents.recordingResult) as GuidedResult;
+/** A learn that did not publish: the recording of its learning attempt (`evidence.video` non-null). */
+type RecordedResult = Omit<GuidedResult, 'evidence'> & {
+  evidence: Omit<GuidedResult['evidence'], 'video'> & { video: VideoEvidence };
+};
+const recordingResult = (): RecordedResult => structuredClone(fixtures.documents.recordingResult) as RecordedResult;
 const SESSION = 'sample-session';
 const STEP = (n: number) => `00000000-0000-4000-8000-00000000000${n}`;
 
-function SeekHarness({ result, onSeek }: { result: GuidedResult; onSeek?: (offsetMs: number) => void }) {
+function SeekHarness({ result, onSeek }: { result: RecordedResult; onSeek?: (offsetMs: number) => void }) {
   const { videoRef, seekToOffset, recordingDurationMs } = useVideoSeek();
   return (
     <>
@@ -137,6 +143,14 @@ describe('AC-7 / D-10: named per-step and per-action seek, from server stamps on
     const result = recordingResult();
     result.evidence.video.status = 'EXPIRED';
     const { container } = render(<GuidedSeekControls result={result} onSeek={() => undefined} />);
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('a published learn has no learning recording, so it offers no seek', () => {
+    const published = structuredClone(fixtures.documents.publishedResult) as GuidedResult;
+    expect(published.evidence.video).toBeNull();
+    expect(guidedSeekTargets(published)).toEqual([]);
+    const { container } = render(<GuidedSeekControls result={published} onSeek={() => undefined} />);
     expect(container).toBeEmptyDOMElement();
   });
 

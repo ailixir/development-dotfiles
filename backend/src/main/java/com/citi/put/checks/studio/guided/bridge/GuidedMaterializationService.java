@@ -3,11 +3,13 @@ package com.citi.put.checks.studio.guided.bridge;
 import static com.citi.put.checks.studio.guided.session.GuidedSessionException.require;
 
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
+import com.citi.put.checks.studio.navigation.AllowedDomains;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.StreamSupport;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /** Called inside the serialized session transaction after current source/account checks. */
@@ -16,10 +18,77 @@ public final class GuidedMaterializationService {
   private final GuidedContracts contracts;
   private final GuidedSourceReferenceValidator validator;
 
-  public GuidedMaterializationService(JdbcTemplate jdbc, GuidedContracts contracts) {
+  public GuidedMaterializationService(
+      JdbcTemplate jdbc, GuidedContracts contracts, AllowedDomains domains) {
     this.jdbc = jdbc;
     this.contracts = contracts;
-    this.validator = new GuidedSourceReferenceValidator(contracts);
+    this.validator = new GuidedSourceReferenceValidator(contracts, domains);
+  }
+
+  /**
+   * A template span mixes authored text with variable values. The runner withholds the value of
+   * every configuration input from the page the model reads; the span is a source span, so each
+   * variable it names is frozen as well, unused by any operation, to keep that protection: the
+   * value stays out of the model's observations as it would for a whole-variable input.
+   */
+  private void withholdTemplateVariables(
+      JsonNode session,
+      GuidedSourceReferenceValidator.Sources sources,
+      JsonNode references,
+      com.fasterxml.jackson.databind.node.ArrayNode array,
+      java.util.Set<String> ids) {
+    for (ObjectNode companion : templateVariableReferences(contracts, sources, references)) {
+      if (StreamSupport.stream(array.spliterator(), false)
+          .anyMatch(item -> item.path("provenance").equals(companion))) {
+        continue;
+      }
+      ObjectNode item = validator.resolve(session, sources, companion);
+      require(ids.add(item.path("inputId").asText()), "IDEMPOTENCY_CONFLICT", 409);
+      array.add(item);
+    }
+  }
+
+  /** The whole-variable configuration references of every variable a template span names. */
+  static List<ObjectNode> templateVariableReferences(
+      GuidedContracts contracts,
+      GuidedSourceReferenceValidator.Sources sources,
+      JsonNode references) {
+    List<ObjectNode> found = new java.util.ArrayList<>();
+    for (JsonNode reference : references) {
+      String stepId = reference.path("stepId").asText();
+      var step = sources.steps().get(stepId);
+      if (step == null || !reference.path("referenceKind").asText().equals("sourceSpan")) {
+        continue;
+      }
+      for (String name :
+          SourceTemplate.variableNames(
+              step.text(),
+              reference.path("startUtf16").asInt(),
+              reference.path("endUtf16").asInt())) {
+        sources.configuration().entrySet().stream()
+            .filter(
+                entry ->
+                    entry.getValue().stepId().equals(stepId)
+                        && name.equals(entry.getValue().referenceName())
+                        && entry.getValue().kind().equals("nonsecretText")
+                        && entry.getValue().intendedSlot().equals("fill.value"))
+            .map(java.util.Map.Entry::getKey)
+            .sorted()
+            .findFirst()
+            .ifPresent(
+                referenceId ->
+                    found.add(
+                        contracts
+                            .object()
+                            .put("referenceKind", "configuration")
+                            .put("configurationRevision", sources.configurationRevision())
+                            .put("stepId", stepId)
+                            .put("referenceId", referenceId)
+                            .put("kind", "nonsecretText")
+                            .put("intendedSlot", "fill.value")));
+      }
+    }
+    return found;
   }
 
   public ObjectNode freeze(
@@ -99,6 +168,7 @@ public final class GuidedMaterializationService {
           413);
       array.add(item);
     }
+    withholdTemplateVariables(session, sources, references, array, ids);
     contracts.validate("v3/authored-inputs", inputs);
     require(
         array.size() <= 200
@@ -288,7 +358,6 @@ public final class GuidedMaterializationService {
     result.set("limits", session.path("limits"));
     result.set("expiresAt", session.path("expiresAt"));
     result.set("leaseExpiresAt", session.path("owner").path("leaseExpiresAt"));
-    result.set("approvedOrigins", session.path("scope").path("approvedOrigins"));
     var steps = result.putArray("sourceStepIds");
     session.path("sourceSteps").forEach(step -> steps.add(step.path("stepId").asText()));
     for (var entry :
@@ -309,20 +378,6 @@ public final class GuidedMaterializationService {
               id)
           .forEach(value -> values.add(contracts.parse(value)));
     }
-    // STUDIO-OBS-014 AC-1 (c2b-spec runnerContextSchema): the governed application policy frozen
-    // into this session at start, and its hash, which the runner re-derives before the first
-    // observation. Read from the immutable freeze joined to the immutable version; the hash is
-    // recomputed here as a defensive check that the stored hash still names this policy.
-    List<java.util.Map<String, Object>> frozen =
-        jdbc.queryForList(
-            "SELECT v.document->'applicationPolicy' AS policy, s.observation_policy_hash AS hash"
-                + " FROM studio_guided_session_policies s JOIN studio_guided_policy_versions v ON"
-                + " v.policy_id=s.policy_id AND v.version=s.policy_version WHERE s.session_id=?",
-            id);
-    require(frozen.size() == 1, "RUNTIME_INCOMPATIBLE", 409);
-    JsonNode policy = contracts.parse(String.valueOf(frozen.getFirst().get("policy")));
-    String hash = String.valueOf(frozen.getFirst().get("hash"));
-    require(GuidedContracts.hash(policy).equals(hash), "RUNTIME_INCOMPATIBLE", 409);
     var programs =
         jdbc.queryForList(
             "SELECT prefix_program::text,prefix_program_hash FROM"
@@ -333,8 +388,6 @@ public final class GuidedMaterializationService {
           "prefixProgram", contracts.parse((String) programs.getFirst().get("prefix_program")));
       result.put("prefixProgramHash", (String) programs.getFirst().get("prefix_program_hash"));
     }
-    result.set("applicationPolicy", policy);
-    result.put("policyHash", hash);
     return result;
   }
 

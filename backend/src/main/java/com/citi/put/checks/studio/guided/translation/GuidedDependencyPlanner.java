@@ -41,6 +41,23 @@ public final class GuidedDependencyPlanner {
         require(at != null && at >= order.get(producer), "BINDING_ORDER", 422);
       }
     }
+    // Needs are derived from the obligations' needIds (ADR-SC-007), so the reverse also holds:
+    // every needId an obligation carries names one of the plan's needs, and a read sits at the
+    // need's producer step.
+    var byId = new HashMap<String, JsonNode>();
+    plan.path("needs").forEach(need -> byId.put(need.path("needId").asText(), need));
+    for (JsonNode obligation : plan.path("obligations")) {
+      if (!obligation.path("needId").isTextual()) {
+        continue;
+      }
+      JsonNode need = byId.get(obligation.path("needId").asText());
+      require(need != null, "MISSING_SOURCE", 409);
+      require(
+          !obligation.path("operationKind").asText().equals("read")
+              || need.path("producerStepId").equals(obligation.path("stepId")),
+          "BINDING_ORDER",
+          422);
+    }
   }
 
   public void allocate(Authentication controller, JsonNode session, ObjectNode plan) {

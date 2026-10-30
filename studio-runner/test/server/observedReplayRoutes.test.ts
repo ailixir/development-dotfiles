@@ -1,3 +1,4 @@
+import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 import {describe,it,expect,vi} from 'vitest';
 import {publicationFixture as fixture} from '../helpers/publicationFixture.js';
 import {createApplication} from '../../src/server/application.js';
@@ -15,7 +16,7 @@ function secureFetch(url:string,init:{method:string;headers:Record<string,string
   });
 }
 import {createRecordingLogSink} from '../../src/server/logging.js';
-import type {TrustedPolicy} from '../../src/executor/observedOperations.js';
+import type {} from '../../src/executor/observedOperations.js';
 import {OBSERVED_SCHEMA_BUNDLE_HASH,OBSERVED_LIMITS,canonicalObserved,hashObserved} from '../../src/validator/observedReferencePolicy.js';
 import * as observedPolicy from '../../src/validator/observedReferencePolicy.js';
 import * as observedValidator from '../../src/validator/observedReplay.js';
@@ -24,7 +25,7 @@ const validationRequest={...fixture.validationRequest,requiredBuild:currentBuild
 describe('actual authenticated observed validation HTTP route',()=>{
   it('validates original immutable evidence without admission/browser and refuses malformed family/auth/bytes',async()=>{
     let network=0,launches=0;const logs=createRecordingLogSink();
-    const app=createApplication(loadConfig({STUDIO_RUNNER_HOST:'127.0.0.1',STUDIO_RUNNER_PORT:'0',STUDIO_RUNNER_SERVICE_IDENTITY:'service',STUDIO_RUNNER_CALLBACK_IDENTITY:'callback',STUDIO_RUNNER_CALLBACK_BASE_URL:'https://backend.test'}),{listener,runtimeVersions:{},scratch:createFakeScratchStore(),launcher:{launch(){launches++;return Promise.reject(Error('no browser'));}},http:{send(){network++;return Promise.resolve({kind:'timeout' as const});}},observed:{build:currentBuild,policies:[fixture.trustedPolicy as TrustedPolicy],validationEnabled:true,replayEnabled:false},logSink:logs});
+    const app=createApplication(loadConfig({STUDIO_RUNNER_ALLOWED_DOMAINS: TEST_DOMAINS.join(','), STUDIO_RUNNER_ALLOW_ALL_DOMAINS: 'false', STUDIO_RUNNER_HOST:'127.0.0.1',STUDIO_RUNNER_PORT:'0',STUDIO_RUNNER_SERVICE_IDENTITY:'service',STUDIO_RUNNER_CALLBACK_IDENTITY:'callback',STUDIO_RUNNER_CALLBACK_BASE_URL:'https://backend.test'}),{listener,runtimeVersions:{},scratch:createFakeScratchStore(),launcher:{launch(){launches++;return Promise.reject(Error('no browser'));}},http:{send(){network++;return Promise.resolve({kind:'timeout' as const});}},observed:{build:currentBuild,validationEnabled:true,replayEnabled:false},logSink:logs});
     try{
       const port=await app.start(),url=`https://127.0.0.1:${String(port)}/v2/validate-observed`;
       const send=(body:string|Uint8Array,authorization='Bearer service')=>secureFetch(url,{method:'POST',headers:{authorization,'content-type':'application/json'},body:typeof body==='string'?body:new Uint8Array(Array.from(body)).buffer});
@@ -46,7 +47,7 @@ describe('actual authenticated observed validation HTTP route',()=>{
     const launch=vi.fn(()=>Promise.reject(Error('unexpected browser/native launch')));
     const callback=vi.fn(()=>Promise.resolve({kind:'timeout' as const}));
     // This application composition has no model gateway: validation uses only the packaged pure validator.
-    const app=createApplication(loadConfig({STUDIO_RUNNER_HOST:'127.0.0.1',STUDIO_RUNNER_PORT:'0',STUDIO_RUNNER_SERVICE_IDENTITY:'service',STUDIO_RUNNER_CALLBACK_IDENTITY:'callback',STUDIO_RUNNER_CALLBACK_BASE_URL:'https://backend.test'}),{listener,runtimeVersions:{},scratch:createFakeScratchStore(),launcher:{launch},http:{send:callback},observed:{build:currentBuild,policies:[fixture.trustedPolicy as TrustedPolicy],validationEnabled:true,replayEnabled:false},logSink:createRecordingLogSink()});
+    const app=createApplication(loadConfig({STUDIO_RUNNER_ALLOWED_DOMAINS: TEST_DOMAINS.join(','), STUDIO_RUNNER_ALLOW_ALL_DOMAINS: 'false', STUDIO_RUNNER_HOST:'127.0.0.1',STUDIO_RUNNER_PORT:'0',STUDIO_RUNNER_SERVICE_IDENTITY:'service',STUDIO_RUNNER_CALLBACK_IDENTITY:'callback',STUDIO_RUNNER_CALLBACK_BASE_URL:'https://backend.test'}),{listener,runtimeVersions:{},scratch:createFakeScratchStore(),launcher:{launch},http:{send:callback},observed:{build:currentBuild,validationEnabled:true,replayEnabled:false},logSink:createRecordingLogSink()});
     try{
       const port=await app.start(),url=`https://127.0.0.1:${String(port)}/v2/validate-observed`;
       const json=canonicalObserved(validationRequest),exact=json+' '.repeat(OBSERVED_LIMITS.validation-Buffer.byteLength(json)),over=exact+' ';
@@ -99,6 +100,6 @@ describe('strict local observed contract reference extension',()=>{
 });
 
 it.each([[false,false],[false,true],[true,false],[true,true]] as const)('keeps validation=%s and replay=%s flags independent',async(validationEnabled,replayEnabled)=>{
-  const app=createApplication(loadConfig({STUDIO_RUNNER_HOST:'127.0.0.1',STUDIO_RUNNER_PORT:'0',STUDIO_RUNNER_SERVICE_IDENTITY:'service',STUDIO_RUNNER_CALLBACK_IDENTITY:'callback',STUDIO_RUNNER_CALLBACK_BASE_URL:'https://backend.test'}),{listener,runtimeVersions:{},scratch:createFakeScratchStore(),launcher:{launch(){return Promise.reject(Error('no browser'));}},http:{send(){return Promise.reject(Error('no send'));}},observed:{build:currentBuild,policies:[fixture.trustedPolicy as TrustedPolicy],validationEnabled,replayEnabled},logSink:createRecordingLogSink()});
+  const app=createApplication(loadConfig({STUDIO_RUNNER_ALLOWED_DOMAINS: TEST_DOMAINS.join(','), STUDIO_RUNNER_ALLOW_ALL_DOMAINS: 'false', STUDIO_RUNNER_HOST:'127.0.0.1',STUDIO_RUNNER_PORT:'0',STUDIO_RUNNER_SERVICE_IDENTITY:'service',STUDIO_RUNNER_CALLBACK_IDENTITY:'callback',STUDIO_RUNNER_CALLBACK_BASE_URL:'https://backend.test'}),{listener,runtimeVersions:{},scratch:createFakeScratchStore(),launcher:{launch(){return Promise.reject(Error('no browser'));}},http:{send(){return Promise.reject(Error('no send'));}},observed:{build:currentBuild,validationEnabled,replayEnabled},logSink:createRecordingLogSink()});
   try{const port=await app.start();const headers={authorization:'Bearer service','content-type':'application/json'};const response=await secureFetch(`https://127.0.0.1:${String(port)}/v2/validate-observed`,{method:'POST',headers,body:JSON.stringify(validationRequest)});expect(response.status).toBe(validationEnabled?200:503);const replay=await secureFetch(`https://127.0.0.1:${String(port)}/v2/runs`,{method:'POST',headers,body:JSON.stringify(fixture.job)});expect(replay.status).toBe(replayEnabled?409:503);expect(app.pool.inUse).toBe(0);}finally{await app.drain();}
 });

@@ -35,7 +35,7 @@ neither consumes the other.
 | Budget | Measured from | Bound | Enforced by |
 |---|---|---|---|
 | **Queue** — admitted-start | `admittedAtMs`, the instant the admission CAS returned | `job.deadlines.admittedStartMs` (§8.5 starting value 30 s) | a **refusal** in `runCoordinator`: `ERROR` / `START_DEADLINE_EXCEEDED`, no browser started |
-| **Runtime** — total browser | the `ready` handshake, and nothing else | `min(job.deadlines.totalRuntimeMs, STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS)` (§5.2, §8.5, 120 s) | **enforcement**: ordered stop, bounded grace, process-tree kill → `ERROR` / `TIMEOUT` |
+| **Runtime** — total browser | the `ready` handshake, and nothing else | `min(job.deadlines.totalRuntimeMs, STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS)` (§5.2, §8.5, default 300 s) | **enforcement**: ordered stop, bounded grace, process-tree kill → `ERROR` / `TIMEOUT` |
 | **Step** — per-step | step start | `min(timeoutSeconds×1000, run deadline)`; ceiling `STUDIO_RUNNER_MAX_STEP_TIMEOUT_MS` = 120 000 (contract max, loader-enforced) | observed jobs above it refused `LIMIT_EXCEEDED` |
 
 A run that spends nine-tenths of its queue budget waiting still gets the **whole** of its browser
@@ -185,7 +185,7 @@ exactly such keys. To start it by hand beside a backend on `:8080`:
 ```bash
 npm run build
 env -i PATH="$PATH" HOME="$HOME" TMPDIR="$WORK" \
-  STUDIO_RUNNER_HOST=127.0.0.1 STUDIO_RUNNER_PORT=8090 STUDIO_RUNNER_POOL_SIZE=1 \
+  STUDIO_RUNNER_HOST=127.0.0.1 STUDIO_RUNNER_PORT=8090 STUDIO_RUNNER_POOL_SIZE=1 STUDIO_RUNNER_ALLOWED_DOMAINS=localhost,example.com,practicetestautomation.com \
   STUDIO_RUNNER_SERVICE_IDENTITY="$STUDIO_RUNNER_SERVICE_TOKEN" \
   STUDIO_RUNNER_CALLBACK_IDENTITY="$STUDIO_CALLBACK_SERVICE_TOKEN" \
   STUDIO_RUNNER_CALLBACK_BASE_URL=http://127.0.0.1:8080 \
@@ -486,15 +486,20 @@ configuration is environment keys, every one a `STUDIO_RUNNER_*` name the loader
   first; it needs `serverAuth` and `clientAuth`, or no extended key usage), `STUDIO_RUNNER_TLS_CA_FILE`
   and `STUDIO_RUNNER_CONTROLLER_CERTIFICATE_FINGERPRINT256` (the backend's client certificate, 32
   upper-case hex pairs joined by `:`). `STUDIO_RUNNER_HOST` and `STUDIO_RUNNER_PORT` are the one listener's.
-- With the switch on, all seven are required, and with it off any of them is refused:
+- Every deployment: `STUDIO_RUNNER_ALLOWED_DOMAINS`, the navigation whitelist (see below). Comma-separated, no
+  trimming, empty or unset denies every navigation; an invalid value exits 78 and the list is logged at startup.
+- Optional: `STUDIO_RUNNER_ALLOW_ALL_DOMAINS`, `true` or `false` exactly (unset or empty is `true`, the default for now; anything else exits 78). On, any
+  http(s) URL whose host is a DNS name is allowed, the list is ignored (still validated), and one WARN line is written at startup.
+- With the switch on, all eight are required, and with it off any of them is refused:
   `STUDIO_RUNNER_GUIDED_WORKER_ID` (equal to the backend's `translation.worker-id`),
   `..._JOURNAL_DIR` (persistent, private, disjoint from `SCRATCH_DIR` and `OBJECT_STORE_DIR`),
   `..._CONTROLLER_ISSUER`, `..._CONTROLLER_SUBJECT`, `..._CONTROLLER_PUBLIC_KEY_FILE`,
   `..._CALLBACK_BASE_URL` (https only; its own key, never derived from `CALLBACK_BASE_URL`) and
   `..._CALLBACK_TOKEN_FILE`; the issuer-issued worker token is reread for each callback so an external
-  credential mount can rotate it. The worker never signs credentials.
-- There is no capacity key (the guided capacity is the constant 1) and no policy-hash key (the hash
-  arrives in the hash-bound runner context).
+  credential mount can rotate it. The worker never signs credentials. `..._CAPACITY` (1 to 8) is how many
+  learning sessions this one process owns at once; the next assignment is refused `CAPACITY`. Each session
+  has its own runtime, browser, journal and recording.
+- There is no policy-hash key (the hash arrives in the hash-bound runner context).
 
 Startup order and refusals: configuration (exit 78, one `configuration rejected:` line per problem), the
 process table (69), then with guided on the debug environment (`CONFIGURATION_DENIED DEBUG_ENV`, 78), the
@@ -503,13 +508,12 @@ build identity (`GUIDED_WORKER_UNAVAILABLE`, 1), `canEnumerateLaunchTree()` incl
 anything listen. Any other failure is `RUNNER_START_FAILED` (1). Each is one value-free line.
 `SIGTERM` runs one drain for both halves and exits 1 only when a guided stop could not be confirmed.
 
-Nothing else. What the worker may observe or read is not mounted configuration: a mounted
-`applicationPolicy` or `rules` key, in any form, is an unenumerated `STUDIO_RUNNER_*` name and the
-runner refuses to start; `createGuidedBridge` refuses either as an option with `CONFIGURATION_DENIED`
-(STUDIO-OBS-014 AC-1). The governed observation policy arrives per session as `applicationPolicy`
-in the runner context, bound by `policyHash`; the worker recomputes the hash before the first
-observation and refuses a mismatch with a `409` `IDENTITY_MISMATCH` refusal. Guided learning
-uses no field rules.
+Nothing else. What the worker may observe or read is not mounted configuration: a mounted `rules` key,
+in any form, is an unenumerated `STUDIO_RUNNER_*` name and the runner refuses to start;
+`createGuidedBridge` refuses it as an option with `CONFIGURATION_DENIED`. The observation read profile
+is one constant of the runner (`src/run/observationReadProfile.ts`), applied to the navigation whitelist
+(one grant per entry): nothing in the context, the configuration or the backend can widen it. Guided
+learning uses no field rules.
 
 The controller commits the context identity before sending `/context`: the worker creates an
 actual isolated `about:blank` page and sends its bootstrap callback during that request. The
@@ -538,140 +542,56 @@ including a lost input acknowledgement, and the worker stops without retry. Publ
 has no atomic retained-node precondition: the guarantee is immediate checks, no locator reacquisition
 and no retries, not an atomic transaction with arbitrary application scripts.
 
-Positive generic reads are granted by the governed policy (the runner context's
-`applicationPolicy`, an approved and audited policy version), independently of structural
-discovery. `readGrants` is required; `[]` means no generic read permission. For example:
+Positive generic reads are granted by the observation read profile, independently of structural
+discovery (`src/run/observationReadProfile.ts`). It is one constant for every test: structural
+discovery on, and for every allowed origin one grant with `region: {"kind": "application"}` and
+`visibleText: {"classification": "permittedBusinessData"}`. No `controlValue` grant exists, so no field
+value is ever readable. The grant id is a pure function of the origin (`readGrantId`), so a read
+recipe learned in a session replays under the same grant in any process. Visible-text grants support
+scalar business surfaces such as named output/status elements and term/value cells; they never
+authorize arbitrary subtree capture. Hidden, sensitive, password, unsupported or mixed sensitive
+descendants refuse the entire source. The same resolver supplies sanitized metadata, preparation and
+the final retained-node read, and privately inventories business values before any observation is
+exported.
 
-```json
-{
-  "policyRuleId": "application-structure",
-  "allowStructuralDiscovery": true,
-  "readGrants": [{
-    "policyRuleId": "operations-business-values",
-    "origin": "https://application.example",
-    "region": {"kind": "role", "role": "main", "name": "Operations", "exact": true},
-    "visibleText": {"classification": "permittedBusinessData"},
-    "controlValue": {"classification": "nonsecretApproved", "types": ["text", "textarea"]}
-  }]
-}
-```
+### Navigation whitelist and the return window
 
-An explicit `{ "kind": "application" }` region grants the named read kinds at the exact approved
-origin. A unique matching semantic region takes precedence; conflicting equally specific grants
-or duplicate region anchors deny reading. In replay only, the published `TrustedPolicy` may also
-carry exact field rules as optional overrides, and an explicit `structuralOnly` field rule vetoes
-broader permission; guided learning has no field rules. Visible-text grants support scalar
-business surfaces such as named output/status elements and term/value cells; they never authorize
-arbitrary subtree capture. Hidden, sensitive, password, unsupported or mixed sensitive descendants
-refuse the entire source. The same resolver supplies sanitized metadata, preparation and the final
-retained-node read, and privately inventories business values before any observation is exported.
+`STUDIO_RUNNER_ALLOWED_DOMAINS` is the only navigation control (`src/allowedDomains.ts`, shared vectors in
+`docs/specs/studio/allowed-domains-vectors.json`). It is per-environment deployment configuration; the
+backend checks its own copy of the same list. An entry is a lowercase punycode host suffix (no wildcard, IP
+literal, scheme, port, path, trailing dot or uppercase; at most 32; none a suffix of another). A host matches
+an entry when it equals it or ends with `"." + entry`, so `evilciti.com` never matches `citi.com`. Pages may
+use `http` or `https` on any port. There is no egress proxy: reachability is the network's business.
 
-Before sending context, the controller persists an immutable assignment and posts `/assign` without
-`X-Owner-Fence`. The actual worker uses its mounted owning-worker credential to call the backend
-`/claim`, validates the complete HTTP202 session grant, and returns HTTP200 `OWNED` only while
-that acknowledgement is live. No browser is created at assignment. An exclusive durable assignment
-marker prevents reacquisition after restart. Repeated live assignments return the latest acknowledged
-lease; stopped/expired assignment retries return HTTP409. Confirmed `/stop` returns `STOPPED` for
-assignment-scoped teardown and omits the fence header, including cancellation before context.
+With `STUDIO_RUNNER_ALLOW_ALL_DOMAINS=true` (ON by default for now, per environment, rendered by the chart from the same value as the
+backend's `studio.navigation.allow-all-domains`) the list is ignored and `domainAllowed` accepts any URL `hostOf` accepts: an
+`http(s)` DNS name, still no userinfo or IP literal. The effective list is the single entry `*` (`ALL_DOMAINS`; a wildcard can
+never be a configured entry), `entryForHost` returns the page's own host, and the read profile carries one grant for `*` that the
+in-page collector matches against the host it is on. `test/fixtures-tier/allow-all-navigation.test.ts` drives it in Chromium.
 
-The observed worker renews serially at an absolute one-second cadence with a fresh key and a
-one-second request cap, while waiting for
-context, executing or awaiting clarification. Only acknowledged same-fence grants extend local
-authority. Context timestamps cannot extend that authority or regress a newer acknowledgement;
-preparation expiry is capped to the acknowledged lease. Invalid, stale, failed or late renewal
-stops without replay or resurrection. Assignment and browser share one capacity reservation until
-confirmed teardown. Diagnostic environment switches are rejected before reading credentials or
-performing initial claim traffic.
+- Author-directed navigation (a Studio step's destination, replay's first navigation) must be on the list and
+  is refused before any request leaves.
+- Anything a page does itself is not filtered: a link, a script, a form post, a `30x` chain, iframes and
+  subresources may use any host.
+- Whenever the runner needs the page (an observation, a replay step's guard) and the main frame is on a host
+  off the list (an SSO hop, say) it waits up to 15 s (`RETURN_WINDOW_MS`, bounded further by a replay step's
+  own deadline) and observes and does nothing meanwhile. Back on the list, work continues. Otherwise learning
+  ends (`ORIGIN_NOT_ALLOWED`, the host name only in diagnostics) and the replay step is refused
+  `POLICY_REFUSED`. An identity provider that shows its own login form must be listed, because filling it is
+  an action. A popup is still closed, so SSO in a popup is unsupported.
+- Read grants are one per list entry, keyed by the entry and matched on the page's hostname; a list that no
+  longer holds an entry refuses a learned read (`READ_REFUSED`). A password fill needs the page on the secret's
+  own origin list and on this list. Each replay step stays pinned to the exact origin it learned on.
 
-Current observed guided and replay startup use bundled full Chromium with `channel: 'chromium'`,
-`headless: true`, `chromiumSandbox: true` and empty arguments. Fresh `Default/Preferences` disables
-credential saving and both autofill kinds and sets `session.restore_on_startup` to5. Startup checks
-the selected executable, confined active Default profile and all four effective registered values.
-The obsolete `profile.password_manager_enabled` key supplies no effective-policy evidence.
-
-Recorded replay verifies those values on the sole trusted startup page in the same persistent
-recorded context. It closes that page, awaits and deletes only its captured confined native video,
-checks that no page or startup artifact remains, then creates the sole clean about:blank app page.
-Unexpected page events remain latched through app creation and late subscriptions. The child samples
-its paired origin once at app recording readiness; startup consumes the existing admitted runtime
-window and absolute start/run deadlines. Close returns only the app's native recording. The native
-video fixtures independently decode initial navigation and failure seeks within500ms; outstanding
-staging calibration and internal-image approval remain separate requirements.
-
-Observed recovery uses one bounded, closed, write-once private receipt of the actual app Video.path
-in an exclusively created scratch directory. It binds existing launch/admission/process and scratch
-identity without adding a job or IPC field. The parent seals one snapshot before stop/kill; late
-publication cannot establish ownership afterward. It inspects only that native file through a
-no-follow descriptor after writer/tree teardown, reads four header bytes and retains the512-byte
-eligibility threshold. Stream retries reopen the same pinned file descriptor identity. No largest,
-newest or stray recording selection is used on the observed path.
-
-Ownership supplies no execution, Ready, usage or finalization fact. A missing owner leaves evidence
-unavailable; an owned attempted recorder with no usable file has failed evidence. Genuine playable
-owned recovery can remain partial without received Ready or FINAL; only authenticated native close
-facts establish complete finalization. Video/receipt failure preserves the actual assertion outcome.
-
-Authenticated completed PASS receipts may support monotone `USED` entries on existing PROGRESS
-reports. Each positive entry retains its matching frozen secretRef step and exact timing support.
-Missing or lost receipts after an Execute send attempt leave unknown use omitted; final reports
-retain earlier confirmed positives. Diagnostics redact all current and previously released values
-before interpolation, bounds and the stderr/callback/separate diagnostic journal writes.
-
-The build packages the mandatory independently authored observed-choice reference alongside the
-actual included corpus. Runtime provenance binds the fixed browser mode, installed executable SHA256
-and compiled launcher SHA256; startup rejects shell or mismatched installations. A local catalog's
-image digest is controlled test identity, never image provenance. `check:pins --require-image` retains
-the Node22/internal-image ED-05 gate even when a public Playwright image supplies a working browser.
-
-The authenticated, fenced `/observe` control refreshes actual browser evidence between source steps
-or after a resolved clarification. It requires the current generation and an idle live context,
-invalidates unconsumed preparations, reserves observation capacity before collection, and preserves
-captured bindings, action counts and source-step ordinals. Its HTTP200 envelope is returned only
-after the owning-worker observation callback receives HTTP202. The callback uses the frozen
-`oref-` correlation hash of identity, request key and canonical request digest. Identical concurrent
-requests join one collection; changed payloads conflict, and cached evidence cannot be returned as
-current after a later generation, action, stop or expiry. Remaining cumulative byte capacity also
-bounds the private collector before export. A lost callback acknowledgement stops the worker;
-a committed callback with a lost final response can be recovered by the controller from its durable
-refresh intent without collecting again.
-
-The private observation inventory survives document replacement and same-document removal. It
-retains observed input values, explicitly sensitive text, approved business sources and their
-locator-normalized aliases, with the strictest provenance. Its independent internal limits are
-4,096 distinct entries and 1 MiB total UTF-8; overflow or collection failure permanently refuses
-further export rather than evicting earlier values. The isolated collector transfers this inventory
-only to the trusted worker's private session store over CDP. The public observation facade returns
-only sanitized evidence. Teardown clears the store and rejects late updates/collection results.
-These limits do not raise any public observation or runtime-value cap.
-
-Native check/uncheck verifies the requested checked state on the retained original input after
-one native attempt. Prevented/reverted toggles or post-effect identity/type loss return uncertainty;
-there is no second click or replacement resolution. Native radio uncheck is unsupported and is
-refused during preparation, before effects. Already-satisfied supported toggles remain no-ops.
-
-Guided request bodies, controller responses and JWT segments use fatal UTF-8, duplicate-key and
-trailing-data rejection. Numeric tokens must be canonical safe integers (no fraction, exponent or
-negative zero); JWT claims are closed to `iss/sub/aud/role/iat/exp` and optional nonnegative `nbf`.
-The v3 wire timestamp profile is uppercase UTC `YYYY-MM-DDTHH:mm:ss[.fraction]Z`, with valid
-Gregorian dates, seconds00–59 and optional1–9 fractional digits. Offsets, lowercase, whitespace,
-leap seconds and excess precision are refused without normalizing signed/hashed data. The bundled
-validator audits its supported keywords, formats and resolved references/pointers at startup;
-unknown semantics, missing definitions and recursive references cannot silently become permissive
-schemas. This supports the currently enforced bridge schemas only.
-
-### Observed replay (artifact 2)
-
-Observed artifacts use the one collapsed replay profile `{contract: 3}`, compared together with the exact build identity (STUDIO-OBS-012A). The authenticated `POST /v2/validate-observed` endpoint independently derives the plan, operation guards, input recipes and binding graph from original immutable evidence. `POST /v2/runs` uses ordinary admission, capacity, the confined recorded child, cancellation, reporting and evidence upload. Artifact-1 validation, AST execution and protocol-1 routes were removed by STUDIO-OBS-012A.
-
-Enable validation and replay independently with `STUDIO_RUNNER_OBSERVED_VALIDATION_ENABLED` and `STUDIO_RUNNER_OBSERVED_REPLAY_ENABLED` (both default false). Trusted startup supplies `STUDIO_RUNNER_OBSERVED_CATALOG_FILE` containing exactly `{profile,build}`, `STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST`, and `STUDIO_RUNNER_OBSERVED_POLICY_FILE` containing the mounted policy projections. The catalog must match packaged schema/reference hashes, the installed Chromium revision and the independently supplied immutable release image digest. A local build records `observedChromiumBuild` separately; it does not assert container provenance or satisfy `check:pins --require-image`.
+Enable validation and replay independently with `STUDIO_RUNNER_OBSERVED_VALIDATION_ENABLED` and `STUDIO_RUNNER_OBSERVED_REPLAY_ENABLED` (both default false). Trusted startup supplies `STUDIO_RUNNER_OBSERVED_CATALOG_FILE` containing exactly `{profile,build}`, and `STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST`. The catalog must match packaged schema/reference hashes, the installed Chromium revision and the independently supplied immutable release image digest. A local build records `observedChromiumBuild` separately; it does not assert container provenance or satisfy `check:pins --require-image`.
 
 Observed login is author-owned: a `<secret ID>` source becomes a value-less `secretRef` input/recipe. Guided delivery carries the value only on its admitted dispatch frame; replay resolves all declared values once per run and uses value-less child metadata to bind each secret ID to its declaring step and `fill.value` slot. The child has no account provider or cookie import and invokes no model during replay.
 
-Secrets fill only the unique rendered, enabled password input in the top-level document, including open shadow roots. The count, preparation and fill share one isolated-world candidate definition. An off-screen rendered decoy counts; frames and closed shadows do not. The prepared element must remain the same attached password input, with unchanged document/generation/mutation/navigation identity. Document origin must belong to both the approved and secret-origin lists, and an owning form action must remain within the secret-origin list. Multi-password pages and secret fills into non-password controls are unsupported at GA; absence/ambiguity refuses with nothing typed, and there is no fallback adapter. Password value assertions and reads are refused.
+Secrets fill only the unique rendered, enabled password input in the top-level document, including open shadow roots. The count, preparation and fill share one isolated-world candidate definition. An off-screen rendered decoy counts; frames and closed shadows do not. The prepared element must remain the same attached password input, with unchanged document/generation/mutation/navigation identity. Document origin must belong to both the secret-origin list and the navigation whitelist, and an owning form action must remain within the secret-origin list. Multi-password pages and secret fills into non-password controls are unsupported at GA; absence/ambiguity refuses with nothing typed, and there is no fallback adapter. Password value assertions and reads are refused.
 
 Both launch modes use a persistent scratch profile with a prewritten `Preferences` file disabling credential/password saving, profile/credit-card autofill and session restore. Chromium launch refuses a missing or unsafe file. Controlled tests scan profile bytes before context close and scratch cleanup, recording the exact browser version in evidence. Transient Chromium files, in-memory strings and operator dumps remain stated operational residuals; masked video frames require the manual OBS-009 inspection.
 
-Secret-bearing observed runs and guided contexts recheck names-only authorization on an absolute one-second cadence, with a one-second response deadline. Denial, malformed authority or a missed deadline stops locally before another step; a step already in flight may complete. `LOGIN_REQUIRED` annotates an existing drift/refusal only, using password count plus an actionable exported button/input. Registration/change-password pages can match this signature; passing steps remain passing. Custom password widgets and non-approved SSO origins are outside that signature.
+Secret-bearing observed runs and guided contexts recheck names-only authorization on an absolute one-second cadence, with a one-second response deadline. Denial, malformed authority or a missed deadline stops locally before another step; a step already in flight may complete. `LOGIN_REQUIRED` annotates an existing drift/refusal only, using password count plus an actionable exported button/input. Registration/change-password pages can match this signature; passing steps remain passing. Custom password widgets and SSO origins off the whitelist are outside that signature.
 
 Replay usage reports contain only confirmed `USED`, proven pre-effect `REFUSED`, and proven unreached `NOT_USED` facts. An interrupted invocation or missing child result leaves its uncertain entry absent; later faults retain confirmed use. Guided failure diagnostics redact released secrets and known values before bounds or writes. The optional callback `errorMessage`, stderr text, and private bounded per-session diagnostic JSONL carry the same redacted text. The separate diagnostic file has no consume/recovery authority; its delivery failure cannot change a completed verdict. Raw errors are never serialized wholesale.
 

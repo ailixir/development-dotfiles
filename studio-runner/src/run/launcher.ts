@@ -61,6 +61,7 @@ import { validateObservedExecute } from '../executor/observedReplay.js';
 import type { ObservedChildMessage } from './protocol.js';
 import type { StepReporter } from '../executor/stepReporter.js';
 import { fork } from 'node:child_process';
+import { ALLOW_ALL_DOMAINS_ENV_KEY, ALLOWED_DOMAINS_ENV_KEY, isAllowAll } from '../allowedDomains.js';
 import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -134,6 +135,13 @@ export interface ChildLauncherOptions {
    * because the child does not inherit the runner's `STUDIO_RUNNER_*` environment.
    */
   readonly seekOriginCalibrationMs: number;
+  /**
+   * The runner's navigation whitelist (`STUDIO_RUNNER_ALLOWED_DOMAINS`, already validated). Required:
+   * an empty list is a choice (deny all) every caller states. The child holds no runner configuration
+   * and the closed launch frame carries none, so it is handed to the child as the one derived
+   * environment value `STUDIO_RUNNER_ALLOWED_DOMAINS`.
+   */
+  readonly allowedDomains: readonly string[];
   readonly spawner?: ChildSpawner | undefined;
   readonly childModulePath?: string | undefined;
   /** Grace given to a child asked to stop before it is killed. */
@@ -329,6 +337,7 @@ export function createForkSpawner(): ChildSpawner {
 function childEnvironment(
   parentEnv: Readonly<Record<string, string | undefined>>,
   scratchPath: string,
+  allowedDomains: readonly string[],
 ): Record<string, string> {
   const env: Record<string, string> = {};
   for (const key of INHERITED_ENV_KEYS) {
@@ -339,6 +348,14 @@ function childEnvironment(
   env.TMPDIR = join(scratchPath, SCRATCH_SUBDIRECTORIES.temp);
   // The browsers come from the image; a child must never fetch one at run time (ADR-001 §4.2).
   env.PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = '1';
+  // The one runner fact the child needs: the navigation whitelist. Always written (empty denies everything); an inherited
+  // value is not on the allowlist and is never read.
+  // Under allow-all the list is the `*` sentinel, which the child's grammar refuses as an entry: it travels as the option instead.
+  const allowAll = isAllowAll(allowedDomains);
+  env[ALLOWED_DOMAINS_ENV_KEY] = allowAll ? '' : allowedDomains.join(',');
+  // Always written, in both directions: an unset key means ON for now (the option's default), so a child of a
+  // list-mode runner must be told `false` explicitly or it would start allow-all.
+  env[ALLOW_ALL_DOMAINS_ENV_KEY] = allowAll ? 'true' : 'false';
   // Stated over what is actually handed to the operating system, so it covers the allowlist and
   // the two literals above alike.
   assertNoCodeLoadingKeys(env);
@@ -396,17 +413,17 @@ export const CANCELLED_MESSAGE = KILL_MESSAGES.cancel;
 async function launchObservedChild(options: ChildLauncherOptions, launchOptions: LaunchOptions, spawner: ChildSpawner, modulePath: string, parentEnv: Readonly<Record<string, string | undefined>>, stopTimeoutMs: number): Promise<BrowserSession> {
     const observed = launchOptions.observed;
     demand(observed);
-    const { job, admission, policy } = observed, b = job.binding;
-    const launch: Launch3 = structuredClone({ kind: 'launch', protocolVersion: 3, mode: 'observed', runId: b.executionId, attemptId: b.attemptId, admission, profile: b.requiredProfile, build: b.requiredBuild, scopeHash: b.scopeHash, configurationHash: b.configurationHash, browser: 'chromium', viewport: job.configuration.viewport, recording: job.recording, seekOriginCalibrationMs: options.seekOriginCalibrationMs, scratchPath: launchOptions.scratchPath, totalRuntimeMs: launchOptions.totalRuntimeMs, scope: b.scope, policy });
+    const { job, admission } = observed, b = job.binding;
+    const launch: Launch3 = structuredClone({ kind: 'launch', protocolVersion: 3, mode: 'observed', runId: b.executionId, attemptId: b.attemptId, admission, profile: b.requiredProfile, build: b.requiredBuild, scopeHash: b.scopeHash, configurationHash: b.configurationHash, browser: 'chromium', viewport: job.configuration.viewport, recording: job.recording, seekOriginCalibrationMs: options.seekOriginCalibrationMs, scratchPath: launchOptions.scratchPath, totalRuntimeMs: launchOptions.totalRuntimeMs, scope: b.scope, });
     validateObserved('replay-ipc#/definitions/Launch3', launch, OBSERVED_LIMITS.launch);
 
     const freezeLaunch=(value:unknown):void=>{if(value&&typeof value==='object'){for(const child of Object.values(value))freezeLaunch(child);Object.freeze(value);}};freezeLaunch(launch);
     const execute: Execute3 = structuredClone({ kind: 'execute', protocolVersion: 3, mode: 'observed', runId: b.executionId, attemptId: b.attemptId, profileHash: hashObserved(b.requiredProfile), configurationHash: b.configurationHash, waitStrategy: job.configuration.waitStrategy, stepTimeoutMs: launchOptions.stepTimeoutMs ?? job.runtime.stepTimeoutMs, steps: job.artifact.steps, guards: job.artifact.guards, bindings: job.artifact.replayPolicy.bindings.map(x => ({ bindingId: x.bindingId, producer: x.producer, recipe: x.recipe, origin: x.sourceOrigin })), transfers: job.artifact.replayPolicy.transfers, inputs: job.artifact.inputRecipes.map(i => { if (i.kind === 'secretRef') { demand(i.provenance.kind === 'configuration'); return { inputId: i.inputId, stepId: i.stepId, kind: 'secretRef' as const, intendedSlot: 'fill.value' as const, referenceName: i.provenance.referenceName }; } const v = job.inputs.find(x => x.inputId === i.inputId); demand(v); return { inputId: i.inputId, stepId: i.stepId, kind: i.kind === 'destination' ? 'destination' : 'nonsecretText', intendedSlot: i.intendedSlot, value: v.value }; }), secrets: job.secrets, secretOrigins: job.secretOrigins, ...(job.artifact.learnedPlan.bindings.some(binding=>binding.consumers.length===0)?{retainedArtifact:job.artifact}:{}) });
-    validateObservedExecute(execute, b.scope, launch);
+    validateObservedExecute(execute, b.scope, options.allowedDomains, launch);
     mkdirSync(join(launchOptions.scratchPath, SCRATCH_SUBDIRECTORIES.temp), { recursive: true });
     secureScratchDirectory(launchOptions.scratchPath);
     const videoRegistry=createAppVideoRegistry(launchOptions.scratchPath);
-    const env = childEnvironment(parentEnv, launchOptions.scratchPath);
+    const env = childEnvironment(parentEnv, launchOptions.scratchPath, options.allowedDomains);
     for (const key of ['STUDIO_RUNNER_OBSERVED_CATALOG_FILE', 'STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST'])
         if (parentEnv[key])
             env[key] = parentEnv[key] ?? '';

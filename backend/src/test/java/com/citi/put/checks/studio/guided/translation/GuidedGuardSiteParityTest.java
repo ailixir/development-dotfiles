@@ -31,7 +31,7 @@ public class GuidedGuardSiteParityTest {
 
   @Test
   void unchangedLegacyGate34FiveKeyProtocolAndCommitSelectionRemainSeparate() throws Exception {
-    assertEquals(34, GuidedRefusalDiagnostics.Gate.values().length);
+    assertEquals(42, GuidedRefusalDiagnostics.Gate.values().length);
     var events = new ArrayList<GuidedRefusalDiagnostics.Receipt>();
     var attempt =
         new GuidedRefusalDiagnostics(events::add)

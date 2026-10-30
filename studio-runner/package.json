@@ -24,6 +24,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:fixtures": "vitest run --config vitest.fixtures.config.ts",
+    "test:perception": "vitest run --config vitest.perception.config.ts",
     "test:deployment": "vitest run --config vitest.deployment.config.ts",
     "evaluate": "node evaluation/cli.mjs",
     "browsers:install": "playwright install chromium"

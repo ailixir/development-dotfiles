@@ -105,7 +105,7 @@ interface RevisionRequest { method: string; url: string; body: unknown; authoriz
 function revisionApi(options: { readResponse?: unknown; updateResponse?: unknown; conflict?: boolean; readUnavailable?: boolean; onRequest?: (method: string) => void } = {}) {
   const requests: RevisionRequest[] = [];
   const client = createPublicApiClient({
-    baseUrl: 'http://127.0.0.1/api/v1/studio', token: 'unit-transport-token', csiId: '60406', environmentId: 'dev', applicationId: 'unit-app',
+    baseUrl: 'http://127.0.0.1/api/v1/studio', token: 'unit-transport-token', csiId: '60406', environmentId: 'dev',
     transport: (url, init) => {
       const method = init.method ?? 'GET';
       if (url.pathname !== '/api/v1/studio/tests/memory' || !['GET', 'PUT'].includes(method)) return Promise.reject(new Error('Unexpected unit request'));
@@ -383,7 +383,7 @@ function wireHarness(options: WireOptions = {}) {
   };
   const json = (body: unknown) => new Response(JSON.stringify(body), { headers: { 'content-type': 'application/json' } });
   const client = createPublicApiClient({
-    baseUrl: 'http://127.0.0.1/api/v1/studio', token: 'unit-wire-token', csiId: '60406', environmentId: 'dev', applicationId: 'unit-wire-app',
+    baseUrl: 'http://127.0.0.1/api/v1/studio', token: 'unit-wire-token', csiId: '60406', environmentId: 'dev',
     transport: async (url, init) => {
       const method = init.method ?? 'GET'; const path = url.pathname.replace('/api/v1/studio', '');
       requests.push({ method, path });

@@ -1,5 +1,7 @@
 import { isAbsolute, relative, resolve } from 'node:path';
 
+import { applyAllowAll, parseAllowAllDomainsEnv, parseAllowedDomainsEnv } from '../allowedDomains.js';
+
 /**
  * Runner configuration (AC-22c, architecture §8.5).
  *
@@ -36,8 +38,15 @@ export interface RunnerConfig {
   readonly port: number;
   /** Bind address; internal ClusterIP only, never a public interface. */
   readonly host: string;
-  /** Concurrent runs this pod admits. ADR-001 §9 starts at 1. */
+  /** Concurrent runs this pod admits. */
   readonly poolSize: number;
+  /**
+   * The navigation domain whitelist (`STUDIO_RUNNER_ALLOWED_DOMAINS`, STUDIO-FLEX-001), validated at
+   * startup. Empty denies every navigation. Replay needs it as well as guided learning, so it is not
+   * a `GUIDED_*` key. Under `STUDIO_RUNNER_ALLOW_ALL_DOMAINS=true` this is `ALL_DOMAINS`
+   * (`isAllowAll`), the configured list being ignored; consumers only call `domainAllowed`.
+   */
+  readonly allowedDomains: readonly string[];
   /** Stable for the process; identifies this instance in every admission (AC-7). */
   readonly runnerInstanceId: string;
   /** Inbound service identity the four internal routes require (AC-2a). */
@@ -134,7 +143,7 @@ export interface RunnerConfig {
    */
   readonly seekOriginCalibrationMs: number;
   /**
-   * The **server limit** on total browser runtime (§5.2, §8.5 starting value 120 s).
+   * The **server limit** on total browser runtime (§5.2, §8.5; default 300 s).
    *
    * §5.2: total browser runtime is "configurable within server limits". The job envelope carries
    * `deadlines.totalRuntimeMs`, and the effective cap is `min(job, this)` — a job asking for less
@@ -161,12 +170,15 @@ export interface RunnerConfig {
 /** One accepted key: its environment suffix, how to read it, and whether it is required. */
 interface KeySpec {
   readonly field: string;
-  readonly kind: 'string' | 'integer' | 'boolean';
+  readonly kind: 'string' | 'integer' | 'boolean' | 'domains' | 'allowAll';
   readonly required: boolean;
   readonly fallback?: string | number | boolean;
   readonly min?: number;
   readonly max?: number;
 }
+
+/** The most concurrent learning sessions one guided process may own (`STUDIO_RUNNER_GUIDED_CAPACITY`). */
+export const MAX_GUIDED_CAPACITY = 8;
 
 /**
  * The complete accepted surface. Adding a key here is the only way to add configuration, which
@@ -177,11 +189,17 @@ const KEY_SPECS: Readonly<Record<string, KeySpec>> = {
   OBSERVED_VALIDATION_ENABLED:{field:'observedValidationEnabled',kind:'boolean',required:false,fallback:false},
   OBSERVED_REPLAY_ENABLED:{field:'observedReplayEnabled',kind:'boolean',required:false,fallback:false},
   OBSERVED_CATALOG_FILE:{field:'observedCatalogFile',kind:'string',required:false,fallback:''},
-  OBSERVED_POLICY_FILE:{field:'observedPolicyFile',kind:'string',required:false,fallback:''},
   OBSERVED_IMAGE_DIGEST:{field:'observedImageDigest',kind:'string',required:false,fallback:''},
   PORT: { field: 'port', kind: 'integer', required: false, fallback: 8080, min: 0, max: 65535 },
   HOST: { field: 'host', kind: 'string', required: false, fallback: '0.0.0.0' },
-  POOL_SIZE: { field: 'poolSize', kind: 'integer', required: false, fallback: 1, min: 1 },
+  POOL_SIZE: { field: 'poolSize', kind: 'integer', required: false, fallback: 2, min: 1 },
+  // The navigation whitelist: comma-separated, no trimming, optional; empty denies everything. Parsed
+  // by `parseKeys` through `parseAllowedDomainsEnv`, the one definition of the grammar.
+  ALLOWED_DOMAINS: { field: 'allowedDomains', kind: 'domains', required: false },
+  // The allow-all option (default ON for now, user decision 2026-10-25): `true`/`false` exactly, or unset (= on). The chart renders it from the
+  // one value that also feeds the backend's STUDIO_ALLOW_ALL_DOMAINS. `loadConfig` folds it into
+  // `allowedDomains` (as `ALL_DOMAINS`); the flag itself is not kept.
+  ALLOW_ALL_DOMAINS: { field: 'allowAllDomains', kind: 'allowAll', required: false },
   INSTANCE_ID: { field: 'runnerInstanceId', kind: 'string', required: false },
   SERVICE_IDENTITY: { field: 'serviceIdentityToken', kind: 'string', required: true },
   CALLBACK_IDENTITY: { field: 'callbackIdentityToken', kind: 'string', required: true },
@@ -315,7 +333,7 @@ const KEY_SPECS: Readonly<Record<string, KeySpec>> = {
     field: 'drainTimeoutMs',
     kind: 'integer',
     required: false,
-    fallback: 150_000,
+    fallback: 360_000,
     min: 0,
   },
   RECORDING_WIDTH: {
@@ -369,7 +387,7 @@ const KEY_SPECS: Readonly<Record<string, KeySpec>> = {
     field: 'maxTotalRuntimeMs',
     kind: 'integer',
     required: false,
-    fallback: 120_000,
+    fallback: 300_000,
     min: 1,
   },
   // Equal to the authoring/contract maximum (timeoutSeconds ≤ 120, openapi TestConfiguration, v3
@@ -426,8 +444,8 @@ const KEY_SPECS: Readonly<Record<string, KeySpec>> = {
   },
   // ── Guided mode is configuration of this one process (ruling A2.2). ──────────────────────────
   // The switch is the only key with a default. Every other `GUIDED_*` key is required when it is
-  // true and refused when it is not (`loadGuidedConfig`). There is no capacity key (code constant
-  // 1, A2.3) and no policy-hash key (context-bound, A2.4).
+  // true and refused when it is not (`loadGuidedConfig`). `GUIDED_CAPACITY` is how many learning
+  // sessions this one process owns at once (1..8); there is no policy-hash key (context-bound, A2.4).
   GUIDED_ENABLED: { field: 'guidedEnabled', kind: 'boolean', required: false, fallback: false },
   GUIDED_WORKER_ID: { field: 'workerId', kind: 'string', required: false },
   GUIDED_JOURNAL_DIR: { field: 'journalDirectory', kind: 'string', required: false },
@@ -440,6 +458,7 @@ const KEY_SPECS: Readonly<Record<string, KeySpec>> = {
   },
   GUIDED_CALLBACK_BASE_URL: { field: 'callbackBaseUrl', kind: 'string', required: false },
   GUIDED_CALLBACK_TOKEN_FILE: { field: 'callbackTokenFile', kind: 'string', required: false },
+  GUIDED_CAPACITY: { field: 'capacity', kind: 'integer', required: false, min: 1, max: MAX_GUIDED_CAPACITY },
 };
 
 /** The four listener keys (every deployment). Parsed by {@link loadListenerConfig} only. */
@@ -537,13 +556,26 @@ function parseKeys(
   env: Readonly<Record<string, string | undefined>>,
   suffixes: readonly string[],
   problems: string[],
-): Record<string, string | number | boolean> {
-  const draft: Record<string, string | number | boolean> = {};
+): Record<string, string | number | boolean | readonly string[]> {
+  const draft: Record<string, string | number | boolean | readonly string[]> = {};
   for (const suffix of suffixes) {
     const spec = KEY_SPECS[suffix];
     if (spec === undefined) throw new Error(`Unenumerated configuration key ${suffix}.`);
     const name = `${CONFIG_PREFIX}${suffix}`;
     const raw = env[name];
+    if (spec.kind === 'domains') {
+      // Not trimmed: a space is an invalid entry, never ignorable padding (shared vectors).
+      const parsed = parseAllowedDomainsEnv(raw);
+      if ('problem' in parsed) problems.push(`${name} is invalid: ${parsed.problem}.`);
+      else draft[spec.field] = parsed.entries;
+      continue;
+    }
+    if (spec.kind === 'allowAll') {
+      const parsed = parseAllowAllDomainsEnv(raw);
+      if ('problem' in parsed) problems.push(`${name} is invalid: ${parsed.problem}.`);
+      else draft[spec.field] = parsed.allowAll;
+      continue;
+    }
     const provided = raw !== undefined && raw.trim() !== '';
 
     if (!provided) {
@@ -566,7 +598,7 @@ function parseKeys(
 }
 
 /** The object-store rules, shared by the replay runner and the guided worker (one source). */
-function validateObjectStore(draft: Readonly<Record<string, string | number | boolean>>, problems: string[]): void {
+function validateObjectStore(draft: Readonly<Record<string, string | number | boolean | readonly string[]>>, problems: string[]): void {
   const objectStoreProvider = draft.objectStoreProvider;
   if (objectStoreProvider !== 'filesystem' && objectStoreProvider !== 'local' && objectStoreProvider !== 's3') {
     problems.push(
@@ -647,6 +679,13 @@ export function loadConfig(env: Readonly<Record<string, string | undefined>>): R
   }
 
   validateObjectStore(draft, problems);
+
+  // Allow-all replaces the effective list (the configured one was still validated above, so a typo
+  // in it is not hidden by the option). The flag is not kept: `isAllowAll(allowedDomains)` is the one test.
+  if (Array.isArray(draft.allowedDomains)) {
+    draft.allowedDomains = applyAllowAll(draft.allowedDomains as readonly string[], draft.allowAllDomains === true);
+  }
+  delete draft.allowAllDomains;
 
   if (problems.length > 0) throw new ConfigurationError(problems);
   return draft as unknown as RunnerConfig;
@@ -775,6 +814,8 @@ export type GuidedConfig =
       /** Its own https-only key; never derived from the replay `CALLBACK_BASE_URL` (A2.2). */
       readonly callbackBaseUrl: string;
       readonly callbackTokenFile: string;
+      /** Learning sessions this process owns at once (1..8). Further assignments are refused `CAPACITY`. */
+      readonly capacity: number;
     };
 
 function isHttpsOriginOnly(raw: string): boolean {
@@ -839,6 +880,8 @@ export function loadGuidedConfig(env: Readonly<Record<string, string | undefined
     return typeof value === 'string' ? value : '';
   };
   const workerId = text('workerId');
+  // Required like every other guided key (the loop above reports it when absent): there is no fallback capacity.
+  const capacity = draft.capacity;
   if (workerId !== '' && workerId.length > 256) {
     problems.push(`${CONFIG_PREFIX}GUIDED_WORKER_ID must be at most 256 characters.`);
   }
@@ -867,6 +910,9 @@ export function loadGuidedConfig(env: Readonly<Record<string, string | undefined
     }
   }
   if (problems.length > 0) throw new ConfigurationError(problems);
+  if (typeof capacity !== 'number') {
+    throw new ConfigurationError([`${CONFIG_PREFIX}GUIDED_CAPACITY is required when ${CONFIG_PREFIX}${GUIDED_SWITCH} is true.`]);
+  }
   return {
     enabled: true,
     workerId,
@@ -876,6 +922,7 @@ export function loadGuidedConfig(env: Readonly<Record<string, string | undefined
     controllerPublicKeyFile: text('controllerPublicKeyFile'),
     callbackBaseUrl,
     callbackTokenFile: text('callbackTokenFile'),
+    capacity,
   };
 }
 

@@ -6,9 +6,10 @@
  *
  *  - `docs/specs/studio/openapi.yaml` (operations `startGuidedSession`, `readGuidedSession`,
  *    `readGuidedResult`, `readGuidedClarification`, `clarifyGuidedSession`, `cancelGuidedSession`,
- *    `finalizeObservedPublication`, `getGuidedSessionVideo`, `getStudioTestCapabilities`);
+ *    `finalizeObservedPublication`, `getGuidedSessionVideo`, `readLatestGuidedAttempts`,
+ *    `getStudioTestCapabilities`);
  *  - `docs/specs/studio-observed-authoring/contracts/v3/*.schema.json`:
- *    `session-view`, `result`, `clarification`, `commands` (start, clarify, cancel), `publication`,
+ *    `session-view`, `result`, `clarification`, `latest-attempts`, `commands` (start, clarify, cancel), `publication`,
  *    `error`, `action-timing`, `learned-plan` (`RelearnedFrom`) and
  *    `public-ui-projections` (`StudioCapabilities`, `PublicProgress`, `PublicExplanation`).
  *
@@ -294,11 +295,24 @@ export interface GuidedActionTiming {
   endMs: number | null;
 }
 
-/** `result.evidence`. `video` is never `null` (S3 tightening). */
+/**
+ * `result.evidence`. `video` is keyed on the publication (architect R1): `null` exactly when
+ * `publication.status` is `PUBLISHED` (the learning recording is discarded; the proof is the replay
+ * named by `result.proof`), and the recording of the learning attempt for every other state.
+ */
 export interface GuidedEvidence {
   kind: 'guidedLedger';
   ref: string | null;
-  video: VideoEvidence;
+  video: VideoEvidence | null;
+}
+
+/**
+ * `result.proof`: the observed replay of the revision a learn published (trigger source
+ * `AFTER_LEARN`), followed through the ordinary execution routes. Non-null only when the
+ * publication is `PUBLISHED`; `null` while that replay was refused or has not been accepted.
+ */
+export interface GuidedProof {
+  executionId: string;
 }
 
 /** `result.detail` / `error.detail` / `failure.detail`: present only with `LOGIN_REQUIRED`. */
@@ -307,10 +321,7 @@ export interface LoginRequiredDetail {
   loginStepsPresent: boolean;
 }
 
-/**
- * `error.schema.json` `code`, in contract order. `result.failure.code` is the same list without
- * `POLICY_NOT_APPROVED` ({@link GUIDED_FAILURE_CODES}).
- */
+/** `error.schema.json` `code`, in contract order. `result.failure.code` is the same list. */
 export const GUIDED_ERROR_CODES = [
   'INVALID_CONTRACT',
   'UNAUTHENTICATED',
@@ -334,12 +345,12 @@ export const GUIDED_ERROR_CODES = [
   'CANCELLED',
   'EXPIRED',
   'SECRET_UNAVAILABLE',
-  'SECRET_USE_NOT_AUTHORIZED',
-  'SECRET_USE_REVOKED',
   'VAULT_UNAVAILABLE',
   'LOGIN_REQUIRED',
   'SECRET_TOO_LONG',
-  'POLICY_NOT_APPROVED',
+  'NO_APPLICATION_URL',
+  'MODEL_UNAVAILABLE',
+  'MODEL_REFUSED',
 ] as const;
 
 export type GuidedErrorCode = (typeof GUIDED_ERROR_CODES)[number];
@@ -368,8 +379,6 @@ export const GUIDED_FAILURE_CODES = [
   'CANCELLED',
   'EXPIRED',
   'SECRET_UNAVAILABLE',
-  'SECRET_USE_NOT_AUTHORIZED',
-  'SECRET_USE_REVOKED',
   'VAULT_UNAVAILABLE',
   'LOGIN_REQUIRED',
   'SECRET_TOO_LONG',
@@ -405,8 +414,10 @@ export interface GuidedResult {
   publication: GuidedPublication;
   currentReadiness: GuidedCurrentReadiness;
   evidence: GuidedEvidence;
-  /** Non-empty only while `evidence.video.status` is `AVAILABLE`. At most 400. */
+  /** Non-empty only while `evidence.video.status` is `AVAILABLE`; `[]` when `evidence.video` is `null`. At most 400. */
   actionTimings: GuidedActionTiming[];
+  /** The replay that is this learn's proof; `null` unless `publication.status` is `PUBLISHED` and it was accepted. */
+  proof: GuidedProof | null;
   errorCode: string | null;
   /** Present only with `errorCode: LOGIN_REQUIRED`. */
   detail?: LoginRequiredDetail;
@@ -427,18 +438,12 @@ export const GUIDED_CLARIFICATION_REASONS = [
   'MISSING_SOURCE',
   'INSUFFICIENT_EVIDENCE',
   'UNSUPPORTED_SURFACE',
-  'SIDE_EFFECT_CONFIRMATION',
 ] as const;
 
 export type GuidedClarificationReason = (typeof GUIDED_CLARIFICATION_REASONS)[number];
 
 /** `clarification.schema.json` `promptCode`. */
-export const GUIDED_PROMPT_CODES = [
-  'CHOOSE_FIELD',
-  'CHOOSE_SOURCE',
-  'REVISE_STEP',
-  'CONFIRM_ACTION',
-] as const;
+export const GUIDED_PROMPT_CODES = ['CHOOSE_FIELD', 'CHOOSE_SOURCE', 'REVISE_STEP'] as const;
 
 export type GuidedPromptCode = (typeof GUIDED_PROMPT_CODES)[number];
 
@@ -450,7 +455,6 @@ export type GuidedLabelSource = (typeof GUIDED_LABEL_SOURCES)[number];
 interface GuidedChoiceBase {
   choiceId: string;
   safeLabel: string;
-  nodeId: string | null;
   bindingId: string | null;
 }
 
@@ -466,7 +470,7 @@ export type GuidedChoice =
 /**
  * `clarification.schema.json`: the body of `readClarification` (200). `204` is "no pending
  * question" and surfaces as `null` from the client. `phase: source` has `documentId: null`,
- * `generation: 0` and choices without node or binding IDs. The contract has no "none of these"
+ * `generation: 0` and choices without a binding ID. The contract has no "none of these"
  * choice (plan B6, AD-3).
  */
 export interface GuidedClarification {
@@ -501,7 +505,6 @@ export interface GuidedStartContext {
   sourceRevision: string;
   configurationRevision: string;
   environmentId: string;
-  applicationId: string;
   versions: { contract: 3 };
 }
 
@@ -568,7 +571,7 @@ export interface GuidedError {
  * inferred:
  *  - `httpStatus`: the HTTP status (`400`, `401`, `403`, `409`, `429`, `503`);
  *  - `error`: the closed v3 body (`error.schema.json`) when the response carried one, for example
- *    `409` `REVISION_CONFLICT` / `POLICY_NOT_APPROVED` and the Studio handler's `429`
+ *    `409` `REVISION_CONFLICT` and the Studio handler's `429`
  *    `BUDGET_EXCEEDED`; `null` otherwise;
  *  - `platformCode`: the platform envelope's code (`PlatformErrorResponse`, for example the rate
  *    limiter's `RATE_LIMITED` `429` or the authentication `503`) when there is no v3 body;
@@ -602,6 +605,35 @@ export type GuidedStartCapability =
 export interface StudioCapabilities {
   vaultSecrets: boolean;
   guidedStart: GuidedStartCapability;
+}
+
+// ---------------------------------------------------------------------------
+// Latest learning attempts (STUDIO-UNIFY-001.6 AC-09, AC-10)
+// ---------------------------------------------------------------------------
+
+/** `readLatestGuidedAttempts`: the most `testId` values one request may carry (`maxItems`). */
+export const GUIDED_LATEST_ATTEMPTS_MAX_TEST_IDS = 50;
+
+/**
+ * One item of `latest-attempts.schema.json#/properties/attempts`: the caller's own most recent
+ * terminal guided session for one test. `startedAt` is the session's creation time. `errorCode` is
+ * the session's `progress.errorCode`. `explanation` is the public explanation of a `FAILED`
+ * attempt and `null` for every other state.
+ */
+export interface GuidedLatestAttempt {
+  testId: string;
+  sessionId: string;
+  state: GuidedTerminalState;
+  /** UTC instant, the family's frozen timestamp pattern. */
+  startedAt: string;
+  errorCode: string | null;
+  explanation: PublicExplanation | null;
+}
+
+/** `latest-attempts.schema.json`: a test with no terminal session of the caller is absent. */
+export interface GuidedLatestAttempts {
+  schemaVersion: 3;
+  attempts: GuidedLatestAttempt[];
 }
 
 // ---------------------------------------------------------------------------

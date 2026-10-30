@@ -5,10 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.citi.put.checks.studio.support.ObservationFixtures;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.lang.reflect.Method;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
@@ -16,241 +15,141 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+/**
+ * ADR-SC-007: the region shown with an observed choice is the text of the {@code group} evidence
+ * segment of the element's fact, as the runner printed it. Presentation only (page text,
+ * untrusted), never authority; anything unusable is an explicit JSON null so the UI shows no region
+ * at all.
+ */
 class GuidedQuestionRegionPresentationTest {
-  private static final ObjectMapper JSON = new ObjectMapper();
+  private static final String EVIDENCE = "Save Primary workspace";
+
+  /** A button fact whose evidence is "Save Primary workspace": name 0-4, group 5-22. */
+  private static ObjectNode fact() {
+    ObjectNode fact = ObservationFixtures.fact("button", "Save", false, null);
+    fact.put("evidence", EVIDENCE);
+    fact.putArray("evidenceSegments")
+        .addObject()
+        .put("field", "name")
+        .put("start", 0)
+        .put("end", 4);
+    fact.withArray("evidenceSegments")
+        .addObject()
+        .put("field", "group")
+        .put("start", 5)
+        .put("end", EVIDENCE.length());
+    return fact;
+  }
+
+  private static ObjectNode segment(ObjectNode fact, int index) {
+    return (ObjectNode) fact.path("evidenceSegments").get(index);
+  }
 
   @Test
-  void otherwiseEqualOpenChoicesUseTheirOwnAdmittedRegionNames() throws Exception {
-    Fixture fixture = new Fixture();
-    ObjectNode secondaryPage = fixture.page.deepCopy();
-    secondaryPage.put("nodeId", "synthetic-secondary-button");
-    secondaryPage.put("regionId", "synthetic-secondary-region");
-    ObjectNode secondaryRegion = fixture.region.deepCopy();
-    secondaryRegion.put("nodeId", "synthetic-secondary-region").put("name", "Secondary workspace");
-    fixture.observation.withArray("nodes").add(secondaryPage).add(secondaryRegion);
-
-    assertEquals(fixture.page.path("name"), secondaryPage.path("name"));
-    assertEquals("Primary workspace", regionName(fixture.progress, fixture.page).asText());
-    assertEquals("Secondary workspace", regionName(fixture.progress, secondaryPage).asText());
-    assertNotEquals(fixture.page.path("regionId"), regionName(fixture.progress, fixture.page));
-    assertNotEquals(secondaryPage.path("regionId"), regionName(fixture.progress, secondaryPage));
-  }
-
-  @ParameterizedTest
-  @MethodSource("admittedRegions")
-  void usesEachSupportedRoleAndAdmittedClassification(String role, String classification)
-      throws Exception {
-    Fixture fixture = new Fixture();
-    fixture.region.put("role", role).put("classification", classification);
-    assertEquals("Primary workspace", regionName(fixture.progress, fixture.page).asText());
-  }
-
-  static Stream<Arguments> admittedRegions() {
-    return Stream.of("main", "region", "navigation")
-        .flatMap(
-            role ->
-                Stream.of("structuralOnly", "permittedBusinessData", "nonsecretApproved")
-                    .map(classification -> Arguments.of(role, classification)));
+  void otherwiseEqualChoicesUseTheirOwnGroupSegments() {
+    ObjectNode primary = fact();
+    ObjectNode secondary = fact();
+    secondary.put("evidence", "Save Secondary workspace");
+    segment(secondary, 1).put("end", "Save Secondary workspace".length());
+    assertEquals(primary.path("name"), secondary.path("name"));
+    assertEquals(
+        "Primary workspace", GuidedTranslationService.observedRegionName(primary).asText());
+    assertEquals(
+        "Secondary workspace", GuidedTranslationService.observedRegionName(secondary).asText());
+    assertNotEquals(
+        GuidedTranslationService.observedRegionName(primary),
+        GuidedTranslationService.observedRegionName(secondary));
   }
 
   @ParameterizedTest(name = "{0}")
-  @MethodSource("ineligibleSnapshots")
-  void unusableOrAmbiguousPresentationReturnsExplicitNull(String scenario, Consumer<Fixture> change)
-      throws Exception {
-    Fixture fixture = new Fixture();
-    change.accept(fixture);
-    JsonNode before = fixture.progress.deepCopy();
-    JsonNode selectedBefore = fixture.page.deepCopy();
-    JsonNode result = regionName(fixture.progress, fixture.page);
+  @MethodSource("unusableFacts")
+  void unusablePresentationReturnsExplicitNull(String scenario, Consumer<ObjectNode> change) {
+    ObjectNode fact = fact();
+    change.accept(fact);
+    JsonNode before = fact.deepCopy();
+    JsonNode result = GuidedTranslationService.observedRegionName(fact);
     assertTrue(result.isNull(), scenario);
     assertFalse(result.isMissingNode(), scenario);
-    assertEquals(before, fixture.progress, scenario);
-    assertEquals(selectedBefore, fixture.page, scenario);
+    assertEquals(before, fact, scenario);
   }
 
-  static Stream<Arguments> ineligibleSnapshots() {
+  static Stream<Arguments> unusableFacts() {
     return Stream.of(
-        bad("missing reference", f -> f.page.remove("regionId")),
-        bad("null reference", f -> f.page.putNull("regionId")),
-        bad("numeric reference", f -> f.page.put("regionId", 1)),
-        bad("object reference", f -> f.page.putObject("regionId")),
-        bad("array reference", f -> f.page.putArray("regionId")),
-        bad("boolean reference", f -> f.page.put("regionId", true)),
-        bad("empty reference", f -> f.page.put("regionId", "")),
-        bad("blank reference", f -> f.page.put("regionId", " \t\n")),
-        bad("dangling reference", f -> f.page.put("regionId", "synthetic-absent-region")),
-        bad("duplicate reference", f -> f.observation.withArray("nodes").add(f.region.deepCopy())),
-        bad(
-            "hidden duplicate still ambiguous",
-            f -> f.observation.withArray("nodes").add(f.region.deepCopy().put("visible", false))),
-        bad(
-            "withheld duplicate still ambiguous",
-            f ->
-                f.observation
-                    .withArray("nodes")
-                    .add(f.region.deepCopy().put("classification", "withheld"))),
-        bad(
-            "stale duplicate still ambiguous",
-            f -> f.observation.withArray("nodes").add(f.region.deepCopy().put("generation", 2))),
-        bad(
-            "unsupported duplicate still ambiguous",
-            f -> f.observation.withArray("nodes").add(f.region.deepCopy().put("role", "button"))),
-        bad("missing observation", f -> f.progress.remove("observation")),
-        bad("null observation", f -> f.progress.putNull("observation")),
-        bad("nonobject observation", f -> f.progress.put("observation", "synthetic-unusable")),
-        bad("missing nodes", f -> f.observation.remove("nodes")),
-        bad("null nodes", f -> f.observation.putNull("nodes")),
-        bad("nonarray nodes", f -> f.observation.putObject("nodes")),
-        bad("missing current document", f -> f.progress.remove("documentId")),
-        bad("null current document", f -> f.progress.putNull("documentId")),
-        bad("blank current document", f -> f.progress.put("documentId", " ")),
-        bad("nontext current document", f -> f.progress.put("documentId", 3)),
-        bad("missing current generation", f -> f.progress.remove("generation")),
-        bad("null current generation", f -> f.progress.putNull("generation")),
-        bad("text current generation", f -> f.progress.put("generation", "3")),
-        bad("negative current generation", f -> f.progress.put("generation", -1)),
-        bad("overflow current generation", f -> f.progress.put("generation", 2147483648L)),
-        bad("fractional current generation", f -> f.progress.put("generation", 3.5)),
-        bad(
-            "stale observation document",
-            f -> f.observation.put("documentId", "synthetic-other-doc")),
-        bad("stale observation generation", f -> f.observation.put("generation", 2)),
-        bad("missing observation document", f -> f.observation.remove("documentId")),
-        bad("missing observation generation", f -> f.observation.remove("generation")),
-        bad("text observation generation", f -> f.observation.put("generation", "3")),
-        bad("stale selected document", f -> f.page.put("documentId", "synthetic-other-doc")),
-        bad("stale selected generation", f -> f.page.put("generation", 2)),
-        bad("missing selected document", f -> f.page.remove("documentId")),
-        bad("missing selected generation", f -> f.page.remove("generation")),
-        bad("text selected generation", f -> f.page.put("generation", "3")),
-        bad("stale region document", f -> f.region.put("documentId", "synthetic-other-doc")),
-        bad("stale region generation", f -> f.region.put("generation", 2)),
-        bad("missing region document", f -> f.region.remove("documentId")),
-        bad("missing region generation", f -> f.region.remove("generation")),
-        bad("text region generation", f -> f.region.put("generation", "3")),
-        bad("unsupported role", f -> f.region.put("role", "button")),
-        bad("nonexact role", f -> f.region.put("role", "Region")),
-        bad("missing role", f -> f.region.remove("role")),
-        bad("null role", f -> f.region.putNull("role")),
-        bad("nontext role", f -> f.region.put("role", 1)),
-        bad("hidden region", f -> f.region.put("visible", false)),
-        bad("missing visibility", f -> f.region.remove("visible")),
-        bad("null visibility", f -> f.region.putNull("visible")),
-        bad("text visibility", f -> f.region.put("visible", "true")),
-        bad("numeric visibility", f -> f.region.put("visible", 1)),
-        bad("withheld region", f -> f.region.put("classification", "withheld")),
-        bad("unknown classification", f -> f.region.put("classification", "synthetic-unknown")),
-        bad("missing classification", f -> f.region.remove("classification")),
-        bad("null classification", f -> f.region.putNull("classification")),
-        bad("nontext classification", f -> f.region.put("classification", true)),
-        bad("missing name", f -> f.region.remove("name")),
-        bad("null name", f -> f.region.putNull("name")),
-        bad("numeric name", f -> f.region.put("name", 42)),
-        bad("boolean name", f -> f.region.put("name", true)),
-        bad("empty name", f -> f.region.put("name", "")),
-        bad("blank name", f -> f.region.put("name", " \t\n")),
-        bad("Unicode blank name", f -> f.region.put("name", "\u2003")),
-        bad("257 ASCII code points", f -> f.region.put("name", "x".repeat(257))),
-        bad(
-            "257 supplementary code points",
-            f -> f.region.put("name", "\uD83C\uDF1F".repeat(257))));
+        bad("no group segment", f -> segment(f, 1).put("field", "header")),
+        bad("only a name segment", f -> f.withArray("evidenceSegments").remove(1)),
+        bad("no segments", f -> f.withArray("evidenceSegments").removeAll()),
+        bad("missing segments", f -> f.remove("evidenceSegments")),
+        bad("sibling is not a region", f -> segment(f, 1).put("field", "sibling")),
+        bad("near is not a region", f -> segment(f, 1).put("field", "near")),
+        bad("empty segment", f -> segment(f, 1).put("start", 5).put("end", 5)),
+        bad("inverted segment", f -> segment(f, 1).put("start", 9).put("end", 5)),
+        bad("blank segment", f -> f.put("evidence", "Save           ")),
+        bad("segment past the evidence", f -> segment(f, 1).put("start", 99).put("end", 120)),
+        bad("missing evidence", f -> f.remove("evidence")),
+        bad("empty evidence", f -> f.put("evidence", "")),
+        bad("Unicode blank group", f -> f.put("evidence", "Save     ")));
   }
 
   @Test
-  void accepts256SupplementaryCodePointsWithoutTruncation() throws Exception {
-    Fixture fixture = new Fixture();
-    String name = "\uD83C\uDF1F".repeat(256);
-    fixture.region.put("name", name);
-    assertEquals(512, name.length());
-    assertEquals(name, regionName(fixture.progress, fixture.page).asText());
+  void aMissingOrNonObjectFactHasNoRegion() {
+    assertTrue(GuidedTranslationService.observedRegionName(null).isNull());
+    assertTrue(
+        GuidedTranslationService.observedRegionName(
+                com.fasterxml.jackson.databind.node.NullNode.instance)
+            .isNull());
+    assertTrue(
+        GuidedTranslationService.observedRegionName(
+                com.fasterxml.jackson.databind.node.TextNode.valueOf("region"))
+            .isNull());
   }
 
   @Test
-  void preservesAdmittedWhitespaceDecompositionAndUntrustedTextExactly() throws Exception {
-    Fixture fixture = new Fixture();
-    String name = "  Cafe\u0301 <b>workspace</b> \u2067synthetic\u2069  ";
-    fixture.region.put("name", name);
-    assertEquals(name, regionName(fixture.progress, fixture.page).asText());
+  void aSegmentBeyondTheEvidenceIsClampedToIt() {
+    ObjectNode fact = fact();
+    segment(fact, 1).put("end", 500);
+    assertEquals("Primary workspace", GuidedTranslationService.observedRegionName(fact).asText());
   }
 
   @Test
-  void missingReferenceDoesNotTraverseAncestorOrUseModelAndLocatorAliases() throws Exception {
-    Fixture fixture = new Fixture();
-    fixture.page.remove("regionId");
-    fixture.page.put("parentNodeId", fixture.region.path("nodeId").asText());
-    fixture.page.put("region", "Synthetic model suggestion");
-    fixture
-        .page
-        .withArray("locatorHints")
+  void theFirstGroupSegmentIsTheRegion() {
+    ObjectNode fact = fact();
+    fact.put("evidence", EVIDENCE + " Billing");
+    fact.withArray("evidenceSegments")
         .addObject()
-        .put("kind", "text")
-        .put("value", "Synthetic locator suggestion")
-        .put("exact", true);
-    assertTrue(regionName(fixture.progress, fixture.page).isNull());
+        .put("field", "group")
+        .put("start", 23)
+        .put("end", 31);
+    assertEquals("Primary workspace", GuidedTranslationService.observedRegionName(fact).asText());
   }
 
   @Test
-  void validLookupDoesNotMutateSnapshotSelectedNodeOrBindingIdentity() throws Exception {
-    Fixture fixture = new Fixture();
-    fixture.page.put("bindingId", "synthetic-existing-binding");
-    JsonNode before = fixture.progress.deepCopy();
-    JsonNode selectedBefore = fixture.page.deepCopy();
-    assertEquals("Primary workspace", regionName(fixture.progress, fixture.page).asText());
-    assertEquals(before, fixture.progress);
-    assertEquals(selectedBefore, fixture.page);
+  void preservesAdmittedWhitespaceDecompositionAndUntrustedTextExactly() {
+    String group = "  Café <b>workspace</b> ⁧synthetic⁩  ";
+    ObjectNode fact = fact();
+    fact.put("evidence", "Save " + group);
+    segment(fact, 1).put("end", 5 + group.length());
+    assertEquals(group, GuidedTranslationService.observedRegionName(fact).asText());
   }
 
   @Test
-  void generationZeroIsAUsableCurrentSnapshot() throws Exception {
-    Fixture fixture = new Fixture();
-    fixture.progress.put("generation", 0);
-    fixture.observation.put("generation", 0);
-    fixture.page.put("generation", 0);
-    fixture.region.put("generation", 0);
-    assertEquals("Primary workspace", regionName(fixture.progress, fixture.page).asText());
+  void supplementaryCodePointsAreCountedInUtf16UnitsAsTheRunnerWritesThem() {
+    String group = "🌟".repeat(100);
+    ObjectNode fact = fact();
+    fact.put("evidence", "Save " + group);
+    segment(fact, 1).put("end", 5 + group.length());
+    assertEquals(group, GuidedTranslationService.observedRegionName(fact).asText());
   }
 
-  private static Arguments bad(String name, Consumer<Fixture> change) {
+  @Test
+  void aRegionIsNeverTakenFromTheNameLabelsOrModelFields() {
+    ObjectNode fact = fact();
+    segment(fact, 1).put("field", "header");
+    fact.put("region", "Synthetic model suggestion");
+    fact.put("parentNodeId", "synthetic-region");
+    assertTrue(GuidedTranslationService.observedRegionName(fact).isNull());
+  }
+
+  private static Arguments bad(String name, Consumer<ObjectNode> change) {
     return Arguments.of(name, change);
-  }
-
-  private static JsonNode regionName(JsonNode progress, JsonNode selected) throws Exception {
-    Method method =
-        GuidedTranslationService.class.getDeclaredMethod(
-            "observedRegionName", JsonNode.class, JsonNode.class);
-    method.setAccessible(true);
-    return (JsonNode) method.invoke(null, progress, selected);
-  }
-
-  private static final class Fixture {
-    private final ObjectNode progress =
-        JSON.createObjectNode()
-            .put("documentId", "synthetic-current-document")
-            .put("generation", 3);
-    private final ObjectNode observation =
-        progress
-            .putObject("observation")
-            .put("documentId", "synthetic-current-document")
-            .put("generation", 3);
-    private final ObjectNode page =
-        JSON.createObjectNode()
-            .put("nodeId", "synthetic-primary-button")
-            .put("name", "Open")
-            .put("documentId", "synthetic-current-document")
-            .put("generation", 3)
-            .put("regionId", "synthetic-primary-region");
-    private final ObjectNode region =
-        JSON.createObjectNode()
-            .put("nodeId", "synthetic-primary-region")
-            .put("name", "Primary workspace")
-            .put("documentId", "synthetic-current-document")
-            .put("generation", 3)
-            .put("role", "region")
-            .put("visible", true)
-            .put("classification", "structuralOnly");
-
-    private Fixture() {
-      observation.putArray("nodes").add(page).add(region);
-    }
   }
 }
