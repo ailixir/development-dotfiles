@@ -1,1 +1,2 @@
 - [Studio harness B UI constraints](project_studio_harness_b_ui_constraints.md) — frozen visual190 harness pins seek button names, Saved text, POST ceilings; keep them in UX fixes
+- [Local stack guided refusal](project_local_stack_guided_refusal.md) — fresh UI tests get RUNTIME_INCOMPATIBLE on local stack; provision guided policy before visual run checks

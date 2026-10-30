@@ -1,2 +1,5 @@
 - [STUDIO-OBSERVED story conventions](project_studio_observed_story_conventions.md) — OBS-006-shaped stories, AC source tags, security conditions verbatim as ACs, Decisions-pending table, one-story-with-lanes precedent
 - [STUDIO-UNIFY-001 stories](project_studio_unify_001_stories.md) — four per-increment stories drafted 2026-10-23, split-AC convention, script-generated task blocks, open items for @po
+- [STUDIO-UNIFY-001.5 visual fixes](project_studio_unify_001_5_visual_fixes.md) — 2026-10-24 story; findings that differ in code (m4, m8, m10), defaults D1-D9
+- [STUDIO-UNIFY-001.6 learning failure](project_studio_unify_001_6_learning_failure.md) — 2026-10-24 story N1-N6; v0.2.0 adds one backend read (latest attempt per test), lanes G-I, D9-D15
+- [STUDIO-UNIFY-001.7 detail page align](project_studio_unify_001_7_detail_page_align.md) — 2026-10-24 story; tabs dropped for CheckDetailsPage layout, Latest run card, defaults D1-D9

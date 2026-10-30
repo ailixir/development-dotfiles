@@ -75,7 +75,7 @@ This section outlines the expanded feature set for the V2.2 vision of the "Check
     * **UI Test Checks:**
         * No-Code UI Test - Plain-English steps learned on the first Run and replayed on later Runs, live progress, and private video evidence; created from Create Check → UI Test and listed in All Checks next to other checks (see section 5.2)
 * **Secure Parameterization:** Integration with the enterprise secrets vault with `<secret ID>` token support
-* **Execution & Scheduling Engine:** On-demand execution and cron scheduling for supported check types; Studio scheduling is implemented and off by default
+* **Execution & Scheduling Engine:** On-demand execution and cron scheduling for supported check types, including UI tests, which are scheduled through the same schedule flow as every other check
 * **Dashboards & Visualization:** CSI-centric dashboards with history views, real-time updates and KPI tracking
 * **Reporting:** A flexible reporting tool to create and schedule email-based status reports with a "live-preview" editor, autosave and cross-CSI support
 
@@ -93,11 +93,11 @@ A clean, two-panel screen separating user *instructions* from system *actions* a
     * A simple, numbered text editor where each line is a distinct step (`1. Go to...`, `2. Click...`).
     * After a run, each line gets a status icon: **green checkmark (✓)** for pass, **red X (✗)** for fail, or **skipped** for steps not attempted after failure.
     * Includes syntax highlighting, auto-completion, variable support (`<var NAME>`), and secret tokens (`<secret ID>`).
-    * Includes the **Test Name**, test metadata and environment selection. Studio scheduling is implemented and off by default.
+    * Includes the **Test Name**, test metadata and environment selection. A UI test is scheduled through the same Schedule dialog and `/api/v1/schedules` flow as any check.
 
 2.  **Right Panel: Run and Proof (The "Go" Button, Logs & Video)**
     * Contains a large **"Run Test"** button and a **Live Log** area for real-time text updates during execution. There is no separate compile or confirm step: Run learns the steps, and later Runs replay them.
-    * After a test run, a **video player** appears here, showing a recording of the tested page, including attempted failing steps where recording was finalized.
+    * After a successful learn, the video is the **proof**: Studio replays the learned steps of the revision it just published (shown as "After learning") and the player shows that replay. The steps therefore run twice for a learn, once to learn and once as the proof, and Studio says so. After a learn that did not publish, the player shows the **learning attempt**, a recording of the attempt including attempted failing steps where recording was finalized, labelled as an attempt and never as a proof. Later Runs show their own replay recording.
     * The video timeline is synchronized with the test steps.
     * Includes attempted-step seeking and authorized video download. Screenshot capture is outside V1. Evidence availability, partial recording and expiry are shown separately from the check outcome.
 
@@ -106,11 +106,11 @@ A clean, two-panel screen separating user *instructions* from system *actions* a
 | Capability | V1 commitment | Later / excluded |
 |---|---|---|
 | Authoring and trust | Save drafts; Run learns the steps on the live page and later Runs replay the learned revision; there is no compile, confirm or reconfirmation step | No runtime AI or silent regeneration; Python export retired |
-| Execution | On-demand Chromium, single-page workflows, CSI ownership and approved destinations; Studio scheduling is implemented and off by default | Multi-page/popups/iframes, other engines |
+| Execution | On-demand Chromium, single-page workflows, CSI ownership and approved destinations; UI tests are scheduled like any other check | Multi-page/popups/iframes, other engines |
 | Live progress | SSE step/log snapshots with reconnection and GET fallback; browser disconnect does not restart the test | Live video and lossless replay of every intermediate event |
 | Evidence | Private native video, authorized download, attempted-step seek, 30-day logical expiry with verified storage deletion policy | Screenshots and video transcoding |
 | Reliability | Durable accepted work/results, no automatic replay of an ambiguous attempt, explicit infrastructure/evidence errors | Exactly identical browser outcomes are not promised |
-| Integration | Studio test/history views organized by registered CSI; stable historical authorization; unified UI_TEST catalog view in V1 as a frontend view (UI tests listed in All Checks, each with a detail page for Overview and Runs) | Application-component/report projections and generic scheduling integration |
+| Integration | Studio test/history views organized by registered CSI; stable historical authorization; unified UI_TEST catalog view in V1 as a frontend view (UI tests listed in All Checks, each with a detail page with Overview, Recent Runs and Latest run) | Application-component/report projections and generic scheduling integration |
 
 SSE is the preferred V1 transport, subject to verifying platform authentication and streaming ingress behavior. GET provides recovery/fallback with the same authorized snapshot. The first implementation targets 1–2 concurrent runs across separate runner pods; larger capacity follows measurement. Ordinary REST/check resources must remain protected by admission limits and bounded execution/progress workloads.
 

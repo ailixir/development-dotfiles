@@ -6,3 +6,5 @@
 - [case436 config retarget](project_case436_config_retarget.md) — round 062: case435 + one hunk call-seconds 140->45 (CONFIG436_CALL_SECONDS), ports 5196/18791-6, 37-check selector, 7-vs-10 protected PIDs
 - [case437 runner fix](project_case437_runner_fix.md) — round 065: runner-only finalize patch, 12-file dist union, RUNNER437_ALLOWLIST hunk, code434 catalog kept, repin receipt
 - [case438 code438 prep](project_case438_code438_prep.md) — round 068: Candidate B refreeze, vite-served frontend allow-list (17 files), call-seconds 60, closed-hunk QA selector
+- [OBS-009 push 2026-10-23](project_obs009_push_20261023.md) — 9 commits pushed; unstaged L1/settings files; push hook env prefix; gitleaks usage
+- [Local guided stack 2026-10-24](project_local_guided_stack.md) — overlay launcher/token issuer/Core stand-in/seed for local guided learn+replay

@@ -1,0 +1,14 @@
+---
+name: tooling-flex-contract-lane-recipes
+description: STUDIO-FLEX-001 Lane C (origin lists removed from v3, allowed-domains vectors) - reseal pipeline extras beyond the Merkle script, old->new hash map to find test literals, Java parity probe, vectors design
+metadata:
+  type: project
+---
+
+Done 2026-10-25 (new bundle hash `730f980e...`, SESSION epoch `43973fbc...`, REPLAY_VALIDATION epoch `5732cf57...`, openapi digest `10b0cb1e...`).
+
+- **Reseal pipeline = Merkle script + 3 fixers.** The g4-style fixpoint script (drop keys in the transform, `PRE=oldBundle:newBundle`, prove NOOP first) leaves four things stale that the checker then names one at a time: (1) `fixtures.json` `cases[].patches` hex values (re-derive by finding, in the BASE patched sample, the subtree whose hash equals the value, then hashing the same path in the new sample; literals that match no subtree are intentional wrong values), (2) `observationRefreshCorrelationVector`/`observationRefreshFlow` requestDigest + `callbackKey` + `canonical`, (3) `hashVectors[]` `canonical`+`sha256`, (4) vector files of shape {input,canonicalUtf8Hex,sha256} (the script handles these). Drop `allowedOrigins` only where the parent has `initialContext` (the secret `allowedOrigins` has `secretId`).
+- **Find test literals for free:** the fixpoint writes the old->new hash map (1680 entries); `grep -F -f oldhashes.txt` over backend/src, studio-runner/test etc. finds every pinned literal (3 files: ObservedArtifactLowererTest, GuidedWireContractTest, incrementalNegativeBoundaries.ts) and the map gives the new value. `g4-negbound.cjs` recomputes the 72 boundary hashes by pointer (dry-run in a root with a symlinked v3 dir).
+- **Java parity without Gradle:** single-file `Parity.java` on `backend/build/classes/java/main` + jackson 2.17.2 jars, call static `GuidedContracts.canonical/hash` on the vector files (50+6+1 all agreed). The epoch method is `docs/qa/evidence/STUDIO-OBS-009/execution-20261018/dex-prep/epoch-probe.cjs <v3 dir>`; run it on the base copy first to reproduce current constants.
+- **Allowed-domains vectors** (`docs/specs/studio/allowed-domains-vectors.json`): generator hand-writes expectations; reference impl lives in the checker (`allowedDomains`, runs every case, also cross-checks WHATWG `new URL().hostname`). Java `IDN.toASCII` agreed on all IDN cases. Rules I had to pin to make Java/WHATWG agree: pre-reject backslash/control/space and `%` or brackets in the authority, empty port and port 0/>65535, entry last label must start with a letter (kills 127.1, 0x7f.1, decimal IPs).
+- Openapi examples are checked by `runPublicApi` (response key sets, example counts: start 429 budget examples now 4, 403 has a v3 error example); `StudioContractTest` status sets did not need to change because no new status was added.

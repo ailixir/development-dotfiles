@@ -42,3 +42,9 @@
 - [OBS-010 dated list cross-check](obs010_dated_list_crosscheck.md) — 2026-10-18 e5c58fa5 WITH-NOTES; RKO-09 surface; observed live via uat; $id refs dont move hashes
 - [Candidate B send cap](candidate_b_send_cap_ruling.md) — r067: TRANSPORT_STALL (capBound+no headers), cap 50, lease=deadline+2s, live call-seconds 60, no migration
 - [P3 UUID refId amendment](p3_uuid_refid_amendment.md) — 2026-10-23 r067: FE omits UUID-shaped referenceIds in action list only; API, safeLabel, flows unchanged
+- [Governance cleanup decisions](governance_overcontrol_inventory.md) — 2026-10-24 STUDIO-GOV: shared ScheduleService, service principal, no governed policy, test-URL origins + runner deny list, test-scoped secrets
+- [Proof is a replay](project_proof_is_replay.md) — 2026-10-25: proof = replay accepted in publication commit (user pick); learn recording kept for unpublished learns only (PUBLISHED stop discards)
+- [Memory location](feedback_memory_location.md) — write agent memory only under repo-root .claude/agent-memory/aiox-architect/, never backend/src
+- [Flexible v1 = domain whitelist](project_flexible_v1_domain_whitelist.md) — 2026-10-25 binding: suffix whitelist only nav control, proxy/IP deny deleted, N learn sessions; V28 next
+- [Compliance latency analysis](compliance_latency_analysis.md) — 2026-10-25: 50 s stall cap, 600 s contract wall, fixedDelay scheduler coupling, capacity 1; R1-R7 levers
+- [Learn/replay parity review](learn_replay_parity_review.md) — 2026-10-29: artifact+executor shared; gap = replay driver pacing + terminal transients; 1/912 claim HEAD-only

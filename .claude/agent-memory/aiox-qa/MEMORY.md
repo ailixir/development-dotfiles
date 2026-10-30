@@ -33,3 +33,18 @@
 - [case439 G1' r070](project_case439_g1b_r070.md) — ACCEPT 2026-10-23; 501+1 pin decomposition; independent-shift method to verify generated-tool diffs; tool shas
 - [pack439 QA r070](project_pack439_qa_r070.md) — NEEDS_WORK 2026-10-23; code PASS, sheet overclaims vs UX review (R1 template-only); pack 6418 bytes
 - [OBS-009 local gate r071](project_obs009_local_gate_r071.md) — CONCERNS 2026-10-23; lint red, IT unrun, no final-tree backend regression; Done blocked externally
+- [GOV-001.2 scheduling QA](project_gov001_2_scheduling_qa.md) — V24 trips GuidedRuntimeRolePrivilegeIT; Home upcoming UNION fix; worktree harness recipes
+- [GOV-001.1/.3/.4 integrated QA](project_gov001_134_integrated_qa.md) — build-script index trap, corpus re-freeze, egress proxy findings, how to finish check offline
+- [Proof=replay runner+FE QA 2026-10-25](project_proof_replay_qa_20261025.md) — runner PASS, FE CONCERNS; vitest 1.6 flags, realStudioStartup red at HEAD, fixtures rewrite evidence
+- [Proof=replay real-stack E2E 2026-10-25](project_proof_replay_e2e_20261025.md) — all 8 items PASS; proof 2-3 s, AVAILABLE +5-6 s, peak ~1.1 GB; final test d9e3be44
+- [Proof=replay backend QA 2026-10-25](project_proof_replay_backend_qa_20261025.md) — CONCERNS; joined ReplayIT not updated (dispatchOnce 2 vs 1), baseline PROFILE_MISMATCH; copy recipe
+- [Perf benchmark 2026-10-25](project_perf_benchmark_20261025.md) — isolated-stack real-model latency study + post-fix re-run (bench2); setup traps (catalog array, GUIDED_CAPACITY, localhost)
+- [Compliance latency gate 2026-10-25](project_compliance_latency_gate_20261025.md) — PASS; runnable(8) LIMIT starvation, drain masks errors, MODEL_REFUSED copy overclaims
+- [Proof cancel re-check 2026-10-25](project_proof_cancel_recheck_20261025.md) — (a) legit: 60+ proof/control pairs PASS; only b2Publish fails (fixture Vault-vs-site rotation)
+- [FLEX-001 integrated QA 2026-10-25](project_flex001_integrated_qa.md) — whitelist parity differential, post-action ORIGIN_NOT_ALLOWED gap, 3 fixtures reds not ours (g4 proof), Node/FE traps
+- [Isolated build dir breaks cohort gate](gotcha_isolated_builddir_cohort.md) — IT writes literal build/; use scratch tree copy for full check
+- [Integrated gate scratch recipe](reference_integrated_gate_scratch_recipe.md) — scratch-copy way to run full backend check + runner/frontend/helm tiers; timings and gotchas
+- [safety.mjs re-run is not a resume](reference_safety_rerun_not_resume.md) — re-run redoes all parts, overwrites safety.json, burns cumulative --max-calls cap
+- [WI-5 gate plan review 2026-10-27](project_wi5_gate_plan_review_20261027.md) — r2 APPROVED after 2 rounds; actions counter=admission, L1 canary printed on page, verify.mjs prefix/exit 0, trace leaks secret
+- [WI-4 plan critique 2026-10-27](project_wi4_plan_critique_20261027.md) — CHANGES_REQUIRED; Playwright error text leak, joined tests encoding deleted guards, ReplayIT C6 observer imports deleted collector
+- [Learn/replay parity QA 2026-10-29](project_learn_replay_parity_qa_20261029.md) — no differential test; guided launch lacks viewport; proof replay detects, does not gate

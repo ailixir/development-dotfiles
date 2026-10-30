@@ -353,8 +353,6 @@ fi
 if [ "$BACKEND" = true ] && [ "$STUDIO_RUNNER" = true ]; then
   RUNNER_DIR="$ROOT_DIR/studio-runner"
   export STUDIO_RUNNER_BASE_URL="https://127.0.0.1:${RUNNER_PORT}"
-  # The Studio pages are gated on the UI_TEST source, which is off by default (application-local.yml).
-  export CHECKS_SOURCE_UI_TEST="${CHECKS_SOURCE_UI_TEST:-true}"
   # Local Studio uses the real Vertex path. Missing project, endpoint, location, or credentials
   # must stop startup instead of producing fixture-backed output that looks successful.
   # Local default is disabled (STUDIO-OBS-012A removed the recorded-fixture provider; the

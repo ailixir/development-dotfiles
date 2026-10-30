@@ -61,3 +61,40 @@
 - [Sealed sources, scratch tree](project_sealed_sources_scratch_tree.md) — seal => rsync scratch backend, patches, no real-tree Gradle; V23 target bumps
 - [Contract reseal Merkle + ripples](tooling_contract_reseal_merkle_and_ripple.md) — required obligation field: fixture hash reseal script, epoch, pinned literals, BSD patch trap
 - [Scratch Gradle: stale dist, cold cap](tooling_scratch_gradle_stale_dist_and_cold_cap.md) — -x verifyRunnerDist; 1 s callTimeout flakes cold; checkstyle vs gjf lambda; sed -i ''
+- [Scratch Playwright msw config](tooling_scratch_playwright_msw_config.md) — scratchpad spec + config, symlinked node_modules, both ports, scroll-cause stack logging
+- [Gate removal + test name lists](tooling_gate_removal_test_lists.md) — build.gradle.kts/ReplayIT name sets; targeted ReplayIT run; guided.session package trap
+- [Scratch worktree GOV lane](tooling_scratch_worktree_gov_lane.md) — FE no .bin (node node_modules/...), vitest pool flags, ddl-auto validate vs target(N), unpinned UNIFY-001.6 openapi op
+- [GOV-001.3 policy removal recipes](tooling_gov_policy_removal_recipes.md) — V25 without V24, v3 contract checklist, ReplayIT name sets, member-removal script, FE vitest flags
+- [GOV-001.4 origins + egress guard](tooling_gov4_origins_egress_recipes.md) — loopback proxy (route sees 1st hop only); local-run signal; reseal preimages; IT fallout (ambiguous "URL.", read rule id)
+- [Bundle-hash reseal + epoch reachability](tooling_contract_bundle_hash_reseal.md) — bridge/stop edit moves schemaBundleHash; reseal script reuse; error.schema vs bridge refusal; result-fixture ripple
+- [Runner node 24 + fixtures baseline](tooling_runner_node24_and_fixtures_baseline.md) — build under node 23 breaks check:pins; fnm node 24 path; secret-login/mixed-mode reds pre-existing; baseline-copy recipe
+- [FLEX Lane C recipes](tooling_flex_contract_lane_recipes.md) — reseal extras (case patches, refresh key, hashVectors), old->new hash map finds test literals, Java parity probe, domain vectors
+- [Helm deployment tier recipe](tooling_helm_deployment_tier.md) — loader-key dependency, scratch overlay, docker tag-inspect quirk, helm.ts guided options
+- [FE proof=replay page gotchas](project_fe_proof_replay_page_gotchas.md) — receipt testid, transport videoPath rule, autorun gating, vitest worker flags
+- [Learn-proof backend lane](project_learn_proof_backend_lane.md) — V27 link table, in-commit acceptPublished, ProofIT harness + fixture traps (steps column, clearLedger)
+- [Shared build dir clobber](tooling_shared_build_dir_clobber.md) — foreign Gradle runs wipe classes; run ITs in an rsync scratch tree, wait for live tree to compile
+- [FLEX Lane B runner recipes](tooling_flex_runner_lane_recipes.md) — whitelist fixture traps (favicon, localhost), pre-existing fixtures reds, pgrep/vitest title, evidence cleanup
+- [FLEX Lane A backend recipes](tooling_flex_lane_a_backend_recipes.md) — isolated build dir + pcache, gjf via xargs, harness env keys, ReplayIT vs V27 proof lane
+- [ReplayIT proof accounting](project_replayit_proof_accounting.md) — settle vs cancel the AFTER_LEARN proof, recording rules, startChild harness fix (F2), lane runtimes
+- [Single ReplayIT method run](tooling_guided_incremental_single_test.md) — low-lane methods need guidedIncrementalTest; retain task fails harmlessly; ReplayIT edited live
+- [Allow-all domains option](project_allow_all_domains_option.md) — chart bool, runner sentinel ["*"], read grant for "*", literal-count ripples, patch in scratch tree
+- [FE vitest Node 22 vs 24](tooling_fe_vitest_node22_vs_24.md) — Node 24 fails 2 CreateCheckPage tests (AbortSignal); run FE vitest on Node 22; shared stack may restart with fresh DB
+- [Google search learn blockers](project_google_search_learn_blockers.md) — aria-owns rule, press targetIntent, settle + Enter grace; obligation pin forbids backend refresh; reCAPTCHA
+- [Live stack DB wipe](tooling_live_stack_devtools_db_wipe.md) — DevTools restart/relaunch wipes embedded PG (random port); stop/relaunch recipe; CSI slot; localhost fixture
+- [Three fixtures reds = practice-site collector](project_fixtures_three_reds_practice_site_collector.md) — intentional hidden veto + plain text nodes; tests updated; capacity already required
+- [Template source spans](project_template_source_spans.md) — mixed text + <var> via sourceSpan-as-template, no schema change; SECRET_IN_TEXT; UNSUPPORTED_STEP; companions withhold
+- [Scratch tree: real runner copy](tooling_scratch_runner_copy_not_symlink.md) — symlinked runner exits 0 silently; Node 24 PATH; GuidedPlanningIntegrationTest is package guided.session
+- [python replace with empty old](tooling_python_replace_empty_old.md) — str.replace("", x) inserts everywhere; assert anchors; recovery by removing the inserted block
+- [WI-1 measurement harness](tooling_wi1_measurement_harness.md) — env-gated Java SOURCE_PLAN harness (ADC), 2nd build dir beside ReplayIT, 429 handling, ReplayIT lane times
+- [V8 precise coverage in vitest](tooling_v8_precise_coverage_in_vitest.md) — fresh Module._compile + marker function; compile cache hides block coverage; pick script by marker
+- [WI-2 perception lessons](project_wi2_perception_lessons.md) — unicode escapes in tool input, ghost parts, synth privateValues, perception tier layout, confinement offenders
+- [WI-5 real-site gate authoring](project_wi5_realsite_gate_authoring.md) — specs + realsite-gate lib authored 2026-10-27; unverified-without-stack list, Playwright test.use trap
+- [WI-4 joined cap + harness coupling](project_wi4_joined_cap_and_harness_coupling.md) — two ReplayIT units exceed 600 s, rc=1 finalizers, guided.session packages, acquire/invoke wrappers
+- [Scratch vitest probe](tooling_scratch_vitest_probe_outside_repo.md) — probe runner TS sources from the scratchpad: symlinked node_modules, no vitest/config import
+- [test-lane vitest mode + blob anchors](tooling_test_lane_vitest_and_blob_anchors.md) — file::title substring semantics, empty title = file, named skip = red; node blob id equals git hash-object
+- [Playwright main-world reads](tooling_playwright_main_world_reads.md) — plural reads/evaluateAll are steerable, singular are not; noWaitAfter navigation recipe; focus verification residual
+- [Mutation rig + runner unit tier](tooling_mutation_rig_and_runner_unit_tier.md) — scratch-copy mutations 3-4 s each; unit tier Node 24 JSON, red meanings; gjf ReplayIT via copy+diff
+- [ADR-SC-007 shape conversion](tooling_adr007_shape_conversion_recipes.md) — unit-scoped converter, JoinedRefs outline text, hung-IT latch diagnosis, Set.of null NPE
+- [WI-4 builder B state](project_wi4b_builder_state.md) — scratch tree, mailbox, authored files, open findings (AC4 TIMEOUT conflict), T-J6 pending
+- [Link-valued cell read](project_link_valued_cell_read.md) — Wikipedia infobox: backend admitted, runner prepare refused (td-only chain); fix in perceive.ts
+- [Press after fill on a combobox](project_press_after_fill_combobox.md) — Wikipedia search box role flips to combobox; runner certificate + backend selection fix

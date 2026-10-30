@@ -98,7 +98,7 @@ The module exposes `./ChecksModule` via Module Federation and integrates with th
 ### Core Check Types
 1. **Basic Checks:** HTTP/HTTPS endpoints, TCP port connectivity
 2. **Integration Checks:** Splunk queries, Grafana metrics, ITRS samplers, AppDynamics health rules
-3. **UI Test Checks:** No-code browser automation with "Checks Studio". UI tests are checks: All Checks lists them, Create Check → UI Test creates them, and each has a detail page (Overview and Runs).
+3. **UI Test Checks:** No-code browser automation with "Checks Studio". UI tests are checks: All Checks lists them, Create Check → UI Test creates them, and each has a detail page like any check's (header, Overview, Recent Runs and Latest run).
 
 ### Checks Studio (UI Testing)
 **Philosophy:** "From Checklist to Reality" - users write plain English steps and watch video proof of execution.
@@ -113,7 +113,7 @@ The module exposes `./ChecksModule` via Module Federation and integrates with th
 ├── 🏠 Home - Attention, CSIs, and upcoming
 ├── ✅ Checks - Check management, including UI tests
 │   │         (Create Check, including UI Test, opens from this page; it is not a sidebar entry)
-│   └── UI test - Overview and Runs; opens Studio
+│   └── UI test - Overview, Recent Runs and Latest run; opens Studio
 └── 📊 Reports - Reporting checks (hidden only when the REPORTS feature is explicitly disabled)
 ```
 
