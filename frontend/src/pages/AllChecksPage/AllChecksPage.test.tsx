@@ -8,14 +8,20 @@ import { http, HttpResponse } from 'msw';
 import { studioMockServer } from '@/services/mocks/studio/server';
 import { resetStudioMocks } from '@/services/mocks/studio/handlers';
 import { readyDraft } from '@/services/mocks/studio/readinessFixtures';
-import { seedScheduleOccurrences } from '@/services/mocks/studio/schedulingHandlers';
+import {
+  SEEDED_FAILED_ATTEMPT_SOURCE_REVISION,
+  SEEDED_FAILED_ATTEMPT_STARTED_AT,
+  SEEDED_FAILED_ATTEMPT_TEST_ID,
+  failGuidedRequests,
+  guidedRequestCount,
+} from '@/services/mocks/studio/guidedHandlers';
+import { formatRelativeTime } from '@/utils/time';
 import studioApi from '@/services/api/studioApi';
-import { studioSchedulesApi } from '@/services/api/studioSchedulesApi';
+import { schedulesApi } from '@/services/api/schedulesApi';
 import type { BackendCheckDto } from '@/services/api/mappers/checkMapper';
-import type { ScheduleOccurrence } from '@/types/studio/studioScheduling';
 import { defaultConfiguration, type TestDto } from '@/types/studio/studioTypes';
 import type { CSI } from '@/types/csi/csiTypes';
-import { uiTestEditorPath, uiTestPath, uiTestRunPath } from '@/components/studio/uiTestPaths';
+import { uiTestEditorPath, uiTestPath } from '@/components/studio/uiTestPaths';
 import checksSlice from '@/store/slices/checksSlice';
 import csiSlice, { fetchCSIs, setSelectedTags } from '@/store/slices/csiSlice';
 import studioSlice from '@/store/slices/studioSlice';
@@ -171,11 +177,18 @@ interface Observed {
   method: string;
   path: string;
   params: Record<string, string>;
+  /** Every `testId` value of the request, repeats included (`params` keeps only the last). */
+  testIds: string[];
 }
 const observed: Observed[] = [];
 function record({ request }: { request: Request }) {
   const url = new URL(request.url);
-  observed.push({ method: request.method, path: url.pathname, params: Object.fromEntries(url.searchParams) });
+  observed.push({
+    method: request.method,
+    path: url.pathname,
+    params: Object.fromEntries(url.searchParams),
+    testIds: url.searchParams.getAll('testId'),
+  });
 }
 
 const studioRequests = () => observed.filter((entry) => entry.path.split('/').includes('studio'));
@@ -184,6 +197,9 @@ const studioListRequests = () =>
 const checksListRequests = () =>
   observed.filter((entry) => entry.method === 'GET' && entry.path === '/api/v1/checks');
 const csiRequests = () => observed.filter((entry) => entry.method === 'GET' && entry.path === '/api/v1/csi');
+/** `GET /studio/guided-sessions/latest`, the one read behind the failed-learn line (STUDIO-UNIFY-001.6 AC-04). */
+const latestAttemptRequests = () =>
+  observed.filter((entry) => entry.method === 'GET' && entry.path.endsWith('/studio/guided-sessions/latest'));
 const writes = () => observed.filter((entry) => entry.method !== 'GET');
 
 const csiDto = ({ id, name }: { id: string; name: string }) => ({
@@ -853,7 +869,7 @@ describe('AC-14 and AC-19: row actions', () => {
     expect(screen.getByTestId(marker)).toBeInTheDocument();
   });
 
-  it('Schedule opens the existing Studio schedule dialog', async () => {
+  it('Schedule opens the same schedule dialog a check opens, for the UI test', async () => {
     world.uiTests = [uiTest(readyDraft.id, { name: 'Checkout smoke' })];
     mountAt('/checks/all', settledStore());
     await findUiRow(readyDraft.id);
@@ -862,38 +878,33 @@ describe('AC-14 and AC-19: row actions', () => {
     await user().click(await screen.findByRole('menuitem', { name: 'Schedule' }));
 
     const dialog = await screen.findByRole('dialog', {}, WAIT);
-    expect(within(dialog).getByText(/Manage schedule/)).toBeInTheDocument();
-    await within(dialog).findByRole('button', { name: 'Close' }, WAIT);
+    expect(within(dialog).getByText('Schedule Configuration')).toBeInTheDocument();
+    expect(within(dialog).getByText('Checkout smoke')).toBeInTheDocument();
+    expect(within(dialog).getByText('UI test is paused')).toBeInTheDocument();
+    expect(within(dialog).getByRole('button', { name: 'Save Schedule' })).toBeInTheDocument();
   });
 
-  it('the schedule dialog opened from a row links a run to ui-tests/{id}/runs/{executionId}', async () => {
-    const schedule = await studioSchedulesApi.create(readyDraft.id, {
-      cronExpression: '0 */5 * * * *',
-      timeZone: 'UTC',
-      executionPrincipal: 'studio-local',
-    });
-    const occurrence: ScheduleOccurrence = {
-      id: 'occ-0', scheduleId: schedule.id, scheduleVersion: 2, testId: readyDraft.id, csiId: readyDraft.csiId!,
-      environment: readyDraft.environment, executionPrincipal: 'studio-local', activationId: 'activation-1',
-      activatedRevisionId: readyDraft.confirmedRevisionId, activatedBy: 'earlier.operator@citi.com',
-      activatedAt: '2026-09-30T12:00:00Z', scheduledAt: '2026-10-05T12:00:00.000Z', localScheduledAt: '2026-10-05T12:00:00',
-      timeZone: 'UTC', offsetSeconds: 0, decision: 'ACCEPTED', code: 'ACCEPTED', executionId: 'real-run',
-      acceptedAt: '2026-10-05T12:00:00Z', retryAt: null, graceExpiresAt: '2026-10-05T13:00:00Z',
-      createdAt: '2026-10-05T12:00:00Z', updatedAt: '2026-10-05T12:00:00Z', missedFrom: null, missedUntil: null, missedCount: null,
-    };
-    seedScheduleOccurrences(readyDraft.id, [occurrence]);
+  it('saving from the row creates the UI test\'s schedule through the shared schedules API', async () => {
     world.uiTests = [uiTest(readyDraft.id, { name: 'Checkout smoke' })];
     mountAt('/checks/all', settledStore());
     await findUiRow(readyDraft.id);
+    const u = user();
 
-    await user().click(within(uiRow(readyDraft.id)).getByRole('button', { name: 'More actions for Checkout smoke' }));
-    await user().click(await screen.findByRole('menuitem', { name: 'Schedule' }));
+    await u.click(within(uiRow(readyDraft.id)).getByRole('button', { name: 'More actions for Checkout smoke' }));
+    await u.click(await screen.findByRole('menuitem', { name: 'Schedule' }));
+    const dialog = await screen.findByRole('dialog', {}, WAIT);
+    await u.click(within(dialog).getByRole('checkbox'));
+    await u.click(within(dialog).getByRole('button', { name: 'Save Schedule' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull(), WAIT);
 
-    const table = await screen.findByRole('table', { name: 'Schedule occurrences' }, WAIT);
-    expect(within(table).getByRole('link', { name: 'View run' })).toHaveAttribute(
-      'href',
-      uiTestRunPath(readyDraft.id, 'real-run'),
-    );
+    const saved = await schedulesApi.list({ uiTestId: readyDraft.id });
+    expect(saved.data).toHaveLength(1);
+    expect(saved.data[0]).toMatchObject({
+      uiTestId: readyDraft.id,
+      checkId: null,
+      enabled: true,
+      cronExpression: '0 */5 * * * *',
+    });
   });
 
   it('Delete asks first, deletes nothing on Cancel, and on confirm deletes the test and refreshes the list', async () => {
@@ -1048,6 +1059,125 @@ describe('AC-04: ?type=UI_TEST', () => {
 
     await waitFor(() => expect(typeSelect()).toHaveTextContent('UI Test'), WAIT);
     expect(screen.queryByText('Payments API')).toBeNull();
+  });
+});
+
+/* ------------------------------------------------------------------------------------------------
+ * STUDIO-UNIFY-001.6 AC-04: the last learning attempt on the row
+ * ---------------------------------------------------------------------------------------------- */
+
+describe('AC-04 (STUDIO-UNIFY-001.6): "Last learning attempt failed" on the UI test row', () => {
+  const NOTE = 'last-learning-attempt';
+  const SEEDED = SEEDED_FAILED_ATTEMPT_TEST_ID;
+  const READY_ID = '11111111-1111-1111-1111-111111111111';
+  const RELEARN_ID = 'aaaaaaaa-0000-4000-8000-000000000001';
+  const LEARNING_ID = 'aaaaaaaa-0000-4000-8000-000000000002';
+  const attemptDate = formatRelativeTime(SEEDED_FAILED_ATTEMPT_STARTED_AT);
+  const seededTest = (overrides: Partial<TestDto> = {}) =>
+    uiTest(SEEDED, {
+      name: 'Statements download',
+      readiness: 'UNLEARNED',
+      sourceRevision: Number(SEEDED_FAILED_ATTEMPT_SOURCE_REVISION),
+      ...overrides,
+    });
+  const noteIn = (id: string) => within(uiRow(id)).queryByTestId(NOTE);
+
+  it('shows the line under the name of an UNLEARNED row with a failed attempt, and only there, from exactly one read', async () => {
+    world.checks = [checkDto('c-1', { name: 'Payments API', status: 'FAILING' })];
+    world.uiTests = [
+      seededTest(),
+      uiTest(READY_ID, { name: 'Checkout smoke', readiness: 'READY', lastRunStatus: 'PASSED' }),
+      uiTest(RELEARN_ID, { name: 'Needs new learn', readiness: 'NEEDS_RELEARN' }),
+      uiTest(LEARNING_ID, { name: 'Being learned', readiness: 'LEARNING' }),
+    ];
+    mountAt('/checks/all', settledStore());
+
+    await findUiRow(SEEDED);
+    await waitFor(() => expect(noteIn(SEEDED)).not.toBeNull(), WAIT);
+    expect(noteIn(SEEDED)).toHaveTextContent(`Last learning attempt failed (${attemptDate}, at step 1)`);
+    // The line sits in the name cell, in the slot of the phone "Last run" caption, which keeps its own testid.
+    const caption = within(uiRow(SEEDED)).getByTestId(`ui-test-last-run-caption-${SEEDED}`);
+    expect(caption.parentElement).toBe(noteIn(SEEDED)!.parentElement);
+    expect(within(uiRow(SEEDED)).getAllByRole('cell')[1]).toContainElement(noteIn(SEEDED));
+
+    // READY and LEARNING rows never show it; a NEEDS_RELEARN row with no attempt shows none either.
+    for (const id of [READY_ID, RELEARN_ID, LEARNING_ID]) expect(noteIn(id)).toBeNull();
+
+    // One request for the page, asking for the UNLEARNED and NEEDS_RELEARN rows only.
+    await sleep(150);
+    expect(latestAttemptRequests()).toHaveLength(1);
+    expect(guidedRequestCount('latest')).toBe(1);
+    expect([...latestAttemptRequests()[0].testIds].sort()).toEqual([RELEARN_ID, SEEDED].sort());
+  });
+
+  it('leaves the step out when the test was edited since the attempt', async () => {
+    world.uiTests = [seededTest({ sourceRevision: Number(SEEDED_FAILED_ATTEMPT_SOURCE_REVISION) + 1 })];
+    mountAt('/checks/all', settledStore());
+
+    await findUiRow(SEEDED);
+    await waitFor(() => expect(noteIn(SEEDED)).not.toBeNull(), WAIT);
+    expect(noteIn(SEEDED)).toHaveTextContent(`Last learning attempt failed (${attemptDate})`);
+    expect(noteIn(SEEDED)).not.toHaveTextContent('at step');
+  });
+
+  it('sends no request when no visible UI test is UNLEARNED or NEEDS_RELEARN', async () => {
+    world.checks = [checkDto('c-1', { name: 'Payments API' })];
+    world.uiTests = [
+      uiTest(READY_ID, { name: 'Checkout smoke', readiness: 'READY' }),
+      uiTest(LEARNING_ID, { name: 'Being learned', readiness: 'LEARNING' }),
+    ];
+    mountAt('/checks/all', settledStore());
+
+    await findUiRow(READY_ID);
+    await checksLoaded('Payments API');
+    await sleep(250);
+    expect(latestAttemptRequests()).toEqual([]);
+    expect(guidedRequestCount('latest')).toBe(0);
+  });
+
+  it('sends no request when there are no UI test rows at all', async () => {
+    world.checks = [checkDto('c-1', { name: 'Payments API' })];
+    mountAt('/checks/all', settledStore());
+
+    await checksLoaded('Payments API');
+    await sleep(250);
+    expect(latestAttemptRequests()).toEqual([]);
+  });
+
+  it('asks once per rendered page, for the visible rows only, never per row', async () => {
+    seedPrefs({ rowsPerPage: 10, searchQuery: '', statusFilter: '', typeFilter: '' });
+    const ids = Array.from({ length: 12 }, (_, index) => `bbbbbbbb-0000-4000-8000-0000000000${String(index).padStart(2, '0')}`);
+    // createdAt descending is the row order, so the first ten ids are on page 1.
+    world.uiTests = ids.map((id, index) =>
+      uiTest(id, { name: `Unlearned ${index}`, readiness: 'UNLEARNED', createdAt: `2026-09-${String(30 - index).padStart(2, '0')}T09:00:00Z` }),
+    );
+    mountAt('/checks/all', settledStore());
+
+    await findUiRow(ids[0]);
+    await waitFor(() => expect(latestAttemptRequests()).toHaveLength(1), WAIT);
+    await sleep(150);
+    expect(latestAttemptRequests()).toHaveLength(1);
+    expect([...latestAttemptRequests()[0].testIds].sort()).toEqual(ids.slice(0, 10).sort());
+
+    await user().click(screen.getByRole('button', { name: /next page/i }));
+    await waitFor(() => expect(latestAttemptRequests()).toHaveLength(2), WAIT);
+    await sleep(150);
+    expect(latestAttemptRequests()).toHaveLength(2);
+    expect([...latestAttemptRequests()[1].testIds].sort()).toEqual(ids.slice(10).sort());
+  });
+
+  it('shows no line and no error when the read fails, and the row is otherwise unchanged', async () => {
+    failGuidedRequests('latest', 'network');
+    world.uiTests = [seededTest()];
+    mountAt('/checks/all', settledStore());
+
+    await findUiRow(SEEDED);
+    await waitFor(() => expect(latestAttemptRequests()).toHaveLength(1), WAIT);
+    await sleep(150);
+    expect(noteIn(SEEDED)).toBeNull();
+    expect(statusChip(SEEDED)).toHaveTextContent('Not learned');
+    expect(screen.getByTestId(`ui-test-last-run-caption-${SEEDED}`)).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).toBeNull();
   });
 });
 

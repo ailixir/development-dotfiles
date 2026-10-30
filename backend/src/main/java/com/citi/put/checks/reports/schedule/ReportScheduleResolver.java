@@ -42,19 +42,14 @@ public class ReportScheduleResolver {
   public Instant nextDelivery(JsonNode schedule) {
     String cron = toCronExpression(schedule);
     ZoneId zone = resolveTimezone(schedule);
-    var next = recurrence.next(cron, zone, Instant.now(), CronRecurrence.Overlap.INSTANT_SEQUENCE);
+    var next = recurrence.next(cron, zone, Instant.now());
     return next != null ? next.scheduledAt() : null;
   }
 
   public Instant nextDeliveryFrom(JsonNode schedule, Instant base) {
     String cron = toCronExpression(schedule);
     ZoneId zone = resolveTimezone(schedule);
-    var next =
-        recurrence.next(
-            cron,
-            zone,
-            base != null ? base : Instant.now(),
-            CronRecurrence.Overlap.INSTANT_SEQUENCE);
+    var next = recurrence.next(cron, zone, base != null ? base : Instant.now());
     return next != null ? next.scheduledAt() : null;
   }
 

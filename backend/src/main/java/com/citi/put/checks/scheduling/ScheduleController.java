@@ -45,12 +45,13 @@ public class ScheduleController {
   public ResponseEntity<Map<String, Object>> list(
       @AuthenticationPrincipal UserIdentity identity,
       @RequestParam(required = false) UUID checkId,
+      @RequestParam(required = false) UUID uiTestId,
       @RequestParam(required = false) Boolean enabled,
       @RequestParam(required = false) String timezone,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "20") int size) {
     Page<ScheduleDto> result =
-        scheduleService.list(identity, checkId, enabled, timezone, page, size);
+        scheduleService.list(identity, checkId, uiTestId, enabled, timezone, page, size);
     return ResponseEntity.ok(toEnvelope(result));
   }
 

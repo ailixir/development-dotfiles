@@ -1,47 +1,34 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useOutletContext } from 'react-router-dom';
 import studioApi from '@/services/api/studioApi';
 import { isUnavailableTestRead } from '@/components/studio/StudioUnavailable';
 import type { TestDetailDto } from '@/types/studio/studioTypes';
 
 /**
  * The read behind the UI test detail routes (spec §8.1) and the contract the page shell hands to the
- * parts that render inside it.
+ * parts that render inside it (STUDIO-UNIFY-001.7).
  *
- * ## Contract for the parts of the detail page (tasks 2.6, 2.7, 2.8)
+ * ## Contract for the parts of the detail page
  *
- * `UiTestDetailsPage` is the layout route of `ui-tests/:id`. It reads `GET /studio/tests/{id}` first and
- * renders nothing from the test, its runs or its drawer until that read succeeds. Everything below is
- * therefore mounted only with a successfully read test.
+ * `UiTestDetailsPage` is the route element of `ui-tests/:id` and of its drawer URL
+ * `ui-tests/:id/runs/:executionId`. It reads `GET /studio/tests/{id}` first and renders nothing from the
+ * test, its runs or its drawer until that read succeeds. Everything below is therefore mounted only with
+ * a successfully read test, and the shell only lays the parts out.
  *
- * - Header (2.6): `UiTestDetailHeader`, a default-less named export taking `UiTestDetailHeaderProps`
- *   (= `UiTestDetailContext`) as props. The shell mounts it at the marked slot in `UiTestDetailsPage.tsx`.
- * - Overview tab (2.7): `UiTestOverviewTab`, a props-less component that is the index child route of
- *   `ui-tests/:id`. It reads the shell's context with `useUiTestDetailContext()`.
- * - Runs tab (2.8): `UiTestRunsTab`, a props-less component that is the child route of both
- *   `ui-tests/:id/runs` and `ui-tests/:id/runs/:executionId`. It reads the shell's context with
- *   `useUiTestDetailContext()` and the drawer's run from `useParams().executionId`.
+ * - Header: `UiTestDetailHeader`, taking `UiTestDetailHeaderProps` (= `UiTestDetailContext`) as props.
+ * - Overview: `UiTestOverviewCard({ test, schedule })`. It shows the shell's test and
+ *   schedule and does not read either. The schedule is the test's shared `/api/v1/schedules` row.
+ * - Recent Runs: `UiTestRecentRunsCard({ testId })`. It reads this test's replays, and owns the run
+ *   drawer (the run in the URL is read with `useParams().executionId`).
+ * - Latest run: `UiTestLatestRunCard({ testId, onRunTerminal? })`. It reads this test's newest replay and
+ *   calls `refresh()` (through `onRunTerminal`) once when it sees a run go from live to terminal.
  *
  * A part must not call `GET /studio/tests/{id}` itself, must not read the test id from anywhere but the
- * context, and must not call `/checks/{id}`. To show fresh data after a write (a schedule saved, a test
- * edited), call `refresh()` from the context; `test` is replaced when the re-read succeeds.
+ * props, and must not call `/checks/{id}`. To show fresh data after a write, call `refresh()` for a test
+ * edit (`test` is replaced when the re-read succeeds) or `reloadSchedule()` after a schedule save.
  */
 
-/** The tabs the shell owns. The route selects the tab; the tabs never select themselves. */
-export type UiTestDetailTab = 'overview' | 'runs';
-
 /**
- * The tab a pathname belongs to: `runs` under `ui-tests/{id}/runs[/{executionId}]`, otherwise `overview`.
- * It looks at the segment after the `ui-tests/{id}` pair only, so it holds under any module base.
- */
-export function uiTestDetailTab(pathname: string): UiTestDetailTab {
-  const segments = pathname.split('/').filter(Boolean);
-  const at = segments.indexOf('ui-tests');
-  return at >= 0 && segments[at + 2] === 'runs' ? 'runs' : 'overview';
-}
-
-/**
- * What the shell provides, through the Outlet context to the tabs and as props to the header. A
+ * What the shell reads and hands to its parts (the header takes it as props). A
  * `UiTestDetailContext` only ever exists for a test the caller was allowed to read.
  */
 export interface UiTestDetailContext {
@@ -55,17 +42,12 @@ export interface UiTestDetailContext {
    * single not-available message.
    */
   readonly refresh: () => Promise<void>;
+  /** Reads the test's shared schedule again, for the Overview card, after the schedule dialog saved. */
+  readonly reloadSchedule: () => Promise<void>;
 }
 
 /** The header takes the whole context as its props. */
 export type UiTestDetailHeaderProps = UiTestDetailContext;
-
-/** The shell's context inside a tab. Throws when the tab is mounted outside `UiTestDetailsPage`. */
-export function useUiTestDetailContext(): UiTestDetailContext {
-  const context = useOutletContext<UiTestDetailContext | undefined>();
-  if (!context) throw new Error('useUiTestDetailContext must be used inside UiTestDetailsPage');
-  return context;
-}
 
 type TestRead =
   | { readonly testId: string; readonly status: 'ready'; readonly test: TestDetailDto }

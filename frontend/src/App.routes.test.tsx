@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
-import { MemoryRouter, Outlet, useParams } from 'react-router-dom';
+import { MemoryRouter, useParams } from 'react-router-dom';
 import sourcesSlice from '@/store/slices/sourcesSlice';
 import featuresSlice, { fetchFeatures } from '@/store/slices/featuresSlice';
 
@@ -15,10 +15,11 @@ import featuresSlice, { fetchFeatures } from '@/store/slices/featuresSlice';
  * `/*`. `ChecksLayout` mounts `PlatformSidebar` from `@put/core-components`, so the layout is a
  * passthrough here, and every lazy page is a sentinel. The editor lives at `ui-tests/:id/studio`
  * behind the STUDIO gate; `studio` and `studio/:id` no longer exist, so they land on module home
- * through the catch-all (no redirect to a ui-tests route). Story .2 adds the detail routes: the shell is
- * the layout route of `ui-tests/:id` behind the STUDIO gate, with the Overview as its index child and
- * the Runs tab at `runs` and `runs/:executionId`; the module-level studio runs paths are gone and
- * land on module home. Story .3 removes the module-level tests list the same way.
+ * through the catch-all (no redirect to a ui-tests route). Story .2 adds the detail routes; story .7 makes
+ * them one page: `ui-tests/:id` and its drawer URL `ui-tests/:id/runs/:executionId` render the same detail
+ * page behind the STUDIO gate (the page reads the execution id), and the bare `ui-tests/:id/runs` tab route
+ * is gone like the module-level studio runs paths: it lands on module home. Story .3 removes the
+ * module-level tests list the same way.
  */
 
 vi.mock('@components/layout/ChecksLayout', () => ({
@@ -44,19 +45,13 @@ vi.mock('./pages/Reports/ReportsHome', () => sentinel('reports'));
 vi.mock('./pages/Reports/ReportBuilder', () => sentinel('report-builder'));
 vi.mock('./pages/Reports/ReportDetailsPage', () => sentinel('report-details'));
 vi.mock('@pages/UiTestDetailsPage', () => ({
-  default: function DetailShellSentinel() {
-    const { id } = useParams();
+  default: function DetailPageSentinel() {
+    const { id, executionId } = useParams();
     return (
-      <div data-testid="page-detail">
+      <div data-testid="page-detail" data-execution-id={executionId ?? ''}>
         {`detail:${id}`}
-        <Outlet />
       </div>
     );
-  },
-  UiTestOverviewTab: () => <div data-testid="page-detail-overview">overview</div>,
-  UiTestRunsTab: function RunsTabSentinel() {
-    const { executionId } = useParams();
-    return <div data-testid="page-detail-runs">{`runs:${executionId ?? 'none'}`}</div>;
   },
 }));
 vi.mock('@pages/ActivityPage', () => sentinel('activity'));
@@ -117,25 +112,26 @@ describe.each([
     expect(screen.queryByTestId('page-editor')).toBeNull();
   });
 
-  it('ui-tests/{id} renders the detail shell with the Overview as the index child', async () => {
+  it('ui-tests/{id} renders the detail page, with no execution id', async () => {
     renderApp(`${base}/ui-tests/${ID}`);
-    expect(await screen.findByTestId('page-detail')).toHaveTextContent(`detail:${ID}`);
-    expect(await screen.findByTestId('page-detail-overview')).toBeInTheDocument();
-    expect(screen.queryByTestId('page-detail-runs')).toBeNull();
+    const page = await screen.findByTestId('page-detail');
+    expect(page).toHaveTextContent(`detail:${ID}`);
+    expect(page).toHaveAttribute('data-execution-id', '');
     expect(screen.queryByTestId('page-editor')).toBeNull();
   });
 
-  it('ui-tests/{id}/runs renders the Runs tab inside the detail shell', async () => {
-    renderApp(`${base}/ui-tests/${ID}/runs`);
-    expect(await screen.findByTestId('page-detail')).toHaveTextContent(`detail:${ID}`);
-    expect(await screen.findByTestId('page-detail-runs')).toHaveTextContent('runs:none');
-    expect(screen.queryByTestId('page-detail-overview')).toBeNull();
+  it('ui-tests/{id}/runs/{executionId} renders the same detail page and exposes the execution id', async () => {
+    renderApp(`${base}/ui-tests/${ID}/runs/${EXEC}`);
+    const page = await screen.findByTestId('page-detail');
+    expect(page).toHaveTextContent(`detail:${ID}`);
+    expect(page).toHaveAttribute('data-execution-id', EXEC);
   });
 
-  it('ui-tests/{id}/runs/{executionId} renders the Runs tab with the execution id', async () => {
-    renderApp(`${base}/ui-tests/${ID}/runs/${EXEC}`);
-    expect(await screen.findByTestId('page-detail')).toHaveTextContent(`detail:${ID}`);
-    expect(await screen.findByTestId('page-detail-runs')).toHaveTextContent(`runs:${EXEC}`);
+  it('the bare ui-tests/{id}/runs tab route is gone: it lands on module home, with no detail page', async () => {
+    renderApp(`${base}/ui-tests/${ID}/runs`);
+    expect(await screen.findByTestId('page-home')).toBeInTheDocument();
+    expect(screen.queryByTestId('page-detail')).toBeNull();
+    expect(screen.queryByTestId('page-editor')).toBeNull();
   });
 
   it('ui-tests/{id}/studio still renders the editor, not the detail shell', async () => {
@@ -146,7 +142,6 @@ describe.each([
 
   it.each([
     ['ui-tests/{id}', `ui-tests/${ID}`],
-    ['ui-tests/{id}/runs', `ui-tests/${ID}/runs`],
     ['ui-tests/{id}/runs/{executionId}', `ui-tests/${ID}/runs/${EXEC}`],
   ])('%s is behind the STUDIO gate', async (_label, tail) => {
     renderApp(`${base}/${tail}`, { studio: false });
@@ -162,7 +157,6 @@ describe.each([
     renderApp(`${base}/${tail}`);
     expect(await screen.findByTestId('page-home')).toBeInTheDocument();
     expect(screen.queryByTestId('page-detail')).toBeNull();
-    expect(screen.queryByTestId('page-detail-runs')).toBeNull();
     expect(screen.queryByTestId('page-editor')).toBeNull();
   });
 });

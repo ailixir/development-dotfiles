@@ -20,12 +20,6 @@ const ReportBuilder = React.lazy(() => import('./pages/Reports/ReportBuilder'));
 const ReportDetailsPage = React.lazy(() => import('./pages/Reports/ReportDetailsPage'));
 // CSIs directory and overview removed
 const UiTestDetailsPage = React.lazy(() => import('@pages/UiTestDetailsPage'));
-const UiTestOverviewTab = React.lazy(() =>
-  import('@pages/UiTestDetailsPage').then((m) => ({ default: m.UiTestOverviewTab }))
-);
-const UiTestRunsTab = React.lazy(() =>
-  import('@pages/UiTestDetailsPage').then((m) => ({ default: m.UiTestRunsTab }))
-);
 // Removed Scheduled and Analytics pages
 const ActivityPage = React.lazy(() => import('@pages/ActivityPage'));
 const SchedulesPage = React.lazy(() => import('@pages/SchedulesPage'));
@@ -114,9 +108,8 @@ const App: React.FC = () => {
         <Route path="edit/:id" element={<EditCheckPage />} />
         <Route path="ui-tests/:id/studio" element={<FeatureGate featureKey="STUDIO"><ChecksStudioPage /></FeatureGate>} />
         <Route path="ui-tests/:id" element={<FeatureGate featureKey="STUDIO"><UiTestDetailsPage /></FeatureGate>}>
-          <Route index element={<UiTestOverviewTab />} />
-          <Route path="runs" element={<UiTestRunsTab />} />
-          <Route path="runs/:executionId" element={<UiTestRunsTab />} />
+          {/* The run drawer URL: it only lets the path match; the page reads `executionId` and opens the drawer. */}
+          <Route path="runs/:executionId" element={null} />
         </Route>
         <Route path="reports" element={<FeatureGate featureKey="REPORTS"><ReportsHome /></FeatureGate>} />
         <Route path="reports/new" element={<FeatureGate featureKey="REPORTS"><ReportBuilder /></FeatureGate>} />
@@ -144,9 +137,8 @@ const App: React.FC = () => {
         {/* Checks Studio */}
         <Route path="ui-tests/:id/studio" element={<FeatureGate featureKey="STUDIO"><ChecksStudioPage /></FeatureGate>} />
         <Route path="ui-tests/:id" element={<FeatureGate featureKey="STUDIO"><UiTestDetailsPage /></FeatureGate>}>
-          <Route index element={<UiTestOverviewTab />} />
-          <Route path="runs" element={<UiTestRunsTab />} />
-          <Route path="runs/:executionId" element={<UiTestRunsTab />} />
+          {/* The run drawer URL: it only lets the path match; the page reads `executionId` and opens the drawer. */}
+          <Route path="runs/:executionId" element={null} />
         </Route>
 
         {/* Reports */}

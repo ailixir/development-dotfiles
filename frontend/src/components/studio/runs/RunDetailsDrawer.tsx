@@ -35,6 +35,7 @@ import { ExecutionProgressView, LOGS_TRUNCATED_STATEMENT } from '@/components/st
 import { VideoEvidencePanel } from '@/components/studio/evidence/VideoEvidencePanel';
 import { useVideoSeek } from '@/components/studio/evidence/useVideoSeek';
 import { formatAbsoluteTime, formatDuration, formatRelativeTime, toIsoDateTime } from '@/utils/time';
+import { displayLogMessage, logEntryTime } from '@/utils/studio/logTime';
 import { RunStatusChip } from './RunStatusChip';
 import { newerSnapshot } from './runSnapshots';
 import { runDurationText, runQueueWaitMs, runTestLabel, shortRunId } from './runPresentation';
@@ -119,16 +120,20 @@ function RunLogs({ snapshot }: { snapshot: ExecutionSnapshot }) {
             overflow: 'auto',
           }}
         >
-          {snapshot.logs.map((entry, index) => (
-            <Box key={`${entry.at ?? 'na'}-${index}`} data-testid={`run-log-line-${index}`} sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-              <Box component="span" sx={{ color: 'grey.500' }}>{logTime(entry.at)}</Box>
-              {entry.at ? ' ' : ''}
-              <Box component="span" sx={{ color: LOG_LEVEL_COLOR[entry.level] ?? 'grey.300', fontWeight: 700 }}>
-                {entry.level.padEnd(5)}
-              </Box>{' '}
-              {entry.message}
-            </Box>
-          ))}
+          {snapshot.logs.map((entry, index) => {
+            // The closing line takes the run's end time and steps count from 1, as on the Logs tab (AC-08).
+            const at = logEntryTime(entry, snapshot.endedAt);
+            return (
+              <Box key={`${entry.at ?? 'na'}-${index}`} data-testid={`run-log-line-${index}`} sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                <Box component="span" sx={{ color: 'grey.500' }}>{logTime(at)}</Box>
+                {at ? ' ' : ''}
+                <Box component="span" sx={{ color: LOG_LEVEL_COLOR[entry.level] ?? 'grey.300', fontWeight: 700 }}>
+                  {entry.level.padEnd(5)}
+                </Box>{' '}
+                {displayLogMessage(entry)}
+              </Box>
+            );
+          })}
         </Box>
       </Collapse>
     </Box>
@@ -332,7 +337,7 @@ function RunDetailsContent({
               </Typography>
               {snapshot.csiId && <Typography variant="body2" component="span">CSI {snapshot.csiId}</Typography>}
               <Typography variant="body2" component="span" sx={{ fontFamily: 'monospace' }}>#{shortRunId(executionId)}</Typography>
-              <Typography variant="body2" component="span">Origin: {snapshot.triggerSource === 'SCHEDULED' ? 'Scheduled' : snapshot.triggerSource === 'MANUAL' ? 'Manual' : 'Unknown'}</Typography>
+              <Typography variant="body2" component="span">Origin: {snapshot.triggerSource === 'SCHEDULED' ? 'Scheduled' : snapshot.triggerSource === 'MANUAL' ? 'Manual' : snapshot.triggerSource === 'AFTER_LEARN' ? 'After learning' : 'Unknown'}</Typography>
             </Stack>
           )}
         </Box>
@@ -340,7 +345,7 @@ function RunDetailsContent({
 
       <Stack spacing={2.5} sx={{ px: { xs: 2, sm: 3 }, py: 2.5, flex: 1 }}>
         {!snapshot && notFound && (
-          <Alert severity="warning" data-testid="run-details-not-found" action={<Button color="inherit" size="small" onClick={onClose}>Back to runs</Button>}>
+          <Alert severity="warning" data-testid="run-details-not-found" action={<Button color="inherit" size="small" onClick={onClose}>Back to test</Button>}>
             <AlertTitle>Run not found</AlertTitle>
             {RUN_NOT_FOUND_MESSAGE}
           </Alert>
@@ -367,10 +372,9 @@ function RunDetailsContent({
             {snapshot.triggerSource === 'SCHEDULED' && <Box data-testid="run-schedule-provenance">
               <Typography variant="subtitle2" component="h3">Scheduled execution</Typography>
               <Typography variant="body2">Scheduled due: {formatAbsoluteTime(snapshot.scheduledAt ?? null)}</Typography>
-              <Typography variant="body2">Schedule {snapshot.scheduleId} · version {snapshot.scheduleVersion} · occurrence {snapshot.occurrenceId}</Typography>
+              {snapshot.scheduleId && <Typography variant="body2">Schedule {snapshot.scheduleId}</Typography>}
               <Typography variant="body2">Learned revision: {snapshot.revisionId ?? 'Unavailable'}</Typography>
-              <Typography variant="body2">Activated by {snapshot.activatedBy ?? 'Unknown'} at {formatAbsoluteTime(snapshot.activatedAt ?? null)}</Typography>
-              <Typography variant="caption">Activation {snapshot.activationId ?? 'Unknown'}. Scheduled due, request acceptance and browser start are separate instants.</Typography>
+              <Typography variant="caption">Scheduled due, request acceptance and browser start are separate instants.</Typography>
             </Box>}
             <FailedStepSummary snapshot={snapshot} />
             {!terminal && (

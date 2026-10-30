@@ -3,19 +3,24 @@ import { normalizePageResponse } from './responseAdapter';
 import type { BackendScheduleDto } from './mappers/scheduleMapper';
 import type { ApiResponse } from '../../types/common/commonTypes';
 
+/** A schedule's target: a check or a UI test, never both. */
+export type ScheduleTargetIds = { checkId: string } | { uiTestId: string };
+
+export interface ScheduleWrite {
+  frequency: string;
+  cronExpression: string;
+  timezone: string;
+  enabled: boolean;
+}
+
 export const schedulesApi = {
-  async create(data: {
-    checkId: string;
-    frequency: string;
-    cronExpression: string;
-    timezone: string;
-    enabled: boolean;
-  }): Promise<BackendScheduleDto> {
+  async create(data: ScheduleTargetIds & ScheduleWrite): Promise<BackendScheduleDto> {
     return apiClient.post('/schedules', data);
   },
 
   async list(params?: {
     checkId?: string;
+    uiTestId?: string;
     enabled?: boolean;
     timezone?: string;
     page?: number;
@@ -32,16 +37,7 @@ export const schedulesApi = {
     return apiClient.get(`/schedules/${id}`);
   },
 
-  async update(
-    id: string,
-    data: {
-      checkId: string;
-      frequency: string;
-      cronExpression: string;
-      timezone: string;
-      enabled: boolean;
-    },
-  ): Promise<BackendScheduleDto> {
+  async update(id: string, data: ScheduleTargetIds & ScheduleWrite): Promise<BackendScheduleDto> {
     return apiClient.put(`/schedules/${id}`, data);
   },
 

@@ -1,8 +1,10 @@
 import type { CheckSchedule } from '../../../types/checks/checkTypes';
 
+/** A shared schedule names exactly one target: a check or a UI test. */
 export interface BackendScheduleDto {
   id: string;
-  checkId: string;
+  checkId: string | null;
+  uiTestId: string | null;
   frequency: string;
   cronExpression: string;
   timezone: string;
@@ -24,7 +26,7 @@ export function mapScheduleDtoToCheckSchedule(dto: BackendScheduleDto): CheckSch
 }
 
 export function isBackendScheduleDto(raw: any): raw is BackendScheduleDto {
-  return raw && typeof raw.cronExpression === 'string' && typeof raw.checkId === 'string';
+  return raw && typeof raw.cronExpression === 'string' && (typeof raw.checkId === 'string' || typeof raw.uiTestId === 'string');
 }
 
 export function mapScheduleResponse(raw: any): BackendScheduleDto {

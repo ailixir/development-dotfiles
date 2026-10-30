@@ -92,6 +92,19 @@ describe('RunDetailsDrawer expectedTestId', { timeout: 20_000 }, () => {
     expect(reads).toEqual([]);
   });
 
+  it.each([
+    ['AFTER_LEARN', 'After learning'],
+    ['MANUAL', 'Manual'],
+    ['SCHEDULED', 'Scheduled'],
+  ] as const)('labels the origin of a %s run "%s"', async (triggerSource, label) => {
+    const own = run('e0000000-0000-0000-0000-0000000000a1', { triggerSource });
+    serveRead(() => undefined);
+    renderDrawer(own.executionId, [own], { expectedTestId: OWN_TEST });
+
+    expect(await screen.findByTestId('run-details-title')).toBeInTheDocument();
+    expect(drawer().getByText(`Origin: ${label}`)).toBeInTheDocument();
+  });
+
   it('shows not-found, and none of the run, when the list row belongs to another test', async () => {
     const foreign = run('e0000000-0000-0000-0000-000000000002', { testId: OTHER_TEST });
     const reads = serveRead(() => undefined);
@@ -155,5 +168,30 @@ describe('RunDetailsDrawer expectedTestId', { timeout: 20_000 }, () => {
 
     expect(await screen.findByTestId('run-details-title')).toHaveTextContent('Checkout journey');
     expect(screen.queryByTestId('run-details-not-found')).toBeNull();
+  });
+});
+
+describe('RunDetailsDrawer logs (STUDIO-UNIFY-001.6 AC-08)', { timeout: 20_000 }, () => {
+  it('counts steps from 1 and gives the untimed closing line the run end time', async () => {
+    const own = run('e0000000-0000-0000-0000-000000000008', {
+      endedAt: '2026-09-14T10:00:40Z',
+      logs: [
+        { at: '2026-09-14T10:00:01Z', level: 'INFO', message: 'step 0 started: Go to the page', stepIndex: 0 },
+        { at: '2026-09-14T10:00:02Z', level: 'INFO', message: 'step 1 passed', stepIndex: 1 },
+        { at: null, level: 'INFO', message: 'run PASSED', stepIndex: null },
+      ],
+    });
+    serveRead(() => undefined);
+    renderDrawer(own.executionId, [own], { expectedTestId: OWN_TEST });
+
+    drawer().getByRole('button', { name: 'Show logs (3)' }).click();
+
+    const first = await screen.findByTestId('run-log-line-0');
+    expect(first).toHaveTextContent('step 1 started: Go to the page');
+    expect(first).not.toHaveTextContent('step 0');
+    expect(screen.getByTestId('run-log-line-1')).toHaveTextContent('step 2 passed');
+    const closing = screen.getByTestId('run-log-line-2');
+    expect(closing).toHaveTextContent('10:00:40.000');
+    expect(closing).toHaveTextContent('run PASSED');
   });
 });

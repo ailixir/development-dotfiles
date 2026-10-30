@@ -7,6 +7,7 @@ import java.util.UUID;
 public record ScheduleDto(
     UUID id,
     UUID checkId,
+    UUID uiTestId,
     String frequency,
     String cronExpression,
     String timezone,
@@ -19,6 +20,7 @@ public record ScheduleDto(
     return new ScheduleDto(
         entity.getId(),
         entity.getCheckId(),
+        entity.getUiTestId(),
         entity.getFrequency(),
         entity.getCronExpression(),
         entity.getTimezone(),

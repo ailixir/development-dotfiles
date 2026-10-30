@@ -1,12 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Box, Button, Chip, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Tooltip, Typography } from '@mui/material';
+import { Box, Button, Card, CardContent, Chip, IconButton, ListItemIcon, ListItemText, Menu, MenuItem, Stack, Tooltip, Typography } from '@mui/material';
 import { DeleteOutline, Edit, MoreVert, PlayArrow, Schedule } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import DeleteTestDialog from '@/components/studio/tests/DeleteTestDialog';
-import { StudioScheduleDialog } from '@/components/studio/scheduling/StudioScheduleDialog';
+import UiTestScheduleDialog from '@/components/scheduling/UiTestScheduleDialog';
 import { executionStatusLabel, executionStatusTone } from '@/components/studio/run/executionStatus';
+import { LastLearningAttemptNote } from '@/components/studio/guided/LastLearningAttemptNote';
+import { useLatestLearningAttempts } from '@/components/studio/guided/useLatestLearningAttempts';
 import { uiTestStatus } from '@/components/studio/tests/uiTestStatus';
-import { uiTestEditorPath, uiTestRunPath } from '@/components/studio/uiTestPaths';
+import { uiTestEditorPath } from '@/components/studio/uiTestPaths';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { fetchCSIs } from '@/store/slices/csiSlice';
 import { formatAbsoluteTime, formatRelativeTime } from '@/utils/time';
@@ -22,7 +24,7 @@ import type { UiTestDetailHeaderProps } from './useUiTestDetail';
  * dialog and then goes to `/checks/all`.
  */
 
-const UiTestDetailHeader: React.FC<UiTestDetailHeaderProps> = ({ testId, test, refresh }) => {
+const UiTestDetailHeader: React.FC<UiTestDetailHeaderProps> = ({ testId, test, reloadSchedule }) => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const registeredCsis = useAppSelector((state) => state.csi.data);
@@ -37,103 +39,144 @@ const UiTestDetailHeader: React.FC<UiTestDetailHeaderProps> = ({ testId, test, r
     return registeredCsis.find((csi) => csi.id === test.csiId)?.name ?? test.csiId;
   }, [registeredCsis, test.csiId]);
 
+  // The failed-learn line (AC-04) exists only for these two readiness states, so the read is asked
+  // for only then: a READY or LEARNING test sends no request.
+  const showsLearningAttempt = test.readiness === 'UNLEARNED' || test.readiness === 'NEEDS_RELEARN';
+  const attemptIds = useMemo(() => (showsLearningAttempt ? [testId] : []), [showsLearningAttempt, testId]);
+  const { byTestId: latestAttempts } = useLatestLearningAttempts(attemptIds);
+
   const status = uiTestStatus(test);
   const closeMenu = () => setMenuAnchor(null);
 
   return (
-    <Box sx={{ mb: 2 }} data-testid="ui-test-detail-header">
-      <Stack
-        direction={{ xs: 'column', md: 'row' }}
-        spacing={2}
-        justifyContent="space-between"
-        alignItems={{ xs: 'flex-start', md: 'center' }}
-      >
-        <Box sx={{ minWidth: 0 }}>
-          <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
-            <Typography variant="h5" component="h1" sx={{ overflowWrap: 'anywhere' }}>{test.name}</Typography>
-            <Chip size="small" label={status.label} color={status.color} data-testid="ui-test-status" />
-            <Chip size="small" variant="outlined" label="UI Test" data-testid="ui-test-type" />
-          </Stack>
+    <Card sx={{ mb: 3 }} data-testid="ui-test-detail-header">
+      <CardContent>
+        <Stack
+          direction={{ xs: 'column', md: 'row' }}
+          spacing={2}
+          justifyContent="space-between"
+          alignItems="flex-start"
+        >
+          <Box sx={{ minWidth: 0 }}>
+            {/*
+              * From `md` the title takes at most two lines (clamped, full name on hover) and the status and
+              * "UI Test" chips stay beside it, so the header does not grow with the name. Below `md` it wraps.
+              */}
+            <Stack direction="row" spacing={1} alignItems="center" flexWrap={{ xs: 'wrap', md: 'nowrap' }} useFlexGap>
+              <Typography
+                variant="h5"
+                component="h1"
+                title={test.name}
+                sx={{
+                  minWidth: 0,
+                  overflowWrap: { xs: 'anywhere', md: 'normal' },
+                  display: { md: '-webkit-box' },
+                  WebkitLineClamp: { md: 2 },
+                  WebkitBoxOrient: { md: 'vertical' },
+                  overflow: { md: 'hidden' },
+                }}
+              >
+                {test.name}
+              </Typography>
+              <Chip size="small" label={status.label} color={status.color} data-testid="ui-test-status" sx={{ flexShrink: 0 }} />
+              <Chip size="small" variant="outlined" label="UI Test" data-testid="ui-test-type" sx={{ flexShrink: 0 }} />
+            </Stack>
+            <Stack
+              direction="row"
+              spacing={2}
+              alignItems="center"
+              flexWrap="wrap"
+              useFlexGap
+              sx={{ mt: 0.5 }}
+            >
+              <Typography variant="body2" color="text.secondary" data-testid="ui-test-csi">
+                {csiLabel ? (
+                  <Tooltip title={`CSI ${test.csiId}`} describeChild><span>CSI: {csiLabel}</span></Tooltip>
+                ) : 'CSI: Not available'}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" data-testid="ui-test-environment">
+                Environment: {test.environment || 'Not specified'}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" component="div" data-testid="ui-test-last-run">
+                Last run:{' '}
+                {test.lastRunStatus ? (
+                  <>
+                    <Chip
+                      size="small"
+                      label={executionStatusLabel(test.lastRunStatus)}
+                      color={executionStatusTone(test.lastRunStatus)}
+                    />
+                    {test.lastRunAt && (
+                      <Tooltip title={formatAbsoluteTime(test.lastRunAt)} describeChild>
+                        <span> {formatRelativeTime(test.lastRunAt)}</span>
+                      </Tooltip>
+                    )}
+                  </>
+                ) : 'Never run'}
+              </Typography>
+              <LastLearningAttemptNote
+                testId={testId}
+                readiness={test.readiness}
+                sourceRevision={test.sourceRevision}
+                attempt={latestAttempts.get(testId)}
+              />
+            </Stack>
+          </Box>
+
+          {/* One right-aligned row from `md`, level with the title line; below `md` it may wrap. */}
           <Stack
             direction="row"
-            spacing={2}
+            spacing={1}
             alignItems="center"
-            flexWrap="wrap"
+            justifyContent="flex-end"
+            flexWrap={{ xs: 'wrap', md: 'nowrap' }}
             useFlexGap
-            sx={{ mt: 0.5 }}
+            sx={{ flexShrink: 0 }}
           >
-            <Typography variant="body2" color="text.secondary" data-testid="ui-test-csi">
-              {csiLabel ? (
-                <Tooltip title={`CSI ${test.csiId}`} describeChild><span>CSI: {csiLabel}</span></Tooltip>
-              ) : 'CSI: Not available'}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" data-testid="ui-test-environment">
-              Environment: {test.environment || 'Not specified'}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" component="div" data-testid="ui-test-last-run">
-              Last run:{' '}
-              {test.lastRunStatus ? (
-                <>
-                  <Chip
-                    size="small"
-                    label={executionStatusLabel(test.lastRunStatus)}
-                    color={executionStatusTone(test.lastRunStatus)}
-                  />
-                  {test.lastRunAt && (
-                    <Tooltip title={formatAbsoluteTime(test.lastRunAt)} describeChild>
-                      <span> {formatRelativeTime(test.lastRunAt)}</span>
-                    </Tooltip>
-                  )}
-                </>
-              ) : 'Never run'}
-            </Typography>
-          </Stack>
-        </Box>
-
-        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
-          <Button
-            variant="outlined"
-            size="small"
-            startIcon={<Edit />}
-            onClick={() => navigate(uiTestEditorPath(testId))}
-          >
-            Edit in Studio
-          </Button>
-          <Button variant="outlined" size="small" startIcon={<Schedule />} onClick={() => setScheduleOpen(true)}>
-            Schedule
-          </Button>
-          <Button
-            variant="contained"
-            size="small"
-            startIcon={<PlayArrow />}
-            onClick={() => navigate(uiTestEditorPath(testId, { autorun: true }))}
-          >
-            Run in Studio
-          </Button>
-          <Tooltip title="More actions" describeChild>
-            <IconButton
+            <Button
+              variant="outlined"
               size="small"
-              aria-label={`More actions for ${test.name}`}
-              aria-haspopup="menu"
-              onClick={(event) => setMenuAnchor(event.currentTarget)}
+              startIcon={<Edit />}
+              onClick={() => navigate(uiTestEditorPath(testId))}
             >
-              <MoreVert />
-            </IconButton>
-          </Tooltip>
-          <Menu
-            anchorEl={menuAnchor}
-            open={menuAnchor !== null}
-            onClose={closeMenu}
-            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-          >
-            <MenuItem onClick={() => { closeMenu(); setDeleteOpen(true); }} sx={{ color: 'error.main' }}>
-              <ListItemIcon><DeleteOutline fontSize="small" color="error" /></ListItemIcon>
-              <ListItemText>Delete</ListItemText>
-            </MenuItem>
-          </Menu>
+              Edit in Studio
+            </Button>
+            <Button variant="outlined" size="small" startIcon={<Schedule />} onClick={() => setScheduleOpen(true)}>
+              Schedule
+            </Button>
+            <Button
+              variant="contained"
+              size="small"
+              startIcon={<PlayArrow />}
+              onClick={() => navigate(uiTestEditorPath(testId, { autorun: true }))}
+            >
+              Run in Studio
+            </Button>
+            <Tooltip title="More actions" describeChild>
+              <IconButton
+                size="small"
+                aria-label={`More actions for ${test.name}`}
+                aria-haspopup="menu"
+                onClick={(event) => setMenuAnchor(event.currentTarget)}
+              >
+                <MoreVert />
+              </IconButton>
+            </Tooltip>
+            <Menu
+              anchorEl={menuAnchor}
+              open={menuAnchor !== null}
+              onClose={closeMenu}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+            >
+              <MenuItem onClick={() => { closeMenu(); setDeleteOpen(true); }} sx={{ color: 'error.main' }}>
+                <ListItemIcon><DeleteOutline fontSize="small" color="error" /></ListItemIcon>
+                <ListItemText>Delete</ListItemText>
+              </MenuItem>
+            </Menu>
+          </Stack>
         </Stack>
-      </Stack>
+      </CardContent>
 
       <DeleteTestDialog
         test={deleteOpen ? { id: testId, name: test.name } : null}
@@ -143,15 +186,14 @@ const UiTestDetailHeader: React.FC<UiTestDetailHeaderProps> = ({ testId, test, r
           navigate('/checks/all');
         }}
       />
-      <StudioScheduleDialog
-        test={scheduleOpen ? test : null}
-        runHref={(executionId) => uiTestRunPath(testId, executionId)}
-        onClose={() => {
-          setScheduleOpen(false);
-          void refresh();
-        }}
-      />
-    </Box>
+      {scheduleOpen && (
+        <UiTestScheduleDialog
+          test={{ id: testId, name: test.name }}
+          onSaved={reloadSchedule}
+          onClose={() => setScheduleOpen(false)}
+        />
+      )}
+    </Card>
   );
 };
 

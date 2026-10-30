@@ -1,12 +1,7 @@
 package com.citi.put.checks.scheduling;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-import com.citi.put.checks.studio.scheduling.StudioScheduleProcessor;
-import com.citi.put.checks.studio.scheduling.StudioScheduledTarget;
-import com.citi.put.checks.studio.scheduling.StudioSchedulingProperties;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -257,7 +252,7 @@ class SchedulingCoordinatorTest {
   }
 
   @Test
-  void roleMatrixKeepsLegacyOrdinaryModesAndStudioWorkerOwnership() throws Exception {
+  void roleMatrixKeepsTheOrdinaryTargetOnTheSchedulerRoleOnly() throws Exception {
     for (String[] profiles :
         List.of(
             new String[] {"dev"},
@@ -268,16 +263,6 @@ class SchedulingCoordinatorTest {
             new String[] {"worker"},
             new String[] {"worker", "api"})) {
       var checks = new AtomicInteger();
-      var studio = new AtomicInteger();
-      var processor = mock(StudioScheduleProcessor.class);
-      when(processor.poll())
-          .thenAnswer(
-              invocation -> {
-                studio.incrementAndGet();
-                return 1;
-              });
-      var props = new StudioSchedulingProperties();
-      props.setEnabled(true);
       try (var context = new AnnotationConfigApplicationContext()) {
         context.getEnvironment().setActiveProfiles(profiles);
         context.register(
@@ -288,26 +273,15 @@ class SchedulingCoordinatorTest {
             "ordinary",
             ScheduledTarget.class,
             () -> new Target("checks", 100, 0, checks::incrementAndGet));
-        context.registerBean(
-            "studio",
-            StudioScheduledTarget.class,
-            () -> new StudioScheduledTarget(processor, props, context.getEnvironment()));
         context.refresh();
         boolean worker = List.of(profiles).contains("worker");
         boolean api = List.of(profiles).contains("api");
-        boolean local = List.of(profiles).contains("local");
         var hub = context.getBeanProvider(SchedulingCoordinator.class).getIfAvailable();
         assertThat(hub != null).isEqualTo(!api || worker);
         if (hub != null) {
           hub.tick();
           eventually(() -> checks.get() == 1);
-          if (worker || (local && !api)) {
-            eventually(() -> studio.get() == 1);
-          } else {
-            assertThat(studio.get()).isZero();
-          }
         } else {
-          assertThat(studio.get()).isZero();
           assertThat(checks.get()).isZero();
         }
       }

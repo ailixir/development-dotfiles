@@ -1,6 +1,6 @@
 # ADR-003: Recurring execution of confirmed Studio tests
 
-Date: 2026-10-05. Decision owner: Aria. Status: accepted for the local implementation of STUDIO-SCHED-001; production activation remains gated.
+Date: 2026-10-05. Decision owner: Aria. Status: **superseded by STUDIO-GOV-001.2 (2026-10-24)**. A UI test is now scheduled through the ordinary check schedule flow (`/api/v1/schedules`, `ScheduleService`, `CronDispatcher`, the shared Schedule dialog); the Studio-specific scheduler, its tables (dropped by V24), its eight public operations, the paused-on-create/activation/acknowledgement model and the production-grant gating described below no longer exist. See [ADR-004](ADR-004-shared-check-scheduling.md). The text below is the historical record of the superseded design.
 
 This records the choices adopted in the [approved specification](../stories/STUDIO-SCHED-001/spec/spec.md) and [implementation contract](../stories/STUDIO-SCHED-001/spec/implementation-contract.md), following independent critique and PO readiness. It adds eight public Studio operations and optional execution provenance to [OpenAPI](../specs/studio/openapi.yaml), without changing runner-produced bodies or admitting legacy schedule JSON as operational work.
 
@@ -14,4 +14,4 @@ Acceptance serializes test, schedule and occurrence work, then uses existing glo
 
 Worker/local due production has a separate bounded executor and CSI rotation; API-only instances do not poll. Scheduling defaults off independently of existing dispatch/recovery. Rollback disables new production/activation first and retains compatible handling for already accepted work and durable audit. Database restores older than external browser effects require operator reconciliation before scheduling is enabled.
 
-[Operations](../specs/studio/scheduling/operations.md) provides terminal administration and configuration. [Implementation evidence](../stories/STUDIO-SCHED-001/implementation/) records measured checks and limitations. Live production identity/vault revocation, capacity, restore/retention and on-demand Studio trust evidence remain release prerequisites. Local fixtures and mock/browser UI tests do not establish those integrations.
+The operations guide (`docs/specs/studio/scheduling/operations.md`) was deleted with the feature. [Implementation evidence](../stories/STUDIO-SCHED-001/implementation/) records measured checks and limitations. Live production identity/vault revocation, capacity, restore/retention and on-demand Studio trust evidence remain release prerequisites. Local fixtures and mock/browser UI tests do not establish those integrations.

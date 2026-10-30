@@ -231,26 +231,44 @@ public class DashboardService {
     boolean admin = isAdmin(identity);
     List<String> ownedCsiIds = resolveOwnedCsiIds(identity, admin);
 
-    StringBuilder sql =
-        new StringBuilder(
-            """
-        SELECT s.check_id, c.name, s.next_execution_at, c.csi_name
-        FROM schedules s
-        JOIN checks c ON c.id = s.check_id
-        WHERE s.enabled = true
-          AND s.next_execution_at IS NOT NULL
-          AND c.deleted_at IS NULL
-        """);
+    // A schedule belongs to a check or to a UI test (a row in ui_tests, not in checks); both are
+    // upcoming work with the same scope rules, so the two selections are one list.
+    String scopeCheck =
+        (csiId != null ? " AND c.csi_id = :csiId" : "")
+            + (admin ? "" : " AND c.csi_id IN (:ownedCsiIds)");
+    String scopeUiTest =
+        (csiId != null ? " AND t.csi_id = :csiId" : "")
+            + (admin ? "" : " AND t.csi_id IN (:ownedCsiIds)");
+    String sql =
+        """
+        SELECT u.target_id, u.name, u.next_execution_at, u.csi_name FROM (
+          SELECT s.check_id AS target_id, c.name AS name, s.next_execution_at AS next_execution_at,
+                 c.csi_name AS csi_name
+          FROM schedules s
+          JOIN checks c ON c.id = s.check_id
+          WHERE s.enabled = true
+            AND s.next_execution_at IS NOT NULL
+            AND c.deleted_at IS NULL
+        """
+            + scopeCheck
+            + """
+          UNION ALL
+          SELECT s.ui_test_id, t.name, s.next_execution_at, cs.name
+          FROM schedules s
+          JOIN ui_tests t ON t.id = s.ui_test_id
+          JOIN csi_systems cs ON cs.id = t.csi_id
+          WHERE s.enabled = true
+            AND s.next_execution_at IS NOT NULL
+            AND t.deleted_at IS NULL
+            AND t.quarantined_at IS NULL
+        """
+            + scopeUiTest
+            + """
+        ) u
+        ORDER BY u.next_execution_at ASC LIMIT :limit
+        """;
 
-    if (csiId != null) {
-      sql.append(" AND c.csi_id = :csiId");
-    }
-    if (!admin) {
-      sql.append(" AND c.csi_id IN (:ownedCsiIds)");
-    }
-    sql.append(" ORDER BY s.next_execution_at ASC LIMIT :limit");
-
-    Query query = em.createNativeQuery(sql.toString());
+    Query query = em.createNativeQuery(sql);
     if (csiId != null) {
       query.setParameter("csiId", csiId);
     }

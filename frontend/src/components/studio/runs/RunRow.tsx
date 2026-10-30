@@ -10,8 +10,6 @@ import { runDurationText, runQueueWaitMs, shortRunId } from './runPresentation';
 
 export interface RunRowProps {
   run: ExecutionSnapshot;
-  /** CSI display name from the registry, when known. */
-  csiName?: string | null;
   /** The run's drawer URL (keeps the list's query string). */
   href: string;
   selected?: boolean;
@@ -26,7 +24,7 @@ function isFromControl(event: MouseEvent<HTMLElement>): boolean {
 }
 
 /** One replay of a single UI test. The run's short id is the row's single link; the trigger sits below it. */
-export function RunRow({ run, csiName, href, selected = false, onOpenRun, onCopyLink }: RunRowProps) {
+export function RunRow({ run, href, selected = false, onOpenRun, onCopyLink }: RunRowProps) {
   const runLabel = `#${shortRunId(run.executionId)}`;
   const queueWait = runQueueWaitMs(run);
 
@@ -57,29 +55,20 @@ export function RunRow({ run, csiName, href, selected = false, onOpenRun, onCopy
           {runLabel}
         </Typography>
         <Typography variant="caption" color="text.secondary" component="div">
-          {run.triggerSource === 'SCHEDULED' ? 'Scheduled' : run.triggerSource === 'MANUAL' ? 'Manual' : 'Unknown origin'}
+          {run.triggerSource === 'SCHEDULED' ? 'Scheduled' : run.triggerSource === 'MANUAL' ? 'Manual' : run.triggerSource === 'AFTER_LEARN' ? 'After learning' : 'Unknown origin'}
         </Typography>
       </TableCell>
       <TableCell sx={{ whiteSpace: 'nowrap', width: 140 }}>
         <RunStatusChip status={run.status} errorCode={run.errorCode} />
       </TableCell>
-      <TableCell sx={hideBelowMd}>
-        {run.csiId ? (
-          <Tooltip title={`CSI ${run.csiId}`} describeChild>
-            <Typography variant="body2" component="span">{csiName ?? run.csiId}</Typography>
-          </Tooltip>
-        ) : (
-          <Typography variant="body2" color="text.secondary" component="span">—</Typography>
-        )}
-      </TableCell>
-      <TableCell sx={{ whiteSpace: 'nowrap' }}>
+      <TableCell data-column="requested" sx={{ whiteSpace: 'nowrap' }}>
         <Tooltip title={formatAbsoluteTime(run.acceptedAt)} placement="top" describeChild>
           <Typography variant="body2" component="time" dateTime={toIsoDateTime(run.acceptedAt)} data-testid="run-requested">
             {formatRelativeTime(run.acceptedAt)}
           </Typography>
         </Tooltip>
       </TableCell>
-      <TableCell sx={[{ whiteSpace: 'nowrap' }, hideBelowMd] as SxProps<Theme>}>
+      <TableCell data-column="duration" sx={[{ whiteSpace: 'nowrap' }, hideBelowMd] as SxProps<Theme>}>
         <Typography variant="body2" component="div" data-testid="run-duration" sx={{ fontVariantNumeric: 'tabular-nums' }}>
           {runDurationText(run)}
         </Typography>

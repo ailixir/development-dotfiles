@@ -20,8 +20,11 @@ public class Schedule {
   @GeneratedValue(strategy = GenerationType.AUTO)
   private UUID id;
 
-  @Column(name = "check_id", nullable = false, unique = true)
+  @Column(name = "check_id", unique = true)
   private UUID checkId;
+
+  @Column(name = "ui_test_id", unique = true)
+  private UUID uiTestId;
 
   @Column(nullable = false, length = 50)
   private String frequency;
@@ -89,12 +92,31 @@ public class Schedule {
     this.checkType = checkType;
   }
 
+  /** A schedule whose target is a UI test (a row in {@code ui_tests}, not in {@code checks}). */
+  public static Schedule forUiTest(
+      UUID uiTestId,
+      String frequency,
+      String cronExpression,
+      String timezone,
+      boolean enabled,
+      Instant nextExecutionAt) {
+    Schedule schedule =
+        new Schedule(
+            null, "UI_TEST", frequency, cronExpression, timezone, enabled, nextExecutionAt);
+    schedule.uiTestId = uiTestId;
+    return schedule;
+  }
+
   public UUID getId() {
     return id;
   }
 
   public UUID getCheckId() {
     return checkId;
+  }
+
+  public UUID getUiTestId() {
+    return uiTestId;
   }
 
   public String getFrequency() {

@@ -63,8 +63,13 @@ public class ScheduleService {
 
   @Transactional
   public ScheduleDto create(ScheduleRequest request, Authentication auth) {
-    Check check = requireCheckExists(request.checkId());
-    requireWrite(auth, check.getCsiId());
+    if ((request.checkId() == null) == (request.uiTestId() == null)) {
+      throw new ScheduleValidationException("Exactly one of checkId or uiTestId is required");
+    }
+    boolean forUiTest = request.uiTestId() != null;
+    Check check = forUiTest ? null : requireCheckExists(request.checkId());
+    String csiId = forUiTest ? requireUiTestCsi(request.uiTestId()) : check.getCsiId();
+    requireWrite(auth, csiId);
     String cron = normalizeCron(request.cronExpression());
     validateCronExpression(cron);
     String tz = resolveTimezone(request.timezone());
@@ -73,20 +78,25 @@ public class ScheduleService {
     boolean enabled = request.enabled() != null ? request.enabled() : true;
 
     Schedule schedule =
-        new Schedule(
-            request.checkId(),
-            check.getType(),
-            request.frequency(),
-            cron,
-            tz,
-            enabled,
-            nextExecution);
+        forUiTest
+            ? Schedule.forUiTest(
+                request.uiTestId(), request.frequency(), cron, tz, enabled, nextExecution)
+            : new Schedule(
+                request.checkId(),
+                check.getType(),
+                request.frequency(),
+                cron,
+                tz,
+                enabled,
+                nextExecution);
 
     try {
       schedule = scheduleRepository.saveAndFlush(schedule);
     } catch (DataIntegrityViolationException e) {
       throw new ScheduleConflictException(
-          "A schedule already exists for check " + request.checkId());
+          forUiTest
+              ? "A schedule already exists for UI test " + request.uiTestId()
+              : "A schedule already exists for check " + request.checkId());
     }
 
     return ScheduleDto.from(schedule);
@@ -94,13 +104,19 @@ public class ScheduleService {
 
   @Transactional(readOnly = true)
   public Page<ScheduleDto> list(
-      UserIdentity identity, UUID checkId, Boolean enabled, String timezone, int page, int size) {
+      UserIdentity identity,
+      UUID checkId,
+      UUID uiTestId,
+      Boolean enabled,
+      String timezone,
+      int page,
+      int size) {
     Pageable pageable =
         PageRequest.of(page, Math.min(size, 100), Sort.by("createdAt").descending());
 
     Page<Schedule> result;
     if (isAdmin(identity)) {
-      result = scheduleRepository.findAllFiltered(checkId, enabled, timezone, pageable);
+      result = scheduleRepository.findAllFiltered(checkId, uiTestId, enabled, timezone, pageable);
     } else {
       List<String> ownedCsiIds =
           identity.csiOwnership().stream()
@@ -111,7 +127,7 @@ public class ScheduleService {
       }
       result =
           scheduleRepository.findAllVisibleToFiltered(
-              ownedCsiIds, checkId, enabled, timezone, pageable);
+              ownedCsiIds, checkId, uiTestId, enabled, timezone, pageable);
     }
     return result.map(ScheduleDto::from);
   }
@@ -122,8 +138,7 @@ public class ScheduleService {
         scheduleRepository
             .findById(id)
             .orElseThrow(() -> new ScheduleNotFoundException("Schedule not found: " + id));
-    Check check = requireCheckExists(schedule.getCheckId());
-    requireRead(auth, check.getCsiId());
+    requireRead(auth, csiOf(schedule));
     return ScheduleDto.from(schedule);
   }
 
@@ -138,8 +153,7 @@ public class ScheduleService {
         scheduleRepository
             .findById(id)
             .orElseThrow(() -> new ScheduleNotFoundException("Schedule not found: " + id));
-    Check check = requireCheckExists(schedule.getCheckId());
-    requireWrite(auth, check.getCsiId());
+    requireWrite(auth, csiOf(schedule));
     String cron = normalizeCron(request.cronExpression());
     validateCronExpression(cron);
     String tz = resolveTimezone(request.timezone());
@@ -162,8 +176,7 @@ public class ScheduleService {
         scheduleRepository
             .findById(id)
             .orElseThrow(() -> new ScheduleNotFoundException("Schedule not found: " + id));
-    Check check = requireCheckExists(schedule.getCheckId());
-    requireWrite(auth, check.getCsiId());
+    requireWrite(auth, csiOf(schedule));
 
     schedule.setEnabled(enabled);
     if (enabled && schedule.getCronExpression() != null) {
@@ -181,8 +194,7 @@ public class ScheduleService {
         scheduleRepository
             .findById(id)
             .orElseThrow(() -> new ScheduleNotFoundException("Schedule not found: " + id));
-    Check check = requireCheckExists(schedule.getCheckId());
-    requireWrite(auth, check.getCsiId());
+    requireWrite(auth, csiOf(schedule));
     scheduleRepository.delete(schedule);
   }
 
@@ -190,6 +202,19 @@ public class ScheduleService {
     return checkRepository
         .findById(checkId)
         .orElseThrow(() -> new IllegalArgumentException("Check not found: " + checkId));
+  }
+
+  private String requireUiTestCsi(UUID uiTestId) {
+    return scheduleRepository
+        .findUiTestCsiId(uiTestId)
+        .orElseThrow(() -> new IllegalArgumentException("UI test not found: " + uiTestId));
+  }
+
+  /** The CSI that owns the schedule's target, whichever kind of target it is. */
+  private String csiOf(Schedule schedule) {
+    return schedule.getUiTestId() != null
+        ? requireUiTestCsi(schedule.getUiTestId())
+        : requireCheckExists(schedule.getCheckId()).getCsiId();
   }
 
   static String normalizeCron(String cron) {
@@ -236,10 +261,7 @@ public class ScheduleService {
     }
     var next =
         recurrence.next(
-            cron,
-            recurrence.zone(timezone, CronRecurrence.ZonePolicy.ANY_ZONE_ID),
-            Instant.now(),
-            CronRecurrence.Overlap.INSTANT_SEQUENCE);
+            cron, recurrence.zone(timezone, CronRecurrence.ZonePolicy.ANY_ZONE_ID), Instant.now());
     return next != null ? next.scheduledAt() : null;
   }
 

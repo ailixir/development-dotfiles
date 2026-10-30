@@ -23,14 +23,9 @@ export function uiTestPath(id: string, { base = DEFAULT_UI_TEST_BASE }: UiTestPa
   return `${base}/ui-tests/${encodeURIComponent(id)}`;
 }
 
-/** `{base}/ui-tests/{id}/runs`: the UI test's runs list. */
-export function uiTestRunsPath(id: string, options: UiTestPathOptions = {}): string {
-  return `${uiTestPath(id, options)}/runs`;
-}
-
 /** `{base}/ui-tests/{id}/runs/{executionId}`: one run of the UI test. */
 export function uiTestRunPath(id: string, executionId: string, options: UiTestPathOptions = {}): string {
-  return `${uiTestRunsPath(id, options)}/${encodeURIComponent(executionId)}`;
+  return `${uiTestPath(id, options)}/runs/${encodeURIComponent(executionId)}`;
 }
 
 /** `{base}/ui-tests/{id}/studio`, with `?autorun=1` when `autorun` is set: the editor. */

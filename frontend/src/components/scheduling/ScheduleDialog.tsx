@@ -26,16 +26,28 @@ import {
   PlayArrow,
   Pause,
 } from '@mui/icons-material';
-import { CheckEntity } from '../../types/checks/checkTypes';
-import { useAppDispatch } from '@store/index';
-import { fetchCheckById } from '@store/slices/checksSlice';
+import type { CheckSchedule } from '../../types/checks/checkTypes';
 import { formatNextCronRun, parseCron } from '@/utils/cronNextRun';
-import { schedulesApi } from '@/services/api/schedulesApi';
+import { schedulesApi, type ScheduleTargetIds } from '@/services/api/schedulesApi';
+
+/**
+ * What a schedule belongs to. A check and a UI test are scheduled the same way, through the same
+ * `/api/v1/schedules` endpoints and this dialog; only the target id differs.
+ */
+export interface ScheduleTarget {
+  kind: 'check' | 'uiTest';
+  id: string;
+  name: string;
+  /** The target's current schedule, or nothing when it has none yet. */
+  schedule?: CheckSchedule | null;
+}
 
 interface ScheduleDialogProps {
   open: boolean;
   onClose: () => void;
-  check: CheckEntity | null;
+  target: ScheduleTarget | null;
+  /** Called after a successful save, before the dialog closes; the caller refreshes what it shows. */
+  onSaved?: () => void | Promise<void>;
 }
 
 const FREQUENCY_OPTIONS = [
@@ -61,23 +73,32 @@ const toDialogFrequency = (raw: string): string => {
   return 'CUSTOM';
 };
 
-const ScheduleDialog: React.FC<ScheduleDialogProps> = ({ open, onClose, check }) => {
+const ScheduleDialog: React.FC<ScheduleDialogProps> = ({ open, onClose, target, onSaved }) => {
   const theme = useTheme();
-  const dispatch = useAppDispatch();
-  
+  const subject = target?.kind === 'uiTest' ? 'UI test' : 'Check';
+
   const [enabled, setEnabled] = useState(false);
   const [frequency, setFrequency] = useState('EVERY_5_MINUTES');
   const [cronExpression, setCronExpression] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // The form starts from the target's current schedule each time the dialog opens or the target's
+  // schedule changes; a caller that rebuilds `target` on every render does not reset the user's edits.
+  const scheduleKey = JSON.stringify(target?.schedule ?? null);
   useEffect(() => {
-    if (check?.schedule) {
-      setEnabled(check.schedule.enabled);
-      setFrequency(toDialogFrequency(check.schedule.frequency || 'EVERY_5_MINUTES'));
-      setCronExpression(check.schedule.cron || '');
+    const schedule = target?.schedule;
+    if (schedule) {
+      setEnabled(schedule.enabled);
+      setFrequency(toDialogFrequency(schedule.frequency || 'EVERY_5_MINUTES'));
+      setCronExpression(schedule.cron || '');
+    } else {
+      setEnabled(false);
+      setFrequency('EVERY_5_MINUTES');
+      setCronExpression('');
     }
-  }, [check]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, target?.kind, target?.id, scheduleKey]);
 
   const dialogFrequencyToCron = (freq: string, cron: string): string => {
     switch (freq) {
@@ -94,20 +115,21 @@ const ScheduleDialog: React.FC<ScheduleDialogProps> = ({ open, onClose, check })
   };
 
   const handleSave = async () => {
-    if (!check) return;
+    if (!target) return;
 
     setLoading(true);
     setError(null);
 
     try {
       const cronExpr = dialogFrequencyToCron(frequency, cronExpression);
-      const existing = await schedulesApi.list({ checkId: check.id, limit: 1 });
+      const ids: ScheduleTargetIds = target.kind === 'uiTest' ? { uiTestId: target.id } : { checkId: target.id };
+      const existing = await schedulesApi.list({ ...ids, limit: 1 });
       const current = existing.data?.[0];
       const payload = {
-        checkId: check.id,
+        ...ids,
         frequency,
         cronExpression: cronExpr,
-        timezone: check.schedule?.timezone || 'America/New_York',
+        timezone: target.schedule?.timezone || 'America/New_York',
         enabled,
       };
       if (current) {
@@ -115,7 +137,7 @@ const ScheduleDialog: React.FC<ScheduleDialogProps> = ({ open, onClose, check })
       } else {
         await schedulesApi.create(payload);
       }
-      await dispatch(fetchCheckById(check.id)).unwrap();
+      await onSaved?.();
       onClose();
     } catch (err) {
       setError('Failed to update schedule. Please try again.');
@@ -125,7 +147,7 @@ const ScheduleDialog: React.FC<ScheduleDialogProps> = ({ open, onClose, check })
   };
 
   const getNextExecutionPreview = (): string => {
-    if (!enabled) return 'Check is disabled';
+    if (!enabled) return `${subject} is disabled`;
     
     const now = new Date();
     let nextExecution: Date;
@@ -169,7 +191,7 @@ const ScheduleDialog: React.FC<ScheduleDialogProps> = ({ open, onClose, check })
     return parseCron(expression) !== null;
   };
 
-  if (!check) return null;
+  if (!target) return null;
 
   return (
     <Dialog 
@@ -189,7 +211,7 @@ const ScheduleDialog: React.FC<ScheduleDialogProps> = ({ open, onClose, check })
               Schedule Configuration
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {check.name}
+              {target.name}
             </Typography>
           </Box>
         </Stack>
@@ -212,7 +234,7 @@ const ScheduleDialog: React.FC<ScheduleDialogProps> = ({ open, onClose, check })
                   Schedule Status
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {enabled ? 'Check will run automatically' : 'Check is paused'}
+                  {enabled ? `${subject} will run automatically` : `${subject} is paused`}
                 </Typography>
               </Box>
               <Stack direction="row" alignItems="center" spacing={2}>

@@ -1,11 +1,6 @@
 export { default } from './UiTestDetailsPage';
 export { UiTestDetailHeader } from './UiTestDetailHeader';
-export { UiTestOverviewTab } from './UiTestOverviewTab';
-export { UiTestRunsTab } from './UiTestRunsTab';
-export {
-  useUiTestDetailContext,
-  uiTestDetailTab,
-  type UiTestDetailContext,
-  type UiTestDetailHeaderProps,
-  type UiTestDetailTab,
-} from './useUiTestDetail';
+export { UiTestOverviewCard, type UiTestOverviewCardProps } from './UiTestOverviewCard';
+export { UiTestRecentRunsCard, type UiTestRecentRunsCardProps } from './UiTestRecentRunsCard';
+export { UiTestLatestRunCard, type UiTestLatestRunCardProps } from './UiTestLatestRunCard';
+export { type UiTestDetailContext, type UiTestDetailHeaderProps } from './useUiTestDetail';

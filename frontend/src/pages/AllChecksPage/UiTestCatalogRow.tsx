@@ -16,12 +16,19 @@ import {
 } from '@mui/material';
 import { ArrowForward, DeleteOutline, Edit, MoreVert, PlayArrow, Schedule, Science } from '@mui/icons-material';
 import DeleteTestDialog from '@/components/studio/tests/DeleteTestDialog';
-import { StudioScheduleDialog } from '@/components/studio/scheduling/StudioScheduleDialog';
-import { uiTestEditorPath, uiTestPath, uiTestRunPath } from '@/components/studio/uiTestPaths';
+import UiTestScheduleDialog from '@/components/scheduling/UiTestScheduleDialog';
+import { LastLearningAttemptNote } from '@/components/studio/guided/LastLearningAttemptNote';
+import type { GuidedLatestAttempt } from '@/types/studio/studioGuidedTypes';
+import { uiTestEditorPath, uiTestPath } from '@/components/studio/uiTestPaths';
 import { catalogRowStatus, formatLastExecution, type UiTestCatalogRowData } from './catalogRows';
 
 export interface UiTestCatalogRowProps {
   row: UiTestCatalogRowData;
+  /**
+   * The test's latest terminal learning attempt, from the page's one read (AC-04); `undefined` when
+   * there is none, while it loads, or when the read failed. The row never reads it itself.
+   */
+  attempt?: GuidedLatestAttempt;
   /** Called after the test is deleted (the page refreshes its UI test list). */
   onDeleted: (id: string) => void;
 }
@@ -57,7 +64,7 @@ const compactChipSx = {
  * starts only if the editor's run gate admits it. The row owns its Schedule and Delete dialogs, which
  * mount only while open.
  */
-const UiTestCatalogRow: React.FC<UiTestCatalogRowProps> = ({ row, onDeleted }) => {
+const UiTestCatalogRow: React.FC<UiTestCatalogRowProps> = ({ row, attempt, onDeleted }) => {
   const { test, csiName } = row;
   const navigate = useNavigate();
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
@@ -73,7 +80,8 @@ const UiTestCatalogRow: React.FC<UiTestCatalogRowProps> = ({ row, onDeleted }) =
           <Checkbox sx={compactCheckboxSx} disabled checked={false} inputProps={{ 'aria-label': `select ${test.name}` }} />
         </TableCell>
         <TableCell>
-          <Stack direction="row" spacing={0.75} alignItems="flex-start">
+          {/* Flex gap, not Stack spacing: the hidden flask (from sm) must not leave an indent before the name. */}
+          <Stack direction="row" spacing={0.75} useFlexGap alignItems="flex-start">
             {/* Below sm the Type column is hidden, so the flask marks UI test rows beside the name (D7). */}
             <Science
               fontSize="small"
@@ -109,13 +117,21 @@ const UiTestCatalogRow: React.FC<UiTestCatalogRowProps> = ({ row, onDeleted }) =
               >
                 Last run: {formatLastExecution(test.lastRunAt)}
               </Typography>
+              {/* The failed-learn line (AC-04) in the same slot, at every width; it wraps instead of widening the column. */}
+              <LastLearningAttemptNote
+                testId={test.id}
+                readiness={test.readiness}
+                sourceRevision={test.sourceRevision}
+                attempt={attempt}
+                sx={{ typography: 'caption' }}
+              />
             </Stack>
           </Stack>
         </TableCell>
         <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
           <Stack direction="row" alignItems="center" spacing={1}>
             <Science />
-            <Typography variant="body2">UI Test</Typography>
+            <Typography variant="body2" noWrap>UI Test</Typography>
           </Stack>
         </TableCell>
         <TableCell>
@@ -178,11 +194,7 @@ const UiTestCatalogRow: React.FC<UiTestCatalogRowProps> = ({ row, onDeleted }) =
       </TableRow>
 
       {dialog === 'schedule' && (
-        <StudioScheduleDialog
-          test={test}
-          runHref={(executionId) => uiTestRunPath(test.id, executionId)}
-          onClose={() => setDialog(null)}
-        />
+        <UiTestScheduleDialog test={test} onClose={() => setDialog(null)} />
       )}
       {dialog === 'delete' && (
         <DeleteTestDialog

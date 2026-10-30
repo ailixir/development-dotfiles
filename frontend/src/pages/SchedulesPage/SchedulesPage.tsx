@@ -1,5 +1,7 @@
+import { uiTestPath } from '@/components/studio/uiTestPaths';
 import type { BackendScheduleDto } from '@/services/api/mappers/scheduleMapper';
 import { schedulesApi } from '@/services/api/schedulesApi';
+import studioApi from '@/services/api/studioApi';
 import type { ApiResponse } from '@/types/common/commonTypes';
 import { formatNextCronRun, parseCron } from '@/utils/cronNextRun';
 import {
@@ -47,6 +49,8 @@ import { useNavigate } from 'react-router-dom';
 
 type EnabledFilter = 'all' | 'enabled' | 'disabled';
 
+const shortId = (id: string): string => `${id.slice(0, 8)}...`;
+
 const SchedulesPage: React.FC = () => {
   const theme = useTheme();
   const navigate = useNavigate();
@@ -61,6 +65,8 @@ const SchedulesPage: React.FC = () => {
   const [enabledFilter, setEnabledFilter] = useState<EnabledFilter>('all');
   const [togglingIds, setTogglingIds] = useState<Set<string>>(new Set());
   const [deleteTarget, setDeleteTarget] = useState<BackendScheduleDto | null>(null);
+  /** UI test names by test id, read once per test shown; a test that cannot be read keeps its short id. */
+  const [uiTestNames, setUiTestNames] = useState<Record<string, string>>({});
 
   const fetchSchedules = useCallback(async () => {
     setLoading(true);
@@ -86,6 +92,24 @@ const SchedulesPage: React.FC = () => {
   useEffect(() => {
     fetchSchedules();
   }, [fetchSchedules]);
+
+  useEffect(() => {
+    const missing = [...new Set(data.map((s) => s.uiTestId).filter((id): id is string => id !== null))].filter(
+      (id) => uiTestNames[id] === undefined,
+    );
+    missing.forEach((id) => {
+      studioApi.getTest(id).then(
+        (test) => setUiTestNames((prev) => ({ ...prev, [id]: test.name })),
+        () => undefined,
+      );
+    });
+  }, [data, uiTestNames]);
+
+  /** What the schedule belongs to, for display: the UI test's name, or a check's short id. */
+  const targetLabel = (schedule: BackendScheduleDto): string =>
+    schedule.uiTestId !== null
+      ? (uiTestNames[schedule.uiTestId] ?? `UI test ${shortId(schedule.uiTestId)}`)
+      : shortId(schedule.checkId ?? '');
 
   const handleToggleEnabled = async (schedule: BackendScheduleDto) => {
     setTogglingIds((prev) => new Set(prev).add(schedule.id));
@@ -120,7 +144,8 @@ const SchedulesPage: React.FC = () => {
   const filteredData = search
     ? data.filter(
         (s) =>
-          s.checkId.toLowerCase().includes(search.toLowerCase()) ||
+          targetLabel(s).toLowerCase().includes(search.toLowerCase()) ||
+          (s.checkId ?? s.uiTestId ?? '').toLowerCase().includes(search.toLowerCase()) ||
           s.cronExpression.toLowerCase().includes(search.toLowerCase()) ||
           s.timezone.toLowerCase().includes(search.toLowerCase()),
       )
@@ -160,7 +185,7 @@ const SchedulesPage: React.FC = () => {
       <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
         <TextField
           size="small"
-          placeholder="Search by check, cron, timezone..."
+          placeholder="Search by check, UI test, cron, timezone..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           InputProps={{
@@ -198,7 +223,7 @@ const SchedulesPage: React.FC = () => {
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell sx={{ fontWeight: 600 }}>Check ID</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Target</TableCell>
               <TableCell sx={{ fontWeight: 600 }}>Frequency</TableCell>
               <TableCell sx={{ fontWeight: 600 }}>Cron Expression</TableCell>
               <TableCell sx={{ fontWeight: 600 }}>Timezone</TableCell>
@@ -237,9 +262,18 @@ const SchedulesPage: React.FC = () => {
                   }}
                 >
                   <TableCell>
-                    <Typography variant="body2" fontFamily="monospace" fontSize="0.8rem">
-                      {schedule.checkId.slice(0, 8)}...
-                    </Typography>
+                    {schedule.uiTestId !== null ? (
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Chip label="UI test" size="small" variant="outlined" />
+                        <Typography variant="body2" sx={{ overflowWrap: 'anywhere' }}>
+                          {targetLabel(schedule)}
+                        </Typography>
+                      </Stack>
+                    ) : (
+                      <Typography variant="body2" fontFamily="monospace" fontSize="0.8rem">
+                        {targetLabel(schedule)}
+                      </Typography>
+                    )}
                   </TableCell>
                   <TableCell>
                     <Chip
@@ -273,10 +307,16 @@ const SchedulesPage: React.FC = () => {
                   </TableCell>
                   <TableCell align="right">
                     <Stack direction="row" spacing={0.5} justifyContent="flex-end">
-                      <Tooltip title="View check">
+                      <Tooltip title={schedule.uiTestId !== null ? 'View UI test' : 'View check'}>
                         <IconButton
                           size="small"
-                          onClick={() => navigate(`/checks/details/${schedule.checkId}`)}
+                          onClick={() =>
+                            navigate(
+                              schedule.uiTestId !== null
+                                ? uiTestPath(schedule.uiTestId)
+                                : `/checks/details/${schedule.checkId}`,
+                            )
+                          }
                         >
                           <OpenInNew fontSize="small" />
                         </IconButton>
@@ -317,9 +357,9 @@ const SchedulesPage: React.FC = () => {
         <DialogTitle>Delete schedule?</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            This will permanently remove the schedule for check{' '}
-            <strong>{deleteTarget?.checkId.slice(0, 8)}...</strong> ({deleteTarget?.cronExpression}).
-            The check itself will not be deleted.
+            This will permanently remove the schedule for {deleteTarget?.uiTestId ? 'UI test' : 'check'}{' '}
+            <strong>{deleteTarget ? targetLabel(deleteTarget) : ''}</strong> ({deleteTarget?.cronExpression}).
+            The {deleteTarget?.uiTestId ? 'UI test' : 'check'} itself will not be deleted.
           </DialogContentText>
         </DialogContent>
         <DialogActions>

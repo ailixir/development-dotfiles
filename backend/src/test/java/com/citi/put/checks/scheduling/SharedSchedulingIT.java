@@ -7,15 +7,12 @@ import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.citi.put.checks.ChecksApplication;
 import com.citi.put.checks.studio.StudioExecutionFixtures;
 import com.citi.put.checks.studio.dispatch.DispatchOutcome;
 import com.citi.put.checks.studio.dispatch.RecordingRunnerDispatchClient;
+import com.citi.put.checks.studio.dispatch.ReferenceDeclarations;
 import com.citi.put.checks.studio.dispatch.StudioDispatcher;
-import com.citi.put.checks.studio.scheduling.StudioScheduleDtos;
-import com.citi.put.checks.studio.scheduling.StudioScheduleService;
-import com.citi.put.checks.studio.scheduling.StudioScheduledTarget;
-import com.citi.put.checks.studio.scheduling.StudioSchedulingProperties;
+import com.citi.put.checks.studio.dispatch.StudioReferenceResolver;
 import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
@@ -26,20 +23,17 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BooleanSupplier;
-import net.javacrumbs.shedlock.core.LockConfiguration;
-import net.javacrumbs.shedlock.core.LockProvider;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.WebApplicationType;
-import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -58,7 +52,8 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
- * Actual common coordinator, registered check executors and durable Studio admission on private PG.
+ * Actual common coordinator, registered check executors and a UI test's shared schedule admitted
+ * through the durable Studio pipeline, on a private PG.
  */
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
@@ -69,9 +64,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
       "checks.scheduling.initial-delay-ms=#{5 * 60 * 1000}",
       "checks.sources.SPLUNK=true",
       "checks.sources.GRAFANA=false",
-      "studio.scheduling.enabled=true",
-      "studio.scheduling.local-grants-enabled=true",
-      "studio.scheduling.poll-interval-ms=#{'PT5S'}",
       "studio.execution.dispatcher.enabled=false",
       "management.server.port=0"
     })
@@ -148,45 +140,61 @@ class SharedSchedulingIT {
     public RecordingRunnerDispatchClient sharedRunner() {
       return new RecordingRunnerDispatchClient();
     }
+
+    /** Accepts every declared reference, so only the schedule can refuse a secret-bearing slot. */
+    @Bean
+    @Primary
+    public StudioReferenceResolver acceptingResolver() {
+      return new StudioReferenceResolver() {
+        @Override
+        public void preflight(
+            String csiId,
+            String environment,
+            UUID testId,
+            String principal,
+            ReferenceDeclarations declarations) {
+          // Secret use is decided at manual start and by the Vault adapter, not by the schedule.
+        }
+
+        @Override
+        public Resolved resolve(
+            String csiId,
+            String environment,
+            UUID testId,
+            String principal,
+            ReferenceDeclarations declarations) {
+          return new Resolved(Map.of(), Map.of(), Map.of());
+        }
+      };
+    }
   }
 
   private static final String OWNER = "shared-scheduling@citi.com";
-  private static final String PRINCIPAL = "shared-studio-local";
   private static final AtomicInteger IDS = new AtomicInteger(82000);
+  private static final String SCHEDULER = "system:checks-scheduler";
   @Autowired JdbcTemplate jdbc;
   @Autowired SchedulingCoordinator coordinator;
   @Autowired CronDispatcher ordinary;
-  @Autowired StudioScheduledTarget studioTarget;
-  @Autowired StudioScheduleService studio;
-  @Autowired StudioSchedulingProperties properties;
   @Autowired StudioDispatcher dispatcher;
   @Autowired RecordingRunnerDispatchClient runner;
-  @Autowired LockProvider locks;
   @Autowired ScheduledAnnotationBeanPostProcessor scheduled;
   private String csi;
+  private StudioExecutionFixtures fixtures;
   private UUID studioTest;
-  private UUID revision;
 
   @BeforeEach
   void seed() {
     coordinator.stop();
     TICKER.set(0);
     CLOCK.value = Instant.now().plusSeconds(120);
-    properties.setEnabled(true);
-    properties.setLocalGrantsEnabled(true);
     SERVER.resetAll();
-    // ShedLock caches known row existence; deleting a row underneath that cache prevents reacquire.
-    jdbc.update(
-        "UPDATE shedlock SET lock_until=now()-interval '1 second' WHERE name='cronDispatcher'");
+    releaseLeadership();
+    jdbc.update("DELETE FROM schedules WHERE ui_test_id IS NOT NULL");
     csi = Integer.toString(IDS.incrementAndGet());
-    var fixtures = new StudioExecutionFixtures(jdbc);
+    fixtures = new StudioExecutionFixtures(jdbc);
     fixtures.seedUser(OWNER);
     fixtures.seedCsi(csi, OWNER);
-    List<String> steps = List.of("Go to the fixture page");
-    studioTest = fixtures.seedTest("Shared Studio", csi, OWNER, steps);
-    revision =
-        fixtures.confirmRevision(studioTest, csi, steps, StudioExecutionFixtures.NO_REFERENCES);
-    properties.getLocalGrants().put(csi + "|Production", PRINCIPAL);
+    studioTest = fixtures.seedRunnableTest("Shared Studio", csi, OWNER, STEPS).testId();
     SERVER.stubFor(get(urlEqualTo("/health")).willReturn(okJson("{\"status\":\"UP\"}")));
     SERVER.stubFor(
         post(urlEqualTo("/api/v1/execute"))
@@ -196,6 +204,8 @@ class SharedSchedulingIT {
                         + " query\",\"detail\":{\"actualCount\":1}}")));
     coordinator.start();
   }
+
+  private static final List<String> STEPS = List.of("Go to the fixture page");
 
   @AfterEach
   void stop() {
@@ -207,13 +217,52 @@ class SharedSchedulingIT {
     SERVER.stop();
   }
 
-  private StudioScheduleDtos.Schedule enable() {
-    var owner = StudioExecutionFixtures.identity(OWNER, csi, "owner");
-    var s =
-        studio.create(
-            studioTest, new StudioScheduleDtos.Create("* * * * *", "UTC", PRINCIPAL), owner);
-    return studio.enabled(
-        studioTest, new StudioScheduleDtos.Enabled(s.version(), true, revision, List.of()), owner);
+  /** A due, enabled shared schedule of a UI test; yearly, so one slot is the only slot. */
+  private UUID scheduleUiTest(UUID testId) {
+    UUID id = UUID.randomUUID();
+    jdbc.update(
+        """
+        INSERT INTO schedules(id, ui_test_id, check_type, frequency,
+        cron_expression, timezone, enabled, next_execution_at)
+        VALUES (?, ?, 'UI_TEST', 'custom', '0 0 0 1 1 *', 'UTC', true, ?)
+        """,
+        id,
+        testId,
+        Timestamp.from(Instant.now().minusSeconds(5)));
+    return id;
+  }
+
+  private void dueNow(UUID schedule) {
+    jdbc.update(
+        "UPDATE schedules SET next_execution_at=? WHERE id=?",
+        Timestamp.from(Instant.now().minusSeconds(5)),
+        schedule);
+  }
+
+  /**
+   * ShedLock caches known row existence, and its minimum hold would block a second pass of the same
+   * test; expiring the row in place releases the leadership without deleting it.
+   */
+  private void releaseLeadership() {
+    jdbc.update(
+        "UPDATE shedlock SET lock_until=now()-interval '1 second' WHERE name='cronDispatcher'");
+  }
+
+  private void tick() {
+    releaseLeadership();
+    TICKER.addAndGet(TimeUnit.MINUTES.toNanos(5));
+    coordinator.tick();
+  }
+
+  private int executions(UUID testId) {
+    return jdbc.queryForObject(
+        "SELECT count(*) FROM ui_test_executions WHERE ui_test_id=?", Integer.class, testId);
+  }
+
+  private Instant nextExecution(UUID schedule) {
+    return jdbc.queryForObject(
+            "SELECT next_execution_at FROM schedules WHERE id=?", Timestamp.class, schedule)
+        .toInstant();
   }
 
   private UUID check(String type, String configuration) {
@@ -261,7 +310,6 @@ class SharedSchedulingIT {
   void actualSpringBootstrapHonorsIsoAndSpelWithoutCircularReferencesAndHasOneDueTimer() {
     assertThat(ordinary.pollInterval()).isEqualTo(Duration.ofMillis(250));
     assertThat(ordinary.initialDelay()).isEqualTo(Duration.ofMinutes(5));
-    assertThat(studioTarget.pollInterval()).isEqualTo(Duration.ofSeconds(5));
     assertThat(coordinator.heartbeatMillis()).isEqualTo(250);
     var due =
         scheduled.getScheduledTasks().stream()
@@ -277,7 +325,8 @@ class SharedSchedulingIT {
   }
 
   @Test
-  void sameCoordinatorRunsHttpTcpSplunkAndStudioThroughTheirExistingPipelines() throws Exception {
+  void sameCoordinatorRunsHttpTcpSplunkAndTheUiTestThroughTheirExistingPipelines()
+      throws Exception {
     UUID http = http();
     UUID tcp =
         check(
@@ -291,18 +340,10 @@ class SharedSchedulingIT {
             "{\"type\":\"SPLUNK\",\"query\":\"index=fixture | stats"
                 + " count\",\"expectedCount\":0,\"countOperator\":\">\"}");
     UUID disabled = check("GRAFANA", "{\"type\":\"GRAFANA\"}");
-    var s = enable();
-    CLOCK.value = s.nextDueAt();
-    TICKER.set(TimeUnit.MINUTES.toNanos(5));
-    coordinator.tick();
+    UUID schedule = scheduleUiTest(studioTest);
+    tick();
     eventually(() -> results(http) == 1 && results(tcp) == 1 && results(splunk) == 1);
-    eventually(
-        () ->
-            studio
-                    .occurrences(
-                        studioTest, 0, 20, StudioExecutionFixtures.identity(OWNER, csi, "owner"))
-                    .totalElements()
-                == 1);
+    eventually(() -> executions(studioTest) == 1);
     for (UUID id : List.of(http, tcp, splunk)) {
       assertThat(
               jdbc.queryForObject(
@@ -311,25 +352,31 @@ class SharedSchedulingIT {
     }
     assertThat(results(disabled)).isZero();
     SERVER.verify(1, postRequestedFor(urlEqualTo("/api/v1/execute")));
-    var occurrence =
-        studio
-            .occurrences(studioTest, 0, 20, StudioExecutionFixtures.identity(OWNER, csi, "owner"))
-            .data()
-            .get(0);
-    assertThat(occurrence.decision()).isEqualTo("ACCEPTED");
+
+    var run =
+        jdbc.queryForMap(
+            "SELECT id, trigger_source, principal, schedule_id, scheduled_at, status"
+                + " FROM ui_test_executions WHERE ui_test_id=?",
+            studioTest);
+    assertThat(run)
+        .containsEntry("trigger_source", "SCHEDULED")
+        .containsEntry("principal", SCHEDULER)
+        .containsEntry("schedule_id", schedule)
+        .containsEntry("status", "PENDING");
+    assertThat(run.get("scheduled_at")).isNotNull();
+    UUID executionId = (UUID) run.get("id");
+    assertThat(nextExecution(schedule)).isAfter(Instant.now().plusSeconds(3600));
+
     runner.willAnswer(DispatchOutcome.ambiguous("fixture lost admission reply"));
-    assertThat(dispatcher.dispatch(occurrence.executionId())).isTrue();
-    assertThat(dispatcher.dispatch(occurrence.executionId())).isFalse();
-    assertThat(
-            runner.sent().stream()
-                .filter(job -> job.executionId().equals(occurrence.executionId()))
-                .count())
+    assertThat(dispatcher.dispatch(executionId)).isTrue();
+    assertThat(dispatcher.dispatch(executionId)).isFalse();
+    assertThat(runner.sent().stream().filter(job -> job.executionId().equals(executionId)).count())
         .isEqualTo(1);
     assertThat(
             jdbc.queryForObject(
                 "SELECT state FROM studio_dispatch_ledger WHERE execution_id=?",
                 String.class,
-                occurrence.executionId()))
+                executionId))
         .isEqualTo("DISPATCHING");
     assertThat(
             jdbc.queryForObject(
@@ -343,95 +390,83 @@ class SharedSchedulingIT {
   }
 
   @Test
-  void ordinaryLeadershipLockCannotSuppressStudioAndStudioFlagCannotSuppressChecks()
-      throws Exception {
-    UUID http = http();
-    var s = enable();
-    var lock =
-        locks
-            .lock(
-                new LockConfiguration(
-                    Instant.now(), "cronDispatcher", Duration.ofMinutes(2), Duration.ZERO))
-            .orElseThrow();
-    try {
-      CLOCK.value = s.nextDueAt();
-      TICKER.set(TimeUnit.MINUTES.toNanos(5));
-      coordinator.tick();
-      eventually(
-          () ->
-              studio
-                      .occurrences(
-                          studioTest, 0, 20, StudioExecutionFixtures.identity(OWNER, csi, "owner"))
-                      .totalElements()
-                  == 1);
-      assertThat(results(http)).isZero();
-    } finally {
-      lock.unlock();
-    }
-    properties.setEnabled(false);
-    TICKER.addAndGet(TimeUnit.SECONDS.toNanos(10));
-    coordinator.tick();
-    eventually(() -> results(http) >= 1);
+  void aTestThatDeclaresSecretsRunsOnSchedule() throws Exception {
+    UUID withSecrets = fixtures.seedTest("Scheduled secret login", csi, OWNER, STEPS);
+    fixtures.confirmRevision(
+        withSecrets,
+        csi,
+        STEPS,
+        StudioExecutionFixtures.references(List.of(), List.of("LOGIN_PW")));
+    UUID schedule = scheduleUiTest(withSecrets);
+    tick();
+    eventually(() -> executions(withSecrets) == 1);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT principal FROM ui_test_executions WHERE ui_test_id=?",
+                String.class,
+                withSecrets))
+        .isEqualTo(SCHEDULER);
+    assertThat(nextExecution(schedule)).isAfter(Instant.now().plusSeconds(3600));
   }
 
   @Test
-  void studioOnlyReplicaRunsWhenCatalogFlagIsOffAndDeduplicatesAgainstAnotherCoordinator()
-      throws Exception {
-    var s = enable();
-    CLOCK.value = s.nextDueAt();
-    try (var replica =
-        new SpringApplicationBuilder(ChecksApplication.class, FixtureConfiguration.class)
-            .web(WebApplicationType.SERVLET)
-            .run(
-                withObservedReplay(
-                    "--spring.profiles.active=test,worker",
-                    "--server.port=0",
-                    "--management.server.port=0",
-                    "--spring.datasource.url=" + DATABASE.getJdbcUrl(),
-                    "--spring.datasource.username=" + DATABASE.getUsername(),
-                    "--spring.datasource.password=" + DATABASE.getPassword(),
-                    "--spring.datasource.driver-class-name=org.postgresql.Driver",
-                    "--spring.flyway.enabled=false",
-                    "--checks.scheduling.dispatcher-enabled=false",
-                    "--checks.scheduling.retry-enabled=false",
-                    "--checks.dc.base-url=" + SERVER.baseUrl(),
-                    "--studio.scheduling.enabled=true",
-                    "--studio.scheduling.local-grants-enabled=true",
-                    "--studio.scheduling.poll-interval-ms=PT5S",
-                    "--studio.execution.dispatcher.enabled=false",
-                    "--studio.scheduling.local-grants[" + csi + "|Production]=" + PRINCIPAL))) {
-      assertThat(replica.getBeansOfType(CronDispatcher.class)).isEmpty();
-      var second = replica.getBean(SchedulingCoordinator.class);
-      assertThat(second.isRunning()).isTrue();
-      TICKER.addAndGet(TimeUnit.MINUTES.toNanos(5));
-      coordinator.tick();
-      second.tick();
-      eventually(
-          () ->
-              studio
-                      .occurrences(
-                          studioTest, 0, 20, StudioExecutionFixtures.identity(OWNER, csi, "owner"))
-                      .totalElements()
-                  == 1);
-      assertThat(
-              jdbc.queryForObject(
-                  "SELECT count(*) FROM studio_dispatch_ledger WHERE test_id=?",
-                  Integer.class,
-                  studioTest))
-          .isEqualTo(1);
-    }
+  void aSlotOnATestThatIsNotReadyIsSpentWithoutARun() throws Exception {
+    UUID unlearned = fixtures.seedTest("Never learned", csi, OWNER, STEPS);
+    UUID schedule = scheduleUiTest(unlearned);
+    tick();
+    eventually(() -> nextExecution(schedule).isAfter(Instant.now().plusSeconds(3600)));
+    assertThat(executions(unlearned)).isZero();
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM studio_dispatch_ledger WHERE test_id=?",
+                Integer.class,
+                unlearned))
+        .isZero();
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM failed_dispatches WHERE reference_id=?",
+                Integer.class,
+                unlearned))
+        .isZero();
   }
 
-  /**
-   * STUDIO-OBS-012A R1: the replica gets the same trusted observed-replay configuration as this
-   * class's own context ({@link ObservedPublicationFixture#register}). Without it the replica's
-   * readiness cannot verify the learned revision, so which coordinator wins the occurrence would
-   * decide its refusal code.
-   */
-  private static String[] withObservedReplay(String... args) {
-    List<String> all = new java.util.ArrayList<>(List.of(args));
-    all.addAll(ObservedPublicationFixture.commandLineProperties());
-    return all.toArray(String[]::new);
+  @Test
+  void aSlotWhileTheSameTestIsStillRunningIsSpentAndTheNextSlotIsNotBlocked() throws Exception {
+    UUID schedule = scheduleUiTest(studioTest);
+    tick();
+    eventually(() -> executions(studioTest) == 1);
+    eventually(() -> nextExecution(schedule).isAfter(Instant.now().plusSeconds(3600)));
+
+    dueNow(schedule);
+    tick();
+    eventually(() -> nextExecution(schedule).isAfter(Instant.now().plusSeconds(3600)));
+    assertThat(executions(studioTest)).isEqualTo(1);
+
+    jdbc.update("UPDATE studio_dispatch_ledger SET state='DONE' WHERE test_id=?", studioTest);
+    dueNow(schedule);
+    tick();
+    eventually(() -> executions(studioTest) == 2);
+  }
+
+  @Test
+  void aSlotRefusedForAFullStudioQuotaIsPutBackNotSpent() throws Exception {
+    UUID other = fixtures.seedTest("Fills the quota", csi, OWNER, STEPS);
+    for (int i = 0; i < 20; i++) {
+      fixtures.unboundExecution(other, csi, "someone@citi.com", "Production", "PENDING");
+    }
+    UUID schedule = scheduleUiTest(studioTest);
+    tick();
+    eventually(
+        () ->
+            nextExecution(schedule).isAfter(Instant.now())
+                && nextExecution(schedule).isBefore(Instant.now().plusSeconds(60)));
+    assertThat(executions(studioTest)).isZero();
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM failed_dispatches WHERE reference_id=?",
+                Integer.class,
+                studioTest))
+        .isZero();
   }
 
   private static void eventually(BooleanSupplier ready) throws Exception {

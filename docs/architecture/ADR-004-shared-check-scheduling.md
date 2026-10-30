@@ -15,3 +15,11 @@ The coordinator remains available independently of the ordinary dispatcher flag.
 Public APIs, DTOs, source artifact/runner contracts and storage are unchanged. No catalog row is fabricated for a saved Studio test. The neutral core imports no Studio classes; adapters depend on the shared scheduling port and retain domain-owned transaction and execution safety. [Compatibility evidence](../stories/STUDIO-SCHED-002/) must cover mixed HTTP/TCP/Splunk/Studio dispatch, flags, roles, locks, failure isolation, cadence, recurrence and existing runner/recovery behavior.
 
 Production identity, live grant/policy attribution, capacity/pilot and restore/retention release gates from ADR-003 remain open. Sharing infrastructure does not certify those integrations.
+
+## Amendment (STUDIO-GOV-001.2, 2026-10-24): one target
+
+Studio no longer contributes a scheduling target. `StudioScheduledTarget`, `StudioScheduleProcessor`, the `studio_schedule*` tables and the eight Studio schedule operations are removed ([ADR-003](ADR-003-studio-test-scheduling.md) is superseded). A UI test owns a row of the shared `schedules` table (`ui_test_id`, exactly one of `check_id` / `ui_test_id`, at most one schedule per test, no shadow `checks` row), so `CronDispatcher` is the only due-production target and `SchedulingCoordinator` drives that one target; the coordinator and `ScheduledTarget` port stay generic.
+
+`CronDispatcher.dispatchSingle` branches on `ui_test_id`: it advances `next_execution_at` and calls the neutral `ScheduledUiTestLauncher` port in the same transaction. The Studio implementation calls the existing scheduled acceptance, so admission, quotas, the ledger, dispatch, callbacks and recovery stay Studio-owned and the neutral core still imports no Studio execution class beyond the test's CSI lookup. UI test slots use the Studio quota rather than executor permits and never use ordinary retry or `failed_dispatches`. Scheduled runs execute as the constant principal `system:checks-scheduler`.
+
+`CronRecurrence` keeps only the catalog and report policies: the Studio minute-grammar format, IANA-only zone policy and earlier-offset overlap policy are removed. "Studio explicitly selects ..." and the Studio target's role and flag conditions above no longer apply.

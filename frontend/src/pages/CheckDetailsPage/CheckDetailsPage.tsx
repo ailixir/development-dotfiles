@@ -34,8 +34,8 @@ import { useAppDispatch, useAppSelector } from '@/store';
 import { fetchCheckById, executeCheck } from '@/store/slices/checksSlice';
 import { checksApi } from '@/services/api/checksApi';
 import type { ExecutionResult } from '@/types/checks/checkTypes';
-import ScheduleDialog from '@components/scheduling/ScheduleDialog';
-import { formatNextCronRun, parseCron } from '@/utils/cronNextRun';
+import ScheduleDialog, { type ScheduleTarget } from '@components/scheduling/ScheduleDialog';
+import ScheduleOverview from '@components/scheduling/ScheduleOverview';
 
 const TERMINAL_SX = {
   p: 2,
@@ -88,6 +88,10 @@ const CheckDetailsPage: React.FC = () => {
 
   const { data: checks, loading, executingChecks, executionResults } = useAppSelector((s) => s.checks);
   const check = useMemo(() => checks.find((c) => c.id === id), [checks, id]);
+  const scheduleTarget = useMemo<ScheduleTarget | null>(
+    () => (check ? { kind: 'check', id: check.id, name: check.name, schedule: check.schedule } : null),
+    [check],
+  );
   const isExecuting = !!(id && executingChecks.includes(id));
   const lastExec = id ? executionResults[id] : undefined;
 
@@ -253,9 +257,7 @@ const CheckDetailsPage: React.FC = () => {
                     </Grid>
                     <Grid item xs={12} sm={6} key="overview-schedule">
                       <Stack spacing={1}>
-                        <Typography variant="body2">Schedule: {check.schedule?.enabled ? (check.schedule?.frequency ? check.schedule.frequency.charAt(0).toUpperCase() + check.schedule.frequency.slice(1) : '—') : 'Disabled'}</Typography>
-                        {check.schedule?.cron && <Typography variant="body2">Cron: {check.schedule.cron}</Typography>}
-                        <Typography variant="body2">Next run: {check.nextExecution ? new Date(check.nextExecution).toLocaleString() : (check.schedule?.cron && parseCron(check.schedule.cron) ? formatNextCronRun(check.schedule.cron) : '—')}</Typography>
+                        <ScheduleOverview schedule={check.schedule} nextExecution={check.nextExecution} />
                         <Typography variant="body2">Owner: {check.createdBy || '—'}</Typography>
                       </Stack>
                     </Grid>
@@ -383,7 +385,14 @@ const CheckDetailsPage: React.FC = () => {
         </Box>
       </Dialog>
 
-      <ScheduleDialog open={scheduleOpen} onClose={() => setScheduleOpen(false)} check={check || null} />
+      <ScheduleDialog
+        open={scheduleOpen}
+        onClose={() => setScheduleOpen(false)}
+        target={scheduleTarget}
+        onSaved={async () => {
+          if (id) await dispatch(fetchCheckById(id)).unwrap();
+        }}
+      />
       <Snackbar open={snack.open} autoHideDuration={3500} onClose={() => setSnack((s) => ({ ...s, open: false }))} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
         <Alert onClose={() => setSnack((s) => ({ ...s, open: false }))} severity={snack.severity} sx={{ width: '100%' }} variant="filled">
           {snack.message}

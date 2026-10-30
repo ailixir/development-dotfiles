@@ -1,5 +1,6 @@
 import EmptyState from '@/components/shared/States/EmptyState';
 import ErrorState from '@/components/shared/States/ErrorState';
+import { useLatestLearningAttempts } from '@/components/studio/guided/useLatestLearningAttempts';
 import { useUiTestAvailability } from '@/hooks/useUiTestAvailability';
 import { checksApi } from '@/services/api/checksApi';
 import { addNotification } from '@/store/slices/uiSlice';
@@ -58,13 +59,13 @@ import {
   useTheme
 } from '@mui/material';
 import { useAppDispatch, useAppSelector } from '@store/index';
-import { deleteCheck, executeCheck, fetchChecks, pauseCheck, resumeCheck } from '@store/slices/checksSlice';
+import { deleteCheck, executeCheck, fetchCheckById, fetchChecks, pauseCheck, resumeCheck } from '@store/slices/checksSlice';
 import { fetchCSIs } from '@store/slices/csiSlice';
 import { selectSources } from '@store/slices/sourcesSlice';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link as RouterLink, useNavigate, useSearchParams } from 'react-router-dom';
 // Visual skeleton: scope is now shown globally in ScopeBar; this page gets a left FiltersRail
-import ScheduleDialog from '@components/scheduling/ScheduleDialog';
+import ScheduleDialog, { type ScheduleTarget } from '@components/scheduling/ScheduleDialog';
 import {
   UI_TEST_TYPE,
   buildCatalogRows,
@@ -222,6 +223,11 @@ const AllChecksPage: React.FC = () => {
   }, [dispatch, uiTestsOn, csiLoadState]);
 
   // Filter and search logic (check rows only: scope, tags and search)
+  const scheduleTarget = useMemo<ScheduleTarget | null>(() => {
+    const check = selectedCheck ? checks?.find((c) => c.id === selectedCheck) : undefined;
+    return check ? { kind: 'check', id: check.id, name: check.name, schedule: check.schedule } : null;
+  }, [checks, selectedCheck]);
+
   const filteredChecks = useMemo(() => {
     let result = checks || [];
     
@@ -291,6 +297,18 @@ const AllChecksPage: React.FC = () => {
     const startIndex = page * rowsPerPage;
     return filteredRows.slice(startIndex, startIndex + rowsPerPage);
   }, [filteredRows, page, rowsPerPage]);
+
+  // The failed-learn line (AC-04): one read per rendered page, for the visible UI test rows that are
+  // UNLEARNED or NEEDS_RELEARN only. No such row means no request, and a row never reads for itself.
+  const learningAttemptIds = useMemo(
+    () =>
+      paginatedRows
+        .filter(isUiCatalogRow)
+        .filter(({ test }) => test.readiness === 'UNLEARNED' || test.readiness === 'NEEDS_RELEARN')
+        .map(({ test }) => test.id),
+    [paginatedRows]
+  );
+  const { byTestId: latestAttempts } = useLatestLearningAttempts(learningAttemptIds);
 
   // Selection and bulk actions take check ids only; a UI test id never reaches them (FR-17).
   const visibleCheckIds = checkRowIds(paginatedRows);
@@ -482,7 +500,7 @@ const AllChecksPage: React.FC = () => {
       <Card elevation={0} sx={{ border: `1px solid ${theme.palette.divider}`, mb: 3 }}>
         <CardContent>
           <Grid container spacing={1} alignItems="center">
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={5}>
               <TextField
                 fullWidth
                 placeholder="Search checks..."
@@ -535,11 +553,12 @@ const AllChecksPage: React.FC = () => {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} md={2}>
+            <Grid item xs={12} md={3}>
               <Stack direction="row" spacing={1} justifyContent="flex-end">
                 <Button
                   variant="outlined"
                   startIcon={<FilterList />}
+                  sx={{ whiteSpace: 'nowrap' }}
                   onClick={() => {
                     setSearchQuery('');
                     setStatusFilter('');
@@ -571,12 +590,9 @@ const AllChecksPage: React.FC = () => {
       )}
 
       <Grid container spacing={3}>
-        <Grid item xs={12} md={3} lg={3}>
-          <FiltersRail />
-        </Grid>
-        <Grid item xs={12} md={9} lg={9}>
-          {/* Results Summary */}
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        {/* Results Summary: above both columns, so the filters rail and the table start on one line. */}
+        <Grid item xs={12}>
+          <Typography variant="body2" color="text.secondary">
             Showing {paginatedRows.length} of {filteredRows.length} checks
             {searchContext.csiId && ` (CSI: ${searchContext.csiId})`}
             {searchContext.environment && ` (Env: ${searchContext.environment})`}
@@ -584,7 +600,11 @@ const AllChecksPage: React.FC = () => {
             {selectedCSI && ' (Local CSI scope active)'}
             {selectedTags.length > 0 && ` (${selectedTags.length} local tag filters)`}
           </Typography>
-
+        </Grid>
+        <Grid item xs={12} md={3} lg={3}>
+          <FiltersRail />
+        </Grid>
+        <Grid item xs={12} md={9} lg={9}>
           {/* UI test list notices: the check rows stay when the Studio list fails or is cut */}
           {uiTestCatalog.error && <UiTestLoadFailureNotice onRetry={uiTestCatalog.retry} />}
           <UiTestCapNotice totalElements={uiTestCatalog.totalElements} />
@@ -596,7 +616,9 @@ const AllChecksPage: React.FC = () => {
         <TableContainer data-testid="all-checks-table-container">
           <Table
             size="small"
-            sx={{ '& .MuiTableCell-root:not(.MuiTableCell-paddingCheckbox)': { px: { xs: 1, sm: 2 } } }}
+            // md-lg: the table is only 570-660 px wide beside the filters rail, so cells keep 8 px side padding
+            // there; Type and Last Execution then stay on one line without a horizontal scroll.
+            sx={{ '& .MuiTableCell-root:not(.MuiTableCell-paddingCheckbox)': { px: { xs: 1, sm: 2, md: 1, xl: 2 } } }}
           >
             <TableHead>
                 <TableRow>
@@ -611,9 +633,9 @@ const AllChecksPage: React.FC = () => {
                     />
                   </TableCell>
                 <TableCell>Check Name</TableCell>
-                <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Type</TableCell>
+                <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' }, minWidth: 112 }}>Type</TableCell>
                 <TableCell>Status</TableCell>
-                <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Last Execution</TableCell>
+                <TableCell sx={{ display: { xs: 'none', md: 'table-cell' }, whiteSpace: 'nowrap' }}>Last Execution</TableCell>
                 <TableCell align="right">Actions</TableCell>
               </TableRow>
             </TableHead>
@@ -631,7 +653,7 @@ const AllChecksPage: React.FC = () => {
               )}
               {paginatedRows.map((row) => {
                 if (isUiCatalogRow(row)) {
-                  return <UiTestCatalogRow key={`ui-test-${row.test.id}`} row={row} onDeleted={() => uiTestCatalog.retry()} />;
+                  return <UiTestCatalogRow key={`ui-test-${row.test.id}`} row={row} attempt={latestAttempts.get(row.test.id)} onDeleted={() => uiTestCatalog.retry()} />;
                 }
                 const check = row.check;
                 return (
@@ -802,7 +824,10 @@ const AllChecksPage: React.FC = () => {
           setScheduleDialogOpen(false);
           setSelectedCheck(null);
         }}
-        check={selectedCheck ? checks?.find(c => c.id === selectedCheck) || null : null}
+        target={scheduleTarget}
+        onSaved={async () => {
+          if (selectedCheck) await dispatch(fetchCheckById(selectedCheck)).unwrap();
+        }}
       />
 
       {/* Snackbar for notifications */}

@@ -426,14 +426,10 @@ export interface RuntimeVersions {
  */
 export interface ExecutionSnapshot {
   /** Absent/null on historical servers or legacy runs; never infer Manual from missing provenance. */
-  triggerSource?: 'MANUAL' | 'SCHEDULED' | null;
+  triggerSource?: 'MANUAL' | 'SCHEDULED' | 'AFTER_LEARN' | null;
+  /** The shared `/api/v1/schedules` schedule that produced the run; null once that schedule is removed. */
   scheduleId?: string | null;
-  scheduleVersion?: number | null;
-  occurrenceId?: string | null;
   scheduledAt?: string | null;
-  activationId?: string | null;
-  activatedBy?: string | null;
-  activatedAt?: string | null;
   executionId: string;
   testId: string;
   /**

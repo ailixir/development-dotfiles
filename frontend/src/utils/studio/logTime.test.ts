@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ExecutionLogEntry } from '@/types/studio/studioTypes';
-import { formatLogTime, toStudioLogLines } from './logTime';
+import { displayLogMessage, formatLogTime, logEntryTime, toStudioLogLines } from './logTime';
 
 /**
  * Studio v1 gaps: the live log panel read `new Date(entry.timestamp)` off API entries that carry
@@ -42,5 +42,70 @@ describe('toStudioLogLines', () => {
       'error',
       'info',
     ]);
+  });
+});
+
+describe('displayLogMessage (AC-08: the runner counts steps from 0, the step list from 1)', () => {
+  it.each([
+    [0, 'step 0 started', 'step 1 started'],
+    [2, 'step 2 PASS', 'step 3 PASS'],
+    [4, 'step 4', 'step 5'],
+  ])('rewrites the exact prefix at step index %s', (stepIndex, message, expected) => {
+    expect(displayLogMessage({ stepIndex, message })).toBe(expected);
+  });
+
+  it.each([
+    ['a mismatching index', 1, 'step 0 started'],
+    ['a longer number sharing the prefix', 1, 'step 10 started'],
+    ['"step 0" later in the text', 0, 'retry of step 0 started'],
+    ['no stepIndex on the entry', undefined, 'step 0 started'],
+    ['a null stepIndex', null, 'step 0 started'],
+  ])('leaves a message unchanged for %s', (_label, stepIndex, message) => {
+    expect(displayLogMessage({ stepIndex, message })).toBe(message);
+  });
+});
+
+describe('logEntryTime (AC-08: the closing line borrows the run end time)', () => {
+  const ENDED = '2026-09-18T06:00:09Z';
+
+  it('gives an untimed closing line the end time, with or without a null stepIndex', () => {
+    expect(logEntryTime({ at: null, message: 'run PASSED' }, ENDED)).toBe(ENDED);
+    expect(logEntryTime({ at: null, message: 'run FAILED', stepIndex: null }, ENDED)).toBe(ENDED);
+  });
+
+  it('leaves a closing line untimed without a parseable end time', () => {
+    expect(logEntryTime({ at: null, message: 'run PASSED' })).toBeNull();
+    expect(logEntryTime({ at: null, message: 'run PASSED' }, null)).toBeNull();
+    expect(logEntryTime({ at: null, message: 'run PASSED' }, 'not-a-time')).toBeNull();
+  });
+
+  it('never changes another line: a timed line, a step line, or a line that is not a closing line', () => {
+    expect(logEntryTime({ at: '2026-09-18T06:00:01Z', message: 'run PASSED' }, ENDED)).toBe(
+      '2026-09-18T06:00:01Z',
+    );
+    expect(logEntryTime({ at: null, message: 'run PASSED', stepIndex: 0 }, ENDED)).toBeNull();
+    expect(logEntryTime({ at: null, message: 'step 0 started', stepIndex: 0 }, ENDED)).toBeNull();
+    expect(logEntryTime({ at: null, message: 'browser heartbeat' }, ENDED)).toBeNull();
+  });
+});
+
+describe('toStudioLogLines with 1-based steps and the closing time', () => {
+  const ENDED = '2026-09-18T06:00:09Z';
+  const logs: ExecutionLogEntry[] = [
+    { at: '2026-09-18T06:00:01Z', level: 'INFO', message: 'step 0 started', stepIndex: 0 },
+    { at: null, level: 'INFO', message: 'step 1 slow', stepIndex: 1 },
+    { at: null, level: 'INFO', message: 'run PASSED' },
+  ];
+
+  it('rewrites the step text, carries stepIndex, and times only the closing line', () => {
+    expect(toStudioLogLines(logs, ENDED)).toEqual([
+      { timestamp: '2026-09-18T06:00:01Z', level: 'info', message: 'step 1 started', stepIndex: 0 },
+      { timestamp: '', level: 'info', message: 'step 2 slow', stepIndex: 1 },
+      { timestamp: ENDED, level: 'info', message: 'run PASSED' },
+    ]);
+  });
+
+  it('behaves as before for a one-argument call: the closing line stays untimed', () => {
+    expect(toStudioLogLines(logs)[2]).toEqual({ timestamp: '', level: 'info', message: 'run PASSED' });
   });
 });

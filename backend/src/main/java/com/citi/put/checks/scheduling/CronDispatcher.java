@@ -66,6 +66,7 @@ public class CronDispatcher implements SmartLifecycle, ScheduledTarget {
   private final AtomicInteger dueGauge = new AtomicInteger(0);
   private volatile boolean running = true;
   private CronRecurrence recurrence = new CronRecurrence();
+  private ScheduledUiTestLauncher uiTestLauncher;
 
   @Value("${checks.scheduling.poll-interval-ms:10000}")
   private String pollIntervalMs = "10000";
@@ -76,6 +77,11 @@ public class CronDispatcher implements SmartLifecycle, ScheduledTarget {
   @Autowired
   public void initializeRecurrence(CronRecurrence value) {
     recurrence = value;
+  }
+
+  @Autowired(required = false)
+  public void initializeUiTestLauncher(ScheduledUiTestLauncher value) {
+    uiTestLauncher = value;
   }
 
   @Override
@@ -196,7 +202,13 @@ public class CronDispatcher implements SmartLifecycle, ScheduledTarget {
         if (!sourceProperties.isEnabled(type)) {
           continue;
         }
-        int typeAvailable = typeBudgets.getOrDefault(type, 0);
+        // A UI test has no check executor and so no permits: its capacity is the Studio quota,
+        // enforced when the launcher admits the run.
+        if (type == CheckType.UI_TEST && uiTestLauncher == null) {
+          continue;
+        }
+        int typeAvailable =
+            type == CheckType.UI_TEST ? Integer.MAX_VALUE : typeBudgets.getOrDefault(type, 0);
         int remaining = Math.min(typeAvailable, globalBudget - toDispatch.size());
         if (remaining <= 0) {
           continue;
@@ -233,11 +245,19 @@ public class CronDispatcher implements SmartLifecycle, ScheduledTarget {
   private void dispatchSingle(Schedule schedule) {
     String traceId = UUID.randomUUID().toString();
     MDC.put("scheduleId", schedule.getId().toString());
-    MDC.put("checkId", schedule.getCheckId().toString());
+    if (schedule.getUiTestId() != null) {
+      MDC.put("uiTestId", schedule.getUiTestId().toString());
+    } else {
+      MDC.put("checkId", schedule.getCheckId().toString());
+    }
     MDC.put("traceId", traceId);
 
     try {
       TransactionTemplate tx = new TransactionTemplate(txManager);
+      if (schedule.getUiTestId() != null) {
+        tx.executeWithoutResult(status -> dispatchUiTest(schedule));
+        return;
+      }
       tx.execute(
           status -> {
             Schedule managed = scheduleRepository.findById(schedule.getId()).orElse(null);
@@ -290,7 +310,41 @@ public class CronDispatcher implements SmartLifecycle, ScheduledTarget {
     } finally {
       MDC.remove("scheduleId");
       MDC.remove("checkId");
+      MDC.remove("uiTestId");
       MDC.remove("traceId");
+    }
+  }
+
+  /**
+   * One due slot of a UI test's schedule: advance the schedule and hand the slot to the launcher in
+   * the same transaction. A run is accepted, put back when the Studio quota is full, or spent
+   * without a run; none of it uses executor permits, ordinary retry or {@code failed_dispatches}.
+   */
+  private void dispatchUiTest(Schedule schedule) {
+    Schedule managed = scheduleRepository.findById(schedule.getId()).orElse(null);
+    if (managed == null) {
+      return;
+    }
+    Instant scheduledAt = managed.getNextExecutionAt();
+    advanceNextExecution(managed);
+    var result = uiTestLauncher.launch(managed.getUiTestId(), managed.getId(), scheduledAt);
+    if (result.outcome() == ScheduledUiTestLauncher.Outcome.THROTTLED) {
+      managed.setNextExecutionAt(Instant.now().plusSeconds(5));
+      managed.setUpdatedAt(Instant.now());
+    }
+    Counter.builder("checks.scheduled.ui_test_slots_total")
+        .tag("outcome", result.outcome().name())
+        .tag("code", result.code())
+        .register(meterRegistry)
+        .increment();
+    if (result.outcome() == ScheduledUiTestLauncher.Outcome.SKIPPED) {
+      LOG.warn(
+          "Skipped scheduled UI test slot uiTestId={} code={}",
+          managed.getUiTestId(),
+          result.code());
+    } else {
+      LOG.info(
+          "Scheduled UI test slot uiTestId={} outcome={}", managed.getUiTestId(), result.outcome());
     }
   }
 
@@ -368,8 +422,7 @@ public class CronDispatcher implements SmartLifecycle, ScheduledTarget {
         recurrence.next(
             schedule.getCronExpression(),
             recurrence.zone(schedule.getTimezone(), CronRecurrence.ZonePolicy.ANY_ZONE_ID),
-            base,
-            CronRecurrence.Overlap.INSTANT_SEQUENCE);
+            base);
     schedule.setNextExecutionAt(next != null ? next.scheduledAt() : null);
   }
 

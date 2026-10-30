@@ -16,17 +16,25 @@ public interface ScheduleRepository extends JpaRepository<Schedule, UUID> {
 
   Optional<Schedule> findByCheckId(UUID checkId);
 
+  Optional<Schedule> findByUiTestId(UUID uiTestId);
+
+  /** The CSI of a visible UI test; empty when it is absent, deleted or quarantined. */
+  @Query("SELECT t.csiId FROM UITest t WHERE t.id = :id AND t.csiId IS NOT NULL")
+  Optional<String> findUiTestCsiId(@Param("id") UUID id);
+
   Page<Schedule> findAllByEnabled(boolean enabled, Pageable pageable);
 
   @Query(
       """
       SELECT s FROM Schedule s
       WHERE (:checkId IS NULL OR s.checkId = :checkId)
+        AND (:uiTestId IS NULL OR s.uiTestId = :uiTestId)
         AND (:enabled IS NULL OR s.enabled = :enabled)
         AND (:timezone IS NULL OR s.timezone = :timezone)
       """)
   Page<Schedule> findAllFiltered(
       @Param("checkId") UUID checkId,
+      @Param("uiTestId") UUID uiTestId,
       @Param("enabled") Boolean enabled,
       @Param("timezone") String timezone,
       Pageable pageable);
@@ -34,15 +42,19 @@ public interface ScheduleRepository extends JpaRepository<Schedule, UUID> {
   @Query(
       """
       SELECT s FROM Schedule s
-      JOIN com.citi.put.checks.checks.entity.Check c ON c.id = s.checkId
-      WHERE c.csiId IN :ownedCsiIds
+      WHERE (s.checkId IN (
+                SELECT c.id FROM com.citi.put.checks.checks.entity.Check c
+                WHERE c.csiId IN :ownedCsiIds)
+             OR s.uiTestId IN (SELECT t.id FROM UITest t WHERE t.csiId IN :ownedCsiIds))
         AND (:checkId IS NULL OR s.checkId = :checkId)
+        AND (:uiTestId IS NULL OR s.uiTestId = :uiTestId)
         AND (:enabled IS NULL OR s.enabled = :enabled)
         AND (:timezone IS NULL OR s.timezone = :timezone)
       """)
   Page<Schedule> findAllVisibleToFiltered(
       @Param("ownedCsiIds") Collection<String> ownedCsiIds,
       @Param("checkId") UUID checkId,
+      @Param("uiTestId") UUID uiTestId,
       @Param("enabled") Boolean enabled,
       @Param("timezone") String timezone,
       Pageable pageable);

@@ -25,7 +25,7 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { getResponse, type RequestHandler } from 'msw';
-import { resetStudioMocks, studioHandlers } from '@services/mocks/studio/handlers';
+import { resetStudioMocks, scheduleHandlers, studioHandlers } from '@services/mocks/studio/handlers';
 import { setGuidedScenario } from '@services/mocks/studio/guidedHandlers';
 import { learnWithQuestion, loginRequired } from '@services/mocks/studio/guidedFixtures';
 import { previewBootstrapHandlers } from './previewBootstrapHandlers';
@@ -60,20 +60,20 @@ interface Scenario {
 
 /** Scenario name to what answers while it is selected. Later lanes add entries here. */
 const scenarios: Record<string, Scenario> = {
-  default: { handlers: studioHandlers as RequestHandler[] },
+  default: { handlers: [...studioHandlers, ...scheduleHandlers] as RequestHandler[] },
   /** A full learn that asks one focused question at step index 1, with page-derived choice labels. */
   'guided-clarification-page': {
-    handlers: studioHandlers as RequestHandler[],
+    handlers: [...studioHandlers, ...scheduleHandlers] as RequestHandler[],
     apply: () => setGuidedScenario(learnWithQuestion('PAGE_CHOICE', 1)),
   },
   /** The first Run fails LOGIN_REQUIRED and the draft has no login steps. */
   'guided-login-required-no-login-steps': {
-    handlers: studioHandlers as RequestHandler[],
+    handlers: [...studioHandlers, ...scheduleHandlers] as RequestHandler[],
     apply: () => setGuidedScenario(loginRequired(false)),
   },
   /** The first Run fails LOGIN_REQUIRED although the draft has login steps. */
   'guided-login-required-login-steps-failed': {
-    handlers: studioHandlers as RequestHandler[],
+    handlers: [...studioHandlers, ...scheduleHandlers] as RequestHandler[],
     apply: () => setGuidedScenario(loginRequired(true)),
   },
 };
