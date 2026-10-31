@@ -32,18 +32,10 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 256
-          },
-          "argumentSlot": {
-            "enum": [
-              "fill.value",
-              "selectOption.value",
-              "assert.expected"
-            ]
           }
         },
         "required": [
-          "stepId",
-          "argumentSlot"
+          "stepId"
         ]
       }
     }

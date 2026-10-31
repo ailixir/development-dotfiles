@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | **Accepted by orchestrator ruling** (2026-10-27), recorded by @architect. This is a judgment on **screening evidence**, not ADR-SC-005 D-C evidence, and it is not a user decision. Adoption is confirmed or reversed by the release gate below; ADR-SC-005 D-C still applies in full |
+| Status | **Superseded in part by [ADR-SC-008](ADR-SC-008-generated-step-code.md) (2026-10-29)**: D2, D3, D4, D7 item 2, the Verification line on D4 and the release-gate state string are superseded; D1, D5 (kept modules), D6, D7 item 4, D8 and the 2026-10-28 implementation amendments for perception and privacy stand. Original status follows. **Accepted by orchestrator ruling** (2026-10-27), recorded by @architect. This is a judgment on **screening evidence**, not ADR-SC-005 D-C evidence, and it is not a user decision. Adoption is confirmed or reversed by the release gate below; ADR-SC-005 D-C still applies in full |
 | Date | 2026-10-27 |
 | Scope | How a guided session observes a live page, how the model names a target, which gates admit the reply, and how the locator is frozen and replayed. Runner `studio-runner/src/{run,guided,executor,validator}`, backend `com.citi.put.checks.studio.guided.{translation,publication,session}`, `docs/specs/studio-observed-authoring/contracts/v3`, frontend only for failure copy |
 | Amends | [ADR-SC-004](ADR-SC-004-observed-authoring.md) (Decision ¶2: "binds one unique current node to the proposed durable locator"); [ADR-SC-005](ADR-SC-005-single-path-observed-authoring.md) (D-A observation shape and "bounded DOM neighbourhood"; the P1 `targetIntent` grounding control). Details under "Amends" |
@@ -32,9 +32,13 @@ Adopt **S3** in production: the model names a ref in a sanitized Playwright AI-s
 
 ### D2 — Reply contract: `{kind:'node', ref}` plus an operation
 
+> **Note 2026-10-29 (append-only): superseded by [ADR-SC-008](ADR-SC-008-generated-step-code.md) D1 and D4.** The reply is now step code or a clarification, not a ref plus an operation. "The model never writes a selector, locator or role expression" no longer holds: the model writes Playwright locators directly. `CLARIFICATION` with ref choices stays.
+
 NEXT_ACTION targets become `{kind:'page'}`, `{kind:'node', ref}` or `{kind:'passwordControl'}`. The model never writes a selector, locator or role expression. CLARIFICATION choice `meaning` becomes `{obligationId, ref, bindingId}`. A ref is valid only for the observation generation that produced it; an unknown or stale ref is refused with the existing `STALE_GENERATION`/`INVALID_CONTRACT` codes. The runner converts a chosen clarification ref into the same synthesized locator before the clarification is stored, so a later answer is re-established against a fresh outline through the existing `selectedLocator` rule.
 
 ### D3 — Gates, one owner each
+
+> **Note 2026-10-29 (append-only): superseded by [ADR-SC-008](ADR-SC-008-generated-step-code.md) D1 and Deferred item 5.** The action gate, intent gate, operation-vs-role gate, G1, G2 and `GuidedActionGuard` leave admission, because each reads a ref-bound target or a typed operation. Admission is a syntax check plus hash checks. Playwright's actionability checks, the model-free proof and the prompt rules protecting N1 to N3 take over.
 
 Every reply passes all gates before dispatch. The runner exports, with each observation, a **per-ref facts table** (`role`, `editable`, `evidence` of at most 256 characters, and `text` of at most 256 characters for assertable roles, absent when withheld), computed once from the already-sanitized nodes. The backend never re-derives them from the outline text, so there is one implementation of `evidenceFor`.
 
@@ -52,6 +56,8 @@ Every reply passes all gates before dispatch. The runner exports, with each obse
 - **Gate parity.** The Java gates are ports of the pure functions in `lib/arms/S3.mjs` (`intentGate`, `operationTargetGate`, `actionGate`) and of G1/G2 from the `regate-v3` analysis. WI-2/WI-3 commit golden verdict vectors extracted from the recorded S3 replies; the ports must reproduce them with zero differences.
 
 ### D4 — Locator synthesis, freeze, replay
+
+> **Note 2026-10-29 (append-only): superseded by [ADR-SC-008](ADR-SC-008-generated-step-code.md) D1, D2 and D4.** The closed grammar, tiers, public-API builder, `Guard` locator and identity check are deleted. The frozen unit is the step-code record (`sourceHash`, `stepHash`), and Playwright strictness (exactly one element before the effect) replaces the same-element check.
 
 - The runner synthesizes the locator from a **closed grammar** (JSON, at most 8 steps): `testId`, `role`, `label`, `placeholder`, `text`, `scope`, `tag`, `filterHas`, `attr` (whitelisted attributes), `nth` (last step only). Production narrows the spike's grammar to **`exact: true` only**; no case-insensitive or substring step exists. Candidate order is tier-ranked (testId, role, label, placeholder, text, scoped, filterHas, attribute, nth). The engine-generated selector tier is **not** accepted (`LOCATOR_GENERATED_ONLY` stays a non-executable result).
 - Verification is by Playwright's own engine: the candidate must resolve to **exactly one element and the same element** as the ref. The same locator is executed at learn time and re-resolved at replay; learning and replay share one resolver and one executor (`publication-contracts.md:256`). Learn-time actions run through the locator (Playwright locator actions), not through the in-page `invoke`; the password-control path (`passwordControl`, Vault resolution at dispatch) is unchanged.
@@ -85,6 +91,8 @@ The runner's own resolver and the emptying budget are deleted, with no flag, kil
 | 1. The S3 intent gate is weaker than today's equality gate | **Accept the word-subset gate**, under four conditions: (a) evidence is only the picked element's own fields listed in D3, never page-wide text or sibling controls outside those sets; (b) the 256-character cap holds; (c) `GuidedActionGuard` stays a separate gate; (d) every action's audit record carries which path passed (exact name or subset) and which evidence field supplied the words | Equality is part of why A1's product-admitted rate is low (11.3% against 44.3% correct), but that gap mixes several Java refusals and the share due to the intent check was not isolated. Hostile and injection cells all passed for S3 (16 of 20 hostile, the 4 not passed are incomplete S1 and S4 cells; 15 of 15 injected). A page can still place authored words in a `near`/`in` label next to a different control: this residual is accepted for the pilot and is what D-C's zero-false-pass gate and OBS-014's first-run side-effect policy measure |
 | 2. Positional and non-exact locators vs the uniqueness guard | **Non-exact is removed** (grammar is exact-only). **`nth` stays as the last-resort tier**, with the `identity` check at replay for `nth`, `attribute` and `filterHas` | Short-term durability shows 119 positional S3 locators OK and 0 wrong-unique. That is same-day evidence only; next-day was not run, so the identity check stays. The user removed the next-day release requirement on 2026-10-28; no next-day durability claim is made. If any gate run shows a wrong-unique result, the offending tier is deleted from the grammar (no flag) |
 | 4. More trusted code in the isolated world | **Accept**, bounded: Playwright 1.63.0 exactly; `playwright-core/lib/coreBundle.js` sha256 pinned (`549070af…9171`); mismatch is `ENGINE_PIN_MISMATCH` with no fallback; the injected-script string is parsed without `eval`/`new Function` (`no-dynamic-evaluation.test.ts` stays green unmodified); it runs only in the runner's isolated world and never exposes a page-reachable surface; a Playwright upgrade re-runs the conformance test (engine vs public API) before the pin moves | This is fixed vendor code, not arbitrary evaluation, but it is a private API: the injected script and the `aria-ref=` selector engine are not in the public types (`ariaSnapshot`/`ariaSnapshotJSON` with `mode:'ai'` are public in 1.63). The spike validated the private path, so production uses the private path. Moving to the public snapshot API plus public ref resolution needs its own measurement and is not part of this decision |
+
+> **Note 2026-10-29 (append-only): D7 item 2 is superseded by [ADR-SC-008](ADR-SC-008-generated-step-code.md) D1.** Positional tiers (`nth`, `attribute`, `filterHas`) and the replay `identity` check no longer exist, because the grammar is deleted. Item 1's intent gate is likewise obsolete. Item 4 (the pinned private engine for perception) stands.
 
 ### D8 — Contracts change in place, v3
 
@@ -263,6 +271,8 @@ The five original work items have recorded owner fixes and the authorized WI-6 f
 
 ## Release gate
 
+> **Note 2026-10-29 (append-only): restated by [ADR-SC-008](ADR-SC-008-generated-step-code.md) D1.** The state string "Completed — learned from this run" is replaced by "Confirmed" (every step has a PASSED model-free proof receipt). N1's closed code is no longer pinned to `TARGET_MISMATCH`: N1 to N3 must never publish or confirm and must dispatch nothing on a wrong element, as hard zeros protected by prompt rules. N2 ends in `ASSERTION_FAILED` or a refusal, never a pass.
+
 **User amendment (2026-10-28):** the 24-hour/next-day replay and L1 practice-site secret canary are removed from this gate. No L1 secret is required. The 14 public-site positives, proof video, two same-day model-free replays, N1–N3 controls and zero-leak scan remain required. This changes acceptance scope; it does not establish next-day durability or secret-login coverage. The user will also run manual Studio tests after the verified readiness handoff.
 
 The gate is the real-site E2E through the Studio UI on the real stack. Passing it is **necessary before STUDIO-OBS-016's D-C benchmark starts and is not a D-C pass**: D-C keeps its own 20 workflows × 3 repetitions, at least 90% completion without clarification, zero false passes and zero leaks.
@@ -320,6 +330,7 @@ The tests avoid links that download files (kernel `tarball`, IANA `CSV`), the ex
 - D1: a fixture page with 600+ nodes and 32 KB+ produces a non-empty outline of at most 40,000 bytes containing the target; no `budget` reason exists in the runner.
 - D3: the golden vectors reproduce with 0 differences in Java; one test per gate asserts its diagnostics `Gate`.
 - D4: grep of `frozen Guard` fixtures shows only grammar locators with `exact:true`; `unresolvedRole`, `matches(`, `acquire(` and `locatorHints` return 0 in `studio-runner/src`; replay uses only public Playwright methods (a lint rule or test bans `evaluate` on the replay path, as `no-dynamic-evaluation.test.ts` does today).
+  - > **Note 2026-10-29 (append-only): superseded by [ADR-SC-008](ADR-SC-008-generated-step-code.md) D1 and D3.1.** Replay no longer uses grammar locators, and generated step code may call the `evaluate` family (refused on a secret-bearing document). `no-dynamic-evaluation.test.ts` is replaced by the four D3.1 checks, which allow exactly one `AsyncFunction` file, `run/stepCode.ts`.
 - D6: canary tests for D1 and D2 pass; the 6 radio tasks plan as `check`; the alpha read checklists show 0 `MISSING_SOURCE` over 10 reps.
 - D8: `tools/check-studio-observed-contracts.cjs` passes; no `contracts/v4` directory exists.
 - Release gate: the evidence report quotes the per-test table, the control results and the scan results with denominators.

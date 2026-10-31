@@ -20,9 +20,6 @@
     "producer": {
       "$ref": "https://checks.citi.example/contracts/observed/v3/action.schema.json#/properties/coordinate"
     },
-    "recipe": {
-      "$ref": "https://checks.citi.example/contracts/observed/v3/producer.schema.json#/properties/recipe"
-    },
     "sourceOrigin": {
       "type": "string",
       "format": "uri",
@@ -76,7 +73,6 @@
     "bindingId",
     "valueType",
     "producer",
-    "recipe",
     "sourceOrigin",
     "consumers",
     "provenance",

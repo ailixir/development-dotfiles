@@ -47,14 +47,6 @@
                 "type": "string",
                 "maxLength": 4096
               },
-              "intendedSlot": {
-                "enum": [
-                  "navigate.destination",
-                  "fill.value",
-                  "selectOption.value",
-                  "assert.expected"
-                ]
-              },
               "provenance": {
                 "$ref": "https://checks.citi.example/contracts/observed/v3/source-reference.schema.json"
               }
@@ -64,7 +56,6 @@
               "sourceStepId",
               "kind",
               "value",
-              "intendedSlot",
               "provenance"
             ]
           },
@@ -90,14 +81,6 @@
                 "format": "uri",
                 "maxLength": 2048
               },
-              "intendedSlot": {
-                "enum": [
-                  "navigate.destination",
-                  "fill.value",
-                  "selectOption.value",
-                  "assert.expected"
-                ]
-              },
               "provenance": {
                 "$ref": "https://checks.citi.example/contracts/observed/v3/source-reference.schema.json"
               }
@@ -107,7 +90,6 @@
               "sourceStepId",
               "kind",
               "value",
-              "intendedSlot",
               "provenance"
             ]
           },
@@ -128,9 +110,6 @@
               "kind": {
                 "const": "secretRef"
               },
-              "intendedSlot": {
-                "const": "fill.value"
-              },
               "provenance": {
                 "$ref": "https://checks.citi.example/contracts/observed/v3/source-reference.schema.json"
               },
@@ -143,7 +122,6 @@
               "inputId",
               "sourceStepId",
               "kind",
-              "intendedSlot",
               "provenance",
               "secretId"
             ]

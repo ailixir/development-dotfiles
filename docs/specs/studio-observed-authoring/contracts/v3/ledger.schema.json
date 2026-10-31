@@ -123,12 +123,6 @@
         "CANCELLED"
       ]
     },
-    "assertionPassed": {
-      "type": [
-        "boolean",
-        "null"
-      ]
-    },
     "executionEvidence": {
       "$ref": "https://checks.citi.example/contracts/observed/v3/execution-evidence.schema.json"
     },
@@ -171,7 +165,6 @@
     "state",
     "dispatchCount",
     "outcomeCode",
-    "assertionPassed",
     "executionEvidence",
     "evidenceHash",
     "authoredInputsHash",

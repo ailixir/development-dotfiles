@@ -153,6 +153,42 @@ the five-second cooperative budget cannot cancel a stalled OS filesystem call. A
 cannot declare worker readiness while operations remain pending. The exact boundary and required
 platform proofs are in the [dated portability ruling](../../qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/architecture/portability-addendum.md).
 
+**Note 2026-10-29 (append-only): export shape of generated step code
+([ADR-SC-008](../../architecture/ADR-SC-008-generated-step-code.md), contract record
+[ADR-002](../../architecture/ADR-002-internal-contract-surface.md) §13).** Once the SC008 contract
+freeze lands, three things change in what this document describes. Items 1 to 4 of §2 are
+unchanged, and so are the sanitizer, INPUT-POLICY-01 and the rule that secret values never leave the
+runner.
+
+- **Sent to the model, new.**
+  - *Repair text.* After a failed attempt the model receives its own previous step code, the closed
+    error code, the stage, the line and column in that code, the match count and at most 256
+    characters of "received" text that passed the outline sanitizer. Playwright error messages are
+    never forwarded.
+  - *Retrieved examples.* Up to 3 step-code snippets per call, each from a step whose frozen code
+    passed a model-free proof of its revision, from the **same CSI only**. Authored literals are
+    replaced by placeholders, and a snippet is sanitized when it is stored and again when the prompt is
+    assembled. Retrieval is lexical and never runs during replay.
+  - *Playwright reference.* A static text generated from the pinned Playwright 1.63.0 type
+    definitions. It carries no tenant data.
+- **Stored, new.** The frozen step code of every step, at most 16 KiB each, with its source hash,
+  reference hash and step hash, in the learned-plan and revision rows where typed operations are
+  stored today, with the same retention as a revision. It holds no secret value (a secret is an
+  opaque handle resolved at dispatch) and no `<var NAME>` value (bound when the step runs). No public
+  route returns it in this release.
+- **Not covered by the sanitizer, accepted.** Code the model writes can read and send data through
+  console output, cookies, request bodies, Node-side `page.request`, `exposeFunction` and Playwright
+  error text (ADR-SC-008 Deferred items 10 and 11). During learning that code runs in the runner
+  server process (item 6). The domain allow-all switch stays on (item 12), so the allowed-domains list
+  restricts no navigation.
+- **Video.** Unchanged: one proof video per revision, the recording of the opener page. A page the
+  step code opens in a popup is not recorded in that video, and its recording is deleted when the run
+  closes; the step's evidence says it acted in a separate window.
+- **Condition.** The gateway owner's answer to ED-01 and compliance's confirmation of this export
+  shape are required **before production use with real CSI data** (ADR-SC-008 O-1; request draft in
+  `docs/specs/studio-generated-step-code/compliance-request.md`). They are not required for the
+  build or for the public-site gate.
+
 ### 3.5 Metering records (new in STUDIO-OBS-014)
 
 | Store | Content | Retention |

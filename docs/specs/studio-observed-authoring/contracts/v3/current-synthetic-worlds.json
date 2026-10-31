@@ -23,14 +23,10 @@
         "valueTransferPolicyId": null,
         "capabilities": [
           "observe",
-          "navigate",
-          "read",
-          "fill",
-          "click",
-          "assert"
+          "step"
         ]
       },
-      "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
+      "scopeHash": "f2aab642c4bcfc38791070de394972bdcf2998e3160bdb07184ae774745049bd",
       "configuration": {
         "browser": "chromium",
         "viewport": {
@@ -159,7 +155,7 @@
       "privateSyntheticInputEnvelopeFixtureOnly": {
         "schemaVersion": 3,
         "sessionId": "qa-control-current-01",
-        "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
+        "scopeHash": "f2aab642c4bcfc38791070de394972bdcf2998e3160bdb07184ae774745049bd",
         "sourceRevision": "1",
         "configurationRevision": "1",
         "inputs": [
@@ -167,15 +163,13 @@
             "inputId": "input-destination",
             "sourceStepId": "00000000-0000-4000-8000-000000000001",
             "kind": "destination",
-            "intendedSlot": "navigate.destination",
             "provenance": {
               "referenceKind": "sourceSpan",
               "sourceRevision": "1",
               "stepId": "00000000-0000-4000-8000-000000000001",
               "startUtf16": 5,
               "endUtf16": 38,
-              "kind": "destination",
-              "intendedSlot": "navigate.destination"
+              "kind": "destination"
             },
             "value": "https://orders.example.test/start"
           },
@@ -183,15 +177,13 @@
             "inputId": "input-label",
             "sourceStepId": "00000000-0000-4000-8000-000000000003",
             "kind": "nonsecretText",
-            "intendedSlot": "fill.value",
             "provenance": {
               "referenceKind": "sourceSpan",
               "sourceRevision": "1",
               "stepId": "00000000-0000-4000-8000-000000000003",
               "startUtf16": 10,
               "endUtf16": 24,
-              "kind": "nonsecretText",
-              "intendedSlot": "fill.value"
+              "kind": "nonsecretText"
             },
             "value": "  Café 🧪 é  "
           },
@@ -199,14 +191,12 @@
             "inputId": "input-config",
             "sourceStepId": "00000000-0000-4000-8000-000000000003",
             "kind": "nonsecretText",
-            "intendedSlot": "fill.value",
             "provenance": {
               "referenceKind": "configuration",
               "configurationRevision": "1",
               "stepId": "00000000-0000-4000-8000-000000000003",
               "referenceId": "saved-label",
-              "kind": "nonsecretText",
-              "intendedSlot": "fill.value"
+              "kind": "nonsecretText"
             },
             "value": ""
           }
@@ -217,14 +207,14 @@
           {
             "schemaVersion": 3,
             "sessionId": "qa-control-current-01",
-            "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
+            "scopeHash": "f2aab642c4bcfc38791070de394972bdcf2998e3160bdb07184ae774745049bd",
             "contextId": "qa-control-context-01",
             "contextRevision": 1,
             "workerId": "qa-control-worker-01",
             "ownerFence": 1,
             "sourceRevision": "1",
             "configurationRevision": "1",
-            "authoredInputsHash": "2d167865c5b862be4f005471a64d63b8c846298a08d606d9ea207079a487ff5d",
+            "authoredInputsHash": "05937c872c69e24b455d90195e97fba1a4ee2da035f0c936ccaff284dc0af570",
             "birthMaterializationRevision": 1,
             "inputCount": 3,
             "previousInputsHash": null
@@ -235,20 +225,18 @@
             "inputOrdinal": 0,
             "inputId": "input-destination",
             "introducedContextRevision": 1,
-            "inputHash": "d4946735c9b8a17eb6bda65f75628a373d93cd9e986cdab5e3ccf3c7d95ee9d0",
+            "inputHash": "b8c7fd9517f9a8a1ccd87cc0863a8638e03f87bf6d8fd6669c097ab2584cb4a5",
             "metadata": {
               "inputId": "input-destination",
               "sourceStepId": "00000000-0000-4000-8000-000000000001",
               "kind": "destination",
-              "intendedSlot": "navigate.destination",
               "provenance": {
                 "referenceKind": "sourceSpan",
                 "sourceRevision": "1",
                 "stepId": "00000000-0000-4000-8000-000000000001",
                 "startUtf16": 5,
                 "endUtf16": 38,
-                "kind": "destination",
-                "intendedSlot": "navigate.destination"
+                "kind": "destination"
               }
             }
           },
@@ -256,20 +244,18 @@
             "inputOrdinal": 1,
             "inputId": "input-label",
             "introducedContextRevision": 1,
-            "inputHash": "b2b1da963201e590c9cb5c0cd6d775e979d5ab6a11cbaa639788cd7e68db02f8",
+            "inputHash": "7bd7b5de2c9b1ffd186bdefdec954a2569db3469d9a9f82f60b7c0a68a4ded4b",
             "metadata": {
               "inputId": "input-label",
               "sourceStepId": "00000000-0000-4000-8000-000000000003",
               "kind": "nonsecretText",
-              "intendedSlot": "fill.value",
               "provenance": {
                 "referenceKind": "sourceSpan",
                 "sourceRevision": "1",
                 "stepId": "00000000-0000-4000-8000-000000000003",
                 "startUtf16": 10,
                 "endUtf16": 24,
-                "kind": "nonsecretText",
-                "intendedSlot": "fill.value"
+                "kind": "nonsecretText"
               }
             }
           },
@@ -277,19 +263,17 @@
             "inputOrdinal": 2,
             "inputId": "input-config",
             "introducedContextRevision": 1,
-            "inputHash": "a0ad7c294ad8142c91ef412c73a07e6da877c47ffd6742bbda7525b7dd55bd27",
+            "inputHash": "4b40d89d6795ddbc6324054f4433a561f9a5f00cef20865d67af96bd39e47da1",
             "metadata": {
               "inputId": "input-config",
               "sourceStepId": "00000000-0000-4000-8000-000000000003",
               "kind": "nonsecretText",
-              "intendedSlot": "fill.value",
               "provenance": {
                 "referenceKind": "configuration",
                 "configurationRevision": "1",
                 "stepId": "00000000-0000-4000-8000-000000000003",
                 "referenceId": "saved-label",
-                "kind": "nonsecretText",
-                "intendedSlot": "fill.value"
+                "kind": "nonsecretText"
               }
             }
           }
@@ -299,7 +283,7 @@
         "contextRevision": 1,
         "materializationRevision": 1,
         "ownerFence": 1,
-        "inputsHash": "2d167865c5b862be4f005471a64d63b8c846298a08d606d9ea207079a487ff5d"
+        "inputsHash": "05937c872c69e24b455d90195e97fba1a4ee2da035f0c936ccaff284dc0af570"
       },
       "deterministicFixtureIdentities": {
         "preparations": [
@@ -367,14 +351,10 @@
         "valueTransferPolicyId": null,
         "capabilities": [
           "observe",
-          "navigate",
-          "read",
-          "fill",
-          "click",
-          "assert"
+          "step"
         ]
       },
-      "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
+      "scopeHash": "f2aab642c4bcfc38791070de394972bdcf2998e3160bdb07184ae774745049bd",
       "configuration": {
         "browser": "chromium",
         "viewport": {
@@ -503,7 +483,7 @@
       "privateSyntheticInputEnvelopeFixtureOnly": {
         "schemaVersion": 3,
         "sessionId": "qa-choice-current-01",
-        "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
+        "scopeHash": "f2aab642c4bcfc38791070de394972bdcf2998e3160bdb07184ae774745049bd",
         "sourceRevision": "1",
         "configurationRevision": "1",
         "inputs": [
@@ -511,15 +491,13 @@
             "inputId": "input-destination",
             "sourceStepId": "00000000-0000-4000-8000-000000000001",
             "kind": "destination",
-            "intendedSlot": "navigate.destination",
             "provenance": {
               "referenceKind": "sourceSpan",
               "sourceRevision": "1",
               "stepId": "00000000-0000-4000-8000-000000000001",
               "startUtf16": 5,
               "endUtf16": 38,
-              "kind": "destination",
-              "intendedSlot": "navigate.destination"
+              "kind": "destination"
             },
             "value": "https://orders.example.test/start"
           },
@@ -527,15 +505,13 @@
             "inputId": "input-label",
             "sourceStepId": "00000000-0000-4000-8000-000000000003",
             "kind": "nonsecretText",
-            "intendedSlot": "fill.value",
             "provenance": {
               "referenceKind": "sourceSpan",
               "sourceRevision": "1",
               "stepId": "00000000-0000-4000-8000-000000000003",
               "startUtf16": 10,
               "endUtf16": 24,
-              "kind": "nonsecretText",
-              "intendedSlot": "fill.value"
+              "kind": "nonsecretText"
             },
             "value": "  Café 🧪 é  "
           },
@@ -543,14 +519,12 @@
             "inputId": "input-config",
             "sourceStepId": "00000000-0000-4000-8000-000000000003",
             "kind": "nonsecretText",
-            "intendedSlot": "fill.value",
             "provenance": {
               "referenceKind": "configuration",
               "configurationRevision": "1",
               "stepId": "00000000-0000-4000-8000-000000000003",
               "referenceId": "saved-label",
-              "kind": "nonsecretText",
-              "intendedSlot": "fill.value"
+              "kind": "nonsecretText"
             },
             "value": ""
           }
@@ -561,14 +535,14 @@
           {
             "schemaVersion": 3,
             "sessionId": "qa-choice-current-01",
-            "scopeHash": "87171c0d5dfca723dcb5fa78163a7ff191b83aa717440b2bc5b9949fe2da0c82",
+            "scopeHash": "f2aab642c4bcfc38791070de394972bdcf2998e3160bdb07184ae774745049bd",
             "contextId": "qa-choice-context-01",
             "contextRevision": 1,
             "workerId": "qa-choice-worker-01",
             "ownerFence": 1,
             "sourceRevision": "1",
             "configurationRevision": "1",
-            "authoredInputsHash": "a47c8a1814196ef024c46a123c8adb98a93afd53790b2f7210b1b15d5263710a",
+            "authoredInputsHash": "70689e14dae2b8b3619bdd86baca6fc6c3741313a2438d78b60cb6f288c82bdd",
             "birthMaterializationRevision": 1,
             "inputCount": 3,
             "previousInputsHash": null
@@ -579,20 +553,18 @@
             "inputOrdinal": 0,
             "inputId": "input-destination",
             "introducedContextRevision": 1,
-            "inputHash": "d4946735c9b8a17eb6bda65f75628a373d93cd9e986cdab5e3ccf3c7d95ee9d0",
+            "inputHash": "b8c7fd9517f9a8a1ccd87cc0863a8638e03f87bf6d8fd6669c097ab2584cb4a5",
             "metadata": {
               "inputId": "input-destination",
               "sourceStepId": "00000000-0000-4000-8000-000000000001",
               "kind": "destination",
-              "intendedSlot": "navigate.destination",
               "provenance": {
                 "referenceKind": "sourceSpan",
                 "sourceRevision": "1",
                 "stepId": "00000000-0000-4000-8000-000000000001",
                 "startUtf16": 5,
                 "endUtf16": 38,
-                "kind": "destination",
-                "intendedSlot": "navigate.destination"
+                "kind": "destination"
               }
             }
           },
@@ -600,20 +572,18 @@
             "inputOrdinal": 1,
             "inputId": "input-label",
             "introducedContextRevision": 1,
-            "inputHash": "b2b1da963201e590c9cb5c0cd6d775e979d5ab6a11cbaa639788cd7e68db02f8",
+            "inputHash": "7bd7b5de2c9b1ffd186bdefdec954a2569db3469d9a9f82f60b7c0a68a4ded4b",
             "metadata": {
               "inputId": "input-label",
               "sourceStepId": "00000000-0000-4000-8000-000000000003",
               "kind": "nonsecretText",
-              "intendedSlot": "fill.value",
               "provenance": {
                 "referenceKind": "sourceSpan",
                 "sourceRevision": "1",
                 "stepId": "00000000-0000-4000-8000-000000000003",
                 "startUtf16": 10,
                 "endUtf16": 24,
-                "kind": "nonsecretText",
-                "intendedSlot": "fill.value"
+                "kind": "nonsecretText"
               }
             }
           },
@@ -621,19 +591,17 @@
             "inputOrdinal": 2,
             "inputId": "input-config",
             "introducedContextRevision": 1,
-            "inputHash": "a0ad7c294ad8142c91ef412c73a07e6da877c47ffd6742bbda7525b7dd55bd27",
+            "inputHash": "4b40d89d6795ddbc6324054f4433a561f9a5f00cef20865d67af96bd39e47da1",
             "metadata": {
               "inputId": "input-config",
               "sourceStepId": "00000000-0000-4000-8000-000000000003",
               "kind": "nonsecretText",
-              "intendedSlot": "fill.value",
               "provenance": {
                 "referenceKind": "configuration",
                 "configurationRevision": "1",
                 "stepId": "00000000-0000-4000-8000-000000000003",
                 "referenceId": "saved-label",
-                "kind": "nonsecretText",
-                "intendedSlot": "fill.value"
+                "kind": "nonsecretText"
               }
             }
           }
@@ -643,7 +611,7 @@
         "contextRevision": 1,
         "materializationRevision": 1,
         "ownerFence": 1,
-        "inputsHash": "a47c8a1814196ef024c46a123c8adb98a93afd53790b2f7210b1b15d5263710a"
+        "inputsHash": "70689e14dae2b8b3619bdd86baca6fc6c3741313a2438d78b60cb6f288c82bdd"
       },
       "deterministicFixtureIdentities": {
         "preparations": [
@@ -729,8 +697,8 @@
   "appendedHistoricalFactory": {
     "sourcePointer": "/incrementalContracts/basisCases/5",
     "facts": "Use existing documented privateInputReconstruction envelope and actual entries: version1 takes exactly entry ordinal0; version2 takes ordinals0..2. Keep current session/context/worker identities of that already synthetic world; explicitly rederive both hashes from whole envelopes.",
-    "knownCurrentExpectedVersion1Hash": "950ed85f5cbaf1bbe2483f7d93ceffde90a7029e9a30637010449007360688f4",
-    "knownCurrentExpectedVersion2Hash": "4eba427f3e628dd5af1dde33e4f9708b870ffb826b8a9b545dd3d5eba3529ba9",
+    "knownCurrentExpectedVersion1Hash": "79d053a43a4e86c08cc3db86964a63fe3ddf19fefcbe519c749588f951888296",
+    "knownCurrentExpectedVersion2Hash": "abb0a78ccf77b8ac2e0ea588bbe6e7d3dde3b7ac797237430e9d8da7c22297fc",
     "bootstrap": "Bind to actual version1; retain v2.previousInputsHash=v1.hash,birth revisions1and3 and each preparation actual captured version/revision; verify hashes before using quoted values."
   },
   "allValuesQualification": "Synthetic URL/Unicode label/empty saved-label are explicitly supplied test values. Public basis uses metadata-minus-value and hash-only declarations. No Vault material/private historical value is inferred. New preimage hashes here are computations over declared design facts, not expected historical runtime success."

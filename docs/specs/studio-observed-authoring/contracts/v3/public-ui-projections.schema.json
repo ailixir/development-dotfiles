@@ -141,7 +141,7 @@
       }
     },
     "PublicExplanation": {
-      "description": "P3. Read-only account of what this session actually did, from the same session projection (never the current head). safeLabel is the controlled string for the recorded operationKind; referenceIds carry declared ids only, never a value. completed, learnedFromThisRun, reusedFrom and relearnedAfterDrift claim only what the retained facts prove; without proof the actions are empty and no claim is made. It does not imply publication: the publication receipt stays authoritative.",
+      "description": "P3. Read-only account of what this session actually did, from the same session projection (never the current head). referenceIds carry declared ids only, never a value. completed, learnedFromThisRun, reusedFrom and relearnedAfterDrift claim only what the retained facts prove; without proof the actions are empty and no claim is made. It does not imply publication: the publication receipt stays authoritative.",
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -237,8 +237,6 @@
                     "admissionId",
                     "ordinal",
                     "attemptOrdinal",
-                    "operationKind",
-                    "safeLabel",
                     "outcome",
                     "referenceIds"
                   ],
@@ -257,25 +255,6 @@
                       "type": "integer",
                       "minimum": 0,
                       "maximum": 1
-                    },
-                    "operationKind": {
-                      "enum": [
-                        "navigate",
-                        "click",
-                        "fill",
-                        "press",
-                        "check",
-                        "uncheck",
-                        "hover",
-                        "selectOption",
-                        "read",
-                        "assert"
-                      ]
-                    },
-                    "safeLabel": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 256
                     },
                     "outcome": {
                       "enum": [
@@ -297,199 +276,7 @@
                         "maxLength": 256
                       }
                     }
-                  },
-                  "allOf": [
-                    {
-                      "if": {
-                        "properties": {
-                          "operationKind": {
-                            "const": "navigate"
-                          }
-                        },
-                        "required": [
-                          "operationKind"
-                        ]
-                      },
-                      "then": {
-                        "properties": {
-                          "safeLabel": {
-                            "const": "Open page"
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "if": {
-                        "properties": {
-                          "operationKind": {
-                            "const": "click"
-                          }
-                        },
-                        "required": [
-                          "operationKind"
-                        ]
-                      },
-                      "then": {
-                        "properties": {
-                          "safeLabel": {
-                            "const": "Click control"
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "if": {
-                        "properties": {
-                          "operationKind": {
-                            "const": "fill"
-                          }
-                        },
-                        "required": [
-                          "operationKind"
-                        ]
-                      },
-                      "then": {
-                        "properties": {
-                          "safeLabel": {
-                            "const": "Fill field"
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "if": {
-                        "properties": {
-                          "operationKind": {
-                            "const": "press"
-                          }
-                        },
-                        "required": [
-                          "operationKind"
-                        ]
-                      },
-                      "then": {
-                        "properties": {
-                          "safeLabel": {
-                            "const": "Press key"
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "if": {
-                        "properties": {
-                          "operationKind": {
-                            "const": "check"
-                          }
-                        },
-                        "required": [
-                          "operationKind"
-                        ]
-                      },
-                      "then": {
-                        "properties": {
-                          "safeLabel": {
-                            "const": "Check control"
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "if": {
-                        "properties": {
-                          "operationKind": {
-                            "const": "uncheck"
-                          }
-                        },
-                        "required": [
-                          "operationKind"
-                        ]
-                      },
-                      "then": {
-                        "properties": {
-                          "safeLabel": {
-                            "const": "Uncheck control"
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "if": {
-                        "properties": {
-                          "operationKind": {
-                            "const": "hover"
-                          }
-                        },
-                        "required": [
-                          "operationKind"
-                        ]
-                      },
-                      "then": {
-                        "properties": {
-                          "safeLabel": {
-                            "const": "Move over control"
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "if": {
-                        "properties": {
-                          "operationKind": {
-                            "const": "selectOption"
-                          }
-                        },
-                        "required": [
-                          "operationKind"
-                        ]
-                      },
-                      "then": {
-                        "properties": {
-                          "safeLabel": {
-                            "const": "Select option"
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "if": {
-                        "properties": {
-                          "operationKind": {
-                            "const": "read"
-                          }
-                        },
-                        "required": [
-                          "operationKind"
-                        ]
-                      },
-                      "then": {
-                        "properties": {
-                          "safeLabel": {
-                            "const": "Read reference"
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "if": {
-                        "properties": {
-                          "operationKind": {
-                            "const": "assert"
-                          }
-                        },
-                        "required": [
-                          "operationKind"
-                        ]
-                      },
-                      "then": {
-                        "properties": {
-                          "safeLabel": {
-                            "const": "Check expected result"
-                          }
-                        }
-                      }
-                    }
-                  ]
+                  }
                 }
               }
             }
@@ -504,8 +291,7 @@
             "required": [
               "bindingId",
               "producerStepId",
-              "consumerStepId",
-              "argumentSlot"
+              "consumerStepId"
             ],
             "properties": {
               "bindingId": {
@@ -522,13 +308,6 @@
                 "type": "string",
                 "format": "uuid",
                 "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
-              },
-              "argumentSlot": {
-                "enum": [
-                  "fill.value",
-                  "selectOption.value",
-                  "assert.expected"
-                ]
               }
             }
           }

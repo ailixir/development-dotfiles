@@ -44,15 +44,6 @@
             "secretRef"
           ]
         },
-        "intendedSlot": {
-          "type": "string",
-          "enum": [
-            "navigate.destination",
-            "fill.value",
-            "selectOption.value",
-            "assert.expected"
-          ]
-        },
         "provenance": {
           "oneOf": [
             {
@@ -115,7 +106,6 @@
         "inputId",
         "stepId",
         "kind",
-        "intendedSlot",
         "provenance"
       ],
       "allOf": [
@@ -134,9 +124,6 @@
           "then": {
             "type": "object",
             "properties": {
-              "intendedSlot": {
-                "const": "fill.value"
-              },
               "provenance": {
                 "type": "object",
                 "additionalProperties": false,
@@ -187,95 +174,11 @@
               "type": "null"
             }
           ]
-        },
-        "target": {
-          "oneOf": [
-            {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "kind": {
-                  "const": "initialBlank"
-                }
-              },
-              "required": [
-                "kind"
-              ]
-            },
-            {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "kind": {
-                  "const": "page"
-                }
-              },
-              "required": [
-                "kind"
-              ]
-            },
-            {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "kind": {
-                  "const": "element"
-                },
-                "locator": {
-                  "$ref": "https://checks.citi.example/contracts/observed/v3/locator.schema.json"
-                },
-                "tier": {
-                  "$ref": "https://checks.citi.example/contracts/observed/v3/locator.schema.json#/definitions/LocatorTier"
-                },
-                "identity": {
-                  "$ref": "https://checks.citi.example/contracts/observed/v3/locator.schema.json#/definitions/TargetIdentity"
-                },
-                "readRuleId": {
-                  "oneOf": [
-                    {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 256
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "assertTextMode": {
-                  "enum": [
-                    "DIRECT_PUBLIC",
-                    "READ_BINDING_SOURCE"
-                  ]
-                }
-              },
-              "required": [
-                "kind",
-                "locator",
-                "tier",
-                "identity",
-                "readRuleId"
-              ]
-            },
-            {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "kind": {
-                  "const": "passwordControl"
-                }
-              },
-              "required": [
-                "kind"
-              ]
-            }
-          ]
         }
       },
       "required": [
         "guardId",
-        "origin",
-        "target"
+        "origin"
       ]
     },
     "Transfer": {
@@ -293,14 +196,6 @@
         "consumer": {
           "$ref": "https://checks.citi.example/contracts/observed/v3/action.schema.json#/properties/coordinate"
         },
-        "slot": {
-          "type": "string",
-          "enum": [
-            "fill.value",
-            "selectOption.value",
-            "assert.expected"
-          ]
-        },
         "origin": {
           "type": "string",
           "format": "uri",
@@ -312,7 +207,6 @@
         "bindingId",
         "producer",
         "consumer",
-        "slot",
         "origin"
       ]
     },
@@ -328,9 +222,6 @@
         "producer": {
           "$ref": "https://checks.citi.example/contracts/observed/v3/action.schema.json#/properties/coordinate"
         },
-        "recipe": {
-          "$ref": "https://checks.citi.example/contracts/observed/v3/producer.schema.json#/properties/recipe"
-        },
         "origin": {
           "type": "string",
           "format": "uri",
@@ -341,7 +232,6 @@
       "required": [
         "bindingId",
         "producer",
-        "recipe",
         "origin"
       ]
     },

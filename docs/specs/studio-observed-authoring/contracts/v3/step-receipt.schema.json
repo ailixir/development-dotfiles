@@ -1,0 +1,79 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://checks.citi.example/contracts/observed/v3/step-receipt.schema.json",
+  "title": "Studio observed v3 per-step receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "closedCode": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "INVALID_CONTRACT",
+            "PROFILE_MISMATCH",
+            "AUTHORIZATION_EXPIRED",
+            "POLICY_REFUSED",
+            "TARGET_DRIFT",
+            "READ_REFUSED",
+            "REFERENCE_REFUSED",
+            "ASSERTION_FAILED",
+            "CANCELLED",
+            "TIMEOUT",
+            "OUTCOME_UNKNOWN",
+            "INTERNAL_ERROR",
+            "LOGIN_REQUIRED",
+            "PASSWORD_CONTROL_READ_REFUSED",
+            "REFERENCE_MISMATCH"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "stepHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "fenceCrossed": {
+      "type": "boolean"
+    },
+    "effects": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "method": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "completed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "method",
+          "completed"
+        ]
+      }
+    },
+    "effectsTruncated": {
+      "type": "boolean"
+    },
+    "offscreen": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "closedCode",
+    "stepHash",
+    "fenceCrossed",
+    "effects",
+    "effectsTruncated",
+    "offscreen"
+  ]
+}

@@ -37,65 +37,6 @@
     "origin": {
       "type": "string"
     },
-    "recipe": {
-      "oneOf": [
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "kind": {
-              "const": "visibleText"
-            },
-            "classification": {
-              "const": "permittedBusinessData"
-            },
-            "policyRuleId": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 256
-            }
-          },
-          "required": [
-            "kind",
-            "classification",
-            "policyRuleId"
-          ]
-        },
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "kind": {
-              "const": "controlValue"
-            },
-            "classification": {
-              "const": "nonsecretApproved"
-            },
-            "controlType": {
-              "enum": [
-                "text",
-                "search",
-                "email",
-                "tel",
-                "url",
-                "textarea"
-              ]
-            },
-            "policyRuleId": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 256
-            }
-          },
-          "required": [
-            "kind",
-            "classification",
-            "controlType",
-            "policyRuleId"
-          ]
-        }
-      ]
-    },
     "availability": {
       "type": "object",
       "additionalProperties": false,
@@ -140,7 +81,6 @@
     "producerAdmissionId",
     "coordinate",
     "origin",
-    "recipe",
     "availability"
   ]
 }

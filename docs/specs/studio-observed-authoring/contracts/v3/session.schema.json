@@ -81,20 +81,11 @@
           "items": {
             "enum": [
               "observe",
-              "navigate",
-              "click",
-              "fill",
-              "press",
-              "check",
-              "uncheck",
-              "selectOption",
-              "hover",
-              "read",
-              "assert"
+              "step"
             ]
           },
           "minItems": 1,
-          "maxItems": 12
+          "maxItems": 2
         }
       },
       "required": [

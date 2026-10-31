@@ -113,18 +113,6 @@
         "outlineBytes"
       ]
     },
-    "readRuleId": {
-      "oneOf": [
-        {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 256
-        },
-        {
-          "type": "null"
-        }
-      ]
-    },
     "outline": {
       "type": "string",
       "minLength": 1,
@@ -151,7 +139,6 @@
     "observedAt",
     "coverage",
     "projection",
-    "readRuleId",
     "outline",
     "facts"
   ],
@@ -219,56 +206,6 @@
         "nearSource": {
           "const": "WITHHELD_ADJACENT_PUBLIC"
         },
-        "readScope": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "relation": {
-              "enum": [
-                "SAME_ROW_LABEL",
-                "IMMEDIATE_HEADING_SAME_PARENT",
-                "R7_ADJACENT_PUBLIC"
-              ]
-            },
-            "sourceRefs": {
-              "type": "array",
-              "minItems": 1,
-              "maxItems": 8,
-              "uniqueItems": true,
-              "items": {
-                "type": "string",
-                "pattern": "^e[0-9]{1,6}$"
-              }
-            },
-            "tableTitleRef": {
-              "type": "string",
-              "pattern": "^e[0-9]{1,6}$"
-            }
-          },
-          "required": [
-            "relation",
-            "sourceRefs"
-          ],
-          "allOf": [
-            {
-              "if": {
-                "required": [
-                  "tableTitleRef"
-                ]
-              },
-              "then": {
-                "properties": {
-                  "relation": {
-                    "const": "SAME_ROW_LABEL"
-                  },
-                  "sourceRefs": {
-                    "minItems": 2
-                  }
-                }
-              }
-            }
-          ]
-        },
         "scopeRefs": {
           "type": "array",
           "minItems": 1,
@@ -278,9 +215,6 @@
             "type": "string",
             "pattern": "^e[0-9]{1,6}$"
           }
-        },
-        "directTextAssertion": {
-          "const": true
         }
       },
       "required": [
@@ -291,34 +225,6 @@
         "evidenceSegments",
         "nameComplete",
         "ownTextComplete"
-      ],
-      "allOf": [
-        {
-          "if": {
-            "required": [
-              "directTextAssertion"
-            ]
-          },
-          "then": {
-            "properties": {
-              "role": {
-                "const": "paragraph"
-              },
-              "name": {
-                "const": ""
-              },
-              "editable": {
-                "const": false
-              },
-              "ownTextComplete": {
-                "const": true
-              }
-            },
-            "required": [
-              "text"
-            ]
-          }
-        }
       ]
     },
     "EvidenceSegment": {

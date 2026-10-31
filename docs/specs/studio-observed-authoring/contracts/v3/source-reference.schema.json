@@ -34,14 +34,6 @@
             "nonsecretText",
             "destination"
           ]
-        },
-        "intendedSlot": {
-          "enum": [
-            "navigate.destination",
-            "fill.value",
-            "selectOption.value",
-            "assert.expected"
-          ]
         }
       },
       "required": [
@@ -50,8 +42,7 @@
         "stepId",
         "startUtf16",
         "endUtf16",
-        "kind",
-        "intendedSlot"
+        "kind"
       ]
     },
     {
@@ -81,14 +72,6 @@
             "nonsecretText",
             "destination"
           ]
-        },
-        "intendedSlot": {
-          "enum": [
-            "navigate.destination",
-            "fill.value",
-            "selectOption.value",
-            "assert.expected"
-          ]
         }
       },
       "required": [
@@ -96,8 +79,7 @@
         "configurationRevision",
         "stepId",
         "referenceId",
-        "kind",
-        "intendedSlot"
+        "kind"
       ]
     },
     {
@@ -125,9 +107,6 @@
         "kind": {
           "const": "secretRef"
         },
-        "intendedSlot": {
-          "const": "fill.value"
-        },
         "referenceName": {
           "type": "string",
           "pattern": "^[A-Za-z0-9_.-]{1,64}$"
@@ -139,7 +118,6 @@
         "stepId",
         "referenceId",
         "kind",
-        "intendedSlot",
         "referenceName"
       ]
     }

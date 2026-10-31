@@ -74,14 +74,6 @@
               "secretRef"
             ]
           },
-          "intendedSlot": {
-            "enum": [
-              "navigate.destination",
-              "fill.value",
-              "selectOption.value",
-              "assert.expected"
-            ]
-          },
           "referenceName": {
             "type": "string",
             "minLength": 1,
@@ -92,31 +84,7 @@
           "referenceId",
           "stepId",
           "kind",
-          "intendedSlot",
           "referenceName"
-        ],
-        "allOf": [
-          {
-            "if": {
-              "type": "object",
-              "properties": {
-                "kind": {
-                  "const": "secretRef"
-                }
-              },
-              "required": [
-                "kind"
-              ]
-            },
-            "then": {
-              "type": "object",
-              "properties": {
-                "intendedSlot": {
-                  "const": "fill.value"
-                }
-              }
-            }
-          }
         ]
       },
       "minItems": 0,
@@ -145,43 +113,20 @@
               "secretRef"
             ]
           },
-          "intendedSlot": {
-            "enum": [
-              "navigate.destination",
-              "fill.value",
-              "selectOption.value",
-              "assert.expected"
-            ]
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "secretId": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.-]{1,64}$"
           }
         },
         "required": [
           "inputId",
           "sourceStepId",
-          "kind",
-          "intendedSlot"
-        ],
-        "allOf": [
-          {
-            "if": {
-              "type": "object",
-              "properties": {
-                "kind": {
-                  "const": "secretRef"
-                }
-              },
-              "required": [
-                "kind"
-              ]
-            },
-            "then": {
-              "type": "object",
-              "properties": {
-                "intendedSlot": {
-                  "const": "fill.value"
-                }
-              }
-            }
-          }
+          "kind"
         ]
       },
       "minItems": 0,
@@ -207,20 +152,6 @@
             "type": "integer",
             "minimum": 0,
             "maximum": 7
-          },
-          "operationKind": {
-            "enum": [
-              "navigate",
-              "click",
-              "fill",
-              "press",
-              "selectOption",
-              "check",
-              "uncheck",
-              "hover",
-              "read",
-              "assert"
-            ]
           },
           "targetIntent": {
             "type": "string",
@@ -257,22 +188,6 @@
                 "type": "string",
                 "minLength": 1,
                 "maxLength": 256
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "predicate": {
-            "oneOf": [
-              {
-                "enum": [
-                  "visible",
-                  "containsText",
-                  "hasValue",
-                  "url",
-                  "title"
-                ]
               },
               {
                 "type": "null"
@@ -330,18 +245,27 @@
           },
           "reconfirm": {
             "const": true
+          },
+          "uses": {
+            "type": "array",
+            "maxItems": 8,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            }
           }
         },
         "required": [
           "obligationId",
           "stepId",
           "occurrence",
-          "operationKind",
           "targetIntent",
           "scopeIntent",
           "referenceIndex",
           "needId",
-          "predicate"
+          "uses"
         ],
         "allOf": [
           {
@@ -392,18 +316,10 @@
                   "type": "string",
                   "minLength": 1,
                   "maxLength": 256
-                },
-                "argumentSlot": {
-                  "enum": [
-                    "fill.value",
-                    "selectOption.value",
-                    "assert.expected"
-                  ]
                 }
               },
               "required": [
-                "stepId",
-                "argumentSlot"
+                "stepId"
               ]
             },
             "minItems": 0,
@@ -539,6 +455,71 @@
     },
     "learningWindow": {
       "$ref": "https://checks.citi.example/contracts/observed/v3/planning-context.schema.json#/definitions/LearningWindow"
+    },
+    "repair": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "closedCode": {
+              "type": "string",
+              "pattern": "^[A-Z][A-Z_]{1,63}$"
+            },
+            "stage": {
+              "enum": [
+                "SYNTAX",
+                "PRE_FENCE"
+              ]
+            },
+            "line": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 2147483647
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "column": {
+              "oneOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 2147483647
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "facts": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 256
+            },
+            "previousCode": {
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 16384
+            }
+          },
+          "required": [
+            "closedCode",
+            "stage",
+            "line",
+            "column",
+            "facts",
+            "previousCode"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
     }
   },
   "required": [

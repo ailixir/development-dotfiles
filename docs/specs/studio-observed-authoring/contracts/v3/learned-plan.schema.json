@@ -163,7 +163,7 @@
           "type": "null"
         },
         "operation": {
-          "$ref": "https://checks.citi.example/contracts/observed/v3/action.schema.json#/properties/operation/oneOf/4"
+          "$ref": "https://checks.citi.example/contracts/observed/v3/action.schema.json#/properties/operation"
         },
         "admissionId": {
           "type": "string",
@@ -173,15 +173,11 @@
         "operationHash": {
           "type": "string",
           "pattern": "^[a-f0-9]{64}$"
-        },
-        "target": {
-          "type": "null"
         }
       },
       "required": [
         "coordinate",
         "origin",
-        "target",
         "operation",
         "admissionId",
         "operationHash"
@@ -211,68 +207,14 @@
         "operationHash": {
           "type": "string",
           "pattern": "^[a-f0-9]{64}$"
-        },
-        "target": {
-          "oneOf": [
-            {
-              "$ref": "https://checks.citi.example/contracts/observed/v3/locator.schema.json#/definitions/ResolvedTarget"
-            },
-            {
-              "type": "null"
-            }
-          ]
         }
       },
       "required": [
         "coordinate",
         "origin",
-        "target",
         "operation",
         "admissionId",
         "operationHash"
-      ],
-      "allOf": [
-        {
-          "if": {
-            "type": "object",
-            "properties": {
-              "operation": {
-                "type": "object",
-                "properties": {
-                  "kind": {
-                    "const": "fill"
-                  },
-                  "value": {
-                    "type": "object",
-                    "properties": {
-                      "kind": {
-                        "const": "secretRef"
-                      }
-                    },
-                    "required": [
-                      "kind"
-                    ]
-                  }
-                },
-                "required": [
-                  "kind",
-                  "value"
-                ]
-              }
-            },
-            "required": [
-              "operation"
-            ]
-          },
-          "then": {
-            "type": "object",
-            "properties": {
-              "target": {
-                "type": "null"
-              }
-            }
-          }
-        }
       ]
     },
     "ReusedFrom": {

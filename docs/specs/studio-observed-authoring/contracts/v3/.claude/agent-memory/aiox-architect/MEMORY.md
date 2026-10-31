@@ -1,0 +1,1 @@
+- [OBS-008 W0 refold](obs008_w0_refold.md) — 2026-10-17 lane plan; collector hashes frontend (source-hold); 6 Flyway head-pin tests; a11y/playback descoped

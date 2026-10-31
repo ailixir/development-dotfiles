@@ -15,7 +15,11 @@
 
 The user's Run authorizes interpretation and one actual execution of the displayed immutable checklist within the configured principal/CSI/environment/application/account/origin scope. The backend snapshots this scope and records a scoped Run authorization. The model proposes typed operations against sanitized current observations; it cannot grant authority, supply code, resolve account credentials, or change the checklist.
 
+> **Note 2026-10-29 (append-only): ¶1 is superseded by [ADR-SC-008](ADR-SC-008-generated-step-code.md) D1.** "The model proposes typed operations … it cannot … supply code" no longer holds: the model now supplies Playwright step code, which is frozen and replayed model-free. Still true: it cannot grant authority, resolve account credentials or change the checklist.
+
 The runner observes each reached page state and binds one unique current node to the proposed durable locator before dispatch. Each source step has a stable ID and zero-based action ordinals. A server-issued hidden binding describes an earlier local read and its later argument consumers. Actual values stay in the isolated run; no capture tokens or user variable declarations are required. The English regex grammar removed by ADR-SC-003 remains removed.
+
+> **Note 2026-10-29 (append-only): ¶2 is superseded by [ADR-SC-008](ADR-SC-008-generated-step-code.md) D1 and D4.** Binding one unique current node to a proposed locator before dispatch, and admission per action ordinal, are replaced: Playwright strictness (the locator must resolve to exactly one element before the effect) applies, and there is one admission per step execution, consumed at the step's first effectful call. Dispatch is at-most-once per step. Stable source step IDs and hidden binding of earlier reads to later consumers (as `vars` captures) stay.
 
 The durable backend ledger records admission before dispatch. The runner consumes a fenced admission exactly once before browser invocation. Ambiguous transport/crash outcomes stop as `UNKNOWN_OUTCOME`; they never automatically repeat browser work. This guarantees at-most-once dispatch, not exactly-once effects in arbitrary applications. Read-only observation/model repair may retry within the original session budgets before admission.
 

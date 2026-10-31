@@ -28,20 +28,6 @@
             "minimum": 0,
             "maximum": 7
           },
-          "operationKind": {
-            "enum": [
-              "navigate",
-              "click",
-              "fill",
-              "press",
-              "selectOption",
-              "check",
-              "uncheck",
-              "hover",
-              "read",
-              "assert"
-            ]
-          },
           "targetIntent": {
             "type": "string",
             "minLength": 1,
@@ -83,32 +69,25 @@
               }
             ]
           },
-          "predicate": {
-            "oneOf": [
-              {
-                "enum": [
-                  "visible",
-                  "containsText",
-                  "hasValue",
-                  "url",
-                  "title"
-                ]
-              },
-              {
-                "type": "null"
-              }
-            ]
+          "uses": {
+            "type": "array",
+            "maxItems": 8,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            }
           }
         },
         "required": [
           "stepId",
           "occurrence",
-          "operationKind",
           "targetIntent",
           "scopeIntent",
           "referenceIndex",
           "needId",
-          "predicate"
+          "uses"
         ]
       },
       "minItems": 1,
@@ -140,18 +119,10 @@
                   "type": "string",
                   "minLength": 1,
                   "maxLength": 256
-                },
-                "argumentSlot": {
-                  "enum": [
-                    "fill.value",
-                    "selectOption.value",
-                    "assert.expected"
-                  ]
                 }
               },
               "required": [
-                "stepId",
-                "argumentSlot"
+                "stepId"
               ]
             },
             "minItems": 0,
@@ -187,29 +158,11 @@
           "type": "integer",
           "minimum": 0,
           "maximum": 7
-        },
-        "operationKind": {
-          "enum": [
-            "navigate",
-            "fill",
-            "selectOption",
-            "assert"
-          ]
-        },
-        "argumentSlot": {
-          "enum": [
-            "navigate.destination",
-            "fill.value",
-            "selectOption.value",
-            "assert.expected"
-          ]
         }
       },
       "required": [
         "stepId",
-        "occurrence",
-        "operationKind",
-        "argumentSlot"
+        "occurrence"
       ]
     },
     "sourceQuestionMeaning": {

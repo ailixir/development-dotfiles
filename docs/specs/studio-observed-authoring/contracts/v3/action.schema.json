@@ -42,477 +42,66 @@
       "minimum": 0,
       "maximum": 2147483647
     },
-    "target": {
-      "oneOf": [
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "kind": {
-              "const": "node"
-            },
-            "ref": {
-              "type": "string",
-              "pattern": "^e[0-9]{1,6}$"
-            },
-            "documentId": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 256
-            },
-            "generation": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 2147483647
-            }
-          },
-          "required": [
-            "kind",
-            "ref",
-            "documentId",
-            "generation"
-          ]
-        },
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "kind": {
-              "const": "page"
-            },
-            "documentId": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 256
-            },
-            "generation": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 2147483647
-            }
-          },
-          "required": [
-            "kind",
-            "documentId",
-            "generation"
-          ]
-        },
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "kind": {
-              "const": "passwordControl"
-            },
-            "documentId": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 256
-            },
-            "generation": {
-              "type": "integer",
-              "minimum": 0,
-              "maximum": 2147483647
-            }
-          },
-          "required": [
-            "kind",
-            "documentId",
-            "generation"
-          ]
-        }
-      ]
-    },
     "operation": {
-      "oneOf": [
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "kind": {
-              "enum": [
-                "click",
-                "check",
-                "uncheck",
-                "hover"
-              ]
-            }
-          },
-          "required": [
-            "kind"
-          ]
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "step"
         },
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "kind": {
-              "const": "fill"
-            },
-            "value": {
-              "oneOf": [
-                {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "kind": {
-                      "const": "authoredLiteral"
-                    },
-                    "sourceInputId": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 256
-                    }
-                  },
-                  "required": [
-                    "kind",
-                    "sourceInputId"
-                  ]
-                },
-                {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "kind": {
-                      "const": "binding"
-                    },
-                    "bindingId": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 256
-                    }
-                  },
-                  "required": [
-                    "kind",
-                    "bindingId"
-                  ]
-                },
-                {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "kind": {
-                      "const": "secretRef"
-                    },
-                    "sourceInputId": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 256
-                    }
-                  },
-                  "required": [
-                    "kind",
-                    "sourceInputId"
-                  ]
-                }
-              ]
-            }
-          },
-          "required": [
-            "kind",
-            "value"
-          ]
+        "code": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16384
         },
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "kind": {
-              "const": "press"
-            },
-            "key": {
-              "enum": [
-                "Enter",
-                "Tab",
-                "Escape",
-                "ArrowDown",
-                "ArrowUp"
-              ]
-            }
-          },
-          "required": [
-            "kind",
-            "key"
-          ]
+        "captures": {
+          "type": "array",
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          }
         },
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "kind": {
-              "const": "selectOption"
-            },
-            "value": {
-              "oneOf": [
-                {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "kind": {
-                      "const": "authoredLiteral"
-                    },
-                    "sourceInputId": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 256
-                    }
-                  },
-                  "required": [
-                    "kind",
-                    "sourceInputId"
-                  ]
-                },
-                {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "kind": {
-                      "const": "binding"
-                    },
-                    "bindingId": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 256
-                    }
-                  },
-                  "required": [
-                    "kind",
-                    "bindingId"
-                  ]
-                }
-              ]
-            }
-          },
-          "required": [
-            "kind",
-            "value"
-          ]
-        },
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "kind": {
-              "const": "navigate"
-            },
-            "destinationInputId": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 256
-            }
-          },
-          "required": [
-            "kind",
-            "destinationInputId"
-          ]
-        },
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "kind": {
-              "const": "read"
-            },
-            "bindingId": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 256
-            },
-            "recipe": {
-              "oneOf": [
-                {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "kind": {
-                      "const": "visibleText"
-                    },
-                    "classification": {
-                      "const": "permittedBusinessData"
-                    },
-                    "policyRuleId": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 256
-                    }
-                  },
-                  "required": [
-                    "kind",
-                    "classification",
-                    "policyRuleId"
-                  ]
-                },
-                {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "kind": {
-                      "const": "controlValue"
-                    },
-                    "classification": {
-                      "const": "nonsecretApproved"
-                    },
-                    "controlType": {
-                      "enum": [
-                        "text",
-                        "search",
-                        "email",
-                        "tel",
-                        "url",
-                        "textarea"
-                      ]
-                    },
-                    "policyRuleId": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 256
-                    }
-                  },
-                  "required": [
-                    "kind",
-                    "classification",
-                    "controlType",
-                    "policyRuleId"
-                  ]
-                }
-              ]
-            }
-          },
-          "required": [
-            "kind",
-            "bindingId",
-            "recipe"
-          ]
-        },
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "kind": {
-              "const": "assert"
-            },
-            "predicate": {
-              "enum": [
-                "visible",
-                "containsText",
-                "hasValue",
-                "url",
-                "title"
-              ]
-            },
-            "expected": {
-              "oneOf": [
-                {
-                  "oneOf": [
-                    {
-                      "type": "object",
-                      "additionalProperties": false,
-                      "properties": {
-                        "kind": {
-                          "const": "authoredLiteral"
-                        },
-                        "sourceInputId": {
-                          "type": "string",
-                          "minLength": 1,
-                          "maxLength": 256
-                        }
-                      },
-                      "required": [
-                        "kind",
-                        "sourceInputId"
-                      ]
-                    },
-                    {
-                      "type": "object",
-                      "additionalProperties": false,
-                      "properties": {
-                        "kind": {
-                          "const": "binding"
-                        },
-                        "bindingId": {
-                          "type": "string",
-                          "minLength": 1,
-                          "maxLength": 256
-                        }
-                      },
-                      "required": [
-                        "kind",
-                        "bindingId"
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            }
-          },
-          "required": [
-            "kind",
-            "predicate",
-            "expected"
-          ],
-          "allOf": [
-            {
-              "if": {
-                "properties": {
-                  "predicate": {
-                    "const": "visible"
-                  }
-                },
-                "type": "object"
+        "uses": {
+          "type": "array",
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "enum": [
+                  "input",
+                  "secret",
+                  "binding"
+                ]
               },
-              "then": {
-                "properties": {
-                  "expected": {
-                    "type": "null"
-                  }
-                },
-                "type": "object"
-              },
-              "else": {
-                "properties": {
-                  "expected": {
-                    "not": {
-                      "type": "null"
-                    }
-                  }
-                },
-                "type": "object"
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
               }
             },
-            {
-              "if": {
-                "properties": {
-                  "predicate": {
-                    "enum": [
-                      "url",
-                      "title"
-                    ]
-                  }
-                },
-                "type": "object"
-              },
-              "then": {
-                "properties": {
-                  "expected": {
-                    "type": "object",
-                    "required": [
-                      "kind"
-                    ],
-                    "properties": {
-                      "kind": {
-                        "const": "authoredLiteral"
-                      }
-                    }
-                  }
-                },
-                "type": "object"
-              }
-            }
-          ]
+            "required": [
+              "kind",
+              "id"
+            ]
+          }
+        },
+        "sourceHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
         }
+      },
+      "required": [
+        "kind",
+        "code",
+        "captures",
+        "uses",
+        "sourceHash"
       ]
     },
     "executionEvidence": {
@@ -538,109 +127,10 @@
     "coordinate",
     "scopeHash",
     "generation",
-    "target",
     "operation",
     "executionEvidence",
     "evidenceHash",
     "authoredInputsHash",
     "contextRevision"
-  ],
-  "allOf": [
-    {
-      "if": {
-        "type": "object",
-        "properties": {
-          "operation": {
-            "type": "object",
-            "properties": {
-              "kind": {
-                "const": "fill"
-              },
-              "value": {
-                "type": "object",
-                "properties": {
-                  "kind": {
-                    "const": "secretRef"
-                  }
-                },
-                "required": [
-                  "kind"
-                ]
-              }
-            },
-            "required": [
-              "kind",
-              "value"
-            ]
-          }
-        },
-        "required": [
-          "operation"
-        ]
-      },
-      "then": {
-        "type": "object",
-        "properties": {
-          "target": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "kind": {
-                "const": "passwordControl"
-              },
-              "documentId": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 256
-              },
-              "generation": {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 2147483647
-              }
-            },
-            "required": [
-              "kind",
-              "documentId",
-              "generation"
-            ]
-          }
-        },
-        "required": [
-          "target"
-        ]
-      },
-      "else": {
-        "type": "object",
-        "properties": {
-          "target": {
-            "not": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "kind": {
-                  "const": "passwordControl"
-                },
-                "documentId": {
-                  "type": "string",
-                  "minLength": 1,
-                  "maxLength": 256
-                },
-                "generation": {
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 2147483647
-                }
-              },
-              "required": [
-                "kind",
-                "documentId",
-                "generation"
-              ]
-            }
-          }
-        }
-      }
-    }
   ]
 }

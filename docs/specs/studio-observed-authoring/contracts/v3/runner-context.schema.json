@@ -165,15 +165,11 @@
         },
         "guard": {
           "$ref": "https://checks.citi.example/contracts/observed/v3/replay-operation.schema.json#/definitions/Guard"
-        },
-        "target": {
-          "$ref": "https://checks.citi.example/contracts/observed/v3/learned-plan.schema.json#/definitions/observedAction/properties/target"
         }
       },
       "required": [
         "coordinate",
         "origin",
-        "target",
         "operation",
         "operationHash",
         "guard"

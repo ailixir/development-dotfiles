@@ -4,6 +4,10 @@ Normative companion to [ADR-SC-004](../../../architecture/ADR-SC-004-observed-au
 
 Schema validation establishes shape. The semantic invariants below need trusted implementation and independent runtime tests; passing these fixtures proves no DOM correspondence, browser effect, database race, Vault lifetime or publication.
 
+## ADR-SC-008 (SC008-E5, 2026-10-30): the step contract
+
+Contract v3 was changed in place (no v4). The `operation` is one record `{kind: "step", code, captures[], uses[{kind, id}], sourceHash}` (`sourceHash = hash(code)`); the ten operation kinds, the node, passwordControl and ResolvedTarget targets (`locator.schema.json`), argument and input slots, read recipes, the press and assert-source bindings, the guard source authority, the observed-choice witness, `PreAdmissionDrift`, `ledger.assertionPassed` and `limits.maxStatementsPerStep` are deleted. A guard is `{guardId, origin}`. The per-step receipt is `step-receipt.schema.json` (`closedCode`, `stepHash`, `fenceCrossed`, `effects[{method, completed}]`, `effectsTruncated`, `offscreen`), carried by the replay `step-finished` event and by the learning outcome. The model answers `SOURCE_PLAN` (obligations without kind or predicate, `uses`, `stepSections`) or `STEP_CODE` (status `CODE` or `CLARIFICATION`). Where the text below names a deleted concept, [ADR-SC-008](../../../architecture/ADR-SC-008-generated-step-code.md) governs. Changing the contract again is a re-run of the reseal scripts, not a hand edit.
+
 ## Files and verification
 
 Run from the repository root (root dependencies installed; Ajv 8, ajv-formats and YAML are reused, no package is added):

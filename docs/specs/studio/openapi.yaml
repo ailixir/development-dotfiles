@@ -10,8 +10,9 @@ info:
     validate and run routes are removed, and runner cancellation is `DELETE /v2/runs/{id}`.
     A test is learned by a guided session
     (`/guided-sessions`, whose closed bodies are `../studio-observed-authoring/contracts/v3`) and
-    replayed model-free through `POST /v2/runs`. Readiness is `UNLEARNED | LEARNING | READY |
-    NEEDS_RELEARN`; a draft that cannot run is `409 LEARN_REQUIRED`. This is the one public
+    replayed model-free through `POST /v2/runs`. Readiness is `UNLEARNED | LEARNING | RECORDED | READY |
+    NEEDS_RELEARN` (`READY` is the confirmed state: every step passed the model-free proof; `RECORDED` is a learned
+    revision whose proof has not confirmed it, ADR-SC-008); a draft that cannot run is `409 LEARN_REQUIRED`. This is the one public
     OpenAPI document; every public route is under `/api/v1/studio`.
 
     Normative source: `docs/architecture/studio-execution.md` v2.1 — §4.4 (source artifact),
@@ -646,6 +647,10 @@ paths:
         administrators may start a Studio execution; every other caller receives the same `403`
         as for an unknown test id. Secret-reference use, when that capability is enabled, remains
         independently authorized.
+
+        A `RECORDED` draft runs its recorded revision as a labelled diagnostic (`ExecutionSnapshot.diagnostic` is
+        true): the run never counts as verification, never promotes and never produces a proof. Only confirmed
+        revisions are scheduled.
       parameters:
         - { $ref: '#/components/parameters/TestId' }
         - name: Idempotency-Key
@@ -740,6 +745,62 @@ paths:
               examples:
                 dispatchDisabled:
                   value: { error: DISPATCH_DISABLED, message: 'Studio execution is currently disabled' }
+
+  /tests/{id}/verify:
+    post:
+      tags: [ tests ]
+      operationId: verifyRecordedRevision
+      summary: Verify the recorded revision again
+      description: |
+        Re-runs the model-free proof of the recorded revision (`triggerSource` AFTER_LEARN) with no model call and no
+        re-learn. A pass promotes the revision atomically; the previous confirmed revision keeps its schedules until then.
+        Offered only when the proof was refused, cancelled, timed out or never started (`verification.state` INCOMPLETE).
+        The proof repeats side effects (named limit L-1). Same ownership, idempotency and kill-switch rules as
+        `executeTest`.
+      parameters:
+        - { $ref: '#/components/parameters/TestId' }
+        - name: Idempotency-Key
+          in: header
+          required: true
+          description: A UUID; the same key with the same request returns the same `executionId`.
+          schema: { type: string, format: uuid }
+      responses:
+        '202':
+          description: Proof accepted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ExecuteAccepted' }
+              examples:
+                accepted:
+                  value:
+                    executionId: 44444444-4444-4444-4444-444444444444
+                    status: PENDING
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/SessionUnauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409':
+          description: |
+            Refused before any dispatch effect: the draft has no recorded revision (`NOT_RECORDED`), or the proof is
+            running or failed (`VERIFY_NOT_AVAILABLE`).
+          x-conflict-codes: [ NOT_RECORDED, VERIFY_NOT_AVAILABLE, IDEMPOTENCY_KEY_REUSED, TEST_DELETED, TEST_QUARANTINED ]
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+              examples:
+                notRecorded:
+                  value: { error: NOT_RECORDED, message: 'The draft has no recorded revision to verify' }
+                verifyNotAvailable:
+                  value: { error: VERIFY_NOT_AVAILABLE, message: 'The proof of the recorded revision is running or has failed' }
+        '429':
+          description: Pending quota exhausted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '503':
+          description: Execution disabled by the kill switch
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
 
   /tests/{id}/validate-variables:
     parameters:
@@ -1520,7 +1581,9 @@ paths:
                   value: { error: { code: RATE_LIMITED, message: Rate limit exceeded } }
         '503': { description: Current authority or Vault unavailable }
       description: >-
-        The server computes baseRevisionId and firstLearnStepId from complete draft/base identity. Each
+        The server computes baseRevisionId and firstLearnStepId from complete draft/base identity; the base may be the
+        recorded (candidate) revision, which is how "Re-learn from step N" keeps steps 1..N-1.
+         Each
         optional request hint is checked independently. A boundary after the computed step is refused; an
         earlier boundary requests more learning. Immutable base identity missing: omitted boundary is refused,
         explicit first step requests full learn. Prefix state is REPLAYING_PREFIX; results report
@@ -1591,8 +1654,6 @@ paths:
                             - admissionId: sample-admission-1
                               ordinal: 0
                               attemptOrdinal: 0
-                              operationKind: navigate
-                              safeLabel: Open page
                               outcome: SUCCEEDED
                               referenceIds: []
                         - stepId: 00000000-0000-4000-8000-000000000002
@@ -1754,8 +1815,6 @@ paths:
                             - admissionId: admission-1
                               ordinal: 0
                               attemptOrdinal: 0
-                              operationKind: navigate
-                              safeLabel: Open page
                               outcome: SUCCEEDED
                               referenceIds: []
                         - stepId: 00000000-0000-4000-8000-000000000002
@@ -1768,8 +1827,6 @@ paths:
                             - admissionId: admission-2
                               ordinal: 0
                               attemptOrdinal: 0
-                              operationKind: fill
-                              safeLabel: Fill field
                               outcome: SUCCEEDED
                               referenceIds: [ LOGIN_PASSWORD ]
                       referenceFlows: []
@@ -1821,8 +1878,6 @@ paths:
                             - admissionId: admission-1
                               ordinal: 0
                               attemptOrdinal: 0
-                              operationKind: navigate
-                              safeLabel: Open page
                               outcome: SUCCEEDED
                               referenceIds: []
                         - stepId: 00000000-0000-4000-8000-000000000002
@@ -1835,8 +1890,6 @@ paths:
                             - admissionId: admission-2
                               ordinal: 0
                               attemptOrdinal: 0
-                              operationKind: fill
-                              safeLabel: Fill field
                               outcome: SUCCEEDED
                               referenceIds: [ LOGIN_PASSWORD ]
                       referenceFlows: []
@@ -1889,8 +1942,6 @@ paths:
                         - admissionId: admission-1
                           ordinal: 0
                           attemptOrdinal: 0
-                          operationKind: navigate
-                          safeLabel: Open page
                           outcome: SUCCEEDED
                           referenceIds: []
                     - stepId: 00000000-0000-4000-8000-000000000002
@@ -1903,8 +1954,6 @@ paths:
                         - admissionId: admission-2
                           ordinal: 0
                           attemptOrdinal: 0
-                          operationKind: fill
-                          safeLabel: Fill field
                           outcome: SUCCEEDED
                           referenceIds: [ LOGIN_PASSWORD ]
                   referenceFlows: []
@@ -2784,9 +2833,6 @@ components:
           x-unique-by: id
           items: { $ref: '#/components/schemas/AuthoringStep' }
         revisionInputs: { $ref: '#/components/schemas/AuthoringRevisionInputs' }
-        review:
-          type: array
-          items: { $ref: '#/components/schemas/ResolvedStepReview' }
 
     AuthoringStep:
       type: object
@@ -3005,99 +3051,6 @@ components:
               revision: { type: integer, format: int64, minimum: 1 }
               hash: { type: string, pattern: '^[a-f0-9]{64}$' }
 
-    ResolvedStepReview:
-      type: object
-      additionalProperties: false
-      required: [ stepId, operation, target, input, contextProvenance, diagnostics ]
-      properties:
-        stepId: { type: string, format: uuid }
-        operation: { $ref: '#/components/schemas/ResolvedOperation' }
-        target: { $ref: '#/components/schemas/ResolvedTarget' }
-        input: { $ref: '#/components/schemas/ResolvedInput' }
-        contextProvenance:
-          type: array
-          items: { $ref: '#/components/schemas/ContextProvenance' }
-        assertions:
-          type: array
-          items: { type: string }
-        diagnostics:
-          type: array
-          items: { $ref: '#/components/schemas/AuthoringDiagnostic' }
-
-    ResolvedOperation:
-      type: object
-      nullable: true
-      additionalProperties: false
-      required: [ kind ]
-      properties:
-        kind: { type: string, enum: [ navigate, click, fill, press, select, check, assert ] }
-
-    ResolvedTarget:
-      type: object
-      nullable: true
-      additionalProperties: false
-      required: [ strategy, value ]
-      properties:
-        strategy: { type: string, enum: [ role, label, testId, text, url ] }
-        value: { type: string }
-        exact: { type: boolean, default: false }
-        evidenceReferenceId: { type: string, format: uuid, nullable: true }
-
-    ResolvedInput:
-      nullable: true
-      oneOf:
-        - { $ref: '#/components/schemas/ResolvedLiteralInput' }
-        - { $ref: '#/components/schemas/ResolvedReferenceInput' }
-      discriminator:
-        propertyName: kind
-
-    ResolvedLiteralInput:
-      type: object
-      additionalProperties: false
-      required: [ kind, value ]
-      properties:
-        kind: { type: string, enum: [ literal ] }
-        value: { type: string }
-
-    ResolvedReferenceInput:
-      type: object
-      additionalProperties: false
-      required: [ kind, referenceId ]
-      properties:
-        kind: { type: string, enum: [ variableRef, secretRef ] }
-        referenceId: { type: string, minLength: 1 }
-
-    ContextProvenance:
-      type: object
-      additionalProperties: false
-      required: [ field, scope, sourceKind ]
-      properties:
-        field: { type: string, minLength: 1 }
-        scope: { type: string, enum: [ explicitStep, stepContext, globalContext, policy, evidence ] }
-        sourceKind: { type: string, enum: [ user, supplied, observed, policy ] }
-        sourceId: { type: string, nullable: true }
-
-    AuthoringDiagnostic:
-      type: object
-      additionalProperties: false
-      required: [ category, stepId, field, message ]
-      properties:
-        category:
-          type: string
-          enum:
-            [
-              missingContext,
-              conflictingValue,
-              ambiguousTarget,
-              incompatibleEvidence,
-              staleEvidence,
-              literalMismatch,
-              unsupportedOperation
-            ]
-        stepId: { type: string, format: uuid, nullable: true }
-        field: { type: string, nullable: true }
-        message: { type: string }
-
     TestRequest:
       type: object
       required:
@@ -3233,6 +3186,7 @@ components:
           enum:
             - UNLEARNED
             - LEARNING
+            - RECORDED
             - READY
             - NEEDS_RELEARN
         firstChangedStepId:
@@ -3240,6 +3194,19 @@ components:
           format: uuid
           nullable: true
           description: The first changed step's stable ID; non-null only with `NEEDS_RELEARN`.
+        verification:
+          type: object
+          nullable: true
+          additionalProperties: false
+          required: [ state, firstUnverifiedStepId ]
+          description: |
+            Non-null exactly with `RECORDED`. `state` PENDING: the model-free proof is running. FAILED: a step failed in
+            the proof, so Studio offers "Re-learn from step N" (and a diagnostic Run). INCOMPLETE: the proof was refused,
+            cancelled, timed out or never started, so Studio also offers "Verify again" (`POST /tests/{id}/verify`).
+            `firstUnverifiedStepId` is the first step without a PASSED proof receipt ("Recorded, not verified (step N)").
+          properties:
+            state: { type: string, enum: [ PENDING, FAILED, INCOMPLETE ] }
+            firstUnverifiedStepId: { type: string, format: uuid }
         confirmedRevisionId:
           type: string
           format: uuid
@@ -3374,6 +3341,9 @@ components:
         stepIndex: { type: integer, minimum: 0 }
         originalText: { type: string }
         status: { $ref: '#/components/schemas/StepStatus' }
+        receipt:
+          description: 'The per-step receipt (ADR-SC-008): closed code, step hash, fence, effect list and popup flag. Absent for legacy history and unstarted steps.'
+          $ref: '../studio-observed-authoring/contracts/v3/step-receipt.schema.json'
         offsetMs:
           type: integer
           format: int64
@@ -3476,6 +3446,10 @@ components:
         ]
       properties:
 
+        diagnostic:
+          type: boolean
+          nullable: true
+          description: 'True when the run executed a revision that was not confirmed (a labelled diagnostic run of a RECORDED draft). Null for legacy history.'
         triggerSource:
           type: string
           nullable: true
@@ -3893,6 +3867,9 @@ components:
           nullable: true
           minimum: 0
           description: Browser time for this step. The public `StepResult.durationMs` is its rounded projection.
+        receipt:
+          description: 'The per-step receipt the runner computed for this step (ADR-SC-008). Absent from a runner that predates it.'
+          $ref: '../studio-observed-authoring/contracts/v3/step-receipt.schema.json'
         failure:
           type: string
           nullable: true
@@ -4137,11 +4114,11 @@ components:
             positives atomically with the winning report and retain them after missing FINAL, reaper/cancel or
             later uncertainty. Three statuses and the existing map shape remain unchanged; OBS-007 AC-14
             defines backend audit-only uncertainty. Supporting receipts are the existing RunnerReport.steps[]
-            objects, exactly {stepIndex,status,startedAtMs,finishedAtMs,durationMs,failure}; they gain no
+            objects, exactly {stepIndex,status,startedAtMs,finishedAtMs,durationMs,failure,receipt}; they gain no
             stepId, sourceInputId, secretId, admission or other wire field. Derive stepId and the secret
             consumer from the frozen accepted artifact.steps[stepIndex].stepId/operations and inputRecipes:
-            fill.value.kind=secretRef, sourceInputId→inputId, matching recipe.stepId, intendedSlot=fill.value
-            and configuration provenance.referenceName. Require an in-range unique ordered stepIndex,
+            the uses entry of kind secret of that step, whose id equals the configuration
+            provenance.referenceName of the input recipe. Require an in-range unique ordered stepIndex,
             status=PASS, failure=null, an actual browserStartedAt, finite nonnegative nonnull timings,
             finishedAtMs>=startedAtMs and durationMs consistent with their difference under the existing
             receipt tolerance. Validate raw receipts before projection/rounding; missing, duplicate,
@@ -4300,6 +4277,7 @@ components:
           enum:
             - UNLEARNED
             - LEARNING
+            - RECORDED
             - READY
             - NEEDS_RELEARN
         firstChangedStepId:
@@ -4307,6 +4285,19 @@ components:
           format: uuid
           nullable: true
           description: The first changed step's stable ID; non-null only with `NEEDS_RELEARN`.
+        verification:
+          type: object
+          nullable: true
+          additionalProperties: false
+          required: [ state, firstUnverifiedStepId ]
+          description: |
+            Non-null exactly with `RECORDED`. `state` PENDING: the model-free proof is running. FAILED: a step failed in
+            the proof, so Studio offers "Re-learn from step N" (and a diagnostic Run). INCOMPLETE: the proof was refused,
+            cancelled, timed out or never started, so Studio also offers "Verify again" (`POST /tests/{id}/verify`).
+            `firstUnverifiedStepId` is the first step without a PASSED proof receipt ("Recorded, not verified (step N)").
+          properties:
+            state: { type: string, enum: [ PENDING, FAILED, INCOMPLETE ] }
+            firstUnverifiedStepId: { type: string, format: uuid }
         confirmedRevisionId:
           type: string
           format: uuid
@@ -4340,10 +4331,6 @@ components:
           $ref: "#/components/schemas/GlobalAuthoringContext"
         revisionInputs:
           $ref: "#/components/schemas/AuthoringRevisionInputs"
-        review:
-          type: array
-          items:
-            $ref: "#/components/schemas/ResolvedStepReview"
         readinessReason:
           type: string
           enum:
