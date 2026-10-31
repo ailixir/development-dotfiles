@@ -1,3 +1,5 @@
+import { stepOp } from '../helpers/stepCode.js';
+import { fakeHandle, newRig } from '../helpers/stepFakes.js';
 import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import { mkdtemp, rm, readFile, readdir, unlink, writeFile,mkdir,lstat } from 'node:fs/promises';
@@ -19,11 +21,11 @@ import { createGuidedRecorder } from '../../src/guided/evidence.js';
 import type { GuidedRecorder, RecordingEvidenceBody } from '../../src/guided/evidence.js';
 import type { PutObjectRequest } from '../../src/run/objectStore.js';
 import { WEBM_MAGIC } from '../../src/run/recording.js';
-import type { BridgeBootstrap, BridgeOrdinaryOutcome as BridgeOutcome, BridgeObservation, Action, Limits } from '../../src/guided/types.js';
+import type { BridgeBootstrap, BridgeOrdinaryOutcome as BridgeOutcome, BridgeObservation, Limits } from '../../src/guided/types.js';
 
 describe('REL-001/D4 the guided start has one deadline',()=>{
   const chainOf=(failure:unknown):Error[]=>{const chain:Error[]=[];for(let link:unknown=failure;link instanceof Error;link=link.cause)chain.push(link);return chain;};
-  const blank=(context:ReturnType<typeof guidedContext>):GuidedBrowser=>({evidence:{kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:randomUUID(),documentId:randomUUID(),bootstrapId:randomUUID(),url:'about:blank',origin:null,generation:0},blankMatches:()=>Promise.resolve(true),navigateBlank:()=>Promise.resolve(),close:()=>Promise.resolve(),terminate:vi.fn(()=>Promise.resolve()),orderlyClosed:()=>true,observations:sessionStub({withhold:()=>Promise.resolve(),observe:()=>Promise.reject(new Error('unused'))})});
+  const blank=(context:ReturnType<typeof guidedContext>):GuidedBrowser=>({evidence:{kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:randomUUID(),documentId:randomUUID(),bootstrapId:randomUUID(),url:'about:blank',origin:null,generation:0},blankMatches:()=>Promise.resolve(true),close:()=>Promise.resolve(),terminate:vi.fn(()=>Promise.resolve()),orderlyClosed:()=>true,observations:sessionStub({withhold:()=>Promise.resolve(),observe:()=>Promise.reject(new Error('unused'))})});
   /** Fake clock from before the runtime exists, so `began` is the fake epoch. The launcher receives the real `startup`. */
   async function harness(launch:(startup:GuidedStartup,context:ReturnType<typeof guidedContext>)=>Promise<GuidedBrowser>,options:{leaseMs?:number;callback?:GuidedRuntimeOptions['callback']}={}){
     vi.useFakeTimers();
@@ -172,7 +174,7 @@ describe('KL-015-D5 the runtime closes by start phase',()=>{
   interface Hooks{close?:()=>Promise<void>;terminate?:()=>Promise<void>;orderly?:boolean;withhold?:()=>Promise<void>;blankMatches?:()=>Promise<boolean>}
   const fake=(context:ReturnType<typeof guidedContext>,hooks:Hooks={}):GuidedBrowser&{close:ReturnType<typeof vi.fn>;terminate:ReturnType<typeof vi.fn>}=>({
     evidence:{kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:randomUUID(),documentId:randomUUID(),bootstrapId:randomUUID(),url:'about:blank',origin:null,generation:0},
-    blankMatches:hooks.blankMatches??(()=>Promise.resolve(true)),navigateBlank:()=>Promise.resolve(),
+    blankMatches:hooks.blankMatches??(()=>Promise.resolve(true)),
     close:vi.fn(hooks.close??(()=>Promise.resolve())),terminate:vi.fn(hooks.terminate??(()=>Promise.resolve())),orderlyClosed:()=>hooks.orderly??false,
     observations:sessionStub({withhold:hooks.withhold??(()=>Promise.resolve()),observe:()=>Promise.reject(new Error('unused'))}),
   });
@@ -273,33 +275,45 @@ describe('KL-015-D5 the runtime closes by start phase',()=>{
   });
 });
 
+const NAV_OP=stepOp('await page.goto(inputs["input-nav"]);',{uses:[{kind:'input',id:'input-nav'}]});
 const cleanup:(()=>Promise<void>)[]=[];
 afterEach(async()=>{vi.useRealTimers();for(const fn of cleanup.reverse())await fn();cleanup.length=0;});
 async function directory(){const p=await mkdtemp(join(tmpdir(),'guided-unit-'));cleanup.push(()=>rm(p,{recursive:true,force:true}));return p;}
 async function setup(options:{failedOutcomeCallback?:boolean;secret?:boolean;failEffect?:boolean;loseOutcomeAck?:boolean;leaseMs?:number;limits?:Partial<Limits>;observationCallback?:(body:unknown,key?:string)=>Promise<void>;onLostObserver?:(callback:()=>void)=>void}={}){
-  const context=guidedContext('https://example.test');Object.assign(context.limits,options.limits);if(options.leaseMs)context.leaseExpiresAt=new Date(Date.now()+options.leaseMs).toISOString();
-  if(options.secret){context.authoredInputs.inputs.push({inputId:'pass',sourceStepId:'fill',kind:'secretRef',intendedSlot:'fill.value',secretId:'PASS',provenance:{referenceKind:'configuration',configurationRevision:context.configurationRevision,stepId:'fill',referenceId:'pass-reference',referenceName:'PASS',kind:'secretRef',intendedSlot:'fill.value'}});context.authoredInputs.inputs.push({inputId:'later',sourceStepId:'submit',kind:'nonsecretText',intendedSlot:'assert.expected',value:'current-assertion-canary',provenance:{referenceKind:'sourceSpan',sourceRevision:context.sourceRevision,stepId:'submit',startUtf16:0,endUtf16:8,kind:'nonsecretText',intendedSlot:'assert.expected'}});context.authoredInputsHash=hash(context.authoredInputs);}
+  const context=guidedContext('https://example.test');Object.assign(context.limits,options.limits);context.allocations.push({bindingId:'binding-fill',needId:'need-fill',producerStepId:'fill',consumers:[{stepId:'submit'}]},{bindingId:'binding-submit',needId:'need-submit',producerStepId:'submit',consumers:[]});if(options.leaseMs)context.leaseExpiresAt=new Date(Date.now()+options.leaseMs).toISOString();
+  if(options.secret){context.authoredInputs.inputs.push({inputId:'pass',sourceStepId:'fill',kind:'secretRef',secretId:'PASS',provenance:{referenceKind:'configuration',configurationRevision:context.configurationRevision,stepId:'fill',referenceId:'pass-reference',referenceName:'PASS',kind:'secretRef'}});context.authoredInputs.inputs.push({inputId:'later',sourceStepId:'submit',kind:'nonsecretText',value:'current-assertion-canary',provenance:{referenceKind:'sourceSpan',sourceRevision:context.sourceRevision,stepId:'submit',startUtf16:0,endUtf16:8,kind:'nonsecretText'}});context.authoredInputsHash=hash(context.authoredInputs);}
   const messages:{route:string;body:unknown;key?:string}[]=[];const path=await directory();let generation=0;
-  const browser:GuidedBrowser={evidence:{kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:randomUUID(),bootstrapId:randomUUID(),documentId:randomUUID(),url:'about:blank',origin:null,generation:0},blankMatches:vi.fn(()=>Promise.resolve(true)),navigateBlank:vi.fn(async()=>{const files=await readdir(path);const journal=await readFile(join(path,files.find(f=>f.endsWith('.journal'))??''),'utf8');expect(journal.trim().split('\n')).toHaveLength(3);expect(JSON.parse(journal.trim().split('\n')[2]??'{}')).toMatchObject({state:'INVOKING',receiptHash:null});if(options.failEffect)throw new Error('captured-canary-private');}),close:vi.fn(()=>Promise.resolve()),terminate:vi.fn(()=>Promise.resolve()),orderlyClosed:()=>true,observations:sessionStub({prepareTarget:()=>Promise.resolve({locator:[{by:'testId',value:'source'}],tier:'testId',identity:{role:'text',name:null}}),pageMatches:()=>Promise.resolve(true),invoke:()=>Promise.resolve({value:'ab'}),withhold:()=>Promise.resolve(),observe:()=>Promise.resolve({observation:{schemaVersion:3,sessionId:context.sessionId,scopeHash:context.scopeHash,documentId:'page-document',generation:++generation,origin:'https://example.test',observedAt:new Date().toISOString(),coverage:{withheldRegions:0,unsupportedRegions:0,passwordControls:options.secret?1:0},projection:{projected:false,tier:null,totalNodes:1,shownNodes:1,notShown:0,outlineBytes:15},readRuleId:null,outline:'- text "x" [e1]',facts:{e1:{role:'text',name:'x',editable:false, nameComplete: true, ownTextComplete: true,evidence:'x',evidenceSegments:[]}}},json:'',bytes:0,observationHash:''}),dispose:()=>Promise.resolve()})};
+  const rig=newRig('about:blank',{withhold:()=>Promise.resolve(),observe:()=>Promise.resolve({observation:{schemaVersion:3,sessionId:context.sessionId,scopeHash:context.scopeHash,documentId:'page-document',generation:++generation,origin:'https://example.test',observedAt:new Date().toISOString(),coverage:{withheldRegions:0,unsupportedRegions:0,passwordControls:options.secret?1:0},projection:{projected:false,tier:null,totalNodes:1,shownNodes:1,notShown:0,outlineBytes:15},outline:'- text "x" [e1]',facts:{e1:{role:'text',name:'x',editable:false, nameComplete: true, ownTextComplete: true,evidence:'x',evidenceSegments:[]}}},json:'',bytes:0,observationHash:''}),dispose:()=>Promise.resolve()});
+  rig.w.matches['input[type="password" i]']=1;
+  const goto=vi.fn(async()=>{const files=await readdir(path);const journal=await readFile(join(path,files.find(f=>f.endsWith('.journal'))??''),'utf8');expect(journal.trim().split('\n')).toHaveLength(3);expect(JSON.parse(journal.trim().split('\n')[2]??'{}')).toMatchObject({state:'INVOKING',receiptHash:null});rig.w.effects.push('goto');if(options.failEffect)throw new Error('captured-canary-private');});
+  rig.page.goto=goto;
+  const browser:GuidedBrowser={evidence:{kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:randomUUID(),bootstrapId:randomUUID(),documentId:randomUUID(),url:'about:blank',origin:null,generation:0},blankMatches:vi.fn(()=>Promise.resolve(true)),close:vi.fn(()=>Promise.resolve()),terminate:vi.fn(()=>Promise.resolve()),orderlyClosed:()=>true,handle:fakeHandle(rig),observations:rig.session};
   const runtime=new GuidedRuntime(context,{workerId:context.workerId,allowedDomains: TEST_DOMAINS, journalDirectory:path,launch:(_config,_contextId,onLost)=>{options.onLostObserver?.(onLost);return Promise.resolve(browser);},callback:(route,body,key)=>{messages.push({route,body,...(key?{key}:{})});return route==='observations'&&options.observationCallback?options.observationCallback(body,key):route==='outcomes'&&(options.loseOutcomeAck||options.failedOutcomeCallback&&(body as BridgeOutcome).ledger.state==='UNKNOWN_OUTCOME')?Promise.reject(new Error('lost')):Promise.resolve();}});cleanup.push(()=>runtime.stop('CANCELLED'));await runtime.start();
-  const evidence=(messages[0]?.body as BridgeBootstrap).executionEvidence;const p=proposal(context,evidence,'nav',{kind:'navigate',destinationInputId:'input-nav'});
-  const prep=await runtime.prepare({pressInheritance:null,...identity(context),proposal:p,requestDigest:hash(p),expiresAt:new Date(Math.min(Date.now()+10_000,Date.parse(context.leaseExpiresAt)-1)).toISOString()});
-  return {context,runtime,browser,messages,path,request:dispatch(context,p,prep)};
+  const evidence=(messages[0]?.body as BridgeBootstrap).executionEvidence;const p=proposal(context,evidence,'nav',NAV_OP);
+  const prep=await runtime.prepare({...identity(context),proposal:p,requestDigest:hash(p),expiresAt:new Date(Math.min(Date.now()+10_000,Date.parse(context.leaseExpiresAt)-1)).toISOString()});
+  return {context,runtime,browser,goto,rig,messages,path,request:dispatch(context,p,prep)};
 }
 describe('durable worker consumption and recovery',()=>{
+  type H=Awaited<ReturnType<typeof setup>>;
+  const lastEvidence=(h:H)=>{const o=(h.messages.filter(m=>m.route==='observations').at(-1)?.body as BridgeObservation).observation;return{o,evidence:{kind:'observedDocument' as const,sessionId:h.context.sessionId,contextId:h.context.contextId,documentId:o.documentId,generation:o.generation,origin:o.origin,observationHash:hash(o)}};};
+  const SECRET_FILL="await page.locator('#pw').fill(secrets['PASS']);";
+  /** Prepares a step on the last observed document and returns the dispatch request (secret value in secrets[], as the bridge sends it). */
+  async function prepared(h:H,stepId:string,code:string,parts:{captures?:string[];uses?:{kind:'input'|'secret'|'binding';id:string}[]}={},secretValue?:string,ordinal=0){
+    const{o,evidence}=lastEvidence(h);const p=proposal(h.context,evidence,stepId,stepOp(code,parts));p.coordinate.ordinal=ordinal;
+    const proof=await h.runtime.prepare({...identity(h.context),proposal:p,requestDigest:hash(p),expiresAt:new Date(Date.now()+10000).toISOString()});
+    return{p,o,request:{...dispatch(h.context,p,proof),secrets:secretValue===undefined?[]:[{secretId:'PASS',value:secretValue,versionId:'unit',allowedOrigins:[o.origin]}]}};
+  }
+  const fillStep=(h:H,value:string,ordinal=0)=>prepared(h,'fill',SECRET_FILL,{uses:[{kind:'secret',id:'PASS'}]},value,ordinal);
   it.each(['fulfill','reject'] as const)('completes managed secret loss only after original close and consumes late %s without output reentry',async late=>{
+    vi.useFakeTimers({toFake:['Date','setTimeout','clearTimeout']});
     let originalLoss:(()=>void)|undefined;
     const h=await setup({secret:true,onLostObserver:callback=>{originalLoss=callback;}});await h.runtime.dispatch(h.request);
-    const o=(h.messages.filter(m=>m.route==='observations').at(-1)?.body as BridgeObservation).observation;
-    const evidence={kind:'observedDocument' as const,sessionId:h.context.sessionId,contextId:h.context.contextId,documentId:o.documentId,generation:o.generation,origin:o.origin,observationHash:hash(o)};
     let nativeFulfill:()=>void=()=>undefined,nativeReject:(error:Error)=>void=()=>undefined,closeFinish:()=>void=()=>undefined;
     const native=new Promise<void>((resolve,reject)=>{nativeFulfill=resolve;nativeReject=reject;});
     h.browser.observations.preparePassword=()=>Promise.resolve();
     const fill=vi.fn(()=>native);h.browser.observations.fillPassword=fill;
     vi.mocked(h.browser.close).mockImplementationOnce(()=>new Promise<void>(resolve=>{closeFinish=resolve;}));
-    const p=proposal(h.context,evidence,'fill',{kind:'fill',value:{kind:'secretRef',sourceInputId:'pass'}},{kind:'passwordControl',documentId:o.documentId,generation:o.generation});
-    const prepared=await h.runtime.prepare({pressInheritance:null,...identity(h.context),proposal:p,requestDigest:hash(p),expiresAt:new Date(Date.now()+10000).toISOString()});
-    const request={...dispatch(h.context,p,prepared),secret:{secretId:'PASS',value:'managed-unit-canary',versionId:'unit',allowedOrigins:[o.origin]}};
+    const{request}=await fillStep(h,'managed-unit-canary');
     const stderr=vi.spyOn(process.stderr,'write').mockImplementation(()=>true);
     try{
       let completed=false;const pending=h.runtime.dispatch(request).then(result=>{completed=true;return result;});
@@ -308,9 +322,9 @@ describe('durable worker consumption and recovery',()=>{
       const stopping=(h.runtime as unknown as {closing:Promise<void>}).closing;
       await Promise.resolve();expect(completed).toBe(false);
       expect((h.runtime as unknown as {busy:boolean}).busy).toBe(true);expect(h.runtime.active).toBe(true);
-      closeFinish();await stopping;
+      closeFinish();await stopping;await vi.advanceTimersByTimeAsync(12_500);
       const result=await pending;expect(result.ledger.state).toBe('UNKNOWN_OUTCOME');expect(result.ledger.outcomeCode).toBe('ACK_LOST');
-      expect((h.runtime as unknown as {busy:boolean}).busy).toBe(false);expect(h.runtime.active).toBe(false);expect(request).not.toHaveProperty('secret');
+      expect((h.runtime as unknown as {busy:boolean}).busy).toBe(false);expect(h.runtime.active).toBe(false);expect((h.runtime as unknown as {secretHolder:Map<string,unknown>}).secretHolder.size).toBe(0);
       const before=JSON.stringify(h.messages),errCount=stderr.mock.calls.length;
       const name=(await readdir(h.path)).find(f=>f.endsWith('.diagnostic.jsonl'));if(!name)throw new Error('DIAGNOSTIC');
       const diagnostic=await readFile(join(h.path,name),'utf8');
@@ -322,50 +336,42 @@ describe('durable worker consumption and recovery',()=>{
     }finally{nativeFulfill();closeFinish();stderr.mockRestore();}
   });
   it('adds a newly captured runtime value to the dispatch-local redactor before shutdown can clear it',async()=>{
-    const h=await setup();await h.runtime.dispatch(h.request);const o=(h.messages.filter(m=>m.route==='observations').at(-1)?.body as BridgeObservation).observation;
-    const evidence={kind:'observedDocument' as const,sessionId:h.context.sessionId,contextId:h.context.contextId,documentId:o.documentId,generation:o.generation,origin:o.origin,observationHash:hash(o)};
-    const p=proposal(h.context,evidence,'read',{kind:'read',bindingId:'binding-one',recipe:{kind:'visibleText',classification:'permittedBusinessData',policyRuleId:'read-policy'}},{kind:'node',ref:'e1',documentId:o.documentId,generation:o.generation});
-    const proof=await h.runtime.prepare({pressInheritance:null,...identity(h.context),proposal:p,requestDigest:hash(p),expiresAt:new Date(Date.now()+10000).toISOString()});const canary='new-runtime-é-canary';
-    h.browser.observations.invoke=()=>Promise.resolve({value:canary});h.browser.observations.withhold=async()=>{await h.runtime.stop('CONTEXT_LOST');throw new Error(canary+' '+encodeURIComponent(canary)+' '+Buffer.from(canary).toString('base64'));};
+    const h=await setup();await h.runtime.dispatch(h.request);const canary='new-runtime-é-canary';
+    h.rig.w.text['#v']=canary;
+    const{request}=await prepared(h,'read','vars["binding-one"] = await page.locator(\'#v\').innerText();',{captures:['binding-one']});
+    h.rig.session.commitCapture=()=>{void h.runtime.stop('CONTEXT_LOST');throw new Error(canary+' '+encodeURIComponent(canary)+' '+Buffer.from(canary).toString('base64'));};
     const stderr=vi.spyOn(process.stderr,'write').mockImplementation(()=>true);
-    try{const outcome=await h.runtime.dispatch(dispatch(h.context,p,proof));expect(outcome.errorMessage).toContain('[REDACTED]');const file=(await readdir(h.path)).find(f=>f.endsWith('.diagnostic.jsonl'));if(!file)throw new Error('DIAGNOSTIC');const persisted=await readFile(join(h.path,file),'utf8');for(const sink of [JSON.stringify(outcome),stderr.mock.calls.map(c=>String(c[0])).join(''),persisted])for(const variant of [canary,encodeURIComponent(canary),Buffer.from(canary).toString('base64')])expect(sink).not.toContain(variant);}
+    try{const outcome=await h.runtime.dispatch(request);expect(outcome.errorMessage).toContain('[REDACTED]');const file=(await readdir(h.path)).find(f=>f.endsWith('.diagnostic.jsonl'));if(!file)throw new Error('DIAGNOSTIC');const persisted=await readFile(join(h.path,file),'utf8');for(const sink of [JSON.stringify(outcome),stderr.mock.calls.map(c=>String(c[0])).join(''),persisted])for(const variant of [canary,encodeURIComponent(canary),Buffer.from(canary).toString('base64')])expect(sink).not.toContain(variant);}
     finally{stderr.mockRestore();}
   });
+  /** After a step that captured a value, the session fails (as commitCapture would) with `message`, having asked the runtime to stop. */
+  const failingCapture=(h:H,stop:()=>Promise<void>,message:()=>string)=>{h.rig.session.commitCapture=()=>{void stop();throw new Error(message());};};
+  const capture=(id:string)=>`vars["${id}"] = await page.locator('#v').innerText();`;
   it.each(['stderr','callback','file'] as const)('keeps prior-value redaction and immutable success when %s diagnostic delivery fails',async sink=>{
     const h=await setup({secret:true,failedOutcomeCallback:sink==='callback'});await h.runtime.dispatch(h.request);h.browser.observations.preparePassword=()=>Promise.resolve();h.browser.observations.fillPassword=()=>Promise.resolve();
-    const make=async(step:'fill'|'submit')=>{const o=(h.messages.filter(m=>m.route==='observations').at(-1)?.body as BridgeObservation).observation;const evidence={kind:'observedDocument' as const,sessionId:h.context.sessionId,contextId:h.context.contextId,documentId:o.documentId,generation:o.generation,origin:o.origin,observationHash:hash(o)};const p=proposal(h.context,evidence,step,step==='fill'?{kind:'fill',value:{kind:'secretRef',sourceInputId:'pass'}}:{kind:'assert',predicate:'title',expected:{kind:'authoredLiteral',sourceInputId:'later'}},step==='fill'?{kind:'passwordControl',documentId:o.documentId,generation:o.generation}:undefined);const proof=await h.runtime.prepare({pressInheritance:null,...identity(h.context),proposal:p,requestDigest:hash(p),expiresAt:new Date(Date.now()+10000).toISOString()});return h.runtime.dispatch({...dispatch(h.context,p,proof),...(step==='fill'?{secret:{secretId:'PASS',value:'prior-sink-canary',versionId:'unit',allowedOrigins:[o.origin]}}:{})});};
-    expect((await make('fill')).ledger.state).toBe('SUCCEEDED');const texts:string[]=[];const stderr=vi.spyOn(process.stderr,'write').mockImplementation(text=>{texts.push(String(text));if(sink==='stderr')throw new Error('stderr unavailable');return true;});
+    expect((await h.runtime.dispatch((await fillStep(h,'prior-sink-canary')).request)).ledger.state).toBe('SUCCEEDED');const texts:string[]=[];const stderr=vi.spyOn(process.stderr,'write').mockImplementation(text=>{texts.push(String(text));if(sink==='stderr')throw new Error('stderr unavailable');return true;});
     const path=join(h.path,hash(h.context.sessionId)+'.diagnostic.jsonl');if(sink==='file')await mkdir(path);
-    h.browser.observations.assertPage=async()=>{await h.runtime.stop('CANCELLED');throw new Error('prior-sink-canary '+Buffer.from('prior-sink-canary').toString('base64'));};
-    try{const outcome=await make('submit');expect(outcome.ledger.state).toBe('UNKNOWN_OUTCOME');expect(outcome.errorMessage).toContain('[REDACTED]');expect(texts.join('')).not.toContain('prior-sink-canary');expect(JSON.stringify(h.messages.filter(m=>m.route==='outcomes'))).not.toContain('prior-sink-canary');expect((h.messages.filter(m=>m.route==='outcomes')[1]?.body as BridgeOutcome).ledger.state).toBe('SUCCEEDED');if(sink!=='file')expect(await readFile(path,'utf8')).not.toContain('prior-sink-canary');else expect(await readdir(path)).toEqual([]);}
+    h.rig.w.text['#v']='captured-value';failingCapture(h,()=>h.runtime.stop('CANCELLED'),()=>'prior-sink-canary '+Buffer.from('prior-sink-canary').toString('base64'));
+    try{const outcome=await h.runtime.dispatch((await prepared(h,'submit',capture('binding-submit'),{captures:['binding-submit']})).request);expect(outcome.errorMessage).toContain('[REDACTED]');expect(texts.join('')).not.toContain('prior-sink-canary');expect(JSON.stringify(h.messages.filter(m=>m.route==='outcomes'))).not.toContain('prior-sink-canary');expect((h.messages.filter(m=>m.route==='outcomes')[1]?.body as BridgeOutcome).ledger.state).toBe('SUCCEEDED');if(sink!=='file')expect(await readFile(path,'utf8')).not.toContain('prior-sink-canary');else expect(await readdir(path)).toEqual([]);}
     finally{stderr.mockRestore();}
   });
   it.each(['CANCELLED','EXPIRED','CONTEXT_LOST'].flatMap(reason=>['immediate','delayed'].flatMap(close=>['nonsecret','secret'].map(action=>({reason:reason as 'CANCELLED'|'EXPIRED'|'CONTEXT_LOST',close,action})))))('redacts all earlier/current values through $reason/$close/$action after inventory erasure',async({reason,close,action})=>{
     const h=await setup({secret:true});await h.runtime.dispatch(h.request);h.browser.observations.preparePassword=()=>Promise.resolve();h.browser.observations.fillPassword=()=>Promise.resolve();
-    const perform=async(secret:boolean,ordinal=0)=>{const o=(h.messages.filter(m=>m.route==='observations').at(-1)?.body as BridgeObservation).observation;
-      const evidence={kind:'observedDocument' as const,sessionId:h.context.sessionId,contextId:h.context.contextId,documentId:o.documentId,generation:o.generation,origin:o.origin,observationHash:hash(o)};
-      const p=proposal(h.context,evidence,secret?'fill':'submit',secret?{kind:'fill',value:{kind:'secretRef',sourceInputId:'pass'}}:{kind:'assert',predicate:'title',expected:{kind:'authoredLiteral',sourceInputId:'later'}},secret?{kind:'passwordControl',documentId:o.documentId,generation:o.generation}:undefined);p.coordinate.ordinal=ordinal;
-      const proof=await h.runtime.prepare({pressInheritance:null,...identity(h.context),proposal:p,requestDigest:hash(p),expiresAt:new Date(Date.now()+10000).toISOString()});
-      return h.runtime.dispatch({...dispatch(h.context,p,proof),...(secret?{secret:{secretId:'PASS',value:ordinal===0?'earlier-released-é':'current-released-é',versionId:'unit',allowedOrigins:[o.origin]}}:{})});};
-    await perform(true);
+    await h.runtime.dispatch((await fillStep(h,'earlier-released-é')).request);
     let release:()=>void=()=>undefined;vi.mocked(h.browser.close).mockImplementationOnce(()=>close==='immediate'?Promise.resolve():new Promise<void>(resolve=>{release=resolve;}));
     const known=['earlier-released-é',...(action==='secret'?['current-released-é']:[]),'current-assertion-canary'],variants=known.flatMap(v=>[v,encodeURIComponent(v),Buffer.from(v).toString('base64')]);
-    const fail=async()=>{const stopped=h.runtime.stop(reason);if(close==='immediate')await stopped;throw new Error(variants.join(' '));};
-    h.browser.observations.fillPassword=fail;h.browser.observations.assertPage=fail;
-    const stderr=vi.spyOn(process.stderr,'write').mockImplementation(()=>true);const pending=perform(action==='secret',action==='secret'?1:0);
+    h.rig.w.text['#v']='captured-value';failingCapture(h,()=>h.runtime.stop(reason),()=>variants.join(' '));
+    const stderr=vi.spyOn(process.stderr,'write').mockImplementation(()=>true);
+    const step=action==='secret'?await prepared(h,'fill',SECRET_FILL+' '+capture('binding-fill'),{uses:[{kind:'secret',id:'PASS'}],captures:['binding-fill']},'current-released-é',1):await prepared(h,'submit',capture('binding-submit'),{captures:['binding-submit']});const pending=h.runtime.dispatch(step.request);
     try{await vi.waitFor(()=>{expect(h.messages.filter(m=>m.route==='outcomes')).toHaveLength(3);});const outcome=h.messages.filter(m=>m.route==='outcomes').at(-1)?.body as BridgeOutcome;expect(outcome.errorMessage).toContain('[REDACTED]');const diagnostic=(await readdir(h.path)).find(f=>f.endsWith('.diagnostic.jsonl'));if(!diagnostic)throw new Error('DIAGNOSTIC');const persisted=await readFile(join(h.path,diagnostic),'utf8');for(const sink of [JSON.stringify(outcome),stderr.mock.calls.map(c=>String(c[0])).join(''),persisted])for(const value of variants)expect(sink).not.toContain(value);expect((h.runtime as unknown as {secretValues:Set<string>}).secretValues.size).toBe(0);}
     finally{release();await pending;stderr.mockRestore();}
   });
   it.each(['trusted-pre-write','uncertain-after-call'] as const)('preserves %s secret target-change evidence without inventing refusal',async mode=>{
     const h=await setup({secret:true});await h.runtime.dispatch(h.request);
-    const observe=h.browser.observations.observe.bind(h.browser.observations);h.browser.observations.observe=async(...args)=>{const collected=await observe(...args);(collected.observation.coverage as {passwordControls:number}).passwordControls=1;return collected;};
-    const refreshed=await h.runtime.refreshObservation({...identity(h.context),expectedGeneration:1,focus:{stepText:'',targetIntents:[]}},'secret-count');const o=refreshed.observation;
-    const evidence={kind:'observedDocument' as const,sessionId:h.context.sessionId,contextId:h.context.contextId,documentId:o.documentId,generation:o.generation,origin:o.origin,observationHash:hash(o)};
-    h.browser.observations.preparePassword=()=>Promise.resolve();h.browser.observations.fillPassword=()=>Promise.reject(mode==='trusted-pre-write'?new PasswordNoEffect('TARGET_CHANGED'):new Error('TARGET_CHANGED'));
-    const action=proposal(h.context,evidence,'fill',{kind:'fill',value:{kind:'secretRef',sourceInputId:'pass'}},{kind:'passwordControl',documentId:o.documentId,generation:o.generation});
-    const prepared=await h.runtime.prepare({pressInheritance:null,...identity(h.context),proposal:action,requestDigest:hash(action),expiresAt:new Date(Date.now()+10000).toISOString()});
-    const request={...dispatch(h.context,action,prepared),secret:{secretId:'PASS',value:'released-unit-canary',versionId:'unit',allowedOrigins:[o.origin]}};
-    const result=await h.runtime.dispatch(request);expect(result.ledger.state).toBe(mode==='trusted-pre-write'?'FAILED':'UNKNOWN_OUTCOME');expect(result.ledger.outcomeCode).toBe('TARGET_CHANGED');expect(()=>validate('bridge',result,'outcome')).not.toThrow();expect(request).not.toHaveProperty('secret');
+    const refreshed=await h.runtime.refreshObservation({...identity(h.context),expectedGeneration:1,focus:{stepText:'',targetIntents:[]}},'secret-count');void refreshed;
+    h.browser.observations.preparePassword=()=>Promise.resolve();h.browser.observations.fillPassword=()=>Promise.reject(mode==='trusted-pre-write'?new PasswordNoEffect('TARGET_CHANGED'):new Error('socket hang up'));
+    const{request}=await fillStep(h,'released-unit-canary');
+    const result=await h.runtime.dispatch(request);expect(result.ledger.state).toBe(mode==='trusted-pre-write'?'FAILED':'UNKNOWN_OUTCOME');expect(result.ledger.outcomeCode).toBe(mode==='trusted-pre-write'?'TARGET_CHANGED':'ACK_LOST');expect(()=>validate('bridge',result,'outcome')).not.toThrow();expect((h.runtime as unknown as {secretHolder:Map<string,unknown>}).secretHolder.size).toBe(0);
   });
   it('excludes independent writers and refuses missing/corrupt expected journal state',async()=>{
     const path=await directory();const journal=await GuidedJournal.open(path,'session');
@@ -375,41 +381,41 @@ describe('durable worker consumption and recovery',()=>{
     await writeFile(join(path,filename),'partial');await expect(GuidedJournal.open(path,'session')).rejects.toThrow('CONTEXT_LOST');
   });
   it('fsyncs before an effect and admits only one concurrent delivery',async()=>{
-    const h=await setup();const results=await Promise.allSettled([h.runtime.dispatch(h.request),h.runtime.dispatch(h.request)]);expect(results.filter(r=>r.status==='fulfilled')).toHaveLength(1);expect(h.browser.navigateBlank).toHaveBeenCalledTimes(1);await expect(h.runtime.dispatch(h.request)).rejects.toThrow();
+    const h=await setup();const results=await Promise.allSettled([h.runtime.dispatch(h.request),h.runtime.dispatch(h.request)]);expect(results.filter(r=>r.status==='fulfilled')).toHaveLength(1);expect(h.goto).toHaveBeenCalledTimes(1);await expect(h.runtime.dispatch(h.request)).rejects.toThrow();
     expect(h.messages.map(m=>m.route)).toEqual(['bootstrap-evidence','outcomes','observations']);
   });
   it('never retries an effect after an uncertain exception and delivers bounded non-authoritative diagnostics',async()=>{
-    const h=await setup({failEffect:true});const result=await h.runtime.dispatch(h.request);expect(result.ledger.state).toBe('UNKNOWN_OUTCOME');expect(h.browser.close).toHaveBeenCalledTimes(1);await expect(h.runtime.dispatch(h.request)).rejects.toThrow();expect(h.browser.navigateBlank).toHaveBeenCalledTimes(1);expect(result.errorMessage).toBe('Error: captured-canary-private');expect(()=>validate('bridge',result,'outcome')).not.toThrow();
+    const h=await setup({failEffect:true});const result=await h.runtime.dispatch(h.request);expect(result.ledger.state).toBe('UNKNOWN_OUTCOME');expect(h.browser.close).toHaveBeenCalledTimes(1);await expect(h.runtime.dispatch(h.request)).rejects.toThrow();expect(h.goto).toHaveBeenCalledTimes(1);expect(result.errorMessage).toBeUndefined();expect(result.receipt).toMatchObject({closedCode:'OUTCOME_UNKNOWN',fenceCrossed:true});expect(()=>validate('bridge',result,'outcome')).not.toThrow();
   });
   it('preserves a definite success when its callback acknowledgement is lost',async()=>{
     const h=await setup({loseOutcomeAck:true});const result=await h.runtime.dispatch(h.request);expect(result.ledger.state).toBe('SUCCEEDED');const outcomes=h.messages.filter(m=>m.route==='outcomes');expect(outcomes).toHaveLength(1);expect((outcomes[0]?.body as BridgeOutcome).ledger.state).toBe('SUCCEEDED');expect(h.browser.close).toHaveBeenCalledOnce();
   });
   it('redacts the in-flight local value when stop has already wiped its inventory',async()=>{
-    const h=await setup();const input=h.context.authoredInputs.inputs[0];if(!input||!('value' in input))throw new Error('INPUT');
+    const h=await setup();await h.runtime.dispatch(h.request);const input=h.context.authoredInputs.inputs[0];if(!input||!('value' in input))throw new Error('INPUT');
     let release:()=>void=()=>undefined;vi.mocked(h.browser.close).mockImplementationOnce(()=>new Promise<void>(resolve=>{release=resolve;}));
     const stderr=vi.spyOn(process.stderr,'write').mockImplementation(()=>true);
-    vi.mocked(h.browser.navigateBlank).mockImplementationOnce(()=>{void h.runtime.stop('CANCELLED');return Promise.reject(new Error(input.value));});
-    const pending=h.runtime.dispatch(h.request);
-    try{await vi.waitFor(()=>{expect(h.messages.filter(message=>message.route==='outcomes')).toHaveLength(1);});const outcome=h.messages.find(message=>message.route==='outcomes')?.body as BridgeOutcome;expect(outcome.errorMessage).toBe('Error: [REDACTED]');expect(JSON.stringify(h.messages)).not.toContain(input.value);expect(stderr).toHaveBeenCalledWith('Error: [REDACTED]\n');}
+    h.rig.w.text['#v']='captured-value';failingCapture(h,()=>h.runtime.stop('CANCELLED'),()=>input.value);
+    const pending=h.runtime.dispatch((await prepared(h,'submit',capture('binding-submit'),{captures:['binding-submit']})).request);
+    try{await vi.waitFor(()=>{expect(h.messages.filter(message=>message.route==='outcomes')).toHaveLength(2);});const outcome=h.messages.filter(message=>message.route==='outcomes')[1]?.body as BridgeOutcome;expect(outcome.errorMessage).toBe('Error: [REDACTED]');expect(JSON.stringify(h.messages)).not.toContain(input.value);expect(stderr).toHaveBeenCalledWith('Error: [REDACTED]\n');}
     finally{release();await pending;stderr.mockRestore();}
   });
   it('cancellation before consume prevents invocation and lease expiry autonomously closes',async()=>{
-    const h=await setup();await h.runtime.stop('CANCELLED');await expect(h.runtime.dispatch(h.request)).rejects.toThrow('CONTEXT_LOST');expect(h.browser.navigateBlank).not.toHaveBeenCalled();
+    const h=await setup();await h.runtime.stop('CANCELLED');await expect(h.runtime.dispatch(h.request)).rejects.toThrow('CONTEXT_LOST');expect(h.goto).not.toHaveBeenCalled();
     vi.useFakeTimers({toFake:['Date','setTimeout','clearTimeout']});const timed=await setup({leaseMs:80});await vi.advanceTimersByTimeAsync(81);expect(timed.runtime.active).toBe(false);expect(timed.browser.close).toHaveBeenCalledOnce();
   });
   it('reports a definite failed target refusal after consume and before any browser invocation',async()=>{
-    const h=await setup();vi.mocked(h.browser.blankMatches).mockResolvedValueOnce(false);const result=await h.runtime.dispatch(h.request);expect(result.ledger.state).toBe('FAILED');expect(result.ledger.outcomeCode).toBe('TARGET_CHANGED');expect(h.browser.navigateBlank).not.toHaveBeenCalled();
+    const h=await setup();vi.mocked(h.browser.blankMatches).mockResolvedValueOnce(false);const result=await h.runtime.dispatch(h.request);expect(result.ledger.state).toBe('FAILED');expect(result.ledger.outcomeCode).toBe('TARGET_CHANGED');expect(h.goto).not.toHaveBeenCalled();
   });
   it('cancellation after durable consume but before invocation prevents the browser call',async()=>{
     const h=await setup();vi.mocked(h.browser.blankMatches).mockImplementationOnce(async()=>{await h.runtime.stop('CANCELLED');return true;});
-    const result=await h.runtime.dispatch(h.request);expect(result.ledger.state).toBe('UNKNOWN_OUTCOME');expect(h.browser.navigateBlank).not.toHaveBeenCalled();
+    const result=await h.runtime.dispatch(h.request);expect(result.ledger.state).toBe('FAILED');expect(result.receipt).toMatchObject({closedCode:'CANCELLED',fenceCrossed:false});expect(h.goto).not.toHaveBeenCalled();
   });
   it('cancellation after an application effect cannot commit a success or retry',async()=>{
-    const h=await setup();let effects=0;vi.mocked(h.browser.navigateBlank).mockImplementationOnce(async()=>{effects++;await h.runtime.stop('CANCELLED');});
+    const h=await setup();let effects=0;h.goto.mockImplementationOnce(async()=>{effects++;await h.runtime.stop('CANCELLED');});
     const result=await h.runtime.dispatch(h.request);expect(effects).toBe(1);expect(result.ledger.state).toBe('UNKNOWN_OUTCOME');await expect(h.runtime.dispatch(h.request)).rejects.toThrow('CONTEXT_LOST');expect(effects).toBe(1);
   });
   it('retains cumulative allocations while admitting appended prospective consumers',async()=>{
-    const h=await setup();const next=structuredClone(h.context);next.materializationRevision++;next.allocations[0]?.consumers.push({stepId:'submit',argumentSlot:'assert.expected'});await expect(h.runtime.update(next)).resolves.toEqual(identity(next));const accepted=hash((h.runtime as unknown as {context:unknown}).context);
+    const h=await setup();const next=structuredClone(h.context);next.materializationRevision++;next.allocations[0]?.consumers.push({stepId:'submit'});await expect(h.runtime.update(next)).resolves.toEqual(identity(next));const accepted=hash((h.runtime as unknown as {context:unknown}).context);
     const dropped=structuredClone(next);dropped.materializationRevision++;dropped.allocations[0]?.consumers.shift();await expect(h.runtime.update(dropped)).rejects.toThrow('CONTEXT_REVISION');expect(hash((h.runtime as unknown as {context:unknown}).context)).toBe(accepted);
     const changed=structuredClone(next);changed.materializationRevision++;if(changed.allocations[0])changed.allocations[0].needId='replacement';await expect(h.runtime.update(changed)).rejects.toThrow('CONTEXT_REVISION');expect(hash((h.runtime as unknown as {context:unknown}).context)).toBe(accepted);
   });
@@ -417,16 +423,13 @@ describe('durable worker consumption and recovery',()=>{
     const h=await setup({limits});await h.runtime.dispatch(h.request);
     const original=h.context.allocations[0];if(!original)throw new Error('ALLOCATION');h.context.allocations.push({...original,bindingId:'second',needId:'need-two'});h.context.materializationRevision++;await h.runtime.update(h.context);
     const read=async(bindingId:string,ordinal:number)=>{
-      const observation=(h.messages.filter(m=>m.route==='observations').at(-1)?.body as BridgeObservation).observation;
-      const evidence={kind:'observedDocument' as const,sessionId:h.context.sessionId,contextId:h.context.contextId,documentId:observation.documentId,generation:observation.generation,origin:observation.origin,observationHash:hash(observation)};
-      const operation:Action['operation']={kind:'read',bindingId,recipe:{kind:'visibleText',classification:'permittedBusinessData',policyRuleId:'read-policy'}};
-      const p=proposal(h.context,evidence,'read',operation,{kind:'node',ref:'e1',documentId:evidence.documentId,generation:evidence.generation});p.coordinate.ordinal=ordinal;
-      const proof=await h.runtime.prepare({pressInheritance:null,...identity(h.context),proposal:p,requestDigest:hash(p),expiresAt:new Date(Date.now()+10_000).toISOString()});const request=dispatch(h.context,p,proof);return{outcome:await h.runtime.dispatch(request),p};
+      h.rig.w.text['#v']='ab';
+      const{p,request}=await prepared(h,'read',`vars["${bindingId}"] = await page.locator('#v').innerText();`,{captures:[bindingId]},undefined,ordinal);return{outcome:await h.runtime.dispatch(request),p};
     };
-    const first=await read('binding-one',0);expect(first.outcome.ledger.state).toBe('SUCCEEDED');if(!first.outcome.availability||first.p.operation.kind!=='read'||!first.p.executionEvidence.origin)throw new Error('READ');
-    h.context.producers.push({bindingId:'binding-one',producerAdmissionId:first.outcome.ledger.admission.admissionId,coordinate:first.p.coordinate,origin:first.p.executionEvidence.origin,recipe:first.p.operation.recipe,availability:first.outcome.availability});h.context.materializationRevision++;await h.runtime.update(h.context);
+    const first=await read('binding-one',0);expect(first.outcome.ledger.state).toBe('SUCCEEDED');if(first.outcome.availability.length===0||!first.p.executionEvidence.origin)throw new Error('READ');
+    h.context.producers.push({bindingId:'binding-one',producerAdmissionId:first.outcome.ledger.admission.admissionId,coordinate:first.p.coordinate,origin:first.p.executionEvidence.origin,availability:(()=>{const a=first.outcome.availability[0];if(!a)throw new Error('AVAILABILITY');return a;})()});h.context.materializationRevision++;await h.runtime.update(h.context);
     const other=await setup();const foreign=structuredClone(other.context);foreign.producers=structuredClone(h.context.producers);foreign.materializationRevision++;const foreignBefore=hash((other.runtime as unknown as {context:unknown}).context);await expect(other.runtime.update(foreign)).rejects.toThrow('CONTEXT_LOST');expect(hash((other.runtime as unknown as {context:unknown}).context)).toBe(foreignBefore);
-    const second=await read('second',1);expect(second.outcome.ledger.state).not.toBe('SUCCEEDED');expect(second.outcome.availability).toBeNull();expect(h.runtime.active).toBe(false);expect(JSON.stringify(h.messages.filter(m=>m.route==='outcomes'))).not.toContain('"value"');
+    const second=await read('second',1);expect(second.outcome.ledger.state).not.toBe('SUCCEEDED');expect(second.outcome.availability).toEqual([]);expect(h.runtime.active).toBe(false);expect(JSON.stringify(h.messages.filter(m=>m.route==='outcomes'))).not.toContain('"value"');
   });
   it('retains capacity until actual browser close and releases private runtime references even when close fails',async()=>{
     const h=await setup();let finish:(()=>void)|undefined;vi.mocked(h.browser.close).mockImplementationOnce(()=>new Promise<void>(resolve=>{finish=resolve;}));const stopping=h.runtime.stop('CANCELLED');await Promise.resolve();expect(h.runtime.active).toBe(true);expect(h.messages.filter(m=>m.route==='lifecycle')).toHaveLength(0);if(!finish)throw new Error('CLOSE');finish();await stopping;expect(h.runtime.active).toBe(false);
@@ -443,22 +446,27 @@ describe('durable worker consumption and recovery',()=>{
     const terminate=vi.fn(()=>Promise.resolve());const browser={...fixture.browser,terminate};const runtime=new GuidedRuntime(context,{workerId:context.workerId,allowedDomains: TEST_DOMAINS, journalDirectory:await directory(),launch:()=>{entered=true;return gate;},callback:()=>Promise.resolve()});
     const starting=runtime.start().catch((error:unknown)=>error instanceof Error?error.message:'unexpected');await expect.poll(()=>entered).toBe(true);const stopping=runtime.stop('CANCELLED');expect(runtime.active).toBe(true);if(!release)throw new Error('LAUNCH');release(browser);await stopping;expect(await starting).toBe('CONTEXT_LOST');expect(terminate).toHaveBeenCalledOnce();expect(runtime.active).toBe(false);
   });
+  it('accepts a generation-0 refresh on the blank page as the first turn observation (FIX-8, runtime.ts:635)',async()=>{
+    const h=await setup();const refreshed=await h.runtime.refreshObservation({...identity(h.context),expectedGeneration:0,focus:{stepText:'',targetIntents:[]}},'blank');expect(refreshed.observation.generation).toBe(1);expect(h.goto).not.toHaveBeenCalled();
+  });
   it('refreshes a new generation, correlates its committed callback and invalidates old preparation without another action',async()=>{
-    const h=await setup();const observe=vi.spyOn(h.browser.observations,'observe');await expect(h.runtime.refreshObservation({...identity(h.context),expectedGeneration:0,focus:{stepText:'',targetIntents:[]}},'blank')).rejects.toThrow('TARGET_CHANGED');await h.runtime.dispatch(h.request);
+    const h=await setup();const observe=vi.spyOn(h.browser.observations,'observe');await h.runtime.dispatch(h.request);
+    // FIX-8 (src/guided/runtime.ts:635): generation 0 is accepted only while the blank bootstrap evidence is current; after dispatch it is stale.
+    await expect(h.runtime.refreshObservation({...identity(h.context),expectedGeneration:0,focus:{stepText:'',targetIntents:[]}},'blank')).rejects.toThrow('TARGET_CHANGED');
     const old=(h.messages.filter(m=>m.route==='observations').at(-1)?.body as BridgeObservation).observation;
     const evidence={kind:'observedDocument' as const,sessionId:h.context.sessionId,contextId:h.context.contextId,documentId:old.documentId,generation:old.generation,origin:old.origin,observationHash:hash(old)};
-    const next=proposal(h.context,evidence,'next',{kind:'navigate',destinationInputId:'input-next'});const prepared=await h.runtime.prepare({pressInheritance:null,...identity(h.context),proposal:next,requestDigest:hash(next),expiresAt:new Date(Date.now()+10_000).toISOString()});
+    const next=proposal(h.context,evidence,'next',stepOp('await page.goto(inputs["input-next"]);',{uses:[{kind:'input',id:'input-next'}]}));const prepared=await h.runtime.prepare({...identity(h.context),proposal:next,requestDigest:hash(next),expiresAt:new Date(Date.now()+10_000).toISOString()});
     const request={...identity(h.context),expectedGeneration:old.generation,focus:{stepText:'',targetIntents:[]}};const refreshed=await h.runtime.refreshObservation(request,'refresh-one');expect(refreshed.observation.generation).toBe(old.generation+1);expect(h.runtime.currentObservation(refreshed)).toEqual(refreshed);expect(h.messages.at(-1)?.key).toBe(`oref-${hash({identity:identity(request),idempotencyKey:'refresh-one',requestDigest:hash(request)})}`);
     await expect(h.runtime.dispatch(dispatch(h.context,next,prepared))).rejects.toThrow('PREPARATION_DENIED');await expect(h.runtime.refreshObservation(request,'stale-new-key')).rejects.toThrow('TARGET_CHANGED');
-    const newer=await h.runtime.refreshObservation({...identity(h.context),expectedGeneration:refreshed.observation.generation,focus:{stepText:'',targetIntents:[]}},'refresh-two');expect(newer.observation.generation).toBe(refreshed.observation.generation+1);expect(()=>h.runtime.currentObservation(refreshed)).toThrow('TARGET_CHANGED');expect(observe).toHaveBeenCalledTimes(3);expect(h.browser.navigateBlank).toHaveBeenCalledOnce();expect(h.messages.filter(m=>m.route==='outcomes')).toHaveLength(1);
+    const newer=await h.runtime.refreshObservation({...identity(h.context),expectedGeneration:refreshed.observation.generation,focus:{stepText:'',targetIntents:[]}},'refresh-two');expect(newer.observation.generation).toBe(refreshed.observation.generation+1);expect(()=>h.runtime.currentObservation(refreshed)).toThrow('TARGET_CHANGED');expect(observe).toHaveBeenCalledTimes(3);expect(h.goto).toHaveBeenCalledOnce();expect(h.messages.filter(m=>m.route==='outcomes')).toHaveLength(1);
   });
   it('does not expose unacknowledged refresh evidence and rejects late acknowledgement after cancellation',async()=>{
     let entered:(()=>void)|undefined,release:(()=>void)|undefined;const entering=new Promise<void>(resolve=>{entered=resolve;});const hold=new Promise<void>(resolve=>{release=resolve;});
     const h=await setup({observationCallback:(_body,key)=>{if(key){entered?.();return hold;}return Promise.resolve();}});await h.runtime.dispatch(h.request);const request={...identity(h.context),expectedGeneration:1,focus:{stepText:'',targetIntents:[]}};const pending=h.runtime.refreshObservation(request,'hold');await entering;
-    await expect(h.runtime.refreshObservation(request,'busy')).rejects.toThrow('BUSY');expect(()=>h.runtime.currentObservation(h.messages.at(-1)?.body)).toThrow('BUSY');await h.runtime.stop('CANCELLED');if(!release)throw new Error('ACK');release();await expect(pending).rejects.toThrow('CONTEXT_LOST');expect(h.browser.navigateBlank).toHaveBeenCalledOnce();expect(h.runtime.active).toBe(false);
+    await expect(h.runtime.refreshObservation(request,'busy')).rejects.toThrow('BUSY');expect(()=>h.runtime.currentObservation(h.messages.at(-1)?.body)).toThrow('BUSY');await h.runtime.stop('CANCELLED');if(!release)throw new Error('ACK');release();await expect(pending).rejects.toThrow('CONTEXT_LOST');expect(h.goto).toHaveBeenCalledOnce();expect(h.runtime.active).toBe(false);
   });
   it('reserves refresh count and remaining byte capacity without resetting budgets or running extra effects',async()=>{
-    const h=await setup({limits:{maxObservations:2}});const observe=vi.spyOn(h.browser.observations,'observe');await h.runtime.dispatch(h.request);await h.runtime.refreshObservation({...identity(h.context),expectedGeneration:1,focus:{stepText:'',targetIntents:[]}},'last');await expect(h.runtime.refreshObservation({...identity(h.context),expectedGeneration:2,focus:{stepText:'',targetIntents:[]}},'exhausted')).rejects.toThrow('BUDGET_EXCEEDED');expect(observe).toHaveBeenCalledTimes(2);expect(h.browser.navigateBlank).toHaveBeenCalledOnce();
+    const h=await setup({limits:{maxObservations:2}});const observe=vi.spyOn(h.browser.observations,'observe');await h.runtime.dispatch(h.request);await h.runtime.refreshObservation({...identity(h.context),expectedGeneration:1,focus:{stepText:'',targetIntents:[]}},'last');await expect(h.runtime.refreshObservation({...identity(h.context),expectedGeneration:2,focus:{stepText:'',targetIntents:[]}},'exhausted')).rejects.toThrow('BUDGET_EXCEEDED');expect(observe).toHaveBeenCalledTimes(2);expect(h.goto).toHaveBeenCalledOnce();
     const bytes=await setup({limits:{maxSanitizedEvidenceBytesTotal:700,maxObservationBytes:700}});const collect=vi.spyOn(bytes.browser.observations,'observe');await bytes.runtime.dispatch(bytes.request);const first=(bytes.messages.filter(m=>m.route==='observations').at(-1)?.body as BridgeObservation).observation;const remaining=700-Buffer.byteLength(JSON.stringify(first));await expect(bytes.runtime.refreshObservation({...identity(bytes.context),expectedGeneration:1,focus:{stepText:'',targetIntents:[]}},'byte-limit')).rejects.toThrow('BUDGET_EXCEEDED');expect(collect.mock.calls[1]?.[0]).toBe(remaining);expect(bytes.messages.filter(m=>m.route==='observations')).toHaveLength(1);
   });
   it('stops on a lost refresh callback acknowledgement without changing already successful action outcomes',async()=>{
@@ -479,13 +487,13 @@ describe('durable worker consumption and recovery',()=>{
     const h=await setup();await expect(h.runtime.dispatch({...h.request,ownerFence:2})).rejects.toThrow('IDENTITY_MISMATCH');await expect(h.runtime.dispatch({...h.request,versions:{...h.request.versions,contract:1}})).rejects.toThrow('SCHEMA');
     expect(()=>validate('runner-context',{...h.context,limits:{...h.context.limits,maxRuntimeValues:33}})).toThrow('SCHEMA');
     const altered=structuredClone(h.request);altered.proposal.executionEvidence={...altered.proposal.executionEvidence,origin:'https://example.test'} as typeof altered.proposal.executionEvidence;await expect(h.runtime.dispatch(altered)).rejects.toThrow('SCHEMA');
-    const before=hash((h.runtime as unknown as {context:unknown}).context);await expect(h.runtime.update({...h.context,authoredInputsHash:'b'.repeat(64)})).rejects.toThrow('INPUT_IDENTITY');expect(hash((h.runtime as unknown as {context:unknown}).context)).toBe(before);expect(h.browser.navigateBlank).not.toHaveBeenCalled();
+    const before=hash((h.runtime as unknown as {context:unknown}).context);await expect(h.runtime.update({...h.context,authoredInputsHash:'b'.repeat(64)})).rejects.toThrow('INPUT_IDENTITY');expect(hash((h.runtime as unknown as {context:unknown}).context)).toBe(before);expect(h.goto).not.toHaveBeenCalled();
   });
 });
 
 describe('guided session recording on the runtime (STUDIO-OBS-013 AC-1, AC-2)', () => {
   type Route = Parameters<GuidedRuntimeOptions['callback']>[0];
-  async function recorded(options:{recorder?:boolean;ready?:boolean;effect?:'ok'|'unknown'|'targetChanged'|'targetChangedAfterNative';csiId?:string;openGate?:Promise<void>;putGate?:Promise<void>}={}){
+  async function recorded(options:{recorder?:boolean;ready?:boolean;effect?:'ok'|'unknown'|'targetChanged';csiId?:string;openGate?:Promise<void>;putGate?:Promise<void>}={}){
     const context=guidedContext('https://example.test');const path=await directory();const evidenceRoot=await directory();
     const objects=new Map<string,Uint8Array>();
     const store={async put(request:PutObjectRequest){await options.putGate;objects.set(request.key,request.body.kind==='bytes'?request.body.data:await readFile(request.body.path));}};
@@ -494,14 +502,15 @@ describe('guided session recording on the runtime (STUDIO-OBS-013 AC-1, AC-2)', 
     const allocatedDirectories:string[]=[];
     let opening=0;const gated:GuidedRecorder={async open(session){opening++;await options.openGate;const recording=await recorder.open(session);if(recording.directory===null)throw new Error('RECORDING_DIRECTORY_NOT_ALLOCATED');allocatedDirectories.push(recording.directory);return recording;}};
     const messages:{route:Route;body:unknown;key?:string}[]=[];const launches:unknown[][]=[];let video:string|null=null;
+    const rig=newRig('about:blank');const goto=vi.fn(()=>{rig.w.effects.push('goto');return options.effect==='unknown'?Promise.reject(new Error('lost')):Promise.resolve();});rig.page.goto=goto;
     const browser:GuidedBrowser={evidence:{kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:randomUUID(),bootstrapId:randomUUID(),documentId:randomUUID(),url:'about:blank',origin:null,generation:0},blankMatches:vi.fn(()=>Promise.resolve(true)),
-      navigateBlank:vi.fn(()=>options.effect==='unknown'?Promise.reject(new Error('lost')):options.effect==='targetChangedAfterNative'?Promise.reject(new Error('TARGET_CHANGED')):Promise.resolve()),close:vi.fn(()=>Promise.resolve()),terminate:vi.fn(()=>Promise.resolve()),orderlyClosed:()=>true,recordedVideo:()=>Promise.resolve(video),
-      observations:sessionStub({withhold:()=>Promise.resolve(),observe:()=>Promise.resolve({observation:{schemaVersion:3,sessionId:context.sessionId,scopeHash:context.scopeHash,documentId:'page-document',generation:1,origin:'https://example.test',observedAt:new Date().toISOString(),coverage:{withheldRegions:0,unsupportedRegions:0,passwordControls:0},projection:{projected:false,tier:null,totalNodes:1,shownNodes:1,notShown:0,outlineBytes:15},readRuleId:null,outline:'- text "x" [e1]',facts:{e1:{role:'text',name:'x',editable:false, nameComplete: true, ownTextComplete: true,evidence:'x',evidenceSegments:[]}}},json:'',bytes:0,observationHash:''}),dispose:()=>Promise.resolve()})};
+      handle:fakeHandle(rig),close:vi.fn(()=>Promise.resolve()),terminate:vi.fn(()=>Promise.resolve()),orderlyClosed:()=>true,recordedVideo:()=>Promise.resolve(video),
+      observations:Object.assign(rig.session,{withhold:()=>Promise.resolve(),observe:()=>Promise.resolve({observation:{schemaVersion:3,sessionId:context.sessionId,scopeHash:context.scopeHash,documentId:'page-document',generation:1,origin:'https://example.test',observedAt:new Date().toISOString(),coverage:{withheldRegions:0,unsupportedRegions:0,passwordControls:0},projection:{projected:false,tier:null,totalNodes:1,shownNodes:1,notShown:0,outlineBytes:15},outline:'- text "x" [e1]',facts:{e1:{role:'text',name:'x',editable:false, nameComplete: true, ownTextComplete: true,evidence:'x',evidenceSegments:[]}}},json:'',bytes:0,observationHash:''}),dispose:()=>Promise.resolve()})};
     const runtime=new GuidedRuntime(context,{workerId:context.workerId,allowedDomains: TEST_DOMAINS, journalDirectory:path,...(options.recorder===false?{}:{recorder:gated}),csiId:options.csiId??'CSI-123',
       launch:async(...args:unknown[])=>{launches.push(args);const request=args[3] as GuidedRecordingRequest|undefined;if(request){request.ready(options.ready??true);video=join(request.dir,'page.webm');const bytes=Buffer.alloc(4096,1);bytes.set(WEBM_MAGIC,0);await writeFile(video,bytes);}return browser;},
       callback:(route,body,key)=>{messages.push({route,body,...(key?{key}:{})});return Promise.resolve();}});
     cleanup.push(()=>runtime.stop('CANCELLED'));
-    return {context,runtime,messages,launches,objects,browser,evidenceRoot,allocatedDirectories,effect:options.effect,opening:()=>opening};
+    return {context,runtime,messages,launches,objects,browser,goto,rig,evidenceRoot,allocatedDirectories,effect:options.effect,opening:()=>opening};
   }
   async function assertRecordingCleanup(h:Awaited<ReturnType<typeof recorded>>):Promise<void>{
     // Capture the actual allocated leaf even when cancellation prevents browser launch.
@@ -529,8 +538,8 @@ describe('guided session recording on the runtime (STUDIO-OBS-013 AC-1, AC-2)', 
     await inspect(h.evidenceRoot,0,null,null);expect(nodes).toBe(5);
   }
   async function navigate(h:Awaited<ReturnType<typeof recorded>>){
-    await h.runtime.start();const evidence=(h.messages[0]?.body as BridgeBootstrap).executionEvidence;const p=proposal(h.context,evidence,'nav',{kind:'navigate',destinationInputId:'input-nav'});
-    const prep=await h.runtime.prepare({pressInheritance:null,...identity(h.context),proposal:p,requestDigest:hash(p),expiresAt:new Date(Date.now()+10_000).toISOString()});const request=dispatch(h.context,p,prep);
+    await h.runtime.start();const evidence=(h.messages[0]?.body as BridgeBootstrap).executionEvidence;const p=proposal(h.context,evidence,'nav',NAV_OP);
+    const prep=await h.runtime.prepare({...identity(h.context),proposal:p,requestDigest:hash(p),expiresAt:new Date(Date.now()+10_000).toISOString()});const request=dispatch(h.context,p,prep);
     // A pre-native target refusal happens after immutable preparation, at the final guard.
     if(h.effect==='targetChanged')vi.mocked(h.browser.blankMatches).mockResolvedValueOnce(false);
     return {request,outcome:await h.runtime.dispatch(request)};
@@ -556,13 +565,13 @@ describe('guided session recording on the runtime (STUDIO-OBS-013 AC-1, AC-2)', 
     expect(h.runtime.active).toBe(false);expect(h.messages.map(m=>m.route)).not.toContain('recording-evidence');
     release();await h.runtime.recordingSettled;expect(h.messages.at(-1)?.route).toBe('recording-evidence');
   });
-  it.each([['unknown','UNKNOWN_OUTCOME',null],['targetChanged','FAILED',null],['targetChangedAfterNative','UNKNOWN_OUTCOME',null]] as const)('stamps endMs per outcome for %s effects', async (effect,state,endMs) => {
+  it.each([['unknown','UNKNOWN_OUTCOME',null],['targetChanged','FAILED',null]] as const)('stamps endMs per outcome for %s effects', async (effect,state,endMs) => {
     const h=await recorded({effect});const stderr=vi.spyOn(process.stderr,'write').mockImplementation(()=>true);let spent:Awaited<ReturnType<typeof navigate>>['request']|undefined;
     try{const {request,outcome}=await navigate(h);spent=request;expect(outcome.ledger.state).toBe(state);expect(outcome.ledger.admission).toEqual(request.ledger.admission);expect(outcome.ledger.preparationId).toBe(request.preparationId);}finally{stderr.mockRestore();}
     await h.runtime.recordingSettled;const body=h.messages.at(-1)?.body as RecordingEvidenceBody;
     expect(body.state).toBe('STORED');expect(h.launches).toHaveLength(1);expect(h.runtime.accepting).toBe(false);
-    if(effect==='targetChanged'){expect(h.browser.navigateBlank).not.toHaveBeenCalled();expect(body.timings).toEqual([]);}
-    else{expect(h.browser.navigateBlank).toHaveBeenCalledOnce();expect(body.timings).toEqual([expect.objectContaining({startMs:10,endMs})]);}
+    if(effect==='targetChanged'){expect(h.goto).not.toHaveBeenCalled();expect(body.timings).toEqual([]);}
+    else{expect(h.goto).toHaveBeenCalledOnce();expect(body.timings).toEqual([expect.objectContaining({startMs:10,endMs})]);}
     await expect(h.runtime.dispatch(spent)).rejects.toThrow('CONTEXT_LOST');
   });
   it('reports a recorder that never attached as UNAVAILABLE with no timings and no video object', async () => {
@@ -628,7 +637,7 @@ describe('STUDIO-OBS-014 AC-1 guided learning takes no field rules (ar-mounted-r
   });
 });
 describe('REL-001 the failed start step and the launch error stay visible',()=>{
-  const blankBrowser=(context:ReturnType<typeof guidedContext>,blank:boolean):GuidedBrowser=>({evidence:{kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:randomUUID(),documentId:randomUUID(),bootstrapId:randomUUID(),url:'about:blank',origin:null,generation:0},blankMatches:()=>Promise.resolve(blank),navigateBlank:()=>Promise.resolve(),close:()=>Promise.resolve(),terminate:vi.fn(()=>Promise.resolve()),orderlyClosed:()=>true,observations:sessionStub({withhold:()=>Promise.resolve(),observe:()=>Promise.reject(new Error('unused'))})});
+  const blankBrowser=(context:ReturnType<typeof guidedContext>,blank:boolean):GuidedBrowser=>({evidence:{kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:randomUUID(),documentId:randomUUID(),bootstrapId:randomUUID(),url:'about:blank',origin:null,generation:0},blankMatches:()=>Promise.resolve(blank),close:()=>Promise.resolve(),terminate:vi.fn(()=>Promise.resolve()),orderlyClosed:()=>true,observations:sessionStub({withhold:()=>Promise.resolve(),observe:()=>Promise.reject(new Error('unused'))})});
   it('keeps a plain launch rejection as the cause and records LAUNCH',async()=>{
     const context=guidedContext('https://example.test');const original=new Error('launch exploded');
     const runtime=new GuidedRuntime(context,{workerId:context.workerId,allowedDomains: TEST_DOMAINS, journalDirectory:await directory(),launch:()=>Promise.reject(original),callback:()=>Promise.resolve()});
@@ -647,50 +656,7 @@ describe('REL-001 the failed start step and the launch error stay visible',()=>{
   });
 });
 
-describe('ADR-SC-007 node targets: prepare proof, dispatch through the session, observation windows',()=>{
-  const TARGET={locator:[{by:'testId' as const,value:'source'}],tier:'testId' as const,identity:{role:'text',name:null}};
-  async function nodeProposal(h:Awaited<ReturnType<typeof setup>>,operation:Action['operation']={kind:'click'}){
-    await h.runtime.dispatch(h.request);const o=(h.messages.filter(m=>m.route==='observations').at(-1)?.body as BridgeObservation).observation;
-    const evidence={kind:'observedDocument' as const,sessionId:h.context.sessionId,contextId:h.context.contextId,documentId:o.documentId,generation:o.generation,origin:o.origin,observationHash:hash(o)};
-    return{o,p:proposal(h.context,evidence,'submit',operation,{kind:'node',ref:'e1',documentId:o.documentId,generation:o.generation})};
-  }
-  const prepare=(h:Awaited<ReturnType<typeof setup>>,p:Action)=>h.runtime.prepare({pressInheritance:null,...identity(h.context),proposal:p,requestDigest:hash(p),expiresAt:new Date(Date.now()+10_000).toISOString()});
-
-  it('puts the prepared target in the proof and acts through session.invoke with that target in the learn profile',async()=>{
-    const h=await setup();const prepareTarget=vi.fn(()=>Promise.resolve(TARGET));const invoke=vi.fn(()=>Promise.resolve({}));
-    h.browser.observations.prepareTarget=prepareTarget;h.browser.observations.invoke=invoke;
-    const{o,p}=await nodeProposal(h);const proof=await prepare(h,p);
-    expect(proof.target).toEqual(TARGET);
-    const authority = (prepareTarget.mock.calls[0] as unknown as [{ continuityAuthority: string }])[0].continuityAuthority;
-    expect(authority).toMatch(/^[a-f0-9]{64}$/u);
-    expect(prepareTarget).toHaveBeenCalledWith({ref:'e1',documentId:o.documentId,generation:o.generation,origin:o.origin,operation:{kind:'click'},authoredLiteral:null,pressInheritance:null,continuityAuthority:authority});
-    await h.runtime.dispatch(dispatch(h.context,p,proof));
-    expect(invoke).toHaveBeenCalledOnce();
-    const[request]=invoke.mock.calls[0] as unknown as [{resolved:unknown;profile:string;expect:unknown;readRuleId:unknown}];
-    expect(request).toMatchObject({resolved:TARGET,profile:'learn',expect:{documentId:o.documentId,generation:o.generation},readRuleId:null});
-  });
-
-  it('refuses a dispatch whose ledger hash was computed without the prepared target',async()=>{
-    const h=await setup();h.browser.observations.prepareTarget=()=>Promise.resolve(TARGET);const invoke=vi.fn(()=>Promise.resolve({}));h.browser.observations.invoke=invoke;
-    const{p}=await nodeProposal(h);const proof=await prepare(h,p);const request=dispatch(h.context,p,{...proof,target:null});
-    await expect(h.runtime.dispatch(request)).rejects.toThrow('ADMISSION_DENIED');expect(invoke).not.toHaveBeenCalled();
-  });
-
-  it.each(['OPTION_NOT_PRESENT','NO_DURABLE_LOCATOR','READ_NOT_ALLOWED','TARGET_CHANGED'])('lets the closed prepare refusal %s leave unchanged and stores nothing',async code=>{
-    const h=await setup();h.browser.observations.prepareTarget=()=>Promise.reject(new Error(code));
-    const{p}=await nodeProposal(h);await expect(prepare(h,p)).rejects.toThrow(code);
-    await expect(h.runtime.dispatch(dispatch(h.context,p,{...(await(async()=>{h.browser.observations.prepareTarget=()=>Promise.resolve(TARGET);return prepare(h,p);})())}))).resolves.toMatchObject({ledger:{state:'SUCCEEDED'}});
-  });
-
-  it('hands G1 the selectOption authored literal, and nothing for a binding-sourced value or another operation',async()=>{
-    const h=await setup();await h.runtime.dispatch(h.request);const o=(h.messages.filter(m=>m.route==='observations').at(-1)?.body as BridgeObservation).observation;
-    const evidence={kind:'observedDocument' as const,sessionId:h.context.sessionId,contextId:h.context.contextId,documentId:o.documentId,generation:o.generation,origin:o.origin,observationHash:hash(o)};
-    const literal=(operation:Action['operation'])=>(h.runtime as unknown as {authoredLiteral(p:Action):string|null}).authoredLiteral(proposal(h.context,evidence,'nav',operation));
-    expect(literal({kind:'selectOption',value:{kind:'authoredLiteral',sourceInputId:'input-nav'}})).toBe('https://example.test/source');
-    expect(literal({kind:'selectOption',value:{kind:'binding',bindingId:'binding-one'}})).toBeNull();
-    expect(literal({kind:'fill',value:{kind:'authoredLiteral',sourceInputId:'input-nav'}})).toBeNull();
-  });
-
+describe('observation windows after a step',()=>{
   it('passes the refresh focus to the observation and ends a deadline as the OBSERVATION_DEADLINE refusal',async()=>{
     const h=await setup();await h.runtime.dispatch(h.request);const observe=vi.spyOn(h.browser.observations,'observe');
     const focus={stepText:'Click the Save button',targetIntents:['Save']};
@@ -710,7 +676,7 @@ describe('ADR-SC-007 node targets: prepare proof, dispatch through the session, 
     gObserve.mockRejectedValue(new ClosedActionError('OBSERVATION_DEADLINE'));
     await expect(g.runtime.dispatch(g.request)).resolves.toMatchObject({ledger:{state:'SUCCEEDED'}});
     expect(g.runtime.active).toBe(true);
-    const s=await setup();vi.useFakeTimers();const sObserve=vi.spyOn(s.browser.observations,'observe');Object.assign(s.browser,{navigateBlank:vi.fn(async()=>{await vi.advanceTimersByTimeAsync(11_000);})});
+    const s=await setup();vi.useFakeTimers();const sObserve=vi.spyOn(s.browser.observations,'observe');s.goto.mockImplementation(async()=>{await vi.advanceTimersByTimeAsync(11_000);});
     await s.runtime.dispatch(s.request);expect(sObserve).not.toHaveBeenCalled();
   });
 

@@ -29,7 +29,7 @@ function fireEarly(earlyMs: number | undefined): void {
 }
 
 function blankBrowser(context: RunnerContext): GuidedBrowser {
-  return { evidence: { kind: 'initialBlank', sessionId: context.sessionId, contextId: context.contextId, creationId: randomUUID(), documentId: randomUUID(), bootstrapId: randomUUID(), url: 'about:blank', origin: null, generation: 0 }, blankMatches: () => Promise.resolve(true), navigateBlank: vi.fn(() => Promise.resolve()), close: vi.fn(() => Promise.resolve()), terminate: vi.fn(() => Promise.resolve()), orderlyClosed: () => true, observations: sessionStub({ withhold: () => Promise.resolve(), dispose: () => Promise.resolve(), observe: () => Promise.reject(new Error('NOT_USED')) }) };
+  return { evidence: { kind: 'initialBlank', sessionId: context.sessionId, contextId: context.contextId, creationId: randomUUID(), documentId: randomUUID(), bootstrapId: randomUUID(), url: 'about:blank', origin: null, generation: 0 }, blankMatches: () => Promise.resolve(true), close: vi.fn(() => Promise.resolve()), terminate: vi.fn(() => Promise.resolve()), orderlyClosed: () => true, observations: sessionStub({ withhold: () => Promise.resolve(), dispose: () => Promise.resolve(), observe: () => Promise.reject(new Error('NOT_USED')) }) };
 }
 
 const lifecycleReason = (messages: { route: string; body: unknown }[]): unknown => (messages.filter(m => m.route === 'lifecycle').at(-1)?.body as { reason?: string } | undefined)?.reason;
@@ -43,7 +43,7 @@ async function ownedSession(options: { lifeMs: number; secret?: boolean; earlyMs
   const directory = await mkdtemp(join(tmpdir(), 'guided-stop-reason-')); clean.push(() => rm(directory, { recursive: true, force: true }));
   const context = guidedContext('https://example.test');
   context.expiresAt = new Date(Date.now() + options.lifeMs).toISOString();
-  if (options.secret) { context.authoredInputs.inputs.push({ inputId: 'pass', sourceStepId: 'fill', kind: 'secretRef', intendedSlot: 'fill.value', secretId: 'PASS', provenance: { referenceKind: 'configuration', configurationRevision: context.configurationRevision, stepId: 'fill', referenceId: 'pass-reference', referenceName: 'PASS', kind: 'secretRef', intendedSlot: 'fill.value' } }); context.authoredInputsHash = hash(context.authoredInputs); }
+  if (options.secret) { context.authoredInputs.inputs.push({ inputId: 'pass', sourceStepId: 'fill', kind: 'secretRef', secretId: 'PASS', provenance: { referenceKind: 'configuration', configurationRevision: context.configurationRevision, stepId: 'fill', referenceId: 'pass-reference', referenceName: 'PASS', kind: 'secretRef' } }); context.authoredInputsHash = hash(context.authoredInputs); }
   const grant = ownershipSession(context); context.leaseExpiresAt = grant.owner.leaseExpiresAt;
   const assignment = assignmentFor(context), claims: { at: number; timeout: number }[] = [], messages: { route: string; body: unknown }[] = [];
   const ownershipOptions: OwnershipOptions = {

@@ -1,4 +1,4 @@
-import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
+import { FIXTURE_ORIGIN, TEST_DOMAINS } from '../helpers/allowedDomains.js';
 /**
  * STUDIO-OBS-012A — the observed child's teardown evidence, its tail hold and its stop-frame guard,
  * driven through the production defaults rather than the injected seams.
@@ -17,16 +17,15 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import fixtureJson from '../../../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json' with { type: 'json' };
 import type {PublicationDocument} from '../helpers/publicationFixture.js';
+import { fakeHandle, newRig } from '../helpers/stepFakes.js';
 import { TAIL_SETTLE_HOLD_MS, attachChildRuntime } from '../../src/run/childRuntime.js';
 import type { ObservedChildMessage } from '../../src/run/protocol.js';
 import type { BuildIdentity } from '../../src/executor/observedOperations.js';
 import { OBSERVED_SCHEMA_BUNDLE_HASH, hashObserved } from '../../src/validator/observedReferencePolicy.js';
 import type { ObservationSession } from '../../src/run/observationTypes.js';
 import type { Observation } from '../../src/guided/types.js';
-import { resolveFromGuards } from '../helpers/replaySession.js';
 import type { BrowserHandle } from '../../src/run/browserFactory.js';
 import { MIN_PLAYABLE_RECORDING_BYTES, WEBM_MAGIC } from '../../src/run/recording.js';
-import { createFakePage } from '../helpers/child.js';
 // Typed view of the static JSON import: the file exceeds tsserver's 4 MiB non-TS limit, so ESLint's projectService types it as `error`.
 const fixture=fixtureJson as unknown as PublicationDocument;
 
@@ -60,20 +59,17 @@ function driver(options: DriverOptions) {
   let clock = 0;
   const observation = structuredClone(fixture.basis.observations[0]?.observation) as Observation | undefined;
   if (!observation) throw new Error('OBSERVATION');
-  const observations: ObservationSession = {
+  const rig = newRig(FIXTURE_ORIGIN, {
     observe: () => Promise.resolve({ observation, json: '{}', bytes: 2, observationHash: hashObserved(observation) }),
-    resolveTarget: resolveFromGuards(fixture.execute.guards),
-    refForTarget: () => Promise.resolve(null),
-    prepareTarget: () => Promise.reject(new Error('unused')),
-    invoke(invocation, control) {
-      control?.beginInvocation();
-      return Promise.resolve(invocation.operation.kind === 'read' ? { value: 'fresh-value' } : { assertionPassed: true });
-    },
     withhold: () => Promise.resolve(),
     preparePassword: () => Promise.resolve(),
     fillPassword: () => Promise.resolve(),
     dispose: () => Promise.resolve(),
-  };
+  });
+  rig.w.text.body = 'fresh-value';
+  rig.w.matches['input[type="password" i]'] = 0;
+  (rig.api as { expect: unknown }).expect = Object.assign(() => new Proxy({}, { get: (_target, key) => (typeof key === 'string' && key !== 'then' ? () => Promise.resolve() : undefined) }), { configure() { return this; } });
+  const observations: ObservationSession = rig.session;
   const closedAt: number[] = [];
   const close = vi.fn(() => {
     closedAt.push(performance.now());
@@ -81,17 +77,11 @@ function driver(options: DriverOptions) {
   });
   const dispose = vi.fn(() => Promise.resolve());
   const handle: BrowserHandle = {
-    page: createFakePage(),
+    ...fakeHandle(rig),
     observedAppVideoPath: () => Promise.resolve('/unit/app.webm'),
     createObservationSession: () => observations,
     observedBlankMatches: () => Promise.resolve(true),
     observedInitialContextMatches: () => Promise.resolve(true),
-    observedWait: () => Promise.resolve(),
-    observedNavigateBlank: (_destination, control) => {
-      control?.beginInvocation();
-      return Promise.resolve();
-    },
-    onExtraPage: () => undefined,
     observedHosts: () => [],
     close,
     dispose,

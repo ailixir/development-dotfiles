@@ -32,9 +32,10 @@ import { SecretUseEvidence } from './secretUse.js';
 import type { Launch3, Execute3, BuildIdentity } from '../executor/observedOperations.js';
 import type { ObservedChildMessage } from './protocol.js';
 import { assertBuild, assertProfile, demand, equalObserved, hashObserved, OBSERVED_LIMITS, validateObserved } from '../validator/observedReferencePolicy.js';
-import { executeObservedReplay, replayError, validateObservedExecute } from '../executor/observedReplay.js';
+import { executeObservedReplay, replayError, stepHashOf, validateObservedExecute } from '../executor/observedReplay.js';
 import type { ReplayError } from '../executor/observedReplay.js';
-import { createObservedReplayAdapter } from './observedReplayAdapter.js';
+import { createObservedReplayAdapter, receiptFromTally } from './observedReplayAdapter.js';
+import type { ObservedAdapter } from './observedReplayAdapter.js';
 
 import type { Clock, StepReporter } from '../executor/stepReporter.js';
 import type { BrowserFactory, BrowserHandle, BrowserLaunchRequest } from './browserFactory.js';
@@ -107,6 +108,7 @@ function attachObservedChildRuntime(dependencies: ChildRuntimeDependencies): voi
     let opening:Promise<BrowserHandle>|null=null,cleanupUnconfirmed=false;
     let runDeadlineMs=0,admittedRuntimeDeadlineEpochMs=0;
     let execution: Execute3 | null = null;
+    let adapter: ObservedAdapter | null = null;
     let usageEvidence = new SecretUseEvidence([]);
     let detail: { stepId: string; loginStepsPresent: boolean } | undefined;
     const startedSteps = new Map<number, number>(), completedSteps = new Set<number>();
@@ -140,11 +142,19 @@ function attachObservedChildRuntime(dependencies: ChildRuntimeDependencies): voi
             recording = { path: e.path, bytes: e.bytes, errorCode: e.error === null ? null : 'RECORDING_FAILED', state: e.state, partial: e.partial };
         }
         if (execution && launch) {
+            // A step a stop cut off reports what its binding recorded, never a guess: the last operation that ran is the one in flight.
+            const inFlight = adapter?.lastRun?.() ?? null;
+            const latest = Math.max(-1, ...startedSteps.keys());
             for (const step of execution.steps) {
                 if (completedSteps.has(step.stepIndex))
                     continue;
                 const start = startedSteps.get(step.stepIndex), end = start === undefined ? null : clock?.now() ?? start;
-                channel.send({ kind: 'step-finished', protocolVersion: 3, mode: 'observed', runId: launch.runId, attemptId: launch.attemptId, stepIndex: step.stepIndex, stepId: step.stepId, status: start === undefined ? 'SKIPPED' : 'FAIL', startedAtMs: start ?? null, finishedAtMs: end, durationMs: start === undefined || end === null ? null : end - start, errorCode: start === undefined ? null : errorCode ?? 'INTERNAL_ERROR' });
+                const stepHash = stepHashOf(step.operations);
+                const code = start === undefined ? null : errorCode ?? 'INTERNAL_ERROR';
+                const receipt = start !== undefined && step.stepIndex === latest && inFlight !== null
+                    ? { ...receiptFromTally(inFlight.operation, inFlight.tally, code), stepHash }
+                    : { closedCode: code, stepHash, fenceCrossed: false, effects: [], effectsTruncated: false, offscreen: false };
+                channel.send({ kind: 'step-finished', protocolVersion: 3, mode: 'observed', runId: launch.runId, attemptId: launch.attemptId, stepIndex: step.stepIndex, stepId: step.stepId, status: start === undefined ? 'SKIPPED' : 'FAIL', startedAtMs: start ?? null, finishedAtMs: end, durationMs: start === undefined || end === null ? null : end - start, receipt });
                 completedSteps.add(step.stepIndex);
             }
         }
@@ -185,7 +195,6 @@ function attachObservedChildRuntime(dependencies: ChildRuntimeDependencies): voi
                     return;
                 }
                 handle = opened;
-                opened.onExtraPage(() => { stop('TARGET_DRIFT'); });
                 live();demand(opened.observedStartupReady?.()??true,'TARGET_DRIFT');
                 demand(typeof opened.observedAppVideoPath==='function','INVALID_CONTRACT');
                 const nativePath=await boundedStartup(()=>opened.observedAppVideoPath?opened.observedAppVideoPath():Promise.reject(new Error('RECORDING_FAILED')),startupDeadline,abort.signal);
@@ -217,8 +226,8 @@ function attachObservedChildRuntime(dependencies: ChildRuntimeDependencies): voi
             const fixed = launch, steps = m.steps;
             const reporter: StepReporter = { stepStarted(e) { if (finished)
                     return; startedSteps.set(e.stepIndex, e.startedAtMs); const step = steps[e.stepIndex]; demand(step); channel.send({ kind: 'step-started', protocolVersion: 3, mode: 'observed', runId: fixed.runId, attemptId: fixed.attemptId, stepIndex: e.stepIndex, stepId: step.stepId, startedAtMs: e.startedAtMs }); }, stepFinished(e) { if (finished)
-                    return; completedSteps.add(e.stepIndex); const step = steps[e.stepIndex]; demand(step); channel.send({ kind: 'step-finished', protocolVersion: 3, mode: 'observed', runId: fixed.runId, attemptId: fixed.attemptId, stepIndex: e.stepIndex, stepId: step.stepId, status: e.status, startedAtMs: e.startedAtMs, finishedAtMs: e.finishedAtMs, durationMs: e.durationMs, errorCode: e.failure as ReplayError | null, ...(e.detail ? {detail: e.detail} : {}) }); } };
-            const adapter = createObservedReplayAdapter(handle, launch.scope, dependencies.allowedDomains, launch.runId, live, m.waitStrategy, m.stepTimeoutMs);
+                    return; completedSteps.add(e.stepIndex); const step = steps[e.stepIndex]; demand(step); channel.send({ kind: 'step-finished', protocolVersion: 3, mode: 'observed', runId: fixed.runId, attemptId: fixed.attemptId, stepIndex: e.stepIndex, stepId: step.stepId, status: e.status, startedAtMs: e.startedAtMs, finishedAtMs: e.finishedAtMs, durationMs: e.durationMs, receipt: e.receipt ?? { closedCode: e.failure as ReplayError | null, stepHash: stepHashOf(step.operations), fenceCrossed: false, effects: [], effectsTruncated: false, offscreen: false }, ...(e.detail ? {detail: e.detail} : {}) }); } };
+            adapter = createObservedReplayAdapter(handle, launch.scope, dependencies.allowedDomains, launch.runId, live);
             const result = await executeObservedReplay(m, adapter, launch.scope, dependencies.allowedDomains, clock, reporter, abort.signal,runDeadlineMs,usageEvidence,fixed);
             detail = result.detail;
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Stop can finish the run while execution awaits native browser input.

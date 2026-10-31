@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Coupon</title></head>
+<body><main>
+<h1>Apply a coupon</h1>
+<label for="code">Coupon code</label><br>
+<input id="code" type="text" autocomplete="off">
+<button id="apply" type="button" disabled>Apply</button>
+<p id="applied"></p>
+<script>
+var c=document.getElementById('code'),a=document.getElementById('apply');
+c.addEventListener('keydown',function(){setTimeout(function(){a.disabled=c.value.length===0;},0);});
+a.addEventListener('click',function(){document.getElementById('applied').textContent='Applied '+c.value;});
+</script>
+</main></body></html>

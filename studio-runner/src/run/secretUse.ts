@@ -1,4 +1,4 @@
-import type {InputRecipe, Step} from '../executor/observedOperations.js';
+import type {Step} from '../executor/observedOperations.js';
 export type SecretUseStatus='USED'|'NOT_USED'|'REFUSED';
 /** Missing status is uncertainty. Positive use is monotone and survives later faults. */
 export class SecretUseEvidence {
@@ -9,17 +9,17 @@ export class SecretUseEvidence {
   refusedBeforeEffect(name:string):void{if(this.statuses.get(name)!=='USED')this.statuses.set(name,'REFUSED');}
   snapshot():Record<string,SecretUseStatus>{return Object.fromEntries(this.statuses);}
 }
-/** Exact immutable recipe linkage, shared by authenticated receipt-derived facts and reporting. */
-export function frozenSecretConsumers(recipes:readonly InputRecipe[],steps:readonly Step[]):ReadonlyMap<number,readonly string[]>{
+/** Exact immutable linkage, shared by authenticated receipt-derived facts and reporting: a step consumes the secrets its frozen `uses` names. */
+export function frozenSecretConsumers(steps:readonly Step[]):ReadonlyMap<number,readonly string[]>{
   const consumers=new Map<number,readonly string[]>();
-  for(const step of steps){const names=new Set<string>();for(const action of step.operations){const op=action.operation;if(op.kind!=='fill'||op.value.kind!=='secretRef')continue;const inputId=op.value.sourceInputId;const recipe=recipes.find(r=>r.inputId===inputId&&r.stepId===step.stepId&&r.kind==='secretRef'&&r.intendedSlot==='fill.value');if(recipe?.provenance.kind==='configuration')names.add(recipe.provenance.referenceName);}consumers.set(step.stepIndex,[...names]);}
+  for(const step of steps){const names=new Set<string>();for(const action of step.operations)for(const use of action.operation.uses)if(use.kind==='secret')names.add(use.id);consumers.set(step.stepIndex,[...names]);}
   return consumers;
 }
 /** IPC receipts can be lost after the child starts an effect. The parent-private Execute send
  * attempt, not absence of a received step-started frame, bounds positive no-invocation proof. */
-export function provenSecretUseAfterLoss(names:readonly string[],recipes:readonly InputRecipe[],steps:readonly Step[],executeAttempted:boolean,completed:ReadonlyMap<number,string>):Record<string,SecretUseStatus>{
+export function provenSecretUseAfterLoss(names:readonly string[],steps:readonly Step[],executeAttempted:boolean,completed:ReadonlyMap<number,string>):Record<string,SecretUseStatus>{
   const facts=new Map<string,SecretUseStatus>();
-  const consumers=frozenSecretConsumers(recipes,steps);
+  const consumers=frozenSecretConsumers(steps);
   for(const name of names){
     const sourceSteps=[...consumers].filter(([,ids])=>ids.includes(name)).map(([index])=>index);
     if(sourceSteps.some(index=>completed.get(index)==='PASS'))facts.set(name,'USED');

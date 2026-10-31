@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ClosedActionError, closeObservationError, closePlaywrightError, closedPageStep, closedReason, closed, CLOSED_ACTION_CODES, detachedObservationState } from '../../src/run/closedError.js';
+import { ClosedActionError, closeObservationError, closePlaywrightError, closedPageStep, closedReason, closedCause, pageLeftUnderObservation, closed, CLOSED_ACTION_CODES, detachedObservationState } from '../../src/run/closedError.js';
 import { ObservedRefusal } from '../../src/validator/observedReferencePolicy.js';
 import { OriginNotAllowed } from '../../src/allowedDomains.js';
 
@@ -127,5 +127,21 @@ describe('closedPageStep', () => {
 
   it('lets the step\'s own closed codes and replay reasons pass unchanged', async () => {
     for (const code of ['TARGET_DRIFT', 'TARGET_CHANGED', 'POLICY_DENIED', 'CANCELLED', 'TIMEOUT']) expect((await leak(code)).message).toBe(code);
+  });
+});
+
+describe('closedCause (SC008-FIX-19)', () => {
+  it('names a closed error, a plain Error that carries a closed code, and nothing else', () => {
+    expect(closedCause(new ClosedActionError('STALE_OBSERVATION'))).toBe('STALE_OBSERVATION');
+    expect(closedCause(new Error('BUDGET_EXCEEDED'))).toBe('BUDGET_EXCEEDED');
+    expect(closedCause(new Error('TARGET_DRIFT'))).toBe('TARGET_DRIFT');
+    for (const thrown of [new Error('CANARY-TEXT'), Object.assign(new Error('CONTEXT_LOST'), { name: 'TimeoutError' }), 'CONTEXT_LOST', null, undefined, { message: 'CONTEXT_LOST' }]) expect(closedCause(thrown)).toBe('UNKNOWN');
+  });
+});
+
+describe('pageLeftUnderObservation (SC008-FIX-19)', () => {
+  it('is true for a protocol error that says the document went away, false for anything else', () => {
+    for (const text of ['Protocol error (Runtime.callFunctionOn): Cannot find context with specified id', 'Protocol error (Runtime.callFunctionOn): Inspected target navigated or closed', 'Execution context was destroyed, most likely because of a navigation']) expect(pageLeftUnderObservation(new Error(text)), text).toBe(true);
+    for (const thrown of [new Error('PERCEPTION_UNAVAILABLE'), new Error('Timeout 30000ms exceeded'), 'Inspected target navigated or closed', null, undefined]) expect(pageLeftUnderObservation(thrown)).toBe(false);
   });
 });

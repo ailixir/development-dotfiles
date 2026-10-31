@@ -381,14 +381,6 @@ export function checkPins(root, options = {}) {
       const packaged=read(observedSchemas),references=read(join(root,'dist','observed-reference.json'));
       const refsRoot=join(root,'fixtures','observed-reference');
       const sourceReferences=Object.fromEntries(readdirSync(refsRoot).filter(n=>n.endsWith('.json')).sort().map(n=>[n,read(join(refsRoot,n))]));
-      const includedChoice=sourceReferences['accepted-observed-choice.json'];
-      if(!includedChoice||includedChoice.basis?.preparations?.filter(p=>p.observedChoice?.version===1).length!==1)throw new Error('Missing observed choice reference.');
-      const choicePath=join(root,'..','docs','specs','studio-observed-authoring','contracts','v3','publication-fixtures.json');
-      if(existsSync(choicePath)){
-        const choice=read(choicePath).observedChoice;
-        if(!choice||choice.basis?.preparations?.filter(p=>p.observedChoice?.version===1).length!==1)throw new Error('Missing observed choice reference.');
-        if(hash(choice)!==hash(includedChoice))failures.push('Observed packaged reference bundle is stale.');
-      }
       if(hash(packaged)!==hash(sourceSchemas)||pins.runtime?.observedSchemaBundleHash!==hash(packaged))failures.push('Observed packaged schema bundle is stale.');
       if(hash(references)!==hash(sourceReferences)||pins.runtime?.observedReferenceBundleHash!==hash(references))failures.push('Observed packaged reference bundle is stale.');
       const actualBrowser=readBrowserProvenance(envBrowserRoot(process.env),pins.runtime?.observedChromiumBuild);

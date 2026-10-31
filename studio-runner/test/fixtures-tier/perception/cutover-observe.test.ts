@@ -1,7 +1,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 // eslint-disable-next-line no-restricted-imports -- Real Chromium types for the perception tier; the production import stays in src/run/browser.ts only.
 import type { Browser } from 'playwright';
 
@@ -10,7 +10,7 @@ import { PrivateInventory } from '../../../src/run/privateInventory.js';
 import { perceive } from '../../../src/run/perceive.js';
 import { OBSERVATION_DEADLINE_MS, unitsFor } from '../../../src/run/observationDeadline.js';
 import { budgetPage, busyPage, cdpOf, guardDist, launchChromium, openPage, R4_PAGE, runawayFormPage } from './harness.js';
-import { codeOf, factOf, hasFact, html, invoke, open, prepare, serve, type Opened, type Served } from './cutover-support.js';
+import { codeOf, factOf, hasFact, html, launchStepRun, open, serve, type Opened, type Served } from './cutover-support.js';
 
 /**
  * ADR-SC-007 WI-4, observation side (AC2, AC7): the production observation session over a real Chromium page.
@@ -65,22 +65,23 @@ describe('WI-4 observation: AC2, AC7 and session invariants on real Chromium', (
     await served.close();
   });
 
-  it('R4: an unnamed empty button beside Save learns and replays the named one', async () => {
+  it('R4: an unnamed empty button beside Save is still observed by name, and the step that clicks it runs twice (learn, then replay)', async () => {
     const created = await page('/r4');
     const exported = await created.session.observe(undefined, false);
     expect(hasFact(exported, 'button', 'Save')).toBe(true);
-    const operation = { kind: 'click' } as const;
-    const prepared = await prepare(created, 'button', 'Save', operation, null, exported);
-    await invoke(created, prepared, operation);
-    expect(await created.page.evaluate(() => document.body.dataset.saved)).toBe('yes');
-    // Replay: the frozen locator resolves to exactly one element and acts on it again.
-    await created.page.evaluate(() => {
-      delete document.body.dataset.saved;
-    });
-    const resolution = await created.session.resolveTarget({ resolved: prepared.resolved, origin: created.origin, operation, readRuleId: null });
-    expect(resolution.kind).toBe('READY');
-    await invoke(created, prepared, operation, { profile: 'replay', bind: false });
-    expect(await created.page.evaluate(() => document.body.dataset.saved)).toBe('yes');
+    const run = await launchStepRun();
+    try {
+      const target = run.handle.stepApi?.page as { goto(url: string): Promise<unknown>; evaluate<T>(fn: () => T): Promise<T> } | undefined;
+      if (!target) throw new Error('PAGE');
+      await target.goto(`${served.origin}/r4`);
+      const click = "await page.getByRole('button', { name: 'Save', exact: true }).click();";
+      expect((await run.step(click)).receipt.closedCode).toBeNull();
+      expect(await target.evaluate(() => document.body.dataset.saved)).toBe('yes');
+      // Replay: the same frozen code acts again on the same single element.
+      await target.evaluate(() => { delete document.body.dataset.saved; });
+      expect((await run.step(click)).receipt.closedCode).toBeNull();
+      expect(await target.evaluate(() => document.body.dataset.saved)).toBe('yes');
+    } finally { await run.dispose(); }
   });
 
   it('budget: a 1,200 item list with a 700 node table observes non-empty', async () => {
@@ -130,15 +131,15 @@ describe('WI-4 observation: AC2, AC7 and session invariants on real Chromium', (
     const second = await created.session.observe(undefined, false);
     expect(second.observation.documentId).toBe(first.observation.documentId);
     expect(second.observation.generation).toBe(first.observation.generation + 1);
-    const stale = created.session.prepareTarget({ ref, documentId: first.observation.documentId, generation: first.observation.generation, origin: first.observation.origin, operation: { kind: 'click' }, authoredLiteral: null });
-    expect(await codeOf(stale)).toBe('TARGET_CHANGED');
-    const current = await created.session.prepareTarget({ ref: factOf(second, 'button', 'Save')[0], documentId: second.observation.documentId, generation: second.observation.generation, origin: second.observation.origin, operation: { kind: 'click' }, authoredLiteral: null });
-    expect(current.locator.length).toBeGreaterThan(0);
+    const stampOf = (observation: { documentId: string; generation: number }) => ({ documentId: observation.documentId, generation: observation.generation });
+    expect(created.session.documentCurrent(stampOf(first.observation), first.observation.origin)).toBe(false);
+    expect(created.session.documentCurrent(stampOf(second.observation), second.observation.origin)).toBe(true);
+    void ref;
     await created.page.goto(`${served.origin}/second`);
     const third = await created.session.observe(undefined, false);
     expect(third.observation.documentId).not.toBe(second.observation.documentId);
-    expect(await codeOf(created.session.prepareTarget({ ref: factOf(second, 'button', 'Save')[0], documentId: second.observation.documentId, generation: second.observation.generation, origin: second.observation.origin, operation: { kind: 'click' }, authoredLiteral: null }))).toBe('TARGET_CHANGED');
-    expect(await codeOf(created.session.prepareTarget({ ref: 'e99999', documentId: third.observation.documentId, generation: third.observation.generation, origin: third.observation.origin, operation: { kind: 'click' }, authoredLiteral: null }))).toBe('TARGET_CHANGED');
+    expect(created.session.documentCurrent(stampOf(second.observation), second.observation.origin)).toBe(false);
+    expect(created.session.documentCurrent(stampOf(third.observation), third.observation.origin)).toBe(true);
   });
 
   it.each([
@@ -209,7 +210,9 @@ describe('WI-4 observation: AC2, AC7 and session invariants on real Chromium', (
     expect(code).toBe('OBSERVATION_DEADLINE');
     // The synchronous sanitizer is bounded by a work budget derived from the deadline; the overrun on this host is recorded above.
     expect(elapsed).toBeLessThan(2 * OBSERVATION_DEADLINE_MS + 5_000);
-  }, 120_000);
+    // The 12,000-row page demands three times the work budget of the real deadline twice (the raised-budget proof, then the real run), so the case
+    // is CPU-bound: 107 s measured on an idle-ish host (load about 4). It gets its own larger bound; no other test's timeout moves.
+  }, 300_000);
 
   it('deadline: a busy main thread ends OBSERVATION_DEADLINE before the loop ends', async () => {
     const created = await page('/busy', { limits: { milliseconds: 600 } });
@@ -242,4 +245,94 @@ describe('WI-4 observation: AC2, AC7 and session invariants on real Chromium', (
     // One world per observation call, none left to grow without bound: never more than one per call.
     expect(worlds.size).toBeLessThanOrEqual(52);
   }, 120_000);
+});
+
+/**
+ * Session privacy over observe, withhold and dispose (ported from the retired guided-targets file, SC008-E7): what the session was told or found
+ * private stays out of every later observation, and a failed or exhausted session fails closed.
+ */
+describe('session privacy: withheld and uncaptured bytes, overflow, collector errors, disposal', () => {
+  let browser: Browser;
+  let served: Served;
+  let current = '';
+  const opened: Opened[] = [];
+  beforeAll(async () => {
+    browser = await launchChromium();
+    served = await serve({
+      '/case': (_request, response) => { response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }); response.end(current); },
+      '/next': html('<p>next</p>'),
+    });
+  });
+  afterEach(async () => { for (const created of opened.splice(0)) await created.close(); vi.restoreAllMocks(); });
+  afterAll(async () => { await browser.close(); await served.close(); });
+  const ready = async (markup: string): Promise<Opened> => {
+    current = html(markup);
+    const created = await open(browser, served, '/case');
+    opened.push(created);
+    return created;
+  };
+
+  it('erases the private masking inventory and refuses late repopulation after disposal', async () => {
+    const inventories = new Set<PrivateInventory>();
+    // eslint-disable-next-line @typescript-eslint/unbound-method -- the original is invoked with .call(this, ...) in the wrapper below.
+    const original = PrivateInventory.prototype.withhold;
+    vi.spyOn(PrivateInventory.prototype, 'withhold').mockImplementation(function (this: PrivateInventory, values: readonly string[]) {
+      inventories.add(this);
+      original.call(this, values);
+    });
+    const h = await ready('<main aria-label="Operations"><button>Other</button></main>');
+    await h.session.withhold?.(['PRIVATE-CAPTURE-CANARY']);
+    expect([...inventories].some((inventory) => inventory.snapshot().some(([value]) => value === 'PRIVATE-CAPTURE-CANARY'))).toBe(true);
+    await h.session.observe(undefined, false);
+    await h.session.dispose();
+    const erased = (): boolean => [...inventories].every((inventory) => { try { return inventory.snapshot().length === 0; } catch { return true; } });
+    expect(erased()).toBe(true);
+    await expect(h.session.withhold?.(['LATE-CANARY'])).rejects.toThrow('CONTEXT_LOST');
+    expect(erased()).toBe(true);
+  });
+  it.each(['password', 'text'])('withholds uncaptured %s bytes and aliases after removal and navigation', async (type) => {
+    const secret = 'QA_PRIOR_  private\u200b\n token';
+    const alias = 'QA_PRIOR_ private token';
+    const h = await ready('<input aria-label="Approved field" type="text"><button>Continue</button>');
+    await h.page.locator('input').evaluate((e, args) => {
+      e.setAttribute('type', args.type);
+      (e as HTMLInputElement).value = args.secret;
+    }, { secret, type });
+    // The control value must be discovered automatically; an explicit withhold seed would defeat this uncaptured-value retention oracle.
+    expect(JSON.stringify(await h.session.observe(undefined, false))).not.toContain('QA_PRIOR_');
+    await h.page.setContent(`<button>${alias}</button>`);
+    expect(JSON.stringify(await h.session.observe(undefined, false))).not.toContain('QA_PRIOR_');
+    await h.page.goto(`${h.origin}/next`);
+    await h.page.setContent(`<button>${alias}</button>`);
+    expect(JSON.stringify(await h.session.observe(undefined, false))).not.toContain('QA_PRIOR_');
+    await h.session.dispose();
+    await expect(h.session.observe(undefined, false)).rejects.toThrow();
+    await expect(h.session.withhold?.(['LATE_PRIVATE'])).rejects.toThrow();
+  });
+  it('fails closed persistently on private inventory count/byte overflow instead of evicting earlier bytes', async () => {
+    for (const values of [Array.from({ length: 4097 }, (_, i) => `secret-${String(i)}`), Array.from({ length: 260 }, (_, i) => `${String(i)}-${'x'.repeat(4096)}`)]) {
+      const h = await ready('<input aria-label="Approved field" value="EARLIER_SECRET">');
+      await expect(h.session.withhold?.(values)).rejects.toThrow('CONTEXT_LOST');
+      await h.page.goto(`${h.origin}/next`);
+      await h.page.setContent('<button>EARLIER_SECRET</button>');
+      await expect(h.session.observe(undefined, false)).rejects.toThrow();
+      await expect(h.session.withhold?.(['new'])).rejects.toThrow();
+    }
+  });
+  it('poisons later observation after an unexpected collector error instead of forgetting prior inventory', async () => {
+    const h = await ready('<button aria-label="Approved field">Seed</button>');
+    await h.session.withhold?.(['PRIVATE_BEFORE_ERROR']);
+    await h.page.locator('button').evaluate((e) => { e.textContent = '\ud800'; });
+    await expect(h.session.observe(undefined, false)).rejects.toThrow('INVALID_UNICODE');
+    await h.page.goto(`${h.origin}/next`);
+    await h.page.setContent('<button>PRIVATE_BEFORE_ERROR</button>');
+    await expect(h.session.observe(undefined, false)).rejects.toThrow();
+  });
+  it('keeps explicit sensitive-region text private after the region is gone', async () => {
+    const h = await ready('<section data-sensitive><span>PRIVATE_REGION_004</span></section><input aria-label="Approved field">');
+    expect(JSON.stringify(await h.session.observe(undefined, false))).not.toContain('PRIVATE_REGION_004');
+    await h.page.goto(`${h.origin}/next`);
+    await h.page.setContent('<button>PRIVATE_REGION_004</button>');
+    expect(JSON.stringify(await h.session.observe(undefined, false))).not.toContain('PRIVATE_REGION_004');
+  });
 });

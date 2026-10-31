@@ -1,5 +1,6 @@
 import { FIXTURE_ORIGIN, TEST_DOMAINS } from '../helpers/allowedDomains.js';
-import {ObservedInvocationControl,ReplayAcquisitionBudget} from '../../src/executor/observedReplay.js';
+import {stepOp,stepReceipt} from '../helpers/stepCode.js';
+import {stepHashOf} from '../../src/executor/observedReplay.js';
 import { describe, it, expect } from 'vitest';
 import wireJson from '../../../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json' with { type: 'json' };
 import type {PublicationDocument} from '../helpers/publicationFixture.js';
@@ -7,7 +8,6 @@ import type {PublicationDocument} from '../helpers/publicationFixture.js';
 const wire=wireJson as unknown as PublicationDocument;
 import { validateObserved, OBSERVED_LIMITS } from '../../src/validator/observedReferencePolicy.js';
 import { validateObservedExecute } from '../../src/executor/observedReplay.js';
-import type { Scope } from '../../src/executor/observedOperations.js';
 describe('source-free observed IPC family', () => {
     // STUDIO-OBS-012A AC-3: the artifact-1 parsers this case also refused the frames in are deleted.
     it('accepts composed closed launch/execute frames', () => { expect(validateObserved('replay-ipc#/definitions/Launch3', wire.launch, OBSERVED_LIMITS.launch)).toEqual(wire.launch); expect(validateObservedExecute(wire.execute, wire.job.binding.scope, TEST_DOMAINS)).toEqual(wire.execute); });
@@ -23,7 +23,7 @@ describe('source-free observed IPC family', () => {
             nested = [nested];
         expect(() => validateObserved('replay-ipc', { kind: 'execute', nested }, OBSERVED_LIMITS.execute)).toThrow();
     });
-    it('requires null unavailable bytes and permits genuine fractional measured time', () => { const base = { protocolVersion: 3, mode: 'observed', runId: wire.execute.runId, attemptId: wire.execute.attemptId }; expect(validateObserved('replay-ipc#/definitions/StepFinished3', { ...base, kind: 'step-finished', stepIndex: 0, stepId: required(wire.execute.steps[0]).stepId, status: 'PASS', startedAtMs: 0.25, finishedAtMs: 3.75, durationMs: 3.5, errorCode: null })).toBeDefined(); expect(() => validateObserved('replay-ipc#/definitions/StepFinished3', { ...base, kind: 'step-finished', stepIndex: 0, stepId: required(wire.execute.steps[0]).stepId, status: 'PASSED', startedAtMs: 0, finishedAtMs: 1, durationMs: 1, errorCode: null })).toThrow(); });
+    it('requires null unavailable bytes and permits genuine fractional measured time', () => { const base = { protocolVersion: 3, mode: 'observed', runId: wire.execute.runId, attemptId: wire.execute.attemptId }; expect(validateObserved('replay-ipc#/definitions/StepFinished3', { ...base, kind: 'step-finished', stepIndex: 0, stepId: required(wire.execute.steps[0]).stepId, status: 'PASS', startedAtMs: 0.25, finishedAtMs: 3.75, durationMs: 3.5, receipt: stepReceipt({ stepHash: 'a'.repeat(64), fenceCrossed: true }) })).toBeDefined(); expect(() => validateObserved('replay-ipc#/definitions/StepFinished3', { ...base, kind: 'step-finished', stepIndex: 0, stepId: required(wire.execute.steps[0]).stepId, status: 'PASSED', startedAtMs: 0, finishedAtMs: 1, durationMs: 1, receipt: stepReceipt({ stepHash: 'a'.repeat(64), fenceCrossed: true }) })).toThrow(); });
 });
 import { createChildBrowserLauncher } from '../../src/run/launcher.js';
 import type { ChildProcessHandle, ChildSpawner } from '../../src/run/launcher.js';
@@ -69,7 +69,7 @@ function virtualChild(mode: 'pass' | 'wrong-build' | 'wrong-attempt' | 'unsafe-r
                     if(mode==='started-secret-lost'&&step.stepIndex===1)return;
                     if (mode === 'duplicate-step')
                         onMessage(started);
-                    onMessage({ ...base, kind: 'step-finished', stepIndex: step.stepIndex, stepId: step.stepId, status: 'PASS', startedAtMs: step.stepIndex, finishedAtMs: step.stepIndex + 0.5, durationMs: 0.5, errorCode: null });
+                    onMessage({ ...base, kind: 'step-finished', stepIndex: step.stepIndex, stepId: step.stepId, status: 'PASS', startedAtMs: step.stepIndex, finishedAtMs: step.stepIndex + 0.5, durationMs: 0.5, receipt: stepReceipt({ stepHash: stepHashOf(step.operations), fenceCrossed: true, effects: [{ method: 'click', completed: true }] }) });
                 }
                 if(mode==='lost-after-pass')return;
                 onMessage({ ...base, kind: 'result', admissionId: l.admission.admissionId, profileHash: hashObserved(l.profile), build: l.build, ok: true, errorCode: null, secretUse: mode==='contradictory-final'?{PASS:'REFUSED'}:{}, recording: { path: null, bytes: null, errorCode: null, state: 'UNAVAILABLE', partial: false }, ...(mode === 'unsafe-result' ? { privateValue: 'CANARY' } : {}) });
@@ -82,13 +82,12 @@ describe('actual observed launcher protocol enforcement', () => {
     it.each(['sparse-final','contradictory-final','lost-after-pass','started-secret-lost','lost-result','ipc-backpressure-loss'] as const)('preserves authenticated frozen secret evidence on %s',async mode=>{
       const dir=await mkdtemp(join(tmpdir(),'secret-receipt-launcher-'));const child=virtualChild(mode),job=structuredClone(wire.job);
       const step=job.artifact.steps[1];if(!step)throw new Error('STEP');
-      (step.operations[0] as {operation:unknown}).operation={kind:'fill',value:{kind:'secretRef',sourceInputId:'pass'}};
-      (job.artifact.guards[1] as {target:unknown}).target={kind:'passwordControl'};
+      (step.operations[0] as {operation:unknown}).operation=stepOp('await page.locator(\'input[type="password"]\').fill(secrets["PASS"]);',{uses:[{kind:'secret',id:'PASS'}]});
       const last=job.artifact.steps[2],literal=last?.operations[1],literalGuard=job.artifact.guards[3];if(!last||!literal||!literalGuard)throw new Error('LITERAL');
       (last as {operations:unknown}).operations=[{...literal,coordinate:{stepId:last.stepId,ordinal:0},guardId:'g2'}];
       (job.artifact as {guards:unknown}).guards=[job.artifact.guards[0],job.artifact.guards[1],{...literalGuard,guardId:'g2'}];
       (job.artifact.replayPolicy as {bindings:unknown;transfers:unknown}).bindings=[];(job.artifact.replayPolicy as {transfers:unknown}).transfers=[];
-      (job.artifact.inputRecipes as unknown[]).push({inputId:'pass',stepId:step.stepId,kind:'secretRef',intendedSlot:'fill.value',provenance:{kind:'configuration',referenceId:'pass-ref',referenceName:'PASS'}});
+      (job.artifact.inputRecipes as unknown[]).push({inputId:'pass',stepId:step.stepId,kind:'secretRef',provenance:{kind:'configuration',referenceId:'pass-ref',referenceName:'PASS'}});
       (job as {secrets:unknown}).secrets={PASS:'receipt-canary',UNREACHED:'no-effect'};(job as {secretOrigins:unknown}).secretOrigins={PASS:[FIXTURE_ORIGIN]};
       const admission={...wire.admissionReceipt,startDeadlineAt:new Date(Date.now()+10000).toISOString(),runDeadlineAt:new Date(Date.now()+20000).toISOString()} as AdmissionReceipt;
       const launcher=createChildBrowserLauncher({recording:{width:640,height:480},stepTimeoutMs:10000,launchTimeoutMs:100,maxFailureMessageLength:400,seekOriginCalibrationMs:0, allowedDomains: TEST_DOMAINS,stopTimeoutMs:20,spawner:child.spawner});
@@ -142,29 +141,6 @@ function required<T>(value: T | null | undefined): T {
         throw new Error("Missing controlled fixture value");
     return value;
 }
-
-import {createObservedReplayAdapter} from '../../src/run/observedReplayAdapter.js';
-import type {BrowserHandle} from '../../src/run/browserFactory.js';
-import type {ObservationSession} from '../../src/run/observationTypes.js';
-import type {Observation} from '../../src/guided/types.js';
-import {sessionStub} from '../helpers/guided.js';
-import type {ReplayAction,Guard} from '../../src/executor/observedOperations.js';
-describe('observed page/blank authority refusal boundaries',()=>{
-  it.each(['navigate','assert','stale-page','uncertain-navigation','blank-refusal','blank-unknown'] as const)('preserves %s semantics without element fallback',async mode=>{
-    let calls=0;const origin=FIXTURE_ORIGIN;
-    const scope={...wire.job.binding.scope,initialContext:mode.startsWith('blank')?{kind:'initialBlank'}:{kind:'observedDocument',origin}} as Scope;
-    const observations:ObservationSession=sessionStub({resolveTarget(){return Promise.resolve({kind:'REFUSED',code:'TARGET_DRIFT'});},observe(){return Promise.resolve({observation:{...wire.basis.observations[0]?.observation,schemaVersion:3} as Observation,json:'',bytes:0,observationHash:'a'.repeat(64)});},pageMatches(){return Promise.resolve(mode!=='stale-page');},navigate(){calls++;return mode==='uncertain-navigation'?Promise.reject(Error('PRIVATE')):Promise.resolve();},assertPage(){calls++;return Promise.resolve(true);},dispose(){return Promise.resolve();}});
-    const handle={createObservationSession:()=>observations,observedBlankMatches:()=>Promise.resolve(mode!=='blank-refusal'),observedNavigateBlank(){calls++;return Promise.reject(Error('PRIVATE'));}} as unknown as BrowserHandle;
-    const blank=mode.startsWith('blank');
-    const adapter=createObservedReplayAdapter(handle, scope, TEST_DOMAINS,'run',()=>undefined);
-    const guard:Guard={guardId:'g0',origin:blank?null:origin,target:{kind:blank?'initialBlank':'page'}};
-    const operation:ReplayAction['operation']=mode==='assert'?{kind:'assert',predicate:'url',expected:{kind:'authoredLiteral',sourceInputId:'url'}}:{kind:'navigate',destinationInputId:'url'};
-    const action:ReplayAction={coordinate:{stepId:wire.execute.steps[0]?.stepId??'',ordinal:0},guardId:'g0',operation};
-    const control=new ObservedInvocationControl({now:()=>performance.now()},performance.now()+1000,new AbortController().signal,new ReplayAcquisitionBudget(),{extra:0});
-    const perform=()=>control.run(()=>adapter.perform(action,guard,origin+'/',control));
-    try{if(mode==='navigate'||mode==='assert'){expect(await perform()).toEqual(mode==='assert'?{assertionPassed:true}:{});expect(calls).toBe(1);}else{await expect(perform()).rejects.toThrow(mode==='blank-refusal'||mode==='stale-page'?'TARGET_DRIFT':'OUTCOME_UNKNOWN');expect(calls).toBe(mode==='blank-refusal'||mode==='stale-page'?0:1);}}finally{await adapter.dispose();}
-  });
-});
 
 it('supports an empty learned binding graph without importing historical value rights',()=>{
   const step=wire.execute.steps[0],guard=wire.execute.guards[0],input=wire.execute.inputs[0];if(!step||!guard||!input)throw Error('fixture');

@@ -13,6 +13,7 @@
  * increasing within an attempt, starts fresh for a new attempt — the runner holds no cross-run
  * state, so it is a per-run counter — and is never reused or decremented, including on a retry.
  */
+import type { StepReceipt } from '../executor/observedOperations.js';
 import type { StepStatus } from '../executor/stepReporter.js';
 import type { LogEntry, LogView, ReportBounds } from './bounds.js';
 import { boundSteps, createLogBuffer, redactLogEntry } from './bounds.js';
@@ -29,6 +30,8 @@ export interface SnapshotStep {
   readonly finishedAtMs: number | null;
   readonly durationMs: number | null;
   readonly failure: string | null;
+  /** The runner's receipt for the step (ADR-SC-008): closed code, stepHash, fence, effects (names only), offscreen. Absent for a step that never ran. */
+  readonly receipt?: StepReceipt;
 }
 
 export interface RunOutcome {

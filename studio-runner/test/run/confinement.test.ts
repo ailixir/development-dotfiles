@@ -325,7 +325,7 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
   // observed clarification choice is {choiceId, safeLabel, labelSource, role, region, bindingId}); operations stay 32.
   // old "35d42df7d2dca7099e3be1cc98fa2993bea8a6f3271007fb7738726ffa5afc7a".
   // new "cd28f40b3e96c6e6c9ffd34afdf704702a2a6c6cd01eeee00c76acb8abf9b663".
-  const BASE_SHA256 = 'cd28f40b3e96c6e6c9ffd34afdf704702a2a6c6cd01eeee00c76acb8abf9b663';
+  const BASE_SHA256 = 'b3e9a44dd59ab7fec444349cffafed4cdc4bb78f88bdacd772294017ea1de1a8';
 
   it('pins the entire reviewed OpenAPI document including observed routes', () => {
     // ADR-002 §11.2 rejected `recordingOriginMs` and amended the document itself; §11.6 moved the

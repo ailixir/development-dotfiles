@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Reservation</title></head>
+<body><main>
+<h1>Reservation summary</h1>
+<p>Reservation state: <strong id="rstate">Confirmed</strong></p>
+<label>Guests <input id="guests" value="4"></label><br>
+<label><input type="checkbox" id="late" checked> Late checkout</label><br>
+<label>Room <select id="room"><option>Standard</option><option selected>Deluxe</option></select></label><br>
+<p>Amount due: <span id="due">$310.00</span></p>
+<p id="roomalert" style="display:none">Room unavailable</p>
+<label><input type="checkbox" id="news"> Newsletter</label><br>
+<a href="/directions">Directions</a><br>
+<button id="coupon">Add coupon</button> <button id="request">Add request</button> <button id="deposit">Pay deposit</button>
+<p id="cmsg" role="status"></p>
+<div id="reqbox" style="display:none"><label>Request <textarea id="req"></textarea></label></div>
+</main>
+<script>
+document.getElementById('coupon').addEventListener('click',function(){document.getElementById('cmsg').textContent='Coupon added';});
+document.getElementById('request').addEventListener('click',function(){document.getElementById('reqbox').style.display='block';});
+</script>
+</body></html>

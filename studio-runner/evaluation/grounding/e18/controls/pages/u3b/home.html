@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Work orders</title></head>
+<body><main><h1>Work orders</h1>
+<table><thead><tr><th>Order</th><th>Subject</th><th>Actions</th></tr></thead><tbody>
+<tr><td>W-310</td><td>Pump check</td><td><button id="open1">View</button> <button>Reassign</button></td></tr>
+<tr><td>W-311</td><td>Valve swap</td><td><button id="open2">View</button> <button>Reassign</button></td></tr>
+</tbody></table>
+<p id="viewed"></p>
+<script>document.querySelectorAll('button').forEach(function(b){b.addEventListener('click',function(){document.getElementById('viewed').textContent='clicked '+b.id;});});</script>
+</main></body></html>

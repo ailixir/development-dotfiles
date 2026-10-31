@@ -33,9 +33,7 @@ function audit(references) {
     const fn = ajv.getSchema('https://checks.citi.example/contracts/observed/v3/' + schema);
     if (!fn(value)) { schemaErrors.push({name, errors:structuredClone(fn.errors)}); throw new Error(name + ': ' + JSON.stringify(fn.errors)); }
   };
-  attempt('exact five-file catalog inventory', () => assert.deepEqual(Object.keys(references).sort(), ['accepted-observed-choice.json','control-value-reference.json','fresh-order-reference.json','manifest.json','operation-mutations.json']));
-  attempt('accepted-observed-choice exact current authoritative counterpart', () => assert.equal(hash(references['accepted-observed-choice.json']), hash(p.observedChoice)));
-  attempt('exactly one version1 observed-choice preparation', () => assert.equal(references['accepted-observed-choice.json'].basis.preparations.filter(x => x.observedChoice?.version === 1).length, 1));
+  attempt('exact four-file catalog inventory', () => assert.deepEqual(Object.keys(references).sort(), ['control-value-reference.json','fresh-order-reference.json','manifest.json','operation-mutations.json']));
   attempt('control-value exact current authoritative counterpart', () => assert.deepEqual(references['control-value-reference.json'], p.controlValueReference));
   attempt('control-value explicit current synthetic classification', () => assert.match(references['control-value-reference.json'].description, /^CURRENT_SYNTHETIC_NO_BROWSER_OR_DB_HISTORY/));
   const fresh = references['fresh-order-reference.json'];
@@ -45,9 +43,9 @@ function audit(references) {
   attempt('fresh-order complete recomputed hash map', () => assert.deepEqual(fresh.hashes, hashes(p.basis, p.artifact)));
   attempt('canonical manifest exact current vector counterpart', () => assert.deepEqual(references['manifest.json'].canonicalVectors, read(contractRoot + 'publication-canonical-vectors.json')));
   attempt('manifest workflow identity unchanged', () => assert.deepEqual(Object.fromEntries(Object.entries(references['manifest.json']).filter(([k]) => k !== 'canonicalVectors')), {schemaVersion:1,catalog:'observed-replay-1',fixture:'fresh-order-reference.json'}));
-  const mutationNames = ['guard-role','guard-control-type','guard-locator','read-recipe','argument-slot','binding-producer','binding-consumer','source-provenance','configuration-reference','original-evidence','allocated-binding','profile'];
-  attempt('all twelve original operation mutation declarations preserved', () => assert.deepEqual(references['operation-mutations.json'], {schemaVersion:1,mutations:mutationNames}));
-  for (const name of ['fresh-order-reference.json','control-value-reference.json','accepted-observed-choice.json']) {
+  const mutationNames = ['guard-origin','step-code','step-captures','step-uses','transfer-binding','binding-producer','binding-consumer','source-provenance','configuration-reference','original-evidence','allocated-binding','profile'];
+  attempt('all twelve step-contract operation mutation declarations preserved', () => assert.deepEqual(references['operation-mutations.json'], {schemaVersion:1,mutations:mutationNames}));
+  for (const name of ['fresh-order-reference.json','control-value-reference.json']) {
     const sample = references[name];
     attempt(name + ' current closed complete basis', () => validate('replay-validation.schema.json#/definitions/ValidationBasis', sample.basis, name + '/basis'));
     attempt(name + ' current closed artifact', () => validate('replay-artifact.schema.json', sample.artifact, name + '/artifact'));
@@ -57,12 +55,10 @@ function audit(references) {
     else failures.push({name:name + ' snapshot authority',code:'MISSING_CURRENT_AUTHORITATIVE_FACTS',message:'No current snapshotEvidence/immutable source counterpart is present; do not synthesize private history.'});
   }
   attempt('current source schema/build commitment', () => assert.equal(p.build.schemaBundleHash, hash(read('studio-runner/src/validator/observedSchemas.json'))));
-  attempt('current synthetic worlds and preserved operation/basis/privacy mutations', () => require('./check-studio-current-vectors.cjs').run());
-  attempt('current choice issuance and original/fresh/history/calendar mutations', () => require('./check-studio-current-choice-vectors.cjs').run());
+  attempt('current synthetic worlds and step operation and basis mutations', () => require('./check-studio-current-vectors.cjs').run());
   return {status:failures.length ? 'FAIL_CURRENT_PACKAGED_CATALOG' : 'PASS_CURRENT_PACKAGED_CATALOG',
     scope:'PURE_SOURCE_CATALOG_NOT_PACKAGED_DIST_OR_EXECUTION', files: Object.keys(references).length,
     canonicalReferenceBundleHash:hash(references), canonicalSchemaBundleHash:hash(read('studio-runner/src/validator/observedSchemas.json')),
-    canonicalObservedChoiceHash:hash(p.observedChoice), packagedObservedChoiceHash:hash(references['accepted-observed-choice.json']),
     checks, failures, schemaErrors, operationMutationDeclarations:mutationNames.length,
     nativeExecution:false, hiddenHistoryProof:false, rebuiltDist:false};
 }

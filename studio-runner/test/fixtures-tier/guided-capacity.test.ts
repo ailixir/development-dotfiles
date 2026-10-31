@@ -6,6 +6,7 @@
  * behind the backend's deployment-wide cap). Stopping one frees its slot. Nothing one session does is visible
  * to another: observations, journals, scratch directories and uploaded recordings stay apart.
  */
+import { stepOp } from '../helpers/stepCode.js';
 import { existsSync } from 'node:fs';
 import { mkdir, mkdtemp, readdir, readFile, rm } from 'node:fs/promises';
 import { createServer } from 'node:http';
@@ -105,8 +106,8 @@ describe('guided capacity 3 on real Chromium', () => {
       await Promise.all([first, second, third].map(async session => {
         const runtime = ownership.getRuntime(identity(session.context));
         const bootstrap = session.messages.find(message => message.route === 'bootstrap-evidence')?.body as BridgeBootstrap;
-        const action = proposal(session.context, bootstrap.executionEvidence, 'nav', { kind: 'navigate', destinationInputId: 'input-nav' });
-        const prepared = await runtime.prepare({ pressInheritance: null, ...identity(session.context), proposal: action, requestDigest: hash(action), expiresAt: new Date(Date.now() + 10_000).toISOString() });
+        const action = proposal(session.context, bootstrap.executionEvidence, 'nav', stepOp('await page.goto(inputs["input-nav"]);', { uses: [{ kind: 'input', id: 'input-nav' }] }));
+        const prepared = await runtime.prepare({ ...identity(session.context), proposal: action, requestDigest: hash(action), expiresAt: new Date(Date.now() + 10_000).toISOString() });
         expect((await runtime.dispatch(dispatch(session.context, action, prepared))).ledger.state).toBe('SUCCEEDED');
       }));
       for (const session of [first, second, third]) {

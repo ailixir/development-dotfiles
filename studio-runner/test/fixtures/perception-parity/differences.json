@@ -7,7 +7,8 @@
   "D2": "Percent-decoded and encoded forms of private values (ADR-SC-007 D6 leak D2). No fixture page triggers it; the canary suites do.",
   "D1-TAINT": "A node that claims withheld text, and every content-named ancestor above a withheld descendant, renders no name, ownText or near; claims travel through ref-less hits (critique R1b).",
   "EVIDENCE-SIBLINGS": "Cell evidence gains the row's sibling cells (ADR-SC-007 D3, iana-assert-01); facts only, the outline is unchanged.",
-  "FACTS-NAME-CAP": "facts.name is capped at 256 characters (the spike's rawName is unbounded). No fixture name is longer; covered by a synthetic test."
+  "FACTS-NAME-CAP": "facts.name is capped at 256 characters (the spike's rawName is unbounded). No fixture name is longer; covered by a synthetic test.",
+  "IFRAME-LEAF": "An iframe is a leaf node line with its title and ref and a fact of its own (ADR-SC-008 FR-19, frames); the spike printed it as an unsupported surface without a ref. Nothing of the frame's content is rendered."
  },
  "outline": {
   "observed/c05/login.html|private": {
@@ -28,6 +29,26 @@
    ],
    "added": [
     "      - combobox [e21] {value withheld} {in=\"form 'Filters' > main\"}"
+   ]
+  },
+  "observed/e3/frame.html|plain": {
+   "kind": "IFRAME-LEAF",
+   "reason": "The iframe renders as a leaf line with its ref instead of an unsupported-surface stub (ADR-SC-008 FR-19, frames).",
+   "removed": [
+    "    - iframe {unsupported surface}"
+   ],
+   "added": [
+    "    - iframe [e5]"
+   ]
+  },
+  "observed/e3/frame.html|private": {
+   "kind": "IFRAME-LEAF",
+   "reason": "The iframe renders as a leaf line with its ref instead of an unsupported-surface stub (ADR-SC-008 FR-19, frames).",
+   "removed": [
+    "    - iframe {unsupported surface}"
+   ],
+   "added": [
+    "    - iframe [e5]"
    ]
   }
  },

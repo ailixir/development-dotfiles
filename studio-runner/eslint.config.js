@@ -9,6 +9,7 @@ import {
   FORBIDDEN_MODULES,
   MESSAGE_FOR_MODULE,
   runDirectoryRules,
+  stepCodeModuleRules,
 } from './eslint.boundary-rules.js';
 
 /**
@@ -61,6 +62,11 @@ export default tseslint.config(
     // directory rule so it narrows it rather than being narrowed by it.
     files: ['src/run/browser.ts'],
     rules: browserModuleRules,
+  },
+  {
+    // The one module that may construct step code (ADR-SC-008 D3.1): the async function construct is allowed here and nowhere else.
+    files: ['src/run/stepCode.ts'],
+    rules: stepCodeModuleRules,
   },
   {
     // Build-time scripts are not shipped in the image and never see artifact content. They may

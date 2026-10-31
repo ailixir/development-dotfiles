@@ -1,8 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 // eslint-disable-next-line no-restricted-imports -- Native grounding/locator conformance in the real-browser perception tier.
-import type { Browser, Locator } from 'playwright';
+import type { Browser } from 'playwright';
 
-import { buildPublicLocator, synthesize, type LocatorRoot } from '../../../src/run/locatorSynth.js';
 import { internalsOf, perceive } from '../../../src/run/perceive.js';
 import { collectPage, type CollectedPage } from '../../../src/run/perceptionInPage.js';
 import { runOnEngine } from '../../../src/run/playwrightEngine.js';
@@ -52,13 +51,10 @@ describe('native primary output name provenance', () => {
       if (!ref) throw new Error('missing named source');
       expect(refs[0]?.[1]).not.toHaveProperty('text');
       expect(internalsOf(s.perception)?.byRef.get(ref)).toMatchObject({ primaryName: true, withheld: true, cleared: true, ownText: '' });
-      const result = await synthesize({ perception: s.perception, inventory: s.inventory, ref });
-      expect(result).toMatchObject({ ok: true, tier: 'role', identity: { role: 'status', name: NAME } });
-      if (!result.ok) throw new Error('missing exact locator');
-      const publicLocator = buildPublicLocator(s.page as unknown as LocatorRoot, result.locator) as Locator;
-      expect(await publicLocator.count()).toBe(1);
+      expect(refs[0]?.[1]).toMatchObject({ role: 'status', name: NAME });
+      expect(await s.page.getByRole('status', { name: NAME, exact: true }).count()).toBe(1);
       expect(await backendIdsOfLocator(s.cdp, s.page.getByRole('status', { name: NAME, exact: true }))).toEqual([s.perception.backendNodeIds[ref]]);
-      expect(s.serialized + JSON.stringify(result)).not.toContain(VALUE);
+      expect(s.serialized).not.toContain(VALUE);
       expect(await domHash(s.cdp)).toBe(s.before);
     } finally { await s.close(); }
   });
@@ -114,7 +110,6 @@ describe('native primary output name provenance', () => {
       const s = await scenario(`<output aria-label="${label}">${VALUE}</output>`);
       try {
         expect(s.serialized).not.toContain(label);
-        for (const ref of Object.keys(s.perception.facts)) expect(JSON.stringify(await synthesize({ perception: s.perception, inventory: s.inventory, ref }))).not.toContain(label);
       } finally { await s.close(); }
     }
     for (const html of [
@@ -135,14 +130,9 @@ describe('native primary output name provenance', () => {
     const s = await scenario(output() + output());
     try {
       expect(await s.page.getByRole('status', { name: NAME, exact: true }).count()).toBe(2);
-      for (const [ref, fact] of Object.entries(s.perception.facts).filter(([, f]) => f.role === 'status')) {
-        expect(fact.name).toBe(NAME);
-        const result = await synthesize({ perception: s.perception, inventory: s.inventory, ref });
-        if (result.ok) {
-          expect(result.tier).not.toBe('role');
-          expect(await (buildPublicLocator(s.page as unknown as LocatorRoot, result.locator) as Locator).count()).toBe(1);
-        }
-      }
+      const statuses = Object.values(s.perception.facts).filter((f) => f.role === 'status');
+      expect(statuses).toHaveLength(2);
+      for (const fact of statuses) expect(fact.name).toBe(NAME);
     } finally { await s.close(); }
   });
 

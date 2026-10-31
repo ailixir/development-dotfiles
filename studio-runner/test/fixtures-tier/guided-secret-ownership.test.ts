@@ -1,3 +1,4 @@
+import { stepOp } from '../helpers/stepCode.js';
 import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 // eslint-disable-next-line no-restricted-imports -- Actual fixed Chromium SDK witness; every intercepted call invokes its original.
 import {chromium} from 'playwright';
@@ -7,7 +8,7 @@ import {TLSSocket} from 'node:tls';
 import {mkdtemp,readdir,readFile,writeFile,rm} from 'node:fs/promises';
 import {existsSync} from 'node:fs';
 import {tmpdir} from 'node:os';
-import {join,resolve} from 'node:path';
+import {join} from 'node:path';
 import {expect,it,vi} from 'vitest';
 import {createGuidedServer,guidedCallback,guidedClaimClient,verifyGuidedJwt} from '../../src/guided/transport.js';
 import {GuidedRuntime} from '../../src/guided/runtime.js';
@@ -19,6 +20,7 @@ import {guidedContext,ownershipSession,assignmentFor,proposal,dispatch} from '..
 import {testTls,testFingerprint,jwtPolicy,jwt,post} from '../helpers/guidedTls.js';
 import {startSecretLoginFixture} from '../fixtures/secret-login/server.js';
 import {untilMs} from './realRunner.js';
+import {evidencePath} from '../helpers/evidenceOut.js';
 
 const modes=['revoked','slow-grant','lost-body-late-grant','hard-expiry'] as const;
 const CANARY='obs007-guided-renew-private';
@@ -34,7 +36,7 @@ it.each(modes)('uses actual mTLS and native focus for guided secret ownership: %
   const fixture=await startSecretLoginFixture(CANARY),directory=await mkdtemp(join(tmpdir(),'guided-secret-ownership-'));
   const context=guidedContext(fixture.origin),destination=context.authoredInputs.inputs[0];
   if(!destination||!('value' in destination))throw Error('DESTINATION');destination.value=fixture.origin+'/slow';
-  context.authoredInputs.inputs.push({inputId:'input-pass',sourceStepId:'fill',kind:'secretRef',intendedSlot:'fill.value',secretId:'PASS',provenance:{referenceKind:'configuration',configurationRevision:context.configurationRevision,stepId:'fill',referenceId:'reference-pass',referenceName:'PASS',kind:'secretRef',intendedSlot:'fill.value'}},{inputId:'input-later-pass',sourceStepId:'submit',kind:'secretRef',intendedSlot:'fill.value',secretId:'NEXT',provenance:{referenceKind:'configuration',configurationRevision:context.configurationRevision,stepId:'submit',referenceId:'reference-next',referenceName:'NEXT',kind:'secretRef',intendedSlot:'fill.value'}});
+  context.authoredInputs.inputs.push({inputId:'input-pass',sourceStepId:'fill',kind:'secretRef',secretId:'PASS',provenance:{referenceKind:'configuration',configurationRevision:context.configurationRevision,stepId:'fill',referenceId:'reference-pass',referenceName:'PASS',kind:'secretRef'}},{inputId:'input-later-pass',sourceStepId:'submit',kind:'secretRef',secretId:'NEXT',provenance:{referenceKind:'configuration',configurationRevision:context.configurationRevision,stepId:'submit',referenceId:'reference-next',referenceName:'NEXT',kind:'secretRef'}});
   if(mode==='hard-expiry')context.expiresAt=new Date(Date.now()+5000).toISOString();
   context.authoredInputsHash=hash(context.authoredInputs);
   let grant=ownershipSession(context);context.leaseExpiresAt=grant.owner.leaseExpiresAt;
@@ -110,13 +112,13 @@ it.each(modes)('uses actual mTLS and native focus for guided secret ownership: %
     expect((await post(address.port,path+'/assign',assignment,{fence:null})).status).toBe(200);
     expect((await post(address.port,path+'/context',context)).status).toBe(200);
     const bootstrap=messages.find(m=>m.route==='bootstrap-evidence')?.body as BridgeBootstrap|undefined;if(!bootstrap)throw Error('BOOTSTRAP');
-    const navigation=proposal(context,bootstrap.executionEvidence,'nav',{kind:'navigate',destinationInputId:'input-nav'}),navigationPreparation=await post(address.port,path+'/prepare',{...identity(context),proposal:navigation,requestDigest:hash(navigation),expiresAt:context.expiresAt},{key:'navigation-prepare'});expectedStage('navigation-prepare',navigationPreparation,200);
+    const navigation=proposal(context,bootstrap.executionEvidence,'nav',stepOp('await page.goto(inputs["input-nav"]);', { uses: [{ kind: 'input', id: 'input-nav' }] })),navigationPreparation=await post(address.port,path+'/prepare',{...identity(context),proposal:navigation,requestDigest:hash(navigation),expiresAt:context.expiresAt},{key:'navigation-prepare'});expectedStage('navigation-prepare',navigationPreparation,200);
     expectedStage('navigation-dispatch',await post(address.port,path+'/dispatch',dispatch(context,navigation,validate<BridgePreparation>('bridge',navigationPreparation.body,'preparation')),{key:'navigation-dispatch'}),200);
     const observation=(messages.filter(m=>m.route==='observations').at(-1)?.body as BridgeObservation).observation;
     expect(observation.origin).toBe(fixture.origin);expect(observation.coverage.passwordControls).toBe(1);
     const evidence={kind:'observedDocument' as const,sessionId:context.sessionId,contextId:context.contextId,documentId:observation.documentId,generation:observation.generation,origin:fixture.origin,observationHash:hash(observation)};
-    const fill=proposal(context,evidence,'fill',{kind:'fill',value:{kind:'secretRef',sourceInputId:'input-pass'}},{kind:'passwordControl',documentId:observation.documentId,generation:observation.generation}),preparation=await post(address.port,path+'/prepare',{...identity(context),proposal:fill,requestDigest:hash(fill),expiresAt:context.expiresAt},{key:'password-prepare'});expectedStage('password-prepare',preparation,200);
-    const request={...dispatch(context,fill,validate<BridgePreparation>('bridge',preparation.body,'preparation')),secret:{secretId:'PASS',value:CANARY,versionId:'fixture-version',allowedOrigins:[fixture.origin]}};
+    const fill=proposal(context,evidence,'fill',stepOp('await page.locator(\'input[type="password"]\').fill(secrets["PASS"]);', { uses: [{ kind: 'secret', id: 'PASS' }] })),preparation=await post(address.port,path+'/prepare',{...identity(context),proposal:fill,requestDigest:hash(fill),expiresAt:context.expiresAt},{key:'password-prepare'});expectedStage('password-prepare',preparation,200);
+    const request={...dispatch(context,fill,validate<BridgePreparation>('bridge',preparation.body,'preparation')),secrets:[{secretId:'PASS',value:CANARY,versionId:'fixture-version',allowedOrigins:[fixture.origin]}]};
     pendingFill=post(address.port,path+'/dispatch',request,{key:'actual-secret-fill'});
     await untilMs(()=>focusAt!==undefined,4000);expect(nativePendingAtFocus).toBe(1);expect(nativePending).toBe(1);expect(nativeEnds).toEqual([]);
     if(mode==='slow-grant'){
@@ -132,7 +134,7 @@ it.each(modes)('uses actual mTLS and native focus for guided secret ownership: %
       if(t0===undefined)throw Error('ACK_CLOCK');expect(authorityStoppedAt-t0).toBeLessThanOrEqual(2000);facts.cutoffMs=authorityStoppedAt-t0;expect(stopReason).toBe(mode==='revoked'?'REVOKED':'LEASE_LOST');
     }
     if(mode==='hard-expiry'){expect(authorityStoppedWallMs).toBeGreaterThanOrEqual(Date.parse(context.expiresAt)-TIMER_EARLY_MS);expect(stopReason).toBe('EXPIRED');expect(claimFacts.slice(1).every(c=>c.timeoutMs<=1000)).toBe(true);}
-    const later=proposal(context,evidence,'submit',{kind:'fill',value:{kind:'secretRef',sourceInputId:'input-later-pass'}},{kind:'passwordControl',documentId:observation.documentId,generation:observation.generation});
+    const later=proposal(context,evidence,'submit',stepOp('await page.locator(\'input[type="password"]\').fill(secrets["PASS"]);', { uses: [{ kind: 'secret', id: 'PASS' }] }));
     expect((await post(address.port,path+'/prepare',{...identity(context),proposal:later,requestDigest:hash(later),expiresAt:context.expiresAt},{key:'later-secret-prepare'})).status).toBe(409);
     if(mode==='lost-body-late-grant')await untilMs(()=>lateGrantWriteAt!==undefined,3000);
     expect((await post(address.port,path+'/context',context,{key:'late-context'})).status).toBe(409);expect((await post(address.port,path+'/assign',assignment,{fence:null,key:'late-assignment'})).status).toBe(409);
@@ -148,6 +150,6 @@ it.each(modes)('uses actual mTLS and native focus for guided secret ownership: %
   }finally{
     await app.close();if(pendingFill)await pendingFill.catch(()=>undefined);for(const timer of timers)clearTimeout(timer);heldLate?.destroy();callbacks.closeAllConnections();await new Promise<void>(r=>callbacks.close(()=>{r();}));
     Object.assign(facts,{commandResponses,claimFacts,requestFacts,focusAt,nativePendingAtFocus,t0,authorityStoppedAt,stopReason,closeRequestedAt,closeFinishedAt,lateGrantWriteAt,lateGrantResponseClosed,launches,nativeEntries,nativeEnds,inputEvents,pids:[...pids],allObservedPidsGone:[...pids].every(pid=>!isAlive(pid)),scratchPath,scratchAbsent:scratchPath!==undefined&&!existsSync(scratchPath),messages});
-    await writeFile(resolve('../docs/qa/evidence/STUDIO-OBS-007/runner-guided-renew-execution-2/oracle-'+mode+'.json'),JSON.stringify(facts,null,2)+'\n');vi.restoreAllMocks();await fixture.close();await rm(directory,{recursive:true,force:true});
+    await writeFile(evidencePath('STUDIO-OBS-007/runner-guided-renew-execution-2/oracle-'+mode+'.json'),JSON.stringify(facts,null,2)+'\n');vi.restoreAllMocks();await fixture.close();await rm(directory,{recursive:true,force:true});
   }
 },45000);

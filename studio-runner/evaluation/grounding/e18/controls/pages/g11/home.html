@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Order lookup</title></head>
+<body><main>
+<h1>Order lookup</h1>
+<label for="ref">Order reference</label><br>
+<input id="ref" type="text" autocomplete="off">
+<button id="find" type="button" disabled>Find</button>
+<p id="found"></p>
+<script>
+var r=document.getElementById('ref'),f=document.getElementById('find');
+r.addEventListener('keyup',function(){f.disabled=r.value.length===0;});
+f.addEventListener('click',function(){document.getElementById('found').textContent='Looking up '+r.value;});
+</script>
+</main></body></html>

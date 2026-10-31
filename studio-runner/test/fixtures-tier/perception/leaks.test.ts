@@ -5,7 +5,6 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Browser, Page } from 'playwright';
 
 import { perceive, type Perception } from '../../../src/run/perceive.js';
-import { synthesize, toEngineSelector } from '../../../src/run/locatorSynth.js';
 import { loadInjectedSourceFrom, type CdpSession } from '../../../src/run/playwrightEngine.js';
 import { DEFAULT_WORK_BUDGET_UNITS, PrivateInventory } from '../../../src/run/privateInventory.js';
 import { cdpOf, domHash, guardDist, launchChromium, openPage } from './harness.js';
@@ -48,15 +47,8 @@ async function scenario(browser: Browser, html: string, privateValues: string[],
   const everything = JSON.stringify({
     outline: perception.outline, facts: perception.facts, segments: perception.evidenceSegments, ids: perception.backendNodeIds, counters: perception.counters, origin: perception.origin, viewport: perception.viewport,
   });
-  let locators = '';
-  if (options.synth !== false) {
-    for (const ref of Object.keys(perception.facts).slice(0, 60)) {
-      const result = await synthesize({ perception, ref, inventory });
-      locators += JSON.stringify(result);
-      if (result.ok) locators += toEngineSelector(result.locator);
-    }
-  }
-  if (options.synth !== false) expect(locators.length, 'the locator scan must not be vacuous').toBeGreaterThan(50);
+  // Locators no longer exist (step code is written against the page); the scan covers every public serialization of the observation.
+  const locators = '';
   return { perception, everything, locators, page, cdp, inventory };
 }
 
@@ -239,8 +231,7 @@ describe('AC2: leak canaries in a real browser', () => {
         expect(leaked(s.everything + s.locators, forms(QM, FRAGMENTS))).toEqual([]);
         const ref = Object.keys(s.perception.facts).find((r) => s.perception.facts[r]?.role === 'button');
         expect(ref, 'the stub keeps a ref').toBeDefined();
-        const result = await synthesize({ perception: s.perception, ref: ref ?? '', inventory: s.inventory });
-        expect(JSON.stringify(result)).not.toMatch(/quillon|marsh/iu);
+        expect(JSON.stringify(s.perception.facts[ref ?? ''])).not.toMatch(/quillon|marsh/iu);
         expect(spelled.length).toBeGreaterThan(0);
       } finally {
         await closeAfter(s);
@@ -426,8 +417,7 @@ describe('AC2: leak canaries in a real browser', () => {
         const cdp = await cdpOf(page);
         const before = await domHash(cdp);
         const inventory = new PrivateInventory();
-        const perception = await perceive({ cdp, inventory, privateValues: [CANARY] });
-        for (const ref of Object.keys(perception.facts)) await synthesize({ perception, ref, inventory });
+        await perceive({ cdp, inventory, privateValues: [CANARY] });
         expect(await domHash(cdp)).toBe(before);
       } finally {
         await page.context().close();

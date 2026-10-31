@@ -175,36 +175,12 @@ it('checks observed bundle/image/installed revision joins with a controlled star
 });
 
 import {checkPins} from '../scripts/check-pins.mjs';
-import publicationReferencesJson from '../../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json' with {type:'json'};
-import type {PublicationDocument,TestDocument} from './helpers/publicationFixture.js';
-// Typed view of the static JSON import: the file exceeds tsserver's 4 MiB non-TS limit, so ESLint's projectService types it as `error`.
-const publicationReferences=publicationReferencesJson as unknown as TestDocument<PublicationDocument>&{observedChoice:{description:string}};
-it('packages independently authored choice evidence without rewriting previous reference bytes',()=>{
-  const workspace=mkdtempSync(join(tmpdir(),'observed-choice-package-'));directories.push(workspace);const root=join(workspace,'studio-runner');mkdirSync(root);
-  for(const file of ['package.json','package-lock.json','Dockerfile','.nvmrc'])cpSync(join(packageRoot,file),join(root,file));
-  for(const dir of ['src/validator','dist/validator','dist/run','fixtures/observed-reference'])mkdirSync(join(root,dir),{recursive:true});cpSync(join(packageRoot,'dist','run','browser.js'),join(root,'dist','run','browser.js'));writeFileSync(join(root,'fixtures/observed-reference/accepted-observed-choice.json'),JSON.stringify(publicationReferences.observedChoice));
-  const source=join(packageRoot,'src','validator','observedSchemas.json');cpSync(source,join(root,'src','validator','observedSchemas.json'));cpSync(source,join(root,'dist','validator','observedSchemas.json'));
-  const original=JSON.stringify({controlled:'untouched-é🧪'});writeFileSync(join(root,'fixtures','observed-reference','fixture.json'),original);
-  const choiceDir=join(workspace,'docs','specs','studio-observed-authoring','contracts','v3');mkdirSync(choiceDir,{recursive:true});const choiceFile=join(choiceDir,'publication-fixtures.json');writeFileSync(choiceFile,JSON.stringify(publicationReferences));
-  writeRuntimeVersionsFile({root,env:{},nodeVersion:'v24.20.0'});
-  expect(checkPins(root).ok).toBe(true);expect(readFileSync(join(root,'fixtures','observed-reference','fixture.json'),'utf8')).toBe(original);
-  const packaged=JSON.parse(readFileSync(join(root,'dist','observed-reference.json'),'utf8')) as Record<string,unknown>;expect(packaged['accepted-observed-choice.json']).toEqual(publicationReferences.observedChoice);
-  const stale=structuredClone(publicationReferences);stale.observedChoice.description+='changed';writeFileSync(choiceFile,JSON.stringify(stale));expect(checkPins(root).failures).toContain('Observed packaged reference bundle is stale.');
-  writeFileSync(choiceFile,'{}');expect(checkPins(root).failures).toContain('Observed packaged support files are missing or invalid.');
-  expect(()=>writeRuntimeVersionsFile({root,env:{},nodeVersion:'v24.20.0'})).toThrow('Observed choice reference evidence is missing or invalid.');
-  // The Docker build has no monorepo docs mount. Its mandatory packaged bytes retain the
-  // same virtual key/content and independently hashed reference identity.
-  rmSync(join(workspace,'docs'),{recursive:true,force:true});writeRuntimeVersionsFile({root,env:{},nodeVersion:'v24.20.0'});
-  expect(JSON.parse(readFileSync(join(root,'dist','observed-reference.json'),'utf8')) as unknown).toEqual(packaged);
-  const runtime=JSON.parse(readFileSync(join(root,'dist','runtime-versions.json'),'utf8')) as {observedReferenceBundleHash:string};expect(runtime.observedReferenceBundleHash).toBe(hashObserved(packaged));expect(checkPins(root).ok).toBe(true);
-  rmSync(join(root,'fixtures','observed-reference','accepted-observed-choice.json'));expect(()=>writeRuntimeVersionsFile({root,env:{},nodeVersion:'v24.20.0'})).toThrow('Observed choice reference evidence is missing or invalid.');expect(checkPins(root).ok).toBe(false);
-});
 it('builds packaged observed bundles and refuses a stale schema/reference artifact independently',()=>{
   const root=mkdtempSync(join(tmpdir(),'observed-package-'));directories.push(root);
   for(const file of ['package.json','package-lock.json','Dockerfile','.nvmrc'])cpSync(join(packageRoot,file),join(root,file));
   mkdirSync(join(root,'src','validator'),{recursive:true});mkdirSync(join(root,'dist','validator'),{recursive:true});mkdirSync(join(root,'fixtures','observed-reference'),{recursive:true});
   const schemaFile=join(packageRoot,'src','validator','observedSchemas.json');cpSync(schemaFile,join(root,'src','validator','observedSchemas.json'));cpSync(schemaFile,join(root,'dist','validator','observedSchemas.json'));
-  mkdirSync(join(root,'dist/run'),{recursive:true});cpSync(join(packageRoot,'dist','run','browser.js'),join(root,'dist','run','browser.js'));writeFileSync(join(root,'fixtures/observed-reference/accepted-observed-choice.json'),JSON.stringify(publicationReferences.observedChoice));writeFileSync(join(root,'fixtures','observed-reference','fixture.json'),JSON.stringify({controlled:'reference'}));
+  mkdirSync(join(root,'dist/run'),{recursive:true});cpSync(join(packageRoot,'dist','run','browser.js'),join(root,'dist','run','browser.js'));writeFileSync(join(root,'fixtures','observed-reference','fixture.json'),JSON.stringify({controlled:'reference'}));
   writeRuntimeVersionsFile({root,env:{},nodeVersion:'v24.20.0'});
   expect(checkPins(root).ok).toBe(true);
   // The observed identities ride next to the Playwright copies; none of the retired stamps comes back (AC-1 P2 a).

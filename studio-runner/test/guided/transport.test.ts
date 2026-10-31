@@ -7,6 +7,7 @@ import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import type { GuidedBrowser } from '../../src/run/guidedBrowser.js';
 import { GuidedLaunchFailure } from '../../src/run/guidedBrowser.js';
+import { ClosedActionError } from '../../src/run/closedError.js';
 import { GuidedRuntime } from '../../src/guided/runtime.js';
 import { createServer } from 'node:https';
 import type { AddressInfo } from 'node:net';
@@ -18,7 +19,8 @@ import { validate,hash,identity,canonical,auditSchemaBundle } from '../../src/gu
 import type { ObservationRefresh } from '../../src/guided/types.js';
 import { parseWireJson } from '../../src/guided/json.js';
 import { assignmentFor,guidedContext,ownershipSession, sessionStub, proposal, dispatch } from '../helpers/guided.js';
-afterEach(()=>{vi.restoreAllMocks();});
+import { stepOp } from '../helpers/stepCode.js';
+import { fakeHandle, newRig } from '../helpers/stepFakes.js';afterEach(()=>{vi.restoreAllMocks();});
 describe('closed callback failure diagnostics',()=>{
   const sentinel='PRIVATE-SENTINEL-MUST-NEVER-APPEAR';
   it('records local schema refusal without credentials, free text or values',async()=>{
@@ -71,20 +73,47 @@ describe('closed callback failure diagnostics',()=>{
       const write=(line:string)=>{lines.push(line);events.push(line.startsWith('GUIDED_COMPLETED_FAILED')?'completed':'callback');};
       const callback=guidedCallback({baseUrl:`https://127.0.0.1:${String(port)}`,tls:testTls,controllerCertificateFingerprint256:testFingerprint,token:()=>Promise.resolve(sentinel),diagnosticStderr:write});
       const evidence:GuidedBrowser['evidence']={kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:randomUUID(),documentId:randomUUID(),bootstrapId:randomUUID(),url:'about:blank',origin:null,generation:0};
-      const navigate=vi.fn(()=>Promise.resolve());
-      const browser:GuidedBrowser={evidence,blankMatches:()=>Promise.resolve(true),navigateBlank:navigate,close:()=>{events.push('close');return Promise.resolve();},terminate:()=>Promise.resolve(),orderlyClosed:()=>true,observations:sessionStub({withhold:()=>Promise.resolve(),observe:()=>Promise.reject(new Error(sentinel))})};
+      const rig=newRig('about:blank',{observe:()=>Promise.reject(new Error(sentinel)),withhold:()=>Promise.resolve()});
+      const browser:GuidedBrowser={evidence,blankMatches:()=>Promise.resolve(true),handle:fakeHandle(rig),close:()=>{events.push('close');return Promise.resolve();},terminate:()=>Promise.resolve(),orderlyClosed:()=>true,observations:rig.session};
       runtime=new GuidedRuntime(context,{workerId:context.workerId,allowedDomains:TEST_DOMAINS,journalDirectory:directory,launch:()=>Promise.resolve(browser),callback,diagnosticStderr:write});
       await runtime.start();
-      const action=proposal(context,evidence,'nav',{kind:'navigate',destinationInputId:'input-nav'});
-      const proof=await runtime.prepare({...identity(context),proposal:action,requestDigest:hash(action),expiresAt:new Date(Date.now()+10_000).toISOString(),pressInheritance:null});
+      const action=proposal(context,evidence,'nav',stepOp('await page.goto(inputs["input-nav"]);',{uses:[{kind:'input',id:'input-nav'}]}));
+      const proof=await runtime.prepare({...identity(context),proposal:action,requestDigest:hash(action),expiresAt:new Date(Date.now()+10_000).toISOString()});
       const outcome=await runtime.dispatch(dispatch(context,action,proof));
       expect(outcome.ledger.state).toBe('SUCCEEDED');expect(outcome.ledger.outcomeCode).toBe('OK');
-      expect(navigate).toHaveBeenCalledOnce();expect(posts).toBe(3);expect(runtime.active).toBe(false);
+      expect(rig.w.effects).toEqual(['goto']);expect(posts).toBe(3);expect(runtime.active).toBe(false);
       expect(events).toEqual(['callback','completed','close']);
       const facts={route:'OUTCOME',phase:'HTTP',status:409,backendCode:'INVALID_CONTRACT'};
-      expect(lines).toEqual(['GUIDED_CALLBACK_FAILED '+JSON.stringify(facts)+'\n','GUIDED_COMPLETED_FAILED '+JSON.stringify(facts)+'\n']);
+      expect(lines).toEqual(['GUIDED_CALLBACK_FAILED '+JSON.stringify(facts)+'\n','GUIDED_COMPLETED_FAILED '+JSON.stringify({...facts,cause:'UNKNOWN'})+'\n']);
       expect(lines.join('')).not.toContain(sentinel);
     }finally{await runtime?.stop('CANCELLED');server.closeAllConnections();await new Promise<void>(resolve=>{server.close(()=>{resolve();});});await rm(directory,{recursive:true,force:true});}
+  });
+});
+describe('the cause of a session that ends after a committed outcome (SC008-FIX-19)',()=>{
+  const sentinel='PRIVATE-SENTINEL-MUST-NEVER-APPEAR';
+  it.each([
+    {label:'a closed action error',thrown:()=>new ClosedActionError('STALE_OBSERVATION'),cause:'STALE_OBSERVATION'},
+    {label:'a plain error that carries a closed code',thrown:()=>new Error('BUDGET_EXCEEDED'),cause:'BUDGET_EXCEEDED'},
+    {label:'free text',thrown:()=>new Error(sentinel),cause:'UNKNOWN'},
+  ])('names $label in the stderr line',async({thrown,cause})=>{
+    const lines:string[]=[];
+    const directory=await mkdtemp(join(tmpdir(),'closed-cause-'));
+    let runtime:GuidedRuntime|undefined;
+    try {
+      const context=guidedContext('https://example.test');
+      const evidence:GuidedBrowser['evidence']={kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:randomUUID(),documentId:randomUUID(),bootstrapId:randomUUID(),url:'about:blank',origin:null,generation:0};
+      const rig=newRig('about:blank',{observe:()=>Promise.reject(thrown()),withhold:()=>Promise.resolve()});
+      const browser:GuidedBrowser={evidence,blankMatches:()=>Promise.resolve(true),handle:fakeHandle(rig),close:()=>Promise.resolve(),terminate:()=>Promise.resolve(),orderlyClosed:()=>true,observations:rig.session};
+      runtime=new GuidedRuntime(context,{workerId:context.workerId,allowedDomains:TEST_DOMAINS,journalDirectory:directory,launch:()=>Promise.resolve(browser),callback:()=>Promise.resolve(undefined as never),diagnosticStderr:line=>{lines.push(line);}});
+      await runtime.start();
+      const action=proposal(context,evidence,'nav',stepOp('await page.goto(inputs["input-nav"]);',{uses:[{kind:'input',id:'input-nav'}]}));
+      const proof=await runtime.prepare({...identity(context),proposal:action,requestDigest:hash(action),expiresAt:new Date(Date.now()+10_000).toISOString()});
+      const outcome=await runtime.dispatch(dispatch(context,action,proof));
+      expect(outcome.ledger.state).toBe('SUCCEEDED');
+      expect(runtime.active).toBe(false);
+      expect(lines).toEqual(['GUIDED_COMPLETED_FAILED '+JSON.stringify({route:'OUTCOME',phase:'UNKNOWN',status:null,backendCode:'UNKNOWN',cause})+'\n']);
+      expect(lines.join('')).not.toContain(sentinel);
+    }finally{await runtime?.stop('CANCELLED');await rm(directory,{recursive:true,force:true});}
   });
 });
 describe('guided strict identity and wire schemas',()=>{
@@ -265,7 +294,7 @@ describe('STUDIO-OBS-014 AC-1 definite context refusal on the wire (AR-2 r14-sto
   it('answers a context that differs from its grant and a context without the policy fields with schema-valid 409 refusals and changes nothing on the worker',async()=>{
     const directory=await mkdtemp(join(tmpdir(),'guided-refusal-'));
     const context=guidedContext('https://example.test');const grant=ownershipSession(context);const assignment=assignmentFor(context);
-    const browser:GuidedBrowser={evidence:{kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:randomUUID(),documentId:randomUUID(),bootstrapId:randomUUID(),url:'about:blank',origin:null,generation:0},blankMatches:()=>Promise.resolve(true),navigateBlank:()=>Promise.resolve(),close:()=>Promise.resolve(),terminate:vi.fn(()=>Promise.resolve()),orderlyClosed:()=>true,observations: sessionStub({withhold:()=>Promise.resolve(),dispose:()=>Promise.resolve(),observe:()=>Promise.reject(new Error('unused'))})};
+    const browser:GuidedBrowser={evidence:{kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:randomUUID(),documentId:randomUUID(),bootstrapId:randomUUID(),url:'about:blank',origin:null,generation:0},blankMatches:()=>Promise.resolve(true),close:()=>Promise.resolve(),terminate:vi.fn(()=>Promise.resolve()),orderlyClosed:()=>true,observations: sessionStub({withhold:()=>Promise.resolve(),dispose:()=>Promise.resolve(),observe:()=>Promise.reject(new Error('unused'))})};
     const launch=vi.fn(()=>Promise.resolve(browser));const callbacks:string[]=[];
     const app=createGuidedServer({workerId:context.workerId,allowedDomains: TEST_DOMAINS, journalDirectory:directory,tls:testTls,controllerJwt:jwtPolicy,controllerCertificateFingerprint256:testFingerprint,launch,
       claim:()=>Promise.resolve({...structuredClone(grant),owner:{...grant.owner,leaseExpiresAt:new Date(Math.min(Date.now()+30_000,Date.parse(grant.expiresAt))).toISOString()}}),

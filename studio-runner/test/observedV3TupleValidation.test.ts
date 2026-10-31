@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import fixtureJson from '../../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json' with { type: 'json' };
 import type {PublicationDocument,TestDocument} from './helpers/publicationFixture.js';
 import { deriveObservedArtifact, validateObservedRequest, validateReplayArtifact } from '../src/validator/observedReplay.js';
-import { hashObserved, OBSERVED_PROFILE, OBSERVED_SCHEMA_BUNDLE_HASH, validateObserved } from '../src/validator/observedReferencePolicy.js';
+import { hashObserved, OBSERVED_PROFILE, OBSERVED_SCHEMA_BUNDLE_HASH } from '../src/validator/observedReferencePolicy.js';
 // Typed view of the static JSON import: the file exceeds tsserver's 4 MiB non-TS limit, so ESLint's projectService types it as `error`.
 const fixture=fixtureJson as unknown as TestDocument<PublicationDocument>;
 
@@ -60,42 +60,4 @@ describe('active observed v3 admission and publication tuple', () => {
     (proof.versions as Record<string, unknown>)[key] = retiredPins[key];
     expect(() => deriveObservedArtifact(basis)).toThrow('INVALID_CONTRACT');
   });
-});
-
-
-describe('v3 observed-choice response provenance', () => {
-  const witness = () => {
-    const preparation = fixture.observedChoice.basis.preparations[3];
-    if (!preparation || !('observedChoice' in preparation)) {
-      throw new Error('Missing independently sealed observed-choice witness');
-    }
-    return structuredClone(preparation.observedChoice);
-  };
-
-  it('accepts the actual v3 model response leaf in a complete legitimate witness and sealed artifact', () => {
-    const value = witness();
-    expect(value.attempt.responseSchemaVersion).toBe(3);
-    validateObserved('replay-validation#/definitions/QuestionAttemptEvidence', value.attempt);
-    validateObserved('replay-validation#/definitions/ObservedChoiceWitness1', value);
-    expect(deriveObservedArtifact(fixture.observedChoice.basis)).toEqual({
-      artifact: fixture.observedChoice.artifact,
-      hashes: fixture.observedChoice.hashes,
-    });
-  });
-
-  it.each(['version2', 'missing-version', 'extra-member'] as const)(
-    'refuses %s without weakening the closed v3 witness', mutation => {
-      const value = witness();
-      const attempt = value.attempt as Record<string, unknown>;
-      if (mutation === 'version2') attempt.responseSchemaVersion = 2;
-      else if (mutation === 'missing-version') delete attempt.responseSchemaVersion;
-      else attempt.unexpectedMember = true;
-      expect(() => validateObserved(
-        'replay-validation#/definitions/QuestionAttemptEvidence', attempt,
-      )).toThrow('INVALID_CONTRACT');
-      expect(() => validateObserved(
-        'replay-validation#/definitions/ObservedChoiceWitness1', value,
-      )).toThrow('INVALID_CONTRACT');
-    },
-  );
 });

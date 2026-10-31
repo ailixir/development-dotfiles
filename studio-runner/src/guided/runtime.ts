@@ -1,24 +1,24 @@
 import { GuidedDiagnostics } from './diagnostics.js';
-import {PasswordNoEffect} from '../run/passwordControl.js';
 import {createRedactor} from '../executor/redaction.js';
 import type {Redactor} from '../executor/redaction.js';
-import { prepareObservedAction, performPreparedObservedAction } from '../run/observedReplayAdapter.js';
-import { operationPreimage } from '../validator/operationPreimage.js';
-import { DISPATCH_WINDOW_MS, MIN_AUTOMATIC_OBSERVATION_MS } from '../run/actionBudget.js';
+import { admit, createSecretRun, newTally, performStep, receiptFromTally } from '../run/observedReplayAdapter.js';
+import type { SecretRun, StepOutcome, StepReceipt } from '../run/observedReplayAdapter.js';
+import { SecretUseEvidence } from '../run/secretUse.js';
+import { DISPATCH_WINDOW_MS, MIN_AUTOMATIC_OBSERVATION_MS, PREPARE_BUDGET_MS } from '../run/actionBudget.js';
 import { ObservedRefusal } from '../validator/observedReferencePolicy.js';
 import type { InvocationControl } from '../executor/observedReplay.js';
-import type { BridgePrefixPrepare, BridgePrefixPrepareResult, BridgePrefixRequestIdentity, BridgePreAdmissionDrift, BridgeAdmittedDrift, BridgeContextAcknowledgement, BridgeOrdinaryPrepare } from './types.js';
+import type { BridgePrefixPrepare, BridgePrefixPrepareResult, BridgePrefixRequestIdentity, BridgeAdmittedDrift, BridgeContextAcknowledgement, BridgeOrdinaryPrepare } from './types.js';
 import { randomUUID } from 'node:crypto';
 import { canonical, hash, identity, insist, sameIdentity, validate } from './contracts.js';
 import { GuidedJournal } from './journal.js';
-import type { Action, BridgeDispatch, BridgeIdentity, BridgeObservation, BridgeOrdinaryOutcome as BridgeOutcome, BridgePreparation, BridgeStop, ConsumerEdge, ExecutionEvidence, PrefixAction, Producer, ResolvedTarget, RunnerContext, ObservationRefresh } from './types.js';
+import type { Action, BridgeDispatch, BridgeIdentity, BridgeObservation, BridgeOrdinaryOutcome as BridgeOutcome, BridgePreparation, BridgeStop, ConsumerEdge, ExecutionEvidence, PrefixAction, Producer, RunnerContext, ObservationRefresh } from './types.js';
 import { GuidedLaunchFailure, GUIDED_RECORDING_FINALIZE_MS, GUIDED_START_BUDGET_MS, GUIDED_START_RESERVE_MS } from '../run/guidedBrowser.js';
 import type { GuidedBrowser, GuidedLossReason, GuidedRecordingRequest, GuidedStartup } from '../run/guidedBrowser.js';
 import { boundedStartup } from '../run/observedBootstrap.js';
 import type { ActionStamp, GuidedRecorder, GuidedSessionRecording } from './evidence.js';
-import type { ObservationConfig, ObservationFocus, InvocationIdentity } from '../run/observationTypes.js';
-import { observationReadProfile } from '../run/observationReadProfile.js';
+import type { ObservationConfig, ObservationFocus } from '../run/observationTypes.js';
 import { domainAllowed, OriginNotAllowed } from '../allowedDomains.js';
+import { closedCause } from '../run/closedError.js';
 
 export const CALLBACK_PROBLEM_CODES: ReadonlySet<string> = new Set([
   'AUTH_DENIED', 'INVALID_CONTRACT', 'IDEMPOTENCY_CONFLICT', 'IDENTITY_MISMATCH', 'STALE_FENCE',
@@ -45,7 +45,7 @@ export function recordCallbackFailure(error: unknown, facts: CallbackFailureFact
 export interface GuidedRuntimeOptions {
   /** Volatile trusted test observer; never available in a mounted config or wire frame. */
   onRawFailure?: (error: unknown) => void;
-  /** Controlled injected-error seam for the released-canary oracle, absent in production. */
+  /** Controlled injected-error seam for the released-canary oracle, absent in production. Called with the value at the one place the secret hook reads it: after the fence, before the trusted write. */
   beforeSecretFill?: (value: string) => void;
   diagnosticStderr?: (text: string) => void;
   workerId: string;
@@ -69,7 +69,6 @@ export interface GuidedRuntimeOptions {
   /** CSI segment of the recording key, from the claimed grant scope, never from the wire context. */
   csiId?: string;
 }
-type Availability = Producer['availability'];
 type Ended<T> = { readonly kind: 'value'; readonly value: T } | { readonly kind: 'error'; readonly error: unknown } | { readonly kind: 'pending' };
 /** How `work` ended, or `pending` once `ms` has passed. Never rejects and never leaves a timer behind. */
 async function endedWithin<T>(work: Promise<T>, ms: number): Promise<Ended<T>> {
@@ -83,8 +82,33 @@ async function endedWithin<T>(work: Promise<T>, ms: number): Promise<Ended<T>> {
 }
 /** Last `start()` step entered. Closed vocabulary: it is logged on a failed start, never derived from input. */
 export type GuidedStartPhase = 'VALIDATE' | 'JOURNAL' | 'RECORDER' | 'LAUNCH' | 'WITHHOLD' | 'BLANK_MATCH' | 'BOOTSTRAP_CALLBACK' | 'STARTED';
-function argumentSlot(operation: Action['operation']): string {
-  return operation.kind === 'navigate' ? 'navigate.destination' : operation.kind === 'fill' ? 'fill.value' : operation.kind === 'selectOption' ? 'selectOption.value' : 'assert.expected';
+/**
+ * A prepare refusal that carries the facts the wire reason allows (bridge#/definitions/refusal): the message is the reason, which the transport
+ * maps to its code (`PREPARATION_DENIED` for all three step reasons). Line and column are the model's own code; matchCount counts locator matches.
+ */
+export class StepRefusal extends Error {
+  constructor(reason: 'STEP_SYNTAX' | 'SOURCE_HASH_MISMATCH' | 'STEP_PRE_FENCE', readonly line: number | null = null, readonly column: number | null = null, readonly matchCount: number | null = null) {
+    super(reason);
+    this.name = 'StepRefusal';
+  }
+}
+interface LedgerOutcome { state: 'SUCCEEDED' | 'FAILED' | 'UNKNOWN_OUTCOME'; outcomeCode: 'OK' | 'ASSERTION_FAILED' | 'TARGET_CHANGED' | 'POLICY_DENIED' | 'TIMEOUT' | 'ACK_LOST' | 'CANCELLED' }
+const FAILED_AS: Readonly<Record<string, LedgerOutcome['outcomeCode']>> = { ASSERTION_FAILED: 'ASSERTION_FAILED', TARGET_DRIFT: 'TARGET_CHANGED', TIMEOUT: 'TIMEOUT', CANCELLED: 'CANCELLED' };
+/** The coarse ledger outcome a receipt's closed code derives (the table pinned by contract v3, E5 row 36): every refusal and contract fault is POLICY_DENIED. */
+export function ledgerOutcomeOf(code: StepReceipt['closedCode']): LedgerOutcome {
+  if (code === null) return { state: 'SUCCEEDED', outcomeCode: 'OK' };
+  if (code === 'OUTCOME_UNKNOWN') return { state: 'UNKNOWN_OUTCOME', outcomeCode: 'ACK_LOST' };
+  return { state: 'FAILED', outcomeCode: FAILED_AS[code] ?? 'POLICY_DENIED' };
+}
+/** The secret evidence of the dispatch that is running: the hook lives for the session, the evidence is reported per dispatch. */
+class DispatchEvidence extends SecretUseEvidence {
+  private current = new SecretUseEvidence([]);
+  constructor() { super([]); }
+  begin(names: readonly string[]): void { this.current = new SecretUseEvidence(names); }
+  override attempting(name: string): void { this.current.attempting(name); }
+  override used(name: string): void { this.current.used(name); }
+  override refusedBeforeEffect(name: string): void { this.current.refusedBeforeEffect(name); }
+  override snapshot(): Record<string, 'USED' | 'NOT_USED' | 'REFUSED'> { return this.current.snapshot(); }
 }
 /** AUTHORED-ECHO-01: source literals are already visible in the authored source. Independent
  * secret, captured-value and DOM-private provenance remains strict in the collector. */
@@ -110,16 +134,18 @@ export class GuidedRuntime {
   private busy = false;
   private observationDeadlineHit = false;
   private preparing = false;
-  private readonly prefixWaits = new Map<string,number>();
-  private prefixExtraObservations = 0;
+  private readonly secretEvidence = new DispatchEvidence();
+  /** The values of the secrets of the dispatch that is running; cleared in its finally, so the session-long hook never holds one. */
+  private readonly secretHolder = new Map<string, { value: string; allowedOrigins: readonly string[] }>();
+  private secretRun: SecretRun | null = null;
+  private stepControl: InvocationControl | null = null;
   private timer: ReturnType<typeof setTimeout> | null = null;
   private readonly secretValues = new Set<string>();
   private readonly values = new Map<string, LocalValue>();
   private readonly prepared = new Map<string, { request: BridgeOrdinaryPrepare; proof: BridgePreparation; prefix?: BridgePrefixRequestIdentity }>();
-  private observation: BridgeObservation['observation'] | null = null;
   private readonly prefixRequests = new Map<string, Promise<BridgePrefixPrepareResult>>();
   private prefixExited = false;
-  private driftReceipt: BridgePreAdmissionDrift | BridgeAdmittedDrift | null = null;
+  private driftReceipt: BridgeAdmittedDrift | null = null;
   private liveLease: string | null = null;
   private readonly contextAcknowledgements = new Map<string, BridgeContextAcknowledgement>();
   private readonly dispatched = new Set<string>();
@@ -135,9 +161,6 @@ export class GuidedRuntime {
   private recordingSettlement: Promise<void> | null = null;
   /** A `PUBLISHED` stop was received: the recording is discarded instead of settled (its proof is the replay). Sticky, so a re-sent stop is harmless. */
   private published = false;
-  private confirmBrowserLoss: (() => void) | null = null;
-  // Fulfilled only by original launch-loss stop completion, never generic stop or early stopped state.
-  private readonly browserLossConfirmation = new Promise<void>(resolve => { this.confirmBrowserLoss = resolve; });
   constructor(private context: RunnerContext, private readonly options: GuidedRuntimeOptions) { this.context = structuredClone(context); this.prefixExited = !context.prefixProgram || context.prefixProgram.actions.length === 0; }
   get hasSecretInputs(): boolean { return this.context.authoredInputs.inputs.some(input => input.kind === 'secretRef'); }
   get active(): boolean { return !this.stopped || !this.browserClosed; }
@@ -200,13 +223,13 @@ export class GuidedRuntime {
       let position = 0;
       for (const stepId of program.sourceStepIds) {
         const actions = program.actions.filter(action => action.coordinate.stepId === stepId);
-        insist(actions.length > 0 && actions.length <= this.context.limits.maxStatementsPerStep, 'INPUT_IDENTITY');
+        insist(actions.length > 0 && actions.length <= 8, 'INPUT_IDENTITY');
         for (const [ordinal, action] of actions.entries()) {
-          insist(program.actions[position] === action && action.coordinate.ordinal === ordinal && action.operationHash === hash(operationPreimage(action.coordinate, action.origin, action.target, action.operation)), 'INPUT_IDENTITY');
-          insist(action.guard.origin === action.origin && canonical(action.target) === canonical(action.guard.target.kind === 'element' ? { locator: action.guard.target.locator, tier: action.guard.target.tier, identity: action.guard.target.identity,
-            ...(action.guard.target.assertTextMode ? { assertTextMode: action.guard.target.assertTextMode } : {}) } : null), 'INPUT_IDENTITY');
-          if (action.guard.target.kind === 'initialBlank') insist(position === 0 && action.operation.kind === 'navigate' && action.origin === null, 'INPUT_IDENTITY');
-          else insist(action.origin !== null && domainAllowed(this.options.allowedDomains, action.origin), 'POLICY_DENIED');
+          insist(program.actions[position] === action && action.coordinate.ordinal === ordinal && action.operationHash === hash({ coordinate: action.coordinate, origin: action.origin, operation: action.operation }), 'INPUT_IDENTITY');
+          // A frozen step is only ever run as the hash names it: the tamper is refused here, before any action.
+          insist(action.guard.origin === action.origin && admit(action.coordinate, action.operation).ok, 'INPUT_IDENTITY');
+          if (action.origin === null) insist(position === 0, 'INPUT_IDENTITY');
+          else insist(domainAllowed(this.options.allowedDomains, action.origin), 'POLICY_DENIED');
           position++;
         }
       }
@@ -229,8 +252,7 @@ export class GuidedRuntime {
     this.live();
     const limits = this.context.limits;
     const config: ObservationConfig = { sessionId: this.context.sessionId, scopeHash: this.context.scopeHash, allowedDomains: this.options.allowedDomains,
-      knownSecrets: [], limits: { outlineBytes: limits.maxOutlineBytes, bytes: limits.maxObservationBytes },
-      readProfile: observationReadProfile(this.options.allowedDomains) };
+      knownSecrets: [], limits: { outlineBytes: limits.maxOutlineBytes, bytes: limits.maxObservationBytes } };
     this.startPhase = 'RECORDER';
     if (this.options.recorder) {
       const opening = this.options.recorder.open({ sessionId: this.context.sessionId, csiId: this.options.csiId ?? null, maxSessionSeconds: limits.maxSessionSeconds });
@@ -246,9 +268,7 @@ export class GuidedRuntime {
     const startup: GuidedStartup = { deadlineEpochMs: Math.min(began + GUIDED_START_BUDGET_MS, this.deadline()), signal: this.startAbort.signal };
     const launching = this.options.launch(config, this.context.contextId, reason => {
       this.lossReason ??= reason ?? null;
-      const originalStop = this.stop('CONTEXT_LOST');
-      // Same original launch loss/stop promise; rejection is never confirmation.
-      void originalStop.then(() => { this.confirmBrowserLoss?.(); this.confirmBrowserLoss = null; }, () => undefined);
+      void this.stop('CONTEXT_LOST').catch(() => undefined);
     }, recordingRequest ?? undefined, startup);
     this.launching = launching;
     void launching.then((value): void => { this.launchEnd = { kind: 'value', value }; }, (error: unknown): void => { this.launchEnd = { kind: 'error', error }; });
@@ -308,7 +328,7 @@ export class GuidedRuntime {
     insist(new Set(next.allocations.map(a => a.bindingId)).size === next.allocations.length, 'CONTEXT_REVISION');
     for (const local of this.values.values()) insist(next.producers.some(p => canonical(p) === canonical(local.producer)), 'CONTEXT_REVISION');
     for (const edge of this.exercisedEdges) insist(next.consumerEdges.some(e => canonical(e) === canonical(edge)), 'CONTEXT_REVISION');
-    insist(new Set(next.consumerEdges.map(e => `${e.consumerAdmissionId}:${e.argumentSlot}`)).size === next.consumerEdges.length, 'CONTEXT_REVISION');
+    insist(new Set(next.consumerEdges.map(e => `${e.consumerAdmissionId}:${e.bindingId}`)).size === next.consumerEdges.length, 'CONTEXT_REVISION');
     for (const producer of next.producers) insist(canonical(this.values.get(producer.bindingId)?.producer ?? null) === canonical(producer), 'CONTEXT_LOST');
     if (appended) {
       insist(this.browser, 'CONTEXT_LOST'); this.busy = true;
@@ -316,8 +336,6 @@ export class GuidedRuntime {
       catch { await this.stop('CONTEXT_LOST'); throw new Error('CONTEXT_LOST'); }
       finally { this.busy = false; }
       this.prepared.clear();
-      this.browser.observations.clearContinuity?.();
-      this.browser.observations.revokeReads?.();
     }
     this.context = structuredClone(next); this.schedule();
     if (deliveryId && next.contextRevision >= 2) {
@@ -330,71 +348,100 @@ export class GuidedRuntime {
     insist(!this.options.capabilities || this.options.capabilities.includes(p.operation.kind), 'POLICY_DENIED');
     insist(p.sessionId === this.context.sessionId && p.scopeHash === this.context.scopeHash && p.contextRevision === this.context.contextRevision && p.authoredInputsHash === this.context.authoredInputsHash, 'IDENTITY_MISMATCH');
     insist(this.evidence && canonical(this.evidence) === canonical(p.executionEvidence) && hash(p.executionEvidence) === p.evidenceHash, 'TARGET_CHANGED');
-    insist(p.target.documentId === p.executionEvidence.documentId && p.target.generation === p.executionEvidence.generation && p.generation === p.target.generation, 'TARGET_CHANGED');
+    insist(p.generation === p.executionEvidence.generation, 'TARGET_CHANGED');
     const index = this.context.sourceStepIds.indexOf(p.coordinate.stepId);
-    insist(index >= this.priorStep && p.coordinate.ordinal === (this.ordinals.get(p.coordinate.stepId) ?? 0) && p.coordinate.ordinal < this.context.limits.maxStatementsPerStep && this.actions < this.context.limits.maxActions, 'ACTION_ORDER');
-    if (p.executionEvidence.kind === 'initialBlank') insist((this.actions === 0 || this.driftReceipt?.phase === 'ADMITTED_PRE_INVOCATION' && canonical(this.driftReceipt.coordinate) === canonical(p.coordinate)) && index === 0 && p.coordinate.ordinal === 0 && p.operation.kind === 'navigate' && p.target.kind === 'page', 'INITIAL_BLANK');
+    insist(index >= this.priorStep && p.coordinate.ordinal === (this.ordinals.get(p.coordinate.stepId) ?? 0) && p.coordinate.ordinal < 8 && this.actions < this.context.limits.maxActions, 'ACTION_ORDER');
+    if (p.executionEvidence.kind === 'initialBlank') insist(this.actions === 0 || this.driftReceipt?.phase === 'ADMITTED_PRE_INVOCATION' && canonical(this.driftReceipt.coordinate) === canonical(p.coordinate), 'INITIAL_BLANK');
     else insist(domainAllowed(this.options.allowedDomains, p.executionEvidence.origin), 'POLICY_DENIED');
-    if (p.operation.kind === 'read') {
-      const op = p.operation; insist(this.context.allocations.some(a => a.bindingId === op.bindingId && a.producerStepId === p.coordinate.stepId) && !this.values.has(op.bindingId), 'BINDING_DENIED'); }
-    if (p.target.kind === 'passwordControl') {
-      insist(p.operation.kind === 'fill' && p.operation.value.kind === 'secretRef', 'POLICY_DENIED');
-      const sourceInputId = p.operation.value.sourceInputId;
-      const input = this.context.authoredInputs.inputs.find(i => i.inputId === sourceInputId);
-      insist(input?.kind === 'secretRef' && input.sourceStepId === p.coordinate.stepId && input.intendedSlot === argumentSlot(p.operation), 'INPUT_IDENTITY');
-    } else if (p.target.kind === 'page') insist(p.operation.kind === 'navigate' || (p.operation.kind === 'assert' && ['url','title'].includes(p.operation.predicate)), 'POLICY_DENIED');
-    else insist(p.operation.kind !== 'navigate' && !(p.operation.kind === 'assert' && ['url','title'].includes(p.operation.predicate)), 'POLICY_DENIED');
-  }
-  /** The page-level half of a target check: initial blank, password control, page. A node target is proven by `prepareProposalTarget` and by `session.invoke` at dispatch. */
-  private async pageTargetMatches(p: Action): Promise<boolean> {
-    if (!this.browser) return false;
-    if (p.executionEvidence.kind === 'initialBlank') return this.browser.blankMatches();
-    if (p.target.kind === 'passwordControl') {
-      insist(typeof this.browser.observations.preparePassword === 'function', 'POLICY_DENIED');
-      await this.browser.observations.preparePassword(p.target, p.executionEvidence.origin); return true;
+    const op = p.operation;
+    // What the step reads: an authored input of this step, a secret reference of this step, or a binding the plan allocated to it.
+    for (const use of op.uses) {
+      if (use.kind === 'binding') insist(this.context.allocations.some(a => a.bindingId === use.id && a.consumers.some(c => c.stepId === p.coordinate.stepId)), 'BINDING_DENIED');
+      else {
+        const input = this.context.authoredInputs.inputs.find(i => (use.kind === 'input' ? i.inputId === use.id : i.kind === 'secretRef' && i.secretId === use.id));
+        insist(input && input.sourceStepId === p.coordinate.stepId && (use.kind === 'secret') === (input.kind === 'secretRef'), 'INPUT_IDENTITY');
+        if (use.kind === 'input' && input.kind === 'destination') insist(domainAllowed(this.options.allowedDomains, input.value), 'POLICY_DENIED');
+      }
     }
-    if (p.target.kind === 'page') return await this.browser.observations.pageMatches?.(p.target, p.executionEvidence.origin) === true;
-    return true;
+    // What the step produces: a binding the plan allocated to this step, not yet captured.
+    for (const bindingId of op.captures) insist(this.context.allocations.some(a => a.bindingId === bindingId && a.producerStepId === p.coordinate.stepId) && !this.values.has(bindingId), 'BINDING_DENIED');
   }
-  /** The authored literal a selectOption carries (G1 applies to it); null for every other operation and for binding-sourced values. */
-  private authoredLiteral(p: Action): string | null {
-    if (p.operation.kind !== 'selectOption' || p.operation.value.kind !== 'authoredLiteral') return null;
-    const sourceInputId = p.operation.value.sourceInputId;
-    const input = this.context.authoredInputs.inputs.find(i => i.inputId === sourceInputId);
-    return input && 'value' in input ? input.value : null;
+  /** Whether the page is still the document the model was shown (or still the blank document): no navigation since, and nothing about the DOM revision. */
+  private async pageCurrent(p: Action): Promise<boolean> {
+    if (!this.browser) return false;
+    const e = p.executionEvidence;
+    if (e.kind === 'initialBlank') return this.browser.blankMatches();
+    return this.browser.observations.documentCurrent({ documentId: e.documentId, generation: e.generation }, e.origin);
   }
-  /**
-   * The proof target of a proposal: the ResolvedTarget {locator, tier, identity} of a node ref (synthesized, verified against the public API,
-   * agreed with the gated fact, G1 and read eligibility applied; or, for a prefix action, the learned target re-resolved), null for a page-level target.
-   * Closed refusals (TARGET_CHANGED, OPTION_NOT_PRESENT, NO_DURABLE_LOCATOR, READ_NOT_ALLOWED) leave as they are.
-   */
-  private async prepareProposalTarget(p: Action, frozen: ResolvedTarget | null, pressInheritance: BridgeOrdinaryPrepare['pressInheritance'], assertSourceBinding: BridgeOrdinaryPrepare['assertSourceBinding']): Promise<ResolvedTarget | null> {
-    if (p.target.kind !== 'node') { insist(await this.pageTargetMatches(p), 'TARGET_CHANGED'); return null; }
-    insist(this.browser && p.executionEvidence.kind === 'observedDocument', 'TARGET_CHANGED');
-    return this.browser.observations.prepareTarget({
-      ref: p.target.ref, documentId: p.target.documentId, generation: p.target.generation, origin: p.executionEvidence.origin, operation: p.operation,
-      authoredLiteral: this.authoredLiteral(p), pressInheritance, continuityAuthority: this.continuityAuthority(), ...(frozen !== null ? { frozen } : {}),
-      ...(assertSourceBinding ? { assertSourceBinding } : {}),
-    });
+  /** The values the step is given: authored inputs by id and captured values by binding id, exactly the ones its `uses` name. */
+  private stepGivens(p: Action): { inputs: Record<string, string>; vars: Record<string, string>; secretIds: string[] } {
+    const inputs: Record<string, string> = {}, vars: Record<string, string> = {}, secretIds: string[] = [];
+    for (const use of p.operation.uses) {
+      if (use.kind === 'secret') secretIds.push(use.id);
+      else if (use.kind === 'input') { const input = this.context.authoredInputs.inputs.find(i => i.inputId === use.id); insist(input && input.kind !== 'secretRef', 'INPUT_IDENTITY'); inputs[use.id] = input.value; }
+      else { const local = this.values.get(use.id); insist(local, 'BINDING_UNAVAILABLE'); vars[use.id] = local.value; }
+    }
+    return { inputs, vars, secretIds };
+  }
+  /** The one secret run of the session (the secret-bearing window outlives a step); its control and values are the running prepare's or dispatch's. */
+  private secrets(): SecretRun {
+    const browser = this.browser;
+    insist(browser, 'CONTEXT_LOST');
+    this.secretRun ??= createSecretRun({ session: browser.observations, evidence: this.secretEvidence, control: () => { insist(this.stepControl, 'CONTEXT_LOST'); return this.stepControl; }, resolve: id => { const held = this.secretHolder.get(id); if (held) this.options.beforeSecretFill?.(held.value); return held; } });
+    return this.secretRun;
   }
   async prepare(value: unknown): Promise<BridgePreparation> {
     insist(!this.preparing, 'BUSY');
     if (this.context.prefixProgram && !this.prefixExited) throw new Error('PREPARATION_DENIED');
     return this.prepareOrdinary(value);
   }
+  /** Admit the code (its hash and its syntax), then run it up to its first effectful call: a step that cannot find its target is refused here, with no effect, and the model repairs it. */
   private async prepareOrdinary(value: unknown, prefixAction?: PrefixAction): Promise<BridgePreparation> {
     const request = validate<BridgeOrdinaryPrepare>('bridge', value, 'ordinaryPrepare'); this.checkIdentity(request); insist(!this.busy, 'BUSY');
     this.checkProposal(request.proposal); insist(hash(request.proposal) === request.requestDigest && Date.parse(request.expiresAt) > Date.now() && Date.parse(request.expiresAt) <= Date.parse(this.context.expiresAt), 'PREPARATION_DENIED');
-    if (request.assertSourceBinding) {
-      const source = request.assertSourceBinding, op = request.proposal.operation, local = this.values.get(source.bindingId);
-      insist(op.kind === 'assert' && op.predicate === 'containsText' && op.expected?.kind === 'binding' && op.expected.bindingId === source.bindingId
-        && local?.producer.producerAdmissionId === source.producerAdmissionId && local.preparationId === source.producerPreparationId
-        && this.context.producers.some(producer => canonical(producer) === canonical(local.producer)), 'BINDING_DENIED');
+    const p = request.proposal;
+    const admission = admit(p.coordinate, p.operation);
+    if (!admission.ok) {
+      if (admission.reason === 'STEP_SYNTAX') throw new StepRefusal('STEP_SYNTAX', admission.syntax?.line ?? 1, admission.syntax?.column ?? 1);
+      if (admission.reason === 'SOURCE_HASH_MISMATCH') throw new StepRefusal('SOURCE_HASH_MISMATCH');
+      throw new Error('INVALID_CONTRACT');
     }
-    const target = await this.prepareProposalTarget(request.proposal, prefixAction?.target ?? null, request.pressInheritance, request.assertSourceBinding); this.live();
+    insist(await this.pageCurrent(p), 'TARGET_CHANGED'); this.live();
+    // A retained prefix step is frozen code that already ran: its pre-fence drift is judged at dispatch (the admitted-drift receipt), not here.
+    if (prefixAction === undefined) await this.runToFence(p);
     insist(this.prepared.size < this.context.limits.maxActions, 'BUDGET_EXCEEDED');
-    const proof: BridgePreparation = { ...identity(request), pressInheritance: request.pressInheritance, ...(request.assertSourceBinding ? { assertSourceBinding: structuredClone(request.assertSourceBinding) } : {}), preparationId: randomUUID(), requestDigest: request.requestDigest, evidenceHash: request.proposal.evidenceHash, authoredInputsHash: this.context.authoredInputsHash, expiresAt: Date.parse(request.expiresAt)<=this.deadline()?request.expiresAt:new Date(this.deadline()).toISOString(), target };
+    const proof: BridgePreparation = { ...identity(request), preparationId: randomUUID(), requestDigest: request.requestDigest, evidenceHash: p.evidenceHash, authoredInputsHash: this.context.authoredInputsHash, expiresAt: Date.parse(request.expiresAt)<=this.deadline()?request.expiresAt:new Date(this.deadline()).toISOString() };
     this.prepared.set(proof.preparationId, { request: structuredClone(request), proof }); return proof;
+  }
+  private async runToFence(p: Action): Promise<void> {
+    const browser = this.browser;
+    insist(browser?.handle?.stepApi, 'CONTEXT_LOST');
+    const givens = this.stepGivens(p);
+    const limit = Math.min(this.deadline(), Date.now() + PREPARE_BUDGET_MS);
+    const abort = new AbortController();
+    const control: InvocationControl = {
+      deadlineMs: limit, remainingMs: () => Math.max(0, limit - Date.now()), signal: abort.signal, phase: 'PREPARING',
+      check: () => { this.live(); if (Date.now() >= limit) throw new ObservedRefusal('TIMEOUT'); },
+      // Until-fence mode stops before the fence; reaching here would be a step that crossed it during prepare.
+      beginInvocation: () => { throw new Error('CONTEXT_LOST'); },
+      poison: () => { abort.abort(); },
+    };
+    const tally = newTally();
+    this.preparing = true; this.stepControl = control;
+    let outcome: StepOutcome;
+    try { outcome = await performStep(browser.handle.stepApi, browser.observations, { coordinate: p.coordinate, operation: p.operation, ...givens, control, tally, allowedDomains: this.options.allowedDomains, secrets: this.secrets(), untilFence: true }); }
+    finally { this.preparing = false; this.stepControl = null; }
+    this.live();
+    // Nothing may have happened: a step that reached an effect before its first effectful call is broken, and the session ends.
+    if (outcome.receipt.fenceCrossed || outcome.receipt.effects.length > 0) { await this.stop('UNKNOWN_OUTCOME'); throw new Error('CONTEXT_LOST'); }
+    const code = outcome.receipt.closedCode;
+    // A failing expect here is a result, not a repair: dispatch runs the step again and records it.
+    if (code === null || code === 'ASSERTION_FAILED') return;
+    if (code === 'TARGET_DRIFT' || code === 'TIMEOUT') throw new StepRefusal('STEP_PRE_FENCE', null, null, outcome.matchCount ?? 0);
+    if (code === 'PASSWORD_CONTROL_READ_REFUSED') throw new Error('PASSWORD_CONTROL_READ_REFUSED');
+    if (code === 'POLICY_REFUSED' || code === 'REFERENCE_MISMATCH' || code === 'REFERENCE_REFUSED' || code === 'READ_REFUSED') throw new Error('POLICY_DENIED');
+    if (code === 'CANCELLED') throw new Error('CONTEXT_LOST');
+    throw new Error('PREPARATION_DENIED');
   }
   async preparePrefix(value: unknown): Promise<BridgePrefixPrepareResult> {
     const envelope = validate<BridgePrefixPrepare>('bridge', value, 'PrefixPrepare');
@@ -408,68 +455,32 @@ export class GuidedRuntime {
     const work = this.acquirePrefix(envelope).finally(() => { this.preparing = false; }); this.prefixRequests.set(envelope.requestDigest, work); return work;
   }
   private async acquirePrefix(envelope: BridgePrefixPrepare): Promise<BridgePrefixPrepareResult> {
-    const r = envelope.request, program = this.context.prefixProgram, browser = this.browser, evidence = this.evidence;
-    insist(program && browser?.handle && evidence, 'CONTEXT_LOST');
+    const r = envelope.request, program = this.context.prefixProgram, evidence = this.evidence;
+    insist(program && this.browser?.handle && evidence, 'CONTEXT_LOST');
     const action = program.actions.find(a => canonical(a.coordinate) === canonical(r.coordinate));
     insist(action && r.coordinate.ordinal === (this.ordinals.get(r.coordinate.stepId) ?? 0), 'ACTION_ORDER');
     try {
-      const prepared = await prepareObservedAction(browser.handle, browser.observations, action, action.guard, this.observation, evidence); this.live();
-      if (prepared.kind === 'WAIT') {
-        const key = `${r.coordinate.stepId}:${String(r.coordinate.ordinal)}`, waits = this.prefixWaits.get(key) ?? 0;
-        if (waits >= 32 || this.prefixExtraObservations >= 200) throw new ObservedRefusal('TARGET_DRIFT');
-        this.prefixWaits.set(key, waits + 1); this.prefixExtraObservations++;
-        return { kind: 'WAIT', requestDigest: envelope.requestDigest, evidenceHash: r.evidenceHash };
-      }
-      const proposal: Action = { schemaVersion: 3, sessionId: r.sessionId, coordinate: action.coordinate, scopeHash: r.scopeHash, generation: evidence.generation, target: prepared.target, operation: action.operation, executionEvidence: evidence, evidenceHash: r.evidenceHash, authoredInputsHash: r.authoredInputsHash, contextRevision: r.contextRevision };
-      const preparation = await this.prepareOrdinary({ ...identity(this.context), proposal, pressInheritance: r.pressInheritance,
-        ...(r.assertSourceBinding ? { assertSourceBinding: r.assertSourceBinding } : {}), requestDigest: hash(proposal), expiresAt: new Date(this.deadline()).toISOString() }, action);
+      this.preparing = false; // prepareOrdinary runs under the prefix call's own flag; it does not take a second one.
+      const proposal: Action = { schemaVersion: 3, sessionId: r.sessionId, coordinate: action.coordinate, scopeHash: r.scopeHash, generation: evidence.generation, operation: action.operation, executionEvidence: evidence, evidenceHash: r.evidenceHash, authoredInputsHash: r.authoredInputsHash, contextRevision: r.contextRevision };
+      const preparation = await this.prepareOrdinary({ ...identity(this.context), proposal, requestDigest: hash(proposal), expiresAt: new Date(this.deadline()).toISOString() }, action);
       const local = this.prepared.get(preparation.preparationId); insist(local, 'PREPARATION_DENIED'); local.prefix = r;
       return { kind: 'PREPARED', requestDigest: envelope.requestDigest, proposal, preparation };
-    } catch (error) {
-      const code = error instanceof ObservedRefusal ? error.code : error instanceof Error ? error.message : '';
-      // A prepare reason raised while preparing a prefix action is a page change, not a protocol failure (the prefix path answers WAIT or DRIFT and has no
-      // prepare refusal): the learned option is gone, the read is no longer allowed, or the learned target no longer verifies. Every other code stops.
-      if (!['TARGET_DRIFT','TARGET_CHANGED','OPTION_NOT_PRESENT','READ_NOT_ALLOWED','NO_DURABLE_LOCATOR'].includes(code)) { await this.stop('CONTEXT_LOST'); throw error; }
-      const receipt = this.makeDrift(r, action.operationHash);
-      insist(receipt.phase === 'PRE_ADMISSION', 'PREPARATION_DENIED');
-      try { await this.options.callback('outcomes', { kind: 'prefixDrift', receipt, ledger: null }, `drift-${receipt.receiptHash}`); this.live(); }
-      catch { await this.stop('UNKNOWN_OUTCOME'); throw new Error('UNKNOWN_OUTCOME'); }
-      this.live(); this.driftReceipt = receipt; this.prefixExited = true; this.prepared.clear();
-      return { kind: 'DRIFT', requestDigest: envelope.requestDigest, receipt };
-    }
+    } catch (error) { await this.stop('CONTEXT_LOST'); throw error; }
+    finally { this.preparing = true; }
   }
-  private makeDrift(request: BridgePrefixRequestIdentity, operationHash: string, spent?: { admissionId: string; preparationId: string }): BridgePreAdmissionDrift | BridgeAdmittedDrift {
-    const common = { ...request, requestDigest: hash(request), operationHash, attemptOrdinal: 0 as const, nativeInvocationStarted: false as const, reason: 'TARGET_DRIFT' as const };
-    const body = spent ? { ...common, phase: 'ADMITTED_PRE_INVOCATION' as const, ...spent } : { ...common, phase: 'PRE_ADMISSION' as const, admissionId: null, preparationId: null };
+  private makeDrift(request: BridgePrefixRequestIdentity, operationHash: string, spent: { admissionId: string; preparationId: string }): BridgeAdmittedDrift {
+    const body = { ...request, requestDigest: hash(request), operationHash, attemptOrdinal: 0 as const, nativeInvocationStarted: false as const, reason: 'TARGET_DRIFT' as const, phase: 'ADMITTED_PRE_INVOCATION' as const, ...spent };
     return { ...body, receiptHash: hash(body) };
   }
-  private continuityAuthority(): string {
-    return hash({ ...identity(this.context), authoredInputsHash: this.context.authoredInputsHash, prefixProgramHash: this.context.prefixProgramHash ?? null });
-  }
-  private resolve(p: Action, admissionId: string, edges: readonly ConsumerEdge[]): string | null {
-    const op = p.operation;
-    const slot = op.kind === 'navigate' ? 'navigate.destination' : op.kind === 'fill' ? 'fill.value' : op.kind === 'selectOption' ? 'selectOption.value' : 'assert.expected';
-    const ref = op.kind === 'navigate' ? { kind: 'authoredLiteral' as const, sourceInputId: op.destinationInputId } : op.kind === 'fill' || op.kind === 'selectOption' ? op.value : op.kind === 'assert' ? op.expected : null;
-    if (!ref) { insist(edges.length === 0, 'BINDING_DENIED'); return null; }
-    if (ref.kind === 'authoredLiteral') {
-      insist(edges.length === 0, 'BINDING_DENIED'); const input = this.context.authoredInputs.inputs.find(i => i.inputId === ref.sourceInputId);
-      insist(input && input.sourceStepId === p.coordinate.stepId && input.intendedSlot === argumentSlot(p.operation) && input.kind === (op.kind === 'navigate' ? 'destination' : 'nonsecretText'), 'INPUT_IDENTITY');
-      if (op.kind === 'navigate') insist(domainAllowed(this.options.allowedDomains, input.value), 'POLICY_DENIED');
-      return input.value;
-    }
-    if (ref.kind === 'secretRef') {
-      insist(edges.length === 0 && op.kind === 'fill' && slot === 'fill.value', 'BINDING_DENIED');
-      const input = this.context.authoredInputs.inputs.find(i => i.inputId === ref.sourceInputId);
-      insist(input?.kind === 'secretRef' && input.sourceStepId === p.coordinate.stepId && input.intendedSlot === argumentSlot(p.operation), 'INPUT_IDENTITY');
-      return null;
-    }
-    const local = this.values.get(ref.bindingId); const producer = this.context.producers.find(v => v.bindingId === ref.bindingId); const allocation = this.context.allocations.find(v => v.bindingId === ref.bindingId);
+  /** The producer, allocation, order and edge checks of one binding a step reads (one consumer edge per binding, at most 16 per step); returns the value. */
+  private bindingValue(p: Action, bindingId: string, admissionId: string, edges: readonly ConsumerEdge[]): string {
+    const local = this.values.get(bindingId); const producer = this.context.producers.find(v => v.bindingId === bindingId); const allocation = this.context.allocations.find(v => v.bindingId === bindingId);
     insist(local && producer && canonical(producer) === canonical(local.producer) && allocation, 'BINDING_UNAVAILABLE');
     const producerIndex = this.context.sourceStepIds.indexOf(producer.coordinate.stepId), consumerIndex = this.context.sourceStepIds.indexOf(p.coordinate.stepId);
     insist(producerIndex < consumerIndex || (producerIndex === consumerIndex && producer.coordinate.ordinal < p.coordinate.ordinal), 'BINDING_ORDER');
-    insist(allocation.consumers.some(c => c.stepId === p.coordinate.stepId && c.argumentSlot === slot), 'BINDING_DENIED');
-    insist(edges.length === 1, 'BINDING_DENIED'); const edge = edges[0];
-    insist(edge && edge.bindingId === ref.bindingId && edge.producerAdmissionId === producer.producerAdmissionId && edge.consumerAdmissionId === admissionId && canonical(edge.coordinate) === canonical(p.coordinate) && edge.argumentSlot === slot && edge.destinationOrigin === p.executionEvidence.origin && edge.destinationOrigin === producer.origin, 'BINDING_DENIED');
+    insist(allocation.consumers.some(c => c.stepId === p.coordinate.stepId), 'BINDING_DENIED');
+    const own = edges.filter(e => e.bindingId === bindingId); insist(own.length === 1, 'BINDING_DENIED'); const edge = own[0];
+    insist(edge && edge.producerAdmissionId === producer.producerAdmissionId && edge.consumerAdmissionId === admissionId && canonical(edge.coordinate) === canonical(p.coordinate) && edge.destinationOrigin === p.executionEvidence.origin && edge.destinationOrigin === producer.origin, 'BINDING_DENIED');
     return local.value;
   }
   async dispatch(value: unknown): Promise<BridgeOutcome> {
@@ -479,155 +490,141 @@ export class GuidedRuntime {
     this.checkProposal(p);
     const replacement = this.driftReceipt?.phase === 'ADMITTED_PRE_INVOCATION' && canonical(this.driftReceipt.coordinate) === canonical(p.coordinate);
     insist(ledger.attemptOrdinal === (replacement ? 1 : 0), 'ADMISSION_DENIED');
-    const operationHash = hash(operationPreimage(p.coordinate, p.executionEvidence.origin, prepared.proof.target, p.operation));
-    insist(ledger.state === 'DISPATCHING' && ledger.dispatchCount === 1 && ledger.outcomeCode === 'PENDING' && ledger.assertionPassed === null && ledger.preparationId === request.preparationId && ledger.requestDigest === hash(p) && ledger.operationHash === operationHash && ledger.ownerFence === request.ownerFence && ledger.documentId === p.target.documentId, 'ADMISSION_DENIED');
+    const operationHash = hash({ coordinate: p.coordinate, origin: p.executionEvidence.origin, operation: p.operation });
+    insist(ledger.state === 'DISPATCHING' && ledger.dispatchCount === 1 && ledger.outcomeCode === 'PENDING' && ledger.preparationId === request.preparationId && ledger.requestDigest === hash(p) && ledger.operationHash === operationHash && ledger.ownerFence === request.ownerFence && ledger.documentId === p.executionEvidence.documentId, 'ADMISSION_DENIED');
     for (const k of ['sessionId','scopeHash','generation','coordinate','executionEvidence','evidenceHash','authoredInputsHash','contextRevision'] as const) insist(canonical(ledger[k]) === canonical(p[k]), 'ADMISSION_DENIED');
     const admissionId = ledger.admission.admissionId; insist(!this.dispatched.has(admissionId), 'ALREADY_CONSUMED');
-    let resolvedValue = this.resolve(p, admissionId, request.consumerEdges);
-    const secretFill = p.operation.kind === 'fill' && p.operation.value.kind === 'secretRef';
-    if (secretFill) {
-      const sourceInputId = p.operation.value.sourceInputId;
-      const input = this.context.authoredInputs.inputs.find(i => i.inputId === sourceInputId);
-      insist(input?.kind === 'secretRef' && request.secret?.secretId === input.secretId, 'INPUT_IDENTITY');
-      insist(request.secret.value.length <= 4096, 'SECRET_TOO_LONG');
-      resolvedValue = request.secret.value;
-      this.secretValues.add(resolvedValue);
-    } else insist(!request.secret, 'INPUT_IDENTITY');
+    // Every binding the step reads has exactly one edge; every secret it reads arrives with its value, and no other does.
+    const bindingUses = p.operation.uses.flatMap(u => u.kind === 'binding' ? [u.id] : []), secretUses = p.operation.uses.flatMap(u => u.kind === 'secret' ? [u.id] : []);
+    insist(request.consumerEdges.length === bindingUses.length, 'BINDING_DENIED');
+    for (const bindingId of bindingUses) this.bindingValue(p, bindingId, admissionId, request.consumerEdges);
+    insist(request.secrets.length === secretUses.length && request.secrets.every(secret => secretUses.includes(secret.secretId)) && new Set(request.secrets.map(secret => secret.secretId)).size === secretUses.length, 'INPUT_IDENTITY');
+    for (const secret of request.secrets) {
+      const input = this.context.authoredInputs.inputs.find(i => i.kind === 'secretRef' && i.secretId === secret.secretId);
+      insist(input?.kind === 'secretRef' && input.sourceStepId === p.coordinate.stepId, 'INPUT_IDENTITY');
+      insist(secret.value.length <= 4096, 'SECRET_TOO_LONG');
+      this.secretValues.add(secret.value);
+    }
+    const givens = this.stepGivens(p);
     // Existing finite input/action/runtime budgets bound this volatile capability. stop() can
     // erase shared inventories at any await; this one action must still redact earlier values.
-    const failureValues=[...this.secretValues,...[...this.values.values()].map(v=>v.value),...this.context.authoredInputs.inputs.flatMap(input=>'value' in input?[input.value]:[]),...(resolvedValue!==null?[resolvedValue]:[])];
+    const failureValues=[...this.secretValues,...[...this.values.values()].map(v=>v.value),...this.context.authoredInputs.inputs.flatMap(input=>'value' in input?[input.value]:[]),...request.secrets.map(secret=>secret.value)];
     let failureRedactor:Redactor|null=createRedactor(failureValues);
     let diagnostics:GuidedDiagnostics|null=this.diagnostics;
     this.exercisedEdges.push(...structuredClone(request.consumerEdges));
     this.busy = true; this.dispatched.add(admissionId); this.prepared.clear();
-    const invocationIdentity: InvocationIdentity = { admissionId, requestDigest: ledger.requestDigest, operationHash, coordinate: p.coordinate, authority: this.continuityAuthority() };
-    if (p.target.kind !== 'node') this.browser?.observations.clearContinuity?.();
+    for (const secret of request.secrets) this.secretHolder.set(secret.secretId, { value: secret.value, allowedOrigins: [...secret.allowedOrigins] });
+    this.secretEvidence.begin(secretUses);
     const dispatchStarted = Date.now();
+    const windowEnd = Math.min(this.deadline(), dispatchStarted + DISPATCH_WINDOW_MS);
     let consumed = false;
-    let secretCallStarted=false;
     let completed: BridgeOutcome | null = null;
     const timing: { stamp: ActionStamp | null } = { stamp: null };
     const nativeFence = { started: false };
     const abort = new AbortController();
+    const tally = newTally();
     const control: InvocationControl = {
-      deadlineMs: this.deadline(), remainingMs: () => Math.max(0, this.deadline() - Date.now()), signal: abort.signal,
+      deadlineMs: windowEnd, remainingMs: () => Math.max(0, windowEnd - Date.now()), signal: abort.signal,
       get phase() { return nativeFence.started ? 'INVOKING' : 'PREPARING'; },
-      check: () => { this.live(); },
+      // The dispatch window ends the step: before the fence it is a timeout, after it nobody knows what the page did.
+      check: () => { this.live(); if (Date.now() >= windowEnd) throw new ObservedRefusal(nativeFence.started ? 'OUTCOME_UNKNOWN' : 'TIMEOUT'); },
       beginInvocation: () => {
         this.live(); if (nativeFence.started) return;
         insist(this.journal, 'JOURNAL_UNAVAILABLE');
         this.journal.fence({ schemaVersion: 3, sessionId: request.sessionId, contextId: request.contextId, ownerFence: request.ownerFence, admissionId, operationHash, state: 'INVOKING', receiptHash: null });
         nativeFence.started = true; timing.stamp = this.recording?.begin(admissionId, p.coordinate.stepId, p.coordinate.ordinal) ?? null;
       },
-      poison: () => { abort.abort(); }, reserveObservation: () => { throw new Error('PREPARATION_DENIED'); }, waitForAdditionalObservation: () => Promise.reject(new Error('PREPARATION_DENIED')),
+      poison: () => { abort.abort(); },
+    };
+    const secretUseOf = (receipt: StepReceipt): Record<string, 'USED' | 'NOT_USED' | 'REFUSED'> => {
+      const seen = this.secretEvidence.snapshot();
+      // A status the evidence lost (an attempt that did not prove an outcome) is reported as used: the secret may have been written.
+      return Object.fromEntries(secretUses.map(id => [id, seen[id] ?? (receipt.fenceCrossed ? 'USED' : 'NOT_USED')]));
+    };
+    const outcomeOf = (receipt: StepReceipt, availability: BridgeOutcome['availability'], errorMessage?: string): BridgeOutcome => {
+      const derived = ledgerOutcomeOf(receipt.closedCode);
+      return { ...identity(request), ledger: { ...ledger, state: derived.state, outcomeCode: derived.outcomeCode }, availability, receipt, secretUse: secretUseOf(receipt), ...(errorMessage ? { errorMessage } : {}) };
     };
     try {
-      insist(this.browser && this.journal, 'CONTEXT_LOST');
+      insist(this.browser && this.journal && this.browser.handle?.stepApi, 'CONTEXT_LOST');
       this.actions++; await this.journal.consume({ sessionId: request.sessionId, contextId: request.contextId, ownerFence: request.ownerFence, admissionId }); consumed = true;
-      this.live(); if (!secretFill && p.target.kind !== 'node') insist(await this.pageTargetMatches(p), 'TARGET_CHANGED'); this.live();
-      // AC-2: the run-clock reading immediately before the browser effect (AR-1 R2 "action").
-      // Timing starts only when the native fence is committed.
-      let captured: string | undefined; let assertionPassed: boolean | null = null;
-      if (prepared.prefix) {
-        const action = this.context.prefixProgram?.actions.find(a => canonical(a.coordinate) === canonical(p.coordinate));
-        insist(action && this.browser.handle, 'CONTEXT_LOST');
-        const secret = request.secret ? {secretId:request.secret.secretId,allowedOrigins:request.secret.allowedOrigins} : undefined;
-        if (secretFill) { insist(resolvedValue !== null, 'INPUT_IDENTITY'); await this.browser.observations.withhold?.([resolvedValue]); delete (request as {secret?:BridgeDispatch['secret']}).secret; this.options.beforeSecretFill?.(resolvedValue); secretCallStarted = true; }
-        const result = await performPreparedObservedAction(this.browser.handle, this.browser.observations, action, action.guard, p.target, resolvedValue, control, secret, 'domcontentloaded', 30000, 'learn', { invocationIdentity, preparationId: request.preparationId,
-          ...(prepared.proof.assertSourceBinding ? { assertSourceBinding: prepared.proof.assertSourceBinding } : {}), pressInheritance: prepared.proof.pressInheritance });
-        captured = result.value; assertionPassed = result.assertionPassed ?? null;
-      } else if (p.operation.kind === 'navigate') {
-        control.beginInvocation(); insist(resolvedValue !== null, 'INPUT_IDENTITY');
-        if (p.executionEvidence.kind === 'initialBlank') await this.browser.navigateBlank(resolvedValue);
-        else { insist(typeof this.browser.observations.navigate === 'function', 'CONTEXT_LOST'); await this.browser.observations.navigate(p.target, p.executionEvidence.origin, resolvedValue); }
-      } else if (p.target.kind === 'passwordControl') {
-        insist(secretFill && resolvedValue !== null && request.secret && p.executionEvidence.origin !== null && typeof this.browser.observations.fillPassword === 'function', 'POLICY_DENIED');
-        const allowedOrigins = request.secret.allowedOrigins;
-        await this.browser.observations.withhold?.([resolvedValue]);
-        delete (request as { secret?: BridgeDispatch['secret'] }).secret;
-        this.options.beforeSecretFill?.(resolvedValue);
-        secretCallStarted=true;
-        const nativeOperation = this.browser.observations.fillPassword(p.target, p.executionEvidence.origin, allowedOrigins, resolvedValue, control);
-        // Both rejection handlers are installed immediately. A late losing SDK rejection cannot
-        // re-enter this dispatch catch or publish another application outcome/diagnostic.
-        await Promise.race([nativeOperation, this.browserLossConfirmation.then(() => { throw new Error('CONTEXT_LOST'); })]);
-        resolvedValue = null;
-      } else if (p.target.kind === 'page') {
-        insist(p.operation.kind === 'assert' && (p.operation.predicate === 'url' || p.operation.predicate === 'title') && resolvedValue !== null, 'POLICY_DENIED');
-        insist(typeof this.browser.observations.assertPage === 'function' && p.executionEvidence.origin !== null, 'CONTEXT_LOST');
-        control.beginInvocation(); assertionPassed = await this.browser.observations.assertPage(p.target, p.executionEvidence.origin, p.operation.predicate, resolvedValue);
-      } else {
-        insist(typeof this.browser.observations.invoke === 'function' && p.executionEvidence.origin !== null && prepared.proof.target !== null, 'CONTEXT_LOST');
-        const result = await this.browser.observations.invoke({
-          invocationIdentity, pressInheritance: prepared.proof.pressInheritance, resolved: prepared.proof.target, operation: p.operation, resolvedValue, origin: p.executionEvidence.origin, maxValueBytes: this.context.limits.maxRuntimeValueBytes,
-          preparationId: request.preparationId, ...(prepared.proof.assertSourceBinding ? { assertSourceBinding: prepared.proof.assertSourceBinding } : {}),
-          readRuleId: p.operation.kind === 'read' ? p.operation.recipe.policyRuleId : null, profile: 'learn', expect: { documentId: p.target.documentId, generation: p.target.generation },
-        }, control);
-        captured = result.value; assertionPassed = result.assertionPassed ?? null;
-      }
-      timing.stamp?.end(true); // The effect's result is known; before any outcome callback.
+      this.live(); insist(await this.pageCurrent(p), 'TARGET_CHANGED'); this.live();
+      // AC-2: the run-clock reading immediately before the browser effect (AR-1 R2 "action"). Timing starts only when the native fence is committed.
+      this.stepControl = control;
+      const outcome = await performStep(this.browser.handle.stepApi, this.browser.observations, { coordinate: p.coordinate, operation: p.operation, ...givens, control, tally, allowedDomains: this.options.allowedDomains, secrets: this.secrets() });
+      const receipt = outcome.receipt;
+      timing.stamp?.end(receipt.closedCode === null); // The effect's result is known (or proven absent); before any outcome callback.
       this.live();
-      let availability: Availability | null = null;
-      if (p.operation.kind === 'read') {
-        insist(typeof captured === 'string', 'READ_DENIED');
-        insist(captured.trim() && p.executionEvidence.origin !== null, 'READ_DENIED'); canonical(captured);
-        const bytes = Buffer.byteLength(captured); const total = [...this.values.values()].reduce((n,v) => n + Buffer.byteLength(v.value), 0);
-        insist(!this.values.has(p.operation.bindingId) && bytes <= this.context.limits.maxRuntimeValueBytes && this.values.size < this.context.limits.maxRuntimeValues && total + bytes <= this.context.limits.maxRuntimeValuesBytesTotal, 'BUDGET_EXCEEDED');
-        // This new bounded value was unknown before the read. Capture it before withhold can
-        // await or stop can erase the shared map, without extending the dispatch lifetime.
-        failureValues.push(captured);failureRedactor=createRedactor(failureValues);
-        availability = { bindingId: p.operation.bindingId, producerAdmissionId: admissionId, contextId: this.context.contextId, workerId: this.context.workerId, ownerFence: this.context.ownerFence };
-        const producer: Producer = { bindingId: p.operation.bindingId, producerAdmissionId: admissionId, coordinate: p.coordinate, origin: p.executionEvidence.origin, recipe: p.operation.recipe, availability };
-        this.values.set(p.operation.bindingId, { value: captured, producer, preparationId: request.preparationId });
-        if (!this.browser.observations.commitRead) await this.browser.observations.withhold?.([captured]);
+      let availability: BridgeOutcome['availability'] = [];
+      if (receipt.closedCode === null) {
+        const added: Producer[] = [];
+        for (const [bindingId, captured] of Object.entries(outcome.captured)) {
+          insist(p.executionEvidence.origin !== null && captured.trim(), 'READ_DENIED'); canonical(captured);
+          const bytes = Buffer.byteLength(captured); const total = [...this.values.values()].reduce((n,v) => n + Buffer.byteLength(v.value), 0);
+          insist(!this.values.has(bindingId) && bytes <= this.context.limits.maxRuntimeValueBytes && this.values.size < this.context.limits.maxRuntimeValues && total + bytes <= this.context.limits.maxRuntimeValuesBytesTotal, 'BUDGET_EXCEEDED');
+          // This new bounded value was unknown before the capture. Mask it before withhold can await or stop can erase the shared map.
+          failureValues.push(captured);failureRedactor=createRedactor(failureValues);
+          const available = { bindingId, producerAdmissionId: admissionId, contextId: this.context.contextId, workerId: this.context.workerId, ownerFence: this.context.ownerFence };
+          const producer: Producer = { bindingId, producerAdmissionId: admissionId, coordinate: p.coordinate, origin: p.executionEvidence.origin, availability: available };
+          this.values.set(bindingId, { value: captured, producer, preparationId: request.preparationId });
+          this.browser.observations.commitCapture(captured);
+          added.push(producer);
+        }
+        availability = added.map(producer => producer.availability);
         this.live();
       }
-      this.ordinals.set(p.coordinate.stepId, p.coordinate.ordinal + 1); this.priorStep = this.context.sourceStepIds.indexOf(p.coordinate.stepId);
-      if (prepared.prefix && this.context.prefixProgram?.actions.every(a => (this.ordinals.get(a.coordinate.stepId) ?? 0) > a.coordinate.ordinal)) this.prefixExited = true;
-      const outcome: BridgeOutcome = { ...identity(request), ledger: { ...ledger, state: assertionPassed === false ? 'FAILED' : 'SUCCEEDED', outcomeCode: assertionPassed === false ? 'ASSERTION_FAILED' : 'OK', assertionPassed }, availability };
-      // A committed success stays success if its response is lost. No action retry, ever.
-      completed = outcome;
-      await this.options.callback('outcomes', outcome);
-      this.live();
-      if (outcome.ledger.state === 'SUCCEEDED') {
-        this.browser.observations.commitInvocation?.(invocationIdentity);
-        if (p.operation.kind === 'read') this.browser.observations.commitRead?.(p.operation.bindingId, { identity: invocationIdentity, preparationId: request.preparationId });
+      // A pre-fence drift of a retained prefix step is the one failure that switches to learning: an admitted-drift receipt and no stop.
+      // The step did not run, so its ordinal and the prior-step mark stay where they were: the replacement is attempt 1 of the same step.
+      const prefixDrift = receipt.closedCode === 'TARGET_DRIFT' && !receipt.fenceCrossed && prepared.prefix && !this.driftReceipt && this.accepting && ledger.attemptOrdinal === 0;
+      if (!prefixDrift) {
+        this.ordinals.set(p.coordinate.stepId, p.coordinate.ordinal + 1); this.priorStep = this.context.sourceStepIds.indexOf(p.coordinate.stepId);
+        if (prepared.prefix && this.context.prefixProgram?.actions.every(a => (this.ordinals.get(a.coordinate.stepId) ?? 0) > a.coordinate.ordinal)) this.prefixExited = true;
       }
-      else this.browser.observations.clearContinuity?.();
-      this.live(); if (assertionPassed === false) { await this.stop('CONTEXT_LOST'); return outcome; }
+      const result = outcomeOf(receipt, availability);
+      if (receipt.closedCode !== null) {
+        if (prefixDrift && prepared.prefix) {
+          try {
+            const drift = this.makeDrift(prepared.prefix, operationHash, { admissionId, preparationId: request.preparationId });
+            insist(this.journal, 'JOURNAL_UNAVAILABLE');
+            this.journal.fence({ schemaVersion: 3, sessionId: request.sessionId, contextId: request.contextId, ownerFence: request.ownerFence, admissionId, operationHash, state: 'REFUSED_BEFORE_INVOCATION', receiptHash: drift.receiptHash });
+            await this.options.callback('outcomes', { kind: 'prefixDrift', receipt: drift, ledger: result.ledger }, `drift-${drift.receiptHash}`);
+            this.live(); this.driftReceipt = drift; this.prefixExited = true; return result;
+          } catch { await this.stop('UNKNOWN_OUTCOME'); return outcomeOf({ ...receipt, closedCode: 'OUTCOME_UNKNOWN' }, []); }
+        }
+        // Any other failure ends the session: the outcome is committed as it is, then the stop.
+        completed = result;
+        await this.options.callback('outcomes', result);
+        this.browser.observations.invalidate();
+        await this.stop(result.ledger.state === 'FAILED' ? 'CONTEXT_LOST' : 'UNKNOWN_OUTCOME'); return result;
+      }
+      // A committed success stays success if its response is lost. No action retry, ever.
+      completed = result;
+      await this.options.callback('outcomes', result);
+      this.live();
       // The automatic observation shares the dispatch call's transport window with the action: it gets what remains of it, and is skipped
       // below the minimum (the backend then pulls the observation in a separate call). A deadline here leaves the committed outcome committed.
       const remaining = DISPATCH_WINDOW_MS - (Date.now() - dispatchStarted);
       if (remaining >= MIN_AUTOMATIC_OBSERVATION_MS) {
         try { await this.collectObservation(undefined, undefined, remaining); } catch (error) { if (!(error instanceof Error && error.message === 'OBSERVATION_DEADLINE')) throw error; this.observationDeadlineHit = true; }
       }
-      return outcome;
+      return result;
     } catch (error) {
       if (completed) {
         const facts = typeof error === 'object' && error !== null ? callbackFailures.get(error) : undefined;
-        try { (this.options.diagnosticStderr ?? (line => { process.stderr.write(line); }))('GUIDED_COMPLETED_FAILED ' + JSON.stringify({ ...(facts ?? { route: 'OUTCOME', phase: 'UNKNOWN', status: null, backendCode: 'UNKNOWN' }) }) + '\n'); } catch { /* Diagnostics never change a known outcome. */ }
+        try { (this.options.diagnosticStderr ?? (line => { process.stderr.write(line); }))('GUIDED_COMPLETED_FAILED ' + JSON.stringify({ ...(facts ?? { route: 'OUTCOME', phase: 'UNKNOWN', status: null, backendCode: 'UNKNOWN' }), cause: closedCause(error) }) + '\n'); } catch { /* Diagnostics never change a known outcome. */ }
         await this.stop('CONTEXT_LOST'); return completed;
       }
       try { this.options.onRawFailure?.(error); } catch { /* Volatile test observation is non-authoritative. */ }
       const errorMessage = consumed ? await diagnostics?.record({sessionId:request.sessionId,contextId:request.contextId,admissionId,stepId:p.coordinate.stepId,ordinal:p.coordinate.ordinal},error,failureRedactor,this.options.diagnosticStderr ?? (text=>{process.stderr.write(text);})):undefined;
-      const code = error instanceof ObservedRefusal ? (error.code === 'TARGET_DRIFT' ? 'TARGET_CHANGED' : error.code === 'POLICY_REFUSED' ? 'POLICY_DENIED' : error.code) : error instanceof Error ? error.message : '';
-      const policyRefusal = ['POLICY_DENIED','PASSWORD_FORM_ACTION_NOT_ALLOWED','PASSWORD_TARGET_ABSENT','PASSWORD_TARGET_AMBIGUOUS','PASSWORD_CONTROL_READ_REFUSED'].includes(code);
-      const provenBeforeEffect=!nativeFence.started && (!secretCallStarted||error instanceof PasswordNoEffect||error instanceof ObservedRefusal && error.noEffect);
-      const failedBeforeEffect=(code === 'TARGET_CHANGED' || policyRefusal)&&provenBeforeEffect;
-      timing.stamp?.end(failedBeforeEffect); // UNKNOWN_OUTCOME observed no completion: endMs stays null.
-      const outcome: BridgeOutcome = { ...identity(request), ledger: { ...ledger, state: failedBeforeEffect ? 'FAILED' : 'UNKNOWN_OUTCOME', outcomeCode: code === 'TARGET_CHANGED' ? 'TARGET_CHANGED' : policyRefusal ? 'POLICY_DENIED' : 'ACK_LOST', assertionPassed: null }, availability: null, ...(errorMessage ? {errorMessage} : {}) };
-      if (consumed && prepared.prefix && provenBeforeEffect && code === 'TARGET_CHANGED' && !this.driftReceipt && this.accepting && ledger.attemptOrdinal === 0) {
-        try {
-          const receipt = this.makeDrift(prepared.prefix, operationHash, { admissionId, preparationId: request.preparationId });
-          insist(this.journal, 'JOURNAL_UNAVAILABLE');
-          this.journal.fence({ schemaVersion: 3, sessionId: request.sessionId, contextId: request.contextId, ownerFence: request.ownerFence, admissionId, operationHash, state: 'REFUSED_BEFORE_INVOCATION', receiptHash: receipt.receiptHash });
-          await this.options.callback('outcomes', { kind: 'prefixDrift', receipt, ledger: outcome.ledger }, `drift-${receipt.receiptHash}`);
-          this.live(); this.driftReceipt = receipt; this.prefixExited = true; return outcome;
-        } catch { await this.stop('UNKNOWN_OUTCOME'); return { ...outcome, ledger: { ...outcome.ledger, state: 'UNKNOWN_OUTCOME', outcomeCode: 'ACK_LOST' } }; }
-      }
+      // A failure outside the step (the session, the journal, a callback): before the fence nothing happened, after it nobody knows.
+      const message = error instanceof ObservedRefusal ? error.code : error instanceof Error ? error.message : '';
+      const closedCode: StepReceipt['closedCode'] = nativeFence.started ? 'OUTCOME_UNKNOWN' : message === 'TARGET_CHANGED' ? 'TARGET_DRIFT' : message === 'POLICY_DENIED' ? 'POLICY_REFUSED' : message === 'CONTEXT_LOST' ? 'CANCELLED' : 'INTERNAL_ERROR';
+      const receipt = receiptFromTally(p.operation, tally, closedCode);
+      timing.stamp?.end(!nativeFence.started && closedCode !== 'INTERNAL_ERROR'); // OUTCOME_UNKNOWN observed no completion: endMs stays null.
+      const outcome = outcomeOf(receipt, [], errorMessage);
       if (consumed) await this.options.callback('outcomes', outcome).catch(() => undefined);
       await this.stop(outcome.ledger.state === 'FAILED' ? 'CONTEXT_LOST' : 'UNKNOWN_OUTCOME'); return outcome;
-    } finally { resolvedValue = null; failureValues.length=0;failureRedactor=null;diagnostics=null;delete (request as { secret?: BridgeDispatch['secret'] }).secret; this.busy = false; }
+    } finally { this.busy = false; this.stepControl = null; this.secretHolder.clear(); (request.secrets as BridgeDispatch['secrets'][number][]).length = 0; /* the request object keeps no secret value; `secrets` is a required field, so it is emptied, not deleted (a replayed request must still reach ALREADY_CONSUMED) */ failureValues.length=0;failureRedactor=null;diagnostics=null; }
   }
   async refreshObservation(value: unknown, idempotencyKey: string): Promise<BridgeObservation> {
     const request=validate<ObservationRefresh>('observation-refresh',value);this.checkIdentity(request);insist(!this.busy&&!this.preparing,'BUSY');
@@ -635,7 +632,8 @@ export class GuidedRuntime {
     // deadline refusal (the page is too heavy to observe), not a stale generation. The session is NOT stopped here: the refusal is the backend's cue to end it as
     // UNSUPPORTED_SURFACE, and a runner that stopped first would be reported lost (a different, earlier terminal) instead.
     if(this.observationDeadlineHit&&this.evidence?.kind==='initialBlank'&&request.expectedGeneration===this.evidence.generation){throw new Error('OBSERVATION_DEADLINE');}
-    insist(this.evidence?.kind==='observedDocument'&&request.expectedGeneration===this.evidence.generation,'TARGET_CHANGED');
+    // The blank document bootstrap leaves (generation 0) is observed like any other: it is the first turn's observation. Any other generation is stale.
+    insist((this.evidence?.kind==='observedDocument'||this.evidence?.kind==='initialBlank')&&request.expectedGeneration===this.evidence.generation,'TARGET_CHANGED');
     insist(idempotencyKey.length>0&&idempotencyKey.length<=256,'SCHEMA');
     const callbackKey=`oref-${hash({identity:identity(request),idempotencyKey,requestDigest:hash(request)})}`;
     this.busy=true;this.prepared.clear();
@@ -667,7 +665,7 @@ export class GuidedRuntime {
     const evidence: ExecutionEvidence = { kind: 'observedDocument', sessionId: this.context.sessionId, contextId: this.context.contextId, documentId: observation.documentId, generation: observation.generation, origin: observation.origin, observationHash: hash(observation) };
     const envelope: BridgeObservation = { ...identity(this.context), observation };
     await this.options.callback('observations', envelope,callbackKey); this.live();
-    this.evidence=evidence; this.observation=observation; // Only the durable acknowledgement makes this generation usable.
+    this.evidence=evidence; // Only the durable acknowledgement makes this generation usable.
     return envelope;
   }
   private async closeResources(reason: BridgeStop['reason']): Promise<void> {
@@ -730,7 +728,7 @@ export class GuidedRuntime {
     if (reason === 'PUBLISHED') this.published = true;
     if (this.closing) return this.closing;
     this.startAbort.abort(new Error('CANCELLED'));
-    this.stopped = true; this.options.onStopping?.(); if (this.timer) clearTimeout(this.timer); this.values.clear(); this.secretValues.clear(); this.prepared.clear(); this.evidence = null; this.observation = null;
+    this.stopped = true; this.options.onStopping?.(); if (this.timer) clearTimeout(this.timer); this.values.clear(); this.secretValues.clear(); this.prepared.clear(); this.evidence = null;
     this.context = { ...this.context, authoredInputs: { ...this.context.authoredInputs, inputs: [] }, allocations: [], producers: [], consumerEdges: [] };
     this.closing = Promise.resolve().then(() => this.closeResources(reason));
     return this.closing;

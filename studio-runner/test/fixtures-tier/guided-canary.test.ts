@@ -1,3 +1,4 @@
+import { stepOp } from '../helpers/stepCode.js';
 import { mkdtemp, readdir, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -11,7 +12,6 @@ import type { Action, BridgeBootstrap, BridgeObservation, ExecutionEvidence } fr
 import { launchGuidedBrowser } from '../../src/run/browser.js';
 import { CLOSED_ACTION_CODES, CLOSED_REPLAY_REASONS } from '../../src/run/closedError.js';
 import type { GuidedBrowser } from '../../src/run/guidedBrowser.js';
-import { observationReadProfile } from '../../src/run/observationReadProfile.js';
 import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 import { dispatch, guidedContext, proposal } from '../helpers/guided.js';
 import { html, serve } from './perception/cutover-support.js';
@@ -77,19 +77,18 @@ describe('guided canary boundary', () => {
     cleanups.push(() => runtime.stop('CANCELLED'));
     await runtime.start();
     let evidence = (messages[0]?.body as BridgeBootstrap).executionEvidence as ExecutionEvidence;
-    const act = async (step: string, operation: Action['operation'], target?: Action['target'], between?: () => Promise<void>) => {
-      const p = proposal(context, evidence, step, operation, target);
-      const prepared = await runtime.prepare({ pressInheritance: null, ...identity(context), proposal: p, requestDigest: hash(p), expiresAt: new Date(Date.now() + 20_000).toISOString() });
+    const act = async (step: string, operation: Action['operation'], between?: () => Promise<void>) => {
+      const p = proposal(context, evidence, step, operation);
+      const prepared = await runtime.prepare({ ...identity(context), proposal: p, requestDigest: hash(p), expiresAt: new Date(Date.now() + 20_000).toISOString() });
       await between?.();
       const outcome = await runtime.dispatch(dispatch(context, p, prepared));
       const seen = messages.filter((m) => m.route === 'observations').at(-1)?.body as BridgeObservation | undefined;
       if (seen) evidence = { kind: 'observedDocument', sessionId: context.sessionId, contextId: context.contextId, documentId: seen.observation.documentId, generation: seen.observation.generation, origin: seen.observation.origin, observationHash: hash(seen.observation) };
       return outcome;
     };
-    expect((await act('nav', { kind: 'navigate', destinationInputId: 'input-nav' })).ledger.state).toBe('SUCCEEDED');
+    expect((await act('nav', stepOp('await page.goto(inputs["input-nav"]);', { uses: [{ kind: 'input', id: 'input-nav' }] }))).ledger.state).toBe('SUCCEEDED');
     const seen = (messages.filter((m) => m.route === 'observations').at(-1)?.body as BridgeObservation).observation;
-    const found = Object.entries(seen.facts).find(([, fact]) => fact.name === 'Pay now');
-    if (found === undefined) throw new Error('the button is not in the observation');
+    if (!Object.values(seen.facts).some((fact) => fact.name === 'Pay now')) throw new Error('the button is not in the observation');
     const page = handleOf(browser).page as unknown as Page;
     const cover = (): Promise<void> => page.evaluate(([attr, text]) => {
       document.body.insertAdjacentHTML('beforeend', `<div id="overlay" data-canary="${attr}" style="position:fixed;inset:0;background:rgba(0,0,0,.2)">${text}</div>`);
@@ -105,21 +104,19 @@ describe('guided canary boundary', () => {
     await page.locator('#overlay').evaluate((element) => { element.remove(); });
     expect([ATTR, TEXT].some((canary) => raw.includes(canary)), 'the raw Playwright error shows the page text, so the test can see a leak').toBe(true);
 
-    const outcome = await act('read', { kind: 'click' }, { kind: 'node', ref: found[0], documentId: seen.documentId, generation: seen.generation }, cover);
+    const outcome = await act('read', stepOp('await page.getByRole("button", { name: "Pay now", exact: true }).click();'), cover);
     expect(outcome.ledger.state).not.toBe('SUCCEEDED');
+    // A step failure is a closed code now: the sidecar only records errors outside the step, so a record is optional.
     const files = (await readdir(directory)).filter((name) => name.endsWith('.diagnostic.jsonl'));
-    expect(files, 'a failed dispatch writes one sidecar record').toHaveLength(1);
-    const sidecar = await readFile(join(directory, files[0] ?? ''), 'utf8');
-    expect(sidecar.length).toBeGreaterThan(0);
+    const sidecar = files[0] === undefined ? '' : await readFile(join(directory, files[0]), 'utf8');
     const surfaces = { sidecar, stderr: stderr.join(''), errorMessage: outcome.errorMessage ?? '', outcome: JSON.stringify(outcome), messages: JSON.stringify(messages.filter((m) => m.route !== 'observations')) };
     for (const [name, text] of Object.entries(surfaces)) {
       for (const canary of [ATTR, TEXT, VALUE]) expect(text.includes(canary), `${canary} in ${name}`).toBe(false);
     }
   });
 
-  it('blank navigation and the wait functions fail only with closed codes', async () => {
-    const served = await site();
-    const config = { sessionId: 'guided-canary-blank', scopeHash: 'a'.repeat(64), allowedDomains: TEST_DOMAINS, knownSecrets: [], readProfile: observationReadProfile(TEST_DOMAINS) };
+  it('the blank and context questions of a closed page answer only with closed codes', async () => {
+    const config = { sessionId: 'guided-canary-blank', scopeHash: 'a'.repeat(64), allowedDomains: TEST_DOMAINS, knownSecrets: [] };
     const closedCode = async (work: () => Promise<unknown>): Promise<string> => {
       try {
         await work();
@@ -128,33 +125,13 @@ describe('guided canary boundary', () => {
         return error instanceof Error ? error.message : 'NOT_AN_ERROR';
       }
     };
-    const fresh = async (): Promise<GuidedBrowser> => {
-      const browser = await launchGuidedBrowser(config, 'ctx-canary', () => undefined);
-      cleanups.push(async () => { await browser.close().catch(() => undefined); });
-      return browser;
-    };
-    const results: Record<string, string> = {};
-
-    // A navigation that cannot be reached: Playwright's error would name the destination, which carries the canary.
-    const refused = await fresh();
-    results['navigateBlank to a refused connection'] = await closedCode(() => refused.navigateBlank(`http://localhost:1/?${ATTR}`));
-
-    // A wait that times out on a page whose subresource is never answered.
-    const slow = await fresh();
-    await slow.navigateBlank(`${served.origin}/slow`).catch(() => undefined);
-    results['observedWait timeout'] = await closedCode(() => (handleOf(slow).observedWait ?? (() => Promise.reject(new Error('NO_WAIT'))))('load', 300));
-
-    // A blank navigation attempted from a page that is no longer blank.
-    results['observedNavigateBlank after leaving blank'] = await closedCode(() => (handleOf(slow).observedNavigateBlank ?? (() => Promise.reject(new Error('NO_NAVIGATE'))))(`${served.origin}/source`));
-
-    // Every blank/context question on a closed page.
-    const closed = await fresh();
+    const closed = await launchGuidedBrowser(config, 'ctx-canary', () => undefined);
+    cleanups.push(async () => { await closed.close().catch(() => undefined); });
     await (handleOf(closed).page as unknown as Page).close();
+    const results: Record<string, string> = {};
     results['blankMatches on a closed page'] = await closedCode(() => closed.blankMatches());
     results['observedBlankMatches on a closed page'] = await closedCode(() => (handleOf(closed).observedBlankMatches ?? (() => Promise.reject(new Error('NO_MATCHES'))))());
     results['observedInitialContextMatches on a closed page'] = await closedCode(() => (handleOf(closed).observedInitialContextMatches ?? (() => Promise.reject(new Error('NO_CONTEXT'))))());
-    results['navigateBlank on a closed page'] = await closedCode(() => closed.navigateBlank(`${served.origin}/source`));
-
     // A closed code, or no error where the function answers false/true instead of throwing; never the canary.
     const offenders = Object.entries(results).filter(([, code]) => !(code === 'NO_ERROR' || CLOSED.includes(code)) || code.includes(ATTR)).map(([name, code]) => `${name}: "${code.slice(0, 120)}"`);
     expect(offenders).toEqual([]);

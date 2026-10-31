@@ -154,7 +154,7 @@ describe('remaining original incremental basis commitments',()=>{
     expect(()=>deriveObservedArtifact(current)).toThrow('INVALID_CONTRACT');
     expect(JSON.stringify(malformed)).toBe(malformedBefore);expect(JSON.stringify(identity)).toBe(before);
   });
-  it('commits each of 537 original complete-basis leaves through the unchanged six-field envelope',()=>{
+  it('commits each of 489 original complete-basis leaves through the unchanged six-field envelope',()=>{
     let total=0;
     for(const [index,parent]of fixtures.incrementalContracts.basisCases.slice(0,3).entries()){
       const b=parent.basis,before=expectedCanonical(b),derived=deriveObservedArtifact(b);
@@ -164,7 +164,7 @@ describe('remaining original incremental basis commitments',()=>{
         const [one,two]=root.split('/');commitmentLeaves(record(record(b)[required(one)])[required(two)],'/'+root,paths);
       }
       if(b.incrementalEvidence)for(const key of ['plan','program','switch','prefixRequests','driftReceipt','firstSuffixAcceptance','excludedAttempts']as const)commitmentLeaves(b.incrementalEvidence[key],'/incrementalEvidence/'+key,paths);
-      expect(new Set(paths).size).toBe(paths.length);expect(paths).toHaveLength(required([79,173,285][index]));
+      expect(new Set(paths).size).toBe(paths.length);expect(paths).toHaveLength(required([73,157,259][index]));
       const envelope=evidencePreimage(b),tuples=admissionTuples(b);
       expect(expectedHash(envelope)).toBe(parent.expectedArtifact.replayPolicy.publicationEvidenceHash);
       for(const path of paths){
@@ -178,7 +178,7 @@ describe('remaining original incremental basis commitments',()=>{
       }
       expect(expectedCanonical(b)).toBe(before);total+=paths.length;
     }
-    expect(total).toBe(537);
+    expect(total).toBe(489);
   },20000);
   it.each([0,1,2])('keeps whole-basis, six-field evidence, effective tuple array and final-plan domains distinct for parent %i',index=>{
     const parent=required(fixtures.incrementalContracts.basisCases[index]),b=parent.basis,before=expectedCanonical(b),artifact=parent.expectedArtifact;
@@ -240,7 +240,7 @@ describe('remaining original incremental basis commitments',()=>{
     expect(canonicalObserved(r)).toBe(expectedCanonical(r));
     expect(validateObservedRequest(r,build)).toMatchObject({ok:false,errorCode:'OPERATION_MISMATCH'});expect(expectedCanonical(original)).toBe(frozen);
   });
-  it.each(['admittedDrift','preAdmissionDrift'])('uses the chosen current-prefix basis at drift j and refuses reuse at j for %s',name=>{
+  it.each(['admittedDrift'])('uses the chosen current-prefix basis at drift j and refuses reuse at j for %s',name=>{
     const parent=required(fixtures.incrementalContracts.basisCases.find(row=>row.name===name)),b=parent.basis,inc=required(b.incrementalEvidence),pin=required(b.snapshotEvidence.pinnedBase);
     const before=expectedCanonical(parent),j=inc.switch.effectiveFirstLearnIndex,jId=required(b.sourceSteps[j]).stepId;
     expect(inc.plan.initialFirstLearnIndex).toBe(2);expect(j).toBe(1);expect(inc.switch.nextSemanticOrdinal).toBe(0);

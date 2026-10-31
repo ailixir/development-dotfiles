@@ -1,3 +1,5 @@
+import { gotoPage } from './helpers/guidedLaunch.js';
+import { stepOp } from '../helpers/stepCode.js';
 import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 /**
  * STUDIO-OBS-013 AC-1, AC-2, AC-5, AC-6 (runner half) — the guided learn run is recorded, on real
@@ -26,7 +28,7 @@ import { execFileSync } from 'node:child_process';
 import { chromium } from 'playwright';
 import { existsSync } from 'node:fs';
 import { mkdir, realpath, mkdtemp, readFile, readdir, rm, symlink, unlink, writeFile } from 'node:fs/promises';
-import { basename, join, resolve } from 'node:path';
+import { basename, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { launchGuidedBrowser } from '../../src/run/browser.js';
 import { GuidedLaunchFailure } from '../../src/run/guidedBrowser.js';
@@ -51,6 +53,7 @@ import publicationJson from '../../../docs/specs/studio-observed-authoring/contr
 import type {PublicationDocument} from '../helpers/publicationFixture.js';
 import { startSecretLoginFixture } from '../fixtures/secret-login/server.js';
 import { dispatch, guidedContext, proposal } from '../helpers/guided.js';
+import {evidencePath} from '../helpers/evidenceOut.js';
 // Typed view of the static JSON import: the file exceeds tsserver's 4 MiB non-TS limit, so ESLint's projectService types it as `error`.
 const publication=publicationJson as unknown as PublicationDocument;
 
@@ -111,7 +114,7 @@ async function loginReference(size: { width: number; height: number }): Promise<
   const dir = await mkdtemp(join(tmpdir(), 'guided-reference-'));
   try {
     const guided = await launchGuidedBrowser({ sessionId: 'reference', scopeHash: 'd'.repeat(64), allowedDomains: TEST_DOMAINS, knownSecrets: [] }, 'reference-context', () => undefined, { dir, size, ready: () => undefined });
-    try { await guided.navigateBlank(fixture.origin + '/login'); await new Promise(r => { setTimeout(r, 500); }); } finally { await guided.close(); }
+    try { await gotoPage(guided, fixture.origin + '/login'); await new Promise(r => { setTimeout(r, 500); }); } finally { await guided.close(); }
     const video = await guided.recordedVideo?.(); if (!video) throw new Error('REFERENCE_VIDEO');
     return lastFrame(video, size);
   } finally { await rm(dir, { recursive: true, force: true }); }
@@ -162,7 +165,7 @@ async function guidedLearnRun(fault: 'none' | 'recorderFileLost' | 'published') 
   await mkdir(evidenceRoot); await mkdir(journal);
   const recorder = createGuidedRecorder({ store, fileSystem: NODE_EVIDENCE_FILE_SYSTEM, bounds: evidenceBoundsFrom(settings), size: { width: settings.recordingWidth, height: settings.recordingHeight }, calibrationOffsetMs: settings.seekOriginCalibrationMs, originSource: systemOriginSource, now: () => performance.now(), sleep: ms => new Promise(resolve => { setTimeout(resolve, ms); }), evidenceRoot });
   const context = guidedContext(fixture.origin); const destination = context.authoredInputs.inputs[0]; if (!destination || !('value' in destination)) throw new Error('DESTINATION'); destination.value = fixture.origin + '/login';
-  context.authoredInputs.inputs.push({ inputId: 'input-pass', sourceStepId: 'fill', kind: 'secretRef', intendedSlot: 'fill.value', secretId: 'PASS', provenance: { referenceKind: 'configuration', configurationRevision: context.configurationRevision, stepId: 'fill', referenceId: 'reference-pass', referenceName: 'PASS', kind: 'secretRef', intendedSlot: 'fill.value' } });
+  context.authoredInputs.inputs.push({ inputId: 'input-pass', sourceStepId: 'fill', kind: 'secretRef', secretId: 'PASS', provenance: { referenceKind: 'configuration', configurationRevision: context.configurationRevision, stepId: 'fill', referenceId: 'reference-pass', referenceName: 'PASS', kind: 'secretRef' } });
   context.authoredInputsHash = hash(context.authoredInputs);
   const messages: { route: string; body: unknown; key?: string }[] = [];
   const launch = async (config: ObservationConfig, contextId: string, onLost: () => void, recording?: GuidedRecordingRequest): Promise<GuidedBrowser> => { request = recording; const browser = await launchGuidedBrowser(config, contextId, onLost, recording); scratch = browser.scratchDirectory; return browser; };
@@ -172,23 +175,22 @@ async function guidedLearnRun(fault: 'none' | 'recorderFileLost' | 'published') 
     await runtime.start();
     let evidence: ExecutionEvidence = (messages.find(m => m.route === 'bootstrap-evidence')?.body as BridgeBootstrap).executionEvidence;
     const latest = () => (messages.filter(m => m.route === 'observations').at(-1)?.body as BridgeObservation).observation;
-    const act = async (step: string, operation: Action['operation'], target?: Action['target'], secret?: string) => {
-      const p = proposal(context, evidence, step, operation, target);
-      const prepared = await runtime.prepare({ pressInheritance: null, ...identity(context), proposal: p, requestDigest: hash(p), expiresAt: new Date(Date.now() + 10_000).toISOString() });
-      const outcome = await runtime.dispatch({ ...dispatch(context, p, prepared), ...(secret ? { secret: { secretId: 'PASS', value: secret, versionId: 'fixture', allowedOrigins: [fixture.origin] } } : {}) });
+    const act = async (step: string, operation: Action['operation'], secret?: string) => {
+      const p = proposal(context, evidence, step, operation);
+      const prepared = await runtime.prepare({ ...identity(context), proposal: p, requestDigest: hash(p), expiresAt: new Date(Date.now() + 10_000).toISOString() });
+      const outcome = await runtime.dispatch({ ...dispatch(context, p, prepared), ...(secret ? { secrets: [{ secretId: 'PASS', value: secret, versionId: 'fixture', allowedOrigins: [fixture.origin] }] } : {}) });
       outcomes.push(outcome); const o = latest();
       evidence = { kind: 'observedDocument', sessionId: context.sessionId, contextId: context.contextId, documentId: o.documentId, generation: o.generation, origin: o.origin, observationHash: hash(o) };
       return outcome;
     };
-    expect((await act('nav', { kind: 'navigate', destinationInputId: 'input-nav' })).ledger.state).toBe('SUCCEEDED');
-    const o = latest();
-    expect((await act('fill', { kind: 'fill', value: { kind: 'secretRef', sourceInputId: 'input-pass' } }, { kind: 'passwordControl', documentId: o.documentId, generation: o.generation }, CANARY)).ledger.state).toBe('SUCCEEDED');
+    expect((await act('nav', stepOp('await page.goto(inputs["input-nav"]);', { uses: [{ kind: 'input', id: 'input-nav' }] }))).ledger.state).toBe('SUCCEEDED');
+    expect((await act('fill', stepOp('await page.locator(\'input[type="password"]\').fill(secrets["PASS"]);', { uses: [{ kind: 'secret', id: 'PASS' }] }), CANARY)).ledger.state).toBe('SUCCEEDED');
     if (fault === 'recorderFileLost') {
       // Recorder-side fault, not a store fault: the recorder's file disappears mid-session.
       const files = request ? await readdir(request.dir) : []; expect(files).toHaveLength(1); for (const file of files) await unlink(join(request?.dir ?? '', file));
     }
-    const seen = latest(), signIn = Object.entries(seen.facts).find(([, fact]) => fact.name === 'Sign in'); if (!signIn) throw new Error('SIGN_IN');
-    expect((await act('submit', { kind: 'click' }, { kind: 'node', ref: signIn[0], documentId: seen.documentId, generation: seen.generation })).ledger.state).toBe('SUCCEEDED');
+    if (!Object.values(latest().facts).some(fact => fact.name === 'Sign in')) throw new Error('SIGN_IN');
+    expect((await act('submit', stepOp('await page.getByRole("button", { name: "Sign in", exact: true }).click();'))).ledger.state).toBe('SUCCEEDED');
     expect(fixture.receipts().at(-1)).toMatchObject({ accepted: true });
     // OBS-007 profile canary scan with recording on: the live profile and the evidence dir.
     expect(scratch && existsSync(scratch)).toBe(true); expect(await scan(scratch ?? '')).toEqual([]); expect(await scan(evidenceRoot)).toEqual([]);
@@ -234,7 +236,7 @@ describe('guided learn run recording on real Chromium (STUDIO-OBS-013)', () => {
       const frames = Array.from({ length: Math.floor(windowPixels.length / frameBytes) }, (_, index) => { const frame = windowPixels.subarray(index * frameBytes, (index + 1) * frameBytes), runs = maxRowRuns(frame, size.width); return { index, ms: pts(index), box: boxOf(frame, size.width), maxRowRuns: runs, contentFree: runs <= CONTENT_FREE_MAX_RUNS, outsideApp: outsideBox(frame, size.width, app) }; });
       const firstApp = frames.find(f => !f.contentFree), t1 = firstApp?.ms, offending = frames.filter(f => !f.contentFree && f.outsideApp > 0);
       const facts = { oracle: 'AR-QA SEC-001 A (content) and B (offset); r13/qa-fixes/README.json oracleRevision', decode: 'ffmpeg full-resolution rgb24, no scale filter', frameSize: size, whiteThreshold: WHITE, contentFreeMaxRowRuns: CONTENT_FREE_MAX_RUNS, loginBox, finalBox, appRegion: app, appRegionArea, appRegionAreaRatio: appRegionArea / frameArea, loginBoxAreaRatio: areaOf(loginBox) / frameArea, finalBoxAreaRatio: areaOf(finalBox) / frameArea, positiveControl: control, a0, t1: t1 ?? null, t1MinusA0: t1 === undefined ? null : t1 - a0, firstAppFrameIndex: firstApp?.index ?? null, offendingFrames: offending.map(f => f.index), probedFrames: probe.frames.length, actionTimings: body.timings.map(t => t.startMs), frames };
-      await writeFile(resolve('../docs/qa/evidence/STUDIO-OBS-013/r13/sec001-guided-video-oracle.json'), JSON.stringify(facts, null, 2) + '\n');
+      await writeFile(evidencePath('STUDIO-OBS-013/r13/sec001-guided-video-oracle.json'), JSON.stringify(facts, null, 2) + '\n');
       expect(windowPixels.length % frameBytes).toBe(0); expect(frames.length).toBeGreaterThan(0); expect(frames.length).toBeLessThanOrEqual(probe.frames.length);
       expect(appRegionArea).toBeLessThanOrEqual(0.10 * frameArea); expect(areaOf(loginBox)).toBeLessThanOrEqual(0.10 * frameArea); expect(areaOf(finalBox)).toBeLessThanOrEqual(0.10 * frameArea);
       // T2: against the same region, the real chrome://version and chrome://prefs-internals pages are flagged.
@@ -305,19 +307,19 @@ describe('guided learn run recording on real Chromium (STUDIO-OBS-013)', () => {
     const scope: Scope = { ...publication.job.binding.scope, initialContext: { kind: 'initialBlank' } };
     
     let ready = 0;
-    const guided = await launchGuidedBrowser({ sessionId: 'parity', scopeHash: 'e'.repeat(64), allowedDomains: TEST_DOMAINS, knownSecrets: [], readProfile: { policyRuleId: 'structural', allowStructuralDiscovery: true } }, 'parity-context', () => undefined, { dir: root, size: { width: 1280, height: 720 }, ready: recording => { if (recording) ready++; } });
+    const guided = await launchGuidedBrowser({ sessionId: 'parity', scopeHash: 'e'.repeat(64), allowedDomains: TEST_DOMAINS, knownSecrets: [] }, 'parity-context', () => undefined, { dir: root, size: { width: 1280, height: 720 }, ready: recording => { if (recording) ready++; } });
     const handle = guided.handle; if (!handle) throw new Error('HANDLE');
     const id = (n: number) => '00000000-0000-4000-8000-' + String(300 + n).padStart(12, '0');
     const frame: Execute3 = { kind: 'execute', protocolVersion: 3, mode: 'observed', runId: publication.execute.runId, attemptId: publication.execute.attemptId, profileHash: hashObserved(OBSERVED_PROFILE), configurationHash: 'c'.repeat(64), waitStrategy: 'domcontentloaded', stepTimeoutMs: 5000,
-      inputs: [{ inputId: 'nav', stepId: id(1), kind: 'destination', intendedSlot: 'navigate.destination', value: fixture.origin + '/login' }, { inputId: 'pass', stepId: id(2), kind: 'secretRef', intendedSlot: 'fill.value', referenceName: 'PASS' }, { inputId: 'home', stepId: id(4), kind: 'nonsecretText', intendedSlot: 'assert.expected', value: fixture.origin + '/home' }],
+      inputs: [{ inputId: 'nav', stepId: id(1), kind: 'destination', value: fixture.origin + '/login' }, { inputId: 'pass', stepId: id(2), kind: 'secretRef', referenceName: 'PASS' }, { inputId: 'home', stepId: id(4), kind: 'nonsecretText', value: fixture.origin + '/home' }],
       secrets: { PASS: CANARY }, secretOrigins: { PASS: [fixture.origin] }, bindings: [], transfers: [],
       steps: [
-        { stepIndex: 0, stepId: id(1), operations: [{ coordinate: { stepId: id(1), ordinal: 0 }, guardId: 'g0', operation: { kind: 'navigate', destinationInputId: 'nav' } }] },
-        { stepIndex: 1, stepId: id(2), operations: [{ coordinate: { stepId: id(2), ordinal: 0 }, guardId: 'g1', operation: { kind: 'fill', value: { kind: 'secretRef', sourceInputId: 'pass' } } }] },
-        { stepIndex: 2, stepId: id(3), operations: [{ coordinate: { stepId: id(3), ordinal: 0 }, guardId: 'g2', operation: { kind: 'click' } }] },
-        { stepIndex: 3, stepId: id(4), operations: [{ coordinate: { stepId: id(4), ordinal: 0 }, guardId: 'g3', operation: { kind: 'assert', predicate: 'url', expected: { kind: 'authoredLiteral', sourceInputId: 'home' } } }] },
+        { stepIndex: 0, stepId: id(1), operations: [{ coordinate: { stepId: id(1), ordinal: 0 }, guardId: 'g0', operation: stepOp('await page.goto(inputs["nav"]);', { uses: [{ kind: 'input', id: 'nav' }] }) }] },
+        { stepIndex: 1, stepId: id(2), operations: [{ coordinate: { stepId: id(2), ordinal: 0 }, guardId: 'g1', operation: stepOp('await page.locator(\'input[type="password"]\').fill(secrets["PASS"]);', { uses: [{ kind: 'secret', id: 'PASS' }] }) }] },
+        { stepIndex: 2, stepId: id(3), operations: [{ coordinate: { stepId: id(3), ordinal: 0 }, guardId: 'g2', operation: stepOp('await page.getByRole("button", { name: "Sign in", exact: true }).click();') }] },
+        { stepIndex: 3, stepId: id(4), operations: [{ coordinate: { stepId: id(4), ordinal: 0 }, guardId: 'g3', operation: stepOp('await expect(page).toHaveURL(inputs["home"]);', { uses: [{ kind: 'input', id: 'home' }] }) }] },
       ],
-      guards: [{ guardId: 'g0', origin: null, target: { kind: 'initialBlank' } }, { guardId: 'g1', origin: fixture.origin, target: { kind: 'passwordControl' } }, { guardId: 'g2', origin: fixture.origin, target: { kind: 'element', locator: [{ by: 'role', role: 'button', name: 'Sign in', exact: true }], tier: 'role', identity: { role: 'button', name: 'Sign in' }, readRuleId: null } }, { guardId: 'g3', origin: fixture.origin, target: { kind: 'page' } }] };
+      guards: [{ guardId: 'g0', origin: null }, { guardId: 'g1', origin: fixture.origin }, { guardId: 'g2', origin: fixture.origin }, { guardId: 'g3', origin: fixture.origin }] };
     const adapter = createObservedReplayAdapter(handle, scope, TEST_DOMAINS, 'guided-parity', () => undefined);
     try {
       expect(ready).toBe(1);

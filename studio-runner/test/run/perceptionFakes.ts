@@ -3,7 +3,7 @@
  * that answers the page programs the modules send (the real programs run in the perception tier).
  */
 import type { CdpSession } from '../../src/run/playwrightEngine.js';
-import type { Box, CollectedPage, ElementCandidateFacts, ElementFacts, PageInventory, SnapshotNode } from '../../src/run/perceptionInPage.js';
+import type { Box, CollectedPage, ElementFacts, PageInventory, SnapshotNode } from '../../src/run/perceptionInPage.js';
 
 export type Child = SnapshotNode | string;
 
@@ -29,7 +29,6 @@ export interface Script {
   collected: CollectedPage;
   inventory?: PageInventory;
   backendIds?: Record<string, number>;
-  candidateFacts?: (ref: string) => ElementCandidateFacts | null;
   check?: (ref: string, selectors: string[]) => ({ count: number; index: number } | { error: true })[];
   options?: (ref: string) => unknown;
 }
@@ -88,9 +87,6 @@ export class ScriptedCdp implements CdpSession {
       const id = `array:${String(this.arrays.size)}`;
       this.arrays.set(id, args[0] as string[]);
       return { result: { objectId: id } };
-    }
-    if (declaration.includes('function elementCandidateFacts')) {
-      return { result: { value: this.script.candidateFacts?.(String(args[0])) ?? null } };
     }
     if (declaration.includes('function checkSelectors')) {
       const selectors = args[1] as string[];

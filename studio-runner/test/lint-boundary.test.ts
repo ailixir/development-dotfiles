@@ -10,6 +10,7 @@ import {
   browserModuleRules,
   executionBoundaryRules,
   runDirectoryRules,
+  stepCodeModuleRules,
   FORBIDDEN_MODULES,
   MESSAGE_FOR_MODULE,
   MODULE_GROUPS,
@@ -33,6 +34,8 @@ const FIXTURES: readonly { readonly file: string; readonly rule: string }[] = [
   { file: 'new-function.ts', rule: 'no-new-func' },
   { file: 'new-function.ts', rule: 'no-restricted-syntax' },
   { file: 'function-call.ts', rule: 'no-restricted-syntax' },
+  // ADR-SC-008 D3.1: the async function construct is banned everywhere except src/run/stepCode.ts.
+  { file: 'async-function.ts', rule: 'no-restricted-syntax' },
   { file: 'dynamic-import.ts', rule: 'no-restricted-syntax' },
   { file: 'indirect-eval.ts', rule: 'no-restricted-properties' },
   { file: 'vm-import.ts', rule: 'no-restricted-imports' },
@@ -142,6 +145,23 @@ describe('execution-boundary lint rules', () => {
       });
       expect(ruleIds).toContain('no-restricted-syntax');
     }
+  });
+
+  it('permits the async function construct in src/run/stepCode.ts alone, and keeps every other ban there', async () => {
+    const rules = stepCodeModuleRules as unknown as Record<string, unknown>;
+    expect(await messagesFor('async-function.ts', rules)).not.toContain('no-restricted-syntax');
+    // Dynamic import() and the Function constructor stay banned in that very file.
+    expect(await messagesFor('dynamic-import.ts', rules)).toContain('no-restricted-syntax');
+    expect(await messagesFor('function-call.ts', rules)).toContain('no-restricted-syntax');
+    expect(await messagesFor('vm-import.ts', rules)).toContain('no-restricted-imports');
+    expect(await messagesFor('playwright-import.ts', rules)).toContain('no-restricted-imports');
+  });
+
+  it('scopes the step-code override to exactly one file in eslint.config.js', () => {
+    const config = readFileSync(join(packageRoot, 'eslint.config.js'), 'utf8');
+    expect(config.match(/stepCodeModuleRules/gu)?.length).toBe(2); // the import and the one block
+    const block = /files:\s*\[([^\]]*)\],\s*rules:\s*stepCodeModuleRules/u.exec(config);
+    expect(block?.[1]?.trim()).toBe("'src/run/stepCode.ts'");
   });
 
   it('keeps the lint fixtures out of the package lint run', () => {

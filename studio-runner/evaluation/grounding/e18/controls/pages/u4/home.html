@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Document Search</title></head>
+<body><main>
+<h1>Document Search</h1>
+<form onsubmit="return false">
+<label for="q">Document name or number</label><br>
+<input id="q" type="text" autocomplete="off">
+<button id="go" type="button" disabled>Search</button>
+</form>
+<p id="result"></p>
+<script>
+var q=document.getElementById('q'),go=document.getElementById('go');
+['keydown','keyup'].forEach(function(t){q.addEventListener(t,function(){go.disabled=q.value.length===0;});});
+go.addEventListener('click',function(){document.getElementById('result').textContent='Searching '+q.value;});
+</script>
+</main></body></html>

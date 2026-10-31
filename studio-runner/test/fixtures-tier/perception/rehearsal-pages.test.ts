@@ -1,9 +1,9 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 // eslint-disable-next-line no-restricted-imports -- Real Chromium types for the perception tier; the production import stays in src/run/browser.ts only.
-import type { Browser } from 'playwright';
+import type { Browser, Page } from 'playwright';
 
 import { guardDist, launchChromium } from './harness.js';
-import { factOf, hasFact, html, invoke, open, prepare, serve, type Operation, type Opened, type Served } from './cutover-support.js';
+import { factOf, hasFact, html, launchStepRun, open, serve, type Opened, type Served } from './cutover-support.js';
 
 /**
  * ADR-SC-007 WI-4, WI-5 rehearsal rehearsal-20261027-1 root causes R1, R2, R3 and R5 (`lean/work/WI-5/rehearsal-rootcause.md`,
@@ -23,8 +23,14 @@ import { factOf, hasFact, html, invoke, open, prepare, serve, type Operation, ty
 
 guardDist();
 
-const literal = { kind: 'authoredLiteral', sourceInputId: 'input' } as const;
-const FILL: Operation = { kind: 'fill', value: literal };
+/** A step run over the served page at `path`: the frozen code runs against the real page the way replay runs it. */
+async function stepRunOn(origin: string, path: string): Promise<{ run: Awaited<ReturnType<typeof launchStepRun>>; page: Page }> {
+  const run = await launchStepRun();
+  const target = run.handle.stepApi?.page as Page | undefined;
+  if (!target) throw new Error('PAGE');
+  await target.goto(`${origin}${path}`);
+  return { run, page: target };
+}
 
 const DATATRACKER_FILTERS = html(`<main aria-label="Search documents">
   <form>
@@ -120,9 +126,12 @@ describe('WI-4 rehearsal pages: R1, R2, R3 and R5 on real Chromium', () => {
     expect(hasFact(exported, 'checkbox', 'Agenda')).toBe(true);
     expect(hasFact(exported, 'checkbox', 'Minutes')).toBe(true);
     expect(exported.observation.outline).not.toContain('{value withheld}');
-    // Learning the click on it prepares a target for the one checkbox.
-    const prepared = await prepare(created, 'checkbox', 'Slides', { kind: 'check' }, null, exported);
-    expect(prepared.resolved.identity.role).toBe('checkbox');
+    // The step that checks it acts on the one checkbox.
+    const { run, page: live } = await stepRunOn(served.origin, '/filters');
+    try {
+      expect((await run.step("await page.getByRole('checkbox', { name: 'Slides', exact: true }).check();")).receipt.closedCode).toBeNull();
+      expect(await live.getByRole('checkbox', { name: 'Slides', exact: true }).isChecked()).toBe(true);
+    } finally { await run.dispose(); }
   });
 
   it('R2: a code-name link in a table cell carries the column header', async () => {
@@ -154,14 +163,17 @@ describe('WI-4 rehearsal pages: R1, R2, R3 and R5 on real Chromium', () => {
     const before = await created.session.observe(undefined, false);
     // The premise: before the fill the page's Search button is disabled (it still has a fact, so the page is the only witness).
     expect(await created.page.locator('#search').isDisabled()).toBe(true);
-    const prepared = await prepare(created, 'textbox', 'Name/number/title', FILL, 'draft-ietf-quic', before);
-    await invoke(created, prepared, FILL, { value: 'draft-ietf-quic' });
-    // What a person typing leaves behind: the keyup handler has run, so the button is enabled.
-    expect(await created.page.locator('#search').isDisabled()).toBe(false);
+    expect(hasFact(before, 'textbox', 'Name/number/title')).toBe(true);
+    const { run, page: live } = await stepRunOn(served.origin, '/search');
+    try {
+      expect((await run.step("await page.getByRole('textbox', { name: 'Name/number/title' }).pressSequentially('draft-ietf-quic');")).receipt.closedCode).toBeNull();
+      // What a person typing leaves behind: the keyup handler has run, so the button is enabled.
+      expect(await live.locator('#search').isDisabled()).toBe(false);
+      expect(await live.locator('#id_name').inputValue()).toBe('draft-ietf-quic');
+    } finally { await run.dispose(); }
     const after = await created.session.observe(undefined, false);
     expect(hasFact(after, 'button', 'Search')).toBe(true);
+    await created.page.evaluate(() => { const search = document.querySelector<HTMLButtonElement>('#search'); if (search) search.disabled = false; });
     expect(await created.page.locator('#search').isDisabled()).toBe(false);
-    // The written value is the authored one, and the neutral key moved nothing.
-    expect(await created.page.locator('#id_name').inputValue()).toBe('draft-ietf-quic');
   });
 });

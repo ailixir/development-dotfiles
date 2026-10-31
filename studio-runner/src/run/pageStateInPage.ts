@@ -3,10 +3,10 @@ import type { PasswordTarget } from './observationTypes.js';
 
 /**
  * The page-state program (ADR-SC-007 WI-4, plan D-7). It is the password code that used to live in the
- * observation collector plus the three page-level operations, and nothing else: the DOM revision counter
+ * observation collector, and nothing else: the DOM revision counter
  * (a MutationObserver), the single password-candidate definition used by count, prepare and fill, the pinned
- * prepare/fill pair, stable(), and navigate / assertPage / pageMatches. Observation, locators and element
- * targets are not here: perception (WI-2) and the shared executor (`targetAction.ts`) own them.
+ * prepare/fill pair and stable(). Observation and element targets are not here: perception (WI-2) owns the first,
+ * and step code (`stepCode.ts`) acts on the page itself.
  *
  * Closure-free like `perceptionInPage.ts`: the runner sends `installPageState.toString()` to the CDP isolated world
  * named `checks-observation-<uuid>` (the same world the perception engine uses) with `Runtime.callFunctionOn`, and
@@ -154,20 +154,6 @@ export function installPageState(options: { allowedDomains: readonly string[] })
       pin.element.dispatchEvent(new Event('input', { bubbles: true }));
       pin.element.dispatchEvent(new Event('change', { bubbles: true }));
       passwordPin = null;
-    },
-    navigate(target: { documentId: string; generation: number }, origin: string, destination: string): void {
-      if (!this.pageMatches(target, origin)) throw new Error('TARGET_CHANGED');
-      const url = new URL(destination);
-      if (!/^https?:$/u.test(url.protocol) || url.username || url.password || !domainAllowed(url.hostname)) throw new Error('TARGET_CHANGED');
-      location.assign(destination);
-    },
-    assertPage(target: { documentId: string; generation: number }, origin: string, predicate: 'url' | 'title', expected: string): boolean {
-      if (!this.pageMatches(target, origin)) throw new Error('TARGET_CHANGED');
-      return (predicate === 'url' ? location.href : document.title) === expected;
-    },
-    pageMatches(target: { documentId: string; generation: number }, origin: string): boolean {
-      drain();
-      return observedRevision === revision && root === document.documentElement && target.documentId === documentId && target.generation === generation && location.origin === origin;
     },
     navigationProceed(): boolean { return navigationEvent !== null && !navigationEvent.defaultPrevented; },
     dispose(): void {

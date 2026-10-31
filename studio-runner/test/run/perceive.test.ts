@@ -1,4 +1,4 @@
-import { validatePublicObservation } from '../../src/validator/pressInheritance.js';
+import { validatePublicObservation } from '../../src/validator/observedSnapshots.js';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -114,7 +114,7 @@ describe('sanitizer', () => {
     const privateName = make(); must(privateName.json[0]).name = 'label-canary';
     expect(run(privateName, ['label-canary']).facts.e1?.nameComplete).not.toBe(true);
   });
-  it('renders password, sensitive, iframe and canvas surfaces as lines without refs, and never as facts', () => {
+  it('renders password, sensitive and canvas surfaces as lines without refs and never as facts, and an iframe as a leaf line with its ref', () => {
     const collected = page(
       [n('document', {},
         n('textbox', { name: 'User', ref: 'e1' }),
@@ -137,14 +137,14 @@ describe('sanitizer', () => {
       '  - textbox "User" [e1]',
       '  - passwordControl',
       '  - withheld {sensitive}',
-      '  - iframe {unsupported surface}',
+      '  - iframe [e4]',
       '  - canvas {unsupported surface}',
       '  - button "Go" [e6]',
       '- canvas {unsupported surface}',
       '- canvas {unsupported surface}',
     ]);
-    expect(result.counters).toMatchObject({ passwordControls: 1, withheldSensitive: 1, unsupported: 2 });
-    expect(Object.keys(result.facts)).toEqual(['e1', 'e6']);
+    expect(result.counters).toMatchObject({ passwordControls: 1, withheldSensitive: 1, unsupported: 1 });
+    expect(Object.keys(result.facts)).toEqual(['e1', 'e4', 'e6']);
     expect(everything(result.outline, result.facts)).not.toContain('secret text');
   });
 
@@ -1013,7 +1013,8 @@ describe('AC1 layer 1: parity with the spike pure pipeline at freeze B', () => {
       const fields = factDifferences(fact, tsFact, sibling?.start);
       if (fields.length) (actualFacts[c.key] ??= {})[ref] = fields;
     }
-    for (const ref of Object.keys(result.facts)) expect(c.pass.facts[ref], `${c.key} ${ref} only in the new pipeline`).toBeDefined();
+    // IFRAME-LEAF: an iframe is a fact of its own now (a leaf line with a ref); the spike printed it as an unsupported surface.
+    for (const ref of Object.keys(result.facts)) expect(c.pass.facts[ref] !== undefined || result.facts[ref]?.role === 'iframe', `${c.key} ${ref} only in the new pipeline`).toBe(true);
     if (!(c.key in differences.outline) && !(c.key in differences.facts)) {
       for (const name of ['withheldPrivate', 'withheldKept', 'withheldSensitive', 'echoScrubbed', 'valuesStripped', 'unsupported', 'passwordControls'] as const) {
         expect(result.counters[name], `${c.key} counter ${name}`).toBe(spike.counters[name]);
@@ -1036,7 +1037,7 @@ describe('AC1 layer 1: parity with the spike pure pipeline at freeze B', () => {
 
   it('documents every difference with a known kind and a reason', () => {
     const kinds = new Set(Object.keys(differences.kinds));
-    expect([...kinds].sort()).toEqual(['D1', 'D1-TAINT', 'D2', 'EVIDENCE-SIBLINGS', 'FACTS-NAME-CAP']);
+    expect([...kinds].sort()).toEqual(['D1', 'D1-TAINT', 'D2', 'EVIDENCE-SIBLINGS', 'FACTS-NAME-CAP', 'IFRAME-LEAF']);
     for (const entry of Object.values(differences.outline)) {
       expect(kinds.has(entry.kind)).toBe(true);
       expect(entry.reason.length).toBeGreaterThan(20);
@@ -1086,9 +1087,9 @@ describe('AC1 layer 1: parity with the spike pure pipeline at freeze B', () => {
       same(raw, [['SPK_NAME', true], ['SPK_PH', true], ['SPK_URL', true], ['SPK_HEAD', true]], { stepText: '', targetIntent: '', maxBytes: 40000 });
     });
 
-    it('password, sensitive, iframe, value-stripping and echo handling match the spike', () => {
+    it('password, sensitive, value-stripping and echo handling match the spike', () => {
       const raw = page(
-        [n('document', {}, n('textbox', { name: 'User', ref: 'e1' }, 'typed'), n('textbox', { name: 'Pw', ref: 'e2' }), n('generic', { ref: 'e3' }, 'secret'), n('iframe', { ref: 'e4' }), n('paragraph', {}, 'echo me'),
+        [n('document', {}, n('textbox', { name: 'User', ref: 'e1' }, 'typed'), n('textbox', { name: 'Pw', ref: 'e2' }), n('generic', { ref: 'e3' }, 'secret'), n('paragraph', {}, 'echo me'),
           n('combobox', { name: 'C', ref: 'e5' }, n('option', { name: 'A', selected: true, ref: 'e6' }), n('option', { name: 'B', ref: 'e7' })))],
         { e1: elementFacts('input', { type: 'text', valueControl: true }), e2: elementFacts('input', { type: 'password', password: true, valueControl: true }), e3: elementFacts('div', { sensitive: true }), e5: elementFacts('select', { valueControl: true }), e6: elementFacts('option', { inSelect: true }), e7: elementFacts('option', { inSelect: true }) },
         { echo: ['echo me'], canvases: 2 },
@@ -1341,16 +1342,6 @@ describe('combined native and public source projection', () => {
     // Identical physical peers carry no physical continuity authority; changing native handles cannot
     // be detected from this semantic tuple. The separate volatile capability supplies that boundary.
     expect(run(raw).facts).toEqual(full.facts);
-  });
-  it('combined read scope refs remain closed and atomic through projection', () => {
-    const raw = page([n('heading', { ref: 'e1', name: 'Release column' }), n('cell', { ref: 'e2', name: 'stable' })], {
-      e1: elementFacts('h2'), e2: elementFacts('td', { readScope: { relation: 'IMMEDIATE_HEADING_SAME_PARENT', sourceRefs: ['e1'] } }),
-    });
-    const full = run(raw); expect(full.facts.e2?.readScope?.sourceRefs).toEqual(['e1']);
-    const masked = run(raw, ['Release column']); expect(masked.facts.e2?.readScope).toBeUndefined();
-    const tiny = run(raw, [], { stepText: 'stable', maxBytes: 45 }); expect(tiny.facts.e2).toBeUndefined();
-    const dangling = run({ ...raw, facts: { ...raw.facts, e2: elementFacts('td', { readScope: { relation: 'SAME_ROW_LABEL', sourceRefs: ['e999'] } }) } });
-    expect(dangling.facts.e2?.readScope).toBeUndefined(); // Invalid optional source context is revoked before projection.
   });
 });
 

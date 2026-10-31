@@ -13,7 +13,7 @@ import { describeStartFailure } from './diagnostics.js';
 import { RECORDING_NOT_RETAINED } from './evidence.js';
 import type { ClaimPort } from './ownership.js';
 import type { GuidedRuntimeOptions } from './runtime.js';
-import { recordCallbackFailure, CALLBACK_PROBLEM_CODES } from './runtime.js';
+import { recordCallbackFailure, CALLBACK_PROBLEM_CODES, StepRefusal } from './runtime.js';
 import type { CallbackFailureFacts } from './runtime.js';
 
 export interface GuidedJwtPolicy { issuer: string; publicKey: string; subject: string; }
@@ -79,12 +79,11 @@ export interface GuidedBridge {
 }
 export function guidedDispatchIdentity(body: unknown): { digest: string; secretIdentity: string } {
   insist(body && typeof body === 'object' && !Array.isArray(body), 'SCHEMA');
-  const { secret, ...publicBody } = body as Record<string, unknown>;
+  const { secrets, ...publicBody } = body as Record<string, unknown>;
   let secretIdentity = '';
-  if (secret !== undefined) {
+  if (Array.isArray(secrets) && secrets.length > 0) {
     const request = validate<BridgeDispatch>('bridge', body, 'dispatch');
-    insist(request.proposal.operation.kind === 'fill' && request.proposal.operation.value.kind === 'secretRef' && request.secret, 'SCHEMA');
-    secretIdentity = canonical({ secretId: request.secret.secretId, sourceInputId: request.proposal.operation.value.sourceInputId });
+    secretIdentity = canonical(request.secrets.map(secret => ({ secretId: secret.secretId, versionId: secret.versionId })));
   }
   return { digest: hash(publicBody), secretIdentity };
 }
@@ -95,16 +94,15 @@ export const GUIDED_REFUSAL_CODES = [
   'TARGET_CHANGED','PREPARATION_DENIED','ADMISSION_DENIED','BINDING_UNAVAILABLE','BINDING_DENIED','BINDING_ORDER',
   'ACTION_ORDER','CONTEXT_REVISION','INPUT_IDENTITY','BUDGET_EXCEEDED'
 ] as const;
-/** The eight reasons of bridge#/definitions/refusal (WI-3 schemas.bridge.refusalReasonEnum). */
+/** The reasons of bridge#/definitions/refusal. */
 export const GUIDED_REFUSAL_REASONS = [
-  'PASSWORD_TARGET_ABSENT','PASSWORD_TARGET_AMBIGUOUS','PASSWORD_FORM_ACTION_NOT_ALLOWED','PASSWORD_CONTROL_READ_REFUSED',
-  'OPTION_NOT_PRESENT','NO_DURABLE_LOCATOR','READ_NOT_ALLOWED','OBSERVATION_DEADLINE'
+  'PASSWORD_FORM_ACTION_NOT_ALLOWED','PASSWORD_CONTROL_READ_REFUSED','OBSERVATION_DEADLINE','STEP_SYNTAX','STEP_PRE_FENCE','SOURCE_HASH_MISMATCH'
 ] as const;
 export type GuidedRefusalReason = (typeof GUIDED_REFUSAL_REASONS)[number];
 /** The code a reason travels with (the allOf of bridge#/definitions/refusal): a closed table, never a guess from an error text. */
 export const GUIDED_REASON_CODES: Readonly<Record<GuidedRefusalReason, (typeof GUIDED_REFUSAL_CODES)[number] | 'POLICY_DENIED'>> = Object.freeze({
-  PASSWORD_TARGET_ABSENT: 'POLICY_DENIED', PASSWORD_TARGET_AMBIGUOUS: 'POLICY_DENIED', PASSWORD_FORM_ACTION_NOT_ALLOWED: 'POLICY_DENIED', PASSWORD_CONTROL_READ_REFUSED: 'POLICY_DENIED',
-  OPTION_NOT_PRESENT: 'PREPARATION_DENIED', NO_DURABLE_LOCATOR: 'PREPARATION_DENIED', READ_NOT_ALLOWED: 'PREPARATION_DENIED',
+  PASSWORD_FORM_ACTION_NOT_ALLOWED: 'POLICY_DENIED', PASSWORD_CONTROL_READ_REFUSED: 'POLICY_DENIED',
+  STEP_SYNTAX: 'PREPARATION_DENIED', STEP_PRE_FENCE: 'PREPARATION_DENIED', SOURCE_HASH_MISMATCH: 'PREPARATION_DENIED',
   OBSERVATION_DEADLINE: 'BUDGET_EXCEEDED',
 });
 export function createGuidedBridge(options: GuidedBridgeOptions): GuidedBridge {
@@ -187,7 +185,9 @@ export function createGuidedBridge(options: GuidedBridgeOptions): GuidedBridge {
       }
       if(!res.headersSent)res.writeHead(code==='AUTH_DENIED'?401:409,{
         'content-type':'application/json','cache-control':'no-store'
-      });res.end(JSON.stringify({code,...(reason ? {reason} : {})}));
+      });// The facts a step refusal carries (the model's own line and column, the locator match count): never a Playwright text.
+      const facts = error instanceof StepRefusal ? reason === 'STEP_SYNTAX' ? { line: error.line, column: error.column, matchCount: null } : reason === 'STEP_PRE_FENCE' ? { line: null, column: null, matchCount: error.matchCount } : {} : {};
+      res.end(JSON.stringify({code,...(reason ? {reason, ...facts} : {})}));
     });
   };
   return {handle:handleRequest,closeSessions:()=>ownership.close()};

@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Order</title></head>
+<body><main>
+<h1>Cart</h1>
+<p>Order status: <strong id="ostatus">Processing</strong></p>
+<label>Quantity <input id="qty" value="1"></label><br>
+<label><input type="checkbox" id="gift"> Gift wrap</label><br>
+<label>Delivery <select id="deliv"><option selected>Standard</option><option>Express</option></select></label><br>
+<p>Total: <span id="total">$24.00</span></p>
+<p id="stockwarn" style="display:block">Out of stock</p>
+<label><input type="checkbox" id="terms" checked> Terms</label><br>
+<a href="/help">Track parcel</a><br>
+<button id="apply">Apply code</button> <button id="addnote">Add note</button> <button id="confirm" disabled>Confirm order</button>
+<p id="dmsg" role="status"></p>
+<div id="notebox" style="display:none"><label>Note <textarea id="note"></textarea></label></div>
+</main>
+<script>
+document.getElementById('apply').addEventListener('click',function(){document.getElementById('dmsg').textContent='Invalid code';});
+document.getElementById('addnote').addEventListener('click',function(){void 0;});
+</script>
+</body></html>

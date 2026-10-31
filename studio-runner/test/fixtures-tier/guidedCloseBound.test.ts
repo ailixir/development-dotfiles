@@ -36,7 +36,7 @@ import { GUIDED_CLOSE_GRACE_MS, GUIDED_START_BUDGET_MS, GUIDED_START_RESERVE_MS 
 import { MIN_PLAYABLE_RECORDING_BYTES, WEBM_MAGIC } from '../../src/run/recording.js';
 import { startSecretLoginFixture } from '../fixtures/secret-login/server.js';
 import {
-  answeredWithin, assignAndWait, cleanupAll, closeFacts, describeBrowser, freezeOwnBrowser, launcherFreezing, newControl, onCleanup, outcomeOf,
+  answeredWithin, assignAndWait, cleanupAll, closeFacts, describeBrowser, freezeOwnBrowser, gotoPage, launcherFreezing, newControl, onCleanup, outcomeOf,
   rounded, send, sleep, slotProbe, startHarness, survivorsOf, trackScratch,
 } from './helpers/guidedLaunch.js';
 import type { Exchange } from './helpers/guidedLaunch.js';
@@ -189,7 +189,7 @@ describe('KL-015-D5 H: a healthy recorded close finishes far inside the grace', 
     for (let iteration = 0; iteration < 5; iteration++) {
       const dir = trackScratch(await mkdtemp(join(tmpdir(), 'guided-d5-healthy-')));
       const guided = await launchGuidedBrowser({ sessionId: `healthy-${String(iteration)}`, scopeHash: 'a'.repeat(64), allowedDomains: TEST_DOMAINS, knownSecrets: [] }, `healthy-context-${String(iteration)}`, () => undefined, { dir, size: { width: 640, height: 360 }, ready: () => undefined });
-      await guided.navigateBlank(`${fixture.origin}/login`);
+      await gotoPage(guided, `${fixture.origin}/login`);
       await sleep(500);
       const began = performance.now();
       await guided.close();

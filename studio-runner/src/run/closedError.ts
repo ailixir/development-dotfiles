@@ -47,6 +47,11 @@ export function detachedObservationState(error: unknown): boolean {
     .some(phrase => error.message.includes(phrase));
 }
 
+/** The protocol said the document an observation was working on went away (a navigation committed): the text is only tested, never copied. */
+export function pageLeftUnderObservation(error: unknown): boolean {
+  return detachedObservationState(error) || (error instanceof Error && error.message.includes('Inspected target navigated or closed'));
+}
+
 const isCode = (value: string): value is ClosedActionCode => CLOSED_SET.has(value);
 
 /**
@@ -77,6 +82,12 @@ export function closedReason(error: unknown): string {
     if (error instanceof Error && error.name === 'Error' && REPLAY_SET.has(error.message)) return error.message;
   }
   return 'OUTCOME_UNKNOWN';
+}
+
+/** The closed code that ended something, for a diagnostic line: a runner closed error, or a plain Error whose message is in the closed vocabulary; 'UNKNOWN' otherwise. */
+export function closedCause(error: unknown): string {
+  if (error instanceof ClosedActionError) return error.code;
+  return error instanceof Error && error.name === 'Error' && REPLAY_SET.has(error.message) ? error.message : 'UNKNOWN';
 }
 
 /** Runs `work` and rethrows only closed errors. */

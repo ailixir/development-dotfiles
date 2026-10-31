@@ -1,3 +1,4 @@
+import {scriptedAdapter,stepOp,stepResult} from '../helpers/stepCode.js';
 import { FIXTURE_ORIGIN, TEST_DOMAINS } from '../helpers/allowedDomains.js';
 import type { Observation } from '../../src/guided/types.js';
 import {readFileSync} from 'node:fs';
@@ -13,30 +14,30 @@ import { guidedDispatchIdentity } from '../../src/guided/transport.js';
 import { dispatch, guidedContext, proposal } from '../helpers/guided.js';
 import { identity, hash } from '../../src/guided/contracts.js';
 import { loginRequiredSignature } from '../../src/run/loginRequired.js';
-import {SecretUseEvidence,provenSecretUseAfterLoss,mergeSecretUseEvidence} from '../../src/run/secretUse.js';
+import {SecretUseEvidence,frozenSecretConsumers,provenSecretUseAfterLoss,mergeSecretUseEvidence} from '../../src/run/secretUse.js';
 
 const stepId = '00000000-0000-4000-8000-000000000031';
 const nextId = '00000000-0000-4000-8000-000000000032';
 const origin = FIXTURE_ORIGIN;
 const scope: Scope = {...fixture.job.binding.scope as Scope, initialContext: {kind: 'observedDocument', origin}};
 function frame(): Execute3 {
-  return {...fixture.execute as Execute3, inputs: [{inputId: 'pass', stepId, kind: 'secretRef', intendedSlot: 'fill.value', referenceName: 'PASS'}], secrets: {PASS: 'run-scoped-canary', UNREACHED: 'other-canary'}, secretOrigins: {PASS: [origin]}, bindings: [], transfers: [],
-    steps: [{stepIndex: 0, stepId, operations: [{coordinate: {stepId, ordinal: 0}, guardId: 'g0', operation: {kind: 'fill', value: {kind: 'secretRef', sourceInputId: 'pass'}}}]}], guards: [{guardId: 'g0', origin, target: {kind: 'passwordControl'}}]};
+  return {...fixture.execute as Execute3, inputs: [{inputId: 'pass', stepId, kind: 'secretRef', referenceName: 'PASS'}], secrets: {PASS: 'run-scoped-canary', UNREACHED: 'other-canary'}, secretOrigins: {PASS: [origin]}, bindings: [], transfers: [],
+    steps: [{stepIndex: 0, stepId, operations: [{coordinate: {stepId, ordinal: 0}, guardId: 'g0', operation: stepOp('await page.locator(\'input[type="password"]\').fill(secrets["PASS"]);', {uses: [{kind: 'secret', id: 'PASS'}]})}]}], guards: [{guardId: 'g0', origin}]};
 }
 function adapter(refused = false): ObservedAdapter {
-  return { perform(_action, _guard, value, control, secret) { expect(value).toBe('run-scoped-canary'); expect(secret).toEqual({secretId: 'PASS', allowedOrigins: [origin]}); control.beginInvocation(); if (refused) return Promise.reject(new ObservedRefusal('POLICY_REFUSED',undefined,true)); return Promise.resolve({}); }, withhold() { return Promise.resolve(); }, dispose() { return Promise.resolve(); }};
+  return scriptedAdapter((action, _guard, io, control) => { expect(io.secrets).toEqual({PASS: 'run-scoped-canary', UNREACHED: 'other-canary'}); expect(io.secretIds).toEqual(['PASS']); expect(io.secretOrigins.PASS).toEqual([origin]); control.beginInvocation(); for (const id of io.secretIds) { io.secretUse.attempting(id); if (refused) io.secretUse.refusedBeforeEffect(id); else io.secretUse.used(id); } if (refused) return Promise.reject(new ObservedRefusal('POLICY_REFUSED',undefined,true)); return Promise.resolve(stepResult(action)); });
 }
 const run = (message: Execute3, browser: ObservedAdapter) => executeObservedReplay(message, browser, scope, TEST_DOMAINS, {now: () => performance.now()}, {stepStarted() { return; }, stepFinished() { return; }}, new AbortController().signal);
 function secretArtifact(): Artifact3 {
   const message=frame(),operation=message.steps[0]?.operations[0];if(!operation)throw Error('ACTION');
-  const projection={coordinate:operation.coordinate,origin,target:null,operation:operation.operation};
+  const projection={coordinate:operation.coordinate,origin,operation:operation.operation};
   const learnedPlan={...(fixture.artifact as Artifact3).learnedPlan,initialContext:scope.initialContext,sourceSteps:[stepId],actions:[{...projection,admissionId:'secret-admission',operationHash:hashObserved(projection)}],bindings:[]};
   const learnedPlanHash=hashObserved(learnedPlan),requirements={...fixture.artifact.replayPolicy.scope as Artifact3['replayPolicy']['scope'],initialContext:scope.initialContext};
-  const inputs:Artifact3['inputRecipes']=[{inputId:'pass',stepId,kind:'secretRef',intendedSlot:'fill.value',provenance:{kind:'configuration',referenceId:'reference-pass',referenceName:'PASS'}}];
+  const inputs:Artifact3['inputRecipes']=[{inputId:'pass',stepId,kind:'secretRef',provenance:{kind:'configuration',referenceId:'reference-pass',referenceName:'PASS'}}];
   return {...fixture.artifact as Artifact3,learnedPlan,learnedPlanHash,inputRecipes:inputs,steps:message.steps,guards:message.guards,replayPolicy:{...fixture.artifact.replayPolicy as Artifact3['replayPolicy'],learnedPlanHash,scope:requirements,inputs,bindings:[],transfers:[]}};
 }
 function resealArtifact(artifact:Artifact3):void {
-  for(const action of artifact.learnedPlan.actions)Object.assign(action,{operationHash:hashObserved({coordinate:action.coordinate,origin:action.origin,target:action.target,operation:action.operation})});
+  for(const action of artifact.learnedPlan.actions)Object.assign(action,{operationHash:hashObserved({coordinate:action.coordinate,origin:action.origin,operation:action.operation})});
   const learnedPlanHash=hashObserved(artifact.learnedPlan);Object.assign(artifact,{learnedPlanHash});Object.assign(artifact.replayPolicy,{learnedPlanHash});
 }
 function secretJob():ObservedJob {
@@ -54,16 +55,14 @@ describe('value-free artifact graph versus strict released-value boundaries',()=
     expect(JSON.stringify(artifact)).not.toContain('run-scoped-canary');
     expect(validateJob(secretJob()).secrets).toEqual({PASS:'run-scoped-canary',UNREACHED:'other-canary'});
   });
-  it.each(['sourceSpan','missing-name','bad-name','wrong-step','wrong-slot','wrong-kind','non-password','non-fill','operation-hash','plan-hash','recipe-join','capability'] as const)('rejects static secret graph mutation: %s',mutation=>{
+  it.each(['sourceSpan','missing-name','bad-name','wrong-step','wrong-kind','non-secret-step','operation-hash','plan-hash','recipe-join','capability'] as const)('rejects static secret graph mutation: %s',mutation=>{
     const artifact=secretArtifact(),input=artifact.inputRecipes[0],action=artifact.learnedPlan.actions[0],guard=artifact.guards[0];if(!input||!action||!guard)throw Error('GRAPH');
     if(mutation==='sourceSpan')Object.assign(input,{provenance:{kind:'sourceSpan',start:0,end:1,sourceHash:artifact.sourceHash}});
     if(mutation==='missing-name')Object.assign(input.provenance,{referenceName:undefined});
     if(mutation==='bad-name')Object.assign(input.provenance,{referenceName:'not canonical'});
     if(mutation==='wrong-step')Object.assign(input,{stepId:nextId});
-    if(mutation==='wrong-slot')Object.assign(input,{intendedSlot:'assert.expected'});
     if(mutation==='wrong-kind')Object.assign(input,{kind:'nonsecretText'});
-    if(mutation==='non-password')Object.assign(guard,{target:{kind:'element',locator:{kind:'role',role:'textbox',name:'Text',exact:true},role:'textbox',elementType:'input',controlType:'text',classification:'structuralOnly',visible:true,actionable:true,readRuleId:null}});
-    if(mutation==='non-fill'){Object.assign(action,{operation:{kind:'click'}});Object.assign(artifact.steps[0]?.operations[0]??{},{operation:action.operation});resealArtifact(artifact);}
+    if(mutation==='non-secret-step'){Object.assign(action,{operation:stepOp('await page.locator("button").click();')});Object.assign(artifact.steps[0]?.operations[0]??{},{operation:action.operation});resealArtifact(artifact);}
     if(mutation==='operation-hash')Object.assign(action,{operationHash:'0'.repeat(64)});
     if(mutation==='plan-hash')Object.assign(artifact,{learnedPlanHash:'0'.repeat(64)});
     if(mutation==='recipe-join')Object.assign(artifact.replayPolicy,{inputs:[]});
@@ -144,7 +143,7 @@ describe('run-scoped secret metadata and usage summary', () => {
     expect(() => validateObservedExecute(message, scope, TEST_DOMAINS)).toThrow('REFERENCE_MISMATCH');
   });
   it('omits uncertain invocation status instead of fabricating a refusal',async()=>{
-    const browser=adapter();browser.perform=(_action,_guard,_value,control)=>{control.beginInvocation();return Promise.reject(new Error('transport interrupted after possible typing'));};
+    const browser=adapter();browser.perform=(_action,_guard,io,control)=>{control.beginInvocation();for(const id of io.secretIds)io.secretUse.attempting(id);return Promise.reject(new Error('transport interrupted after possible typing'));};
     const result=await run(frame(),browser);expect(result.ok).toBe(false);expect(result.secretUse).toEqual({UNREACHED:'NOT_USED'});
   });
   it('keeps confirmed use monotone through later unknown or pre-effect refusal',()=>{
@@ -153,11 +152,12 @@ describe('run-scoped secret metadata and usage summary', () => {
     facts.attempting('UNREACHED');facts.refusedBeforeEffect('UNREACHED');expect(facts.snapshot().UNREACHED).toBe('REFUSED');expect(Object.hasOwn(facts.snapshot(),'__proto__')).toBe(true);
   });
   it('uses authenticated step receipts to distinguish child-loss uncertainty from unreached inputs',()=>{
-    const message=frame();const recipes=[{inputId:'pass',stepId,kind:'secretRef' as const,intendedSlot:'fill.value' as const,provenance:{kind:'configuration' as const,referenceId:'reference-pass',referenceName:'PASS'}}];
-    expect(provenSecretUseAfterLoss(['PASS','UNREACHED'],recipes,message.steps,false,new Map())).toEqual({PASS:'NOT_USED',UNREACHED:'NOT_USED'});
-    expect(provenSecretUseAfterLoss(['PASS','UNREACHED'],recipes,message.steps,true,new Map())).toEqual({UNREACHED:'NOT_USED'});
-    expect(provenSecretUseAfterLoss(['PASS'],recipes,message.steps,true,new Map([[0,'PASS']]))).toEqual({PASS:'USED'});
-    expect(provenSecretUseAfterLoss(['PASS'],recipes,message.steps,true,new Map([[0,'FAILED']]))).toEqual({});
+    const steps=[{stepIndex:0,stepId,operations:[{coordinate:{stepId,ordinal:0},guardId:'g0',operation:{kind:'step' as const,code:'await page.locator("input").fill(secrets["PASS"]);',captures:[],uses:[{kind:'secret' as const,id:'PASS'},{kind:'secret' as const,id:'PASS'}],sourceHash:'0'.repeat(64)}}]}];
+    expect(frozenSecretConsumers(steps)).toEqual(new Map([[0,['PASS']]]));
+    expect(provenSecretUseAfterLoss(['PASS','UNREACHED'],steps,false,new Map())).toEqual({PASS:'NOT_USED',UNREACHED:'NOT_USED'});
+    expect(provenSecretUseAfterLoss(['PASS','UNREACHED'],steps,true,new Map())).toEqual({UNREACHED:'NOT_USED'});
+    expect(provenSecretUseAfterLoss(['PASS'],steps,true,new Map([[0,'PASS']]))).toEqual({PASS:'USED'});
+    expect(provenSecretUseAfterLoss(['PASS'],steps,true,new Map([[0,'FAILED']]))).toEqual({});
   });
   it('merges sparse finals with authenticated facts and rejects contradictions without erasing positive use',()=>{
     expect(mergeSecretUseEvidence({PASS:'USED',UNREACHED:'NOT_USED'},{},['PASS','UNREACHED']).facts).toEqual({PASS:'USED',UNREACHED:'NOT_USED'});
@@ -166,22 +166,17 @@ describe('run-scoped secret metadata and usage summary', () => {
     expect(mergeSecretUseEvidence({},undefined,['PASS'])).toEqual({facts:{},contradictory:false});
     expect(mergeSecretUseEvidence({PASS:'NOT_USED'},{PASS:'USED',OTHER:'USED'},['PASS'])).toEqual({facts:{PASS:'NOT_USED'},contradictory:true});
   });
-  it('rechecks secret metadata at perform after a tampering setup hook', async () => {
-    const message = frame(); (message.inputs as unknown[]).push({inputId: 'unused', stepId, kind: 'nonsecretText', intendedSlot: 'fill.value', value: 'literal'});
-    const browser = adapter(); browser.withhold = () => { (message.inputs[0] as {stepId: string}).stepId = nextId; return Promise.resolve(); };
-    expect(await run(message, browser)).toMatchObject({ok: false, errorCode: 'REFERENCE_MISMATCH', secretUse: {PASS: 'NOT_USED'}});
-  });
   it('refuses transient literals equal to resolved declared values', () => {
-    const message = frame(); (message.inputs as unknown[]).push({inputId: 'literal', stepId, kind: 'nonsecretText', intendedSlot: 'fill.value', value: 'run-scoped-canary'});
-    (message.steps[0]?.operations[0] as {operation: unknown}).operation = {kind: 'fill', value: {kind: 'authoredLiteral', sourceInputId: 'literal'}};
+    const message = frame(); (message.inputs as unknown[]).push({inputId: 'literal', stepId, kind: 'nonsecretText', value: 'run-scoped-canary'});
+    (message.steps[0]?.operations[0] as {operation: unknown}).operation = stepOp('await page.locator("input").fill(inputs["literal"]);', {uses: [{kind: 'input', id: 'literal'}]});
     expect(() => { assertResolvedSecretLiterals(message); }).toThrow('REFERENCE_MISMATCH');
   });
   it.each([false, true])('annotates only existing drift with loginStepsPresent=%s', async loginStepsPresent => {
     const message = frame();
-    const failingStep = {stepIndex: loginStepsPresent ? 1 : 0, stepId: nextId, operations: [{coordinate: {stepId: nextId, ordinal: 0}, guardId: loginStepsPresent ? 'g1' : 'g0', operation: {kind: 'click' as const}}]};
-    if (loginStepsPresent) { (message.steps as unknown[]).push(failingStep); (message.guards as unknown[]).push({...message.guards[0], guardId: 'g1', target: {kind: 'element', locator: [{by: 'role', role: 'button', name: 'Report', exact: true}], tier: 'role', identity: {role: 'button', name: 'Report'}, readRuleId: null}}); }
-    else { (message as {steps: unknown}).steps = [failingStep]; (message as {inputs: unknown}).inputs = []; (message as {guards: unknown}).guards = [{...message.guards[0], target: {kind: 'element', locator: [{by: 'role', role: 'button', name: 'Report', exact: true}], tier: 'role', identity: {role: 'button', name: 'Report'}, readRuleId: null}}]; }
-    const browser = adapter(); const fill = browser.perform.bind(browser); browser.loginRequired = () => true; browser.perform = (action, guard, value, control, secret) => action.operation.kind === 'fill' ? fill(action, guard, value, control, secret) : Promise.reject(new ObservedRefusal('TARGET_DRIFT'));
+    const failingStep = {stepIndex: loginStepsPresent ? 1 : 0, stepId: nextId, operations: [{coordinate: {stepId: nextId, ordinal: 0}, guardId: loginStepsPresent ? 'g1' : 'g0', operation: stepOp('await page.getByRole("button", {name: "Report", exact: true}).click();')}]};
+    if (loginStepsPresent) { (message.steps as unknown[]).push(failingStep); (message.guards as unknown[]).push({...message.guards[0], guardId: 'g1'}); }
+    else { (message as {steps: unknown}).steps = [failingStep]; (message as {inputs: unknown}).inputs = []; (message as {guards: unknown}).guards = [{...message.guards[0]}]; }
+    const browser = adapter(); const fill = browser.perform.bind(browser); browser.loginRequired = () => true; browser.perform = (action, guard, io, control, tally) => action.operation.uses.some(use => use.kind === 'secret') ? fill(action, guard, io, control, tally) : Promise.resolve(stepResult(action, {}, {closedCode: 'TARGET_DRIFT', fenceCrossed: false, effects: []}));
     expect(await run(message, browser)).toMatchObject({ok: false, errorCode: 'LOGIN_REQUIRED', detail: {stepId: nextId, loginStepsPresent}});
   });
 });
@@ -189,12 +184,13 @@ describe('run-scoped secret metadata and usage summary', () => {
 it('strips the complete guided secret frame from its digest while retaining only safe identity', () => {
   const context = guidedContext(origin); context.sourceStepIds = ['fill'];
   const evidence = {kind: 'observedDocument' as const, sessionId: context.sessionId, contextId: context.contextId, documentId: 'login-document', generation: 1, origin, observationHash: 'c'.repeat(64)};
-  const action = proposal(context, evidence, 'fill', {kind: 'fill', value: {kind: 'secretRef', sourceInputId: 'secret-input'}}, {kind: 'passwordControl', documentId: evidence.documentId, generation: 1});
-  const proof = {...identity(context), preparationId: 'preparation',pressInheritance:null, requestDigest: hash(action), evidenceHash: hash(evidence), authoredInputsHash: context.authoredInputsHash, expiresAt: context.expiresAt, target: null};
-  const body = {...dispatch(context, action, proof), secret: {secretId: 'PASS', value: 'canary-one', versionId: 'v1', allowedOrigins: [origin]}};
-  const initial = guidedDispatchIdentity(body), rotated = guidedDispatchIdentity({...body, secret: {...body.secret, value: 'canary-two', versionId: 'v2'}});
+  const action = proposal(context, evidence, 'fill', stepOp('await page.locator("input").fill(secrets["PASS"]);', {uses: [{kind: 'secret', id: 'PASS'}]}));
+  const proof = {...identity(context), preparationId: 'preparation', requestDigest: hash(action), evidenceHash: hash(evidence), authoredInputsHash: context.authoredInputsHash, expiresAt: context.expiresAt};
+  const secret = {secretId: 'PASS', value: 'canary-one', versionId: 'v1', allowedOrigins: [origin]};
+  const body = {...dispatch(context, action, proof), secrets: [secret]};
+  const initial = guidedDispatchIdentity(body), rotated = guidedDispatchIdentity({...body, secrets: [{...secret, value: 'canary-two'}]});
   expect(rotated).toEqual(initial); expect(JSON.stringify(initial)).not.toContain('canary');
-  const swapped = guidedDispatchIdentity({...body, secret: {...body.secret, secretId: 'OTHER'}}); expect(swapped.digest).toBe(initial.digest); expect(swapped.secretIdentity).not.toBe(initial.secretIdentity);
+  const swapped = guidedDispatchIdentity({...body, secrets: [{...secret, secretId: 'OTHER'}]}); expect(swapped.digest).toBe(initial.digest); expect(swapped.secretIdentity).not.toBe(initial.secretIdentity);
 });
 
 it('computes structural signature independently of localized labels', () => {

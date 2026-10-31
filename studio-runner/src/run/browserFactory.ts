@@ -1,4 +1,3 @@
-import type {InvocationControl} from '../executor/observedReplay.js';
 /**
  * The seam between the child's run logic and the browser library (AC-1, AC-6a, AC-7).
  *
@@ -16,6 +15,7 @@ import type {InvocationControl} from '../executor/observedReplay.js';
 import type { ObservationConfig, ObservationSession } from './observationTypes.js';
 import type { Scope } from '../executor/observedOperations.js';
 import type {BrowserPreferenceEvidence} from './scratchLayout.js';
+import {ObservedRefusal} from '../validator/observedReferencePolicy.js';
 
 export interface BrowserLaunchRequest {
   /** Job-supplied browser name. Only `chromium` is supported in V1. */
@@ -48,17 +48,10 @@ export interface BrowserHandle {
   observedStartupReady?():boolean;
   /** Private exact actual app Video capability; never a directory-selected recording. */
   observedAppVideoPath?():Promise<string>;
-  observedWait?(strategy:'load'|'domcontentloaded'|'networkidle',timeoutMs:number):Promise<void>;
-  observedNavigateBlank?(destination:string, control?:InvocationControl): Promise<void>;
   /** Optional on browser-free unit fakes; implemented by the real trusted browser. */
   createObservationSession?(config: ObservationConfig): ObservationSession;
-  /**
-   * Fires when the context opens a page other than its single page — a popup or `window.open`.
-   *
-   * The handle closes the extra page itself; the callback exists so the run can refuse rather
-   * than continue against a page the recording no longer follows (AC-15).
-   */
-  onExtraPage(listener: () => void): void;
+  /** What step code runs against (ADR-SC-008 D3.2). Optional only on browser-free unit fakes. */
+  readonly stepApi?: StepApi;
   /** Every host the browser issued a request to, deduplicated and bounded (AC-19). */
   observedHosts(): readonly string[];
   /**
@@ -68,6 +61,64 @@ export interface BrowserHandle {
   close(): Promise<string | null>;
   /** Last resort on an error path: tears the browser down without waiting for a flush. */
   dispose(): Promise<void>;
+}
+
+/** A Playwright Page, structurally: all the popup registry needs of one. */
+export interface PageHandle { close(): Promise<void>; isClosed(): boolean }
+
+/**
+ * The pages a run opens besides its own. A page that opens while a step runs may be adopted by that step (it awaited the popup);
+ * every other new page is closed when the step ends, or at once when no step runs. At most {@link POPUP_CAP} adopted pages are open
+ * at any time across the whole run: the pages travel to later steps in `vars`, so the cap is not per step.
+ */
+export const POPUP_CAP = 4;
+export class StepPages {
+  private readonly adopted = new Set<PageHandle>();
+  private readonly recorded = new Set<PageHandle>();
+  private running = false;
+  private any = false;
+  /** Called for every context 'page' event of a page other than the run's own. */
+  opened(page: PageHandle): void {
+    this.any = true;
+    if (this.running) this.recorded.add(page);
+    else void page.close().catch(() => undefined);
+  }
+  begin(): void { this.running = true; }
+  adopt(page: PageHandle): void {
+    if (this.adopted.has(page)) return;
+    if (this.openAdopted().length >= POPUP_CAP) {
+      void page.close().catch(() => undefined);
+      throw new ObservedRefusal('POLICY_REFUSED', undefined, true);
+    }
+    this.adopted.add(page);
+  }
+  openAdopted(): PageHandle[] { return [...this.adopted].filter(page => !page.isClosed()); }
+  async end(): Promise<void> {
+    this.running = false;
+    const unadopted = [...this.recorded].filter(page => !this.adopted.has(page));
+    this.recorded.clear();
+    await Promise.all(unadopted.map(page => page.close().catch(() => undefined)));
+  }
+  /** True once any other page was opened: its recording, if it has one, is deleted when the run closes. */
+  get sawOtherPage(): boolean { return this.any; }
+}
+
+/** What the step runner needs of the browser: the Playwright objects step code is given and the run's page policy. */
+export interface StepApi {
+  readonly page: object;
+  readonly context: object;
+  /** Playwright's `expect`, from the pinned `playwright/test` entry. */
+  readonly expect: unknown;
+  awaitWhitelistedMainFrame(allowedDomains: readonly string[]): Promise<void>;
+  beginStep(): void;
+  /**
+   * After an effectful step's code: waits up to `navStartMs` for a main-frame navigation to start (or for one that started during the step), then for it to
+   * commit and load, all within `maxMs`. Never rejects: a timeout just ends the wait (FIX-25).
+   */
+  settleNavigation?(maxMs: number): Promise<void>;
+  endStep(): Promise<void>;
+  adopt(page: object): void;
+  adoptedPages(): readonly object[];
 }
 
 export interface BrowserFactory {

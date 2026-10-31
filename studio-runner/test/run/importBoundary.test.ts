@@ -14,7 +14,7 @@ import { packageRoot } from '../helpers/corpus.js';
  * test/deployment-tier-wiring.test.ts watches the deployment tier.
  */
 
-const NEW_MODULES = ['perceive', 'perceptionInPage', 'locatorSynth', 'playwrightEngine', 'privateInventory'] as const;
+const NEW_MODULES = ['perceive', 'perceptionInPage', 'playwrightEngine', 'privateInventory'] as const;
 const NEW_FILES = NEW_MODULES.map((name) => join('src', 'run', `${name}.ts`));
 const ENTRY_POINTS = [
   'src/main.ts',
@@ -88,20 +88,12 @@ describe('the perception modules are wired into the runner through observationFl
         if (target !== undefined && NEW_FILES.includes(relative(packageRoot, target))) importers.push(`${rel} -> ${specifier}`);
       }
     }
-    // Q25: browser's captured-handle bridge reuses the exact engine pin before private inspection.
     expect([...new Set(importers)].sort()).toEqual([
-      'src/run/browser.ts -> ./playwrightEngine.js',
       'src/run/observationDeadline.ts -> ./privateInventory.js',
-      'src/run/observationFlow.ts -> ./locatorSynth.js',
       'src/run/observationFlow.ts -> ./perceive.js',
-      'src/run/observationFlow.ts -> ./perceptionInPage.js',
       'src/run/observationFlow.ts -> ./playwrightEngine.js',
       'src/run/observationFlow.ts -> ./privateInventory.js',
       'src/run/observationSanitizer.ts -> ./perceive.js',
-      'src/run/targetAction.ts -> ./locatorSynth.js',
-      'src/run/targetAction.ts -> ./privateInventory.js',
-      'src/run/targetIdentity.ts -> ./locatorSynth.js',
-      'src/run/targetOptions.ts -> ./playwrightEngine.js',
     ]);
   });
 
@@ -195,7 +187,7 @@ describe('the perception modules contain nothing that turns a string into code',
 // The perception tier is wired, and cannot be lost quietly.
 
 const TIER_DIR = join(packageRoot, 'test', 'fixtures-tier', 'perception');
-const TIER_TESTS = ['parity.test.ts', 'leaks.test.ts', 'conformance.test.ts', 'optionGate.test.ts', 'cutover-observe.test.ts', 'cutover-act.test.ts', 'cutover-read.test.ts', 'canary-boundary.test.ts', 'identity-snapshots.test.ts', 'infoboxLinkRead.test.ts', 'searchComboboxValue.test.ts', 'fillPressSuccessor.test.ts', 'titledReadReplay.test.ts', 'fillReplacedField.test.ts', 'primaryOutputName.test.ts', 'retained-privacy-guards.test.ts', 'rehearsal-pages.test.ts', 'nativeChildContext.test.ts', 'publicContextCertificate.test.ts', 'labelCompleteness.test.ts'] as const;
+const TIER_TESTS = ['parity.test.ts', 'leaks.test.ts', 'cutover-observe.test.ts', 'canary-boundary.test.ts', 'searchComboboxValue.test.ts', 'primaryOutputName.test.ts', 'retained-privacy-guards.test.ts', 'rehearsal-pages.test.ts', 'publicContextCertificate.test.ts', 'labelCompleteness.test.ts', 'infoboxStepRead.test.ts', 'stepCodeLive.test.ts', 'secretFillLive.test.ts', 'stepRunLive.test.ts'] as const;
 
 /** Every `it.skipIf` / `describe.skipIf` call in `source`, with comments removed first. */
 function skipIfCallsIn(source: string): string[] {

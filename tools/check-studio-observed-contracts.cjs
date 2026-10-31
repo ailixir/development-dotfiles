@@ -24,6 +24,11 @@ for (const name of schemaFiles) {
   assert.equal(schema.$schema, 'http://json-schema.org/draft-07/schema#');
   ajv.addSchema(schema);
 }
+// CONTRACT_AUDIT=1 lists every mismatching fixture case instead of stopping at the first (used while resealing).
+function expectCase(actual, expected, message) {
+  if (process.env.CONTRACT_AUDIT) { if (actual !== expected) console.log('AUDIT', String(message).slice(0, 220), 'expected', expected, 'got', actual); return; }
+  assert.equal(actual, expected, message);
+}
 const readJson = name => JSON.parse(fs.readFileSync(path.join(directory, name), 'utf8'));
 // Canonical JSON subset: sorted ASCII keys, Unicode strings preserved, safe integers only.
 function canonical(value) {
@@ -42,8 +47,25 @@ function canonical(value) {
 }
 const hash = value => crypto.createHash('sha256').update(canonical(value), 'utf8').digest('hex');
 const key = coordinate => `${coordinate.stepId}:${coordinate.ordinal}`;
-// ADR-SC-007: the operation identity hashes the runner-reported ResolvedTarget (locator, tier, identity), never a backend-derived locator.
-const operationIdentity = action => ({ coordinate: action.coordinate, origin: action.origin, target: action.target, operation: action.operation });
+// ADR-SC-008: the operation identity hashes exactly {coordinate, origin, operation}; the operation is the frozen step record.
+const operationIdentity = action => ({ coordinate: action.coordinate, origin: action.origin, operation: action.operation });
+// ADR-SC-008 / field-needs row 36: the coarse ledger outcome is derived from the step receipt's closed code (the receipt is authoritative).
+const LEDGER_FROM_CLOSED_CODE = Object.freeze({
+  ASSERTION_FAILED: ['FAILED', 'ASSERTION_FAILED'], TARGET_DRIFT: ['FAILED', 'TARGET_CHANGED'],
+  POLICY_REFUSED: ['FAILED', 'POLICY_DENIED'], READ_REFUSED: ['FAILED', 'POLICY_DENIED'], PASSWORD_CONTROL_READ_REFUSED: ['FAILED', 'POLICY_DENIED'],
+  REFERENCE_REFUSED: ['FAILED', 'POLICY_DENIED'], REFERENCE_MISMATCH: ['FAILED', 'POLICY_DENIED'], LOGIN_REQUIRED: ['FAILED', 'POLICY_DENIED'],
+  TIMEOUT: ['FAILED', 'TIMEOUT'], CANCELLED: ['FAILED', 'CANCELLED'], OUTCOME_UNKNOWN: ['UNKNOWN_OUTCOME', 'ACK_LOST'],
+  INVALID_CONTRACT: ['FAILED', 'POLICY_DENIED'], INTERNAL_ERROR: ['FAILED', 'POLICY_DENIED'], PROFILE_MISMATCH: ['FAILED', 'POLICY_DENIED'],
+  AUTHORIZATION_EXPIRED: ['FAILED', 'POLICY_DENIED'] });
+function outcomeMatchesReceipt(outcome) {
+  const expected = outcome.receipt.closedCode === null ? ['SUCCEEDED', 'OK'] : LEDGER_FROM_CLOSED_CODE[outcome.receipt.closedCode];
+  check(expected && outcome.ledger.state === expected[0] && outcome.ledger.outcomeCode === expected[1], 'RECEIPT_LEDGER');
+}
+function validateOutcomeDerivation(outcome) { structural('bridge#/definitions/outcome', outcome); outcomeMatchesReceipt(outcome); }
+// Step helpers: a step lists the bindings it captures and the inputs, secrets and bindings it uses.
+const usesBinding = (operation, id) => operation.uses.some(use => use.kind === 'binding' && use.id === id);
+const edgeKey = edge => `${edge.consumerAdmissionId}:${edge.bindingId}`;
+const stepSourceHash = operation => hash(operation.code);
 function fail(code) { const error = new Error(code); error.code = code; throw error; }
 function check(condition, code) { if (!condition) fail(code); }
 // The facts table must key exactly the refs the outline shows (WI-2 perceive.ts guarantees it; the backend refuses a mismatch at ingestion),
@@ -93,10 +115,10 @@ function canonicalOrigin(value) {
   check(parsed.hostname.startsWith('[') || parsed.hostname.split('.').every(
     label => /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(label)), 'ORIGIN');
 }
-const proposalOperationIdentity = (proposal, proof) => ({ coordinate: proposal.coordinate,
-  origin: proposal.executionEvidence.origin, target: proof.target ?? null,
+const proposalOperationIdentity = proposal => ({ coordinate: proposal.coordinate,
+  origin: proposal.executionEvidence.origin,
   operation: proposal.operation });
-const mutableLedgerFields = new Set(['state', 'dispatchCount', 'outcomeCode', 'assertionPassed']);
+const mutableLedgerFields = new Set(['state', 'dispatchCount', 'outcomeCode']);
 function immutableLedger(ledger) {
   return Object.fromEntries(Object.entries(ledger).filter(([field]) => !mutableLedgerFields.has(field)));
 }
@@ -117,8 +139,7 @@ function validateInputs(context, source) {
   for (const input of table.inputs) {
     const ref = input.provenance;
     check(input.sourceStepId === ref.stepId && context.sourceStepIds.includes(ref.stepId)
-      && input.kind === ref.kind && input.intendedSlot === ref.intendedSlot, 'SOURCE_PROVENANCE');
-    check((input.kind === 'destination') === (input.intendedSlot === 'navigate.destination'), 'INPUT_SLOT');
+      && input.kind === ref.kind, 'SOURCE_PROVENANCE');
     let value;
     if (ref.referenceKind === 'sourceSpan') {
       check(ref.sourceRevision === source.sourceRevision, 'SOURCE_REVISION');
@@ -136,8 +157,7 @@ function validateInputs(context, source) {
       check(ref.configurationRevision === source.configurationRevision, 'SOURCE_REVISION');
       const configured = source.configuration[ref.referenceId];
       check(configured && configured.approvedNonsecret && configured.scopeHash === context.scopeHash
-        && configured.stepId === ref.stepId && configured.kind === ref.kind
-        && configured.intendedSlot === ref.intendedSlot, 'SOURCE_CLASSIFICATION');
+        && configured.stepId === ref.stepId && configured.kind === ref.kind, 'SOURCE_CLASSIFICATION');
       value = configured.value;
     }
     check(typeof value === 'string' && value.isWellFormed(), 'INVALID_UNICODE');
@@ -164,7 +184,7 @@ function validateMaterializations(contexts, source) {
     unique(context.allocations, item => item.bindingId, 'BINDING_ID');
     unique(context.allocations, item => item.needId, 'BINDING_ID');
     unique(context.producers, item => item.bindingId, 'BINDING_ID');
-    unique(context.consumerEdges, item => `${item.consumerAdmissionId}:${item.argumentSlot}`, 'BINDING_EDGE');
+    unique(context.consumerEdges, edgeKey, 'BINDING_EDGE');
     for (const allocation of context.allocations) {
       const producerStep = context.sourceStepIds.indexOf(allocation.producerStepId);
       check(producerStep >= 0 && allocation.consumers.every(consumer =>
@@ -182,8 +202,7 @@ function validateMaterializations(contexts, source) {
       const producer = context.producers.find(item => item.bindingId === edge.bindingId);
       const allocation = context.allocations.find(item => item.bindingId === edge.bindingId);
       check(producer && edge.producerAdmissionId === producer.producerAdmissionId
-        && allocation.consumers.some(item => item.stepId === edge.coordinate.stepId
-          && item.argumentSlot === edge.argumentSlot), 'BINDING_EDGE');
+        && allocation.consumers.some(item => item.stepId === edge.coordinate.stepId), 'BINDING_EDGE');
       const producerStep = context.sourceStepIds.indexOf(producer.coordinate.stepId);
       const consumerStep = context.sourceStepIds.indexOf(edge.coordinate.stepId);
       check(consumerStep > producerStep || (consumerStep === producerStep
@@ -215,20 +234,17 @@ function validatePlan(plan) {
   unique(plan.actions, action => action.admissionId, 'ADMISSION_IDENTITY');
   for (let index = 0; index < plan.actions.length; index++) {
     const action = plan.actions[index];
+    check(action.operation.kind === 'step' && action.operation.sourceHash === stepSourceHash(action.operation), 'STEP_HASH');
     if (action.origin === null) check(blank && index === 0
-      && action.coordinate.stepId === plan.sourceSteps[0]
-      && action.coordinate.ordinal === 0 && action.operation.kind === 'navigate'
-      && action.target === null, 'BOOTSTRAP');
+      && action.coordinate.stepId === plan.sourceSteps[0] && action.coordinate.ordinal === 0, 'BOOTSTRAP');
     else canonicalOrigin(action.origin);
     if (index === 0) check(blank ? action.origin === null : action.origin === plan.initialContext.origin, 'BOOTSTRAP');
     const stepIndex = plan.sourceSteps.indexOf(action.coordinate.stepId);
-    check(stepIndex >= 0 && stepIndex >= priorStep
+    // learning emits one frozen step record per authored step (ordinal 0); the contract admits ordinals 0..7 per step
+    check(stepIndex >= 0 && stepIndex >= priorStep && action.coordinate.ordinal < 8
       && action.coordinate.ordinal === (counts.get(action.coordinate.stepId) || 0), 'ACTION_ORDER');
     priorStep = stepIndex;
     counts.set(action.coordinate.stepId, action.coordinate.ordinal + 1);
-    const page = action.operation.kind === 'navigate' || (action.operation.kind === 'assert'
-      && ['url', 'title'].includes(action.operation.predicate));
-    check(page === (action.target === null), 'TARGET_MISMATCH');
     check(action.operationHash === hash(operationIdentity(action)), 'OPERATION_HASH');
   }
   check(plan.sourceSteps.every(step => counts.has(step)), 'INCOMPLETE_PLAN');
@@ -237,34 +253,29 @@ function validatePlan(plan) {
   for (const binding of plan.bindings) {
     const producerIndex = plan.actions.findIndex(action => action.admissionId === binding.provenance.producerAdmissionId);
     const producer = plan.actions[producerIndex];
-    check(producer && producer.operation.kind === 'read' && producer.operation.bindingId === binding.bindingId
+    check(producer && producer.operation.captures.includes(binding.bindingId)
       && key(producer.coordinate) === key(binding.producer)
       && binding.provenance.sourceIntentStepId === producer.coordinate.stepId
       && producer.origin === binding.sourceOrigin, 'BINDING_PRODUCER');
-    same(binding.recipe, producer.operation.recipe, 'BINDING_PRODUCER');
     if (binding.consumers.length === 0) check(plan.incremental !== null
       && plan.incremental.retainedPrefixAdmissionIds.includes(producer.admissionId), 'BINDING_PRODUCER');
     for (const edge of binding.consumers) {
       const consumerIndex = plan.actions.findIndex(action => action.admissionId === edge.consumerAdmissionId);
       check(consumerIndex > producerIndex, 'BINDING_ORDER');
       const consumer = plan.actions[consumerIndex];
-      const value = consumer.operation.value || consumer.operation.expected;
-      const slot = consumer.operation.kind === 'assert' ? 'assert.expected' : `${consumer.operation.kind}.value`;
       check(edge.bindingId === binding.bindingId && edge.producerAdmissionId === producer.admissionId
-        && value?.kind === 'binding' && value.bindingId === binding.bindingId
-        && key(edge.coordinate) === key(consumer.coordinate) && edge.argumentSlot === slot, 'BINDING_EDGE');
+        && usesBinding(consumer.operation, binding.bindingId)
+        && key(edge.coordinate) === key(consumer.coordinate), 'BINDING_EDGE');
       check(edge.destinationOrigin === consumer.origin && consumer.origin === producer.origin, 'ORIGIN');
-      const id = `${consumer.admissionId}:${slot}`;
+      const id = `${consumer.admissionId}:${binding.bindingId}`;
       check(!exercisedEdges.has(id), 'BINDING_EDGE');
       exercisedEdges.add(id);
     }
   }
   for (const action of plan.actions) {
-    if (action.operation.kind === 'read') check(plan.bindings.some(binding => binding.bindingId === action.operation.bindingId
+    for (const id of action.operation.captures) check(plan.bindings.some(binding => binding.bindingId === id
       && binding.provenance.producerAdmissionId === action.admissionId), 'BINDING_PRODUCER');
-    const value = action.operation.value || action.operation.expected;
-    if (value?.kind === 'binding') check(exercisedEdges.has(`${action.admissionId}:${action.operation.kind === 'assert'
-      ? 'assert.expected' : action.operation.kind + '.value'}`), 'BINDING_EDGE');
+    for (const use of action.operation.uses) if (use.kind === 'binding') check(exercisedEdges.has(`${action.admissionId}:${use.id}`), 'BINDING_EDGE');
   }
 }
 function validateFlow(flow) {
@@ -307,63 +318,47 @@ function validateFlow(flow) {
     check(materialization && Number.isInteger(flow.contextAtAction[index])
       && (index === 0 || flow.contextAtAction[index] >= flow.contextAtAction[index - 1]), 'MATERIALIZATION');
     structural('action', proposal);
-    check(session.scope.capabilities.includes(proposal.operation.kind), 'CAPABILITY');
-    check(proposal.coordinate.ordinal < context.limits.maxStatementsPerStep, 'BUDGET');
+    check(proposal.operation.kind === 'step' && session.scope.capabilities.includes('step'), 'CAPABILITY');
+    check(proposal.operation.sourceHash === stepSourceHash(proposal.operation), 'STEP_HASH');
+    check(proposal.coordinate.ordinal < 8, 'BUDGET');
     check(proposal.sessionId === context.sessionId && proposal.scopeHash === context.scopeHash
       && evidence.sessionId === context.sessionId && evidence.contextId === context.contextId
       && proposal.contextRevision === context.contextRevision, 'EVIDENCE_IDENTITY');
     check(proposal.authoredInputsHash === context.authoredInputsHash, 'INPUT_HASH');
     check(proposal.evidenceHash === hash(evidence), 'EVIDENCE_HASH');
-    check(proposal.target.documentId === evidence.documentId && proposal.target.generation === evidence.generation
-      && proposal.generation === evidence.generation, 'EVIDENCE_IDENTITY');
+    check(proposal.generation === evidence.generation, 'EVIDENCE_IDENTITY');
     if (evidence.kind === 'initialBlank') {
-      check(index === 0 && plan.initialContext.kind === 'initialBlank' && proposal.operation.kind === 'navigate'
-        && proposal.target.kind === 'page' && proposal.coordinate.stepId === context.sourceStepIds[0]
+      check(index === 0 && plan.initialContext.kind === 'initialBlank' && proposal.coordinate.stepId === context.sourceStepIds[0]
         && proposal.coordinate.ordinal === 0, 'BOOTSTRAP');
     } else {
       canonicalOrigin(evidence.origin);
       const observation = observationsByHash.get(evidence.observationHash);
       check(observation && observation.origin === evidence.origin && observation.documentId === evidence.documentId
         && observation.generation === evidence.generation, 'OBSERVATION_HASH');
-      if (proposal.target.kind !== 'page') {
-        // ref is a fact of this observation; the runner-reported target agrees with the gated fact (the D-15 prepare-proof cross-check);
-        // a read needs facts text and the page-level readRuleId (the backend-completed recipe)
-        const fact = observation.facts[proposal.target.ref], proof = preparations[index];
-        check(fact && proof.target !== null && proof.target.identity.role === fact.role
-          && (proof.target.identity.name === null || proof.target.identity.name === fact.name), 'TARGET_MISMATCH');
-        if (proposal.operation.kind === 'read') {
-          const recipe = proposal.operation.recipe;
-          check(fact.text !== undefined && recipe.policyRuleId === observation.readRuleId && recipe.classification === 'permittedBusinessData', 'SENSITIVE_SOURCE');
-        }
-      }
     }
     if (index > 0) {
       const previous = proposals[index - 1];
       check(proposal.generation >= previous.generation, 'STALE_GENERATION');
-      if (!['read', 'assert'].includes(previous.operation.kind)
-        || evidence.documentId !== previous.executionEvidence.documentId) check(proposal.generation > previous.generation, 'STALE_GENERATION');
+      // a step is opaque code, so a new document needs a newer generation; reuse of the same document's evidence is the orchestrator's rule, not a wire rule
+      if (evidence.documentId !== previous.executionEvidence.documentId) check(proposal.generation > previous.generation, 'STALE_GENERATION');
+    }
+    for (const use of proposal.operation.uses) {
+      if (use.kind === 'binding') continue;
+      const input = context.authoredInputs.inputs.find(item => use.kind === 'input' ? item.inputId === use.id
+        : item.kind === 'secretRef' && item.secretId === use.id);
+      check(input && input.sourceStepId === proposal.coordinate.stepId && (use.kind === 'secret') === (input.kind === 'secretRef'), 'INPUT_SLOT');
     }
     const action = plan.actions[index];
-    same(proposalOperationIdentity(proposal, preparations[index]), operationIdentity(action), 'OPERATION_IDENTITY');
-    const inputId = proposal.operation.destinationInputId || ((proposal.operation.value || proposal.operation.expected)?.kind === 'authoredLiteral'
-      ? (proposal.operation.value || proposal.operation.expected).sourceInputId : null);
-    if (inputId) {
-      const input = context.authoredInputs.inputs.find(item => item.inputId === inputId);
-      const slot = proposal.operation.kind === 'navigate' ? 'navigate.destination'
-        : proposal.operation.kind === 'assert' ? 'assert.expected' : `${proposal.operation.kind}.value`;
-      check(input && input.sourceStepId === proposal.coordinate.stepId && input.intendedSlot === slot, 'INPUT_SLOT');
-    }
+    same(proposalOperationIdentity(proposal), operationIdentity(action), 'OPERATION_IDENTITY');
     const history = histories[index];
     for (const ledger of [history.admitted, history.dispatching, history.outcome]) structural('ledger', ledger);
     const admitted = history.admitted;
     check(admitted.state === 'ADMITTED' && admitted.dispatchCount === 0 && admitted.outcomeCode === 'PENDING'
-      && admitted.assertionPassed === null && history.dispatching.state === 'DISPATCHING'
-      && history.dispatching.dispatchCount === 1 && history.dispatching.outcomeCode === 'PENDING'
-      && history.dispatching.assertionPassed === null, 'LEDGER_STATE');
+      && history.dispatching.state === 'DISPATCHING'
+      && history.dispatching.dispatchCount === 1 && history.dispatching.outcomeCode === 'PENDING', 'LEDGER_STATE');
     same(immutableLedger(admitted), immutableLedger(history.dispatching), 'IMMUTABLE_ADMISSION');
     same(immutableLedger(admitted), immutableLedger(history.outcome), 'IMMUTABLE_ADMISSION');
-    check(history.outcome.state === 'SUCCEEDED' && history.outcome.dispatchCount === 1 && history.outcome.outcomeCode === 'OK'
-      && history.outcome.assertionPassed === (proposal.operation.kind === 'assert' ? true : null), 'LEDGER_STATE');
+    check(history.outcome.state === 'SUCCEEDED' && history.outcome.dispatchCount === 1 && history.outcome.outcomeCode === 'OK', 'LEDGER_STATE');
     check(admitted.sessionId === context.sessionId && admitted.scopeHash === context.scopeHash
       && admitted.ownerFence === context.ownerFence && admitted.contextRevision === context.contextRevision
       && admitted.generation === proposal.generation && admitted.documentId === evidence.documentId
@@ -372,7 +367,7 @@ function validateFlow(flow) {
     same(admitted.executionEvidence, evidence, 'EVIDENCE_IDENTITY');
     check(admitted.authoredInputsHash === context.authoredInputsHash, 'INPUT_HASH');
     check(admitted.evidenceHash === proposal.evidenceHash && admitted.requestDigest === hash(proposal)
-      && admitted.operationHash === hash(proposalOperationIdentity(proposal, preparations[index])), 'OPERATION_HASH');
+      && admitted.operationHash === hash(proposalOperationIdentity(proposal)), 'OPERATION_HASH');
     const preparation = preparations[index], dispatch = dispatches[index], outcome = outcomes[index];
     structural('bridge#/definitions/preparation', preparation);
     structural('bridge#/definitions/dispatch', dispatch);
@@ -385,23 +380,29 @@ function validateFlow(flow) {
     same(dispatch.proposal, proposal, 'IMMUTABLE_ADMISSION');
     same(dispatch.ledger, history.dispatching, 'IMMUTABLE_ADMISSION');
     same(outcome.ledger, history.outcome, 'IMMUTABLE_ADMISSION');
+    same(dispatch.secrets.map(secret => secret.secretId).sort(),
+      proposal.operation.uses.filter(use => use.kind === 'secret').map(use => use.id).sort(), 'SECRET_BINDING');
     const edges = materialization.consumerEdges.filter(edge => edge.consumerAdmissionId === admitted.admission.admissionId);
     same(dispatch.consumerEdges, edges, 'BINDING_EDGE');
-    if (proposal.operation.kind === 'read') {
-      const producer = finalContext.producers.find(item => item.bindingId === proposal.operation.bindingId);
+    const captured = proposal.operation.captures.map(id => {
+      const producer = finalContext.producers.find(item => item.bindingId === id);
       check(producer && producer.producerAdmissionId === admitted.admission.admissionId
         && key(producer.coordinate) === key(proposal.coordinate) && producer.origin === evidence.origin, 'BINDING_PRODUCER');
-      same(producer.recipe, proposal.operation.recipe, 'BINDING_PRODUCER');
-      same(outcome.availability, producer.availability, 'AVAILABILITY');
       check(!materialization.producers.some(item => item.bindingId === producer.bindingId), 'BINDING_ORDER');
-    } else check(outcome.availability === null, 'AVAILABILITY');
-    const value = proposal.operation.value || proposal.operation.expected;
-    if (value?.kind === 'binding') {
-      check(edges.length === 1 && edges[0].bindingId === value.bindingId, 'BINDING_EDGE');
-      const producer = materialization.producers.find(item => item.bindingId === value.bindingId);
+      return producer.availability;
+    });
+    same(outcome.availability, captured, 'AVAILABILITY');
+    // the learning receipt: the same shape as the replay receipt; the ledger outcome is derived from its closed code
+    outcomeMatchesReceipt(outcome);
+    check(outcome.receipt.stepHash === hash(proposal.operation) && outcome.receipt.closedCode === null && outcome.receipt.fenceCrossed === true
+      && outcome.receipt.effects.every(effect => effect.completed), 'RECEIPT');
+    const used = proposal.operation.uses.filter(use => use.kind === 'binding').map(use => use.id).sort();
+    same(edges.map(edge => edge.bindingId).sort(), used, 'BINDING_EDGE');
+    for (const id of used) {
+      const producer = materialization.producers.find(item => item.bindingId === id);
       check(producer && histories.slice(0, index).some(item => item.outcome.admission.admissionId === producer.producerAdmissionId
         && item.outcome.state === 'SUCCEEDED'), 'BINDING_ORDER');
-    } else check(edges.length === 0, 'BINDING_EDGE');
+    }
   }
   unique(histories, item => item.admitted.admission.admissionId, 'ADMISSION_IDENTITY');
   check(plan.bindings.length === finalContext.producers.length, 'BINDING_PRODUCER');
@@ -410,8 +411,7 @@ function validateFlow(flow) {
     check(producer && binding.provenance.sessionId === context.sessionId, 'BINDING_PRODUCER');
     same(binding.consumers, finalContext.consumerEdges.filter(edge => edge.bindingId === binding.bindingId), 'BINDING_EDGE');
     const allocation = finalContext.allocations.find(item => item.bindingId === binding.bindingId);
-    check(allocation.consumers.every(expected => binding.consumers.some(edge => edge.coordinate.stepId === expected.stepId
-      && edge.argumentSlot === expected.argumentSlot)), 'INCOMPLETE_BINDING');
+    check(allocation.consumers.every(expected => binding.consumers.some(edge => edge.coordinate.stepId === expected.stepId)), 'INCOMPLETE_BINDING');
   }
   check(finalContext.allocations.length === plan.bindings.length, 'INCOMPLETE_BINDING');
 }
@@ -577,7 +577,9 @@ function validateObservationRefresh(flow) {
   const [file, fragment] = name.split('#');
   const validate = ajv.getSchema(`${base}${file}.schema.json${fragment ? '#' + fragment : ''}`);
   assert(validate, `missing validator: ${name}`);
-  check(validate(value), 'SCHEMA');
+  const accepted = validate(value);
+  if (!accepted && process.env.CONTRACT_DEBUG) console.error('SCHEMA', name, JSON.stringify(validate.errors.slice(0, 4)));
+  check(accepted, 'SCHEMA');
 }
 const snapshotOracle = require('./studio-snapshot-contract-oracle.cjs')({ hash, canonical, check, same, structural });
 
@@ -604,6 +606,26 @@ function runSchemas() {
     checked++;
   }
   assert(!fs.existsSync(path.join(directory, 'replay-account.schema.json')), 'the account ABI stays removed');
+  // ADR-SC-008: deleted concepts leave no definition, file or reference behind; the receipt enum is the one closed-code list.
+  assert(!fs.existsSync(path.join(directory, 'locator.schema.json')), 'locator.schema.json is deleted with the closed grammar');
+  const text = schemaFiles.map(file => fs.readFileSync(path.join(directory, file), 'utf8')).join('\n');
+  for (const gone of ['locator.schema.json', 'ObservedChoiceWitness1', 'QuestionCapture1', 'GuardSourceAuthorization', 'PressInheritance', 'AssertSourceBinding',
+    'PreAdmissionDrift', 'intendedSlot', 'argumentSlot', 'operationKind', 'pressInheritance', 'assertionPassed', 'maxStatementsPerStep', 'NEXT_ACTION', 'VERIFY_STEP', '"passwordControl"']) {
+    assert(!text.includes(gone), `${gone} is deleted from contracts/v3`);
+  }
+  for (const kind of ['navigate', 'click', 'fill', 'press', 'check', 'uncheck', 'hover', 'selectOption', 'read', 'assert']) {
+    assert(!text.includes(`"${kind}"`), `the operation kind ${kind} is deleted from contracts/v3`);
+  }
+  for (const file of ['fixtures.json', 'planning-fixtures.json', 'publication-fixtures.json', 'publication-canonical-vectors.json', 'current-synthetic-worlds.json']) {
+    for (const url of new Set(fs.readFileSync(path.join(directory, file), 'utf8').match(/https:\/\/checks\.citi\.example\/contracts\/observed\/v3\/[A-Za-z0-9._#\/-]+/g) ?? [])) {
+      assert(ajv.getSchema(url.replace(/\/+$/, '')), `${file}: ${url} resolves to a v3 schema`);
+    }
+  }
+  assert.deepEqual(readJson('step-receipt.schema.json').properties.closedCode.oneOf[0].enum,
+    readJson('replay-ipc.schema.json').definitions.Result3.properties.errorCode.oneOf[0].enum, 'receipt.closedCode and Result3.errorCode are one closed list');
+  for (const old of ['click', 'fill', 'press', 'navigate', 'read', 'assert']) {
+    assert(!ajv.getSchema(base + 'action.schema.json')({ ...structuredClone(readJson('fixtures.json').documents.action), operation: { kind: old } }), `old kind ${old} is refused by action`);
+  }
   oneActionTimingDefinition();
   return checked;
 }
@@ -656,6 +678,7 @@ function runFixtures() {
       }
       wellFormed(sample);
       if (fixture.validator === 'flow') validateFlow(sample);
+      else if (fixture.validator === 'outcome-derivation') validateOutcomeDerivation(sample);
       else if (fixture.validator === 'plan') validatePlan(sample);
       else if (fixture.validator === 'source') validateInputs(sample.context, sample.source);
       else if (fixture.validator === 'materializations') validateMaterializations(sample.contexts, sample.source);
@@ -664,6 +687,7 @@ function runFixtures() {
       else if (fixture.validator === 'observation-refresh-flow') validateObservationRefresh(sample);
       else structural(fixture.validator, sample);
     } catch (error) { failure = error; }
+    if (process.env.CONTRACT_AUDIT) { const got = failure?.code || (failure ? 'INTERNAL_ERROR' : 'VALID'); if (got !== fixture.expected) console.log('AUDIT fixtures', JSON.stringify(fixture.name), 'expected', fixture.expected, 'got', got, failure && failure.code === undefined ? failure.message : ''); checked++; continue; }
     assert.equal(failure?.code || (failure ? 'INTERNAL_ERROR' : 'VALID'), fixture.expected,
       `${fixture.name}: ${failure?.message || 'accepted'}`);
     checked++;
@@ -752,6 +776,7 @@ function runPlanning() {
   for (const fixture of planning.cases) {
     const validate = ajv.getSchema(base + fixture.schema + '.schema.json');
     assert(validate, fixture.schema);
+    if (process.env.CONTRACT_AUDIT) { if (validate(fixture.value) !== fixture.valid) console.log('AUDIT planning', JSON.stringify(fixture.name), 'expected', fixture.valid, JSON.stringify((validate.errors || []).slice(0, 1))); continue; }
     assert.equal(validate(fixture.value), fixture.valid, fixture.name + ': ' + JSON.stringify(validate.errors));
   }
   return planning.cases.length;
@@ -783,8 +808,7 @@ function runPublication() {
   }
   // Admission/publication aggregates are independently rebuilt from immutable source facts.
   // Structural conformance cannot catch a stale preparation tuple inside a valid digest string.
-  for (const sample of [publication, publication.observedChoice,
-    publication.controlValueReference, publication.controlValueReferenceUsedConfiguration]) {
+  for (const sample of [publication, publication.controlValueReference, publication.controlValueReferenceUsedConfiguration]) {
     const { basis, artifact } = sample;
     validateSnapshotGraph(basis, sample.snapshotAuthority, artifact);
     const preparations = new Map(basis.preparations.map(fact => [fact.preparationId, fact]));
@@ -812,11 +836,9 @@ function runPublication() {
         sourceManifestHash: basis.sourceManifestHash }), 'publication aggregate preimage');
     assert.equal(artifact.learnedPlanHash, hash(artifact.learnedPlan), 'learned plan preimage');
     assert.equal(artifact.replayPolicy.learnedPlanHash, artifact.learnedPlanHash, 'policy plan pin');
-    const usedInputs = new Set(basis.preparations.flatMap(fact => {
-      const operation = fact.proposal.operation, argument = operation.value ?? operation.expected;
-      return operation.kind === 'navigate' ? [operation.destinationInputId]
-        : ['authoredLiteral', 'secretRef'].includes(argument?.kind) ? [argument.sourceInputId] : [];
-    }));
+    const secretInput = id => basis.inputs.find(input => input.kind === 'secretRef' && input.provenance.referenceName === id)?.inputId;
+    const usedInputs = new Set(basis.preparations.flatMap(fact => fact.proposal.operation.uses
+      .filter(use => use.kind !== 'binding').map(use => use.kind === 'input' ? use.id : secretInput(use.id))));
     assert.deepEqual(artifact.inputRecipes.map(input => input.inputId).sort(), [...usedInputs].sort(),
       'candidate replay recipes exclude unused retained materialization');
     // One collapsed tuple (ADR-SC-005 "Contracts"): the profile is {contract:3}; the build identity
@@ -851,40 +873,24 @@ function runPublication() {
     publication.artifact.replayPolicy.publicationEvidenceHash);
   assert.equal(publication.basis.learningProvenance.guidedPromptHash, null);
   assert(publication.basis.learningProvenance.outputContractHash);
-  // Observed-choice witness (OBS-006, carried into v3): independent proof, never an explicit null.
-  const choice = publication.observedChoice;
-  assert(choice, 'independently authored observed-choice baseline is required');
-  const validateBasis = ajv.getSchema(base + 'replay-validation.schema.json#/definitions/ValidationBasis');
-  const prep = choice.basis.preparations.find(p => p.observedChoice), w = prep.observedChoice;
-  const captureHeader = choice.basis.materializationEvidence.versions[w.context.questionCapture.contextRevision - 1];
-  assert.equal(w.context.questionCapture.authoredInputsHash, captureHeader.authoredInputsHash,
-    'new synthetic original question binds its actual captured materialization version');
-  assert.equal(prep.proof.authoredInputsHash, captureHeader.authoredInputsHash);
-  assert.equal(choice.basis.bootstrap.inputsHash,
-    choice.basis.materializationEvidence.versions[choice.basis.bootstrap.contextRevision - 1].authoredInputsHash);
-  assert.equal(w.receipt.contextIdentityHash, hash(w.context));
-  assert.equal(w.receipt.meaningsHash, hash(w.meanings));
-  assert.equal(w.receipt.questionCaptureHash, hash(w.context.questionCapture));
-  assert.equal(w.context.questionCapture.modelQuestionHash, hash(w.attempt.modelQuestion));
-  assert.equal(w.questionPlan.planHash, hash(w.questionPlan.plan));
-  // The fresh node is independently proved: a later generation, whose runner-reported identity is the accepted choice's stored selection.
-  const accepted = w.meanings.find(meaning => meaning.choiceId === w.receipt.answer.choiceId);
-  assert(accepted, 'the receipt names one of the witness meanings');
-  assert(prep.proposal.target.generation > w.receipt.answer.generation, 'refresh node is independently proved');
-  assert.deepEqual(prep.proof.target.identity, { role: accepted.selection.role, name: accepted.selection.name },
-    'the fresh preparation proves the identity of the accepted selection');
-  assert(publication.basis.preparations.every(p => !Object.hasOwn(p, 'observedChoice')), 'zero-choice optional evidence is omitted');
-  const singleton = structuredClone(choice.basis), single = singleton.preparations.find(p => p.observedChoice).observedChoice;
-  single.meanings.splice(0, 1); single.context.question.choices.splice(0, 1); single.attempt.modelQuestion.choices.splice(0, 1);
-  single.context.questionCapture.modelQuestionHash = hash(single.attempt.modelQuestion);
-  single.receipt.contextIdentityHash = hash(single.context); single.receipt.meaningsHash = hash(single.meanings);
-  single.receipt.questionCaptureHash = hash(single.context.questionCapture);
-  assert(!validateBasis(singleton), 'coherently resealed one-alternative witness must refuse');
-  const nullProof = structuredClone(choice.basis);
-  nullProof.preparations.find(p => p.observedChoice).observedChoice = null;
-  assert(!validateBasis(nullProof), 'optional proof cannot be explicit null');
-  checked += 8;
+  // ADR-SC-008: the observed-choice witness is deleted; a clarification makes the model rewrite the step code and leaves no witness behind.
+  assert(publication.basis.preparations.every(p => !Object.hasOwn(p, 'observedChoice')), 'no preparation carries a choice witness');
+  assert(!Object.hasOwn(publication, 'observedChoice'), 'the observed-choice sample is deleted');
   const vectors = readJson('publication-canonical-vectors.json');
+  // SC008-FIX-2: the file mirrors the incremental vectors and the correction01 publication preimages of the sealed fixtures.
+  for (const vector of publication.incrementalContracts.canonicalVectors) {
+    const mirror = vectors.positive.find(item => item.name === 'incremental/' + vector.name);
+    assert(mirror, `mirror of ${vector.name}`);
+    for (const field of ['input', 'canonical', 'canonicalUtf8Hex', 'sha256']) assert.equal(canonical(mirror[field]), canonical(vector[field]), `mirror incremental/${vector.name}.${field}`);
+    checked++;
+  }
+  for (const positive of publication.snapshotCorrection.positives) {
+    const mirror = vectors.positive.find(item => item.name === `correction01/${positive.name}/publication-preimage`);
+    assert(mirror, `correction01 preimage vector of ${positive.name}`);
+    assert.equal(canonical(mirror.input), canonical(positive.publicationEvidencePreimage), `correction01/${positive.name} preimage`);
+    assert.equal(mirror.sha256, positive.publicationEvidenceHash, `correction01/${positive.name} hash`);
+    checked++;
+  }
   for (const vector of vectors.positive) {
     assert.equal(Buffer.from(canonical(vector.input)).toString('hex'), vector.canonicalUtf8Hex);
     assert.equal(hash(vector.input), vector.sha256);
@@ -915,7 +921,7 @@ function runPublicApi() {
     for (const method of Object.keys(item)) if (['get', 'post', 'put', 'patch', 'delete'].includes(method)) operations.push(`${method.toUpperCase()} ${route}`);
   }
   for (const retired of retiredOperations) assert(!operations.includes(retired), `retired operation still declared: ${retired}`);
-  assert.equal(operations.length, 32, 'OBS-015 changes contracts on existing operations only; OBS-008 C-int W1 adds getStudioTestCapabilities; STUDIO-UNIFY-001.6 adds readLatestGuidedAttempts; STUDIO-GOV-001.3 removes the five guided-policy operations; STUDIO-GOV-001.2 removes the eight Studio schedule operations');
+  assert.equal(operations.length, 33, 'OBS-015 changes contracts on existing operations only; OBS-008 C-int W1 adds getStudioTestCapabilities; STUDIO-UNIFY-001.6 adds readLatestGuidedAttempts; STUDIO-GOV-001.3 removes the five guided-policy operations; STUDIO-GOV-001.2 removes the eight Studio schedule operations');
   assert(operations.includes('DELETE /v2/runs/{id}'), 'runner cancellation is DELETE /v2/runs/{id}');
   assert(operations.includes('POST /tests/{id}/validate-variables'), 'validate-variables stays documented (CLN-12)');
   const pointer = (root, fragment) => (fragment || '').replace(/^#?\//, '').split('/').filter(Boolean)
@@ -1281,12 +1287,32 @@ function runIncremental() {
   for (const test of fixture.wireCases) {
     const validate = ajv.getSchema(test.schema);
     assert(validate, test.schema);
-    assert.equal(validate(test.value), test.valid, `${test.name}: ${JSON.stringify(validate.errors)}`); checked++;
+    expectCase(validate(test.value), test.valid, `${test.name}: ${JSON.stringify(validate.errors)}`); checked++;
   }
   for (const test of fixture.schemaCases) {
     const validate = ajv.getSchema(fixture.definitionLocations[test.definition]);
     assert(validate, test.definition);
-    assert.equal(validate(test.value), test.valid, `${test.name}: ${JSON.stringify(validate.errors)}`); checked++;
+    expectCase(validate(test.value), test.valid, `${test.name}: ${JSON.stringify(validate.errors)}`); checked++;
+  }
+  // SC008-FIX-1: the complete-basis vectors are the basis cases themselves, and the next vector is that basis's publication evidence preimage.
+  for (const [caseIndex, vectorIndex] of [[0, 24], [1, 27]]) {
+    const basis = fixture.basisCases[caseIndex].basis;
+    assert.equal(canonical(basis), canonical(fixture.canonicalVectors[vectorIndex].input), `canonicalVectors[${vectorIndex}] is the basis case ${caseIndex}`);
+    assert.equal(canonical({ version: 1, basisHash: hash(basis), runAuthorizationHash: hash(basis.runAuthorization), translationHash: basis.translationHash,
+      bootstrapHash: hash(basis.bootstrap), sourceManifestHash: basis.sourceManifestHash }), canonical(fixture.canonicalVectors[vectorIndex + 1].input), `canonicalVectors[${vectorIndex + 1}] is its evidence preimage`);
+    checked += 2;
+  }
+  // SC008-FIX-2: derived-vector table. [26] is the tuple array of every basis case's actions (they share it) and the hash the lowered artifacts commit;
+  // the schema-case vectors are the values of schema cases. A vector that is derived from a sealed document must equal it.
+  const tuplesOf = basis => basis.actions.map(({ ledger: l }) => ({ coordinate: l.coordinate, admission: l.admission, operationHash: l.operationHash, scopeHash: l.scopeHash }));
+  for (const i of [0, 1, 2]) {
+    assert.equal(canonical(tuplesOf(fixture.basisCases[i].basis)), canonical(fixture.canonicalVectors[26].input), `canonicalVectors[26] is the admission tuple array of basis case ${i}`);
+    assert.equal(fixture.basisCases[i].expectedArtifact.replayPolicy.admissionProvenanceHash, fixture.canonicalVectors[26].sha256, `basis case ${i} commits the tuple vector hash`);
+    checked += 2;
+  }
+  const schemaValues = new Set(fixture.schemaCases.map(item => canonical(item.value)));
+  for (const i of [0, 2, 3, 4, 7, 8, 9, 12, 13, 18, 19, 20, 21]) {
+    assert(schemaValues.has(canonical(fixture.canonicalVectors[i].input)), `canonicalVectors[${i}] (${fixture.canonicalVectors[i].name}) is the value of a schema case`); checked++;
   }
   for (const vector of fixture.canonicalVectors) {
     assert.equal(canonical(vector.input), vector.canonical, vector.name);
@@ -1299,7 +1325,7 @@ function runIncremental() {
       validateExtendedBasis(test.basis, test.authority);
       if (test.expectedArtifact) validateSnapshotGraph(test.basis, test.authority.snapshot, test.expectedArtifact);
     } catch (error) { code = error.code || 'INTERNAL_ERROR'; }
-    assert.equal(code, test.expected, `${test.name}: ${code}`); checked++;
+    expectCase(code, test.expected, `${test.name}: ${code}`); checked++;
   }
   for (const test of fixture.resultCases) {
     let code = 'VALID';
@@ -1312,7 +1338,7 @@ function runIncremental() {
       if (test.value.publication.receipt !== null) same(test.value.publication.receipt.relearnedFrom,
         expected, 'RECEIPT_SWITCH');
     } catch (error) { code = error.code || 'INTERNAL_ERROR'; }
-    assert.equal(code, test.expected, `${test.name}: ${code}`); checked++;
+    expectCase(code, test.expected, `${test.name}: ${code}`); checked++;
   }
   const { base: original, edit4 } = fixture.tenStepChain;
   const equal = [];
@@ -1338,9 +1364,7 @@ function runIncremental() {
 function projectEffectiveGraph(basis) {
   const before = canonical(basis), inc = basis.incrementalEvidence;
   const allocations = new Map(), producers = new Map(), actions = new Map(), needs = new Map();
-  const pair = value => `${value.stepId}:${value.argumentSlot}`;
-  const slot = operation => operation.kind === 'assert' ? 'assert.expected' : `${operation.kind}.value`;
-  const argument = operation => operation.value ?? operation.expected;
+  const pair = value => value.stepId;
   const position = coordinate => basis.sourceSteps.findIndex(step => step.stepId === coordinate.stepId) * 8 + coordinate.ordinal;
   const actionOf = fact => {
     const preparation = basis.preparations.find(p => p.preparationId === fact.preparationId);
@@ -1363,23 +1387,22 @@ function projectEffectiveGraph(basis) {
   const importedRead = id => {
     if (!drift || !inc.firstSuffixAcceptance || !basis.snapshotEvidence.baseProof) return null;
     const binding = baseBindings.get(id);
-    const read = inc.program.actions.find(a => a.operation.kind === 'read' && a.operation.bindingId === id);
+    const read = inc.program.actions.find(a => a.operation.captures.includes(id));
     return binding && read && key(binding.producer) === key(read.coordinate) ? { binding, read } : null;
   };
   const atOrAfter = coordinate => position(coordinate) >= inc.switch.effectiveFirstLearnIndex * 8 + inc.switch.nextSemanticOrdinal;
   const importedConsumer = (id, consumer) => {
     const original = importedRead(id); if (!original) return false;
     authorizeFirstSuffixProjection();
-    return original.binding.consumers.some(edge => edge.coordinate.stepId === consumer.stepId && edge.argumentSlot === consumer.argumentSlot
+    return original.binding.consumers.some(edge => edge.coordinate.stepId === consumer.stepId
       && atOrAfter(edge.coordinate) && inc.program.actions.some(action => key(action.coordinate) === key(edge.coordinate)
-        && argument(action.operation)?.kind === 'binding' && argument(action.operation).bindingId === id
-        && slot(action.operation) === consumer.argumentSlot));
+        && usesBinding(action.operation, id)));
   };
   const excluded = inc?.excludedAttempts ?? [], spent = excluded[0];
   check(excluded.length <= 1, 'GRAPH_EXCLUDED');
   const liveEdges = [], excludedEdges = [], seen = new Set();
   for (const edge of basis.consumerEdges) {
-    const edgeId = `${edge.consumerAdmissionId}:${edge.argumentSlot}`; check(!seen.has(edgeId), 'GRAPH_EDGE'); seen.add(edgeId);
+    const edgeId = edgeKey(edge); check(!seen.has(edgeId), 'GRAPH_EDGE'); seen.add(edgeId);
     let consumer = actions.get(edge.consumerAdmissionId), isExcluded = false;
     if (!consumer && spent?.action.ledger.admission.admissionId === edge.consumerAdmissionId) {
       const receipt = inc.driftReceipt, ledger = spent.action.ledger;
@@ -1390,37 +1413,37 @@ function projectEffectiveGraph(basis) {
       consumer = { ledger, operation: spent.preparation.proposal.operation }; isExcluded = true;
     }
     check(consumer && (isExcluded || consumer.ledger.state === 'SUCCEEDED'), 'GRAPH_UNKNOWN_EDGE');
-    const producer = producers.get(edge.bindingId), value = argument(consumer.operation);
-    check(producer && value?.kind === 'binding' && value.bindingId === edge.bindingId
-      && edge.producerAdmissionId === producer.producerAdmissionId && edge.argumentSlot === slot(consumer.operation)
+    const producer = producers.get(edge.bindingId);
+    check(producer && usesBinding(consumer.operation, edge.bindingId)
+      && edge.producerAdmissionId === producer.producerAdmissionId
       && edge.destinationOrigin === producer.origin && edge.destinationOrigin === consumer.ledger.executionEvidence.origin
       && position(producer.coordinate) < position(edge.coordinate), 'GRAPH_EDGE');
     same(edge.coordinate, consumer.ledger.coordinate, 'GRAPH_EDGE');
     (isExcluded ? excludedEdges : liveEdges).push(edge);
   }
   for (const value of actions.values()) {
-    const arg = argument(value.operation), ledger = value.ledger;
-    if (arg?.kind === 'binding') check(liveEdges.filter(e => e.consumerAdmissionId === ledger.admission.admissionId
-      && e.bindingId === arg.bindingId && e.argumentSlot === slot(value.operation)).length === 1, 'GRAPH_MISSING_SUCCESSFUL_EDGE');
-    if (value.operation.kind === 'read') check(producers.get(value.operation.bindingId)?.producerAdmissionId === ledger.admission.admissionId, 'GRAPH_PRODUCER');
+    const ledger = value.ledger;
+    for (const use of value.operation.uses) if (use.kind === 'binding') check(liveEdges.filter(e => e.consumerAdmissionId === ledger.admission.admissionId
+      && e.bindingId === use.id).length === 1, 'GRAPH_MISSING_SUCCESSFUL_EDGE');
+    for (const id of value.operation.captures) check(producers.get(id)?.producerAdmissionId === ledger.admission.admissionId, 'GRAPH_PRODUCER');
   }
   for (const [id, producer] of producers) {
     const actual = actions.get(producer.producerAdmissionId), raw = allocations.get(id), need = needs.get(id);
-    check(actual && actual.operation.kind === 'read' && actual.operation.bindingId === id && raw && need
+    check(actual && actual.operation.captures.includes(id) && raw && need
       && need.needId === raw.needId && need.producerStepId === raw.producerStepId
       && producer.coordinate.stepId === raw.producerStepId && producer.origin === actual.ledger.executionEvidence.origin, 'GRAPH_PRODUCER');
-    same(producer.coordinate, actual.ledger.coordinate, 'GRAPH_PRODUCER'); same(producer.recipe, actual.operation.recipe, 'GRAPH_PRODUCER');
+    same(producer.coordinate, actual.ledger.coordinate, 'GRAPH_PRODUCER');
     const proof = actual.preparation.proof;
     same(producer.availability, { bindingId: id, producerAdmissionId: producer.producerAdmissionId,
       contextId: proof.contextId, workerId: proof.workerId, ownerFence: proof.ownerFence }, 'GRAPH_AVAILABILITY');
     const original = importedRead(id);
     if (original && inc.switch.retainedPrefixAdmissionIds.includes(producer.producerAdmissionId)) {
       check(actual.ledger.operationHash === original.read.operationHash && producer.origin === original.binding.sourceOrigin, 'GRAPH_IMPORT_IDENTITY');
-      same(actual.operation, original.read.operation, 'GRAPH_IMPORT_IDENTITY'); same(producer.recipe, original.binding.recipe, 'GRAPH_IMPORT_IDENTITY');
+      same(actual.operation, original.read.operation, 'GRAPH_IMPORT_IDENTITY');
     }
-    const edges = liveEdges.filter(edge => edge.bindingId === id), used = new Set(edges.map(edge => pair({ stepId: edge.coordinate.stepId, argumentSlot: edge.argumentSlot })));
+    const edges = liveEdges.filter(edge => edge.bindingId === id), used = new Set(edges.map(edge => pair({ stepId: edge.coordinate.stepId })));
     check(need.consumers.length === used.size && need.consumers.every(consumer => used.has(pair(consumer))), 'GRAPH_NEED');
-    for (const edge of edges) check(raw.consumers.some(consumer => pair(consumer) === pair({ stepId: edge.coordinate.stepId, argumentSlot: edge.argumentSlot })), 'GRAPH_RAW_INTENT');
+    for (const edge of edges) check(raw.consumers.some(consumer => pair(consumer) === pair({ stepId: edge.coordinate.stepId })), 'GRAPH_RAW_INTENT');
     for (const consumer of raw.consumers) if (!used.has(pair(consumer))) check(importedConsumer(id, consumer), 'GRAPH_IMPORT_ONLY');
     if (edges.length === 0) check(importedRead(id) && authorizeFirstSuffixProjection()
       && inc.switch.retainedPrefixAdmissionIds.includes(producer.producerAdmissionId), 'GRAPH_ZERO_CONSUMER');
@@ -1436,9 +1459,9 @@ function projectEffectiveGraph(basis) {
   const utf8 = (left, right) => Buffer.compare(Buffer.from(left), Buffer.from(right));
   const transfers = liveEdges.map(edge => ({ bindingId: edge.bindingId,
     producer: producers.get(edge.bindingId).coordinate, consumer: edge.coordinate,
-    slot: edge.argumentSlot, origin: edge.destinationOrigin }))
+    origin: edge.destinationOrigin }))
     .sort((left, right) => position(left.producer) - position(right.producer)
-      || position(left.consumer) - position(right.consumer) || utf8(left.slot, right.slot)
+      || position(left.consumer) - position(right.consumer)
       || utf8(left.bindingId, right.bindingId));
   same(basis.transfers, transfers, 'GRAPH_TRANSFER_BIJECTION');
   same(canonical(basis), before, 'GRAPH_RAW_MUTATED');
@@ -1495,7 +1518,6 @@ function validateObservationAccounting(basis) {
   anchor(basis.bootstrap.initialEvidence);
   for (const p of [...basis.preparations, ...(basis.incrementalEvidence?.excludedAttempts ?? []).map(x => x.preparation)]) {
     anchor(p.executionEvidence);
-    if (p.observedChoice) anchor(p.observedChoice.context.questionCapture.executionEvidence);
   }
   for (const request of basis.incrementalEvidence?.prefixRequests ?? []) {
     // Requests carry an evidence hash, not a fabricated observation ID. A full current fact
@@ -1575,8 +1597,8 @@ function runGraphTimingConformance() {
             === test.basis.snapshotEvidence.baseProof.revision.stepSnapshotHashes[producer.coordinate.stepId], 'GRAPH_PRODUCER_SNAPSHOT');
         }
       }
-    } catch { refused = true; }
-    assert.equal(refused, test.expected === 'REJECT', test.name);
+    } catch (error) { refused = true; if (process.env.CONTRACT_AUDIT && test.expected !== 'REJECT') console.log('AUDIT-CODE', test.name, error.code || error.message); }
+    expectCase(refused, test.expected === 'REJECT', test.name);
     assert.equal(canonical(test.basis), raw, 'raw arrays, bootstrap and every original fact remain byte exact'); checked++;
   }
   // This sidecar checks synthetic immutable row transitions only. The complete wire basis does
@@ -1600,19 +1622,19 @@ function runGraphTimingConformance() {
             && need.consumers.every(consumer => next.consumers.some(value => canonical(value) === canonical(consumer))), 'HISTORY_NEED');
         }
       }
-    } catch { refused = true; }
-    assert.equal(refused, test.expected === 'REJECT', test.name); checked++;
+    } catch (error) { refused = true; if (process.env.CONTRACT_AUDIT && test.expected !== 'REJECT') console.log('AUDIT-CODE', test.name, error.code || error.message); }
+    expectCase(refused, test.expected === 'REJECT', test.name); checked++;
   }
   for (const test of fixtures.timingCases) {
     let refused = false;
     try { const result = validateTimingReadings(test); if (test.expectedSteps) same(result.steps, test.expectedSteps, 'TIMING_STEP'); }
-    catch { refused = true; }
-    assert.equal(refused, test.expected === 'REJECT', test.name); checked++;
+    catch (error) { refused = true; if (process.env.CONTRACT_AUDIT && test.expected !== 'REJECT') console.log('AUDIT-CODE', test.name, error.code || error.message); }
+    expectCase(refused, test.expected === 'REJECT', test.name); checked++;
   }
   for (const test of fixtures.publicWaitingCases) {
     let refused = false;
-    try { structural(test.schema, test.value); } catch { refused = true; }
-    assert.equal(refused, test.expected === 'REJECT', test.name); checked++;
+    try { structural(test.schema, test.value); } catch (error) { refused = true; if (process.env.CONTRACT_AUDIT && test.expected !== 'REJECT') console.log('AUDIT-CODE', test.name, error.code || error.message); }
+    expectCase(refused, test.expected === 'REJECT', test.name); checked++;
   }
   return checked;
 }
@@ -1656,8 +1678,6 @@ function validateRetainedExecute(execute, acceptedLaunch) {
   const runtimeGuards = new Map(execute.guards.map(guard => [guard.guardId, guard]));
   const runtimeBindings = new Map(execute.bindings.map(binding => [binding.bindingId, binding]));
   const coordinatePosition = coordinate => steps.indexOf(coordinate.stepId) * 8 + coordinate.ordinal;
-  const argumentOf = operation => operation.value ?? operation.expected;
-  const operationSlot = operation => operation.kind === 'assert' ? 'assert.expected' : `${operation.kind}.value`;
   for (let i = 0; i < execute.steps.length; i++) {
     const step = execute.steps[i]; check(step.stepIndex === i, 'EXECUTE_STEP');
     step.operations.forEach((entry, ordinal) => check(entry.coordinate.stepId === step.stepId
@@ -1667,24 +1687,20 @@ function validateRetainedExecute(execute, acceptedLaunch) {
   for (const transfer of execute.transfers) {
     const binding = runtimeBindings.get(transfer.bindingId);
     const consumer = runtimeOperations.find(entry => key(entry.coordinate) === key(transfer.consumer));
-    check(binding && consumer && argumentOf(consumer.operation)?.kind === 'binding'
-      && argumentOf(consumer.operation).bindingId === transfer.bindingId
-      && operationSlot(consumer.operation) === transfer.slot
+    check(binding && consumer && usesBinding(consumer.operation, transfer.bindingId)
       && transfer.origin === binding.origin && runtimeGuards.get(consumer.guardId).origin === binding.origin
       && coordinatePosition(transfer.producer) < coordinatePosition(transfer.consumer), 'EXECUTE_TRANSFER');
     same(transfer.producer, binding.producer, 'EXECUTE_TRANSFER');
-    const id = key(transfer.consumer) + ':' + transfer.slot; check(!exercised.has(id), 'EXECUTE_TRANSFER'); exercised.add(id);
+    const id = key(transfer.consumer) + ':' + transfer.bindingId; check(!exercised.has(id), 'EXECUTE_TRANSFER'); exercised.add(id);
   }
   for (const binding of execute.bindings) {
     const read = runtimeOperations.find(entry => key(entry.coordinate) === key(binding.producer));
-    check(read?.operation.kind === 'read' && read.operation.bindingId === binding.bindingId
+    check(read && read.operation.captures.includes(binding.bindingId)
       && runtimeGuards.get(read.guardId).origin === binding.origin, 'EXECUTE_RUNTIME_READ');
-    same(read.operation.recipe, binding.recipe, 'EXECUTE_RUNTIME_READ');
   }
   for (const entry of runtimeOperations) {
-    const arg = argumentOf(entry.operation);
-    if (entry.operation.kind === 'read') check(runtimeBindings.has(entry.operation.bindingId), 'EXECUTE_RUNTIME_READ');
-    if (arg?.kind === 'binding') check(exercised.has(key(entry.coordinate) + ':' + operationSlot(entry.operation)), 'EXECUTE_TRANSFER');
+    for (const id of entry.operation.captures) check(runtimeBindings.has(id), 'EXECUTE_RUNTIME_READ');
+    for (const use of entry.operation.uses) if (use.kind === 'binding') check(exercised.has(key(entry.coordinate) + ':' + use.id), 'EXECUTE_TRANSFER');
   }
   const zero = execute.bindings.filter(binding => !execute.transfers.some(t => t.bindingId === binding.bindingId)).map(binding => binding.bindingId);
   check(Object.hasOwn(execute, 'retainedArtifact') === (zero.length > 0), 'EXECUTE_PROOF_PRESENCE');
@@ -1715,7 +1731,7 @@ function validateRetainedExecute(execute, acceptedLaunch) {
   same(artifact.learnedPlan.initialContext, requirements.initialContext, 'EXECUTE_INITIAL_CONTEXT');
   same(execute.steps, artifact.steps, 'EXECUTE_STEPS'); same(execute.guards, artifact.guards, 'EXECUTE_GUARDS');
   same(execute.bindings, artifact.replayPolicy.bindings.map(b => ({ bindingId: b.bindingId,
-    producer: b.producer, recipe: b.recipe, origin: b.sourceOrigin })), 'EXECUTE_BINDING_PROJECTION');
+    producer: b.producer, origin: b.sourceOrigin })), 'EXECUTE_BINDING_PROJECTION');
   same(execute.transfers, artifact.replayPolicy.transfers, 'EXECUTE_TRANSFER_PROJECTION');
   same(artifact.replayPolicy.bindings, artifact.learnedPlan.bindings, 'EXECUTE_ARTIFACT_BINDINGS');
   const inputMetadata = execute.inputs.map(({ value, ...metadata }) => metadata);
@@ -1723,7 +1739,7 @@ function validateRetainedExecute(execute, acceptedLaunch) {
     check(recipe.provenance.sourceHash === artifact.sourceHash, 'EXECUTE_ARTIFACT_SOURCE');
   }
   const expectedInputs = artifact.inputRecipes.map(recipe => ({ inputId: recipe.inputId, stepId: recipe.stepId,
-    kind: recipe.kind, intendedSlot: recipe.intendedSlot,
+    kind: recipe.kind,
     ...(recipe.kind === 'secretRef' ? { referenceName: recipe.provenance.referenceName } : {}) }));
   same(inputMetadata, expectedInputs, 'EXECUTE_INPUT_PROJECTION');
   const plan = artifact.learnedPlan, incremental = plan.incremental;
@@ -1742,16 +1758,13 @@ function validateRetainedExecute(execute, acceptedLaunch) {
     plan.actions.map(action => ({ coordinate: action.coordinate, operation: action.operation })), 'EXECUTE_ARTIFACT_OPERATIONS');
   for (const binding of emptyBindings) {
     const read = plan.actions.find(action => key(action.coordinate) === key(binding.producer));
-    check(read && read.operation.kind === 'read' && read.operation.bindingId === binding.bindingId
+    check(read && read.operation.captures.includes(binding.bindingId)
       && read.admissionId === binding.provenance.producerAdmissionId
       && binding.provenance.sourceIntentStepId === binding.producer.stepId
       && incremental.retainedPrefixAdmissionIds.includes(read.admissionId)
       && read.origin === binding.sourceOrigin, 'EXECUTE_RETAINED_READ');
-    same(read.operation.recipe, binding.recipe, 'EXECUTE_RETAINED_RECIPE');
     const operation = operations.find(op => key(op.coordinate) === key(read.coordinate)), guard = guards.get(operation?.guardId);
-    check(guard && guard.origin === read.origin && guard.target.kind === 'element'
-      && guard.target.readRuleId === binding.recipe.policyRuleId, 'EXECUTE_RETAINED_GUARD');
-    same(guard.target.locator, read.target.locator, 'EXECUTE_RETAINED_GUARD');
+    check(guard && guard.origin === read.origin, 'EXECUTE_RETAINED_GUARD');
   }
   check(canonical(acceptedLaunch) === launchBefore, 'EXECUTE_LAUNCH_MUTATED');
   return { zeroBindings: zero, proof: true };
@@ -1763,8 +1776,8 @@ function runRetainedExecuteConformance() {
   for (const test of fixtures.cases) {
     const before = canonical(test.execute), launchBefore = test.acceptedLaunch ? canonical(test.acceptedLaunch) : null;
     let refused = false;
-    try { validateRetainedExecute(test.execute, test.acceptedLaunch); } catch { refused = true; }
-    assert.equal(refused, test.expected === 'REJECT', test.name);
+    try { validateRetainedExecute(test.execute, test.acceptedLaunch); } catch (error) { refused = true; if (process.env.CONTRACT_AUDIT && test.expected !== 'REJECT') console.log('AUDIT-CODE', test.name, error.code || error.message); }
+    expectCase(refused, test.expected === 'REJECT', test.name);
     assert.equal(canonical(test.execute), before); if (test.acceptedLaunch) assert.equal(canonical(test.acceptedLaunch), launchBefore); checked++;
     if (test.expected === 'ACCEPT' && test.acceptedAt) {
       assert(Date.parse(test.acceptedAt) < Date.parse(test.acceptedLaunch.admission.startDeadlineAt));
@@ -1816,7 +1829,7 @@ function runSnapshotCorrection() {
   }
   for (const test of fixture.negatives) {
     let refused = false;
-    try { snapshotOracle.validate(test.basis, test.authority, test.expectedArtifact); } catch { refused = true; }
+    try { snapshotOracle.validate(test.basis, test.authority, test.expectedArtifact); } catch (error) { refused = true; if (process.env.CONTRACT_AUDIT && test.expected !== 'REJECT') console.log('AUDIT-CODE', test.name, error.code || error.message); }
     assert(refused, test.name + ': correction negative must refuse'); checked++;
   }
   const example = fixture.underdeterminationCounterexample;

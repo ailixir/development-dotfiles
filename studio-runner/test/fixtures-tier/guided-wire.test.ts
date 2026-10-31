@@ -1,3 +1,4 @@
+import { stepOp } from '../helpers/stepCode.js';
 import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 import { it,expect } from 'vitest';
 import { createServer as httpServer } from 'node:http';
@@ -41,7 +42,7 @@ it('uses real mTLS + service JWT for blank-to-Chromium control and data-free cal
     expect((await post(address.port,`${path}/context`,context)).status).toBe(200);expect(messages).toHaveLength(1);
     expect((await post(address.port,`${path}/context`,{...context,materializationRevision:2})).body).toEqual({code:'IDEMPOTENCY_CONFLICT'});
     const bootstrap=validate<BridgeBootstrap>('bridge',messages[0]?.body,'bootstrap');expect(bootstrap.executionEvidence.origin).toBeNull();
-    const p=proposal(context,bootstrap.executionEvidence,'nav',{kind:'navigate',destinationInputId:'input-nav'});const prepared=await post(address.port,`${path}/prepare`,{...identity(context),proposal:p,requestDigest:hash(p),expiresAt:new Date(Date.now()+10_000).toISOString()});expect(prepared.status).toBe(200);
+    const p=proposal(context,bootstrap.executionEvidence,'nav',stepOp('await page.goto(inputs["input-nav"]);', { uses: [{ kind: 'input', id: 'input-nav' }] }));const prepared=await post(address.port,`${path}/prepare`,{...identity(context),proposal:p,requestDigest:hash(p),expiresAt:new Date(Date.now()+10_000).toISOString()});expect(prepared.status).toBe(200);
     const repeated=await post(address.port,`${path}/prepare`,{...identity(context),proposal:p,requestDigest:hash(p),expiresAt:(prepared.body as BridgePreparation).expiresAt});expect(repeated.body).toEqual(prepared.body);
     const request=dispatch(context,p,validate<BridgePreparation>('bridge',prepared.body,'preparation'));const completed=await post(address.port,`${path}/dispatch`,request);expect(completed.status).toBe(200);expect((completed.body as BridgeOutcome).ledger.state).toBe('SUCCEEDED');expect(receipts).toBe(1);
     expect((await post(address.port,`${path}/dispatch`,request)).status).toBe(409);expect(receipts).toBe(1);expect(messages.map(m=>m.route)).toEqual(['bootstrap-evidence','outcomes','observations']);

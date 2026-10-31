@@ -1,33 +1,18 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 // eslint-disable-next-line no-restricted-imports -- Real Chromium types for the perception tier only.
-import type { Browser } from 'playwright';
+import type { Browser, Page } from 'playwright';
 
 import type { ObservationExport } from '../../../src/run/observationTypes.js';
 import { guardDist, launchChromium } from './harness.js';
-import { codeOf, factOf, html, invoke, open, prepare, serve, TestControl, type Opened, type Served } from './cutover-support.js';
+import { factOf, html, launchStepRun, open, serve, type Opened, type Served } from './cutover-support.js';
 
 // Retained privacy and no-effect properties from the removed collector fixture. These tests use
 // real controls/isolated observation and do not seed their automatically discovered private values.
 guardDist();
-const CLICK = { kind: 'click' } as const;
 
-async function exportedWithLocators(created: Opened, exported: ObservationExport): Promise<string> {
-  const locators: unknown[] = [];
-  let preparedTargets = 0;
-  for (const ref of Object.keys(exported.observation.facts)) {
-    try {
-      locators.push(await created.session.prepareTarget({
-        ref, documentId: exported.observation.documentId, generation: exported.observation.generation,
-        origin: exported.observation.origin, operation: CLICK, authoredLiteral: null,
-      }));
-      preparedTargets++;
-    } catch (error) {
-      locators.push({ closed: error instanceof Error ? error.message : 'UNKNOWN' });
-    }
-  }
-  expect(locators.length).toBeGreaterThan(0);
-  expect(preparedTargets, 'the durable locator scan must include a successful ordinary target').toBeGreaterThan(0);
-  return JSON.stringify({ wire: exported, locators });
+/** Everything the observation puts on the wire (locators no longer exist: step code is written against the page). */
+function exportedWire(exported: ObservationExport): string {
+  return JSON.stringify({ wire: exported });
 }
 
 describe('retained observation privacy and CSSOM guards on real Chromium', () => {
@@ -66,7 +51,7 @@ describe('retained observation privacy and CSSOM guards on real Chromium', () =>
       if (slotHost) slotHost.attachShadow({ mode: 'open' }).innerHTML = '<section data-sensitive><slot></slot></section>';
     });
     const exported = await created.session.observe(undefined, false);
-    const bytes = await exportedWithLocators(created, exported);
+    const bytes = exportedWire(exported);
     for (const canary of ['OUTER_PRIVATE_CANARY', 'SHADOW_PRIVATE_CANARY', 'SLOT_PRIVATE_CANARY', 'LABEL_PRIVATE_CANARY', 'NATIVE_PRIVATE_CANARY', 'INLINE_PRIVATE_CANARY']) {
       expect(bytes.includes(canary), `private channel ${canary}`).toBe(false);
     }
@@ -80,7 +65,7 @@ describe('retained observation privacy and CSSOM guards on real Chromium', () =>
       if (host) host.attachShadow({ mode: 'open' }).innerHTML = '<input value="Continue">';
     });
     const exported = await created.session.observe(undefined, false);
-    const bytes = await exportedWithLocators(created, exported);
+    const bytes = exportedWire(exported);
     expect(bytes.includes('Continue')).toBe(false);
     expect(factOf(exported, 'button', 'Proceed')[0]).toMatch(/^e\d+$/u);
   });
@@ -108,15 +93,10 @@ describe('retained observation privacy and CSSOM guards on real Chromium', () =>
       Object.defineProperty(window, 'MutationObserver', { value: class { observe() { return undefined; } disconnect() { return undefined; } takeRecords() { return []; } }, configurable: true });
     });
     const exported = await created.session.observe(undefined, false);
-    const bytes = await exportedWithLocators(created, exported);
+    const bytes = exportedWire(exported);
     for (const canary of ['RETAINED_VAULT_PRIVATE_CANARY', 'RETAINED_INPUT_PRIVATE_CANARY', 'FORGED']) expect(bytes.includes(canary)).toBe(false);
     expect(await created.page.evaluate(() => (window as unknown as { intercepted: string[] }).intercepted)).toEqual([]);
     expect(await created.page.evaluate(() => (window as unknown as { forgedValueReads: number }).forgedValueReads)).toBe(0);
-    const prepared = await prepare(created, 'button', 'Continue', CLICK, null, exported);
-    const control = new TestControl();
-    await created.page.locator('button').first().evaluate(element => { element.replaceWith(element.cloneNode(true)); });
-    expect(await codeOf(invoke(created, prepared, CLICK, { control }))).toBe('TARGET_CHANGED');
-    expect(control.fenced).toBe(0);
   });
 
   it('a same-document hash change preserves document identity and advances observation generation', async () => {
@@ -128,14 +108,13 @@ describe('retained observation privacy and CSSOM guards on real Chromium', () =>
     const next = await created.session.observe(undefined, false);
     expect(next.observation.documentId).toBe(first.observation.documentId);
     expect(next.observation.generation).toBeGreaterThan(first.observation.generation);
-    expect(await codeOf(created.session.prepareTarget({ ref, documentId: first.observation.documentId,
-      generation: first.observation.generation, origin: first.observation.origin,
-      operation: CLICK, authoredLiteral: null }))).toBe('TARGET_CHANGED');
+    expect(created.session.documentCurrent({ documentId: first.observation.documentId, generation: first.observation.generation }, first.observation.origin)).toBe(false);
+    void ref;
   });
 
-  it('document.open replacement changes document identity and never acts on the replaced prepared node', async () => {
+  it('document.open replacement changes document identity, and the stamp of the replaced document is no longer current', async () => {
     const created = await page('/identity');
-    const prepared = await prepare(created, 'button', 'Continue', CLICK);
+    const before = await created.session.observe(undefined, false);
     const originalUrl = created.page.url();
     await created.page.evaluate(() => {
       document.open();
@@ -144,25 +123,20 @@ describe('retained observation privacy and CSSOM guards on real Chromium', () =>
       document.close();
     });
     expect(created.page.url()).toBe(originalUrl);
-    const control = new TestControl();
-    expect(await codeOf(invoke(created, prepared, CLICK, { control }))).toBe('TARGET_CHANGED');
-    expect(control.fenced).toBe(0);
-    expect(await created.page.evaluate(() => (window as unknown as { clicks?: number }).clicks ?? 0)).toBe(0);
     const next = await created.session.observe(undefined, false);
-    expect(next.observation.documentId).not.toBe(prepared.exported.observation.documentId);
-    expect(next.observation.generation).toBeGreaterThan(prepared.exported.observation.generation);
+    expect(next.observation.documentId).not.toBe(before.observation.documentId);
+    expect(next.observation.generation).toBeGreaterThan(before.observation.generation);
+    expect(created.session.documentCurrent({ documentId: before.observation.documentId, generation: before.observation.generation }, before.observation.origin)).toBe(false);
     expect(factOf(next, 'button', 'Continue')[0]).toMatch(/^e\d+$/u);
   });
 
-  it('CSSOM hiding without a DOM mutation refuses the prepared action before any click', async () => {
+  it('CSSOM hiding without a DOM mutation ends the step before any click (the target is not there)', async () => {
     const created = await page('/cssom');
     await created.page.evaluate(() => {
       const state = window as unknown as { mutationCount: number; clicks: number };
       state.mutationCount = 0; state.clicks = 0;
       new MutationObserver(records => { state.mutationCount += records.length; }).observe(document, { subtree: true, attributes: true, childList: true, characterData: true });
     });
-    const prepared = await prepare(created, 'button', 'Continue', CLICK);
-    expect((await created.session.resolveTarget({ resolved: prepared.resolved, origin: created.origin, operation: CLICK, readRuleId: null })).kind).toBe('READY');
     await created.page.evaluate(async () => {
       const sheet = document.styleSheets[0];
       if (!sheet) throw new Error('stylesheet missing');
@@ -171,9 +145,16 @@ describe('retained observation privacy and CSSOM guards on real Chromium', () =>
     });
     expect(await created.page.evaluate(() => (window as unknown as { mutationCount: number }).mutationCount)).toBe(0);
     expect(await created.page.getByRole('button', { name: 'Continue', exact: true }).count()).toBe(0);
-    const control = new TestControl();
-    expect(await codeOf(invoke(created, prepared, CLICK, { control }))).toBe('TARGET_CHANGED');
-    expect(control.fenced).toBe(0);
-    expect(await created.page.evaluate(() => (window as unknown as { clicks: number }).clicks)).toBe(0);
+    // The same page under the step runner: the code finds nothing to click, the step ends before its fence.
+    const run = await launchStepRun();
+    try {
+      const target = run.handle.stepApi?.page as Page | undefined;
+      if (!target) throw new Error('PAGE');
+      await target.goto(`${served.origin}/cssom`);
+      await target.evaluate(() => { const sheet = document.styleSheets[0]; sheet?.insertRule('button { display:none }', sheet.cssRules.length); });
+      const outcome = await run.step("await page.getByRole('button', { name: 'Continue', exact: true }).click();", { remainingMs: 3000 });
+      expect(outcome.receipt).toMatchObject({ closedCode: 'TARGET_DRIFT', fenceCrossed: false, effects: [] });
+      expect(await target.evaluate(() => (window as unknown as { clicks?: number }).clicks ?? 0)).toBe(0);
+    } finally { await run.dispose(); }
   });
 });

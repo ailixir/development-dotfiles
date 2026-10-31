@@ -17,7 +17,7 @@ function secureFetch(url:string,init:{method:string;headers:Record<string,string
 }
 import {createRecordingLogSink} from '../../src/server/logging.js';
 import type {} from '../../src/executor/observedOperations.js';
-import {OBSERVED_SCHEMA_BUNDLE_HASH,OBSERVED_LIMITS,canonicalObserved,hashObserved} from '../../src/validator/observedReferencePolicy.js';
+import {OBSERVED_SCHEMA_BUNDLE_HASH,OBSERVED_LIMITS,canonicalObserved} from '../../src/validator/observedReferencePolicy.js';
 import * as observedPolicy from '../../src/validator/observedReferencePolicy.js';
 import * as observedValidator from '../../src/validator/observedReplay.js';
 const currentBuild={...fixture.build,schemaBundleHash:OBSERVED_SCHEMA_BUNDLE_HASH};
@@ -37,8 +37,6 @@ describe('actual authenticated observed validation HTTP route',()=>{
       const staleBuildRequest={...validationRequest,requiredBuild:{...currentBuild,schemaBundleHash:'0'.repeat(64)}};
       expect(staleBuildRequest.requiredProfile).toEqual(validationRequest.requiredProfile);
       expect((await send(JSON.stringify(staleBuildRequest))).status).toBe(400); // Explicit unsupported exact bundle; canonical positives may be re-pinned.
-      const choiceRequest={...validationRequest,validationBasis:fixture.observedChoice.basis,artifact:fixture.observedChoice.artifact,basisHash:hashObserved(fixture.observedChoice.basis)};
-      const chosen=await send(JSON.stringify(choiceRequest));expect(chosen.status).toBe(200);expect(await chosen.json()).toMatchObject({ok:true,artifactHash:fixture.observedChoice.hashes.artifactHash});
       expect((await send(JSON.stringify({oversize:'a'.repeat(8388608)}))).status).toBe(413);
       expect(network).toBe(0);expect(launches).toBe(0);expect(app.pool.inUse).toBe(0);expect(logs.lines.join('\n')).not.toContain('UNKNOWN-CANARY');
     }finally{await app.drain();}

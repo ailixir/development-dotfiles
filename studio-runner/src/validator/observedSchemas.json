@@ -43,477 +43,66 @@
         "minimum": 0,
         "maximum": 2147483647
       },
-      "target": {
-        "oneOf": [
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "kind": {
-                "const": "node"
-              },
-              "ref": {
-                "type": "string",
-                "pattern": "^e[0-9]{1,6}$"
-              },
-              "documentId": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 256
-              },
-              "generation": {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 2147483647
-              }
-            },
-            "required": [
-              "kind",
-              "ref",
-              "documentId",
-              "generation"
-            ]
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "kind": {
-                "const": "page"
-              },
-              "documentId": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 256
-              },
-              "generation": {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 2147483647
-              }
-            },
-            "required": [
-              "kind",
-              "documentId",
-              "generation"
-            ]
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "kind": {
-                "const": "passwordControl"
-              },
-              "documentId": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 256
-              },
-              "generation": {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 2147483647
-              }
-            },
-            "required": [
-              "kind",
-              "documentId",
-              "generation"
-            ]
-          }
-        ]
-      },
       "operation": {
-        "oneOf": [
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "kind": {
-                "enum": [
-                  "click",
-                  "check",
-                  "uncheck",
-                  "hover"
-                ]
-              }
-            },
-            "required": [
-              "kind"
-            ]
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "step"
           },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "kind": {
-                "const": "fill"
-              },
-              "value": {
-                "oneOf": [
-                  {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                      "kind": {
-                        "const": "authoredLiteral"
-                      },
-                      "sourceInputId": {
-                        "type": "string",
-                        "minLength": 1,
-                        "maxLength": 256
-                      }
-                    },
-                    "required": [
-                      "kind",
-                      "sourceInputId"
-                    ]
-                  },
-                  {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                      "kind": {
-                        "const": "binding"
-                      },
-                      "bindingId": {
-                        "type": "string",
-                        "minLength": 1,
-                        "maxLength": 256
-                      }
-                    },
-                    "required": [
-                      "kind",
-                      "bindingId"
-                    ]
-                  },
-                  {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                      "kind": {
-                        "const": "secretRef"
-                      },
-                      "sourceInputId": {
-                        "type": "string",
-                        "minLength": 1,
-                        "maxLength": 256
-                      }
-                    },
-                    "required": [
-                      "kind",
-                      "sourceInputId"
-                    ]
-                  }
-                ]
-              }
-            },
-            "required": [
-              "kind",
-              "value"
-            ]
+          "code": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 16384
           },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "kind": {
-                "const": "press"
-              },
-              "key": {
-                "enum": [
-                  "Enter",
-                  "Tab",
-                  "Escape",
-                  "ArrowDown",
-                  "ArrowUp"
-                ]
-              }
-            },
-            "required": [
-              "kind",
-              "key"
-            ]
+          "captures": {
+            "type": "array",
+            "maxItems": 8,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            }
           },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "kind": {
-                "const": "selectOption"
-              },
-              "value": {
-                "oneOf": [
-                  {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                      "kind": {
-                        "const": "authoredLiteral"
-                      },
-                      "sourceInputId": {
-                        "type": "string",
-                        "minLength": 1,
-                        "maxLength": 256
-                      }
-                    },
-                    "required": [
-                      "kind",
-                      "sourceInputId"
-                    ]
-                  },
-                  {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                      "kind": {
-                        "const": "binding"
-                      },
-                      "bindingId": {
-                        "type": "string",
-                        "minLength": 1,
-                        "maxLength": 256
-                      }
-                    },
-                    "required": [
-                      "kind",
-                      "bindingId"
-                    ]
-                  }
-                ]
-              }
-            },
-            "required": [
-              "kind",
-              "value"
-            ]
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "kind": {
-                "const": "navigate"
-              },
-              "destinationInputId": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 256
-              }
-            },
-            "required": [
-              "kind",
-              "destinationInputId"
-            ]
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "kind": {
-                "const": "read"
-              },
-              "bindingId": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 256
-              },
-              "recipe": {
-                "oneOf": [
-                  {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                      "kind": {
-                        "const": "visibleText"
-                      },
-                      "classification": {
-                        "const": "permittedBusinessData"
-                      },
-                      "policyRuleId": {
-                        "type": "string",
-                        "minLength": 1,
-                        "maxLength": 256
-                      }
-                    },
-                    "required": [
-                      "kind",
-                      "classification",
-                      "policyRuleId"
-                    ]
-                  },
-                  {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                      "kind": {
-                        "const": "controlValue"
-                      },
-                      "classification": {
-                        "const": "nonsecretApproved"
-                      },
-                      "controlType": {
-                        "enum": [
-                          "text",
-                          "search",
-                          "email",
-                          "tel",
-                          "url",
-                          "textarea"
-                        ]
-                      },
-                      "policyRuleId": {
-                        "type": "string",
-                        "minLength": 1,
-                        "maxLength": 256
-                      }
-                    },
-                    "required": [
-                      "kind",
-                      "classification",
-                      "controlType",
-                      "policyRuleId"
-                    ]
-                  }
-                ]
-              }
-            },
-            "required": [
-              "kind",
-              "bindingId",
-              "recipe"
-            ]
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "kind": {
-                "const": "assert"
-              },
-              "predicate": {
-                "enum": [
-                  "visible",
-                  "containsText",
-                  "hasValue",
-                  "url",
-                  "title"
-                ]
-              },
-              "expected": {
-                "oneOf": [
-                  {
-                    "oneOf": [
-                      {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                          "kind": {
-                            "const": "authoredLiteral"
-                          },
-                          "sourceInputId": {
-                            "type": "string",
-                            "minLength": 1,
-                            "maxLength": 256
-                          }
-                        },
-                        "required": [
-                          "kind",
-                          "sourceInputId"
-                        ]
-                      },
-                      {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                          "kind": {
-                            "const": "binding"
-                          },
-                          "bindingId": {
-                            "type": "string",
-                            "minLength": 1,
-                            "maxLength": 256
-                          }
-                        },
-                        "required": [
-                          "kind",
-                          "bindingId"
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "kind",
-              "predicate",
-              "expected"
-            ],
-            "allOf": [
-              {
-                "if": {
-                  "properties": {
-                    "predicate": {
-                      "const": "visible"
-                    }
-                  },
-                  "type": "object"
+          "uses": {
+            "type": "array",
+            "maxItems": 16,
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "input",
+                    "secret",
+                    "binding"
+                  ]
                 },
-                "then": {
-                  "properties": {
-                    "expected": {
-                      "type": "null"
-                    }
-                  },
-                  "type": "object"
-                },
-                "else": {
-                  "properties": {
-                    "expected": {
-                      "not": {
-                        "type": "null"
-                      }
-                    }
-                  },
-                  "type": "object"
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
                 }
               },
-              {
-                "if": {
-                  "properties": {
-                    "predicate": {
-                      "enum": [
-                        "url",
-                        "title"
-                      ]
-                    }
-                  },
-                  "type": "object"
-                },
-                "then": {
-                  "properties": {
-                    "expected": {
-                      "type": "object",
-                      "required": [
-                        "kind"
-                      ],
-                      "properties": {
-                        "kind": {
-                          "const": "authoredLiteral"
-                        }
-                      }
-                    }
-                  },
-                  "type": "object"
-                }
-              }
-            ]
+              "required": [
+                "kind",
+                "id"
+              ]
+            }
+          },
+          "sourceHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
           }
+        },
+        "required": [
+          "kind",
+          "code",
+          "captures",
+          "uses",
+          "sourceHash"
         ]
       },
       "executionEvidence": {
@@ -539,110 +128,11 @@
       "coordinate",
       "scopeHash",
       "generation",
-      "target",
       "operation",
       "executionEvidence",
       "evidenceHash",
       "authoredInputsHash",
       "contextRevision"
-    ],
-    "allOf": [
-      {
-        "if": {
-          "type": "object",
-          "properties": {
-            "operation": {
-              "type": "object",
-              "properties": {
-                "kind": {
-                  "const": "fill"
-                },
-                "value": {
-                  "type": "object",
-                  "properties": {
-                    "kind": {
-                      "const": "secretRef"
-                    }
-                  },
-                  "required": [
-                    "kind"
-                  ]
-                }
-              },
-              "required": [
-                "kind",
-                "value"
-              ]
-            }
-          },
-          "required": [
-            "operation"
-          ]
-        },
-        "then": {
-          "type": "object",
-          "properties": {
-            "target": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "kind": {
-                  "const": "passwordControl"
-                },
-                "documentId": {
-                  "type": "string",
-                  "minLength": 1,
-                  "maxLength": 256
-                },
-                "generation": {
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 2147483647
-                }
-              },
-              "required": [
-                "kind",
-                "documentId",
-                "generation"
-              ]
-            }
-          },
-          "required": [
-            "target"
-          ]
-        },
-        "else": {
-          "type": "object",
-          "properties": {
-            "target": {
-              "not": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "kind": {
-                    "const": "passwordControl"
-                  },
-                  "documentId": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 256
-                  },
-                  "generation": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 2147483647
-                  }
-                },
-                "required": [
-                  "kind",
-                  "documentId",
-                  "generation"
-                ]
-              }
-            }
-          }
-        }
-      }
     ]
   },
   "action-timing": {
@@ -788,18 +278,10 @@
               "type": "string",
               "minLength": 1,
               "maxLength": 256
-            },
-            "argumentSlot": {
-              "enum": [
-                "fill.value",
-                "selectOption.value",
-                "assert.expected"
-              ]
             }
           },
           "required": [
-            "stepId",
-            "argumentSlot"
+            "stepId"
           ]
         }
       }
@@ -997,14 +479,6 @@
                   "type": "string",
                   "maxLength": 4096
                 },
-                "intendedSlot": {
-                  "enum": [
-                    "navigate.destination",
-                    "fill.value",
-                    "selectOption.value",
-                    "assert.expected"
-                  ]
-                },
                 "provenance": {
                   "$ref": "https://checks.citi.example/contracts/observed/v3/source-reference.schema.json"
                 }
@@ -1014,7 +488,6 @@
                 "sourceStepId",
                 "kind",
                 "value",
-                "intendedSlot",
                 "provenance"
               ]
             },
@@ -1040,14 +513,6 @@
                   "format": "uri",
                   "maxLength": 2048
                 },
-                "intendedSlot": {
-                  "enum": [
-                    "navigate.destination",
-                    "fill.value",
-                    "selectOption.value",
-                    "assert.expected"
-                  ]
-                },
                 "provenance": {
                   "$ref": "https://checks.citi.example/contracts/observed/v3/source-reference.schema.json"
                 }
@@ -1057,7 +522,6 @@
                 "sourceStepId",
                 "kind",
                 "value",
-                "intendedSlot",
                 "provenance"
               ]
             },
@@ -1078,9 +542,6 @@
                 "kind": {
                   "const": "secretRef"
                 },
-                "intendedSlot": {
-                  "const": "fill.value"
-                },
                 "provenance": {
                   "$ref": "https://checks.citi.example/contracts/observed/v3/source-reference.schema.json"
                 },
@@ -1093,7 +554,6 @@
                 "inputId",
                 "sourceStepId",
                 "kind",
-                "intendedSlot",
                 "provenance",
                 "secretId"
               ]
@@ -1616,9 +1076,6 @@
       "producer": {
         "$ref": "https://checks.citi.example/contracts/observed/v3/action.schema.json#/properties/coordinate"
       },
-      "recipe": {
-        "$ref": "https://checks.citi.example/contracts/observed/v3/producer.schema.json#/properties/recipe"
-      },
       "sourceOrigin": {
         "type": "string",
         "format": "uri",
@@ -1672,7 +1129,6 @@
       "bindingId",
       "valueType",
       "producer",
-      "recipe",
       "sourceOrigin",
       "consumers",
       "provenance",
@@ -1827,29 +1283,6 @@
             "type": "string",
             "format": "date-time",
             "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,9})?Z(?![\\s\\S])"
-          },
-          "target": {
-            "oneOf": [
-              {
-                "$ref": "https://checks.citi.example/contracts/observed/v3/locator.schema.json#/definitions/ResolvedTarget"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "pressInheritance": {
-            "oneOf": [
-              {
-                "$ref": "https://checks.citi.example/contracts/observed/v3/bridge.schema.json#/definitions/PressInheritance"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "assertSourceBinding": {
-            "$ref": "#/definitions/AssertSourceBinding"
           }
         },
         "required": [
@@ -1867,9 +1300,7 @@
           "requestDigest",
           "evidenceHash",
           "authoredInputsHash",
-          "expiresAt",
-          "target",
-          "pressInheritance"
+          "expiresAt"
         ]
       },
       "dispatch": {
@@ -1934,48 +1365,53 @@
           },
           "consumerEdges": {
             "type": "array",
-            "maxItems": 1,
+            "maxItems": 16,
             "items": {
               "$ref": "https://checks.citi.example/contracts/observed/v3/consumer-edge.schema.json"
             }
           },
-          "secret": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "secretId": {
-                "type": "string",
-                "pattern": "^[A-Za-z0-9_.-]{1,64}$"
-              },
-              "value": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 4096
-              },
-              "versionId": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 256
-              },
-              "allowedOrigins": {
-                "type": "array",
-                "minItems": 1,
-                "maxItems": 16,
-                "uniqueItems": true,
-                "items": {
+          "secrets": {
+            "type": "array",
+            "minItems": 0,
+            "maxItems": 8,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "secretId": {
                   "type": "string",
-                  "format": "uri",
-                  "maxLength": 512,
-                  "pattern": "^https?://[^/?#]+$"
+                  "pattern": "^[A-Za-z0-9_.-]{1,64}$"
+                },
+                "value": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "versionId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                "allowedOrigins": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 16,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "format": "uri",
+                    "maxLength": 512,
+                    "pattern": "^https?://[^/?#]+$"
+                  }
                 }
-              }
-            },
-            "required": [
-              "secretId",
-              "value",
-              "versionId",
-              "allowedOrigins"
-            ]
+              },
+              "required": [
+                "secretId",
+                "value",
+                "versionId",
+                "allowedOrigins"
+              ]
+            }
           }
         },
         "required": [
@@ -1992,104 +1428,8 @@
           "proposal",
           "ledger",
           "preparationId",
-          "consumerEdges"
-        ],
-        "allOf": [
-          {
-            "if": {
-              "type": "object",
-              "properties": {
-                "proposal": {
-                  "type": "object",
-                  "properties": {
-                    "operation": {
-                      "type": "object",
-                      "properties": {
-                        "kind": {
-                          "const": "fill"
-                        },
-                        "value": {
-                          "type": "object",
-                          "properties": {
-                            "kind": {
-                              "const": "secretRef"
-                            }
-                          },
-                          "required": [
-                            "kind"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "kind",
-                        "value"
-                      ]
-                    }
-                  },
-                  "required": [
-                    "operation"
-                  ]
-                }
-              },
-              "required": [
-                "proposal"
-              ]
-            },
-            "then": {
-              "type": "object",
-              "properties": {
-                "secret": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "secretId": {
-                      "type": "string",
-                      "pattern": "^[A-Za-z0-9_.-]{1,64}$"
-                    },
-                    "value": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 4096
-                    },
-                    "versionId": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 256
-                    },
-                    "allowedOrigins": {
-                      "type": "array",
-                      "minItems": 1,
-                      "maxItems": 16,
-                      "uniqueItems": true,
-                      "items": {
-                        "type": "string",
-                        "format": "uri",
-                        "maxLength": 512,
-                        "pattern": "^https?://[^/?#]+$"
-                      }
-                    }
-                  },
-                  "required": [
-                    "secretId",
-                    "value",
-                    "versionId",
-                    "allowedOrigins"
-                  ]
-                }
-              },
-              "required": [
-                "secret"
-              ]
-            },
-            "else": {
-              "type": "object",
-              "properties": {
-                "secret": {
-                  "not": {}
-                }
-              }
-            }
-          }
+          "consumerEdges",
+          "secrets"
         ]
       },
       "stop": {
@@ -2602,14 +1942,48 @@
           "reason": {
             "type": "string",
             "enum": [
-              "PASSWORD_TARGET_ABSENT",
-              "PASSWORD_TARGET_AMBIGUOUS",
               "PASSWORD_FORM_ACTION_NOT_ALLOWED",
               "PASSWORD_CONTROL_READ_REFUSED",
-              "OPTION_NOT_PRESENT",
-              "NO_DURABLE_LOCATOR",
-              "READ_NOT_ALLOWED",
-              "OBSERVATION_DEADLINE"
+              "OBSERVATION_DEADLINE",
+              "STEP_SYNTAX",
+              "STEP_PRE_FENCE",
+              "SOURCE_HASH_MISMATCH"
+            ]
+          },
+          "line": {
+            "oneOf": [
+              {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "column": {
+            "oneOf": [
+              {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "matchCount": {
+            "oneOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2147483647
+              },
+              {
+                "type": "null"
+              }
             ]
           }
         },
@@ -2623,8 +1997,6 @@
               "properties": {
                 "reason": {
                   "enum": [
-                    "PASSWORD_TARGET_ABSENT",
-                    "PASSWORD_TARGET_AMBIGUOUS",
                     "PASSWORD_FORM_ACTION_NOT_ALLOWED",
                     "PASSWORD_CONTROL_READ_REFUSED"
                   ]
@@ -2649,9 +2021,9 @@
               "properties": {
                 "reason": {
                   "enum": [
-                    "OPTION_NOT_PRESENT",
-                    "NO_DURABLE_LOCATOR",
-                    "READ_NOT_ALLOWED"
+                    "STEP_SYNTAX",
+                    "STEP_PRE_FENCE",
+                    "SOURCE_HASH_MISMATCH"
                   ]
                 }
               },
@@ -2685,6 +2057,67 @@
               "properties": {
                 "code": {
                   "const": "BUDGET_EXCEEDED"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "type": "object",
+              "properties": {
+                "reason": {
+                  "const": "STEP_SYNTAX"
+                }
+              },
+              "required": [
+                "reason"
+              ]
+            },
+            "then": {
+              "type": "object",
+              "required": [
+                "line",
+                "column"
+              ],
+              "properties": {
+                "line": {
+                  "type": "integer"
+                },
+                "column": {
+                  "type": "integer"
+                },
+                "matchCount": {
+                  "type": "null"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "type": "object",
+              "properties": {
+                "reason": {
+                  "const": "STEP_PRE_FENCE"
+                }
+              },
+              "required": [
+                "reason"
+              ]
+            },
+            "then": {
+              "type": "object",
+              "required": [
+                "matchCount"
+              ],
+              "properties": {
+                "matchCount": {
+                  "type": "integer"
+                },
+                "line": {
+                  "type": "null"
+                },
+                "column": {
+                  "type": "null"
                 }
               }
             }
@@ -2749,19 +2182,6 @@
           "evidenceHash": {
             "type": "string",
             "pattern": "^[a-f0-9]{64}$"
-          },
-          "pressInheritance": {
-            "oneOf": [
-              {
-                "$ref": "https://checks.citi.example/contracts/observed/v3/bridge.schema.json#/definitions/PressInheritance"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "assertSourceBinding": {
-            "$ref": "#/definitions/AssertSourceBinding"
           }
         },
         "required": [
@@ -2777,8 +2197,7 @@
           "configurationRevision",
           "prefixProgramHash",
           "coordinate",
-          "evidenceHash",
-          "pressInheritance"
+          "evidenceHash"
         ]
       },
       "PrefixPrepare": {
@@ -2800,139 +2219,6 @@
           "kind",
           "request",
           "requestDigest"
-        ]
-      },
-      "PreAdmissionDrift": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "schemaVersion": {
-            "const": 3
-          },
-          "sessionId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "workerId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "ownerFence": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 2147483647
-          },
-          "scopeHash": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          },
-          "contextId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "contextRevision": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 201
-          },
-          "authoredInputsHash": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          },
-          "sourceRevision": {
-            "type": "string",
-            "pattern": "^(0|[1-9][0-9]{0,18})$"
-          },
-          "configurationRevision": {
-            "type": "string",
-            "pattern": "^(0|[1-9][0-9]{0,18})$"
-          },
-          "prefixProgramHash": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          },
-          "coordinate": {
-            "$ref": "https://checks.citi.example/contracts/observed/v3/action.schema.json#/properties/coordinate"
-          },
-          "evidenceHash": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          },
-          "requestDigest": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          },
-          "operationHash": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          },
-          "attemptOrdinal": {
-            "const": 0
-          },
-          "nativeInvocationStarted": {
-            "const": false
-          },
-          "reason": {
-            "enum": [
-              "TARGET_DRIFT",
-              "LOCATOR_AMBIGUOUS",
-              "STALE_GENERATION"
-            ]
-          },
-          "receiptHash": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          },
-          "phase": {
-            "const": "PRE_ADMISSION"
-          },
-          "admissionId": {
-            "type": "null"
-          },
-          "preparationId": {
-            "type": "null"
-          },
-          "pressInheritance": {
-            "oneOf": [
-              {
-                "$ref": "https://checks.citi.example/contracts/observed/v3/bridge.schema.json#/definitions/PressInheritance"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "assertSourceBinding": {
-            "$ref": "#/definitions/AssertSourceBinding"
-          }
-        },
-        "required": [
-          "schemaVersion",
-          "sessionId",
-          "workerId",
-          "ownerFence",
-          "scopeHash",
-          "contextId",
-          "contextRevision",
-          "authoredInputsHash",
-          "sourceRevision",
-          "configurationRevision",
-          "prefixProgramHash",
-          "coordinate",
-          "evidenceHash",
-          "requestDigest",
-          "operationHash",
-          "attemptOrdinal",
-          "nativeInvocationStarted",
-          "reason",
-          "receiptHash",
-          "phase",
-          "admissionId",
-          "preparationId",
-          "pressInheritance"
         ]
       },
       "AdmittedDrift": {
@@ -3031,19 +2317,6 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 256
-          },
-          "pressInheritance": {
-            "oneOf": [
-              {
-                "$ref": "https://checks.citi.example/contracts/observed/v3/bridge.schema.json#/definitions/PressInheritance"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "assertSourceBinding": {
-            "$ref": "#/definitions/AssertSourceBinding"
           }
         },
         "required": [
@@ -3068,90 +2341,35 @@
           "receiptHash",
           "phase",
           "admissionId",
-          "preparationId",
-          "pressInheritance"
+          "preparationId"
         ]
       },
       "DriftReceipt": {
-        "oneOf": [
-          {
-            "$ref": "https://checks.citi.example/contracts/observed/v3/bridge.schema.json#/definitions/PreAdmissionDrift"
-          },
-          {
-            "$ref": "https://checks.citi.example/contracts/observed/v3/bridge.schema.json#/definitions/AdmittedDrift"
-          }
-        ]
+        "$ref": "https://checks.citi.example/contracts/observed/v3/bridge.schema.json#/definitions/AdmittedDrift"
       },
       "PrefixPrepareResult": {
-        "oneOf": [
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "kind": {
-                "const": "PREPARED"
-              },
-              "requestDigest": {
-                "type": "string",
-                "pattern": "^[a-f0-9]{64}$"
-              },
-              "proposal": {
-                "$ref": "https://checks.citi.example/contracts/observed/v3/action.schema.json"
-              },
-              "preparation": {
-                "$ref": "https://checks.citi.example/contracts/observed/v3/bridge.schema.json#/definitions/preparation"
-              }
-            },
-            "required": [
-              "kind",
-              "requestDigest",
-              "proposal",
-              "preparation"
-            ]
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "const": "PREPARED"
           },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "kind": {
-                "const": "WAIT"
-              },
-              "requestDigest": {
-                "type": "string",
-                "pattern": "^[a-f0-9]{64}$"
-              },
-              "evidenceHash": {
-                "type": "string",
-                "pattern": "^[a-f0-9]{64}$"
-              }
-            },
-            "required": [
-              "kind",
-              "requestDigest",
-              "evidenceHash"
-            ]
+          "requestDigest": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
           },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "kind": {
-                "const": "DRIFT"
-              },
-              "requestDigest": {
-                "type": "string",
-                "pattern": "^[a-f0-9]{64}$"
-              },
-              "receipt": {
-                "$ref": "https://checks.citi.example/contracts/observed/v3/bridge.schema.json#/definitions/PreAdmissionDrift"
-              }
-            },
-            "required": [
-              "kind",
-              "requestDigest",
-              "receipt"
-            ]
+          "proposal": {
+            "$ref": "https://checks.citi.example/contracts/observed/v3/action.schema.json"
+          },
+          "preparation": {
+            "$ref": "https://checks.citi.example/contracts/observed/v3/bridge.schema.json#/definitions/preparation"
           }
+        },
+        "required": [
+          "kind",
+          "requestDigest",
+          "proposal",
+          "preparation"
         ]
       },
       "PrefixDriftCallback": {
@@ -3165,53 +2383,13 @@
             "$ref": "https://checks.citi.example/contracts/observed/v3/bridge.schema.json#/definitions/DriftReceipt"
           },
           "ledger": {
-            "oneOf": [
-              {
-                "$ref": "https://checks.citi.example/contracts/observed/v3/ledger.schema.json"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "https://checks.citi.example/contracts/observed/v3/ledger.schema.json"
           }
         },
         "required": [
           "kind",
           "receipt",
           "ledger"
-        ],
-        "allOf": [
-          {
-            "if": {
-              "properties": {
-                "receipt": {
-                  "properties": {
-                    "phase": {
-                      "const": "PRE_ADMISSION"
-                    }
-                  },
-                  "type": "object"
-                }
-              },
-              "type": "object"
-            },
-            "then": {
-              "properties": {
-                "ledger": {
-                  "type": "null"
-                }
-              },
-              "type": "object"
-            },
-            "else": {
-              "properties": {
-                "ledger": {
-                  "$ref": "https://checks.citi.example/contracts/observed/v3/ledger.schema.json"
-                }
-              },
-              "type": "object"
-            }
-          }
         ]
       },
       "ContextDelivery": {
@@ -3685,19 +2863,6 @@
             "type": "string",
             "format": "date-time",
             "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,9})?Z(?![\\s\\S])"
-          },
-          "pressInheritance": {
-            "oneOf": [
-              {
-                "$ref": "https://checks.citi.example/contracts/observed/v3/bridge.schema.json#/definitions/PressInheritance"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "assertSourceBinding": {
-            "$ref": "#/definitions/AssertSourceBinding"
           }
         },
         "required": [
@@ -3713,8 +2878,7 @@
           "versions",
           "proposal",
           "requestDigest",
-          "expiresAt",
-          "pressInheritance"
+          "expiresAt"
         ]
       },
       "ordinaryOutcome": {
@@ -3770,55 +2934,72 @@
             "$ref": "https://checks.citi.example/contracts/observed/v3/ledger.schema.json"
           },
           "availability": {
-            "oneOf": [
-              {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "bindingId": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 256
-                  },
-                  "producerAdmissionId": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 256
-                  },
-                  "contextId": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 256
-                  },
-                  "workerId": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 256
-                  },
-                  "ownerFence": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 2147483647
-                  }
+            "type": "array",
+            "minItems": 0,
+            "maxItems": 8,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "bindingId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
                 },
-                "required": [
-                  "bindingId",
-                  "producerAdmissionId",
-                  "contextId",
-                  "workerId",
-                  "ownerFence"
-                ]
+                "producerAdmissionId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                "contextId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                "workerId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                "ownerFence": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 2147483647
+                }
               },
-              {
-                "type": "null"
-              }
-            ]
+              "required": [
+                "bindingId",
+                "producerAdmissionId",
+                "contextId",
+                "workerId",
+                "ownerFence"
+              ]
+            }
           },
           "errorMessage": {
             "type": "string",
             "minLength": 1,
             "maxLength": 2048,
             "description": "Already-redacted failure diagnostic; redact actual resolved/known values before bounding or serialization. Not replay authority."
+          },
+          "receipt": {
+            "$ref": "https://checks.citi.example/contracts/observed/v3/step-receipt.schema.json"
+          },
+          "secretUse": {
+            "type": "object",
+            "maxProperties": 8,
+            "propertyNames": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.-]{1,64}$"
+            },
+            "additionalProperties": {
+              "type": "string",
+              "enum": [
+                "USED",
+                "NOT_USED",
+                "REFUSED"
+              ]
+            }
           }
         },
         "required": [
@@ -3833,7 +3014,9 @@
           "configurationRevision",
           "versions",
           "ledger",
-          "availability"
+          "availability",
+          "receipt",
+          "secretUse"
         ],
         "allOf": [
           {
@@ -3885,317 +3068,8 @@
             }
           }
         ]
-      },
-      "PressInheritance": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "kind": {
-            "const": "same-element-press"
-          },
-          "predecessorAdmissionId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "predecessorRequestDigest": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          },
-          "predecessorOperationHash": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          },
-          "predecessorCoordinate": {
-            "$ref": "https://checks.citi.example/contracts/observed/v3/action.schema.json#/properties/coordinate"
-          },
-          "documentId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          }
-        },
-        "required": [
-          "kind",
-          "predecessorAdmissionId",
-          "predecessorRequestDigest",
-          "predecessorOperationHash",
-          "predecessorCoordinate",
-          "documentId"
-        ]
-      },
-      "AssertSourceBinding": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "bindingId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "producerAdmissionId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "producerPreparationId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          }
-        },
-        "required": [
-          "bindingId",
-          "producerAdmissionId",
-          "producerPreparationId"
-        ]
       }
     }
-  },
-  "clarification": {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "https://checks.citi.example/contracts/observed/v3/clarification.schema.json",
-    "title": "Studio observed v3 production question",
-    "type": "object",
-    "additionalProperties": false,
-    "properties": {
-      "schemaVersion": {
-        "const": 3
-      },
-      "clarificationId": {
-        "type": "string",
-        "minLength": 1,
-        "maxLength": 256
-      },
-      "sessionId": {
-        "type": "string",
-        "minLength": 1,
-        "maxLength": 256
-      },
-      "scopeHash": {
-        "type": "string",
-        "pattern": "^[a-f0-9]{64}$"
-      },
-      "coordinate": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "stepId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "ordinal": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 2147483647
-          }
-        },
-        "required": [
-          "stepId",
-          "ordinal"
-        ]
-      },
-      "documentId": {
-        "oneOf": [
-          {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          {
-            "type": "null"
-          }
-        ]
-      },
-      "generation": {
-        "type": "integer",
-        "minimum": 0,
-        "maximum": 2147483647
-      },
-      "reason": {
-        "enum": [
-          "AMBIGUOUS_TARGET",
-          "AMBIGUOUS_BINDING",
-          "MISSING_SOURCE",
-          "INSUFFICIENT_EVIDENCE",
-          "UNSUPPORTED_SURFACE"
-        ]
-      },
-      "promptCode": {
-        "enum": [
-          "CHOOSE_FIELD",
-          "CHOOSE_SOURCE",
-          "REVISE_STEP"
-        ]
-      },
-      "choices": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "choiceId": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 256
-            },
-            "safeLabel": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 256
-            },
-            "labelSource": {
-              "enum": [
-                "AUTHORED",
-                "SAVED_INPUT",
-                "PAGE"
-              ]
-            },
-            "role": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 256
-            },
-            "region": {
-              "type": [
-                "string",
-                "null"
-              ]
-            },
-            "bindingId": {
-              "type": [
-                "string",
-                "null"
-              ]
-            }
-          },
-          "required": [
-            "choiceId",
-            "safeLabel",
-            "labelSource",
-            "bindingId"
-          ],
-          "allOf": [
-            {
-              "if": {
-                "type": "object",
-                "properties": {
-                  "labelSource": {
-                    "const": "PAGE"
-                  }
-                },
-                "required": [
-                  "labelSource"
-                ]
-              },
-              "then": {
-                "type": "object",
-                "properties": {
-                  "role": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 256
-                  },
-                  "region": {
-                    "type": [
-                      "string",
-                      "null"
-                    ]
-                  }
-                },
-                "required": [
-                  "role",
-                  "region"
-                ]
-              },
-              "else": {
-                "type": "object",
-                "properties": {
-                  "role": {
-                    "not": {}
-                  },
-                  "region": {
-                    "not": {}
-                  }
-                }
-              }
-            }
-          ]
-        },
-        "minItems": 0,
-        "maxItems": 10
-      },
-      "expiresAt": {
-        "type": "string",
-        "format": "date-time",
-        "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]{1,9})?Z(?![\\s\\S])"
-      },
-      "phase": {
-        "enum": [
-          "source",
-          "observed"
-        ]
-      }
-    },
-    "required": [
-      "schemaVersion",
-      "clarificationId",
-      "sessionId",
-      "scopeHash",
-      "coordinate",
-      "documentId",
-      "generation",
-      "reason",
-      "promptCode",
-      "choices",
-      "expiresAt",
-      "phase"
-    ],
-    "allOf": [
-      {
-        "if": {
-          "properties": {
-            "phase": {
-              "const": "source"
-            }
-          },
-          "type": "object"
-        },
-        "then": {
-          "properties": {
-            "documentId": {
-              "type": "null"
-            },
-            "generation": {
-              "const": 0
-            },
-            "choices": {
-              "items": {
-                "properties": {
-                  "bindingId": {
-                    "type": "null"
-                  }
-                },
-                "type": "object"
-              },
-              "type": "array"
-            }
-          },
-          "type": "object"
-        },
-        "else": {
-          "properties": {
-            "documentId": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 256
-            }
-          },
-          "type": "object"
-        }
-      }
-    ]
   },
   "consumer-edge": {
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -4238,13 +3112,6 @@
           "ordinal"
         ]
       },
-      "argumentSlot": {
-        "enum": [
-          "fill.value",
-          "selectOption.value",
-          "assert.expected"
-        ]
-      },
       "destinationOrigin": {
         "type": "string"
       },
@@ -4257,7 +3124,6 @@
       "producerAdmissionId",
       "consumerAdmissionId",
       "coordinate",
-      "argumentSlot",
       "destinationOrigin",
       "transferPolicy"
     ]
@@ -4533,7 +3399,7 @@
             "type": "null"
           },
           "operation": {
-            "$ref": "https://checks.citi.example/contracts/observed/v3/action.schema.json#/properties/operation/oneOf/4"
+            "$ref": "https://checks.citi.example/contracts/observed/v3/action.schema.json#/properties/operation"
           },
           "admissionId": {
             "type": "string",
@@ -4543,15 +3409,11 @@
           "operationHash": {
             "type": "string",
             "pattern": "^[a-f0-9]{64}$"
-          },
-          "target": {
-            "type": "null"
           }
         },
         "required": [
           "coordinate",
           "origin",
-          "target",
           "operation",
           "admissionId",
           "operationHash"
@@ -4581,68 +3443,14 @@
           "operationHash": {
             "type": "string",
             "pattern": "^[a-f0-9]{64}$"
-          },
-          "target": {
-            "oneOf": [
-              {
-                "$ref": "https://checks.citi.example/contracts/observed/v3/locator.schema.json#/definitions/ResolvedTarget"
-              },
-              {
-                "type": "null"
-              }
-            ]
           }
         },
         "required": [
           "coordinate",
           "origin",
-          "target",
           "operation",
           "admissionId",
           "operationHash"
-        ],
-        "allOf": [
-          {
-            "if": {
-              "type": "object",
-              "properties": {
-                "operation": {
-                  "type": "object",
-                  "properties": {
-                    "kind": {
-                      "const": "fill"
-                    },
-                    "value": {
-                      "type": "object",
-                      "properties": {
-                        "kind": {
-                          "const": "secretRef"
-                        }
-                      },
-                      "required": [
-                        "kind"
-                      ]
-                    }
-                  },
-                  "required": [
-                    "kind",
-                    "value"
-                  ]
-                }
-              },
-              "required": [
-                "operation"
-              ]
-            },
-            "then": {
-              "type": "object",
-              "properties": {
-                "target": {
-                  "type": "null"
-                }
-              }
-            }
-          }
         ]
       },
       "ReusedFrom": {
@@ -4920,12 +3728,6 @@
           "CANCELLED"
         ]
       },
-      "assertionPassed": {
-        "type": [
-          "boolean",
-          "null"
-        ]
-      },
       "executionEvidence": {
         "$ref": "https://checks.citi.example/contracts/observed/v3/execution-evidence.schema.json"
       },
@@ -4968,7 +3770,6 @@
       "state",
       "dispatchCount",
       "outcomeCode",
-      "assertionPassed",
       "executionEvidence",
       "evidenceHash",
       "authoredInputsHash",
@@ -5056,12 +3857,6 @@
         "maximum": 100,
         "default": 100
       },
-      "maxStatementsPerStep": {
-        "type": "integer",
-        "minimum": 1,
-        "maximum": 8,
-        "default": 8
-      },
       "maxOutlineBytes": {
         "type": "integer",
         "minimum": 1,
@@ -5082,709 +3877,8 @@
       "maxRuntimeValues",
       "maxRuntimeValueBytes",
       "maxRuntimeValuesBytesTotal",
-      "maxSourceSteps",
-      "maxStatementsPerStep"
+      "maxSourceSteps"
     ]
-  },
-  "locator": {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "https://checks.citi.example/contracts/observed/v3/locator.schema.json",
-    "title": "Studio observed v3 locator: closed, exact-only grammar, synthesized and verified by the runner",
-    "description": "An array of at most 8 steps applied left to right from the page. Also enforced by the runner validateLocator (not expressible in draft-07): nth only as the last step, filterHas never first, and at most 8 steps counting the steps inside filterHas.",
-    "type": "array",
-    "minItems": 1,
-    "maxItems": 8,
-    "items": {
-      "$ref": "#/definitions/LocatorStep"
-    },
-    "definitions": {
-      "LocatorStep": {
-        "oneOf": [
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "by": {
-                "const": "testId"
-              },
-              "value": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 200
-              }
-            },
-            "required": [
-              "by",
-              "value"
-            ]
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "by": {
-                "const": "role"
-              },
-              "role": {
-                "type": "string",
-                "pattern": "^[a-z][a-z-]{0,40}$"
-              }
-            },
-            "required": [
-              "by",
-              "role"
-            ]
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "by": {
-                "const": "role"
-              },
-              "role": {
-                "type": "string",
-                "pattern": "^[a-z][a-z-]{0,40}$"
-              },
-              "name": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 200
-              },
-              "exact": {
-                "const": true
-              }
-            },
-            "required": [
-              "by",
-              "role",
-              "name",
-              "exact"
-            ]
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "by": {
-                "enum": [
-                  "label",
-                  "placeholder",
-                  "text"
-                ]
-              },
-              "value": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 200
-              },
-              "exact": {
-                "const": true
-              }
-            },
-            "required": [
-              "by",
-              "value",
-              "exact"
-            ]
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "by": {
-                "const": "scope"
-              },
-              "role": {
-                "type": "string",
-                "pattern": "^[a-z][a-z-]{0,40}$"
-              },
-              "name": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 200
-              },
-              "exact": {
-                "const": true
-              }
-            },
-            "required": [
-              "by",
-              "role",
-              "name",
-              "exact"
-            ]
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "by": {
-                "const": "tag"
-              },
-              "tag": {
-                "enum": [
-                  "a",
-                  "article",
-                  "aside",
-                  "button",
-                  "dialog",
-                  "details",
-                  "div",
-                  "fieldset",
-                  "footer",
-                  "form",
-                  "h1",
-                  "h2",
-                  "h3",
-                  "h4",
-                  "h5",
-                  "h6",
-                  "header",
-                  "img",
-                  "input",
-                  "label",
-                  "li",
-                  "main",
-                  "nav",
-                  "ol",
-                  "option",
-                  "p",
-                  "section",
-                  "select",
-                  "span",
-                  "summary",
-                  "table",
-                  "tbody",
-                  "td",
-                  "textarea",
-                  "th",
-                  "tr",
-                  "ul"
-                ]
-              }
-            },
-            "required": [
-              "by",
-              "tag"
-            ]
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "by": {
-                "const": "attr"
-              },
-              "tag": {
-                "enum": [
-                  "a",
-                  "article",
-                  "aside",
-                  "button",
-                  "dialog",
-                  "details",
-                  "div",
-                  "fieldset",
-                  "footer",
-                  "form",
-                  "h1",
-                  "h2",
-                  "h3",
-                  "h4",
-                  "h5",
-                  "h6",
-                  "header",
-                  "img",
-                  "input",
-                  "label",
-                  "li",
-                  "main",
-                  "nav",
-                  "ol",
-                  "option",
-                  "p",
-                  "section",
-                  "select",
-                  "span",
-                  "summary",
-                  "table",
-                  "tbody",
-                  "td",
-                  "textarea",
-                  "th",
-                  "tr",
-                  "ul"
-                ]
-              },
-              "attrs": {
-                "type": "array",
-                "minItems": 1,
-                "maxItems": 2,
-                "items": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "name": {
-                      "enum": [
-                        "name",
-                        "id",
-                        "type",
-                        "aria-label",
-                        "title"
-                      ]
-                    },
-                    "value": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 200
-                    }
-                  },
-                  "required": [
-                    "name",
-                    "value"
-                  ]
-                }
-              }
-            },
-            "required": [
-              "by",
-              "tag",
-              "attrs"
-            ]
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "by": {
-                "const": "filterHas"
-              },
-              "has": {
-                "type": "array",
-                "minItems": 1,
-                "maxItems": 7,
-                "items": {
-                  "$ref": "https://checks.citi.example/contracts/observed/v3/locator.schema.json#/definitions/InnerLocatorStep"
-                }
-              }
-            },
-            "required": [
-              "by",
-              "has"
-            ]
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "by": {
-                "const": "filterHas"
-              },
-              "has": {
-                "type": "array",
-                "minItems": 1,
-                "maxItems": 1,
-                "items": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "by": {
-                      "const": "role"
-                    },
-                    "role": {
-                      "type": "string",
-                      "pattern": "^[a-z][a-z-]{0,40}$"
-                    },
-                    "name": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 200
-                    },
-                    "exact": {
-                      "const": true
-                    }
-                  },
-                  "required": [
-                    "by",
-                    "role",
-                    "name",
-                    "exact"
-                  ]
-                }
-              },
-              "relation": {
-                "const": "child"
-              }
-            },
-            "required": [
-              "by",
-              "has",
-              "relation"
-            ]
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "by": {
-                "const": "nth"
-              },
-              "index": {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 500
-              }
-            },
-            "required": [
-              "by",
-              "index"
-            ]
-          }
-        ]
-      },
-      "InnerLocatorStep": {
-        "oneOf": [
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "by": {
-                "const": "testId"
-              },
-              "value": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 200
-              }
-            },
-            "required": [
-              "by",
-              "value"
-            ]
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "by": {
-                "const": "role"
-              },
-              "role": {
-                "type": "string",
-                "pattern": "^[a-z][a-z-]{0,40}$"
-              }
-            },
-            "required": [
-              "by",
-              "role"
-            ]
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "by": {
-                "const": "role"
-              },
-              "role": {
-                "type": "string",
-                "pattern": "^[a-z][a-z-]{0,40}$"
-              },
-              "name": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 200
-              },
-              "exact": {
-                "const": true
-              }
-            },
-            "required": [
-              "by",
-              "role",
-              "name",
-              "exact"
-            ]
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "by": {
-                "enum": [
-                  "label",
-                  "placeholder",
-                  "text"
-                ]
-              },
-              "value": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 200
-              },
-              "exact": {
-                "const": true
-              }
-            },
-            "required": [
-              "by",
-              "value",
-              "exact"
-            ]
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "by": {
-                "const": "scope"
-              },
-              "role": {
-                "type": "string",
-                "pattern": "^[a-z][a-z-]{0,40}$"
-              },
-              "name": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 200
-              },
-              "exact": {
-                "const": true
-              }
-            },
-            "required": [
-              "by",
-              "role",
-              "name",
-              "exact"
-            ]
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "by": {
-                "const": "tag"
-              },
-              "tag": {
-                "enum": [
-                  "a",
-                  "article",
-                  "aside",
-                  "button",
-                  "dialog",
-                  "details",
-                  "div",
-                  "fieldset",
-                  "footer",
-                  "form",
-                  "h1",
-                  "h2",
-                  "h3",
-                  "h4",
-                  "h5",
-                  "h6",
-                  "header",
-                  "img",
-                  "input",
-                  "label",
-                  "li",
-                  "main",
-                  "nav",
-                  "ol",
-                  "option",
-                  "p",
-                  "section",
-                  "select",
-                  "span",
-                  "summary",
-                  "table",
-                  "tbody",
-                  "td",
-                  "textarea",
-                  "th",
-                  "tr",
-                  "ul"
-                ]
-              }
-            },
-            "required": [
-              "by",
-              "tag"
-            ]
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "by": {
-                "const": "attr"
-              },
-              "tag": {
-                "enum": [
-                  "a",
-                  "article",
-                  "aside",
-                  "button",
-                  "dialog",
-                  "details",
-                  "div",
-                  "fieldset",
-                  "footer",
-                  "form",
-                  "h1",
-                  "h2",
-                  "h3",
-                  "h4",
-                  "h5",
-                  "h6",
-                  "header",
-                  "img",
-                  "input",
-                  "label",
-                  "li",
-                  "main",
-                  "nav",
-                  "ol",
-                  "option",
-                  "p",
-                  "section",
-                  "select",
-                  "span",
-                  "summary",
-                  "table",
-                  "tbody",
-                  "td",
-                  "textarea",
-                  "th",
-                  "tr",
-                  "ul"
-                ]
-              },
-              "attrs": {
-                "type": "array",
-                "minItems": 1,
-                "maxItems": 2,
-                "items": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "name": {
-                      "enum": [
-                        "name",
-                        "id",
-                        "type",
-                        "aria-label",
-                        "title"
-                      ]
-                    },
-                    "value": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 200
-                    }
-                  },
-                  "required": [
-                    "name",
-                    "value"
-                  ]
-                }
-              }
-            },
-            "required": [
-              "by",
-              "tag",
-              "attrs"
-            ]
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "by": {
-                "const": "nth"
-              },
-              "index": {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 500
-              }
-            },
-            "required": [
-              "by",
-              "index"
-            ]
-          }
-        ]
-      },
-      "LocatorTier": {
-        "enum": [
-          "testId",
-          "role",
-          "label",
-          "placeholder",
-          "text",
-          "scoped",
-          "filterHas",
-          "attribute",
-          "nth"
-        ]
-      },
-      "TargetIdentity": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "role": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 64
-          },
-          "name": {
-            "oneOf": [
-              {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 256
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "required": [
-          "role",
-          "name"
-        ]
-      },
-      "ResolvedTarget": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "locator": {
-            "$ref": "https://checks.citi.example/contracts/observed/v3/locator.schema.json"
-          },
-          "tier": {
-            "$ref": "#/definitions/LocatorTier"
-          },
-          "identity": {
-            "$ref": "#/definitions/TargetIdentity"
-          },
-          "assertTextMode": {
-            "enum": [
-              "DIRECT_PUBLIC",
-              "READ_BINDING_SOURCE"
-            ]
-          }
-        },
-        "required": [
-          "locator",
-          "tier",
-          "identity"
-        ]
-      }
-    }
   },
   "observation": {
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -5901,18 +3995,6 @@
           "outlineBytes"
         ]
       },
-      "readRuleId": {
-        "oneOf": [
-          {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          {
-            "type": "null"
-          }
-        ]
-      },
       "outline": {
         "type": "string",
         "minLength": 1,
@@ -5939,7 +4021,6 @@
       "observedAt",
       "coverage",
       "projection",
-      "readRuleId",
       "outline",
       "facts"
     ],
@@ -6007,56 +4088,6 @@
           "nearSource": {
             "const": "WITHHELD_ADJACENT_PUBLIC"
           },
-          "readScope": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "relation": {
-                "enum": [
-                  "SAME_ROW_LABEL",
-                  "IMMEDIATE_HEADING_SAME_PARENT",
-                  "R7_ADJACENT_PUBLIC"
-                ]
-              },
-              "sourceRefs": {
-                "type": "array",
-                "minItems": 1,
-                "maxItems": 8,
-                "uniqueItems": true,
-                "items": {
-                  "type": "string",
-                  "pattern": "^e[0-9]{1,6}$"
-                }
-              },
-              "tableTitleRef": {
-                "type": "string",
-                "pattern": "^e[0-9]{1,6}$"
-              }
-            },
-            "required": [
-              "relation",
-              "sourceRefs"
-            ],
-            "allOf": [
-              {
-                "if": {
-                  "required": [
-                    "tableTitleRef"
-                  ]
-                },
-                "then": {
-                  "properties": {
-                    "relation": {
-                      "const": "SAME_ROW_LABEL"
-                    },
-                    "sourceRefs": {
-                      "minItems": 2
-                    }
-                  }
-                }
-              }
-            ]
-          },
           "scopeRefs": {
             "type": "array",
             "minItems": 1,
@@ -6066,9 +4097,6 @@
               "type": "string",
               "pattern": "^e[0-9]{1,6}$"
             }
-          },
-          "directTextAssertion": {
-            "const": true
           }
         },
         "required": [
@@ -6079,34 +4107,6 @@
           "evidenceSegments",
           "nameComplete",
           "ownTextComplete"
-        ],
-        "allOf": [
-          {
-            "if": {
-              "required": [
-                "directTextAssertion"
-              ]
-            },
-            "then": {
-              "properties": {
-                "role": {
-                  "const": "paragraph"
-                },
-                "name": {
-                  "const": ""
-                },
-                "editable": {
-                  "const": false
-                },
-                "ownTextComplete": {
-                  "const": true
-                }
-              },
-              "required": [
-                "text"
-              ]
-            }
-          }
         ]
       },
       "EvidenceSegment": {
@@ -6186,65 +4186,6 @@
       "origin": {
         "type": "string"
       },
-      "recipe": {
-        "oneOf": [
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "kind": {
-                "const": "visibleText"
-              },
-              "classification": {
-                "const": "permittedBusinessData"
-              },
-              "policyRuleId": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 256
-              }
-            },
-            "required": [
-              "kind",
-              "classification",
-              "policyRuleId"
-            ]
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "kind": {
-                "const": "controlValue"
-              },
-              "classification": {
-                "const": "nonsecretApproved"
-              },
-              "controlType": {
-                "enum": [
-                  "text",
-                  "search",
-                  "email",
-                  "tel",
-                  "url",
-                  "textarea"
-                ]
-              },
-              "policyRuleId": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 256
-              }
-            },
-            "required": [
-              "kind",
-              "classification",
-              "controlType",
-              "policyRuleId"
-            ]
-          }
-        ]
-      },
       "availability": {
         "type": "object",
         "additionalProperties": false,
@@ -6289,7 +4230,6 @@
       "producerAdmissionId",
       "coordinate",
       "origin",
-      "recipe",
       "availability"
     ]
   },
@@ -6726,15 +4666,6 @@
                         "nonsecretText"
                       ]
                     },
-                    "intendedSlot": {
-                      "type": "string",
-                      "enum": [
-                        "navigate.destination",
-                        "fill.value",
-                        "selectOption.value",
-                        "assert.expected"
-                      ]
-                    },
                     "value": {
                       "type": "string",
                       "maxLength": 4096
@@ -6744,7 +4675,6 @@
                     "inputId",
                     "stepId",
                     "kind",
-                    "intendedSlot",
                     "value"
                   ]
                 },
@@ -6764,9 +4694,6 @@
                     "kind": {
                       "const": "secretRef"
                     },
-                    "intendedSlot": {
-                      "const": "fill.value"
-                    },
                     "referenceName": {
                       "type": "string",
                       "pattern": "^[A-Za-z0-9_.-]{1,64}$"
@@ -6776,7 +4703,6 @@
                     "inputId",
                     "stepId",
                     "kind",
-                    "intendedSlot",
                     "referenceName"
                   ]
                 }
@@ -7027,33 +4953,6 @@
               }
             ]
           },
-          "errorCode": {
-            "oneOf": [
-              {
-                "type": "string",
-                "enum": [
-                  "INVALID_CONTRACT",
-                  "PROFILE_MISMATCH",
-                  "AUTHORIZATION_EXPIRED",
-                  "POLICY_REFUSED",
-                  "TARGET_DRIFT",
-                  "READ_REFUSED",
-                  "REFERENCE_REFUSED",
-                  "ASSERTION_FAILED",
-                  "CANCELLED",
-                  "TIMEOUT",
-                  "OUTCOME_UNKNOWN",
-                  "INTERNAL_ERROR",
-                  "LOGIN_REQUIRED",
-                  "PASSWORD_CONTROL_READ_REFUSED",
-                  "REFERENCE_MISMATCH"
-                ]
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "detail": {
             "type": "object",
             "additionalProperties": false,
@@ -7071,6 +4970,9 @@
               "stepId",
               "loginStepsPresent"
             ]
+          },
+          "receipt": {
+            "$ref": "https://checks.citi.example/contracts/observed/v3/step-receipt.schema.json"
           }
         },
         "required": [
@@ -7085,19 +4987,27 @@
           "startedAtMs",
           "finishedAtMs",
           "durationMs",
-          "errorCode"
+          "receipt"
         ],
         "allOf": [
           {
             "if": {
               "type": "object",
               "properties": {
-                "errorCode": {
-                  "const": "LOGIN_REQUIRED"
+                "receipt": {
+                  "type": "object",
+                  "properties": {
+                    "closedCode": {
+                      "const": "LOGIN_REQUIRED"
+                    }
+                  },
+                  "required": [
+                    "closedCode"
+                  ]
                 }
               },
               "required": [
-                "errorCode"
+                "receipt"
               ]
             },
             "then": {
@@ -7883,15 +5793,6 @@
               "secretRef"
             ]
           },
-          "intendedSlot": {
-            "type": "string",
-            "enum": [
-              "navigate.destination",
-              "fill.value",
-              "selectOption.value",
-              "assert.expected"
-            ]
-          },
           "provenance": {
             "oneOf": [
               {
@@ -7954,7 +5855,6 @@
           "inputId",
           "stepId",
           "kind",
-          "intendedSlot",
           "provenance"
         ],
         "allOf": [
@@ -7973,9 +5873,6 @@
             "then": {
               "type": "object",
               "properties": {
-                "intendedSlot": {
-                  "const": "fill.value"
-                },
                 "provenance": {
                   "type": "object",
                   "additionalProperties": false,
@@ -8026,95 +5923,11 @@
                 "type": "null"
               }
             ]
-          },
-          "target": {
-            "oneOf": [
-              {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "kind": {
-                    "const": "initialBlank"
-                  }
-                },
-                "required": [
-                  "kind"
-                ]
-              },
-              {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "kind": {
-                    "const": "page"
-                  }
-                },
-                "required": [
-                  "kind"
-                ]
-              },
-              {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "kind": {
-                    "const": "element"
-                  },
-                  "locator": {
-                    "$ref": "https://checks.citi.example/contracts/observed/v3/locator.schema.json"
-                  },
-                  "tier": {
-                    "$ref": "https://checks.citi.example/contracts/observed/v3/locator.schema.json#/definitions/LocatorTier"
-                  },
-                  "identity": {
-                    "$ref": "https://checks.citi.example/contracts/observed/v3/locator.schema.json#/definitions/TargetIdentity"
-                  },
-                  "readRuleId": {
-                    "oneOf": [
-                      {
-                        "type": "string",
-                        "minLength": 1,
-                        "maxLength": 256
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "assertTextMode": {
-                    "enum": [
-                      "DIRECT_PUBLIC",
-                      "READ_BINDING_SOURCE"
-                    ]
-                  }
-                },
-                "required": [
-                  "kind",
-                  "locator",
-                  "tier",
-                  "identity",
-                  "readRuleId"
-                ]
-              },
-              {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "kind": {
-                    "const": "passwordControl"
-                  }
-                },
-                "required": [
-                  "kind"
-                ]
-              }
-            ]
           }
         },
         "required": [
           "guardId",
-          "origin",
-          "target"
+          "origin"
         ]
       },
       "Transfer": {
@@ -8132,14 +5945,6 @@
           "consumer": {
             "$ref": "https://checks.citi.example/contracts/observed/v3/action.schema.json#/properties/coordinate"
           },
-          "slot": {
-            "type": "string",
-            "enum": [
-              "fill.value",
-              "selectOption.value",
-              "assert.expected"
-            ]
-          },
           "origin": {
             "type": "string",
             "format": "uri",
@@ -8151,7 +5956,6 @@
           "bindingId",
           "producer",
           "consumer",
-          "slot",
           "origin"
         ]
       },
@@ -8167,9 +5971,6 @@
           "producer": {
             "$ref": "https://checks.citi.example/contracts/observed/v3/action.schema.json#/properties/coordinate"
           },
-          "recipe": {
-            "$ref": "https://checks.citi.example/contracts/observed/v3/producer.schema.json#/properties/recipe"
-          },
           "origin": {
             "type": "string",
             "format": "uri",
@@ -8180,7 +5981,6 @@
         "required": [
           "bindingId",
           "producer",
-          "recipe",
           "origin"
         ]
       },
@@ -8400,20 +6200,11 @@
           "capabilities": {
             "type": "array",
             "minItems": 1,
-            "maxItems": 10,
+            "maxItems": 1,
             "items": {
               "type": "string",
               "enum": [
-                "navigate",
-                "click",
-                "fill",
-                "press",
-                "check",
-                "uncheck",
-                "hover",
-                "selectOption",
-                "read",
-                "assert"
+                "step"
               ]
             },
             "uniqueItems": true
@@ -8451,20 +6242,11 @@
           "capabilities": {
             "type": "array",
             "minItems": 1,
-            "maxItems": 10,
+            "maxItems": 1,
             "items": {
               "type": "string",
               "enum": [
-                "navigate",
-                "click",
-                "fill",
-                "press",
-                "check",
-                "uncheck",
-                "hover",
-                "selectOption",
-                "read",
-                "assert"
+                "step"
               ]
             },
             "uniqueItems": true
@@ -8534,6 +6316,14 @@
                 "type": "null"
               }
             ]
+          },
+          "playwrightReferenceHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "stepCodeContractHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
           }
         },
         "required": [
@@ -8543,7 +6333,9 @@
           "outputContractHash",
           "publicationResultVersion",
           "configuredModel",
-          "providerReturnedModelVersion"
+          "providerReturnedModelVersion",
+          "playwrightReferenceHash",
+          "stepCodeContractHash"
         ]
       }
     }
@@ -8904,13 +6696,6 @@
           },
           "snapshotEvidence": {
             "$ref": "https://checks.citi.example/contracts/observed/v3/authoring-snapshot.schema.json"
-          },
-          "guardAuthorizations": {
-            "type": "array",
-            "maxItems": 200,
-            "items": {
-              "$ref": "https://checks.citi.example/contracts/observed/v3/replay-validation.schema.json#/definitions/GuardSourceAuthorization"
-            }
           }
         },
         "required": [
@@ -8949,8 +6734,7 @@
           "transfers",
           "materializationEvidence",
           "incrementalEvidence",
-          "snapshotEvidence",
-          "guardAuthorizations"
+          "snapshotEvidence"
         ]
       },
       "ValidationVerdict": {
@@ -9074,20 +6858,6 @@
                   "minimum": 0,
                   "maximum": 7
                 },
-                "operationKind": {
-                  "enum": [
-                    "navigate",
-                    "click",
-                    "fill",
-                    "press",
-                    "selectOption",
-                    "check",
-                    "uncheck",
-                    "hover",
-                    "read",
-                    "assert"
-                  ]
-                },
                 "targetIntent": {
                   "type": "string",
                   "minLength": 1,
@@ -9129,37 +6899,30 @@
                     }
                   ]
                 },
-                "predicate": {
-                  "oneOf": [
-                    {
-                      "enum": [
-                        "visible",
-                        "containsText",
-                        "hasValue",
-                        "url",
-                        "title"
-                      ]
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
                 "obligationId": {
                   "type": "string",
                   "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+                },
+                "uses": {
+                  "type": "array",
+                  "maxItems": 8,
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  }
                 }
               },
               "required": [
                 "stepId",
                 "occurrence",
-                "operationKind",
                 "targetIntent",
                 "scopeIntent",
                 "referenceIndex",
                 "needId",
-                "predicate",
-                "obligationId"
+                "obligationId",
+                "uses"
               ]
             },
             "minItems": 1,
@@ -9191,18 +6954,10 @@
                         "type": "string",
                         "minLength": 1,
                         "maxLength": 256
-                      },
-                      "argumentSlot": {
-                        "enum": [
-                          "fill.value",
-                          "selectOption.value",
-                          "assert.expected"
-                        ]
                       }
                     },
                     "required": [
-                      "stepId",
-                      "argumentSlot"
+                      "stepId"
                     ]
                   },
                   "minItems": 0,
@@ -9223,12 +6978,43 @@
             },
             "minItems": 0,
             "maxItems": 32
+          },
+          "stepSections": {
+            "type": "array",
+            "minItems": 0,
+            "maxItems": 100,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "stepId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                "sections": {
+                  "type": "array",
+                  "minItems": 0,
+                  "maxItems": 4,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  }
+                }
+              },
+              "required": [
+                "stepId",
+                "sections"
+              ]
+            }
           }
         },
         "required": [
           "sourceReferences",
           "obligations",
-          "needs"
+          "needs",
+          "stepSections"
         ]
       },
       "InputIndex": {
@@ -9252,15 +7038,6 @@
               "secretRef"
             ]
           },
-          "intendedSlot": {
-            "type": "string",
-            "enum": [
-              "navigate.destination",
-              "fill.value",
-              "selectOption.value",
-              "assert.expected"
-            ]
-          },
           "provenance": {
             "$ref": "https://checks.citi.example/contracts/observed/v3/source-reference.schema.json"
           }
@@ -9269,31 +7046,7 @@
           "inputId",
           "stepId",
           "kind",
-          "intendedSlot",
           "provenance"
-        ],
-        "allOf": [
-          {
-            "if": {
-              "type": "object",
-              "properties": {
-                "kind": {
-                  "const": "secretRef"
-                }
-              },
-              "required": [
-                "kind"
-              ]
-            },
-            "then": {
-              "type": "object",
-              "properties": {
-                "intendedSlot": {
-                  "const": "fill.value"
-                }
-              }
-            }
-          }
         ]
       },
       "ConfigReference": {
@@ -9322,15 +7075,6 @@
               "secretRef"
             ]
           },
-          "intendedSlot": {
-            "type": "string",
-            "enum": [
-              "navigate.destination",
-              "fill.value",
-              "selectOption.value",
-              "assert.expected"
-            ]
-          },
           "inputId": {
             "type": "string",
             "minLength": 1,
@@ -9342,31 +7086,7 @@
           "referenceName",
           "stepId",
           "kind",
-          "intendedSlot",
           "inputId"
-        ],
-        "allOf": [
-          {
-            "if": {
-              "type": "object",
-              "properties": {
-                "kind": {
-                  "const": "secretRef"
-                }
-              },
-              "required": [
-                "kind"
-              ]
-            },
-            "then": {
-              "type": "object",
-              "properties": {
-                "intendedSlot": {
-                  "const": "fill.value"
-                }
-              }
-            }
-          }
         ]
       },
       "PreparationFact": {
@@ -9398,9 +7118,6 @@
               }
             ]
           },
-          "observedChoice": {
-            "$ref": "https://checks.citi.example/contracts/observed/v3/replay-validation.schema.json#/definitions/ObservedChoiceWitness1"
-          },
           "materializationRevision": {
             "type": "integer",
             "minimum": 1,
@@ -9414,597 +7131,6 @@
           "executionEvidence",
           "observationHash",
           "materializationRevision"
-        ]
-      },
-      "QuestionCapture1": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "version": {
-            "const": 1
-          },
-          "attemptId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "requestId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "attempt": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 3
-          },
-          "planRevision": {
-            "type": "string",
-            "pattern": "^(0|[1-9][0-9]{0,18})$"
-          },
-          "planHash": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          },
-          "obligationId": {
-            "type": "string",
-            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
-          },
-          "workerId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "ownerFence": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 2147483647
-          },
-          "contextId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "contextRevision": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 2147483647
-          },
-          "authoredInputsHash": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          },
-          "executionEvidence": {
-            "$ref": "https://checks.citi.example/contracts/observed/v3/execution-evidence.schema.json"
-          },
-          "evidenceHash": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          },
-          "observationHash": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          },
-          "modelQuestionHash": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          }
-        },
-        "required": [
-          "version",
-          "attemptId",
-          "requestId",
-          "attempt",
-          "planRevision",
-          "planHash",
-          "obligationId",
-          "workerId",
-          "ownerFence",
-          "contextId",
-          "contextRevision",
-          "authoredInputsHash",
-          "executionEvidence",
-          "evidenceHash",
-          "observationHash",
-          "modelQuestionHash"
-        ]
-      },
-      "ObservedAnswerSnapshot": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "sessionId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "scopeHash": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          },
-          "clarificationId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "coordinate": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "stepId": {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 256
-              },
-              "ordinal": {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 7
-              }
-            },
-            "required": [
-              "stepId",
-              "ordinal"
-            ]
-          },
-          "documentId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "generation": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 2147483647
-          },
-          "choiceId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "bindingId": {
-            "oneOf": [
-              {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 256
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "sourceRevision": {
-            "type": "string",
-            "pattern": "^(0|[1-9][0-9]{0,18})$"
-          },
-          "configurationRevision": {
-            "type": "string",
-            "pattern": "^(0|[1-9][0-9]{0,18})$"
-          },
-          "resolvedAt": {
-            "$ref": "https://checks.citi.example/contracts/observed/v3/session.schema.json#/properties/owner/properties/leaseExpiresAt"
-          }
-        },
-        "required": [
-          "sessionId",
-          "scopeHash",
-          "clarificationId",
-          "coordinate",
-          "documentId",
-          "generation",
-          "choiceId",
-          "bindingId",
-          "sourceRevision",
-          "configurationRevision",
-          "resolvedAt"
-        ]
-      },
-      "ObservedChoiceReceipt1": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "version": {
-            "const": 1
-          },
-          "sessionId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "preparationId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "clarificationId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "obligationId": {
-            "type": "string",
-            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
-          },
-          "contextIdentityHash": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          },
-          "meaningsHash": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          },
-          "questionCaptureHash": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          },
-          "acceptedChoiceId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "answer": {
-            "$ref": "https://checks.citi.example/contracts/observed/v3/replay-validation.schema.json#/definitions/ObservedAnswerSnapshot"
-          }
-        },
-        "required": [
-          "version",
-          "sessionId",
-          "preparationId",
-          "clarificationId",
-          "obligationId",
-          "contextIdentityHash",
-          "meaningsHash",
-          "questionCaptureHash",
-          "acceptedChoiceId",
-          "answer"
-        ]
-      },
-      "ObservedQuestionMeaning": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "obligationId": {
-            "type": "string",
-            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
-          },
-          "ref": {
-            "type": "string",
-            "pattern": "^e[0-9]{1,6}$"
-          },
-          "bindingId": {
-            "oneOf": [
-              {
-                "type": "string",
-                "minLength": 1,
-                "maxLength": 256
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "required": [
-          "obligationId",
-          "ref",
-          "bindingId"
-        ]
-      },
-      "ModelObservedQuestion": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "reason": {
-            "type": "string",
-            "enum": [
-              "AMBIGUOUS_TARGET",
-              "AMBIGUOUS_BINDING",
-              "INSUFFICIENT_EVIDENCE"
-            ]
-          },
-          "choices": {
-            "type": "array",
-            "minItems": 2,
-            "maxItems": 10,
-            "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "choiceId": {
-                  "type": "string",
-                  "minLength": 1,
-                  "maxLength": 256
-                },
-                "safeLabel": {
-                  "type": "string",
-                  "minLength": 1,
-                  "maxLength": 256
-                },
-                "meaning": {
-                  "$ref": "https://checks.citi.example/contracts/observed/v3/replay-validation.schema.json#/definitions/ObservedQuestionMeaning"
-                }
-              },
-              "required": [
-                "choiceId",
-                "safeLabel",
-                "meaning"
-              ]
-            }
-          }
-        },
-        "required": [
-          "reason",
-          "choices"
-        ]
-      },
-      "ObservedQuestionContext": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "sessionId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "scopeHash": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          },
-          "sourceRevision": {
-            "type": "string",
-            "pattern": "^(0|[1-9][0-9]{0,18})$"
-          },
-          "configurationRevision": {
-            "type": "string",
-            "pattern": "^(0|[1-9][0-9]{0,18})$"
-          },
-          "clarificationId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "question": {
-            "$ref": "https://checks.citi.example/contracts/observed/v3/clarification.schema.json"
-          },
-          "questionCapture": {
-            "$ref": "https://checks.citi.example/contracts/observed/v3/replay-validation.schema.json#/definitions/QuestionCapture1"
-          }
-        },
-        "required": [
-          "sessionId",
-          "scopeHash",
-          "sourceRevision",
-          "configurationRevision",
-          "clarificationId",
-          "question",
-          "questionCapture"
-        ]
-      },
-      "QuestionAttemptEvidence": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "attemptId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "requestId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "attempt": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 3
-          },
-          "kind": {
-            "const": "NEXT_ACTION"
-          },
-          "status": {
-            "const": "APPLIED"
-          },
-          "projectionHash": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          },
-          "planRevision": {
-            "type": "string",
-            "pattern": "^(0|[1-9][0-9]{0,18})$"
-          },
-          "scopeHash": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          },
-          "scope": {
-            "$ref": "https://checks.citi.example/contracts/observed/v3/session.schema.json#/properties/scope"
-          },
-          "owner": {
-            "$ref": "https://checks.citi.example/contracts/observed/v3/session.schema.json#/properties/owner"
-          },
-          "documentId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "generation": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 2147483647
-          },
-          "executionEvidence": {
-            "$ref": "https://checks.citi.example/contracts/observed/v3/execution-evidence.schema.json"
-          },
-          "responseSchemaVersion": {
-            "const": 3
-          },
-          "responseRequestId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "responseKind": {
-            "const": "NEXT_ACTION"
-          },
-          "responseStatus": {
-            "const": "CLARIFICATION"
-          },
-          "modelQuestion": {
-            "$ref": "https://checks.citi.example/contracts/observed/v3/replay-validation.schema.json#/definitions/ModelObservedQuestion"
-          }
-        },
-        "required": [
-          "attemptId",
-          "requestId",
-          "attempt",
-          "kind",
-          "status",
-          "projectionHash",
-          "planRevision",
-          "scopeHash",
-          "scope",
-          "owner",
-          "documentId",
-          "generation",
-          "executionEvidence",
-          "responseSchemaVersion",
-          "responseRequestId",
-          "responseKind",
-          "responseStatus",
-          "modelQuestion"
-        ]
-      },
-      "QuestionPlanEvidence": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "revision": {
-            "type": "string",
-            "pattern": "^(0|[1-9][0-9]{0,18})$"
-          },
-          "planHash": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          },
-          "plan": {
-            "$ref": "https://checks.citi.example/contracts/observed/v3/replay-validation.schema.json#/definitions/AcceptedTranslationPlan"
-          }
-        },
-        "required": [
-          "revision",
-          "planHash",
-          "plan"
-        ]
-      },
-      "ObservedChoiceWitness1": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "version": {
-            "const": 1
-          },
-          "receipt": {
-            "$ref": "https://checks.citi.example/contracts/observed/v3/replay-validation.schema.json#/definitions/ObservedChoiceReceipt1"
-          },
-          "context": {
-            "$ref": "https://checks.citi.example/contracts/observed/v3/replay-validation.schema.json#/definitions/ObservedQuestionContext"
-          },
-          "meanings": {
-            "type": "array",
-            "minItems": 2,
-            "maxItems": 10,
-            "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "choiceId": {
-                  "type": "string",
-                  "minLength": 1,
-                  "maxLength": 256
-                },
-                "meaning": {
-                  "$ref": "https://checks.citi.example/contracts/observed/v3/replay-validation.schema.json#/definitions/ObservedQuestionMeaning"
-                },
-                "selection": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "role": {
-                      "type": "string",
-                      "minLength": 1,
-                      "maxLength": 64
-                    },
-                    "name": {
-                      "type": "string",
-                      "minLength": 0,
-                      "maxLength": 256
-                    },
-                    "evidence": {
-                      "type": "string",
-                      "minLength": 0,
-                      "maxLength": 256
-                    },
-                    "ordinal": {
-                      "type": "object",
-                      "additionalProperties": false,
-                      "properties": {
-                        "index": {
-                          "type": "integer",
-                          "minimum": 1,
-                          "maximum": 2147483647
-                        },
-                        "count": {
-                          "type": "integer",
-                          "minimum": 2,
-                          "maximum": 2147483647
-                        }
-                      },
-                      "required": [
-                        "index",
-                        "count"
-                      ]
-                    },
-                    "scopeHash": {
-                      "type": "string",
-                      "pattern": "^[a-f0-9]{64}$"
-                    }
-                  },
-                  "required": [
-                    "role",
-                    "name",
-                    "evidence"
-                  ]
-                }
-              },
-              "required": [
-                "choiceId",
-                "meaning",
-                "selection"
-              ]
-            }
-          },
-          "acceptedChoiceId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "attempt": {
-            "$ref": "https://checks.citi.example/contracts/observed/v3/replay-validation.schema.json#/definitions/QuestionAttemptEvidence"
-          },
-          "questionPlan": {
-            "$ref": "https://checks.citi.example/contracts/observed/v3/replay-validation.schema.json#/definitions/QuestionPlanEvidence"
-          }
-        },
-        "required": [
-          "version",
-          "receipt",
-          "context",
-          "meanings",
-          "acceptedChoiceId",
-          "attempt",
-          "questionPlan"
         ]
       },
       "InputEvidenceMetadata": {
@@ -10026,14 +7152,6 @@
               "kind": {
                 "const": "nonsecretText"
               },
-              "intendedSlot": {
-                "enum": [
-                  "navigate.destination",
-                  "fill.value",
-                  "selectOption.value",
-                  "assert.expected"
-                ]
-              },
               "provenance": {
                 "$ref": "https://checks.citi.example/contracts/observed/v3/source-reference.schema.json"
               }
@@ -10042,7 +7160,6 @@
               "inputId",
               "sourceStepId",
               "kind",
-              "intendedSlot",
               "provenance"
             ]
           },
@@ -10063,14 +7180,6 @@
               "kind": {
                 "const": "destination"
               },
-              "intendedSlot": {
-                "enum": [
-                  "navigate.destination",
-                  "fill.value",
-                  "selectOption.value",
-                  "assert.expected"
-                ]
-              },
               "provenance": {
                 "$ref": "https://checks.citi.example/contracts/observed/v3/source-reference.schema.json"
               }
@@ -10079,7 +7188,6 @@
               "inputId",
               "sourceStepId",
               "kind",
-              "intendedSlot",
               "provenance"
             ]
           },
@@ -10100,9 +7208,6 @@
               "kind": {
                 "const": "secretRef"
               },
-              "intendedSlot": {
-                "const": "fill.value"
-              },
               "provenance": {
                 "$ref": "https://checks.citi.example/contracts/observed/v3/source-reference.schema.json"
               },
@@ -10115,7 +7220,6 @@
               "inputId",
               "sourceStepId",
               "kind",
-              "intendedSlot",
               "provenance",
               "secretId"
             ]
@@ -10315,365 +7419,6 @@
           "translationHash",
           "bootstrapHash",
           "sourceManifestHash"
-        ]
-      },
-      "GuardSourceAuthorization": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "pressAdmissionId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "predecessorAdmissionId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "pressPreparationId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "predecessorPreparationId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "contextId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "sourceRevision": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "configurationRevision": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "workerId": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 256
-          },
-          "pressProofHash": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          },
-          "predecessorProofHash": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          },
-          "pressObservationHash": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          },
-          "predecessorObservationHash": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          },
-          "sourceManifestHash": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          },
-          "sourceIdentityHash": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          },
-          "authoredInputsHash": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          },
-          "scopeHash": {
-            "type": "string",
-            "pattern": "^[a-f0-9]{64}$"
-          },
-          "version": {
-            "const": 1
-          },
-          "contextRevision": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 201
-          },
-          "ownerFence": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 2147483647
-          },
-          "predecessorGrounding": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "field": {
-                "enum": [
-                  "NAME",
-                  "OWN_TEXT",
-                  "ROLE"
-                ]
-              },
-              "mode": {
-                "enum": [
-                  "WHOLE_PHRASE",
-                  "ALL_WORDS",
-                  "ROLE"
-                ]
-              },
-              "source": {
-                "oneOf": [
-                  {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                      "kind": {
-                        "const": "AUTHORED"
-                      },
-                      "stepId": {
-                        "type": "string",
-                        "minLength": 1,
-                        "maxLength": 256
-                      }
-                    },
-                    "required": [
-                      "kind",
-                      "stepId"
-                    ]
-                  },
-                  {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "properties": {
-                      "kind": {
-                        "const": "SAVED_INPUT"
-                      },
-                      "stepId": {
-                        "type": "string",
-                        "minLength": 1,
-                        "maxLength": 256
-                      },
-                      "declarationId": {
-                        "type": "string",
-                        "minLength": 1,
-                        "maxLength": 256
-                      },
-                      "declarationHash": {
-                        "type": "string",
-                        "pattern": "^[a-f0-9]{64}$"
-                      }
-                    },
-                    "required": [
-                      "kind",
-                      "stepId",
-                      "declarationId",
-                      "declarationHash"
-                    ]
-                  }
-                ]
-              }
-            },
-            "required": [
-              "field",
-              "mode",
-              "source"
-            ]
-          },
-          "predecessorDestructive": {
-            "type": "array",
-            "maxItems": 15,
-            "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "verb": {
-                  "enum": [
-                    "delete",
-                    "remove",
-                    "erase",
-                    "destroy",
-                    "purge",
-                    "pay",
-                    "transfer",
-                    "send money",
-                    "submit order",
-                    "place order",
-                    "confirm payment",
-                    "cancel subscription",
-                    "close account",
-                    "deactivate",
-                    "revoke"
-                  ]
-                },
-                "source": {
-                  "oneOf": [
-                    {
-                      "type": "object",
-                      "additionalProperties": false,
-                      "properties": {
-                        "kind": {
-                          "const": "AUTHORED"
-                        },
-                        "stepId": {
-                          "type": "string",
-                          "minLength": 1,
-                          "maxLength": 256
-                        }
-                      },
-                      "required": [
-                        "kind",
-                        "stepId"
-                      ]
-                    },
-                    {
-                      "type": "object",
-                      "additionalProperties": false,
-                      "properties": {
-                        "kind": {
-                          "const": "SAVED_INPUT"
-                        },
-                        "stepId": {
-                          "type": "string",
-                          "minLength": 1,
-                          "maxLength": 256
-                        },
-                        "declarationId": {
-                          "type": "string",
-                          "minLength": 1,
-                          "maxLength": 256
-                        },
-                        "declarationHash": {
-                          "type": "string",
-                          "pattern": "^[a-f0-9]{64}$"
-                        }
-                      },
-                      "required": [
-                        "kind",
-                        "stepId",
-                        "declarationId",
-                        "declarationHash"
-                      ]
-                    }
-                  ]
-                }
-              },
-              "required": [
-                "verb",
-                "source"
-              ]
-            }
-          },
-          "currentDestructive": {
-            "type": "array",
-            "maxItems": 15,
-            "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "properties": {
-                "verb": {
-                  "enum": [
-                    "delete",
-                    "remove",
-                    "erase",
-                    "destroy",
-                    "purge",
-                    "pay",
-                    "transfer",
-                    "send money",
-                    "submit order",
-                    "place order",
-                    "confirm payment",
-                    "cancel subscription",
-                    "close account",
-                    "deactivate",
-                    "revoke"
-                  ]
-                },
-                "source": {
-                  "oneOf": [
-                    {
-                      "type": "object",
-                      "additionalProperties": false,
-                      "properties": {
-                        "kind": {
-                          "const": "AUTHORED"
-                        },
-                        "stepId": {
-                          "type": "string",
-                          "minLength": 1,
-                          "maxLength": 256
-                        }
-                      },
-                      "required": [
-                        "kind",
-                        "stepId"
-                      ]
-                    },
-                    {
-                      "type": "object",
-                      "additionalProperties": false,
-                      "properties": {
-                        "kind": {
-                          "const": "SAVED_INPUT"
-                        },
-                        "stepId": {
-                          "type": "string",
-                          "minLength": 1,
-                          "maxLength": 256
-                        },
-                        "declarationId": {
-                          "type": "string",
-                          "minLength": 1,
-                          "maxLength": 256
-                        },
-                        "declarationHash": {
-                          "type": "string",
-                          "pattern": "^[a-f0-9]{64}$"
-                        }
-                      },
-                      "required": [
-                        "kind",
-                        "stepId",
-                        "declarationId",
-                        "declarationHash"
-                      ]
-                    }
-                  ]
-                }
-              },
-              "required": [
-                "verb",
-                "source"
-              ]
-            }
-          }
-        },
-        "required": [
-          "pressAdmissionId",
-          "predecessorAdmissionId",
-          "pressPreparationId",
-          "predecessorPreparationId",
-          "contextId",
-          "sourceRevision",
-          "configurationRevision",
-          "workerId",
-          "pressProofHash",
-          "predecessorProofHash",
-          "pressObservationHash",
-          "predecessorObservationHash",
-          "sourceManifestHash",
-          "sourceIdentityHash",
-          "authoredInputsHash",
-          "scopeHash",
-          "version",
-          "contextRevision",
-          "ownerFence",
-          "predecessorGrounding",
-          "predecessorDestructive",
-          "currentDestructive"
         ]
       }
     }
@@ -11294,15 +8039,11 @@
           },
           "guard": {
             "$ref": "https://checks.citi.example/contracts/observed/v3/replay-operation.schema.json#/definitions/Guard"
-          },
-          "target": {
-            "$ref": "https://checks.citi.example/contracts/observed/v3/learned-plan.schema.json#/definitions/observedAction/properties/target"
           }
         },
         "required": [
           "coordinate",
           "origin",
-          "target",
           "operation",
           "operationHash",
           "guard"
@@ -11644,20 +8385,11 @@
             "items": {
               "enum": [
                 "observe",
-                "navigate",
-                "click",
-                "fill",
-                "press",
-                "check",
-                "uncheck",
-                "selectOption",
-                "hover",
-                "read",
-                "assert"
+                "step"
               ]
             },
             "minItems": 1,
-            "maxItems": 12
+            "maxItems": 2
           }
         },
         "required": [
@@ -11891,14 +8623,6 @@
               "nonsecretText",
               "destination"
             ]
-          },
-          "intendedSlot": {
-            "enum": [
-              "navigate.destination",
-              "fill.value",
-              "selectOption.value",
-              "assert.expected"
-            ]
           }
         },
         "required": [
@@ -11907,8 +8631,7 @@
           "stepId",
           "startUtf16",
           "endUtf16",
-          "kind",
-          "intendedSlot"
+          "kind"
         ]
       },
       {
@@ -11938,14 +8661,6 @@
               "nonsecretText",
               "destination"
             ]
-          },
-          "intendedSlot": {
-            "enum": [
-              "navigate.destination",
-              "fill.value",
-              "selectOption.value",
-              "assert.expected"
-            ]
           }
         },
         "required": [
@@ -11953,8 +8668,7 @@
           "configurationRevision",
           "stepId",
           "referenceId",
-          "kind",
-          "intendedSlot"
+          "kind"
         ]
       },
       {
@@ -11982,9 +8696,6 @@
           "kind": {
             "const": "secretRef"
           },
-          "intendedSlot": {
-            "const": "fill.value"
-          },
           "referenceName": {
             "type": "string",
             "pattern": "^[A-Za-z0-9_.-]{1,64}$"
@@ -11996,7 +8707,6 @@
           "stepId",
           "referenceId",
           "kind",
-          "intendedSlot",
           "referenceName"
         ]
       }
@@ -12031,20 +8741,6 @@
               "type": "integer",
               "minimum": 0,
               "maximum": 7
-            },
-            "operationKind": {
-              "enum": [
-                "navigate",
-                "click",
-                "fill",
-                "press",
-                "selectOption",
-                "check",
-                "uncheck",
-                "hover",
-                "read",
-                "assert"
-              ]
             },
             "targetIntent": {
               "type": "string",
@@ -12087,32 +8783,25 @@
                 }
               ]
             },
-            "predicate": {
-              "oneOf": [
-                {
-                  "enum": [
-                    "visible",
-                    "containsText",
-                    "hasValue",
-                    "url",
-                    "title"
-                  ]
-                },
-                {
-                  "type": "null"
-                }
-              ]
+            "uses": {
+              "type": "array",
+              "maxItems": 8,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              }
             }
           },
           "required": [
             "stepId",
             "occurrence",
-            "operationKind",
             "targetIntent",
             "scopeIntent",
             "referenceIndex",
             "needId",
-            "predicate"
+            "uses"
           ]
         },
         "minItems": 1,
@@ -12144,18 +8833,10 @@
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 256
-                  },
-                  "argumentSlot": {
-                    "enum": [
-                      "fill.value",
-                      "selectOption.value",
-                      "assert.expected"
-                    ]
                   }
                 },
                 "required": [
-                  "stepId",
-                  "argumentSlot"
+                  "stepId"
                 ]
               },
               "minItems": 0,
@@ -12191,29 +8872,11 @@
             "type": "integer",
             "minimum": 0,
             "maximum": 7
-          },
-          "operationKind": {
-            "enum": [
-              "navigate",
-              "fill",
-              "selectOption",
-              "assert"
-            ]
-          },
-          "argumentSlot": {
-            "enum": [
-              "navigate.destination",
-              "fill.value",
-              "selectOption.value",
-              "assert.expected"
-            ]
           }
         },
         "required": [
           "stepId",
-          "occurrence",
-          "operationKind",
-          "argumentSlot"
+          "occurrence"
         ]
       },
       "sourceQuestionMeaning": {
@@ -12233,6 +8896,85 @@
         ]
       }
     }
+  },
+  "step-receipt": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://checks.citi.example/contracts/observed/v3/step-receipt.schema.json",
+    "title": "Studio observed v3 per-step receipt",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "closedCode": {
+        "oneOf": [
+          {
+            "type": "string",
+            "enum": [
+              "INVALID_CONTRACT",
+              "PROFILE_MISMATCH",
+              "AUTHORIZATION_EXPIRED",
+              "POLICY_REFUSED",
+              "TARGET_DRIFT",
+              "READ_REFUSED",
+              "REFERENCE_REFUSED",
+              "ASSERTION_FAILED",
+              "CANCELLED",
+              "TIMEOUT",
+              "OUTCOME_UNKNOWN",
+              "INTERNAL_ERROR",
+              "LOGIN_REQUIRED",
+              "PASSWORD_CONTROL_READ_REFUSED",
+              "REFERENCE_MISMATCH"
+            ]
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "stepHash": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}$"
+      },
+      "fenceCrossed": {
+        "type": "boolean"
+      },
+      "effects": {
+        "type": "array",
+        "maxItems": 64,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "method": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "completed": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "method",
+            "completed"
+          ]
+        }
+      },
+      "effectsTruncated": {
+        "type": "boolean"
+      },
+      "offscreen": {
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "closedCode",
+      "stepHash",
+      "fenceCrossed",
+      "effects",
+      "effectsTruncated",
+      "offscreen"
+    ]
   },
   "versions": {
     "$schema": "http://json-schema.org/draft-07/schema#",

@@ -5,21 +5,16 @@ import { join } from 'node:path';
 
 import { afterAll, describe, expect, it } from 'vitest';
 
-import { elementCandidateFacts, listOptions, resolveRefs } from '../../src/run/perceptionInPage.js';
+import { resolveRefs } from '../../src/run/perceptionInPage.js';
 import {
   ENGINE_PIN,
-  backendIdsForSelector,
   backendNodeIdsFor,
-  candidateFactsOf,
-  checkLiveOptions,
-  checkOptionPresent,
   decodeJsStringLiteral,
   engineExpression,
   loadInjectedSource,
   loadInjectedSourceFrom,
   openEngine,
   runOnEngine,
-  verifySelectors,
   type CdpSession,
   type PerceptionEngine,
 } from '../../src/run/playwrightEngine.js';
@@ -280,16 +275,6 @@ describe('page programs on the engine', () => {
     expect(cdp.calls[0]).toMatchObject({ method: 'Runtime.callFunctionOn', params: { objectId: 'engine-1', functionDeclaration: resolveRefs.toString(), arguments: [{ value: ['e1'] }], returnByValue: true } });
   });
 
-  it('verifySelectors maps results to counts, or to an error marker, and refuses a malformed reply', async () => {
-    const cdp = new FakeCdp(() => ok([{ count: 1, index: 0 }, { count: 3, index: -1 }, { error: true }]));
-    expect(await verifySelectors(engineOn(cdp), 'e5', ['a', 'b', 'c'])).toEqual([{ count: 1, index: 0 }, { count: 3, index: -1 }, { error: true }]);
-    expect(cdp.calls[0]?.params?.arguments).toEqual([{ value: 'e5' }, { value: ['a', 'b', 'c'] }]);
-    const short = new FakeCdp(() => ok([{ count: 1, index: 0 }]));
-    expect(await rejection(verifySelectors(engineOn(short), 'e5', ['a', 'b']))).toBe('PERCEPTION_UNAVAILABLE');
-    const text = new FakeCdp(() => ok('text'));
-    expect(await rejection(verifySelectors(engineOn(text), 'e5', ['a']))).toBe('PERCEPTION_UNAVAILABLE');
-  });
-
   it('backendNodeIdsFor resolves refs to backend ids through a remote array, in chunks, and releases it', async () => {
     const cdp = new FakeCdp((method, params) => {
       switch (method) {
@@ -319,73 +304,4 @@ describe('page programs on the engine', () => {
     expect(await backendNodeIdsFor(engineOn(cdp), ['e1', 'e2'])).toEqual({ e1: 5 });
   });
 
-  it('backendIdsForSelector lists the matches of an internal selector in document order', async () => {
-    const cdp = new FakeCdp((method, params) => {
-      switch (method) {
-        case 'Runtime.callFunctionOn': return { result: { objectId: 'array-9' } };
-        case 'Runtime.getProperties': return { result: [{ name: '1', value: { objectId: 'b' } }, { name: '0', value: { objectId: 'a' } }] };
-        case 'DOM.describeNode': return { node: { backendNodeId: params?.objectId === 'a' ? 11 : 22 } };
-        default: return {};
-      }
-    });
-    expect(await backendIdsForSelector(engineOn(cdp), 'internal:text="x"s')).toEqual([11, 22]);
-  });
-
-  it('candidateFactsOf returns the facts, or null when the ref no longer resolves', async () => {
-    const facts = { tag: 'button', id: null, name: null, type: null, ariaLabel: null, title: null, placeholder: null, testId: null, levels: [], generated: null };
-    const cdp = new FakeCdp(() => ok(facts));
-    expect(await candidateFactsOf(engineOn(cdp), 'e1', 'data-testid', ['e2'])).toEqual(facts);
-    expect(cdp.calls[0]?.params?.functionDeclaration).toBe(elementCandidateFacts.toString());
-    expect(await candidateFactsOf(engineOn(new FakeCdp(() => ok(null))), 'e1', 'data-testid', [])).toBeNull();
-    expect(await rejection(candidateFactsOf(engineOn(new FakeCdp(() => ok(7))), 'e1', 'data-testid', []))).toBe('PERCEPTION_UNAVAILABLE');
-  });
-});
-
-describe('G1 OPTION_NOT_PRESENT', () => {
-  it('passes a literal that is a live option and refuses one that is absent', () => {
-    expect(checkOptionPresent('3.12', ['3.11', '3.12', '3.13'])).toEqual({ kind: 'pass' });
-    expect(checkOptionPresent('3.99', ['3.11', '3.12', '3.13'])).toEqual({ kind: 'refuse', code: 'OPTION_NOT_PRESENT' });
-  });
-
-  it('matches NFKC and case-insensitively, ignoring surrounding and repeated whitespace (non-breaking spaces included)', () => {
-    expect(checkOptionPresent('KENYA', ['Kenya']).kind).toBe('pass');
-    expect(checkOptionPresent('Ｋｅｎｙａ', ['Kenya']).kind).toBe('pass');
-    expect(checkOptionPresent('  New   York ', ['New York']).kind).toBe('pass');
-    expect(checkOptionPresent('New York', ['New York']).kind).toBe('pass');
-    expect(checkOptionPresent('New York', ['New  York']).kind).toBe('pass');
-    expect(checkOptionPresent('Kenya!', ['Kenya']).kind).toBe('refuse');
-  });
-
-  it('is not a verdict on an empty or blank list', () => {
-    expect(checkOptionPresent('x', [])).toEqual({ kind: 'notApplicable', reason: 'OPTIONS_UNAVAILABLE' });
-    expect(checkOptionPresent('x', ['', '  '])).toEqual({ kind: 'notApplicable', reason: 'OPTIONS_UNAVAILABLE' });
-  });
-
-  describe('against the live option list', () => {
-    const live = (listing: unknown): ReturnType<typeof checkLiveOptions> =>
-      checkLiveOptions({ engine: engineOn(new FakeCdp(() => ok(listing))), ref: 'e7', literal: 'beta' });
-
-    it('reads every option of a native select, the selected one included, by label and by value', async () => {
-      expect(await live({ kind: 'native', labels: ['Alpha', 'Beta', 'Gamma'], values: ['a', 'b', 'g'], tooMany: false })).toEqual({ kind: 'pass' });
-      const byValue = await checkLiveOptions({ engine: engineOn(new FakeCdp(() => ok({ kind: 'native', labels: ['Alpha'], values: ['us'], tooMany: false }))), ref: 'e7', literal: 'US' });
-      expect(byValue).toEqual({ kind: 'pass' });
-      expect(await live({ kind: 'native', labels: ['Alpha', 'Gamma'], values: ['a', 'g'], tooMany: false })).toEqual({ kind: 'refuse', code: 'OPTION_NOT_PRESENT' });
-    });
-
-    it('reads ARIA options', async () => {
-      expect(await live({ kind: 'aria', labels: ['Beta'], values: [], tooMany: false })).toEqual({ kind: 'pass' });
-    });
-
-    it('is not applicable to a non-list, an unresolved ref, or an oversize list', async () => {
-      expect(await live({ kind: 'none', labels: [], values: [], tooMany: false })).toEqual({ kind: 'notApplicable', reason: 'NOT_A_LIST' });
-      expect(await live(null)).toEqual({ kind: 'notApplicable', reason: 'OPTIONS_UNAVAILABLE' });
-      expect(await live({ kind: 'native', labels: [], values: [], tooMany: true })).toEqual({ kind: 'notApplicable', reason: 'OPTIONS_UNAVAILABLE' });
-    });
-
-    it('asks the engine for the options of the ref', async () => {
-      const cdp = new FakeCdp(() => ok({ kind: 'native', labels: ['Beta'], values: [], tooMany: false }));
-      await checkLiveOptions({ engine: engineOn(cdp), ref: 'e7', literal: 'Beta' });
-      expect(cdp.calls[0]?.params).toMatchObject({ functionDeclaration: listOptions.toString(), arguments: [{ value: 'e7' }] });
-    });
-  });
 });

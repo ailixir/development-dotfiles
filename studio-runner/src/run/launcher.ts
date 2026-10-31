@@ -57,7 +57,8 @@ import { ObservedPreReadyFailure } from './errors.js';
 
 import type { Execute3, Launch3, Ready3, Result3 } from '../executor/observedOperations.js';
 import { demand, equalObserved, hashObserved, isRecord, OBSERVED_LIMITS, validateObserved } from '../validator/observedReferencePolicy.js';
-import { validateObservedExecute } from '../executor/observedReplay.js';
+import { stepHashOf, validateObservedExecute } from '../executor/observedReplay.js';
+import { stepReceiptAgrees } from './protocol.js';
 import type { ObservedChildMessage } from './protocol.js';
 import type { StepReporter } from '../executor/stepReporter.js';
 import { fork } from 'node:child_process';
@@ -418,7 +419,7 @@ async function launchObservedChild(options: ChildLauncherOptions, launchOptions:
     validateObserved('replay-ipc#/definitions/Launch3', launch, OBSERVED_LIMITS.launch);
 
     const freezeLaunch=(value:unknown):void=>{if(value&&typeof value==='object'){for(const child of Object.values(value))freezeLaunch(child);Object.freeze(value);}};freezeLaunch(launch);
-    const execute: Execute3 = structuredClone({ kind: 'execute', protocolVersion: 3, mode: 'observed', runId: b.executionId, attemptId: b.attemptId, profileHash: hashObserved(b.requiredProfile), configurationHash: b.configurationHash, waitStrategy: job.configuration.waitStrategy, stepTimeoutMs: launchOptions.stepTimeoutMs ?? job.runtime.stepTimeoutMs, steps: job.artifact.steps, guards: job.artifact.guards, bindings: job.artifact.replayPolicy.bindings.map(x => ({ bindingId: x.bindingId, producer: x.producer, recipe: x.recipe, origin: x.sourceOrigin })), transfers: job.artifact.replayPolicy.transfers, inputs: job.artifact.inputRecipes.map(i => { if (i.kind === 'secretRef') { demand(i.provenance.kind === 'configuration'); return { inputId: i.inputId, stepId: i.stepId, kind: 'secretRef' as const, intendedSlot: 'fill.value' as const, referenceName: i.provenance.referenceName }; } const v = job.inputs.find(x => x.inputId === i.inputId); demand(v); return { inputId: i.inputId, stepId: i.stepId, kind: i.kind === 'destination' ? 'destination' : 'nonsecretText', intendedSlot: i.intendedSlot, value: v.value }; }), secrets: job.secrets, secretOrigins: job.secretOrigins, ...(job.artifact.learnedPlan.bindings.some(binding=>binding.consumers.length===0)?{retainedArtifact:job.artifact}:{}) });
+    const execute: Execute3 = structuredClone({ kind: 'execute', protocolVersion: 3, mode: 'observed', runId: b.executionId, attemptId: b.attemptId, profileHash: hashObserved(b.requiredProfile), configurationHash: b.configurationHash, waitStrategy: job.configuration.waitStrategy, stepTimeoutMs: launchOptions.stepTimeoutMs ?? job.runtime.stepTimeoutMs, steps: job.artifact.steps, guards: job.artifact.guards, bindings: job.artifact.replayPolicy.bindings.map(x => ({ bindingId: x.bindingId, producer: x.producer, origin: x.sourceOrigin })), transfers: job.artifact.replayPolicy.transfers, inputs: job.artifact.inputRecipes.map(i => { if (i.kind === 'secretRef') { demand(i.provenance.kind === 'configuration'); return { inputId: i.inputId, stepId: i.stepId, kind: 'secretRef' as const, referenceName: i.provenance.referenceName }; } const v = job.inputs.find(x => x.inputId === i.inputId); demand(v); return { inputId: i.inputId, stepId: i.stepId, kind: i.kind === 'destination' ? 'destination' : 'nonsecretText', value: v.value }; }), secrets: job.secrets, secretOrigins: job.secretOrigins, ...(job.artifact.learnedPlan.bindings.some(binding=>binding.consumers.length===0)?{retainedArtifact:job.artifact}:{}) });
     validateObservedExecute(execute, b.scope, options.allowedDomains, launch);
     mkdirSync(join(launchOptions.scratchPath, SCRATCH_SUBDIRECTORIES.temp), { recursive: true });
     secureScratchDirectory(launchOptions.scratchPath);
@@ -461,7 +462,7 @@ async function launchObservedChild(options: ChildLauncherOptions, launchOptions:
                 demand(!result && (m.ok ? m.errorCode === null : m.errorCode !== null));
                 if (executed)
                     demand(completedSteps.size === execute.steps.length && (!m.ok || execute.steps.every(s => completedSteps.get(s.stepIndex) === 'PASS')));
-                const receipts=provenSecretUseAfterLoss(Object.keys(job.secrets),job.artifact.inputRecipes,job.artifact.steps,executed,completedSteps);
+                const receipts=provenSecretUseAfterLoss(Object.keys(job.secrets),job.artifact.steps,executed,completedSteps);
                 demand(!mergeSecretUseEvidence(receipts,m.secretUse,Object.keys(job.secrets)).contradictory);
                 result = m;
             }
@@ -476,9 +477,9 @@ async function launchObservedChild(options: ChildLauncherOptions, launchOptions:
                 else {
                     demand(!completedSteps.has(m.stepIndex) && m.stepIndex === completedSteps.size);
                     demand(m.status === 'SKIPPED' ? !startedSteps.has(m.stepIndex) : startedSteps.get(m.stepIndex) === m.startedAtMs);
-                    demand(m.status === 'SKIPPED' ? m.startedAtMs === null && m.finishedAtMs === null && m.durationMs === null && m.errorCode === null : m.startedAtMs !== null && m.finishedAtMs !== null && m.durationMs !== null && [m.startedAtMs,m.finishedAtMs,m.durationMs].every(n=>Number.isFinite(n)&&n>=0) && m.finishedAtMs >= m.startedAtMs && Math.abs(m.durationMs - (m.finishedAtMs - m.startedAtMs)) < 0.001 && (m.status === 'PASS' ? m.errorCode === null : m.errorCode !== null));
+                    demand(m.status === 'SKIPPED' ? m.startedAtMs === null && m.finishedAtMs === null && m.durationMs === null && m.receipt.closedCode === null : m.startedAtMs !== null && m.finishedAtMs !== null && m.durationMs !== null && [m.startedAtMs,m.finishedAtMs,m.durationMs].every(n=>Number.isFinite(n)&&n>=0) && m.finishedAtMs >= m.startedAtMs && Math.abs(m.durationMs - (m.finishedAtMs - m.startedAtMs)) < 0.001 && stepReceiptAgrees(m, stepHashOf(job.artifact.steps[m.stepIndex]?.operations ?? [])));
                     completedSteps.set(m.stepIndex, m.status);
-                    reporter.stepFinished({ stepIndex: m.stepIndex, status: m.status, startedAtMs: m.startedAtMs, finishedAtMs: m.finishedAtMs, durationMs: m.durationMs, failure: m.errorCode });
+                    reporter.stepFinished({ stepIndex: m.stepIndex, status: m.status, startedAtMs: m.startedAtMs, finishedAtMs: m.finishedAtMs, durationMs: m.durationMs, failure: m.receipt.closedCode, receipt: m.receipt });
                 }
             }
             wake();
@@ -545,7 +546,7 @@ async function launchObservedChild(options: ChildLauncherOptions, launchOptions:
                 else
                     await stop();
                 const final = result as Result3 | null;
-                const usage=mergeSecretUseEvidence(provenSecretUseAfterLoss(Object.keys(job.secrets),job.artifact.inputRecipes,job.artifact.steps,executed,completedSteps),final?.secretUse,Object.keys(job.secrets));
+                const usage=mergeSecretUseEvidence(provenSecretUseAfterLoss(Object.keys(job.secrets),job.artifact.steps,executed,completedSteps),final?.secretUse,Object.keys(job.secrets));
                 const recording=observeOwnedAppRecording(sealedVideo(),final?.recording.path,wasOrderly(final),quiescent);
                 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- IPC callbacks and stop may change this state while the parent awaits.
                 return { ok: killReason === null && !violation && final?.ok === true, failureKind: killReason ? KILL_FAILURE_KINDS[killReason] : final?.errorCode === 'ASSERTION_FAILED' ? 'step' : final?.ok ? null : 'run-fault', failureMessage: killReason ? KILL_MESSAGES[killReason] : final?.errorCode ?? (violation ? 'INVALID_CONTRACT' : null), recording, observedHosts: [], secretUse: usage.facts, ...(final?.detail ? {detail: final.detail} : {}) };

@@ -60,7 +60,7 @@ module.exports = ({ hash, canonical, check, same, structural }) => {
       }
       producedBindings.sort((a, b) => a.producer.ordinal - b.producer.ordinal || utf8(a.bindingId, b.bindingId));
       consumedBindings.sort((a, b) => a.coordinate.ordinal - b.coordinate.ordinal
-        || utf8(a.argumentSlot, b.argumentSlot) || utf8(a.bindingId, b.bindingId));
+        || utf8(a.bindingId, b.bindingId));
       const learnedContent = { actions, producedBindings, consumedBindings };
       const stepSnapshot = { domain: 'studio.step-snapshot', version: 1, stepId: step.id,
         inputChain: previous, learnedStepHash: hash(learnedContent) };
@@ -79,25 +79,24 @@ module.exports = ({ hash, canonical, check, same, structural }) => {
       check(preparation && ledger.state === 'SUCCEEDED' && ledger.dispatchCount === 1, 'SNAPSHOT_GRAPH');
       const proposal = preparation.proposal;
       const action = { coordinate: clone(ledger.coordinate), origin: proposal.executionEvidence.origin,
-        target: clone(preparation.proof.target ?? null), operation: clone(proposal.operation) };
+        operation: clone(proposal.operation) };
       check(ledger.operationHash === hash(action), 'SNAPSHOT_GRAPH');
       return { ...action, admissionId: ledger.admission.admissionId, operationHash: hash(action) };
     });
     const bindings = basis.producers.map(producer => {
       const actual = actions.find(action => action.admissionId === producer.producerAdmissionId);
-      check(actual && actual.operation.kind === 'read' && actual.operation.bindingId === producer.bindingId, 'SNAPSHOT_GRAPH');
-      same(actual.coordinate, producer.coordinate, 'SNAPSHOT_GRAPH'); same(actual.operation.recipe, producer.recipe, 'SNAPSHOT_GRAPH');
+      check(actual && actual.operation.kind === 'step' && actual.operation.captures.includes(producer.bindingId), 'SNAPSHOT_GRAPH');
+      same(actual.coordinate, producer.coordinate, 'SNAPSHOT_GRAPH');
       const consumers = basis.consumerEdges.filter(edge => edge.bindingId === producer.bindingId)
-        .sort((a, b) => compare(a.coordinate, b.coordinate) || utf8(a.argumentSlot, b.argumentSlot) || utf8(a.bindingId, b.bindingId));
+        .sort((a, b) => compare(a.coordinate, b.coordinate) || utf8(a.bindingId, b.bindingId));
       for (const edge of consumers) {
         const action = actions.find(action => action.admissionId === edge.consumerAdmissionId);
-        const argument = action?.operation.value ?? action?.operation.expected;
-        check(action && argument?.kind === 'binding' && argument.bindingId === producer.bindingId
+        check(action && action.operation.uses.some(use => use.kind === 'binding' && use.id === producer.bindingId)
           && edge.producerAdmissionId === producer.producerAdmissionId, 'SNAPSHOT_GRAPH');
         same(edge.coordinate, action.coordinate, 'SNAPSHOT_GRAPH');
       }
       return { schemaVersion: 3, bindingId: producer.bindingId, valueType: 'string', producer: clone(producer.coordinate),
-        recipe: clone(producer.recipe), sourceOrigin: producer.origin, consumers: clone(consumers),
+        sourceOrigin: producer.origin, consumers: clone(consumers),
         provenance: { sessionId: basis.sessionId, producerAdmissionId: producer.producerAdmissionId,
           sourceIntentStepId: producer.coordinate.stepId }, transferPolicy: 'sameOrigin', preserveBytes: true };
     }).sort((a, b) => compare(a.producer, b.producer) || utf8(a.bindingId, b.bindingId));

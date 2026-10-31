@@ -1,3 +1,4 @@
+import { stepOp } from '../helpers/stepCode.js';
 import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 // eslint-disable-next-line no-restricted-imports -- Test-local original fixed SDK delegation; no alternate browser/password primitive.
 import {chromium, type BrowserContext} from 'playwright';
@@ -5,7 +6,7 @@ import {createServer} from 'node:https';
 import {TLSSocket} from 'node:tls';
 import {mkdtemp, readdir, readFile, writeFile, rm, realpath} from 'node:fs/promises';
 import {existsSync, readdirSync, readFileSync} from 'node:fs';
-import {basename, dirname, join, resolve} from 'node:path';
+import {basename,dirname,join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {expect, it} from 'vitest';
 import {createGuidedServer, guidedClaimClient, guidedCallback, verifyGuidedJwt} from '../../src/guided/transport.js';
@@ -22,6 +23,7 @@ import {guidedContext, ownershipSession, assignmentFor, proposal, dispatch} from
 import {testTls, testFingerprint, jwtPolicy, jwt, post} from '../helpers/guidedTls.js';
 import {startSecretLoginFixture} from '../fixtures/secret-login/server.js';
 import {untilMs} from './realRunner.js';
+import {evidencePath} from '../helpers/evidenceOut.js';
 
 const CANARY = 'obs007-stale-grant-A-é:+/';
 const CLEANUP_MS = 5000;
@@ -144,19 +146,19 @@ it('rejects the genuine retired CSI-A grant for a fresh CSI-B assignment before 
     if (!fixture) throw Error('FIXTURE');
     const context = guidedContext(fixture.origin), destination = context.authoredInputs.inputs[0];
     if (!destination || !('value' in destination)) throw Error('DESTINATION'); destination.value = fixture.origin + '/login';
-    context.authoredInputs.inputs.push({inputId: 'input-pass', sourceStepId: 'fill', kind: 'secretRef', intendedSlot: 'fill.value', secretId: 'PASS', provenance: {referenceKind: 'configuration', configurationRevision: context.configurationRevision, stepId: 'fill', referenceId: 'reference-pass', referenceName: 'PASS', kind: 'secretRef', intendedSlot: 'fill.value'}});
+    context.authoredInputs.inputs.push({inputId: 'input-pass', sourceStepId: 'fill', kind: 'secretRef', secretId: 'PASS', provenance: {referenceKind: 'configuration', configurationRevision: context.configurationRevision, stepId: 'fill', referenceId: 'reference-pass', referenceName: 'PASS', kind: 'secretRef'}});
     const grant = ownershipSession(context); grant.scope.csiId = csiId; grant.scopeHash = hash(grant.scope); grant.runAuthorization.scopeHash = grant.scopeHash;
     context.scopeHash = grant.scopeHash; context.authoredInputs.scopeHash = grant.scopeHash; context.authoredInputsHash = hash(context.authoredInputs); context.leaseExpiresAt = grant.owner.leaseExpiresAt;
     const client: Client = {label, context, grant, assignment: assignmentFor(context), sdkRestores: [], launchAttempts: 0, launches: 0, starts: 0, dispatches: 0, nativeEntries: 0, nativePending: 0, closed: false};
     clients.set(context.sessionId, client); return client;
   }
   const route = (client: Client): string => '/internal/v2/studio/guided-sessions/' + client.context.sessionId;
-  async function action(client: Client, step: string, operation: Action['operation'], target?: Action['target'], secret?: string): Promise<void> {
-    if (!client.evidence || !fixture) throw Error('EVIDENCE'); const proposed = proposal(client.context, client.evidence, step, operation, target);
+  async function action(client: Client, step: string, operation: Action['operation'], secret?: string): Promise<void> {
+    if (!client.evidence || !fixture) throw Error('EVIDENCE'); const proposed = proposal(client.context, client.evidence, step, operation);
     const prepared = await post(workerPort, route(client) + '/prepare', {...identity(client.context), proposal: proposed, requestDigest: hash(proposed), expiresAt: client.context.expiresAt}, {key: client.label + '-prepare-' + step}); status(prepared, 200);
     const request = dispatch(client.context, proposed, validate<BridgePreparation>('bridge', prepared.body, 'preparation'));
-    const frame = secret === undefined ? request : {...request, secret: {secretId: 'PASS', value: secret, versionId: 'fixture-version', allowedOrigins: [fixture.origin]}};
-    let reply: Awaited<ReturnType<typeof post>>; try {reply = await post(workerPort, route(client) + '/dispatch', frame, {key: client.label + '-dispatch-' + step});} finally {if ('secret' in frame) delete (frame as {secret?: unknown}).secret;}
+    const frame = secret === undefined ? request : {...request, secrets: [{secretId: 'PASS', value: secret, versionId: 'fixture-version', allowedOrigins: [fixture.origin]}]};
+    let reply: Awaited<ReturnType<typeof post>>; try {reply = await post(workerPort, route(client) + '/dispatch', frame, {key: client.label + '-dispatch-' + step});} finally {if ('secrets' in frame) frame.secrets.forEach(entry => { (entry as {value: string}).value = ''; });}
     status(reply, 200); const outcome = validate<BridgeOutcome>('bridge', reply.body, 'outcome'); expect(outcome.ledger.state).toBe('SUCCEEDED'); expect(hits(Buffer.from(JSON.stringify(outcome)))).toBe(0);
   }
   async function stop(client: Client): Promise<void> {
@@ -279,10 +281,10 @@ it('rejects the genuine retired CSI-A grant for a fresh CSI-B assignment before 
     };
     worker = createGuidedServer(options); const ownedWorker = worker; await new Promise<void>((done, reject) => {ownedWorker.server.once('error', reject); ownedWorker.server.listen(0, '127.0.0.1', () => {ownedWorker.server.off('error', reject); done();});}); const address = worker.server.address(); if (!address || typeof address === 'string') throw Error('PORT'); workerPort = address.port;
     status(await post(workerPort, route(a) + '/assign', a.assignment, {fence: null, key: 'A-assign'}), 200); status(await post(workerPort, route(a) + '/context', a.context, {key: 'A-context'}), 200);
-    await action(a, 'nav', {kind: 'navigate', destinationInputId: 'input-nav'}); const observation = a.observation; if (!observation) throw Error('OBSERVATION'); expect(observation.coverage.passwordControls).toBe(1);
-    await action(a, 'fill', {kind: 'fill', value: {kind: 'secretRef', sourceInputId: 'input-pass'}}, {kind: 'passwordControl', documentId: observation.documentId, generation: observation.generation}, CANARY);
+    await action(a, 'nav', stepOp('await page.goto(inputs["input-nav"]);', { uses: [{ kind: 'input', id: 'input-nav' }] })); const observation = a.observation; if (!observation) throw Error('OBSERVATION'); expect(observation.coverage.passwordControls).toBe(1);
+    await action(a, 'fill', stepOp('await page.locator(\'input[type="password"]\').fill(secrets["PASS"]);', { uses: [{ kind: 'secret', id: 'PASS' }] }), CANARY);
     const seen = a.observation, signIn = seen && Object.entries(seen.facts).find(([, fact]) => fact.name === 'Sign in'); if (!seen || !signIn) throw Error('SIGN_IN');
-    await action(a, 'submit', {kind: 'click'}, {kind: 'node', ref: signIn[0], documentId: seen.documentId, generation: seen.generation});
+    await action(a, 'submit', stepOp('await page.getByRole("button", { name: "Sign in", exact: true }).click();'));
     expect(fixture.receipts().length).toBe(1); expect(fixture.receipts()[0]?.accepted === true && fixture.receipts()[0]?.password === CANARY).toBe(true);
     expect(a.launchAttempts).toBe(1); expect(a.launches).toBe(1); expect(a.nativeEntries).toBe(1); expect(a.nativePending).toBe(0); expect(pids.some(pid => pid.label === 'A' && isAlive(pid.pid))).toBe(true);
     const withhold = facts.filter(fact => fact.kind === 'inventory' && fact.label === 'A' && fact.phase === 'after' && fact.containsA === true).at(-1); expect(withhold !== undefined).toBe(true); expect(Number(withhold?.size)).toBeGreaterThan(0); expect(Number(withhold?.bytes)).toBeGreaterThan(0);
@@ -320,7 +322,7 @@ it('rejects the genuine retired CSI-A grant for a fresh CSI-B assignment before 
       clients.clear(); setup.clear(); resources.length = 0; fixture = undefined;
       const serialized = JSON.stringify({primaryFailed, facts, pids, cleanup, outputHits: output.counts, outputObserved: output.observed, pendingDescriptorRestorations: restorers.length, unresolved: cleanup.some(fact => !fact.confirmed) || restorers.length > 0, allTrackedPidsGone: pids.every(pid => !isAlive(pid.pid)), sourceGuidedWorker: true, compiledWorker: false, coreVaultAuthorizationProved: false, physicalHeapErasureProved: false}, null, 2) + '\n';
       if (hits(Buffer.from(serialized)) > 0) cleanup.push({label: 'scalar-evidence-canary', confirmed: false});
-      else await bounded('evidence', () => writeFile(resolve('../docs/qa/evidence/STUDIO-OBS-007/r-stale-grant-candidate/native-facts.json'), serialized), deadline, cleanup);
+      else await bounded('evidence', () => writeFile(evidencePath('STUDIO-OBS-007/r-stale-grant-candidate/native-facts.json'), serialized), deadline, cleanup);
     }
   }
   if (!primaryFailed && (cleanup.some(fact => !fact.confirmed) || restorers.length > 0)) throw Error('STALE_GRANT_CLEANUP_UNCONFIRMED');

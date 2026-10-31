@@ -65,7 +65,8 @@ describe('outline round trip', () => {
   const MEASURED = '/private/tmp/claude-501/-Users-brunobuger-orca-workspaces-put-checks-ui-studio/a615d823-312a-4d12-89da-36ddb90f660f/scratchpad/e5/fmt/';
   describe.skipIf(!existsSync(MEASURED))('real-site observations measured 2026-10-26', () => {
     for (const site of ['practice', 'wikipedia', 'govuk', 'hackernews', 'pythondocs', 'mdn', 'github']) {
-      it(`${site}: exact, and byte-identical to the verified Python prototype output`, () => {
+      // The measured inputs live in a scratchpad outside the repo; skip a site whose files are gone.
+      it.skipIf(!existsSync(`${MEASURED}${site}.json`) || !existsSync(`${MEASURED}${site}.lossless.txt`))(`${site}: exact, and byte-identical to the verified Python prototype output`, () => {
         const observation = JSON.parse(readFileSync(`${MEASURED}${site}.json`, 'utf8')) as Observation;
         expect(same(observation)).toBe(true);
         expect(render.encode(observation)).toBe(readFileSync(`${MEASURED}${site}.lossless.txt`, 'utf8'));

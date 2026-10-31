@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { allowedDomainListProblem } from '../allowedDomains.js';
 import type { Observation } from '../guided/types.js';
 import { DEADLINE_CEILING_MS, OBSERVATION_DEADLINE_MS } from './observationDeadline.js';
-import type { ObservationConfig, ObservationExport, ObservationReadProfile } from './observationTypes.js';
+import type { ObservationConfig, ObservationExport } from './observationTypes.js';
 import { OUTLINE_BYTES } from './perceive.js';
 
 /** Schema limits.maxObservationBytes (v3 default and maximum): the canonical size cap of one observation. */
@@ -27,7 +27,6 @@ export interface ObservationOptions {
   readonly scopeHash: string;
   readonly allowedDomains: readonly string[];
   readonly knownSecrets: string[];
-  readonly readProfile: ObservationReadProfile;
   readonly limits: { readonly outlineBytes: number; readonly bytes: number; readonly milliseconds: number };
 }
 
@@ -36,18 +35,6 @@ export function observationOptions(config: ObservationConfig): ObservationOption
   const validText = (value: string): boolean => value.length > 0 && Array.from(value).length <= 256;
   if (!validText(config.sessionId) || !/^[a-f0-9]{64}$/u.test(config.scopeHash) || config.knownSecrets.length > 64 || config.knownSecrets.some(secret => secret.length > 4096)) throw new Error('INVALID_CONTRACT');
   if (allowedDomainListProblem(config.allowedDomains) !== null) throw new Error('INVALID_CONTRACT');
-  const profile = config.readProfile ?? { policyRuleId: 'observed-structure-v1', allowStructuralDiscovery: true, readGrants: [] };
-  if (!validText(profile.policyRuleId) || !profile.allowStructuralDiscovery) throw new Error('INVALID_CONTRACT');
-  const grants = profile.readGrants ?? [];
-  if (grants.length > 32) throw new Error('INVALID_CONTRACT');
-  const ids = new Set<string>();
-  for (const grant of grants) {
-    const keysOf = (value: unknown): string => (typeof value === 'object' && value !== null ? Object.keys(value).sort().join(',') : '');
-    const closedShape = keysOf(grant) === 'domain,policyRuleId,region,visibleText' && keysOf(grant.region) === 'kind' && keysOf(grant.visibleText) === 'classification';
-    if (!closedShape || !validText(grant.policyRuleId) || ids.has(grant.policyRuleId) || !config.allowedDomains.includes(grant.domain)) throw new Error('INVALID_CONTRACT');
-    if ((grant.region as { kind: string }).kind !== 'application' || (grant.visibleText as { classification: string }).classification !== 'permittedBusinessData') throw new Error('INVALID_CONTRACT');
-    ids.add(grant.policyRuleId);
-  }
   const limit = (value: number | undefined, ceiling: number): number => {
     const resolved = value ?? ceiling;
     if (!Number.isInteger(resolved) || resolved < 1 || resolved > ceiling) throw new Error('INVALID_CONTRACT');
@@ -55,7 +42,6 @@ export function observationOptions(config: ObservationConfig): ObservationOption
   };
   return {
     sessionId: config.sessionId, scopeHash: config.scopeHash, allowedDomains: [...config.allowedDomains], knownSecrets: [...config.knownSecrets],
-    readProfile: structuredClone(profile),
     limits: {
       outlineBytes: limit(config.limits?.outlineBytes, OUTLINE_BYTES),
       bytes: limit(config.limits?.bytes, MAX_OBSERVATION_BYTES),

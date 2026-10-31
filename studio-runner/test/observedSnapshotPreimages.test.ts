@@ -233,18 +233,12 @@ describe('57/five construction envelopes', () => {
     put(evidence, `0/${field}`, value); put(i, 'authoring/globalContext/evidenceReferences', evidence); put(expected, 'testConfig/globalContextHash', hashObserved(at(i, 'authoring/globalContext')));
     construction(`57/config/global-evidence/${field}`, i, configuration(), learned(), expected);
   });
-  it('57/learned/retained-semantic-fields/coordinates;57/learned/utf8-ties/argumentSlot', () => {
+  it('57/learned/retained-semantic-fields/coordinates', () => {
     for (const [source, target, value] of [
       ['actions/0/coordinate/ordinal', 'rows/0/learnedContent/actions/0/coordinate/ordinal', 3],
       ['bindings/0/producer/ordinal', 'rows/1/learnedContent/producedBindings/0/producer/ordinal', 1],
       ['bindings/0/consumers/0/coordinate/ordinal', 'rows/2/learnedContent/consumedBindings/0/coordinate/ordinal', 1],
     ] as const) { const p = learned(), expected = computation(ordinary); put(p, source, value); put(expected, target, value); construction('57/learned/retained-semantic-fields/coordinate', current(), configuration(), p, expected); }
-    const p = learned(), expected = computation(ordinary), source = arr(at(p, 'bindings/0/consumers')), targets = arr(at(expected, 'rows/2/learnedContent/consumedBindings'));
-    for (const [n, slot] of [[0, '\u{10000}'], [1, '\uE000']] as const) {
-      put(required(source[n]), 'coordinate/ordinal', 0); put(required(source[n]), 'argumentSlot', slot);
-      put(required(targets[n]), 'coordinate/ordinal', 0); put(required(targets[n]), 'argumentSlot', slot);
-    }
-    targets.reverse(); construction('57/learned/utf8-ties/argumentSlot', current(), configuration(), p, expected);
     // Step membership is semantic at this projection layer; moving an action changes both rows.
     const moved = learned(), exp = computation(ordinary), action = copy(at(exp, 'rows/0/learnedContent/actions/0'));
     const id = at(exp, 'rows/1/stepInput/stepId'); put(moved, 'actions/0/coordinate/stepId', id); put(action, 'coordinate/stepId', id);
@@ -397,7 +391,7 @@ describe('65/exact immediate-base preimages', () => {
   });
   for (const [label, path, value, preserve] of [
     ['65/artifact/valid-inner-change', `${artifactPath}/learnedPlan/planId`, 'different-plan', 'artifactHash'],
-    ['65/plan/semantic-change', `${artifactPath}/learnedPlan/actions/0/operation/destinationInputId`, 'input-other', 'learnedPlanHash'],
+    ['65/plan/semantic-change', `${artifactPath}/learnedPlan/actions/0/operation/code`, 'await page.goto("https://other.example.test/");', 'learnedPlanHash'],
     ['65/policy/semantic-change', `${artifactPath}/replayPolicy/bindings/0/sourceOrigin`, 'https://other.example.test', 'referencePolicyHash'],
     ['65/plan/duplicate-field-mismatch', `${artifactPath}/learnedPlanHash`, altered, 'learnedPlanHash'],
   ] as const) it(label, () => { const b = fresh(); put(b, path, value); reseal(b, preserve); reject(label, b); });
@@ -405,7 +399,7 @@ describe('65/exact immediate-base preimages', () => {
   for (const path of [`${basePath}/revision/id`, 'snapshotEvidence/pinnedBase/revisionId', 'incrementalEvidence/plan/baseRevisionId', 'incrementalEvidence/program/baseRevisionId', 'incrementalEvidence/switch/baseRevisionId']) it(`65/pin/each-id-copy/${path}`, () => { const b = fresh(); put(b, path, '00000000-0000-4000-8000-000000000902'); if (path.includes('/program/')) put(b, 'incrementalEvidence/plan/prefixProgramHash', hashObserved(at(b, 'incrementalEvidence/program'))); reject('65/pin/each-id-copy', b); });
   for (const path of [`${basePath}/revision/revisionDigest`, 'snapshotEvidence/pinnedBase/revisionDigest', 'incrementalEvidence/program/baseRevisionDigest']) it(`65/pin/each-digest-copy/${path}`, () => { const b = fresh(); put(b, path, altered); if (path.includes('/program/')) put(b, 'incrementalEvidence/plan/prefixProgramHash', hashObserved(at(b, 'incrementalEvidence/program'))); reject('65/pin/each-digest-copy', b); });
   it('65/program/wrapper', () => { const b = fresh(); put(b, 'incrementalEvidence/plan/prefixProgramHash', hashObserved({ program: at(b, 'incrementalEvidence/program') })); reject('65/program/wrapper', b); });
-  for (const [label, path, value] of [['guard', 'actions/1/guard/target/readRuleId', 'other-rule'], ['action', 'actions/0/operation/destinationInputId', 'other-input']] as const) it(`65/program/${label}-resealed`, () => { const b = fresh(); put(b, `incrementalEvidence/program/${path}`, value); put(b, 'incrementalEvidence/plan/prefixProgramHash', hashObserved(at(b, 'incrementalEvidence/program'))); reject(`65/program/${label}-resealed`, b); });
+  for (const [label, path, value] of [['guard', 'actions/1/guard/origin', 'https://other.example.test'], ['action', 'actions/0/operation/code', 'await page.goto("https://other.example.test/");']] as const) it(`65/program/${label}-resealed`, () => { const b = fresh(); put(b, `incrementalEvidence/program/${path}`, value); put(b, 'incrementalEvidence/plan/prefixProgramHash', hashObserved(at(b, 'incrementalEvidence/program'))); reject(`65/program/${label}-resealed`, b); });
   for (const [label, field] of [['admission', 'admissionProvenanceHash'], ['publication', 'publicationEvidenceHash'], ['authorization', 'runAuthorizationHash']] as const) it(`65/receipt/${label}-one-sided`, () => { const b = fresh(); put(b, `${artifactPath}/replayPolicy/${field}`, altered); reseal(b); reject(`65/receipt/${label}-one-sided`, b); });
   for (const [label, variant] of [['65/maps/missing-key', 'missing'], ['65/maps/extra-key', 'extra'], ['65/maps/reuse-copy-mismatch', 'reuse']] as const) it(label, () => {
     const b = fresh(), id = '00000000-0000-4000-8000-000000000001';

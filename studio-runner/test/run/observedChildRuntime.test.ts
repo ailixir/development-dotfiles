@@ -6,7 +6,7 @@ import type {ObservedJob} from '../../src/executor/observedOperations.js';
 import {mkdtemp,rm} from 'node:fs/promises';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
-import {describe, expect, it, vi} from 'vitest';
+import {afterEach, describe, expect, it, vi} from 'vitest';
 import {readFileSync} from 'node:fs';
 import type {ValidationBasis} from '../../src/executor/observedOperations.js';
 const fixture=JSON.parse(readFileSync(new URL('../../../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json',import.meta.url),'utf8')) as {build:BuildIdentity;launch:Launch3;execute:Execute3;basis:ValidationBasis;job:ObservedJob};
@@ -16,12 +16,13 @@ import type {Launch3, Execute3, BuildIdentity} from '../../src/executor/observed
 import {hashObserved, OBSERVED_SCHEMA_BUNDLE_HASH} from '../../src/validator/observedReferencePolicy.js';
 import type {ObservationSession} from '../../src/run/observationTypes.js';
 import type {Observation} from '../../src/guided/types.js';
-import {resolveFromGuards} from '../helpers/replaySession.js';
+import {FakeLocator,fakeHandle,newRig} from '../helpers/stepFakes.js';
+import {stepOp} from '../helpers/stepCode.js';
 import type {BrowserHandle} from '../../src/run/browserFactory.js';
-import {createFakePage} from '../helpers/child.js';
 import {PasswordNoEffect} from '../../src/run/passwordControl.js';
 import {BrowserStartupCleanupFailure} from '../../src/run/browserFactory.js';
 
+afterEach(()=>{vi.restoreAllMocks();});
 function driver(fault: 'none'|'launch'|'cleanup-unconfirmed'|'close'|'read'|'target'|'secret'|'secret-delay'|'launch-delay' = 'none', withRetained=false,freshReadValue='private-fresh-value',retainedSecret=false) {
   const build: BuildIdentity = {...fixture.build, schemaBundleHash: OBSERVED_SCHEMA_BUNDLE_HASH};
   const retained=withRetained?(retainedSecret?retainedSecretReplay():retainedReplay()):null;
@@ -34,26 +35,34 @@ function driver(fault: 'none'|'launch'|'cleanup-unconfirmed'|'close'|'read'|'tar
   const execute = structuredClone(retained?.execute??fixture.execute);
   const messages: ObservedChildMessage[] = [], exits: number[] = [], captured: string[] = [], withheld: string[] = [];
   let parentMessage:(value:unknown)=>void=()=>undefined,parentExit:()=>void=()=>undefined;
-  let listener: (value: unknown) => void = () => undefined, popup: () => void = () => undefined, clock = 0;
+  let listener: (value: unknown) => void = () => undefined, clock = 0;
   const observation = structuredClone(fixture.basis.observations[0]?.observation) as Observation | undefined;
   if (!observation) throw new Error('OBSERVATION');
   const observationDispose = vi.fn(() => Promise.resolve());
   let releaseSecret:()=>void=()=>undefined;
   const pendingSecret=new Promise<void>(resolve=>{releaseSecret=resolve;});
-  const observations: ObservationSession = {
+  const rig=newRig(FIXTURE_ORIGIN,{
     observe: () => Promise.resolve({observation, json: '{}', bytes: 2, observationHash: hashObserved(observation)}),
-    resolveTarget: resolveFromGuards(execute.guards, () => fault === 'target'),
-    refForTarget: () => Promise.resolve(null),
-    prepareTarget: () => Promise.reject(new Error('unused')),
-    invoke(invocation, control) { control?.beginInvocation(); if (fault === 'read') return Promise.reject(new Error('PRIVATE-ERROR')); if (invocation.operation.kind === 'read') return Promise.resolve({value: freshReadValue}); if (invocation.resolvedValue) captured.push(invocation.resolvedValue); return Promise.resolve({assertionPassed: true}); },
     withhold(values) { withheld.push(...values); return Promise.resolve(); },
+    commitCapture(value) { withheld.push(value); },
     preparePassword: () => Promise.resolve(),
-    fillPassword(_target, _origin, _allowed, value, control) { control?.beginInvocation(); if (fault === 'secret') return Promise.reject(new PasswordNoEffect('PASSWORD_FORM_ACTION_NOT_ALLOWED')); captured.push(value); return fault==='secret-delay'?pendingSecret:Promise.resolve(); },
+    fillPassword(_target, _origin, _allowed, value) { if (fault === 'secret') return Promise.reject(new PasswordNoEffect('PASSWORD_FORM_ACTION_NOT_ALLOWED')); captured.push(value); return fault==='secret-delay'?pendingSecret:Promise.resolve(); },
     dispose: observationDispose,
-  };
+  });
+  const observations: ObservationSession = rig.session;
+  // The page: the read step reads the body text, the fill steps record what they typed; permissive matchers stand in for expect.
+  rig.w.text.body = freshReadValue;
+  // No password input on the page unless a test fills a secret (a nonsecret fill checks that none holds its literal).
+  rig.w.matches['input[type="password" i]'] = fault.startsWith('secret') || retainedSecret ? 1 : 0;
+  const realFill = Reflect.get(FakeLocator.prototype, 'fill') as (this: FakeLocator, value: unknown) => Promise<void>;
+  vi.spyOn(FakeLocator.prototype, 'fill').mockImplementation(async function (this: FakeLocator, value: unknown) { if (typeof value === 'string') captured.push(value); await realFill.call(this, value); });
+  if (fault === 'read') vi.spyOn(FakeLocator.prototype, 'innerText').mockRejectedValue(new Error('PRIVATE-ERROR'));
+  // The page changed since learning: the target is not there (Playwright's own timeout before any effect), a closed TARGET_DRIFT.
+  if (fault === 'target') vi.spyOn(FakeLocator.prototype, 'innerText').mockRejectedValue(Object.assign(new Error('PRIVATE-TIMEOUT'), { name: 'TimeoutError' }));
+  (rig.api as { expect: unknown }).expect = Object.assign(() => new Proxy({}, { get: (_target, key) => (typeof key === 'string' && key !== 'then' ? () => Promise.resolve() : undefined) }), { configure() { return this; } });
   const close = vi.fn(() => fault === 'close' ? Promise.reject(new Error('PRIVATE-CLOSE')) : Promise.resolve(null));
   const dispose = vi.fn(() => Promise.resolve());
-  const handle: BrowserHandle = {page: createFakePage(), observedAppVideoPath:()=>Promise.resolve("/unit/app.webm"), createObservationSession: () => observations, observedBlankMatches: () => Promise.resolve(true), observedInitialContextMatches: () => Promise.resolve(true), observedWait: () => Promise.resolve(), observedNavigateBlank: (_destination, control) => {control?.beginInvocation();return Promise.resolve();}, onExtraPage(fn) {popup=fn;}, observedHosts: () => [], close, dispose};
+  const handle: BrowserHandle = {...fakeHandle(rig), observedAppVideoPath:()=>Promise.resolve("/unit/app.webm"), createObservationSession: () => observations, observedBlankMatches: () => Promise.resolve(true), observedInitialContextMatches: () => Promise.resolve(true), observedHosts: () => [], close, dispose};
   let releaseLaunch: (handle: BrowserHandle) => void = () => undefined;
   const pendingLaunch = new Promise<BrowserHandle>(resolve => {releaseLaunch=resolve;});
   const open = vi.fn(() => fault==='cleanup-unconfirmed'?Promise.reject(new BrowserStartupCleanupFailure()):fault === 'launch' ? Promise.reject(new Error('PRIVATE-LAUNCH')) : fault === 'launch-delay' ? pendingLaunch : Promise.resolve(handle));
@@ -61,7 +70,7 @@ function driver(fault: 'none'|'launch'|'cleanup-unconfirmed'|'close'|'read'|'tar
   const result = () => messages.find(message => message.kind === 'result' && 'mode' in message);
   const child:ChildProcessHandle={pid:123,send(message){listener(message);},onMessage(callback){parentMessage=callback;},onExit(callback){parentExit=()=>{callback(0,null);};},onOutput(){return;},kill(){listener({kind:'stop'});}};
   const spawner:ChildSpawner={spawn:()=>child};
-  return {retained,spawner,launch, execute, messages, exits, captured, withheld, observations, handle, close, dispose, observationDispose, open, releaseSecret,releaseLaunch: () => {releaseLaunch(handle);}, send: (value: unknown) => {listener(value);}, popup: () => {popup();}, result};
+  return {retained,spawner,launch, execute, messages, exits, captured, withheld, observations, handle, close, dispose, observationDispose, open, releaseSecret,releaseLaunch: () => {releaseLaunch(handle);}, send: (value: unknown) => {listener(value);}, rig, result};
 }
 describe('actual observed child lifecycle against the browser-free factory seam', () => {
   it('replays identical retained artifact bytes twice through actual launcher and child validators with fresh admissions',async()=>{
@@ -83,13 +92,13 @@ describe('actual observed child lifecycle against the browser-free factory seam'
     try{const h=driver('none',true);(h.launch.admission as {startDeadlineAt:string}).startDeadlineAt=new Date(start+500).toISOString();h.send(h.launch);await vi.waitFor(()=>{expect(h.messages.some(m=>m.kind==='ready')).toBe(true);});vi.setSystemTime(start+1000);h.send(h.execute);await vi.waitFor(()=>{expect(h.exits).toEqual([0]);});expect(h.result()?.ok).toBe(true);}finally{vi.useRealTimers();}
   });
   it('preserves child secret withholding, frame erasure and value-free output with retained proof',async()=>{
-    const h=driver('none',true,'fresh-retained-business-canary',true);h.send(h.launch);await vi.waitFor(()=>{expect(h.messages.some(m=>m.kind==='ready')).toBe(true);});h.send(h.execute);await vi.waitFor(()=>{expect(h.exits).toEqual([0]);});expect(h.result()).toMatchObject({ok:true,secretUse:{PASS:'USED'}});expect(h.withheld).toEqual(expect.arrayContaining(['released-secret-canary','fresh-retained-business-canary']));expect(h.execute.secrets).toEqual({PASS:''});expect(JSON.stringify(h.execute.retainedArtifact)).not.toMatch(/released-secret-canary|fresh-retained-business-canary/u);expect(JSON.stringify(h.messages)).not.toMatch(/released-secret-canary|fresh-retained-business-canary/u);
+    const h=driver('none',true,'fresh-retained-business-canary',true);h.send(h.launch);await vi.waitFor(()=>{expect(h.messages.some(m=>m.kind==='ready')).toBe(true);});h.send(h.execute);await vi.waitFor(()=>{expect(h.exits).toEqual([0]);});expect(h.result()).toMatchObject({ok:true,secretUse:{PASS:'USED'}});expect(h.captured).toContain('released-secret-canary');expect(h.withheld).toContain('fresh-retained-business-canary');expect(h.execute.secrets).toEqual({PASS:''});expect(JSON.stringify(h.execute.retainedArtifact)).not.toMatch(/released-secret-canary|fresh-retained-business-canary/u);expect(JSON.stringify(h.messages)).not.toMatch(/released-secret-canary|fresh-retained-business-canary/u);
   });
   it.each(['execute-before-launch','launch-replacement']as const)('refuses %s without replay native input',async mode=>{
-    const h=driver('none',true),invoke=vi.spyOn(h.observations,'invoke'),navigate=vi.spyOn(h.handle,'observedNavigateBlank');if(mode==='launch-replacement'){h.send(h.launch);await vi.waitFor(()=>{expect(h.messages.some(m=>m.kind==='ready')).toBe(true);});h.send(h.launch);}else h.send(h.execute);await vi.waitFor(()=>{expect(h.exits).toEqual([0]);});expect(invoke).not.toHaveBeenCalled();expect(navigate).not.toHaveBeenCalled();
+    const h=driver('none',true);if(mode==='launch-replacement'){h.send(h.launch);await vi.waitFor(()=>{expect(h.messages.some(m=>m.kind==='ready')).toBe(true);});h.send(h.launch);}else h.send(h.execute);await vi.waitFor(()=>{expect(h.exits).toEqual([0]);});expect(h.rig.w.effects).toEqual([]);
   });
   it('refuses a malformed retained proof before any replay native invocation',async()=>{
-    const h=driver('none',true),invoke=vi.spyOn(h.observations,'invoke'),navigate=vi.spyOn(h.handle,'observedNavigateBlank');h.send(h.launch);await vi.waitFor(()=>{expect(h.messages.some(m=>m.kind==='ready')).toBe(true);});h.send({...h.execute,retainedArtifact:{...h.execute.retainedArtifact,trusted:true}});await vi.waitFor(()=>{expect(h.exits).toEqual([0]);});expect(invoke).not.toHaveBeenCalled();expect(navigate).not.toHaveBeenCalled();expect(h.captured).toEqual([]);expect(h.result()?.ok).toBe(false);
+    const h=driver('none',true);h.send(h.launch);await vi.waitFor(()=>{expect(h.messages.some(m=>m.kind==='ready')).toBe(true);});h.send({...h.execute,retainedArtifact:{...h.execute.retainedArtifact,trusted:true}});await vi.waitFor(()=>{expect(h.exits).toEqual([0]);});expect(h.rig.w.effects).toEqual([]);expect(h.captured).toEqual([]);expect(h.result()?.ok).toBe(false);
   });
   it('consumes the admitted runtime window during startup without granting a new allowance on late page readiness',async()=>{
     const h=driver('launch-delay');(h.launch as {totalRuntimeMs:number}).totalRuntimeMs=100;h.send(h.launch);await vi.waitFor(()=>{expect(h.open).toHaveBeenCalledOnce();});await new Promise<void>(r=>setTimeout(r,130));expect(h.exits).toEqual([]);h.releaseLaunch();await vi.waitFor(()=>{expect(h.exits).toEqual([0]);});expect(h.messages.some(m=>m.kind==='ready')).toBe(false);expect(h.result()).toMatchObject({errorCode:'TIMEOUT'});expect(h.dispose).toHaveBeenCalledOnce();
@@ -102,13 +111,13 @@ describe('actual observed child lifecycle against the browser-free factory seam'
     const h=driver(fault), stepId=fixture.execute.steps[1]?.stepId;
     const firstStep=h.execute.steps[0], firstGuard=h.execute.guards[0], firstInput=h.execute.inputs[0];
     if(!stepId || !firstStep || !firstGuard || !firstInput)throw new Error('SECRET_STEP');
-    const message: Execute3 = {...h.execute, steps: [firstStep, {stepIndex:1,stepId,operations:[{coordinate:{stepId,ordinal:0},guardId:'g1',operation:{kind:'fill',value:{kind:'secretRef',sourceInputId:'pass'}}}]}], guards:[firstGuard,{guardId:'g1',origin:FIXTURE_ORIGIN,target:{kind:'passwordControl'}}],bindings:[],transfers:[],inputs:[firstInput,{inputId:'pass',stepId,kind:'secretRef',intendedSlot:'fill.value',referenceName:'PASS'}],secrets:{PASS:'child-secret-value',UNREACHED:'child-unreached'},secretOrigins:{PASS:[FIXTURE_ORIGIN]}};
+    const message: Execute3 = {...h.execute, steps: [firstStep, {stepIndex:1,stepId,operations:[{coordinate:{stepId,ordinal:0},guardId:'g1',operation:stepOp('await page.locator(\'input[type="password"]\').fill(secrets["PASS"]);',{uses:[{kind:'secret',id:'PASS'}]})}]}], guards:[firstGuard,{guardId:'g1',origin:FIXTURE_ORIGIN}],bindings:[],transfers:[],inputs:[firstInput,{inputId:'pass',stepId,kind:'secretRef',referenceName:'PASS'}],secrets:{PASS:'child-secret-value',UNREACHED:'child-unreached'},secretOrigins:{PASS:[FIXTURE_ORIGIN]}};
     h.send(h.launch);await vi.waitFor(()=>{ expect(h.messages.some(message=>message.kind==='ready')).toBe(true); });h.send(message);
     if(fault==='secret-delay'){await vi.waitFor(()=>{expect(h.captured).toContain('child-secret-value');});h.send({kind:'stop'});}
     await vi.waitFor(()=>{ expect(h.exits).toEqual([0]); });
     expect(h.result()).toMatchObject({ok:fault==='none',secretUse:fault==='secret-delay'?{UNREACHED:'NOT_USED'}:{PASS:fault==='none'?'USED':'REFUSED',UNREACHED:'NOT_USED'}});
     if(fault==='secret-delay'){expect(h.result()).not.toHaveProperty('secretUse.PASS');h.releaseSecret();await Promise.resolve();expect(h.messages.filter(message=>message.kind==='result')).toHaveLength(1);}
-    expect(message.secrets).toEqual({PASS:'',UNREACHED:''});expect(h.withheld).toContain('child-secret-value');expect(JSON.stringify(h.messages)).not.toContain('child-secret-value');expect(h.observationDispose).toHaveBeenCalledOnce();
+    expect(message.secrets).toEqual({PASS:'',UNREACHED:''});if(fault!=='secret')expect(h.captured).toContain('child-secret-value');expect(JSON.stringify(h.messages)).not.toContain('child-secret-value');expect(h.observationDispose).toHaveBeenCalledOnce();
   });
   it.each(['none','close','read','target'] as const)('performs admitted v3 IPC, disposes and exits on %s', async fault => {
     const h=driver(fault); h.send(h.launch); await vi.waitFor(() => { expect(h.messages.some(message => message.kind === 'ready')).toBe(true); }); h.send(h.execute);
@@ -124,9 +133,9 @@ describe('actual observed child lifecycle against the browser-free factory seam'
     if (fault === 'identity') (h.launch as {runId: string}).runId = '00000000-0000-4000-8000-000000000999';
     h.send(h.launch); await vi.waitFor(() => { expect(h.exits).toEqual([0]); }); if (fault === 'profile') {expect(h.result()).toBeUndefined(); expect(h.open).not.toHaveBeenCalled();} else expect(h.result()?.ok).toBe(false); expect(h.messages.some(message => message.kind === 'ready')).toBe(false); expect(JSON.stringify(h.messages)).not.toContain('PRIVATE-LAUNCH');
   });
-  it.each(['stop','popup','bad-execute'] as const)('stops a ready context on %s and emits no duplicate result', async fault => {
+  it.each(['stop','bad-execute'] as const)('stops a ready context on %s and emits no duplicate result', async fault => {
     const h=driver();h.send(h.launch);await vi.waitFor(()=>{ expect(h.messages.some(message=>message.kind==='ready')).toBe(true); });
-    if(fault==='popup')h.popup(); else if(fault==='stop')h.send({kind:'stop'}); else h.send({...h.execute,source:'FORBIDDEN'});
+    if(fault==='stop')h.send({kind:'stop'}); else h.send({...h.execute,source:'FORBIDDEN'});
     await vi.waitFor(()=>{ expect(h.exits).toEqual([0]); }); expect(h.messages.filter(message=>message.kind==='result')).toHaveLength(1);expect(h.close).toHaveBeenCalledOnce();
   });
 });

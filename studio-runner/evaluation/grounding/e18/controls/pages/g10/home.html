@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Reports</title></head>
+<body><main><h1>Reports</h1>
+<table><thead><tr><th>Report</th><th>Owner</th><th>Actions</th></tr></thead><tbody>
+<tr><td>R-7</td><td>Finance</td><td><button id="edit1">Edit</button> <button>Archive</button></td></tr>
+<tr><td>R-8</td><td>Support</td><td><button id="edit2">Edit</button> <button>Archive</button></td></tr>
+</tbody></table>
+<p id="note"></p>
+<script>document.querySelectorAll('button').forEach(function(b){b.addEventListener('click',function(){document.getElementById('note').textContent='clicked '+b.id;});});</script>
+</main></body></html>

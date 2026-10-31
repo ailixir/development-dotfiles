@@ -58,6 +58,8 @@ export interface ElementFacts {
   opaquePublicSource?: true;
   /** Same-pass native provenance for the direct stripped value string; never public authority. */
   directValueOnly?: 'NATIVE_INPUT_VALUE_ONLY';
+  /** An iframe's own title attribute: the one thing about a frame the outline shows (its content is never read). */
+  frameTitle?: string;
   scopeRefs?: string[];
   readScope?: { relation: 'SAME_ROW_LABEL' | 'IMMEDIATE_HEADING_SAME_PARENT' | 'R7_ADJACENT_PUBLIC'; sourceRefs: string[]; tableTitleRef?: string };
 
@@ -86,34 +88,6 @@ export interface PageInventory {
   oversize: boolean;
 }
 
-export interface ElementCandidateFacts {
-  tag: string;
-  id: string | null;
-  name: string | null;
-  type: string | null;
-  ariaLabel: string | null;
-  title: string | null;
-  placeholder: string | null;
-  testId: string | null;
-  levels: { tag: string; has: string[]; children?: string[] }[];
-  generated: string | null;
-  nativeContext?: boolean;
-  selfChildren?: string[];
-}
-
-export interface OptionListing {
-  kind: 'native' | 'aria' | 'none';
-  labels: string[];
-  values: string[];
-  tooMany: boolean;
-}
-
-export interface SelectorCheck {
-  count?: number;
-  index?: number;
-  error?: boolean;
-}
-
 /** The AI snapshot plus element facts and the echo material for controls the snapshot cannot attribute. */
 export function collectPage(this: InjectedScriptLike): CollectedPage {
   const norm = (s: string | null | undefined): string => (s ?? '').replace(/\s+/g, ' ').trim();
@@ -140,6 +114,7 @@ export function collectPage(this: InjectedScriptLike): CollectedPage {
     const f: ElementFacts = {
       tag, valueControl: false, editable: false, editableRoot: false, sensitive: false, inSelect: false, valueAttr: false,
     };
+    if (tag === 'iframe') f.frameTitle = (el.getAttribute('title') ?? '').slice(0, 512);
     if (tag === 'input') {
       const input = el as HTMLInputElement;
       f.type = (input.type === '' ? 'text' : input.type).toLowerCase();
@@ -607,85 +582,6 @@ export function resolveRefs(this: InjectedScriptLike, refs: string[]): (Element 
   const out: (Element | null)[] = [];
   for (const ref of refs) out.push(this.querySelector(this.parseSelector('aria-ref=' + ref), document, false));
   return out;
-}
-
-/** Elements matched by an internal selector, in document order, as a remote array. */
-export function selectorElements(this: InjectedScriptLike, selector: string): Element[] {
-  return this.querySelectorAll(this.parseSelector(selector), document);
-}
-
-/** Facts about one ref used to propose locators, and which candidate refs sit under which ancestor. */
-export function elementCandidateFacts(this: InjectedScriptLike, ref: string, testIdAttr: string, candidateRefs: string[]): ElementCandidateFacts | null {
-  const resolve = (r: string): Element | null => this.querySelector(this.parseSelector('aria-ref=' + r), document, false);
-  const el = resolve(ref);
-  if (!el) return null;
-  const attr = (n: string): string | null => {
-    const v = el.getAttribute(n);
-    return v;
-  };
-  const ancestors: Element[] = [];
-  for (let p = el.parentElement; p && p !== document.body && p !== document.documentElement && ancestors.length < 6; p = p.parentElement) ancestors.push(p);
-  const cands: { r: string; e: Element }[] = [];
-  for (const r of candidateRefs) {
-    const e = resolve(r);
-    if (e && e !== el) cands.push({ r, e });
-  }
-  const levels = ancestors.map((p) => ({
-    tag: p.tagName.toLowerCase(),
-    children: cands.filter(c => c.e.parentElement === p).slice(0, 60).map(c => c.r),
-    has: cands.filter((c) => p.contains(c.e) && !el.contains(c.e) && !c.e.contains(el)).slice(0, 60).map((c) => c.r),
-  }));
-  let generated: string | null = null;
-  try {
-    generated = this.generateSelectorSimple(el);
-  } catch {
-    generated = null;
-  }
-  return {
-    tag: el.tagName.toLowerCase(), id: attr('id'), name: attr('name'), type: attr('type'), ariaLabel: attr('aria-label'),
-    title: attr('title'), placeholder: attr('placeholder'), testId: attr(testIdAttr), levels, generated,
-    selfChildren: cands.filter(c => c.e.parentElement === el).map(c => c.r),
-    nativeContext: el.getRootNode() === document && !el.assignedSlot && ancestors.every(p => !p.assignedSlot && p.getRootNode() === document),
-  };
-}
-
-/** For each selector: how many elements it matches and the index of the ref's element among them. */
-export function checkSelectors(this: InjectedScriptLike, ref: string, selectors: string[]): SelectorCheck[] {
-  const el = this.querySelector(this.parseSelector('aria-ref=' + ref), document, false);
-  return selectors.map((s) => {
-    try {
-      const all = this.querySelectorAll(this.parseSelector(s), document);
-      return { count: all.length, index: el ? all.indexOf(el) : -1 };
-    } catch {
-      return { error: true };
-    }
-  });
-}
-
-/** The live options of the element behind a ref: all options of a native select, or ARIA option elements. */
-export function listOptions(this: InjectedScriptLike, ref: string): OptionListing | null {
-  const el = this.querySelector(this.parseSelector('aria-ref=' + ref), document, false);
-  if (!el) return null;
-  const MAX = 5000;
-  const clean = (s: string | null | undefined): string => (s ?? '').replace(/\s+/g, ' ').trim();
-  if (el instanceof HTMLSelectElement) {
-    const options = Array.from(el.options);
-    if (options.length > MAX) return { kind: 'native', labels: [], values: [], tooMany: true };
-    return { kind: 'native', labels: options.map((o) => clean(o.label)), values: options.map((o) => o.value), tooMany: false };
-  }
-  const found = new Set<Element>();
-  for (const o of Array.from(el.querySelectorAll('[role="option"]'))) found.add(o);
-  const root = el.getRootNode() as Document | ShadowRoot;
-  const ids = `${el.getAttribute('aria-controls') ?? ''} ${el.getAttribute('aria-owns') ?? ''}`.split(/\s+/).filter(Boolean);
-  for (const id of ids) {
-    const target = root.getElementById(id);
-    if (!target) continue;
-    if (target.getAttribute('role') === 'option') found.add(target);
-    for (const o of Array.from(target.querySelectorAll('[role="option"]'))) found.add(o);
-  }
-  if (found.size === 0) return { kind: 'none', labels: [], values: [], tooMany: false };
-  if (found.size > MAX) return { kind: 'aria', labels: [], values: [], tooMany: true };
-  return { kind: 'aria', labels: Array.from(found).map((o) => clean(o.getAttribute('aria-label') ?? o.textContent)), values: [], tooMany: false };
 }
 
 /** Recheck only already-public labels and certified local relations. Returns a boolean; no current

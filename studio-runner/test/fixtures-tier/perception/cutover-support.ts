@@ -14,13 +14,19 @@ import type { AddressInfo } from 'node:net';
 import type { Browser, Page } from 'playwright';
 
 import { TEST_DOMAINS } from '../../helpers/allowedDomains.js';
-import type { InvocationControl } from '../../../src/executor/observedReplay.js';
-import type { Action, Observation, ObservationFact, ResolvedTarget } from '../../../src/guided/types.js';
-import { createBrowserObservationSession } from '../../../src/run/browser.js';
-import { observationReadProfile } from '../../../src/run/observationReadProfile.js';
-import type { ObservationConfig, ObservationExport, ObservationSession, TargetInvocation, TargetInvocationResult } from '../../../src/run/observationTypes.js';
+import type { Observation, ObservationFact } from '../../../src/guided/types.js';
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
-export type Operation = Action['operation'];
+import type { Scope } from '../../../src/executor/observedOperations.js';
+import { createBrowserObservationSession } from '../../../src/run/browser.js';
+import type { BrowserHandle } from '../../../src/run/browserFactory.js';
+import { newTally, performStep } from '../../../src/run/observedReplayAdapter.js';
+import type { StepOutcome } from '../../../src/run/observedReplayAdapter.js';
+import { coordinate, openControl, operation } from '../../helpers/stepFakes.js';
+import { playwrightBrowserFactory } from '../preparedBrowser.js';
+import type { ObservationConfig, ObservationExport, ObservationSession } from '../../../src/run/observationTypes.js';
 
 export interface Served {
   readonly origin: string;
@@ -78,7 +84,6 @@ export function sessionConfig(over: Partial<ObservationConfig> = {}): Observatio
     scopeHash: 'a'.repeat(64),
     allowedDomains: TEST_DOMAINS,
     knownSecrets: [],
-    readProfile: observationReadProfile(TEST_DOMAINS),
     ...over,
   };
 }
@@ -122,93 +127,6 @@ export const hasFact = (exported: ObservationExport, role: string, name: string)
 /** The refs the outline shows (`[eN]`), in order. */
 export const shownRefs = (observation: Observation): string[] => [...observation.outline.matchAll(/\[(e\d+)\]/gu)].map((match) => match[1] ?? '');
 
-export interface Prepared {
-  readonly ref: string;
-  readonly resolved: ResolvedTarget;
-  readonly exported: ObservationExport;
-}
-
-/** Observe, pick the one fact, prepare it for `operation` (learn): the production prepare path. */
-export async function prepare(
-  opened: Opened,
-  role: string,
-  name: string,
-  operation: Operation,
-  authoredLiteral: string | null = null,
-  exported?: ObservationExport,
-): Promise<Prepared> {
-  const observed = exported ?? (await opened.session.observe(undefined, false));
-  const [ref] = factOf(observed, role, name);
-  const resolved = await opened.session.prepareTarget({
-    ref,
-    documentId: observed.observation.documentId,
-    generation: observed.observation.generation,
-    origin: observed.observation.origin,
-    operation,
-    authoredLiteral,
-  });
-  return { ref, resolved, exported: observed };
-}
-
-/** A control whose fence a test can observe or hook (a page mutation right after the pre-flight, for instance). */
-export class TestControl implements InvocationControl {
-  phase: InvocationControl['phase'] = 'PREPARING';
-  readonly deadlineMs = Date.now() + 120_000;
-  readonly signal = new AbortController().signal;
-  fenced = 0;
-  constructor(private readonly onFence: () => Promise<void> | void = () => undefined) {}
-  check(): void {
-    if (this.phase === 'POISONED') throw new Error('POISONED');
-  }
-  /**
-   * The journal fence. A test hook may mutate the page here (cover the target, disable it, remove it); the executor awaits
-   * the call (targetAction.performOnTarget), so the mutation has landed before the first post-fence Playwright call.
-   */
-  beginInvocation(): void {
-    this.fenced++;
-    this.phase = 'INVOKING';
-    const pending: unknown = this.onFence();
-    return pending as undefined;
-  }
-  poison(): void {
-    this.phase = 'POISONED';
-  }
-  /** Milliseconds left on the control's own clock (the executor budgets a replay invoke from it). */
-  remainingMs(): number {
-    return Math.max(0, this.deadlineMs - Date.now());
-  }
-  reserveObservation(): (bytes: number) => void {
-    return () => undefined;
-  }
-  waitForAdditionalObservation(): Promise<void> {
-    return Promise.resolve();
-  }
-}
-
-export interface InvokeOptions {
-  readonly value?: string | null;
-  readonly profile?: 'learn' | 'replay';
-  readonly readRuleId?: string | null;
-  readonly maxValueBytes?: number;
-  readonly control?: TestControl;
-  readonly bind?: boolean;
-}
-
-/** Invokes a prepared target through the session: the one executor of learn and replay. */
-export function invoke(opened: Opened, prepared: Prepared, operation: Operation, options: InvokeOptions = {}): Promise<TargetInvocationResult> {
-  const request: TargetInvocation = {
-    resolved: prepared.resolved,
-    operation,
-    resolvedValue: options.value ?? null,
-    origin: prepared.exported.observation.origin,
-    maxValueBytes: options.maxValueBytes ?? 4096,
-    readRuleId: options.readRuleId ?? null,
-    profile: options.profile ?? 'learn',
-    ...(options.bind === false ? {} : { expect: { documentId: prepared.exported.observation.documentId, generation: prepared.exported.observation.generation } }),
-  };
-  return opened.session.invoke(request, options.control ?? new TestControl());
-}
-
 /** The error a promise rejects with (a ClosedActionError for every boundary), or null. */
 export async function rejection(work: Promise<unknown>): Promise<Error | null> {
   try {
@@ -223,6 +141,30 @@ export async function rejection(work: Promise<unknown>): Promise<Error | null> {
 export async function codeOf(work: Promise<unknown>): Promise<string | null> {
   const error = await rejection(work);
   return error === null ? null : error.message;
+}
+
+/** One real recorded browser the way the replay child gets it (step api, popup registry, document counter), and the real observation session over it. */
+export interface StepRun {
+  readonly handle: BrowserHandle;
+  readonly session: ObservationSession;
+  step(code: string, parts?: { readonly captures?: readonly string[]; readonly inputs?: Readonly<Record<string, string>>; readonly remainingMs?: number; readonly vars?: Readonly<Record<string, string>>; readonly uses?: readonly { readonly kind: 'input' | 'secret' | 'binding'; readonly id: string }[] }): Promise<StepOutcome>;
+  dispose(): Promise<void>;
+}
+const stepScratches: string[] = [];
+export async function launchStepRun(allowedDomains: readonly string[] = TEST_DOMAINS): Promise<StepRun> {
+  const scratch = await mkdtemp(join(tmpdir(), 'step-run-'));
+  stepScratches.push(scratch);
+  const scope: Scope = { principalId: 'p', csiId: 'csi', environment: 'fixture', capabilities: ['step'], initialContext: { kind: 'initialBlank' } };
+  const handle = await playwrightBrowserFactory.launch({ allowedDomains, browser: 'chromium', viewport: { width: 1280, height: 720 }, recording: { width: 640, height: 480 }, scratchPath: scratch, observedScope: scope });
+  const session = handle.createObservationSession?.({ sessionId: 'step-run', scopeHash: '0'.repeat(64), allowedDomains, knownSecrets: [] });
+  if (!session || !handle.stepApi) throw new Error('HANDLE');
+  const host = handle.stepApi;
+  let n = 0;
+  return {
+    handle, session,
+    step: (code, parts = {}) => performStep(host, session, { coordinate: coordinate(`step-${String(n++)}`), operation: operation(code, { ...(parts.captures === undefined ? {} : { captures: [...parts.captures] }), ...(parts.uses === undefined ? {} : { uses: [...parts.uses] }) }), inputs: parts.inputs ?? {}, vars: parts.vars ?? {}, secretIds: [], control: openControl({ remainingMs: parts.remainingMs ?? 20_000 }), tally: newTally(), allowedDomains }),
+    dispose: async () => { await session.dispose(); await handle.dispose(); await rm(scratch, { recursive: true, force: true }); },
+  };
 }
 
 /** Waits for `condition` to hold within `timeoutMs` (polling), then returns; throws otherwise. */

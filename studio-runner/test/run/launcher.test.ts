@@ -1,3 +1,5 @@
+import { stepOp, stepReceipt } from '../helpers/stepCode.js';
+import { stepHashOf } from '../../src/executor/observedReplay.js';
 import { FIXTURE_ORIGIN, TEST_DOMAINS } from '../helpers/allowedDomains.js';
 /**
  * AC-1, AC-5, AC-16, AC-21 — the parent half of the killable child.
@@ -474,9 +476,9 @@ describe('AC-16 — step events reach 10.6’s reporter, across the process boun
     const [first, second, third] = wire.job.artifact.steps;
     if (first === undefined || second === undefined || third === undefined) throw new Error('fixture');
     child.emit({ ...base, kind: 'step-started', stepIndex: 0, stepId: first.stepId, startedAtMs: 1.25 });
-    child.emit({ ...base, kind: 'step-finished', stepIndex: 0, stepId: first.stepId, status: 'FAIL', startedAtMs: 1.25, finishedAtMs: 9.5, durationMs: 8.25, errorCode: 'ASSERTION_FAILED' });
-    child.emit({ ...base, kind: 'step-finished', stepIndex: 1, stepId: second.stepId, status: 'SKIPPED', startedAtMs: null, finishedAtMs: null, durationMs: null, errorCode: null });
-    child.emit({ ...base, kind: 'step-finished', stepIndex: 2, stepId: third.stepId, status: 'SKIPPED', startedAtMs: null, finishedAtMs: null, durationMs: null, errorCode: null });
+    child.emit({ ...base, kind: 'step-finished', stepIndex: 0, stepId: first.stepId, status: 'FAIL', startedAtMs: 1.25, finishedAtMs: 9.5, durationMs: 8.25, receipt: stepReceipt({ closedCode: 'ASSERTION_FAILED', stepHash: stepHashOf(first.operations), fenceCrossed: true, effects: [{ method: 'click', completed: true }] }) });
+    child.emit({ ...base, kind: 'step-finished', stepIndex: 1, stepId: second.stepId, status: 'SKIPPED', startedAtMs: null, finishedAtMs: null, durationMs: null, receipt: stepReceipt({ stepHash: stepHashOf(second.operations) }) });
+    child.emit({ ...base, kind: 'step-finished', stepIndex: 2, stepId: third.stepId, status: 'SKIPPED', startedAtMs: null, finishedAtMs: null, durationMs: null, receipt: stepReceipt({ stepHash: stepHashOf(third.operations) }) });
     emitResult(child, false, 'ASSERTION_FAILED');
     child.end();
     const result = await pending;
@@ -535,7 +537,7 @@ describe('AC-5 — the session closes the child on every path', () => {
     // the one stop.
     const base = frameBase(child);
     for (const step of wire.job.artifact.steps) {
-      child.emit({ ...base, kind: 'step-finished', stepIndex: step.stepIndex, stepId: step.stepId, status: 'SKIPPED', startedAtMs: null, finishedAtMs: null, durationMs: null, errorCode: null });
+      child.emit({ ...base, kind: 'step-finished', stepIndex: step.stepIndex, stepId: step.stepId, status: 'SKIPPED', startedAtMs: null, finishedAtMs: null, durationMs: null, receipt: stepReceipt({ stepHash: stepHashOf(step.operations) }) });
     }
     emitResult(child, false, 'CANCELLED');
     await pending;
@@ -564,15 +566,14 @@ function secretBearingJob(value: string): ObservedJob {
   const job = structuredClone(wire.job);
   const step = job.artifact.steps[1];
   if (!step) throw new Error('STEP');
-  (step.operations[0] as { operation: unknown }).operation = { kind: 'fill', value: { kind: 'secretRef', sourceInputId: 'pass' } };
-  (job.artifact.guards[1] as { target: unknown }).target = { kind: 'passwordControl' };
+  (step.operations[0] as { operation: unknown }).operation = stepOp('await page.locator(\'input[type="password"]\').fill(secrets["PASS"]);', { uses: [{ kind: 'secret', id: 'PASS' }] });
   const last = job.artifact.steps[2], literal = last?.operations[1], literalGuard = job.artifact.guards[3];
   if (!last || !literal || !literalGuard) throw new Error('LITERAL');
   (last as { operations: unknown }).operations = [{ ...literal, coordinate: { stepId: last.stepId, ordinal: 0 }, guardId: 'g2' }];
   (job.artifact as { guards: unknown }).guards = [job.artifact.guards[0], job.artifact.guards[1], { ...literalGuard, guardId: 'g2' }];
   (job.artifact.replayPolicy as { bindings: unknown }).bindings = [];
   (job.artifact.replayPolicy as { transfers: unknown }).transfers = [];
-  (job.artifact.inputRecipes as unknown[]).push({ inputId: 'pass', stepId: step.stepId, kind: 'secretRef', intendedSlot: 'fill.value', provenance: { kind: 'configuration', referenceId: 'pass-ref', referenceName: 'PASS' } });
+  (job.artifact.inputRecipes as unknown[]).push({ inputId: 'pass', stepId: step.stepId, kind: 'secretRef', provenance: { kind: 'configuration', referenceId: 'pass-ref', referenceName: 'PASS' } });
   (job as { secrets: unknown }).secrets = { PASS: value };
   (job as { secretOrigins: unknown }).secretOrigins = { PASS: [FIXTURE_ORIGIN] };
   return job;

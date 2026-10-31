@@ -13,13 +13,12 @@ const cleanups: (() => Promise<void>)[] = [];
 afterEach(async () => { for (const clean of cleanups.reverse()) await clean(); cleanups.length = 0; });
 
 function inputs(context: ReturnType<typeof guidedContext>, suffix: string) {
-  const intendedSlot = 'assert.expected' as const;
   const kind = 'nonsecretText' as const;
   const sourceStepId = 'next';
   return [
-    { inputId: `source-${suffix}`, sourceStepId, kind, value: 'Reports', intendedSlot, provenance: { referenceKind: 'sourceSpan' as const, sourceRevision: context.sourceRevision, stepId: sourceStepId, startUtf16: 0, endUtf16: 7, kind, intendedSlot } },
-    { inputId: `configuration-${suffix}`, sourceStepId, kind, value: `PRIVATE_CONFIG_${suffix}`, intendedSlot, provenance: { referenceKind: 'configuration' as const, configurationRevision: context.configurationRevision, stepId: sourceStepId, referenceId: `saved-${suffix}`, kind, intendedSlot } },
-    { inputId: `secret-${suffix}`, sourceStepId: 'fill', kind: 'secretRef' as const, secretId: randomUUID(), intendedSlot: 'fill.value' as const, provenance: { referenceKind: 'configuration' as const, configurationRevision: context.configurationRevision, stepId: 'fill', referenceId: `secret-${suffix}`, referenceName: 'PASS', kind: 'secretRef' as const, intendedSlot: 'fill.value' as const } },
+    { inputId: `source-${suffix}`, sourceStepId, kind, value: 'Reports', provenance: { referenceKind: 'sourceSpan' as const, sourceRevision: context.sourceRevision, stepId: sourceStepId, startUtf16: 0, endUtf16: 7, kind } },
+    { inputId: `configuration-${suffix}`, sourceStepId, kind, value: `PRIVATE_CONFIG_${suffix}`, provenance: { referenceKind: 'configuration' as const, configurationRevision: context.configurationRevision, stepId: sourceStepId, referenceId: `saved-${suffix}`, kind } },
+    { inputId: `secret-${suffix}`, sourceStepId: 'fill', kind: 'secretRef' as const, secretId: randomUUID(), provenance: { referenceKind: 'configuration' as const, configurationRevision: context.configurationRevision, stepId: 'fill', referenceId: `secret-${suffix}`, referenceName: 'PASS', kind: 'secretRef' as const } },
   ];
 }
 
@@ -36,7 +35,7 @@ it('AUTHORED-ECHO-01 installs strict configuration values before the first possi
   const callback = vi.fn(() => Promise.resolve());
   const browser: GuidedBrowser = {
     evidence: { kind: 'initialBlank', sessionId: context.sessionId, contextId: context.contextId, creationId: randomUUID(), documentId: randomUUID(), bootstrapId: randomUUID(), url: 'about:blank', origin: null, generation: 0 },
-    blankMatches, navigateBlank: () => Promise.resolve(), close: () => Promise.resolve(), terminate: () => Promise.resolve(), orderlyClosed: () => true,
+    blankMatches, close: () => Promise.resolve(), terminate: () => Promise.resolve(), orderlyClosed: () => true,
     observations: sessionStub({ withhold, dispose: () => Promise.resolve(), observe: () => Promise.reject(new Error('unused')) }),
   };
   const runtime = new GuidedRuntime(context, { workerId: context.workerId, allowedDomains: TEST_DOMAINS, journalDirectory: directory, launch: () => Promise.resolve(browser), callback });

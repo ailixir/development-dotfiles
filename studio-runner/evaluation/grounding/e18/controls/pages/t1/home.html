@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Settings</title></head>
+<body><main>
+<h1>Account settings</h1>
+<p id="status">Status: Active</p>
+<label>Display name <input id="name" value="Ada"></label><br>
+<label><input type="checkbox" id="notify" checked> Email notifications</label><br>
+<label>Language <select id="lang"><option selected>English</option><option>French</option><option>German</option></select></label><br>
+<button id="save">Save</button> <button id="cancel">Cancel</button>
+<p id="msg" role="status"></p>
+</main>
+<script>document.getElementById('save').addEventListener('click',function(){document.getElementById('msg').textContent='Saved';});</script>
+</body></html>

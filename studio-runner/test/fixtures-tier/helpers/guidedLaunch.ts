@@ -35,6 +35,12 @@ type Context = ReturnType<typeof guidedContext>;
 /** The origin the stub sessions approve; nothing is ever served from it. */
 export const ORIGIN = 'http://localhost:9';
 
+/** Takes a launched guided browser to `url`: the blank-page navigation the old browser API did, now plain Playwright on the guided page (the domain policy is step code's, tested in stepRunLive). */
+export async function gotoPage(guided: GuidedBrowser, url: string): Promise<void> {
+  if (guided.handle === undefined) throw new Error('HANDLE');
+  await (guided.handle.page as { goto(url: string): Promise<unknown> }).goto(url);
+}
+
 export const sleep = (ms: number): Promise<void> => new Promise<void>((resolve) => { setTimeout(resolve, ms); });
 export const rounded = (value: number | null): number | null => (value === null ? null : Math.round(value));
 

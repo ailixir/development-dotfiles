@@ -1,4 +1,3 @@
-import type {InvocationControl} from '../executor/observedReplay.js';
 /**
  * **The only module in this package that imports Playwright** (AC-1).
  *
@@ -35,21 +34,20 @@ import { GuidedLaunchFailure, GUIDED_START_BUDGET_MS, GUIDED_START_RESERVE_MS, g
 import type { GuidedBrowser, GuidedLaunchPhase, GuidedLossReason, GuidedRecordingRequest, GuidedStartup } from './guidedBrowser.js';
 import { killLaunchTree, survivorsOf } from './tree.js';
 import { chromium } from 'playwright';
+import { expect } from 'playwright/test';
 import { randomUUID } from 'node:crypto';
 import type { BrowserContext, Page, Frame, CDPSession } from 'playwright';
 import { readdir, rm, mkdtemp,realpath,lstat } from 'node:fs/promises';
 import { join,dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 
-import type { BrowserFactory, BrowserHandle, BrowserLaunchRequest } from './browserFactory.js';
-import {BrowserStartupCleanupFailure} from './browserFactory.js';
+import type { BrowserFactory, BrowserHandle, BrowserLaunchRequest, StepApi } from './browserFactory.js';
+import {BrowserStartupCleanupFailure, StepPages} from './browserFactory.js';
 import {BootstrapPageGuard,boundedStartup,isAbsoluteStartupTimeout} from './observedBootstrap.js';
 import {readVersionPaths} from './versionProbe.js';
 import {validateAppVideoPath} from './appVideoOwnership.js';
 import { createObservationFlow } from './observationFlow.js';
-import { ClosedActionError, closedPageStep } from './closedError.js';
-import { loadInjectedSource } from './playwrightEngine.js';
-import type { BoundElement, PageLike } from './targetAction.js';
+import { REPLAY_PROFILE } from './actionBudget.js';
 import type { ObservationConfig, ObservationSession } from './observationTypes.js';
 import { SCRATCH_SUBDIRECTORIES, prepareBrowserProfile, requireBrowserPreferences,assertEffectiveBrowserPreferences,browserProfileConfinement,releaseBrowserProfile } from './scratchLayout.js';
 import type {BrowserPreferenceEvidence} from './scratchLayout.js';
@@ -68,11 +66,6 @@ async function verifyBrowserPreferences(page:Page,profile:string):Promise<Browse
   });
   assertEffectiveBrowserPreferences(effective);if(browserProfileConfinement(profile).defaultProfile.path!==expected)throw new Error('PROFILE_PREFERENCES_REQUIRED');await page.goto('about:blank');browserProfileConfinement(profile);
   return {channel:'chromium',browserVersion:page.context().browser()?.version()??'UNKNOWN',activeProfilePath:expected,executablePath:await realpath(executable),effective};
-}
-
-function mainDocumentTransition(page: Page): Promise<boolean> {
-  const loaded = (): Promise<void> => page.waitForLoadState('domcontentloaded', {timeout: 30000});
-  return page.waitForEvent('framenavigated', {predicate: frame => frame === page.mainFrame(), timeout: 30000}).then(loaded).then(() => true, () => false);
 }
 
 /**
@@ -138,6 +131,50 @@ async function removeStrayRecordings(videoDir: string, keep: string): Promise<vo
   }
 }
 
+/**
+ * SC008-FIX-25: what a step started that lands a tick after its own call returned (a select whose handler fetches first, then sets location).
+ * Learning hides it behind the model gap and the observation; a model-free run would start the next step on the dying document.
+ * `reset` at the start of a step; `settle` after its code: wait up to navStartMs for a main-frame navigation request (or a commit that
+ * already happened), then up to navGraceMs for the commit, then for `load`, never beyond `maxMs`. Timeouts are swallowed.
+ */
+function trackNavigation(page: Page): { reset(): void; settle(maxMs: number): Promise<void> } {
+  let started = false, committed = false;
+  page.on('request', request => {
+    try { if (request.isNavigationRequest() && request.frame() === page.mainFrame()) started = true; } catch { /* a request without a frame */ }
+  });
+  page.on('framenavigated', frame => { if (frame === page.mainFrame()) committed = true; });
+  const sleep = (ms: number): Promise<void> => new Promise<void>(resolve => { setTimeout(resolve, Math.max(1, ms)); });
+  return {
+    reset() { started = false; committed = false; },
+    async settle(maxMs) {
+      const begin = Date.now(), end = begin + maxMs;
+      try {
+        const startBy = Math.min(end, begin + REPLAY_PROFILE.navStartMs);
+        while (!started && !committed && Date.now() < startBy) await sleep(Math.min(25, startBy - Date.now()));
+        if (!started && !committed) return;
+        const commitBy = Math.min(end, Date.now() + REPLAY_PROFILE.navGraceMs);
+        while (!committed && Date.now() < commitBy) await sleep(Math.min(25, commitBy - Date.now()));
+        if (!committed || Date.now() >= end) return;
+        await page.waitForLoadState('load', { timeout: Math.max(1, end - Date.now()) });
+      } catch { /* the wait never fails a step */ }
+    },
+  };
+}
+
+/** What step code runs against: the run's page and context, Playwright's own expect, and the run's popup registry. */
+function makeStepApi(page: Page, context: BrowserContext, pages: StepPages): StepApi {
+  const navigation = trackNavigation(page);
+  return {
+    page, context, expect,
+    awaitWhitelistedMainFrame: allowedDomains => awaitWhitelistedMainFrame(page, allowedDomains),
+    beginStep: () => { pages.begin(); navigation.reset(); },
+    settleNavigation: maxMs => navigation.settle(maxMs),
+    endStep: () => pages.end(),
+    adopt: adopted => { pages.adopt(adopted as Page); },
+    adoptedPages: () => pages.openAdopted(),
+  };
+}
+
 export const playwrightBrowserFactory: BrowserFactory = {
   async launch(request: BrowserLaunchRequest): Promise<BrowserHandle> {
     if (request.browser !== 'chromium') {
@@ -173,10 +210,11 @@ export const playwrightBrowserFactory: BrowserFactory = {
     const startupDeadline=request.startup?.deadlineEpochMs??Date.now()+30000;
     const cleanupStartup=async():Promise<void>=>{const closing=context.close();const now=Date.now(),deadline=Math.max(now+1,Math.min(startupDeadline,now+5000));await boundedStartup(()=>closing,deadline,undefined,5000);releaseBrowserProfile(join(request.scratchPath,SCRATCH_SUBDIRECTORIES.profile));};
     try {
-    let extraPageListener: (() => void) | null = null;
-    let sawExtraPage = false;
-    const guard=request.observedScope?new BootstrapPageGuard<Page>(opened=>{sawExtraPage=true;void opened.close().catch(()=>undefined);}):undefined;
-    if(guard)context.on('page',opened=>{guard.opened(opened);});
+    const pages = new StepPages();
+    let appPhase = false;
+    const guard=request.observedScope?new BootstrapPageGuard<Page>(opened=>{void opened.close().catch(()=>undefined);}):undefined;
+    // Until the app page exists the bootstrap guard owns every page event. After that a new page belongs to the step that opened it.
+    if(guard)context.on('page',opened=>{if(appPhase){if(opened!==page)pages.opened(opened);}else guard.opened(opened);});
     const [first] = context.pages();
     let page:Page;
     if(request.observedScope){if(!first)throw new Error('TARGET_DRIFT');page=first;}else page=first??await context.newPage();
@@ -190,7 +228,7 @@ export const playwrightBrowserFactory: BrowserFactory = {
       if(directory!==join(root,SCRATCH_SUBDIRECTORIES.video)||(await lstat(videoDir)).isSymbolicLink()||file.isSymbolicLink()||!file.isFile()||dirname(actual)!==directory)throw new Error('RECORDING_FAILED');
       await boundedStartup(()=>startupVideo.delete(),deadline,signal,5000);guard.check();
       if((await readdir(videoDir)).length!==0)throw new Error('RECORDING_FAILED');guard.startupRemoved(context.pages());guard.beginApp();
-      page=await boundedStartup(()=>context.newPage(),deadline,signal);guard.appReturned(page,context.pages());
+      page=await boundedStartup(()=>context.newPage(),deadline,signal);guard.appReturned(page,context.pages());appPhase=true;
       if(page.url()!=='about:blank')throw new Error('TARGET_DRIFT');
     }catch(error){try{await cleanupStartup();}catch{throw new BrowserStartupCleanupFailure();}throw error;}}
 
@@ -212,10 +250,6 @@ export const playwrightBrowserFactory: BrowserFactory = {
       if (!blankConnection || !blankObject) return false;
       try { const r = await blankConnection.send('Runtime.callFunctionOn',{objectId:blankObject,functionDeclaration:'function() { return this === document && location.href === "about:blank" && location.origin === "null"; }',returnByValue:true});return !r.exceptionDetails && r.result.value === true; } catch { return false; }
     };
-    const approvedDestination = (destination:string):void => {
-      const url = new URL(destination);
-      if (!domainAllowed(request.allowedDomains, destination) || url.username || url.password) throw new Error('POLICY_REFUSED');
-    };
     const hosts = new Set<string>();
     context.on('request', (request_) => {
       if (hosts.size >= MAX_OBSERVED_HOSTS) return;
@@ -223,15 +257,7 @@ export const playwrightBrowserFactory: BrowserFactory = {
       if (host !== null) hosts.add(host);
     });
 
-    if(!guard)context.on('page', (opened) => {
-      if (opened === page) return;
-      // Closed immediately (§5.2, AC-15): V1 drives one page, and execution never continues on
-      // the other one. Its recording is dealt with in `close`, below, where the files are
-      // finalized and can actually be removed.
-      sawExtraPage = true;
-      void opened.close().catch(() => undefined);
-      extraPageListener?.();
-    });
+    if(!guard)context.on('page', (opened) => { if (opened !== page) pages.opened(opened); });
 
     let disposed=false;
     guard?.check();
@@ -243,31 +269,13 @@ export const playwrightBrowserFactory: BrowserFactory = {
       page,
 
       createObservationSession: (config) => createBrowserObservationSession(page, config),
+      stepApi: makeStepApi(page, context, pages),
       ...(observedScope ? {
         observedBlankMatches: blankMatches,
         observedStartupReady(){return guard?.ready(page,context.pages())===true;},
         observedAppVideoPath(){guard?.check();if(!appVideo||!guard?.ready(page,context.pages()))throw new Error('RECORDING_FAILED');appVideoPath??=boundedStartup(()=>appVideo.path(),startupDeadline,request.startup?.signal).then(path=>validateAppVideoPath(request.scratchPath,path));return appVideoPath;},
         async observedInitialContextMatches(){guard?.check();return observedScope.initialContext.kind==='initialBlank'?blankMatches():new URL(page.url()).origin===observedScope.initialContext.origin;},
-        async observedWait(strategy:'load'|'domcontentloaded'|'networkidle',timeoutMs:number){await closedPageStep(()=>page.waitForLoadState(strategy,{timeout:timeoutMs}));},
-        observedNavigateBlank(destination:string, control?:InvocationControl) { return closedPageStep(async function (): Promise<void> {
-          const reached = mainDocumentTransition(page);
-          control?.check();
-          approvedDestination(destination);
-          if (!blankConnection || !blankObject || !await blankMatches()) throw new Error('TARGET_DRIFT');
-          control?.check();
-          control?.beginInvocation();
-          const r=await blankConnection.send('Runtime.callFunctionOn',{objectId:blankObject,functionDeclaration:'function(destination) { if (this !== document || location.href !== "about:blank" || location.origin !== "null") throw new Error("TARGET_CHANGED"); location.assign(destination); }',arguments:[{value:destination}],returnByValue:true});
-          control?.check();
-          if (r.exceptionDetails) throw new Error('TARGET_DRIFT');
-          if (!await reached) throw new Error('TARGET_DRIFT');
-          control?.check();
-        }); },
       } : {}),
-
-      onExtraPage(listener: () => void): void {
-        extraPageListener = listener;
-        guard?.subscribe(listener);
-      },
 
       observedHosts(): readonly string[] {
         return [...hosts].sort();
@@ -284,11 +292,11 @@ export const playwrightBrowserFactory: BrowserFactory = {
         const produced = await video.path();
         if(observedScope){appVideoPath??=Promise.resolve(validateAppVideoPath(request.scratchPath,produced));if(validateAppVideoPath(request.scratchPath,produced)!==await appVideoPath)throw new Error('RECORDING_FAILED');}
         // **One run, one video.** A context records per *page*, so a popup starts a second file
-        // even though it is closed on sight. Leaving it in scratch would mean the run produced
+        // even if it is closed at once. Leaving it in scratch would mean the run produced
         // two recordings and something downstream would have to choose between them — or worse,
         // merge them, which §5.2 forbids outright. The stray files go here, after the close that
         // finalized them, and only ever inside this run's own video directory.
-        if (sawExtraPage && !observedScope) await removeStrayRecordings(videoDir, produced);
+        if (pages.sawOtherPage) await removeStrayRecordings(videoDir, produced);
         return produced;
       },
 
@@ -310,75 +318,20 @@ export const playwrightBrowserFactory: BrowserFactory = {
  */
 export function createBrowserObservationSession(page: Page, config: ObservationConfig): ObservationSession {
   return createObservationFlow({
-    // A Playwright Page satisfies PageLike except for the parameter type of Locator.and (a real Locator); targetAction only ever passes
-    // locators built from this same page, so the structural type is kept narrow and the one difference is bridged here.
-    page: page as unknown as PageLike,
+    page,
     newCdp: () => page.context().newCDPSession(page),
-    inspectBoundElement: bound => inspectCapturedElement(page, bound),
     onNavigation(listener) {
       const navigated = (frame: Frame): void => { if (frame === page.mainFrame()) listener(); };
       page.on('framenavigated', navigated);
       return () => { page.off('framenavigated', navigated); };
     },
+    // domcontentloaded fires once per new document of the main frame and never for a history change.
+    onDocument(listener) {
+      page.on('domcontentloaded', listener);
+      return () => { page.off('domcontentloaded', listener); };
+    },
     awaitWhitelistedMainFrame: allowedDomains => awaitWhitelistedMainFrame(page, allowedDomains),
   }, config);
-}
-
-type RecordLike = Record<string, unknown>;
-const record = (value: unknown): RecordLike => {
-  if (typeof value !== 'object' || value === null) throw new ClosedActionError('TARGET_CHANGED');
-  return value as RecordLike;
-};
-const callable = (value: unknown): ((...args: unknown[]) => unknown) => {
-  if (typeof value !== 'function') throw new ClosedActionError('TARGET_CHANGED');
-  return value as (...args: unknown[]) => unknown;
-};
-
-/** No public ElementHandle.evaluate/getProperty, adoption, DOM mutation, query or action. */
-export async function inspectCapturedElement(
-  page: unknown,
-  captured: BoundElement,
-): Promise<number> {
-  try {
-    // Verify the unchanged exact bundle/version before touching the trusted private mapping.
-    loadInjectedSource();
-    const apiPage = record(page), apiHandle = record(captured);
-    const connection = record(apiPage._connection);
-    if (apiHandle._connection !== connection) throw new ClosedActionError('TARGET_CHANGED');
-    const toImpl = callable(connection.toImpl);
-    const implPage = record(toImpl.call(connection, page));
-    const mainFrame = callable(apiPage.mainFrame);
-    const apiFrame = mainFrame.call(page);
-    const implFrame = record(toImpl.call(connection, apiFrame));
-    const implHandle = record(toImpl.call(connection, captured));
-    const context = record(implHandle._context);
-    const delegate = record(context.delegate), client = record(delegate._client);
-    const send = callable(client.send), currentContext = callable(implFrame.existingContext);
-    const objectId = implHandle._objectId;
-    if (typeof objectId !== 'string' || objectId.length === 0) throw new ClosedActionError('TARGET_CHANGED');
-    const live = (): void => {
-      if (apiPage._connection !== connection || apiHandle._connection !== connection
-        || toImpl.call(connection, page) !== implPage || toImpl.call(connection, captured) !== implHandle
-        || mainFrame.call(page) !== apiFrame || toImpl.call(connection, apiFrame) !== implFrame
-        || implHandle.__elementhandle !== true || implHandle._disposed !== false
-        || implHandle._page !== implPage || implHandle._frame !== implFrame
-        || implHandle._context !== context || currentContext.call(implFrame, 'main') !== context
-        || implHandle._objectId !== objectId || context.delegate !== delegate || delegate._client !== client) {
-        throw new ClosedActionError('TARGET_CHANGED');
-      }
-    };
-    live();
-    const response = record(await send.call(client, 'DOM.describeNode', { objectId }));
-    live();
-    const backendNodeId = record(response.node).backendNodeId;
-    if (typeof backendNodeId !== 'number' || !Number.isSafeInteger(backendNodeId) || backendNodeId <= 0) {
-      throw new ClosedActionError('TARGET_CHANGED');
-    }
-    return backendNodeId;
-  } catch {
-    // Neither raw protocol errors, page text, attributes, object IDs nor causes escape.
-    throw new ClosedActionError('TARGET_CHANGED');
-  }
 }
 
 /** How long the hard teardown waits for an abandoned launch that has already left a process behind to settle. */
@@ -455,8 +408,9 @@ export async function launchGuidedBrowser(config: ObservationConfig, contextId: 
     const probePage = page;
     preferenceEvidence = await bounded(() => verifyBrowserPreferences(probePage, profile));
   }
-  let extraPageListener: (() => void) | null = null;
-  context.on('page', extra => { if (extra !== page) { void extra.close().catch(() => undefined); extraPageListener?.(); onLost('EXTRA_PAGE'); } });
+  // A page other than the session's own belongs to the step that opens it (ADR-SC-008 D7 ruling 3); it is never a loss of the session.
+  const pages = new StepPages();
+  context.on('page', extra => { if (extra !== page) pages.opened(extra); });
   page.on('crash', () => { if (!closed) onLost('PAGE_CRASH'); });
   browser?.on('disconnected', () => { if (!closed) onLost('BROWSER_DISCONNECTED'); });
   const hosts = new Set<string>();
@@ -478,17 +432,6 @@ export async function launchGuidedBrowser(config: ObservationConfig, contextId: 
   const blankMatches = async (): Promise<boolean> => {
     try { const result = await cdp.send('Runtime.callFunctionOn', { objectId: blankId, functionDeclaration: 'function() { return this === document && location.href === "about:blank" && location.origin === "null"; }', returnByValue: true }); return !result.exceptionDetails && result.result.value === true; } catch { return false; }
   };
-  const navigateBlank = (destination: string, control?: InvocationControl): Promise<void> => closedPageStep(async function (): Promise<void> {
-    const reached = mainDocumentTransition(page);
-    control?.check();
-    if (!domainAllowed(config.allowedDomains, destination)) throw new Error('POLICY_DENIED');
-    control?.beginInvocation();
-    const result = await cdp.send('Runtime.callFunctionOn', { objectId: blankId, functionDeclaration: 'function(destination) { if (this !== document || location.href !== "about:blank" || location.origin !== "null") throw new Error("TARGET_CHANGED"); location.assign(destination); }', arguments: [{ value: destination }], returnByValue: true });
-    control?.check();
-    if (result.exceptionDetails) throw new Error('TARGET_CHANGED');
-    if (!await reached) throw new Error('TARGET_CHANGED');
-    control?.check();
-  });
   const close = stages.close;
   // The recorder outlives the hard stage on purpose (see `hardTeardown`). Wait for it to exit by itself, bounded; past the bound it is killed.
   const finalizeRecording = async (boundMs: number): Promise<boolean> => {
@@ -498,7 +441,15 @@ export async function launchGuidedBrowser(config: ObservationConfig, contextId: 
     return false;
   };
   // Valid after close: Playwright finalizes the webm when the context closes (§6.1).
-  const recordedVideo = async (): Promise<string | null> => { if (!video) return null; try { return await video.path(); } catch { return null; } };
+  const recordedVideo = async (): Promise<string | null> => {
+    if (!video) return null;
+    try {
+      const path = await video.path();
+      // One session, one recording: a popup that was opened records into the same directory, and that file is not evidence.
+      if (pages.sawOtherPage && recording) await removeStrayRecordings(recording.dir, path);
+      return path;
+    } catch { return null; }
+  };
   // AC-1 parity: the recorded handle type the observed replay adapter consumes, same page/recording.
   const handle: BrowserHandle = {
     page,
@@ -506,9 +457,7 @@ export async function launchGuidedBrowser(config: ObservationConfig, contextId: 
     observedBlankMatches: blankMatches,
     observedInitialContextMatches: blankMatches,
     observedStartupReady: () => !closed,
-    async observedWait(strategy, timeoutMs) { await closedPageStep(() => page.waitForLoadState(strategy, { timeout: timeoutMs })); },
-    observedNavigateBlank: navigateBlank,
-    onExtraPage(listener) { extraPageListener = listener; },
+    stepApi: makeStepApi(page, live, pages),
     observedHosts: () => [...hosts].sort(),
     async close() { await close(); return recordedVideo(); },
     async dispose() { await close().catch(() => undefined); },
@@ -519,7 +468,6 @@ export async function launchGuidedBrowser(config: ObservationConfig, contextId: 
     scratchDirectory,
     observations: createBrowserObservationSession(page, config),
     blankMatches,
-    navigateBlank: destination => navigateBlank(destination),
     close,
     terminate: stages.terminate,
     orderlyClosed: stages.orderlyClosed,

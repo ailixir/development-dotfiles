@@ -8,7 +8,6 @@
  * here by a small hand-written decoder, never by evaluating bundle code.
  *
  * This module only talks to the browser through a structural `CdpSession`; it does not import Playwright.
- * It also holds the live-option check G1 (`OPTION_NOT_PRESENT`), which needs the engine to find the element.
  */
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
@@ -17,21 +16,13 @@ import { dirname, join } from 'node:path';
 
 import pin from './playwrightEnginePin.json' with { type: 'json' };
 import {
-  checkSelectors,
-  elementCandidateFacts,
-  listOptions,
   resolveRefs,
-  selectorElements,
   captureReadSource,
-  pageInventory,
   collectPage,
   checkPublicSourceRelations,
-  type ElementCandidateFacts,
-  type OptionListing,
-  type SelectorCheck,
 } from './perceptionInPage.js';
-import { nativeMatcherFactorySource, type InventoryEntry } from './privateInventory.js';
-import type { Locator } from './locatorSynth.js';
+/** The locator steps the in-page read-context factory receives. Its only caller passes none; the type is the JSON shape, not a grammar. */
+type Locator = readonly object[];
 
 export interface CdpSession {
   send(method: string, params?: object): Promise<unknown>;
@@ -271,58 +262,9 @@ export async function captureSourceOnEngine(engine: PerceptionEngine, selector: 
   catch { throw new Error('READ_REFUSED'); }
 }
 
-export async function sourceValue(engine: PerceptionEngine, sourceId: string, entries: readonly InventoryEntry[]): Promise<string> {
-  const declaration = `function(entries) {
-    const fresh = (${pageInventory.toString()})();
-    if (fresh.oversize) throw new Error('READ_REFUSED');
-    const matcher = (${nativeMatcherFactorySource()})([...entries, ...fresh.entries], { workBudget: { remaining: 20000000000 } });
-    this.extract(text => matcher.hitSplit([text]));
-  }`;
-  await send(engine.cdp, 'Runtime.callFunctionOn', { objectId: sourceId, functionDeclaration: declaration, arguments: [{ value: entries }], returnByValue: true });
-  await assertUnshadowedSource(engine, sourceId);
-  const result = await send(engine.cdp, 'Runtime.callFunctionOn', { objectId: sourceId, functionDeclaration: 'function() { return this.value(); }', returnByValue: true });
-  const value = remote(result.result).value;
-  if (typeof value !== 'string') throw new Error('READ_REFUSED');
-  return value;
-}
 
-export async function sourceBackendNodeId(engine: PerceptionEngine, sourceId: string): Promise<number> {
-  const result = await send(engine.cdp, 'Runtime.callFunctionOn', { objectId: sourceId, functionDeclaration: 'function() { return this.node(); }', returnByValue: false });
-  const objectId = remote(result.result).objectId;
-  if (typeof objectId !== 'string') throw new Error('READ_REFUSED');
-  try {
-    const described = await send(engine.cdp, 'DOM.describeNode', { objectId, depth: 0, pierce: false });
-    const id = (described.node as { backendNodeId?: unknown } | undefined)?.backendNodeId;
-    if (typeof id !== 'number') throw new Error('READ_REFUSED');
-    return id;
-  } finally { await engine.cdp.send('Runtime.releaseObject', { objectId }).catch(() => undefined); }
-}
 
-export async function sourceSame(engine: PerceptionEngine, sourceId: string, selector: string): Promise<boolean> {
-  const result = await send(engine.cdp, 'Runtime.callFunctionOn', { objectId: sourceId,
-    functionDeclaration: 'function(selector) { return this.same(selector); }',
-    arguments: [{ value: selector }], returnByValue: true });
-  return remote(result.result).value === true;
-}
 
-export async function compareSource(engine: PerceptionEngine, sourceId: string, expected: string, entries: readonly InventoryEntry[], mode: 'DIRECT_PUBLIC' | 'READ_BINDING_SOURCE', locator: Locator, selector: string, allEntries: readonly InventoryEntry[] = entries): Promise<boolean> {
-  const context = (locator.length === 5 || locator.length === 6) && locator[0]?.by === 'tag' && locator[0].tag === 'table'
-    && locator[1]?.by === 'filterHas' && locator[3]?.by === 'filterHas' ? { title: locator[1].has[0], label: locator[3].has[0] } : null;
-  const declaration = `function(expected, entries, mode, selector, context, allEntries) {
-    if (!this.same(selector)) throw new Error('READ_REFUSED');
-    if (context && !this.context(engine => (${frozenContextDeclaration()}).call(engine, selector, context.title, context.label, allEntries, mode === 'READ_BINDING_SOURCE'))) throw new Error('READ_REFUSED');
-    const makeMatcher = ${nativeMatcherFactorySource()};
-    const inventory = ${pageInventory.toString()};
-    this.compare(expected, entries, mode, makeMatcher, inventory, allEntries);
-  }`;
-  await send(engine.cdp, 'Runtime.callFunctionOn', { objectId: sourceId, functionDeclaration: declaration,
-    arguments: [{ value: expected }, { value: entries }, { value: mode }, { value: selector }, { value: context }, { value: allEntries }], returnByValue: true });
-  await assertUnshadowedSource(engine, sourceId);
-  const result = await send(engine.cdp, 'Runtime.callFunctionOn', { objectId: sourceId, functionDeclaration: 'function() { return this.commitComparison(); }', returnByValue: true });
-  const value = remote(result.result).value;
-  if (typeof value !== 'boolean') throw new Error('READ_REFUSED');
-  return value;
-}
 
 /** R5: quarantine metadata on the dedicated untracked channel; never inspect or retain payload text. */
 async function assertUnshadowedSource(engine: PerceptionEngine, sourceId: string): Promise<void> {
@@ -402,116 +344,7 @@ export async function unsafePublicRoots(engine: PerceptionEngine, refs: readonly
   return unsafe;
 }
 
-/** Current DOM-private inventory and native certificates are checked in one isolated task. */
-export async function checkPublicRelationsOnEngine(engine: PerceptionEngine, request: Parameters<typeof checkPublicSourceRelations>[0], entries: readonly InventoryEntry[]): Promise<boolean> {
-  const declaration = nativeScopeCertificateDeclaration();
-  const result = await send(engine.cdp, 'Runtime.callFunctionOn', { objectId: engine.objectId, functionDeclaration: declaration,
-    arguments: [{ value: request }, { value: entries }], returnByValue: false });
-  return finishSourceCertificate(engine, result);
-}
 
-/** Reconstructs the new title + row certificate for the frozen standard-grammar locator.
- * No ordinary descendant prefix is ever selected or materialized. */
-export async function checkFrozenSourceContext(engine: PerceptionEngine, locator: Locator, selector: string, entries: readonly InventoryEntry[], captureComparison = false): Promise<boolean> {
-  const [table, title, row, label, cell] = locator;
-  if (locator.length !== 5 && locator.length !== 6 || table?.by !== 'tag' || table.tag !== 'table' || title?.by !== 'filterHas'
-    || row?.by !== 'tag' || row.tag !== 'tr' || label?.by !== 'filterHas' || cell?.by !== 'tag' || cell.tag !== 'td') return true;
-  const tail = locator[5];
-  if (locator.length === 6 && (tail?.by !== 'role' || tail.role !== 'link' || tail.name === undefined)) return false;
-  const titleStep = title.has[0], labelStep = label.has[0];
-  if (title.has.length !== 1 || label.has.length !== 1 || titleStep?.by !== 'role' || !('name' in titleStep)
-    || labelStep?.by !== 'role' || !('name' in labelStep) || title.relation !== undefined || label.relation !== undefined) return false;
-  const declaration = frozenContextDeclaration();
-  // A live page keeps changing its own ancestors for a moment after it loads (a site script toggling classes on <html>). The certificate
-  // revokes on every such change, so a revoked capture is simply made again from scratch; it is never reused or loosened. A page that
-  // keeps changing past the last attempt is a drifted page (false), not an internal error.
-  for (let attempt = 1; ; attempt++) {
-    try {
-      const result = await send(engine.cdp, 'Runtime.callFunctionOn', { objectId: engine.objectId, functionDeclaration: declaration,
-        arguments: [{ value: selector }, { value: titleStep }, { value: labelStep }, { value: entries }, { value: captureComparison }, { value: true }], returnByValue: false });
-      return await finishSourceCertificate(engine, result);
-    } catch (error) {
-      if (!(error instanceof Error) || !['READ_REFUSED', 'PERCEPTION_UNAVAILABLE'].includes(error.message)) throw error;
-      if (attempt >= CERTIFICATE_ATTEMPTS) return false;
-      await new Promise<void>(resolve => { setTimeout(resolve, CERTIFICATE_RETRY_MS * attempt); });
-    }
-  }
-}
-const CERTIFICATE_ATTEMPTS = 8;
-const CERTIFICATE_RETRY_MS = 150;
-
-function frozenContextDeclaration(): string {
-  return `function(selector, expectedTitle, expectedLabel, entries, captureComparison, certificate) {
-    const all = this.querySelectorAll(this.parseSelector(selector), document);
-    if (all.length !== 1) return false;
-    const target = all[0];
-    const collected = (${collectPage.toString()}).call(this);
-    const refs = Object.keys(collected.facts);
-    const ref = refs.find(ref => this.querySelector(this.parseSelector('aria-ref=' + ref), document, false) === target);
-    const scope = ref && collected.facts[ref].readScope;
-    if (!scope || !scope.tableTitleRef || scope.relation !== 'SAME_ROW_LABEL') return false;
-    const metadata = collected.facts[ref];
-    if (metadata.sensitive || metadata.editable || metadata.valueControl || metadata.inSelect || metadata.valueAttr
-      || target.closest('[data-sensitive],[contenteditable],[aria-valuetext],[aria-valuenow],input,textarea,select')
-      || target.querySelector('input,textarea,select,iframe,canvas,object,embed,[contenteditable],[data-sensitive],[aria-valuetext],[aria-valuenow]')) return false;
-    const nodes = new Map();
-    const walk = node => { if (typeof node === 'string') return; if (node.ref) nodes.set(node.ref, node); for (const child of node.children || []) walk(child); };
-    collected.json.forEach(walk);
-    const title = nodes.get(scope.tableTitleRef);
-    const label = scope.sourceRefs.filter(ref => ref !== scope.tableTitleRef).map(ref => nodes.get(ref)).find(node => node && node.role === expectedLabel.role && node.name === expectedLabel.name);
-    if (!title || title.role !== expectedTitle.role || title.name !== expectedTitle.name || !label) return false;
-    const fresh = (${pageInventory.toString()})(); if (fresh.oversize) return false;
-    const matcher = (${nativeMatcherFactorySource()})([...entries, ...fresh.entries], { workBudget: { remaining: 20000000000 } });
-    if (!captureComparison && matcher.hitSplit([target.innerText])) return false;
-    const sources = scope.sourceRefs.map(ref => { const node = nodes.get(ref); return node && { ref, role: node.role, name: node.name || '', mode: scope.relation }; });
-    if (sources.some(source => !source || !source.name || matcher.hitSplit([source.name]))) return false;
-    const request = { ref, sources, tableTitleRef: scope.tableTitleRef };
-    if (certificate) return (${nativeScopeCertificateDeclaration()}).call(this, request, entries);
-    return (${checkPublicSourceRelations.toString()}).call(this, request);
-  }`;
-}
-
-async function finishSourceCertificate(engine: PerceptionEngine, result: Record<string, unknown>): Promise<boolean> {
-  const returned = remote(result.result);
-  if (typeof returned.value === 'boolean') return returned.value;
-  const objectId = returned.objectId;
-  if (!objectId) return false;
-  try {
-    await assertUnshadowedSource(engine, objectId);
-    const committed = await send(engine.cdp, 'Runtime.callFunctionOn', { objectId, functionDeclaration: 'function() { return this.finish(); }', returnByValue: true });
-    return remote(committed.result).value === true;
-  } finally { await disposeSource(engine, objectId); }
-}
-
-function nativeScopeCertificateDeclaration(): string {
-  return `function(request, entries) {
-    const engine = this, readonly = request.sources.filter(source => source.mode !== 'scope');
-    const held = { target: engine.querySelector(engine.parseSelector('aria-ref=' + request.ref), document, false), sources: new Map() };
-    if (!held.target) return false;
-    for (const source of request.sources) {
-      const element = engine.querySelector(engine.parseSelector('aria-ref=' + source.ref), document, false);
-      if (!element) return false; held.sources.set(source.ref, element);
-    }
-    const caps = [];
-    const dispose = () => { for (const cap of caps) cap.dispose(); };
-    try {
-      const context = readonly.length ? (${nativeReadContextFactorySource()})(engine, held.target,
-        { ref: request.ref, sources: readonly, ...(request.tableTitleRef ? { tableTitleRef: request.tableTitleRef } : {}) }, []) : null;
-      if (context) for (const source of context.roots) caps.push((${captureReadSource.toString()}).call(engine, '', 4096, undefined, source));
-      const hosts = [...new Set(caps.flatMap(cap => cap.nodes()))];
-      if (hosts.length > 4096) throw new Error('READ_REFUSED');
-      const fresh = (${pageInventory.toString()})(); if (fresh.oversize) throw new Error('READ_REFUSED');
-      const matcher = (${nativeMatcherFactorySource()})([...entries, ...fresh.entries], { workBudget: { remaining: 20000000000 } });
-      const valid = !request.sources.some(source => matcher.hitSplit([source.name]))
-        && (!context || context.check(text => matcher.hitSplit([text])))
-        && (${checkPublicSourceRelations.toString()}).call(engine, request, held);
-      if (!context) return valid;
-      return { nodes() { for (const cap of caps) cap.nodes(); return hosts; }, finish() { for (const cap of caps) cap.nodes(); return valid; }, dispose };
-    } catch { dispose(); throw new Error('READ_REFUSED'); }
-  }`;
-}
-
-/** Only the existing certified READ_ASSERT_ONLY group, never unrelated ancestor/form contents. */
 function nativeReadContextFactorySource(): string {
   return `function(engine, target, request, locator) {
     const fullTable = (locator.length === 5 || locator.length === 6) && locator[0]?.by === 'tag' && locator[0].tag === 'table'
@@ -598,77 +431,4 @@ export async function backendNodeIdsFor(engine: PerceptionEngine, refs: readonly
     if (id !== undefined) ids[ref] = id;
   });
   return ids;
-}
-
-/** backendNodeIds of every element an internal selector matches, in document order. */
-export async function backendIdsForSelector(engine: PerceptionEngine, selector: string): Promise<number[]> {
-  const arrayId = await runForHandle(engine, selectorElements, [selector]);
-  const byIndex = await backendIdsOfArray(engine.cdp, arrayId);
-  return [...byIndex.entries()].sort((a, b) => a[0] - b[0]).map((entry) => entry[1]);
-}
-
-/**
- * A page script may replace a text input with a new one while it is used (a search box whose autocomplete component re-renders it,
- * keeping its value and focus). The press that follows a fill may inherit the filled field only when the field it filled is gone
- * from the document's fields (detached or already collected) and the element it now names is the one that holds the focus. A predecessor that
- * is still attached means two different elements, which never inherit. Any failure to establish both facts is `false`.
- */
-export async function replacedFocusedField(engine: PerceptionEngine, predecessorBackendNodeId: number, currentBackendNodeId: number): Promise<boolean> {
-  const [fields, focused] = await Promise.all([
-    backendIdsForSelector(engine, 'css=input, textarea, select, [contenteditable]'),
-    backendIdsForSelector(engine, 'css=:focus'),
-  ]);
-  return !fields.includes(predecessorBackendNodeId) && focused.length === 1 && focused[0] === currentBackendNodeId;
-}
-
-export type Verification = { readonly count: number; readonly index: number } | { readonly error: true };
-
-/** For each selector: how many elements it matches and where the ref's element sits among them. */
-export async function verifySelectors(engine: PerceptionEngine, ref: string, selectors: readonly string[]): Promise<Verification[]> {
-  const value = await runOnEngine(engine, checkSelectors, [ref, selectors]);
-  if (!Array.isArray(value) || value.length !== selectors.length) throw new Error('PERCEPTION_UNAVAILABLE');
-  return (value as SelectorCheck[]).map((check) => (typeof check.count === 'number' && typeof check.index === 'number' ? { count: check.count, index: check.index } : { error: true }));
-}
-
-/** Element facts used to propose locators for a ref (null when the ref no longer resolves). */
-export async function candidateFactsOf(engine: PerceptionEngine, ref: string, testIdAttribute: string, candidateRefs: readonly string[]): Promise<ElementCandidateFacts | null> {
-  const value = await runOnEngine(engine, elementCandidateFacts, [ref, testIdAttribute, candidateRefs]);
-  if (value === null || value === undefined) return null;
-  if (typeof value !== 'object') throw new Error('PERCEPTION_UNAVAILABLE');
-  return value as ElementCandidateFacts;
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-// G1: OPTION_NOT_PRESENT (ADR-SC-007 D3).
-
-export type OptionGateResult =
-  | { readonly kind: 'pass' }
-  | { readonly kind: 'refuse'; readonly code: 'OPTION_NOT_PRESENT' }
-  | { readonly kind: 'notApplicable'; readonly reason: 'NOT_A_LIST' | 'OPTIONS_UNAVAILABLE' };
-
-const optionKey = (text: string): string => text.normalize('NFKC').replace(/\s+/gu, ' ').trim().toLowerCase();
-
-/**
- * Pure G1: the authored literal is present when, after NFKC, whitespace collapse (non-breaking spaces
- * included), trim and lower-casing, it equals one of the live options (labels and values). An empty list is
- * not a verdict.
- */
-export function checkOptionPresent(literal: string, options: readonly string[]): OptionGateResult {
-  const candidates = options.map(optionKey).filter((option) => option !== '');
-  if (candidates.length === 0) return { kind: 'notApplicable', reason: 'OPTIONS_UNAVAILABLE' };
-  return candidates.includes(optionKey(literal)) ? { kind: 'pass' } : { kind: 'refuse', code: 'OPTION_NOT_PRESENT' };
-}
-
-/**
- * G1 against the LIVE option list of the element behind `ref`: every option of a native select (the selected
- * one included, which the outline strips on purpose), or the ARIA option elements of a combobox/listbox.
- * Anything else, or an unreadable or oversize list, is not applicable and never a refusal.
- */
-export async function checkLiveOptions(a: { engine: PerceptionEngine; ref: string; literal: string }): Promise<OptionGateResult> {
-  const value = await runOnEngine(a.engine, listOptions, [a.ref]);
-  if (value === null || value === undefined) return { kind: 'notApplicable', reason: 'OPTIONS_UNAVAILABLE' };
-  const listing = value as OptionListing;
-  if (listing.kind === 'none') return { kind: 'notApplicable', reason: 'NOT_A_LIST' };
-  if (listing.tooMany) return { kind: 'notApplicable', reason: 'OPTIONS_UNAVAILABLE' };
-  return checkOptionPresent(a.literal, [...listing.labels, ...listing.values]);
 }

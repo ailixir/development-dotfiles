@@ -6,6 +6,8 @@
  * were deleted (STUDIO-OBS-012A AC-3); the shapes are unchanged.
  */
 
+import type { StepReceipt } from './observedOperations.js';
+
 /**
  * Architecture §8.2 fixes the per-step vocabulary as `PENDING | RUNNING | PASS | FAIL | SKIPPED`;
  * the executor produces the three terminal values and the snapshot adds `RUNNING`.
@@ -32,6 +34,8 @@ export interface StepFinishedEvent {
   readonly durationMs: number | null;
   /** Redacted failure message; `null` unless the status is FAIL. */
   readonly failure: string | null;
+  /** The step receipt (ADR-SC-008 D5): closed code, stepHash, fence, effects (names only), offscreen. Absent only for steps a pre-ready failure never ran. */
+  readonly receipt?: StepReceipt;
 }
 
 export interface StepReporter {

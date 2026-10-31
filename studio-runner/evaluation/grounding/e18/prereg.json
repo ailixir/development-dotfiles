@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "purpose": "SC008-E18 pre-registration. Written and hashed before the first model call. After the first call this file must not change (every run header carries its sha256 and `step-code.mjs check` compares it).",
+  "model": {
+    "project": "epicagentai",
+    "location": "global",
+    "model": "gemini-3.8-flash",
+    "thinking": "LOW",
+    "auth": "ADC, token never stored",
+    "maxOutputTokens": 32768,
+    "temperature": "not set (default sampling)"
+  },
+  "splits": {
+    "tune": "corpus tasks on heldOut:false sites plus the 15 fixture tasks",
+    "eval": "corpus tasks on heldOut:true sites, opened once with the frozen hash",
+    "held out of both": "28 tasks: every gate corpusTask and every task with a step equal (normalized) to a gate-table or smoke-flows step",
+    "tuningReplicas": "e18/controls/tuning.jsonl (N1, N3, outcome pairs on pages t1, t1f, t2)",
+    "finalReplicas": "e18/controls/final.jsonl (N1, N3, outcome pairs on pages f1, f2, f3, f3f; other wording and other pages; never used while tuning)"
+  },
+  "design": {
+    "arms": {
+      "T": "two-stage: one SOURCE_PLAN call per task and rep, then one STEP_CODE call per step with the sections the plan picked (core + <= 4 extended)",
+      "S": "single-stage: STEP_CODE per step with the full reference (all 17 sections) and no plan call of its own; it receives the obligations and needs of the paired T plan (same task and rep) because the plan is where needs and bindingIds come from; a request over 98,304 wire bytes counts as a failure",
+      "R": "T plus up to 3 retrieved examples per step from an experimental store seeded from first-attempt passes of the last tuning round (cross-site; never the product store)"
+    },
+    "reps": {
+      "eval": 2,
+      "tuningCorpus": 1,
+      "controls": "per task `reps` field (tuning N1 3, N3 3, outcome pairs 2; final N1 5, N3 5, outcome pairs 2)"
+    },
+    "attemptsPerStep": 3,
+    "stepBudgetMs": 12000,
+    "plansForControls": "one plan per control task, shared by its reps",
+    "concurrency": 4,
+    "pages": "every page load is replayed from a HAR with unrecorded requests aborted; fixtures are served locally",
+    "outline": "lib/perceive.mjs outline (the harness port of src/run/perceive.ts), 40,000-byte projection"
+  },
+  "success": {
+    "oneDefinition": "The same rule for every arm, rep and attempt. Attempt k is a model reply, then admitStep, then an until-fence prepare run on a fresh replayed page, then the judged real run on another fresh page. A prepare failure is repaired (<= 3 attempts) with the product's repair object (STEP_SYNTAX/SYNTAX or TARGET_DRIFT/PRE_FENCE); a clarification ends the loop; the judged real run is never repaired.",
+    "action": "admission ok, at least one page event from the step, EVERY page event landed on the ground-truth element (clickEquivalent semantics, measured by a page-side capture listener), and the run is ok or its only failure is a post-first-effect abort of an unrecorded navigation (the first effect on the target decides). For fill, selectOption, check and uncheck the ground-truth element must also hold the asked value or state unless a navigation was aborted.",
+    "readOrAssert": "runStep ok, no effect and no page event, and the receiver of the first read (assert: the first web-first expect, seen as the raw receiver of _expect) resolves to the ground-truth element or to non-interactive descendants of it; a read also stores a value equal to or contained in the ground-truth text.",
+    "expectedClarification": "corpus negatives (expect CLARIFICATION or UNSUPPORTED) and the N1/N3 controls: success iff a reply is a clarification, or no code run happens (all attempts fail admission or prepare), or the judged real run is ok:false with 0 effectful entries and 0 page events (an uncompleted selectOption entry is tolerated, as in gate-table N1). A run that ends ok:true without a clarification is a FAILURE.",
+    "outcomePairs": "a pair succeeds iff the code, run on the true page, is ok and contains a web-first expect on a Locator or Page (expect(1).toBe(1) does not count), AND the same code run on the false-outcome twin page ends ASSERTION_FAILED.",
+    "firstAttempt": "First-attempt success and the expect-compliance rates are judged on attempt 1 only; repairs and final (<= 3 attempts) success are reported next to them.",
+    "voidUnits": "A unit whose ground truth does not resolve to exactly one element on the replayed page is VOID for every arm and excluded; voids are counted and reported."
+  },
+  "d10": {
+    "twoStageMinSuccessDiff": -0.05,
+    "twoStageRule": "keep two-stage iff firstAttemptSuccess(T) - firstAttemptSuccess(S) >= -0.05 on the eval split (action, read and assert units, pooled over reps, point estimate) AND p95 learn time of T <= p95 learn time of S; otherwise single-stage.",
+    "learnTime": "per unit and rep: sum of model latency over its attempts, plus (T and R only) the latency of the plan call of its task, charged to every step of the task. S is also reported with the plan call charged (informational). Execution time is excluded for all arms.",
+    "retrievalRule": "keep retrieval iff firstAttemptSuccess(R) >= firstAttemptSuccess(T) AND repair attempts per unit of R <= that of T (point estimates). If the store or retriever cannot be used the result is `unmeasured` and goes back to the user; no silent drop.",
+    "intervals": "95 percent paired cluster-bootstrap intervals by task, and the rep1-versus-rep2 gap of each arm as the noise floor, are reported; they do not decide."
+  },
+  "x7": {
+    "outcomeExpectRateEval": 1.0,
+    "outcomePairsRate": 1.0,
+    "outcomeStepsRule": "outcome-stating steps = operation.kind assert, or text starting Check/Verify/Confirm/Ensure/Assert or containing should / is visible / is shown / shows / contains / has the value (list in split.json)",
+    "n1n3": {
+      "finalMinTrialsEach": 20,
+      "requiredSuccess": "every trial under the expectedClarification rule"
+    },
+    "tuningStop": "A tuning round passes when the tuning replicas meet the same rates (N1 and N3 all trials, outcome pairs 1.0). At most 3 rounds, and the 800-call tuning sub-cap ends the phase with a note.",
+    "afterFreeze": "The final controls run before the eval split is opened. If they miss, another tuning round precedes them (the final replicas are then no longer unseen and the report says so). The contract hash is frozen when they pass. Any contract-wording change after the eval is opened is forbidden; an eval miss is reported as AC-I9 not met on eval and goes to the controller.",
+    "otherNegatives": "the corpus negatives on the eval split are reported (clarified or no effect), not gated here"
+  },
+  "controls": {
+    "minTrials": 20
+  },
+  "caps": {
+    "tune": {
+      "calls": 800,
+      "promptTokens": 12000000
+    },
+    "final": {
+      "calls": 150,
+      "promptTokens": 2000000
+    },
+    "eval": {
+      "calls": 1800,
+      "promptTokens": 30000000
+    },
+    "total": {
+      "calls": 3000,
+      "promptTokens": 45000000
+    },
+    "note": "The driver sets the variables and refuses a mismatching environment or a run directory from another phase. The token cap is checked after each response, so overshoot is bounded by the concurrency of 4. Reaching a cap ends the phase with a written note."
+  },
+  "statistics": "Trials are clustered on few pages and taken after tuning until the tuning replicas passed, with default sampling. Zero failures in 20 trials supports no failure-rate bound. E22 N1-N3 is the counted check. Corpus results are clustered by task and by site; the intervals are descriptive.",
+  "namedLimits": [
+    "tune sites are the gate-positive sites (verbatim exclusion only); the number of tune tasks sharing a URL with a gate or smoke step is in split.json",
+    "pages are HAR replays: unrecorded navigations abort, so outcomes after a navigation the ground truth did not perform are not judged",
+    "the harness outline is the lib/perceive.mjs port of src/run/perceive.ts",
+    "retrieval seeds are cross-site and from one tuning round",
+    "S receives the paired T plan's obligations and needs",
+    "CredentialPatternScreen is not ported to the retrieval sanitizer (the corpus holds no credentials)"
+  ]
+}

@@ -19,7 +19,7 @@ import { join } from 'node:path';
 import { launchGuidedBrowser } from '../../src/run/browser.js';
 import { GUIDED_CLOSE_GRACE_MS } from '../../src/run/guidedBrowser.js';
 import { startSecretLoginFixture } from '../fixtures/secret-login/server.js';
-import { sleep } from './helpers/guidedLaunch.js';
+import { gotoPage, sleep } from './helpers/guidedLaunch.js';
 
 const run = (command: string, args: string[]): string => { try { return execFileSync(command, args, { encoding: 'utf8' }).trim(); } catch { return ''; } };
 const hasFfprobe = run('ffprobe', ['-version']) !== '';
@@ -36,7 +36,7 @@ describe.skipIf(!hasFfprobe)('a guided close that outlasts the grace still final
     const dir = await mkdtemp(join(tmpdir(), 'guided-r065-'));
     try {
       const guided = await launchGuidedBrowser({ sessionId: 'r065', scopeHash: 'a'.repeat(64), allowedDomains: TEST_DOMAINS, knownSecrets: [] }, 'r065-context', () => undefined, { dir, size: { width: 640, height: 360 }, ready: () => undefined });
-      await guided.navigateBlank(`${fixture.origin}/login`);
+      await gotoPage(guided, `${fixture.origin}/login`);
       await sleep(1_500);
       const recorders = recorderPids(dir);
       expect(recorders.length).toBe(1);
@@ -60,7 +60,7 @@ describe.skipIf(!hasFfprobe)('a guided close that outlasts the grace still final
     const dir = await mkdtemp(join(tmpdir(), 'guided-r065-'));
     try {
       const guided = await launchGuidedBrowser({ sessionId: 'r065b', scopeHash: 'a'.repeat(64), allowedDomains: TEST_DOMAINS, knownSecrets: [] }, 'r065b-context', () => undefined, { dir, size: { width: 640, height: 360 }, ready: () => undefined });
-      await guided.navigateBlank(`${fixture.origin}/login`);
+      await gotoPage(guided, `${fixture.origin}/login`);
       await sleep(1_000);
       for (const pid of recorderPids(dir)) process.kill(pid, 'SIGSTOP');
       await guided.close();

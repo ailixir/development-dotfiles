@@ -1,3 +1,4 @@
+import { controlWindowJob } from '../helpers/stepCode.js';
 import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 import {createServer} from 'node:http';
 import type {ServerResponse} from 'node:http';
@@ -8,7 +9,7 @@ import {pathToFileURL} from 'node:url';
 import {expect,it} from 'vitest';
 import corpusJson from '../../../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json' with {type:'json'};
 import type {PublicationDocument} from '../helpers/publicationFixture.js';
-import type {ObservedJob,Artifact3,Scope,BuildIdentity} from '../../src/executor/observedOperations.js';
+import type {ObservedJob,BuildIdentity} from '../../src/executor/observedOperations.js';
 import {hashObserved,OBSERVED_PROFILE,OBSERVED_SCHEMA_BUNDLE_HASH,validateObserved} from '../../src/validator/observedReferencePolicy.js';
 import {validateReplayArtifact} from '../../src/validator/observedReplay.js';
 import {createApplication} from '../../src/server/application.js';
@@ -23,38 +24,16 @@ import type {ChildProcessHandle} from '../../src/run/launcher.js';
 import {descendantsOf,isAlive} from '../../src/run/tree.js';
 import {envBrowserRoot} from '../../scripts/browser-provenance.mjs';
 import {untilMs} from './realRunner.js';
+import {evidencePath} from '../helpers/evidenceOut.js';
 // Typed view of the static JSON import: the file exceeds tsserver's 4 MiB non-TS limit, so ESLint's projectService types it as `error`.
 const corpus=corpusJson as unknown as PublicationDocument;
 
 const modes=['worst-phase','slow-revoked','lost-control-body','progress-revoked'] as const;
 const CANARY='obs007-control-native-private';
-const stepId=(index:number)=>'00000000-0000-4000-8000-'+String(301+index).padStart(12,'0');
 /** Controlled independent artifact construction; not a learned/publication proof. */
 function controlledJob(origin:string,build:BuildIdentity):{job:ObservedJob}{
-  const job=structuredClone(corpus.job);
-  const scope:Scope={...job.binding.scope,initialContext:{kind:'initialBlank'}};
-  
-  const configuration={...job.configuration,timeoutSeconds:10,waitStrategy:'domcontentloaded' as const,viewport:{width:800,height:600}};
-  const inputRecipes:Artifact3['inputRecipes']=[{inputId:'nav',stepId:stepId(0),kind:'destination',intendedSlot:'navigate.destination',provenance:{kind:'sourceSpan',start:0,end:1,sourceHash:job.artifact.sourceHash}},...(['PASS','NEXT'] as const).map((referenceName,index)=>({inputId:referenceName.toLowerCase(),stepId:stepId(index+1),kind:'secretRef' as const,intendedSlot:'fill.value' as const,provenance:{kind:'configuration' as const,referenceId:'reference-'+referenceName,referenceName}}))];
-  const steps:Artifact3['steps']=[{stepIndex:0,stepId:stepId(0),operations:[{coordinate:{stepId:stepId(0),ordinal:0},guardId:'g0',operation:{kind:'navigate',destinationInputId:'nav'}}]},...(['pass','next'] as const).map((input,index)=>({stepIndex:index+1,stepId:stepId(index+1),operations:[{coordinate:{stepId:stepId(index+1),ordinal:0},guardId:'g'+String(index+1),operation:{kind:'fill' as const,value:{kind:'secretRef' as const,sourceInputId:input}}}]})),{stepIndex:3,stepId:stepId(3),operations:[{coordinate:{stepId:stepId(3),ordinal:0},guardId:'g3',operation:{kind:'click'}}]}];
-  const guards:Artifact3['guards']=[{guardId:'g0',origin:null,target:{kind:'initialBlank'}},{guardId:'g1',origin,target:{kind:'passwordControl'}},{guardId:'g2',origin,target:{kind:'passwordControl'}},{guardId:'g3',origin,target:{kind:'element',locator:[{by:'role',role:'button',name:'Continue',exact:true}],tier:'role',identity:{role:'button',name:'Continue'},readRuleId:null}}];
-  const {principalId,...requirements}=scope;
-  const actions:Artifact3['learnedPlan']['actions']=steps.flatMap(step=>step.operations.map(action=>{
-    const guard=guards.find(g=>g.guardId===action.guardId);if(!guard)throw Error('GUARD');
-    if(guard.origin===null){
-      if(action.operation.kind!=='navigate'||action.coordinate.ordinal!==0)throw Error('BLANK_ACTION');
-      const projection={coordinate:{stepId:action.coordinate.stepId,ordinal:0 as const},origin:null,target:null,operation:action.operation};
-      return {...projection,admissionId:'control-admission-'+String(step.stepIndex),operationHash:hashObserved(projection)};
-    }
-    const projection={coordinate:action.coordinate,origin:guard.origin,target:guard.target.kind==='element'?{locator:guard.target.locator,tier:guard.target.tier,identity:guard.target.identity}:null,operation:action.operation};
-    return {...projection,admissionId:'control-admission-'+String(step.stepIndex),operationHash:hashObserved(projection)};
-  }));
-  const learnedPlan={...job.artifact.learnedPlan,sourceSteps:steps.map(s=>s.stepId),actions,bindings:[]};
-  const learnedPlanHash=hashObserved(learnedPlan),configurationHash=hashObserved(configuration);
-  const artifact:Artifact3={...job.artifact,configurationHash,learnedPlan,learnedPlanHash,inputRecipes,steps,guards,replayPolicy:{...job.artifact.replayPolicy,learnedPlanHash,scope:requirements,inputs:inputRecipes,bindings:[],transfers:[]}};
-  const now=Date.now(),scopeHash=hashObserved(scope);
-  const binding={...job.binding,artifactHash:hashObserved(artifact),configurationHash,learnedPlanHash,referencePolicyHash:hashObserved(artifact.replayPolicy),publicationEvidenceHash:artifact.replayPolicy.publicationEvidenceHash,requiredBuild:build,requiredProfile:OBSERVED_PROFILE,scope,scopeHash,principalId,startedAt:new Date(now).toISOString(),replayGrant:{...job.binding.replayGrant,scopeHash,profileHash:hashObserved(OBSERVED_PROFILE),buildHash:hashObserved(build),issuedAt:new Date(now).toISOString(),expiresAt:new Date(now+30000).toISOString()}};
-  return {job:{...job,binding,artifact,configuration,inputs:[{inputId:'nav',value:origin+'/login'}],secrets:{PASS:CANARY,NEXT:CANARY+'-next'},secretOrigins:{PASS:[origin],NEXT:[origin]},runtime:{stepTimeoutMs:10000,totalRuntimeMs:20000},recording:{width:800,height:600}}};
+  const {job}=controlWindowJob(corpus.job,origin,build,10);
+  return {job:{...job,secrets:{PASS:CANARY,NEXT:CANARY+'-next'}}};
 }
 
 it.each(modes)('proves actual secret-bearing observed control cutoff: %s',async mode=>{
@@ -135,7 +114,7 @@ it.each(modes)('proves actual secret-bearing observed control cutoff: %s',async 
   }finally{
     await app.drain();server.closeAllConnections();await new Promise<void>(r=>server.close(()=>{r();}));
     Object.assign(facts,{controls,focusAt,nativePendingAtFocus,revokedAt,stopAt,stopSendAt,clearedAt,nativeEntries,nativeEnds,inputEvents,effects,reports,pids:[...observedPids],allObservedPidsGone:[...observedPids].every(pid=>!isAlive(pid)),capacityInUse:app.pool.inUse,scratchEntries:await readdir(scratch).catch(()=>[])});
-    await writeFile(resolve('../docs/qa/evidence/STUDIO-OBS-007/runner-control-focus-candidate/oracle-'+mode+'.json'),JSON.stringify(facts,null,2)+'\n');
+    await writeFile(evidencePath('STUDIO-OBS-007/runner-control-focus-candidate/oracle-'+mode+'.json'),JSON.stringify(facts,null,2)+'\n');
     if(handle?.pid&&isAlive(handle.pid))handle.kill();await rm(directory,{recursive:true,force:true});
   }
 },45000);

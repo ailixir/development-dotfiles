@@ -127,6 +127,7 @@ export function createRunReporter(options: RunReporterOptions): RunReporter {
         finishedAtMs: event.finishedAtMs,
         durationMs: event.durationMs,
         failure: event.failure,
+        ...(event.receipt === undefined ? {} : { receipt: event.receipt }),
       });
       // The bounded retained log the API shows the user (architecture §5.3, §5.5). The failure
       // text is the executor's already-redacted `safeMessage`, and the whole body passes through

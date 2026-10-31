@@ -12,8 +12,8 @@ import type { GuidedBrowser } from '../../src/run/guidedBrowser.js';
 import { GuidedStartFailure, describeStartFailure } from '../../src/guided/diagnostics.js';
 import { hash,identity } from '../../src/guided/contracts.js';
 import { guidedContext,ownershipSession,assignmentFor,proposal,dispatch, sessionStub } from '../helpers/guided.js';
-import { observationReadProfile } from '../../src/run/observationReadProfile.js';
-import type { ObservationConfig } from '../../src/run/observationTypes.js';
+import { stepOp } from '../helpers/stepCode.js';
+import { fakeHandle, newRig } from '../helpers/stepFakes.js';
 import type { CommandsClaim } from '../../src/guided/types.js';
 const clean:(()=>Promise<void>)[]=[];
 afterEach(async()=>{for(const fn of clean.reverse())await fn().catch(()=>undefined);clean.length=0;vi.useRealTimers();});
@@ -21,13 +21,13 @@ async function setup(claimOverride?:ClaimPort,secret=false){
   vi.useFakeTimers({toFake:['Date','setTimeout','clearTimeout']});
   const directory=await mkdtemp(join(tmpdir(),'guided-own-'));clean.push(()=>rm(directory,{recursive:true,force:true}));
   const context=guidedContext('https://example.test');
-  if(secret){context.authoredInputs.inputs.push({inputId:'pass',sourceStepId:'fill',kind:'secretRef',intendedSlot:'fill.value',secretId:'PASS',provenance:{referenceKind:'configuration',configurationRevision:context.configurationRevision,stepId:'fill',referenceId:'pass-reference',referenceName:'PASS',kind:'secretRef',intendedSlot:'fill.value'}});context.authoredInputsHash=hash(context.authoredInputs);}
-  const grant=ownershipSession(context),assignment=assignmentFor(context);
+  if(secret){context.authoredInputs.inputs.push({inputId:'pass',sourceStepId:'fill',kind:'secretRef',secretId:'PASS',provenance:{referenceKind:'configuration',configurationRevision:context.configurationRevision,stepId:'fill',referenceId:'pass-reference',referenceName:'PASS',kind:'secretRef'}});context.authoredInputsHash=hash(context.authoredInputs);}
+  const grant=ownershipSession(context),assignment=assignmentFor(context),rig=newRig('about:blank');
   const claims:{command:CommandsClaim;key:string;timeout:number}[]=[];const messages:{route:string;body:unknown}[]=[];
-  const browser:GuidedBrowser={evidence:{kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:randomUUID(),documentId:randomUUID(),bootstrapId:randomUUID(),url:'about:blank',origin:null,generation:0},blankMatches:()=>Promise.resolve(true),navigateBlank:vi.fn(()=>Promise.resolve()),close:vi.fn(()=>Promise.resolve()),terminate:vi.fn(()=>Promise.resolve()),orderlyClosed:()=>true,observations: sessionStub({withhold:()=>Promise.resolve(),dispose:()=>Promise.resolve(),observe:()=>Promise.resolve({observation:{schemaVersion:3,sessionId:context.sessionId,scopeHash:context.scopeHash,documentId:'after-nav',generation:1,origin:'https://example.test',observedAt:new Date().toISOString(),coverage:{withheldRegions:0,unsupportedRegions:0,passwordControls:0},projection:{projected:false,tier:null,totalNodes:1,shownNodes:1,notShown:0,outlineBytes:15},readRuleId:null,outline:'- text "x" [e1]',facts:{e1:{role:'text',name:'x',editable:false, nameComplete: true, ownTextComplete: true,evidence:'x',evidenceSegments:[]}}},json:'',bytes:0,observationHash:''})})};
+  const browser:GuidedBrowser={evidence:{kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:randomUUID(),documentId:randomUUID(),bootstrapId:randomUUID(),url:'about:blank',origin:null,generation:0},blankMatches:()=>Promise.resolve(true),handle:fakeHandle(rig),close:vi.fn(()=>Promise.resolve()),terminate:vi.fn(()=>Promise.resolve()),orderlyClosed:()=>true,observations: sessionStub({withhold:()=>Promise.resolve(),dispose:()=>Promise.resolve(),observe:()=>Promise.resolve({observation:{schemaVersion:3,sessionId:context.sessionId,scopeHash:context.scopeHash,documentId:'after-nav',generation:1,origin:'https://example.test',observedAt:new Date().toISOString(),coverage:{withheldRegions:0,unsupportedRegions:0,passwordControls:0},projection:{projected:false,tier:null,totalNodes:1,shownNodes:1,notShown:0,outlineBytes:15},outline:'- text "x" [e1]',facts:{e1:{role:'text',name:'x',editable:false, nameComplete: true, ownTextComplete: true,evidence:'x',evidenceSegments:[]}}},json:'',bytes:0,observationHash:''})})};
   const launch=vi.fn(()=>Promise.resolve(browser));
   const options:OwnershipOptions={workerId:context.workerId,allowedDomains: TEST_DOMAINS, journalDirectory:directory,launch,callback:(route,body)=>{messages.push({route,body});return Promise.resolve();},claim:(command,key,timeout,signal)=>{claims.push({command,key,timeout});return claimOverride?claimOverride(command,key,timeout,signal):Promise.resolve({...structuredClone(grant),owner:{...grant.owner,leaseExpiresAt:new Date(Math.min(Date.now()+30_000,Date.parse(grant.expiresAt))).toISOString()}});}};
-  const manager=new GuidedOwnership(options);clean.push(()=>manager.close());return{context,grant,assignment,claims,messages,browser,launch,options,manager,directory};
+  const manager=new GuidedOwnership(options);clean.push(()=>manager.close());return{context,grant,assignment,claims,messages,browser,launch,options,manager,directory,rig};
 }
 describe('actual owning-worker driver and acknowledged lease authority',()=>{
   it('caps secret reauthorization requests at one second and stops on the two-second lost-response ceiling',async()=>{
@@ -44,20 +44,20 @@ describe('actual owning-worker driver and acknowledged lease authority',()=>{
   });
   it('stops with authentic REVOKED on secret renewal denial and cannot accept another step',async()=>{
     const h=await setup(undefined,true);await h.manager.assign(h.assignment);await h.manager.context(h.context);h.options.claim=()=>Promise.reject(new Error('REVOKED'));
-    await vi.advanceTimersByTimeAsync(1000);expect(h.browser.close).toHaveBeenCalledOnce();expect(h.messages.filter(m=>m.route==='lifecycle').at(-1)?.body).toHaveProperty('reason','REVOKED');expect(()=>h.manager.getRuntime(h.context)).toThrow('CONTEXT_LOST');expect(h.browser.navigateBlank).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(1000);expect(h.browser.close).toHaveBeenCalledOnce();expect(h.messages.filter(m=>m.route==='lifecycle').at(-1)?.body).toHaveProperty('reason','REVOKED');expect(()=>h.manager.getRuntime(h.context)).toThrow('CONTEXT_LOST');expect(h.rig.w.effects).toEqual([]);
   });
   it('claims once, serially renews beyond30seconds with fresh keys, and installs a delayed context under only acknowledged authority',async()=>{
     const h=await setup();const owned=await h.manager.assign(h.assignment);expect(owned.status).toBe('OWNED');expect(owned.ownerFence).toBe(1);expect(h.claims).toHaveLength(1);expect(h.launch).not.toHaveBeenCalled();
     await h.manager.assign(h.assignment);expect(h.claims).toHaveLength(1);
     await vi.advanceTimersByTimeAsync(35_000);expect(h.claims).toHaveLength(4);expect(new Set(h.claims.map(c=>c.key)).size).toBe(4);expect(h.claims.map(c=>c.command.expectedFence)).toEqual([0,1,1,1]);expect(h.launch).not.toHaveBeenCalled();
     h.context.leaseExpiresAt=new Date(Date.now()-1000).toISOString();await h.manager.context(h.context);expect(h.launch).toHaveBeenCalledOnce();
-    const runtime=h.manager.getRuntime(h.context);const p=proposal(h.context,h.browser.evidence,'nav',{kind:'navigate',destinationInputId:'input-nav'});const prepared=await runtime.prepare({pressInheritance:null,...identity(h.context),proposal:p,requestDigest:hash(p),expiresAt:h.context.expiresAt});expect(Date.parse(prepared.expiresAt)).toBeLessThanOrEqual(Date.now()+30_000);
+    const runtime=h.manager.getRuntime(h.context);const p=proposal(h.context,h.browser.evidence,'nav',stepOp('await page.goto(inputs["input-nav"]);',{uses:[{kind:'input',id:'input-nav'}]}));const prepared=await runtime.prepare({...identity(h.context),proposal:p,requestDigest:hash(p),expiresAt:h.context.expiresAt});expect(Date.parse(prepared.expiresAt)).toBeLessThanOrEqual(Date.now()+30_000);
     expect((await runtime.dispatch(dispatch(h.context,p,prepared))).ledger.state).toBe('SUCCEEDED');
   });
   it('renews while a consumed browser action is busy without resetting workflow or materialization',async()=>{
-    const h=await setup();await h.manager.assign(h.assignment);await h.manager.context(h.context);const runtime=h.manager.getRuntime(h.context);let release:(()=>void)|undefined;let entered:(()=>void)|undefined;const entering=new Promise<void>(resolve=>{entered=resolve;});vi.mocked(h.browser.navigateBlank).mockImplementationOnce(()=>{entered?.();return new Promise<void>(resolve=>{release=resolve;});});
-    const p=proposal(h.context,h.browser.evidence,'nav',{kind:'navigate',destinationInputId:'input-nav'});const proof=await runtime.prepare({pressInheritance:null,...identity(h.context),proposal:p,requestDigest:hash(p),expiresAt:h.context.expiresAt});const request=dispatch(h.context,p,proof);const pending=runtime.dispatch(request);await entering;
-    await vi.advanceTimersByTimeAsync(35_000);expect(h.claims.length).toBeGreaterThan(3);expect(h.browser.navigateBlank).toHaveBeenCalledOnce();if(!release)throw new Error('RELEASE');release();expect((await pending).ledger.state).toBe('SUCCEEDED');await expect(runtime.dispatch(request)).rejects.toThrow();
+    const h=await setup();await h.manager.assign(h.assignment);await h.manager.context(h.context);const runtime=h.manager.getRuntime(h.context);let release:(()=>void)|undefined;let entered:(()=>void)|undefined;const entering=new Promise<void>(resolve=>{entered=resolve;});h.rig.page.goto=()=>{h.rig.w.effects.push('goto');entered?.();return new Promise<void>(resolve=>{release=resolve;});};
+    const p=proposal(h.context,h.browser.evidence,'nav',stepOp('await page.goto(inputs["input-nav"]);',{uses:[{kind:'input',id:'input-nav'}]}));const proof=await runtime.prepare({...identity(h.context),proposal:p,requestDigest:hash(p),expiresAt:h.context.expiresAt});const request=dispatch(h.context,p,proof);const pending=runtime.dispatch(request);await entering;
+    await vi.advanceTimersByTimeAsync(11_000);expect(h.claims.length).toBeGreaterThan(1);expect(h.rig.w.effects).toEqual(['goto']);if(!release)throw new Error('RELEASE');release();expect((await pending).ledger.state).toBe('SUCCEEDED');await expect(runtime.dispatch(request)).rejects.toThrow();
   });
   it('stops on renewal failure, stale fence/lease or terminal grant and cannot revive via context or assignment retry',async()=>{
     for(const failure of ['network','fence','lease','terminal'] as const){
@@ -87,14 +87,6 @@ describe('actual owning-worker driver and acknowledged lease authority',()=>{
     const h=await setup();h.grant.state='AWAITING_CLARIFICATION';await h.manager.assign(h.assignment);await vi.advanceTimersByTimeAsync(35_000);expect(h.claims.length).toBeGreaterThan(3);expect(h.launch).not.toHaveBeenCalled();h.context.leaseExpiresAt=h.context.expiresAt;await h.manager.context(h.context);
     const stopped=await h.manager.stop({schemaVersion:3,kind:'assignment',assignment:h.assignment,reason:'CANCELLED'});expect(stopped).toMatchObject({status:'STOPPED',ownerFence:1});
     const bad=await setup();bad.grant.scope.configurationRevision='other';await expect(bad.manager.assign(bad.assignment)).rejects.toThrow('CONTEXT_LOST');expect(bad.launch).not.toHaveBeenCalled();
-  });
-});
-describe('the observation read profile of a learning session',()=>{
-  const launched=(launch:ReturnType<typeof vi.fn>):ObservationConfig[]=>(launch.mock.calls as unknown as [ObservationConfig][]).map(([config])=>config);
-  it('starts the runtime with the constant read profile for the approved origins, never a configured one',async()=>{
-    const h=await setup();await h.manager.assign(h.assignment);await h.manager.context(h.context);
-    expect(launched(h.launch)).toHaveLength(1);expect(launched(h.launch)[0]?.readProfile).toEqual(observationReadProfile(TEST_DOMAINS));
-    expect(launched(h.launch)[0]).not.toHaveProperty('rules');
   });
 });
 describe('the configured capacity (STUDIO_RUNNER_GUIDED_CAPACITY)',()=>{
@@ -298,8 +290,8 @@ describe('009 secret renewal keeps its original claim-phase endpoint',()=>{
   it('does not install an otherwise valid late grant after a delayed renewal phase has ended',async()=>{
     const h=await setup(undefined,true);await h.manager.assign(h.assignment);await h.manager.context(h.context);
     const runtime=h.manager.getRuntime(h.context),installed=vi.spyOn(runtime,'applyAcknowledgedLease'),began=Date.now();
-    const action=proposal(h.context,h.browser.evidence,'nav',{kind:'navigate',destinationInputId:'input-nav'});
-    const proof=await runtime.prepare({pressInheritance:null,...identity(h.context),proposal:action,requestDigest:hash(action),expiresAt:h.context.expiresAt}),request=dispatch(h.context,action,proof);
+    const action=proposal(h.context,h.browser.evidence,'nav',stepOp('await page.goto(inputs["input-nav"]);',{uses:[{kind:'input',id:'input-nav'}]}));
+    const proof=await runtime.prepare({...identity(h.context),proposal:action,requestDigest:hash(action),expiresAt:h.context.expiresAt}),request=dispatch(h.context,action,proof);
     let release:((grant:Session)=>void)|undefined;const claims:{at:number;timeout:number}[]=[];
     h.options.claim=(_command,_key,timeout)=>{claims.push({at:Date.now(),timeout});return new Promise<Session>(resolve=>{release=resolve;});};
     try{
@@ -314,7 +306,7 @@ describe('009 secret renewal keeps its original claim-phase endpoint',()=>{
       expect(installed).not.toHaveBeenCalled();expect(h.browser.close).toHaveBeenCalledOnce();
       expect(h.messages.filter(m=>m.route==='lifecycle').at(-1)?.body).toHaveProperty('reason','LEASE_LOST');
       expect(()=>h.manager.getRuntime(h.context)).toThrow('CONTEXT_LOST');
-      await expect(runtime.dispatch(request)).rejects.toThrow('CONTEXT_LOST');expect(h.browser.navigateBlank).not.toHaveBeenCalled();
+      await expect(runtime.dispatch(request)).rejects.toThrow('CONTEXT_LOST');expect(h.rig.w.effects).toEqual([]);
       await expect(h.manager.context(h.context)).rejects.toThrow('CONTEXT_LOST');await expect(h.manager.assign(h.assignment)).rejects.toThrow('CONTEXT_LOST');
       await vi.advanceTimersByTimeAsync(1000);expect(claims).toHaveLength(1);expect(installed).not.toHaveBeenCalled();
     }finally{

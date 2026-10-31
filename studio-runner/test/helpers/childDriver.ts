@@ -1,3 +1,4 @@
+import { stepHashOf } from '../../src/executor/observedReplay.js';
 import { TEST_DOMAINS } from './allowedDomains.js';
 /**
  * A **real** launcher over a fake spawn seam, driven message by message (10.13).
@@ -112,7 +113,8 @@ export function createChildDriver(
           finished.add(index);
           const startedAtMs = status === 'SKIPPED' ? null : scriptedStartMs(index);
           const finishedAtMs = startedAtMs === null ? null : startedAtMs + 5;
-          child.emit({ ...base(), kind: 'step-finished', stepIndex: index, stepId: step.stepId, status, startedAtMs, finishedAtMs, durationMs: startedAtMs === null ? null : 5, errorCode });
+          const crossed = status === 'PASS' || errorCode === 'OUTCOME_UNKNOWN';
+          child.emit({ ...base(), kind: 'step-finished', stepIndex: index, stepId: step.stepId, status, startedAtMs, finishedAtMs, durationMs: startedAtMs === null ? null : 5, receipt: { closedCode: errorCode, stepHash: stepHashOf(step.operations), fenceCrossed: crossed, effects: crossed ? [{ method: 'click', completed: errorCode === null }] : [], effectsTruncated: false, offscreen: false } });
         };
         const result = (ok: boolean, errorCode: string | null): void => {
           if (launch === null || resultSent) return;

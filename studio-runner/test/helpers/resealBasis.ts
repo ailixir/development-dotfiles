@@ -1,4 +1,11 @@
-import {boundaryHash} from './incrementalBoundaryFixture.js';
+import {createHash} from 'node:crypto';
+/** The independent canonical serializer: sorted keys, JSON scalars. It never calls the production hash. */
+function canonical(value:unknown):string {
+  if(Array.isArray(value))return '['+value.map(canonical).join(',')+']';
+  if(value!==null&&typeof value==='object')return '{'+Object.keys(value).sort().map(key=>JSON.stringify(key)+':'+canonical((value as Record<string,unknown>)[key])).join(',')+'}';
+  return JSON.stringify(value);
+}
+export const boundaryHash=(value:unknown):string=>createHash('sha256').update(canonical(value),'utf8').digest('hex');
 
 /**
  * Mutates a copy of a complete validation basis and re-derives every content-addressed hash that
@@ -19,12 +26,12 @@ function pair(before:unknown,after:unknown,out:Map<string,string>):void {
   out.set(boundaryHash(before),boundaryHash(after));
   for(const key of Object.keys(after))pair((before as Record<string,unknown>)[key],(after as Record<string,unknown>)[key],out);
 }
-interface Facts {scope:unknown;preparations:{preparationId:string;proof:unknown;proposal:{target:{locator?:unknown};operation:unknown;executionEvidence:{origin:unknown}}}[];actions:{preparationId:string;ledger:{coordinate:unknown;operationHash:string;requestDigest:string;admission:{policyDecisionHash:string}}}[]}
+interface Facts {scope:unknown;preparations:{preparationId:string;proof:unknown;proposal:{operation:unknown;executionEvidence:{origin:unknown}}}[];actions:{preparationId:string;ledger:{coordinate:unknown;operationHash:string;requestDigest:string;admission:{policyDecisionHash:string}}}[]}
 /** admission.policyDecisionHash commits {scopeHash, preparation proof, requestDigest}: a synthetic preimage, not a sub-document. */
 function policyDecisions(before:unknown,after:unknown,out:Map<string,string>):void {
   const b=before as Facts,a=after as Facts;
   const decision=(facts:Facts,fact:Facts['actions'][number])=>boundaryHash({scopeHash:boundaryHash(facts.scope),preparation:facts.preparations.find(p=>p.preparationId===fact.preparationId)?.proof,requestDigest:fact.ledger.requestDigest});
-  const operation=(facts:Facts,fact:Facts['actions'][number])=>{const p=facts.preparations.find(item=>item.preparationId===fact.preparationId)?.proposal;return boundaryHash({coordinate:fact.ledger.coordinate,origin:p?.executionEvidence.origin,locator:p&&'locator'in p.target?p.target.locator:null,operation:p?.operation});};
+  const operation=(facts:Facts,fact:Facts['actions'][number])=>{const p=facts.preparations.find(item=>item.preparationId===fact.preparationId)?.proposal;return boundaryHash({coordinate:fact.ledger.coordinate,origin:p?.executionEvidence.origin,operation:p?.operation});};
   b.actions.forEach((fact,index)=>{const changed=a.actions[index];if(changed){out.set(fact.ledger.admission.policyDecisionHash,decision(a,changed));out.set(fact.ledger.operationHash,operation(a,changed));}});
 }
 export function resealBasis<T>(base:T,mutate:(copy:T)=>void):T {

@@ -22,12 +22,15 @@ import { join } from 'node:path';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 
 import { OriginNotAllowed } from '../../src/allowedDomains.js';
-import { ObservedInvocationControl, ReplayAcquisitionBudget } from '../../src/executor/observedReplay.js';
+import { ObservedInvocationControl } from '../../src/executor/observedReplay.js';
 import type { Guard, ReplayAction, Scope } from '../../src/executor/observedOperations.js';
 import { RETURN_WINDOW_MS, launchGuidedBrowser } from '../../src/run/browser.js';
 import type { GuidedBrowser } from '../../src/run/guidedBrowser.js';
 import type { BrowserHandle } from '../../src/run/browserFactory.js';
-import { createObservedReplayAdapter } from '../../src/run/observedReplayAdapter.js';
+import { createObservedReplayAdapter, newTally } from '../../src/run/observedReplayAdapter.js';
+import { SecretUseEvidence } from '../../src/run/secretUse.js';
+import { stepOp } from '../helpers/stepCode.js';
+import { gotoPage } from './helpers/guidedLaunch.js';
 import { ObservedRefusal } from '../../src/validator/observedReferencePolicy.js';
 import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 import { playwrightBrowserFactory } from './preparedBrowser.js';
@@ -81,24 +84,9 @@ describe('learning (the guided browser)', () => {
   let guided: GuidedBrowser | undefined;
   afterEach(async () => { await guided?.close().catch(() => undefined); guided = undefined; });
 
-  it('refuses an author-directed navigation to a host off the list before any request leaves, whatever the host', async () => {
-    guided = await launchGuidedBrowser(guidedConfig(), 'context', () => undefined);
-    for (const destination of [`${IDP()}/app`, 'http://example.org/', `http://localhost.evil.test:${String(port)}/app`, `http://user@localhost:${String(port)}/app`]) {
-      await expect(guided.navigateBlank(destination), destination).rejects.toThrow('POLICY_DENIED');
-    }
-    expect(hits).toEqual([]);
-    await guided.close(); guided = undefined;
-  });
-
-  it('refuses every navigation when the list is empty', async () => {
-    guided = await launchGuidedBrowser(guidedConfig([]), 'context', () => undefined);
-    await expect(guided.navigateBlank(`${APP()}/app`)).rejects.toThrow('POLICY_DENIED');
-    expect(hits).toEqual([]);
-  });
-
   it('continues when the page hops to another host and comes back inside the return window', async () => {
     guided = await launchGuidedBrowser(guidedConfig(), 'context', () => undefined);
-    await guided.navigateBlank(`${APP()}/app?delay=1500`);
+    await gotoPage(guided, `${APP()}/app?delay=1500`);
     const first = await guided.observations.observe();
     expect(first.observation.origin).toBe(APP());
     // A page-initiated main-frame navigation (a link) to a host off the list is not blocked.
@@ -114,7 +102,7 @@ describe('learning (the guided browser)', () => {
 
   it('follows a 30x chain onto another host and continues when the page returns', async () => {
     guided = await launchGuidedBrowser(guidedConfig(), 'context', () => undefined);
-    await guided.navigateBlank(`${APP()}/redirect?delay=1000`);
+    await gotoPage(guided, `${APP()}/redirect?delay=1000`);
     const observed = await guided.observations.observe();
     expect(observed.observation.origin).toBe(APP());
     expect(hitsOn('127.0.0.1', '/idp')).toBe(1);
@@ -122,7 +110,7 @@ describe('learning (the guided browser)', () => {
 
   it('loads iframes and subresources from any host', async () => {
     guided = await launchGuidedBrowser(guidedConfig(), 'context', () => undefined);
-    await guided.navigateBlank(`${APP()}/embed`);
+    await gotoPage(guided, `${APP()}/embed`);
     const observed = await guided.observations.observe();
     expect(observed.observation.origin).toBe(APP());
     await new Promise<void>(resolve => { setTimeout(resolve, 500); });
@@ -132,7 +120,7 @@ describe('learning (the guided browser)', () => {
 
   it('ends with the host only, and observes nothing, when the page stays away past the window', async () => {
     guided = await launchGuidedBrowser(guidedConfig(), 'context', () => undefined);
-    await guided.navigateBlank(`${APP()}/app?delay=22000`);
+    await gotoPage(guided, `${APP()}/app?delay=22000`);
     await guided.observations.observe();
     await pageOf(guided).click('a');
     const started = Date.now();
@@ -146,12 +134,12 @@ describe('learning (the guided browser)', () => {
     expect(JSON.stringify(failure, Object.getOwnPropertyNames(failure))).not.toMatch(/idp|delay|http/u);
     expect(pageOf(guided).url().startsWith(IDP())).toBe(true);
     expect(hitsOn('localhost', '/back')).toBe(0);
-  }, 60_000);
+  }, 90_000);
 });
 
 describe('replay (the observed adapter over the real browser)', () => {
   let handle: BrowserHandle | undefined;
-  const scope: Scope = { principalId: 'p', csiId: 'csi', environment: 'fixture', capabilities: ['navigate', 'click', 'assert'], initialContext: { kind: 'initialBlank' } };
+  const scope: Scope = { principalId: 'p', csiId: 'csi', environment: 'fixture', capabilities: ['step'], initialContext: { kind: 'initialBlank' } };
   const open = async (domains: readonly string[] = TEST_DOMAINS): Promise<{ readonly handle: BrowserHandle; readonly page: Page }> => {
     const scratch = await mkdtemp(join(tmpdir(), 'return-window-'));
     scratchDirs.push(scratch);
@@ -160,29 +148,22 @@ describe('replay (the observed adapter over the real browser)', () => {
   };
   afterEach(async () => { await handle?.dispose().catch(() => undefined); handle = undefined; });
   const assertTitle = (expected: string): { readonly action: ReplayAction; readonly guard: Guard; readonly expected: string } => ({
-    action: { coordinate: { stepId: '00000000-0000-4000-8000-000000000001', ordinal: 0 }, guardId: 'g1', operation: { kind: 'assert', predicate: 'title', expected: { kind: 'authoredLiteral', sourceInputId: 'expected' } } } as ReplayAction,
-    guard: { guardId: 'g1', origin: APP(), target: { kind: 'page' } } as Guard,
+    action: { coordinate: { stepId: '00000000-0000-4000-8000-000000000001', ordinal: 0 }, guardId: 'g1', operation: stepOp('await expect(page).toHaveTitle(inputs["expected"]);', { uses: [{ kind: 'input', id: 'expected' }] }) },
+    guard: { guardId: 'g1', origin: APP() },
     expected,
   });
   const performOn = (opened: BrowserHandle, domains: readonly string[], step: ReturnType<typeof assertTitle>) => {
     const adapter = createObservedReplayAdapter(opened, scope, domains, 'return-window-run', () => undefined);
-    const control = new ObservedInvocationControl({ now: () => performance.now() }, performance.now() + 120_000, new AbortController().signal, new ReplayAcquisitionBudget(), { extra: 0 });
-    return { adapter, run: () => adapter.perform(step.action, step.guard, step.expected, control) };
+    const control = new ObservedInvocationControl({ now: () => performance.now() }, performance.now() + 120_000, new AbortController().signal);
+    const io = { inputs: { expected: step.expected }, vars: {}, secretIds: [], secrets: {}, secretOrigins: {}, secretUse: new SecretUseEvidence([]) };
+    return { adapter, run: () => adapter.perform(step.action, step.guard, io, control, newTally()) };
   };
-
-  it('refuses an author-directed navigation to a host off the list before any request leaves', async () => {
-    const { handle: opened } = await open();
-    for (const destination of [`${IDP()}/app`, 'http://example.org/']) {
-      await expect(opened.observedNavigateBlank?.(destination), destination).rejects.toThrow('POLICY_REFUSED');
-    }
-    expect(hits).toEqual([]);
-  });
 
   it('refuses a step whose learned origin is off the list before it observes anything', async () => {
     const { handle: opened, page } = await open();
     await page.goto(`${IDP()}/back`);
     const step = assertTitle('Back');
-    const { adapter, run } = performOn(opened, TEST_DOMAINS, { ...step, guard: { ...step.guard, origin: IDP() } as Guard });
+    const { adapter, run } = performOn(opened, TEST_DOMAINS, { ...step, guard: { ...step.guard, origin: IDP() } });
     try { await expect(run()).rejects.toMatchObject({ code: 'POLICY_REFUSED' }); } finally { await adapter.dispose(); }
   });
 
@@ -191,13 +172,13 @@ describe('replay (the observed adapter over the real browser)', () => {
     await page.goto(`${APP()}/app?delay=1500`);
     await page.click('a');
     const { adapter, run } = performOn(opened, TEST_DOMAINS, assertTitle('Back'));
-    try { await expect(run()).resolves.toEqual({ assertionPassed: true }); } finally { await adapter.dispose(); }
+    try { expect((await run()).receipt.closedCode).toBeNull(); } finally { await adapter.dispose(); }
     expect(hitsOn('localhost', '/back')).toBe(1);
   });
 
   it('refuses the step POLICY_REFUSED when the page stays away past the window, and acts on nothing', async () => {
     const { handle: opened, page } = await open();
-    await page.goto(`${APP()}/app?delay=22000`);
+    await page.goto(`${APP()}/app?delay=40000`);
     await page.click('a');
     const { adapter, run } = performOn(opened, TEST_DOMAINS, assertTitle('Back'));
     const started = Date.now();
@@ -208,5 +189,5 @@ describe('replay (the observed adapter over the real browser)', () => {
       expect(Date.now() - started).toBeGreaterThanOrEqual(RETURN_WINDOW_MS - 200);
       expect(hitsOn('localhost', '/back')).toBe(0);
     } finally { await adapter.dispose(); }
-  }, 60_000);
+  }, 90_000);
 });

@@ -64,7 +64,7 @@ import { admitObserved } from '../reporting/admissionClient.js';
  * `cancelRequested` on every progress acknowledgement. All three signals take the same path.
  */
 import { createRedactor } from '../executor/redaction.js';
-import type { StepReporter } from '../executor/stepReporter.js';
+import type { StepFinishedEvent, StepReporter } from '../executor/stepReporter.js';
 import {
   ObservedPreReadyFailure,
   RUNNER_ERROR_CODES,
@@ -166,12 +166,12 @@ function openStepTracker(
   reporter: StepReporter,
 ): StepReporter & {
   open(): readonly { readonly stepIndex: number; readonly startedAtMs: number }[];
-  interrupted(): readonly { readonly stepIndex: number; readonly startedAtMs: number }[];
+  interrupted(): readonly { readonly stepIndex: number; readonly startedAtMs: number; readonly receipt?: StepFinishedEvent['receipt'] }[];
 } {
   const open = new Map<number, number>();
   // Steps the child itself ended for the stop's reason (`FAIL` / `CANCELLED`, its closed code). Remembered only so that
   // a self-stop the API never recorded can say what the kill path says (R10c); the event itself is forwarded unchanged.
-  const stoppedByChild = new Map<number, number>();
+  const stoppedByChild = new Map<number, { readonly startedAtMs: number; readonly receipt?: StepFinishedEvent['receipt'] }>();
   return {
     stepStarted(event): void {
       open.set(event.stepIndex, event.startedAtMs);
@@ -180,14 +180,14 @@ function openStepTracker(
     stepFinished(event): void {
       const startedAtMs = open.get(event.stepIndex);
       open.delete(event.stepIndex);
-      if (event.status === 'FAIL' && event.failure === RUNNER_ERROR_CODES.CANCELLED && startedAtMs !== undefined) stoppedByChild.set(event.stepIndex, startedAtMs);
+      if (event.status === 'FAIL' && event.failure === RUNNER_ERROR_CODES.CANCELLED && startedAtMs !== undefined) stoppedByChild.set(event.stepIndex, { startedAtMs, ...(event.receipt === undefined ? {} : { receipt: event.receipt }) });
       reporter.stepFinished(event);
     },
     open(): readonly { readonly stepIndex: number; readonly startedAtMs: number }[] {
       return [...open].map(([stepIndex, startedAtMs]) => ({ stepIndex, startedAtMs }));
     },
-    interrupted(): readonly { readonly stepIndex: number; readonly startedAtMs: number }[] {
-      return [...stoppedByChild].map(([stepIndex, startedAtMs]) => ({ stepIndex, startedAtMs }));
+    interrupted(): readonly { readonly stepIndex: number; readonly startedAtMs: number; readonly receipt?: StepFinishedEvent['receipt'] }[] {
+      return [...stoppedByChild].map(([stepIndex, stopped]) => ({ stepIndex, ...stopped }));
     },
   };
 }
@@ -482,7 +482,7 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
     const redactor = createRedactor([]);
     const reportRuntimeVersions = {...options.runtimeVersions,observedProfile:JSON.stringify(observed.job.binding.requiredProfile),observedBuild:JSON.stringify(observed.job.binding.requiredBuild)};
     const snapshot = createRunSnapshot({
-      allowUnstartedSkippedSteps:true,observedSecretConsumers:frozenSecretConsumers(observed.job.artifact.inputRecipes,observed.job.artifact.steps),
+      allowUnstartedSkippedSteps:true,observedSecretConsumers:frozenSecretConsumers(observed.job.artifact.steps),
       identity,
       bounds: options.bounds,
       runtimeVersions: reportRuntimeVersions,
@@ -809,7 +809,8 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
         // The step the stop interrupted says what the kill path already says (below): stopped, not judged. A child that
         // honoured the stop reported it `FAIL` with its own closed code; that code is not a verdict on the step either.
         for (const step of stepReporter.interrupted()) {
-          snapshot.stepFinished({ stepIndex: step.stepIndex, status: 'SKIPPED', startedAtMs: step.startedAtMs, finishedAtMs: null, durationMs: null, failure: STOPPED_STEP_MESSAGE });
+          // The child's own receipt of the step it stopped (what it did before the stop) is a fact the stop does not erase.
+          snapshot.stepFinished({ stepIndex: step.stepIndex, status: 'SKIPPED', startedAtMs: step.startedAtMs, finishedAtMs: null, durationMs: null, failure: STOPPED_STEP_MESSAGE, ...(step.receipt === undefined ? {} : { receipt: step.receipt }) });
           snapshot.appendLog({ atMs: null, level: 'info', message: `step ${String(step.stepIndex)} SKIPPED: ${STOPPED_STEP_MESSAGE}` });
         }
       }

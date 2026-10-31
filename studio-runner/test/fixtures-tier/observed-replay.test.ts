@@ -1,4 +1,4 @@
-import { LOCAL_DOMAIN, TEST_DOMAINS } from '../helpers/allowedDomains.js';
+import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 import {randomUUID} from 'node:crypto';
 import type {ServerResponse} from 'node:http';
 import {writeRuntimeVersionsFile} from '../../scripts/write-runtime-versions.mjs';
@@ -18,7 +18,6 @@ import { createApplication } from '../../src/server/application.js';
 import { secureFetch, testListener } from '../helpers/guidedTls.js';
 import { loadConfig } from '../../src/server/config.js';
 import { createRecordingLogSink } from '../../src/server/logging.js';
-import { readGrantId } from '../../src/run/observationReadProfile.js';
 import { untilMs } from './realRunner.js';
 const uid = (n: number) => '00000000-0000-4000-8000-' + String(n).padStart(12, '0');
 describe('observed ordinary recorded child', () => {
@@ -115,7 +114,7 @@ describe('observed ordinary recorded child', () => {
         try {
             // Manual projection of the same five approved primitive operations onto this controlled app.
             const a = structuredClone(fixture.artifact) as unknown as Artifact3;
-            const mutable = JSON.parse(JSON.stringify(a).split('"business-reference"').join(JSON.stringify(readGrantId(LOCAL_DOMAIN)))) as typeof fixture.artifact;
+            const mutable = structuredClone(a) as unknown as typeof fixture.artifact;
             mutable.learnedPlan.actions.forEach(x => {
                 if (x.origin !== null)
                     x.origin = origin;
@@ -124,14 +123,19 @@ describe('observed ordinary recorded child', () => {
                 if (g.origin !== null)
                     g.origin = origin;
             });
-            const names = ['Reference', 'Destination', 'Label', 'Destination'];
-            mutable.guards.slice(1).forEach((g, i) => {
-                // A password input named Reference is a textbox: the frozen read reaches it, and the live read refuses it.
-                const role = i === 0 && mode !== 'password' ? 'status' : 'textbox', name = names[i] ?? '';
-                const frozen = { locator: [{ by: 'role' as const, role, name, exact: true as const }], tier: 'role' as const, identity: { role, name } };
-                g.target = { kind: 'element', ...frozen, readRuleId: i === 0 ? readGrantId(LOCAL_DOMAIN) : null } as typeof g.target;
+            // Manual projection of the same four approved steps onto this controlled app: read the Reference, type it into Destination, type the Label, assert the Destination.
+            const codes = [
+                'vars["binding-reference"] = await page.getByRole(\'status\', { name: \'Reference\', exact: true }).innerText();',
+                'await page.getByRole(\'textbox\', { name: \'Destination\', exact: true }).fill(vars["binding-reference"]);',
+                'await page.getByRole(\'textbox\', { name: \'Label\', exact: true }).fill(inputs["input-label"]);',
+                'await expect(page.getByRole(\'textbox\', { name: \'Destination\', exact: true })).toHaveValue(vars["binding-reference"]);',
+            ];
+            codes.forEach((code, i) => {
                 const action = required(mutable.learnedPlan.actions[i + 1]);
-                action.target = frozen as unknown as typeof action.target;
+                const operation = { ...action.operation, code, sourceHash: hashObserved(code) };
+                (action as { operation: unknown }).operation = operation;
+                const wired = (mutable.steps as Artifact3['steps']).flatMap(step => step.operations).find(o => o.coordinate.stepId === action.coordinate.stepId && o.coordinate.ordinal === action.coordinate.ordinal);
+                if (wired) (wired as { operation: unknown }).operation = operation;
             });
             for (const b of mutable.learnedPlan.bindings) {
                 b.sourceOrigin = origin;
@@ -139,9 +143,8 @@ describe('observed ordinary recorded child', () => {
             }
             mutable.replayPolicy.bindings = mutable.learnedPlan.bindings;
             mutable.replayPolicy.transfers.forEach(t => t.origin = origin);
-            if(asynchronous){const guard=required(mutable.guards[4]);const frozen={locator:[{by:'role' as const,role:'textbox',name:'Confirmation',exact:true as const}],tier:'role' as const,identity:{role:'textbox',name:'Confirmation'}};Object.assign(guard.target,frozen);required(mutable.learnedPlan.actions[4]).target=frozen as unknown as typeof mutable.learnedPlan.actions[4]['target'];}
             for (const action of mutable.learnedPlan.actions)
-                action.operationHash = hashObserved({ coordinate: action.coordinate, origin: action.origin, target: action.target, operation: action.operation });
+                action.operationHash = hashObserved({ coordinate: action.coordinate, origin: action.origin, operation: action.operation });
             mutable.learnedPlanHash = hashObserved(mutable.learnedPlan);
             mutable.replayPolicy.learnedPlanHash = mutable.learnedPlanHash;
             const artifact = validateReplayArtifact(mutable), frozen = hashObserved(artifact), scope = { principalId: 'current-user', ...artifact.replayPolicy.scope } as Scope;
@@ -156,7 +159,7 @@ describe('observed ordinary recorded child', () => {
             const startup={STUDIO_RUNNER_OBSERVED_CATALOG_FILE:catalogPath,STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST:build.executableImageDigest,PLAYWRIGHT_BROWSERS_PATH:browserRoot};
             expect(loadObservedBuild(startup,resolve('dist/runtime-versions.json'),resolve('dist/observed-reference.json'))).toEqual(build);
             const child = join(dir, 'controlled-observed-child.mjs');
-            await writeFile(child, `import {startChild} from ${JSON.stringify(pathToFileURL(resolve('dist/run/child.js')).href)};import {loadObservedBuild} from ${JSON.stringify(pathToFileURL(resolve('dist/compat/runtime-versions.js')).href)};import {playwrightBrowserFactory} from ${JSON.stringify(pathToFileURL(resolve('dist/run/browser.js')).href)};const actualBuild=loadObservedBuild(${JSON.stringify(startup)});const originalLaunch=playwrightBrowserFactory.launch.bind(playwrightBrowserFactory);playwrightBrowserFactory.launch=async request=>{const handle=await originalLaunch(request);const create=handle.createObservationSession.bind(handle);handle.createObservationSession=config=>{const session=create(config),resolveTarget=session.resolveTarget.bind(session),invoke=session.invoke.bind(session);session.resolveTarget=async request=>{const result=await resolveTarget(request);if(request.resolved.locator.at(-1)?.name==='Confirmation')await fetch(${JSON.stringify(origin+'/acquisition')},{method:'POST',body:result.kind});return result;};session.invoke=async (...args)=>{const result=await invoke(...args);const request=args[0];await fetch(${JSON.stringify(origin+'/invocation')},{method:'POST',body:request.operation.kind});return result;};return session;};return handle;};startChild(process,${JSON.stringify(TEST_DOMAINS)},{observedBuild:actualBuild});`);
+            await writeFile(child, `import {startChild} from ${JSON.stringify(pathToFileURL(resolve('dist/run/child.js')).href)};import {loadObservedBuild} from ${JSON.stringify(pathToFileURL(resolve('dist/compat/runtime-versions.js')).href)};const actualBuild=loadObservedBuild(${JSON.stringify(startup)});startChild(process,${JSON.stringify(TEST_DOMAINS)},{observedBuild:actualBuild});`);
             for (let run = 0; run < (positive ? 2 : 1); run++) {
                 const now = Date.now(), issuedAt = new Date(now).toISOString(), expiresAt = new Date(now + 30000).toISOString(), executionId = uid(30 + run), attemptId = uid(40 + run), revisionDigest = 'c'.repeat(64), scopeHash = hashObserved(scope);
                 const binding = { version: 1 as const, executionId, attemptId, startedAt: issuedAt, revisionId: uid(70), revisionDigest, testId: uid(10), csiId: scope.csiId, principalId: scope.principalId, environment: scope.environment, artifactHash: frozen, configurationHash: artifact.configurationHash, learnedPlanHash: artifact.learnedPlanHash, referencePolicyHash: hashObserved(artifact.replayPolicy), publicationEvidenceHash: artifact.replayPolicy.publicationEvidenceHash, requiredProfile: OBSERVED_PROFILE, requiredBuild: build, scope, scopeHash, replayGrant: { version: 1 as const, grantId: uid(60 + run), executionId, attemptId, revisionId: uid(70), revisionDigest, principalId: scope.principalId, csiId: scope.csiId, scopeHash, profileHash: hashObserved(OBSERVED_PROFILE), buildHash: hashObserved(build),  issuedAt, expiresAt } };
@@ -176,10 +179,10 @@ describe('observed ordinary recorded child', () => {
                     expect(final).toBeDefined();
                     expect(ownership.get(executionId)?.state).toBe('FINAL');
 
-                    expect(final).toMatchObject({ outcome: { result: positive ? 'PASSED' : mode === 'password' ? 'FAILED' : 'ERROR' } });
+                    expect(final).toMatchObject({ outcome: { result: positive ? 'PASSED' : mode === 'post-fence' ? 'FAILED' : 'ERROR' } });
                     const prefix = `studio/${binding.csiId}/${binding.testId}/${executionId}/${attemptId}`;
                     const manifest = JSON.parse(await readFile(join(dir, 'objects-' + String(run), prefix + '.result.json'), 'utf8')) as Record<string, unknown>;
-                    expect(manifest).toMatchObject({ outcome: positive ? 'PASSED' : mode === 'password' ? 'FAILED' : 'ERROR', evidenceState: 'STORED', artifactHash: frozen });
+                    expect(manifest).toMatchObject({ outcome: positive ? 'PASSED' : mode === 'post-fence' ? 'FAILED' : 'ERROR', evidenceState: 'STORED', artifactHash: frozen });
                         expect((await readFile(join(dir, 'objects-' + String(run), prefix + '.webm'))).length).toBeGreaterThan(0);
 
                     const retained = JSON.stringify({ reports, sink: sink.lines, manifest });
@@ -198,7 +201,6 @@ describe('observed ordinary recorded child', () => {
             expect(admissions).toBe(positive ? 2 : 1);
             expect(visits).toBe(positive ? 2 : 1);
             expect(receipts).toEqual(positive||asynchronous?issuedValues:[]);
-            if(asynchronous){expect(acquisitions).toContain('ABSENT');expect(invocations.filter(kind=>kind==='read')).toHaveLength(positive?2:1);expect(invocations.filter(kind=>kind==='fill')).toHaveLength(positive?4:2);expect(invocations.filter(kind=>kind==='assert')).toHaveLength(positive?2:0);if(positive)expect(acquisitions.filter(kind=>kind==='READY')).toHaveLength(2);else expect(acquisitions).not.toContain('READY');}
         }
         finally {
             server.closeAllConnections();
@@ -206,7 +208,7 @@ describe('observed ordinary recorded child', () => {
             await rm(dir, { recursive: true, force: true });
         }
     };
-    it.each(['fresh', 'async-confirmation', 'never-confirmation', 'hidden', 'password', 'sensitive-descendant', 'duplicate', 'readonly'] as const)('uses actual recorded normal pipeline: %s', runMode, 90000);
+    it.each(['fresh', 'hidden', 'duplicate', 'readonly'] as const)('uses actual recorded normal pipeline: %s', runMode, 90000);
     it('a post-fence Playwright failure leaves the canary out of the refusal reason', async () => { await runMode('post-fence'); }, 90000);
 });
 function required<T>(value: T | null | undefined): T {

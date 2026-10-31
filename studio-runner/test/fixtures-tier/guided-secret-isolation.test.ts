@@ -1,4 +1,5 @@
-import { LOCAL_DOMAIN, TEST_DOMAINS } from '../helpers/allowedDomains.js';
+import { stepOp } from '../helpers/stepCode.js';
+import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 // eslint-disable-next-line no-restricted-imports -- Test-local original SDK delegation; no alternate browser or password primitive.
 import {chromium,type BrowserContext} from 'playwright';
 import {createServer} from 'node:https';
@@ -7,7 +8,7 @@ import {TLSSocket} from 'node:tls';
 import {mkdtemp,readFile,readdir,writeFile,rm,stat,realpath} from 'node:fs/promises';
 import {existsSync,readdirSync,readFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
-import {join,resolve,dirname,basename} from 'node:path';
+import {join,dirname,basename} from 'node:path';
 import {expect,it,vi} from 'vitest';
 import {createGuidedServer,guidedClaimClient,guidedCallback,verifyGuidedJwt} from '../../src/guided/transport.js';
 import {GuidedRuntime} from '../../src/guided/runtime.js';
@@ -19,11 +20,11 @@ import {hash,identity,validate} from '../../src/guided/contracts.js';
 import type {Action,ExecutionEvidence,BridgeBootstrap,BridgeObservation,BridgeOrdinaryOutcome as BridgeOutcome,BridgePreparation,CommandsClaim,Producer,ConsumerEdge} from '../../src/guided/types.js';
 import type {BrowserPreferenceEvidence} from '../../src/run/scratchLayout.js';
 import {guidedContext,ownershipSession,assignmentFor,proposal,dispatch} from '../helpers/guided.js';
-import {readGrantId} from '../../src/run/observationReadProfile.js';
 import {testTls,testFingerprint,jwtPolicy,jwt,post} from '../helpers/guidedTls.js';
 import {startSecretLoginFixture} from '../fixtures/secret-login/server.js';
 import {startGuidedDataflowFixture,canary as publicReference} from '../fixtures/guided-dataflow/visibleTextServer.js';
 import {untilMs} from './realRunner.js';
+import {evidencePath} from '../helpers/evidenceOut.js';
 
 // Only the HTTPS factory counter is mocked, and the proxy delegates the real factory.
 // No TLS options, private arguments, return objects or mock call/result records are stored.
@@ -197,9 +198,9 @@ async function harness(){
   function client(label:string,csiId:string,initial:string):Client{
     // The read profile is the runner's constant, derived from the approved origins of each session's context.
     const context=guidedContext(F.origin);context.sourceStepIds=['login-nav','password-fill','login-submit','nav','read','next','fill','submit','reports'];
-    for(let i=0;i<65;i++)context.authoredInputs.inputs.push({inputId:`private-${String(i)}`,sourceStepId:'fill',kind:'nonsecretText',value:`PRIVATE-INPUT-${String(i).padStart(3,'0')}`,intendedSlot:'fill.value',provenance:{referenceKind:'configuration',configurationRevision:context.configurationRevision,stepId:'fill',referenceId:`saved-${String(i)}`,kind:'nonsecretText',intendedSlot:'fill.value'}});
-    for(const [id,step,value] of [['input-login','login-nav',initial],['input-reports','reports',S.origin+'/reports']] as const)context.authoredInputs.inputs.push({inputId:id,sourceStepId:step,kind:'destination',intendedSlot:'navigate.destination',value,provenance:{referenceKind:'sourceSpan',sourceRevision:context.sourceRevision,stepId:step,startUtf16:0,endUtf16:12,kind:'destination',intendedSlot:'navigate.destination'}});
-    context.authoredInputs.inputs.push({inputId:'input-pass',sourceStepId:'password-fill',kind:'secretRef',intendedSlot:'fill.value',secretId:'PASS',provenance:{referenceKind:'configuration',configurationRevision:context.configurationRevision,stepId:'password-fill',referenceId:'reference-pass',referenceName:'PASS',kind:'secretRef',intendedSlot:'fill.value'}});
+    for(let i=0;i<65;i++)context.authoredInputs.inputs.push({inputId:`private-${String(i)}`,sourceStepId:'fill',kind:'nonsecretText',value:`PRIVATE-INPUT-${String(i).padStart(3,'0')}`,provenance:{referenceKind:'configuration',configurationRevision:context.configurationRevision,stepId:'fill',referenceId:`saved-${String(i)}`,kind:'nonsecretText'}});
+    for(const [id,step,value] of [['input-login','login-nav',initial],['input-reports','reports',S.origin+'/reports']] as const)context.authoredInputs.inputs.push({inputId:id,sourceStepId:step,kind:'destination',value,provenance:{referenceKind:'sourceSpan',sourceRevision:context.sourceRevision,stepId:step,startUtf16:0,endUtf16:12,kind:'destination'}});
+    context.authoredInputs.inputs.push({inputId:'input-pass',sourceStepId:'password-fill',kind:'secretRef',secretId:'PASS',provenance:{referenceKind:'configuration',configurationRevision:context.configurationRevision,stepId:'password-fill',referenceId:'reference-pass',referenceName:'PASS',kind:'secretRef'}});
     const grant=ownershipSession(context);grant.scope.csiId=csiId;grant.scopeHash=hash(grant.scope);grant.runAuthorization.scopeHash=grant.scopeHash;context.scopeHash=grant.scopeHash;context.authoredInputs.scopeHash=grant.scopeHash;context.authoredInputsHash=hash(context.authoredInputs);context.leaseExpiresAt=grant.owner.leaseExpiresAt;
     const value:Client={label,context,grant,assignment:assignmentFor(context),closeRestores:[],nativeCount:0,focusCount:0,nativePending:0,closed:false};clients.set(context.sessionId,value);return value;
   }
@@ -234,26 +235,25 @@ async function harness(){
   async function startWorker(){worker=createGuidedServer(options);await new Promise<void>(r=>worker?.server.listen(0,'127.0.0.1',r));const at=worker.server.address();if(!at||typeof at==='string')throw Error('PORT');workerPort=at.port;}
   async function assign(entry:Client,key:string){return post(workerPort,path(entry)+'/assign',entry.assignment,{fence:null,key});}
   async function context(entry:Client){const reply=await post(workerPort,path(entry)+'/context',entry.context,{key:'context-'+String(entry.context.materializationRevision)});if(reply.status===200){const bootstrap=messages.find(m=>m.label===entry.label&&m.route==='bootstrap-evidence')?.body as BridgeBootstrap|undefined;if(bootstrap&&!entry.evidence)entry.evidence=bootstrap.executionEvidence;}return reply;}
-  function target(entry:Client,name:string):Action['target']{const seen=entry.observation,found=seen&&Object.entries(seen.facts).find(([,fact])=>fact.name===name);if(!seen||!found)throw Error('OBSERVED_TARGET');return {kind:'node',ref:found[0],documentId:seen.documentId,generation:seen.generation};}
-  async function act(entry:Client,step:string,operation:Action['operation'],target_?:Action['target'],secret?:string){
-    if(!entry.evidence)throw Error('EVIDENCE');const p=proposal(entry.context,entry.evidence,step,operation,target_);
+  async function act(entry:Client,step:string,operation:Action['operation'],secret?:string){
+    if(!entry.evidence)throw Error('EVIDENCE');const p=proposal(entry.context,entry.evidence,step,operation);
     const prepared=await post(workerPort,path(entry)+'/prepare',{...identity(entry.context),proposal:p,requestDigest:hash(p),expiresAt:entry.context.expiresAt},{key:'prepare-'+step});resultStatus(prepared,200);
     const request=dispatch(entry.context,p,validate<BridgePreparation>('bridge',prepared.body,'preparation'));
-    if(operation.kind==='fill'&&operation.value.kind==='binding'){
-      const producer=entry.producer;if(!producer)throw Error('PRODUCER');request.consumerEdges=[{bindingId:producer.bindingId,producerAdmissionId:producer.producerAdmissionId,consumerAdmissionId:request.ledger.admission.admissionId,coordinate:p.coordinate,argumentSlot:'fill.value',destinationOrigin:producer.origin,transferPolicy:'sameOrigin'}];
+    if(operation.uses.some(use=>use.kind==='binding')){
+      const producer=entry.producer;if(!producer)throw Error('PRODUCER');request.consumerEdges=[{bindingId:producer.bindingId,producerAdmissionId:producer.producerAdmissionId,consumerAdmissionId:request.ledger.admission.admissionId,coordinate:p.coordinate,destinationOrigin:producer.origin,transferPolicy:'sameOrigin'}];
     }
-    const frame=secret===undefined?request:{...request,secret:{secretId:'PASS',value:secret,versionId:'fixture-version',allowedOrigins:[S.origin]}};
-    let response:Awaited<ReturnType<typeof post>>;try{response=await post(workerPort,path(entry)+'/dispatch',frame,{key:'dispatch-'+step});}finally{if('secret' in frame)delete (frame as {secret?:unknown}).secret;}
+    const frame=secret===undefined?request:{...request,secrets:[{secretId:'PASS',value:secret,versionId:'fixture-version',allowedOrigins:[S.origin]}]};
+    let response:Awaited<ReturnType<typeof post>>;try{response=await post(workerPort,path(entry)+'/dispatch',frame,{key:'dispatch-'+step});}finally{if('secrets' in frame)frame.secrets.forEach(entry_=>{(entry_ as {value:string}).value='';});}
     resultStatus(response,200);const result=validate<BridgeOutcome>('bridge',response.body,'outcome');expect(result.ledger.state).toBe('SUCCEEDED');refresh(entry);return {result,request,p};
   }
   async function login(entry:Client,secret:string,afterFill?:()=>void){
-    await act(entry,'login-nav',{kind:'navigate',destinationInputId:'input-login'});expect(entry.observation?.origin).toBe(S.origin);expect(entry.observation?.coverage.passwordControls).toBe(1);expect(entry.sdk?.deref()?.pages()[0]?.url()).toBe(S.origin+'/login');
-    const observation=entry.observation;if(!observation)throw Error('OBSERVATION');await act(entry,'password-fill',{kind:'fill',value:{kind:'secretRef',sourceInputId:'input-pass'}},{kind:'passwordControl',documentId:observation.documentId,generation:observation.generation},secret);afterFill?.();
-    await act(entry,'login-submit',{kind:'click'},target(entry,'Sign in'));
+    await act(entry,'login-nav',stepOp('await page.goto(inputs["input-login"]);', { uses: [{ kind: 'input', id: 'input-login' }] }));expect(entry.observation?.origin).toBe(S.origin);expect(entry.observation?.coverage.passwordControls).toBe(1);expect(entry.sdk?.deref()?.pages()[0]?.url()).toBe(S.origin+'/login');
+    const observation=entry.observation;if(!observation)throw Error('OBSERVATION');void observation;await act(entry,'password-fill',stepOp('await page.locator(\'input[type="password"]\').fill(secrets["PASS"]);',{uses:[{kind:'secret',id:'PASS'}]}),secret);afterFill?.();
+    await act(entry,'login-submit',stepOp('await page.getByRole("button", { name: "Sign in", exact: true }).click();'));
   }
   async function stop(entry:Client){await scans();resultStatus(await post(workerPort,path(entry)+'/stop',{...identity(entry.context),reason:'CANCELLED'},{key:'stop'}),200);await untilMs(()=>entry.closed&&pids.filter(p=>p.label===entry.label).every(p=>!isAlive(p.pid)),5000);expect(entry.scratch===undefined?false:!existsSync(entry.scratch)).toBe(true);}
   async function unusedPreparation(entry:Client){
-    if(!entry.evidence)throw Error('EVIDENCE');const p=proposal(entry.context,entry.evidence,'reports',{kind:'navigate',destinationInputId:'input-reports'});p.coordinate.ordinal=1;
+    if(!entry.evidence)throw Error('EVIDENCE');const p=proposal(entry.context,entry.evidence,'reports',stepOp('await page.goto(inputs["input-reports"]);', { uses: [{ kind: 'input', id: 'input-reports' }] }));p.coordinate.ordinal=1;
     resultStatus(await post(workerPort,path(entry)+'/prepare',{...identity(entry.context),proposal:p,requestDigest:hash(p),expiresAt:entry.context.expiresAt},{key:'unused-reports-preparation'}),200);
   }
   async function scans(){
@@ -262,7 +262,7 @@ async function harness(){
   }
   async function record(name:string,primaryFailure=false){
     const serialized=JSON.stringify({name,primaryFailure,events,claims,pids,outputHits:output.counts,outputObserved:output.observed,cleanupIssues,pendingDescriptorRestorations:restores.length,launches:launchCount,maxLive,allObservedPidsGone:pids.every(p=>!isAlive(p.pid)),backendVaultScopeProved:false,physicalHeapErasureProved:false},null,2)+'\n';
-    expect(byteHits(Buffer.from(serialized))).toBe(0);await writeFile(resolve('../docs/qa/evidence/STUDIO-OBS-007/runner-isolation-source-repair/'+name+'.json'),serialized);
+    expect(byteHits(Buffer.from(serialized))).toBe(0);await writeFile(evidencePath('STUDIO-OBS-007/runner-isolation-source-repair/'+name+'.json'),serialized);
   }
   async function close(name:string,primaryFailure:boolean,pendingStop?:Promise<void>){
     if(cleanupDone)return;cleanupDone=true;gateA?.release();const deadline=performance.now()+CLEANUP_MS;scanExtant();
@@ -281,12 +281,12 @@ async function harness(){
     }
     if(!primaryFailure&&cleanupIssues.some(issue=>!issue.confirmed))throw Error('ISOLATION_CLEANUP_UNCONFIRMED');
   }
-  return {F,S,events,messages,claims,pids,options,client,startWorker,assign,context,act,login,stop,unusedPreparation,target,refresh,scans,close,record,path,get port(){return workerPort;},get launches(){return launchCount;},get maxLive(){return maxLive;},holdClose(){gateA=gate();return gateA;},get gateEntered(){return gateEntered;}};
+  return {F,S,events,messages,claims,pids,options,client,startWorker,assign,context,act,login,stop,unusedPreparation,refresh,scans,close,record,path,get port(){return workerPort;},get launches(){return launchCount;},get maxLive(){return maxLive;},holdClose(){gateA=gate();return gateA;},get gateEntered(){return gateEntered;}};
   }catch(original){
     const deadline=performance.now()+CLEANUP_MS;for(const item of acquired.reverse())await boundedRelease(item.label,item.release,deadline,constructionIssues);acquired.length=0;
     if(restores.length>0)await boundedRelease('descriptor-retry',()=>restoreMethods(restores,'constructor-descriptor-retry',cleanupIssues)?Promise.resolve():Promise.reject(Error('DESCRIPTOR_RESTORE_UNCONFIRMED')),deadline,constructionIssues);
     const serialized=JSON.stringify({constructionFailed:true,releaseIssues:constructionIssues,descriptorAndScanIssues:cleanupIssues,pendingDescriptorRestorations:restores.length,unresolved:restores.length>0||constructionIssues.some(issue=>!issue.confirmed)||cleanupIssues.some(issue=>!issue.confirmed),nativeQuiescenceProved:false})+'\n';
-    if(byteHits(Buffer.from(serialized))===0)await boundedRelease('construction-evidence',()=>writeFile(resolve('../docs/qa/evidence/STUDIO-OBS-007/runner-isolation-source-repair/construction-cleanup.json'),serialized),deadline,constructionIssues);throw original;
+    if(byteHits(Buffer.from(serialized))===0)await boundedRelease('construction-evidence',()=>writeFile(evidencePath('STUDIO-OBS-007/runner-isolation-source-repair/construction-cleanup.json'),serialized),deadline,constructionIssues);throw original;
   }
 }
 
@@ -315,15 +315,14 @@ it('ISO3 isolates fresh CSI-B PASS from genuine A producer, cookie, masking and 
     await h.startWorker();const a=h.client('A','CSI-A',h.S.origin+'/login');resultStatus(await h.assign(a,'assign-A'),200);resultStatus(await h.context(a),200);await h.login(a,A);
     expect(h.S.receipts().length).toBe(1);expect(h.S.receipts()[0]?.accepted===true&&h.S.receipts()[0]?.password===A).toBe(true);
     expect((await a.sdk?.deref()?.cookies(h.S.origin))?.some(cookie=>cookie.name==='fixture_session')).toBe(true);
-    await h.act(a,'nav',{kind:'navigate',destinationInputId:'input-nav'});expect(h.F.sourceRequests()).toBe(1);
-    const recipe:Producer['recipe']={kind:'visibleText',classification:'permittedBusinessData',policyRuleId:readGrantId(LOCAL_DOMAIN)};
-    const read=await h.act(a,'read',{kind:'read',bindingId:'binding-one',recipe},h.target(a,'Business reference'));expect(read.result.availability!==null).toBe(true);
-    if(!read.result.availability||read.p.executionEvidence.kind!=='observedDocument')throw Error('PRODUCER');
-    const producer:Producer={bindingId:'binding-one',producerAdmissionId:read.request.ledger.admission.admissionId,coordinate:read.p.coordinate,origin:read.p.executionEvidence.origin,recipe,availability:read.result.availability};a.producer=producer;a.context.producers=[producer];a.context.materializationRevision++;resultStatus(await h.context(a),200);
-    await h.act(a,'next',{kind:'navigate',destinationInputId:'input-next'});const used=await h.act(a,'fill',{kind:'fill',value:{kind:'binding',bindingId:'binding-one'}},h.target(a,'Destination'));await h.act(a,'submit',{kind:'click'},h.target(a,'Submit'));
+    await h.act(a,'nav',stepOp('await page.goto(inputs["input-nav"]);', { uses: [{ kind: 'input', id: 'input-nav' }] }));expect(h.F.sourceRequests()).toBe(1);
+    const read=await h.act(a,'read',stepOp('vars["binding-one"] = await page.getByText(/OBS-private/).innerText();',{captures:['binding-one']}));expect(read.result.availability.length>0).toBe(true);
+    if(read.result.availability.length===0||read.p.executionEvidence.kind!=='observedDocument')throw Error('PRODUCER');
+    const producer:Producer={bindingId:'binding-one',producerAdmissionId:read.request.ledger.admission.admissionId,coordinate:read.p.coordinate,origin:read.p.executionEvidence.origin,availability:(()=>{const first=read.result.availability[0];if(!first)throw new Error('AVAILABILITY');return first;})()};a.producer=producer;a.context.producers=[producer];a.context.materializationRevision++;resultStatus(await h.context(a),200);
+    await h.act(a,'next',stepOp('await page.goto(inputs["input-next"]);', { uses: [{ kind: 'input', id: 'input-next' }] }));const used=await h.act(a,'fill',stepOp('await page.getByRole("textbox", { name: "Destination" }).fill(vars["binding-one"]);',{uses:[{kind:'binding',id:'binding-one'}]}));await h.act(a,'submit',stepOp('await page.getByRole("button", { name: "Submit" }).click();'));
     await untilMs(()=>h.F.receipts.length===1,3000);expect(h.F.receipts[0]===publicReference).toBe(true);
     a.context.consumerEdges=used.request.consumerEdges as ConsumerEdge[];a.context.materializationRevision++;resultStatus(await h.context(a),200);
-    await h.act(a,'reports',{kind:'navigate',destinationInputId:'input-reports'});expect(a.observation?.origin).toBe(h.S.origin);expect(a.observation?.coverage.passwordControls).toBe(0);expect(a.sdk?.deref()?.pages()[0]?.url()).toBe(h.S.origin+'/reports');
+    await h.act(a,'reports',stepOp('await page.goto(inputs["input-reports"]);', { uses: [{ kind: 'input', id: 'input-reports' }] }));expect(a.observation?.origin).toBe(h.S.origin);expect(a.observation?.coverage.passwordControls).toBe(0);expect(a.sdk?.deref()?.pages()[0]?.url()).toBe(h.S.origin+'/reports');
     const liveA=h.events.filter(e=>e.kind==='runtime'&&e.label==='A').at(-1);expect(liveA?.hasBinding).toBe(true);expect(liveA?.edges).toBe(1);
     await h.unusedPreparation(a);
     const maskedA=h.events.filter(e=>e.kind==='inventory'&&e.label==='A'&&e.stage==='after-merge').at(-1);expect(maskedA!==undefined).toBe(true);expect(maskedA?.containsA).toBe(true);expect(Number(maskedA?.size)).toBeGreaterThan(0);expect(Number(maskedA?.bytes)).toBeGreaterThan(0);

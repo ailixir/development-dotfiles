@@ -5,15 +5,12 @@ import { ALL_DOMAINS } from '../../src/allowedDomains.js';
 import { OriginNotAllowed } from '../../src/allowedDomains.js';
 import { ClosedActionError } from '../../src/run/closedError.js';
 import { canonicalObservation, exportObservation, observationOptions } from '../../src/run/observationSanitizer.js';
-import { createObservationFlow, shownRefsOf, type FlowCdp, type FlowHost } from '../../src/run/observationFlow.js';
-import { readGrantId } from '../../src/run/observationReadProfile.js';
-import type { ObservationConfig, ObservationReadProfile } from '../../src/run/observationTypes.js';
+import { createObservationFlow, shownRefsOf, type FlowCdp, type FlowEngine, type FlowHost } from '../../src/run/observationFlow.js';
+import type { ObservationConfig } from '../../src/run/observationTypes.js';
 import { installPageState } from '../../src/run/pageStateInPage.js';
-import type { ElementCandidateFacts, OptionListing } from '../../src/run/perceptionInPage.js';
-import { FakePage, FakeWorld } from '../helpers/fakePage.js';
 import { perceive } from '../../src/run/perceive.js';
 import { ScriptedCdp, elementFacts, n, page, type Script } from './perceptionFakes.js';
-import { untrackedObservationChannel, captureSourceOnEngine, sourceValue } from '../../src/run/playwrightEngine.js';
+import { untrackedObservationChannel, captureSourceOnEngine } from '../../src/run/playwrightEngine.js';
 
 /**
  * The Playwright-free observation session (plan D-1, D-2, D-5, D-16) driven by a scripted CDP and the fake page of the executor tests.
@@ -40,38 +37,7 @@ describe('D5/R5 dedicated untracked source metadata channel', () => {
     await expect(captureSourceOnEngine({ cdp: { send }, worldId: 1, objectId: 'unknown-engine' }, 'p', 4096)).rejects.toThrow('READ_REFUSED');
     expect(send).not.toHaveBeenCalled();
   });
-  it.each(['root','nested','content-document','malformed','error','overflow','missing-host','final-drain'] as const)('quarantines the staged value when host metadata is %s', async failure => {
-    let valueCalls = 0;
-    const channel = untrackedObservationChannel({
-      send(method, params) {
-        const request = params as { functionDeclaration?: string } | undefined;
-        if (method === 'Runtime.getProperties') return Promise.resolve({ result: [
-          { name: '0', value: { objectId: 'exact-original-host' } },
-          { name: 'length', value: { value: failure === 'overflow' ? 4097 : failure === 'missing-host' ? 2 : 1 } },
-        ] });
-        if (method === 'DOM.describeNode') {
-          if (failure === 'error') return Promise.reject(Error('PRIVATE PROTOCOL ERROR'));
-          return Promise.resolve({ node: { nodeType: failure === 'malformed' ? 'element' : 1,
-            ...(failure === 'root' ? { shadowRoots: [{ shadowRootType: 'closed' }] } : {}),
-            ...(failure === 'nested' ? { children: [{ nodeValue: 'PRIVATE NESTED CONTENT' }] } : {}),
-            ...(failure === 'content-document' ? { contentDocument: { nodeType: 9 } } : {}),
-          } });
-        }
-        if (request?.functionDeclaration === 'function() { return this.value(); }') { valueCalls++; return Promise.resolve({ result: { value: 'PRIVATE UNRELEASED CANARY' } }); }
-        if (request?.functionDeclaration === 'function() { this.nodes(); }' && failure === 'final-drain') return Promise.reject(Error('PRIVATE EPOCH ERROR'));
-        if (request?.functionDeclaration === 'function() { return this.nodes(); }') return Promise.resolve({ result: { objectId: 'original-host-array' } });
-        return Promise.resolve({ result: {} });
-      },
-    });
-    await expect(sourceValue({ cdp: channel, worldId: 1, objectId: 'engine' }, 'native-source', [])).rejects.toThrow('READ_REFUSED');
-    expect(valueCalls).toBe(0);
-  });
 });
-const READ_PROFILE = (domains: readonly string[]): ObservationReadProfile => ({
-  policyRuleId: 'observed-structure-v1', allowStructuralDiscovery: true,
-  readGrants: domains.map(domain => ({ policyRuleId: readGrantId(domain), domain, region: { kind: 'application' as const }, visibleText: { classification: 'permittedBusinessData' as const } })),
-});
-
 /** Wraps the scripted engine CDP with the page-state object the session installs next to it. */
 class FlowCdpFake implements FlowCdp {
   readonly calls: { method: string; params: Record<string, unknown> }[] = [];
@@ -118,7 +84,6 @@ class FlowCdpFake implements FlowCdp {
 interface Rig {
   readonly session: ReturnType<typeof createObservationFlow>;
   readonly cdp: FlowCdpFake;
-  readonly world: FakeWorld;
   readonly navigate: (newDocument?: boolean) => void;
 }
 
@@ -130,18 +95,16 @@ function rig(o: { origin?: string; domains?: readonly string[]; script?: Partial
     backendIds: { e1: 11 }, ...o.script,
   };
   const cdp = new FlowCdpFake(new ScriptedCdp(script));
-  const world = new FakeWorld();
-  world.url = `${origin}/page`;
-  const listeners = new Set<() => void>();
+  const listeners = new Set<() => void>(), documents = new Set<() => void>();
   const host: FlowHost = {
-    inspectBoundElement: world.inspectBoundElement, page: new FakePage(world), newCdp: () => Promise.resolve(o.cdp ?? cdp), onNavigation: listener => { listeners.add(listener); return () => { listeners.delete(listener); }; },
+    page: { url: () => `${origin}/page` }, newCdp: () => Promise.resolve(o.cdp ?? cdp), onNavigation: listener => { listeners.add(listener); return () => { listeners.delete(listener); }; },
+    onDocument: listener => { documents.add(listener); return () => { documents.delete(listener); }; },
     awaitWhitelistedMainFrame: o.whitelistWait ?? (() => Promise.resolve()),
   };
-  const config: ObservationConfig = { sessionId: 'session', scopeHash: SCOPE, allowedDomains: domains, knownSecrets: [], readProfile: READ_PROFILE(domains), ...o.config };
-  return { session: createObservationFlow(host, config, o.engines, world.now), cdp, world, navigate: (newDocument = true) => { if (newDocument) cdp.documentAnswers.push(false); for (const listener of listeners) listener(); } };
+  const config: ObservationConfig = { sessionId: 'session', scopeHash: SCOPE, allowedDomains: domains, knownSecrets: [], ...o.config };
+  return { session: createObservationFlow(host, config, o.engines), cdp, navigate: (newDocument = true) => { if (newDocument) { cdp.documentAnswers.push(false); for (const listener of documents) listener(); } for (const listener of listeners) listener(); } };
 }
 
-const candidate = (extra: Partial<ElementCandidateFacts> = {}): ElementCandidateFacts => ({ tag: 'button', id: null, name: null, type: null, ariaLabel: null, title: null, placeholder: null, testId: 'continue', levels: [], generated: null, ...extra });
 
 afterEach(() => { vi.useRealTimers(); });
 
@@ -163,11 +126,11 @@ describe('observe() and the origin whitelist', () => {
     await expect(r.session.observe()).rejects.toMatchObject({ message: 'SCOPE_DENIED' });
   });
 
-  it('allow-all: observes a page on any host, and a read grant for `*` applies to whatever page the collector is on', async () => {
+  it('allow-all: observes a page on any host', async () => {
     for (const hostname of ['citi.com', 'evilciti.com', 'localhost', 'a.b.example.org']) {
       const r = rig({ origin: `https://${hostname}`, domains: ALL_DOMAINS });
       const exported = await r.session.observe();
-      expect(exported.observation.readRuleId, hostname).toBe(readGrantId('*'));
+      expect(exported.observation.origin, hostname).toBe(`https://${hostname}`);
     }
   });
 });
@@ -183,7 +146,6 @@ describe('what an observation is', () => {
     expect(Object.keys(observation.facts).sort()).toEqual([...shownRefsOf(observation.outline)].sort());
     expect(observation.facts.e1?.role).toBe('textbox');
     expect(observation.facts.e1?.evidenceSegments.length).toBeGreaterThan(0);
-    expect(observation.readRuleId).toBe(readGrantId('example.test'));
     expect(bytes).toBe(Buffer.byteLength(json));
     expect(observation.generation).toBe(1);
     expect((await r.session.observe()).observation.generation).toBe(2);
@@ -287,148 +249,15 @@ describe('the collection deadline', () => {
   });
 });
 
-describe('prepareTarget', () => {
-  const selectScript = (listing: OptionListing | null): Partial<Script> => ({
-    collected: page([n('combobox', { name: 'Color', ref: 'e1' })], { e1: elementFacts('select', { editable: true }) }, { origin: 'https://example.test' }),
-    backendIds: { e1: 11 },
-    candidateFacts: () => candidate({ tag: 'select', testId: 'color' }),
-    options: () => listing,
-  });
-  const select = (literal: string | null) => ({ ref: 'e1', operation: { kind: 'selectOption' as const, valueInputId: 'v' }, authoredLiteral: literal });
-
-  async function observed(script: Partial<Script>, engines?: Parameters<typeof createObservationFlow>[2]) {
-    const r = rig({ script, ...(engines !== undefined ? { engines } : {}) });
-    const { observation } = await r.session.observe();
-    return { r, identity: { documentId: observation.documentId, generation: observation.generation, origin: observation.origin } };
-  }
-
-  it('prepareTarget refuses an absent select literal with OPTION_NOT_PRESENT before any fence', async () => {
-    const { r, identity } = await observed(selectScript({ kind: 'native', labels: ['Red', 'Blue'], values: ['red', 'blue'], tooMany: false }));
-    await expect(r.session.prepareTarget({ ...identity, ...select('Green') } as never)).rejects.toMatchObject({ message: 'OPTION_NOT_PRESENT' });
-    expect(r.world.fenced).toBe(false);
-    expect(r.world.after()).toEqual([]);
-  });
-
-  it('a literal equal to the selected option passes G1', async () => {
-    const { r, identity } = await observed(selectScript({ kind: 'native', labels: ['Red', 'Blue'], values: ['red', 'blue'], tooMany: false }));
-    const resolved = await r.session.prepareTarget({ ...identity, ...select('Red') } as never);
-    expect(resolved.locator).toEqual([{ by: 'testId', value: 'color' }]);
-    expect(resolved.identity).toEqual({ role: 'combobox', name: 'Color' });
-  });
-
-  it('does not treat an unreadable option list as a refusal', async () => {
-    const { r, identity } = await observed(selectScript(null));
-    await expect(r.session.prepareTarget({ ...identity, ...select('Anything') } as never)).resolves.toMatchObject({ tier: 'testId' });
-  });
-
-  it('refuses a stale ref, an unknown ref and a changed generation as TARGET_CHANGED', async () => {
-    const { r, identity } = await observed(selectScript(null));
-    await expect(r.session.prepareTarget({ ...identity, ref: 'e99', operation: { kind: 'click' }, authoredLiteral: null } as never)).rejects.toMatchObject({ message: 'TARGET_CHANGED' });
-    await expect(r.session.prepareTarget({ ...identity, generation: identity.generation + 1, ref: 'e1', operation: { kind: 'click' }, authoredLiteral: null } as never)).rejects.toMatchObject({ message: 'TARGET_CHANGED' });
-    r.navigate();
-    await expect(r.session.prepareTarget({ ...identity, ref: 'e1', operation: { kind: 'click' }, authoredLiteral: null } as never)).rejects.toMatchObject({ message: 'TARGET_CHANGED' });
-  });
-
-  it('refuses a ref the synthesis cannot give a verified locator for as NO_DURABLE_LOCATOR', async () => {
-    const { r, identity } = await observed({ ...selectScript(null), check: (_ref, selectors) => selectors.map(() => ({ count: 2, index: 0 })) });
-    await expect(r.session.prepareTarget({ ...identity, ref: 'e1', operation: { kind: 'click' }, authoredLiteral: null } as never)).rejects.toMatchObject({ message: 'NO_DURABLE_LOCATOR' });
-  });
-
-  it('refuses a read the profile does not allow as READ_NOT_ALLOWED', async () => {
-    const { r, identity } = await observed(selectScript(null));
-    const operation = { kind: 'read' as const, bindingId: 'b', recipe: { kind: 'visibleText' as const, classification: 'permittedBusinessData' as const, policyRuleId: 'some-other-rule' } };
-    await expect(r.session.prepareTarget({ ...identity, ref: 'e1', operation, authoredLiteral: null } as never)).rejects.toMatchObject({ message: 'READ_NOT_ALLOWED' });
-  });
-
-  it('a prepareTarget that never finishes ends NO_DURABLE_LOCATOR', async () => {
-    const hung = vi.fn(() => new Promise<never>(() => undefined));
-    const { r, identity } = await observed(selectScript(null), { synthesize: hung });
-    vi.useFakeTimers();
-    const outcome = r.session.prepareTarget({ ...identity, ref: 'e1', operation: { kind: 'click' }, authoredLiteral: null } as never).then(() => 'resolved', (error: unknown) => (error as Error).message);
-    await vi.advanceTimersByTimeAsync(8_001);
-    await expect(outcome).resolves.toBe('NO_DURABLE_LOCATOR');
-    expect(hung).toHaveBeenCalledOnce();
-  });
-});
-
-describe('invoke at learn', () => {
-  it('acts only on a target prepared in the same observation and on the node bound at prepare', async () => {
-    const ids = vi.fn(() => Promise.resolve([11]));
-    const r = rig({ script: { candidateFacts: () => candidate() }, engines: { backendIdsForSelector: ids } });
-    const { observation } = await r.session.observe();
-    const resolved = await r.session.prepareTarget({ ref: 'e1', documentId: observation.documentId, generation: observation.generation, origin: observation.origin, operation: { kind: 'click' }, authoredLiteral: null } as never);
-    const request = { resolved, operation: { kind: 'click' as const }, resolvedValue: null, origin: observation.origin, maxValueBytes: 1024, readRuleId: null, profile: 'learn' as const, expect: { documentId: observation.documentId, generation: observation.generation } };
-    // the node was replaced after prepare: refused before any fence
-    ids.mockResolvedValueOnce([99]);
-    await expect(r.session.invoke(request, r.world.control())).rejects.toMatchObject({ message: 'TARGET_CHANGED' });
-    expect(r.world.fenced).toBe(false);
-    // a target that was never prepared is refused
-    await expect(r.session.invoke({ ...request, resolved: { ...resolved, locator: [{ by: 'testId', value: 'other' }] } }, r.world.control())).rejects.toMatchObject({ message: 'TARGET_CHANGED' });
-    // the bound node and the prepared target: one fenced click
-    await r.session.invoke(request, r.world.control());
-    expect(r.world.fenced).toBe(true);
-    expect(r.world.after().some(call => call.method === 'click')).toBe(true);
-  });
-
-  it('refuses after a newer observation replaced the one the target was prepared in', async () => {
-    const r = rig({ script: { candidateFacts: () => candidate() }, engines: { backendIdsForSelector: () => Promise.resolve([11]) } });
-    const first = (await r.session.observe()).observation;
-    const resolved = await r.session.prepareTarget({ ref: 'e1', documentId: first.documentId, generation: first.generation, origin: first.origin, operation: { kind: 'click' }, authoredLiteral: null } as never);
-    await r.session.observe();
-    await expect(r.session.invoke({ resolved, operation: { kind: 'click' }, resolvedValue: null, origin: first.origin, maxValueBytes: 1024, readRuleId: null, profile: 'learn', expect: { documentId: first.documentId, generation: first.generation } }, r.world.control())).rejects.toMatchObject({ message: 'TARGET_CHANGED' });
-  });
-});
-
-describe('resolveTarget and refForTarget (replay and prefix)', () => {
-  const target = { locator: [{ by: 'testId' as const, value: 'continue' }], tier: 'testId' as const, identity: { role: 'button', name: 'Continue' } };
-
-  it('matches a frozen target restored from JSONB with reordered object properties', async () => {
-    const r = rig({ engines: { backendIdsForSelector: vi.fn(() => Promise.resolve([11])) } });
-    await r.session.observe();
-    const restored = { identity: { name: 'Continue', role: 'button' }, tier: 'testId', locator: [{ value: 'continue', by: 'testId' }] };
-    expect(await r.session.refForTarget(restored as never)).toBe('e1');
-  });
-
-  it('reports READY, ABSENT and a duplicate match without observing', async () => {
-    const r = rig();
-    expect(await r.session.resolveTarget({ resolved: target, origin: 'https://example.test', operation: { kind: 'click' }, readRuleId: null } as never)).toEqual({ kind: 'READY' });
-    r.world.b.count = 0;
-    expect(await r.session.resolveTarget({ resolved: target, origin: 'https://example.test', operation: { kind: 'click' }, readRuleId: null } as never)).toEqual({ kind: 'ABSENT' });
-    r.world.b.count = 2;
-    expect(await r.session.resolveTarget({ resolved: target, origin: 'https://example.test', operation: { kind: 'click' }, readRuleId: null } as never)).toEqual({ kind: 'REFUSED', code: 'TARGET_DRIFT' });
-  });
-
-  it('refuses a read whose learned grant is not the one the live profile gives the page', async () => {
-    const r = rig();
-    const operation = { kind: 'read' as const, bindingId: 'b', recipe: { kind: 'visibleText' as const, classification: 'permittedBusinessData' as const, policyRuleId: 'x' } };
-    expect(await r.session.resolveTarget({ resolved: target, origin: 'https://example.test', operation, readRuleId: 'x' } as never)).toEqual({ kind: 'REFUSED', code: 'READ_REFUSED' });
-    expect(await r.session.resolveTarget({ resolved: target, origin: 'https://example.test', operation, readRuleId: readGrantId('example.test') } as never)).toEqual({ kind: 'READY' });
-  });
-
-  it('names the ref of the held observation that holds the frozen target, null when none does, and refuses several matches', async () => {
-    const ids = vi.fn(() => Promise.resolve([11]));
-    const r = rig({ engines: { backendIdsForSelector: ids } });
-    expect(await r.session.refForTarget(target as never)).toBeNull(); // nothing held yet
-    await r.session.observe();
-    expect(await r.session.refForTarget(target as never)).toBe('e1');
-    ids.mockResolvedValueOnce([]);
-    expect(await r.session.refForTarget(target as never)).toBeNull();
-    ids.mockResolvedValueOnce([77]);
-    expect(await r.session.refForTarget(target as never)).toBeNull(); // present but not shown in the held outline: WAIT
-    ids.mockResolvedValueOnce([11, 12]);
-    await expect(r.session.refForTarget(target as never)).rejects.toMatchObject({ message: 'TARGET_CHANGED' });
-  });
-});
-
 describe('document identity is distinct from navigation and observation generation', () => {
-  it('a same-document navigation preserves identity and advances generation while refusing old preparations', async () => {
+  it('a same-document navigation preserves identity and advances generation while the old stamp is no longer current', async () => {
     const r = rig();
     const first = (await r.session.observe()).observation;
     r.navigate(false);
     const next = (await r.session.observe()).observation;
     expect(next.documentId).toBe(first.documentId);
     expect(next.generation).toBeGreaterThan(first.generation);
-    await expect(r.session.prepareTarget({ documentId: first.documentId, generation: first.generation, origin: first.origin, ref: 'e1', operation: { kind: 'click' }, authoredLiteral: null } as never)).rejects.toMatchObject({ code: 'TARGET_CHANGED' });
+    expect(r.session.documentCurrent({ documentId: first.documentId, generation: first.generation }, first.origin)).toBe(false);
   });
 
   it.each([false, new Error('Protocol error: Could not find object with given id')])('a replaced root or lost old private context starts a new identity', async (answer) => {
@@ -470,6 +299,83 @@ describe('document identity is distinct from navigation and observation generati
   });
 });
 
+describe('a navigation that commits during the observation (SC008-FIX-19)', () => {
+  type Perceive = FlowEngine['perceive'];
+  /** An engine whose first `failures` perceptions navigate the page and then fail with `message`; the rest are the real one. */
+  function navigating(failures: number, message: string, calls: { n: number }, hook: () => void): Perceive {
+    return options => {
+      calls.n++;
+      if (calls.n <= failures) { hook(); return Promise.reject(new Error(message)); }
+      return perceive(options);
+    };
+  }
+  const withNavigation = (failures: number, message: string, extra: Partial<Parameters<typeof rig>[0]> = {}): { r: Rig; calls: { n: number } } => {
+    const calls = { n: 0 };
+    const holder: { r?: Rig } = {};
+    const r = rig({ ...extra, engines: { perceive: navigating(failures, message, calls, () => { holder.r?.navigate(false); }) } });
+    holder.r = r;
+    return { r, calls };
+  };
+
+  it.each(['STALE_OBSERVATION', 'PERCEPTION_UNAVAILABLE'])('observes once more after %s when the page navigated during the attempt, and the second attempt is the document', async message => {
+    const waits = { n: 0 };
+    const { r, calls } = withNavigation(1, message, { whitelistWait: () => { waits.n++; return Promise.resolve(); } });
+    const exported = await r.session.observe();
+    expect(calls.n).toBe(2);
+    expect(waits.n).toBe(2); // the whitelist wait is repeated before the retry
+    expect(exported.observation.generation).toBe(1); // the failed attempt consumed no generation
+    expect(exported.observation.outline).toContain('Continue');
+    await r.session.dispose();
+  });
+
+  it('does not retry when nothing navigated, and an ordinary failure is not retried either', async () => {
+    const calls = { n: 0 };
+    const quiet = rig({ engines: { perceive: navigating(1, 'STALE_OBSERVATION', calls, () => undefined) } });
+    await expect(quiet.session.observe()).rejects.toMatchObject({ code: 'STALE_OBSERVATION' });
+    expect(calls.n).toBe(1);
+  });
+
+  it('retries when the protocol says the document went away, even though the navigation event has not arrived yet', async () => {
+    const calls = { n: 0 };
+    const r = rig({ engines: { perceive: options => (++calls.n === 1 ? Promise.reject(new Error('cdpSession.send: Protocol error (Runtime.callFunctionOn): Inspected target navigated or closed')) : perceive(options)) } });
+    await expect(r.session.observe()).resolves.toMatchObject({ observation: { generation: 1 } });
+    expect(calls.n).toBe(2);
+  });
+
+  it.each(['SCOPE_DENIED', 'BUDGET_EXCEEDED', 'CONTEXT_LOST', 'INVALID_UNICODE'])('does not retry %s even after a navigation', async message => {
+    const { r, calls } = withNavigation(1, message);
+    await expect(r.session.observe()).rejects.toMatchObject({ code: message });
+    expect(calls.n).toBe(1);
+  });
+
+  it('continuous navigation ends after the one retry with the ORIGINAL code, long before the deadline', async () => {
+    const { r, calls } = withNavigation(10, 'STALE_OBSERVATION');
+    const started = Date.now();
+    await expect(r.session.observe()).rejects.toMatchObject({ code: 'STALE_OBSERVATION' });
+    expect(calls.n).toBe(2);
+    expect(Date.now() - started).toBeLessThan(2_000);
+  });
+
+  it('a navigation to a host that is off the list is ORIGIN_NOT_ALLOWED on the retry, not SCOPE_DENIED', async () => {
+    let waits = 0;
+    const { r, calls } = withNavigation(1, 'STALE_OBSERVATION', { whitelistWait: () => (++waits === 2 ? Promise.reject(new OriginNotAllowed('login.elsewhere.test')) : Promise.resolve()) });
+    await expect(r.session.observe()).rejects.toBeInstanceOf(OriginNotAllowed);
+    expect(calls.n).toBe(1);
+  });
+
+  it('the retry is inside the deadline: a second attempt that never answers ends OBSERVATION_DEADLINE', async () => {
+    vi.useFakeTimers();
+    const calls = { n: 0 };
+    const holder: { r?: Rig } = {};
+    const r = rig({ config: { limits: { milliseconds: 500 } }, engines: { perceive: () => { if (++calls.n === 1) { holder.r?.navigate(false); return Promise.reject(new Error('STALE_OBSERVATION')); } return new Promise(() => undefined); } } });
+    holder.r = r;
+    const outcome = r.session.observe().then(() => 'published', (error: unknown) => (error as ClosedActionError).code);
+    await vi.advanceTimersByTimeAsync(501);
+    expect(await outcome).toBe('OBSERVATION_DEADLINE');
+    expect(calls.n).toBe(2);
+  });
+});
+
 describe('observation contract details found in the first real runs', () => {
   it('waits for a page that is off the list before, not inside, the collection deadline, and keeps ORIGIN_NOT_ALLOWED as itself', async () => {
     vi.useFakeTimers();
@@ -490,21 +396,6 @@ describe('observation contract details found in the first real runs', () => {
     expect(observation.facts).toEqual({});
     expect(bytes).toBeGreaterThan(0);
   });
-
-  it('measures a replay invoke on the control clock, not by subtracting Date.now from a run-clock deadline', async () => {
-    const r = rig({ script: { candidateFacts: () => candidate() } });
-    const target = { locator: [{ by: 'testId' as const, value: 'continue' }], tier: 'testId' as const, identity: { role: 'button', name: 'Continue' } };
-    const control = { ...r.world.control(), deadlineMs: 5, remainingMs: () => 12_000 }; // run clock: five milliseconds after recording started
-    await r.session.invoke({ resolved: target, operation: { kind: 'click' }, resolvedValue: null, origin: 'https://example.test', maxValueBytes: 1024, readRuleId: null, profile: 'replay' }, control);
-    expect(r.world.after().some(call => call.method === 'click')).toBe(true);
-    expect(Math.max(...r.world.timeouts())).toBeGreaterThan(1);
-    // A spent control cannot fence a new bound action; any preflight timeout keeps the 1 ms floor.
-    const spent = { ...r.world.control(), remainingMs: () => 0 };
-    const again = rig({ script: { candidateFacts: () => candidate() } });
-    await expect(again.session.invoke({ resolved: target, operation: { kind: 'click' }, resolvedValue: null, origin: 'https://example.test', maxValueBytes: 1024, readRuleId: null, profile: 'replay' }, spent)).rejects.toMatchObject({ code: 'TARGET_CHANGED' });
-    expect(again.world.fenced).toBe(false); expect(again.world.effectedIds).toEqual([]);
-    expect(Math.max(...again.world.timeouts())).toBe(1);
-  });
 });
 
 describe('trusted observation policy and canonical export', () => {
@@ -517,17 +408,6 @@ describe('trusted observation policy and canonical export', () => {
     expect(() => observationOptions({ ...base, scopeHash: 'x' })).toThrow('INVALID_CONTRACT');
     expect(() => observationOptions({ ...base, allowedDomains: ['Example.com'] })).toThrow('INVALID_CONTRACT');
     expect(() => observationOptions({ ...base, knownSecrets: Array.from({ length: 65 }, (_, index) => `s${String(index)}`) })).toThrow('INVALID_CONTRACT');
-  });
-
-  it('rejects malformed or excessively broad trusted read grants before a session exists', () => {
-    const grant = (over: Record<string, unknown> = {}) => ({ policyRuleId: 'g', domain: 'example.test', region: { kind: 'application' }, visibleText: { classification: 'permittedBusinessData' }, ...over });
-    const profile = (grants: unknown[]) => ({ policyRuleId: 'p', allowStructuralDiscovery: true, readGrants: grants }) as unknown as ObservationReadProfile;
-    expect(() => observationOptions({ ...base, readProfile: profile([grant()]) })).not.toThrow();
-    for (const bad of [grant({ domain: 'other.test' }), grant({ region: { kind: 'role', role: 'main', name: 'x', exact: true } }), grant({ controlValue: { classification: 'nonsecretApproved', types: ['text'] } }), grant({ visibleText: undefined }), grant({ extra: 1 })]) {
-      expect(() => observationOptions({ ...base, readProfile: profile([bad]) })).toThrow('INVALID_CONTRACT');
-    }
-    expect(() => observationOptions({ ...base, readProfile: profile([grant(), grant()]) })).toThrow('INVALID_CONTRACT');
-    expect(() => observationOptions({ ...base, readProfile: profile(Array.from({ length: 33 }, (_, index) => grant({ policyRuleId: `g${String(index)}` }))) })).toThrow('INVALID_CONTRACT');
   });
 
   it('exports immutable canonical bytes and hashes compatible with the frozen corpus', () => {
@@ -581,58 +461,30 @@ describe('trusted observation policy and canonical export', () => {
   });
 });
 
-it('captured binding freezes held document generation origin and navigation across every await', async () => {
-  for (const method of ['elementHandle', 'inspectBoundElement']) for (const at of [1, 2]) for (const mutation of ['navigation', 'origin', 'dispose', 'held']) {
-    const r = rig({ script: { candidateFacts: () => candidate() }, engines: { backendIdsForSelector: () => Promise.resolve([11]) } });
-    const observation = (await r.session.observe()).observation;
-    const resolved = await r.session.prepareTarget({ ref: 'e1', documentId: observation.documentId, generation: observation.generation, origin: observation.origin, operation: { kind: 'click' }, authoredLiteral: null });
-    let calls = 0; let mutationDone: Promise<unknown> | undefined;
-    r.world.hooks[method] = () => {
-      if (++calls !== at) return;
-      if (mutation === 'navigation') r.navigate();
-      else if (mutation === 'origin') r.world.url = 'https://different.test/page';
-      else if (mutation === 'dispose') mutationDone = r.session.dispose();
-      else mutationDone = r.session.observe();
-    };
-    await expect(r.session.invoke({ resolved, operation: { kind: 'click' }, resolvedValue: null, origin: observation.origin, maxValueBytes: 1024, readRuleId: null, profile: 'learn', expect: { documentId: observation.documentId, generation: observation.generation } }, r.world.control())).rejects.toBeDefined();
-    expect(r.world.fenced).toBe(false); expect(r.world.effectedIds).toEqual([]);
-    await mutationDone?.catch(() => undefined); await r.session.dispose();
-  }
-});
-
-it('combined committed physical predecessor survives only authenticated same-context sync', async () => {
-  const ids = vi.fn(() => Promise.resolve([11]));
-  const r = rig({ script: { candidateFacts: () => candidate() }, engines: { backendIdsForSelector: ids } });
-  const first = (await r.session.observe()).observation;
-  const identity = { admissionId: 'successful-predecessor', requestDigest: 'a'.repeat(64), operationHash: 'b'.repeat(64), coordinate: { stepId: 'fill', ordinal: 0 }, authority: 'same-authenticated-context' };
-  const inherited = { kind: 'same-element-press' as const, predecessorAdmissionId: identity.admissionId, predecessorRequestDigest: identity.requestDigest, predecessorOperationHash: identity.operationHash, predecessorCoordinate: identity.coordinate, documentId: first.documentId };
-  const prepare = (o: typeof first, press = false) => r.session.prepareTarget({ ref: 'e1', documentId: o.documentId, generation: o.generation, origin: o.origin, operation: press ? { kind: 'press', key: 'Enter' } : { kind: 'click' }, authoredLiteral: null, ...(press ? { pressInheritance: inherited, continuityAuthority: identity.authority } : {}) });
-  const resolved = await prepare(first);
-  await r.session.invoke({ resolved, operation: { kind: 'click' }, resolvedValue: null, origin: first.origin, maxValueBytes: 1024, readRuleId: null, profile: 'learn', expect: first, invocationIdentity: identity }, r.world.control());
-  // No callback, no committed predecessor authority, even though the native click succeeded.
-  await expect(prepare(first, true)).rejects.toMatchObject({ code: 'TARGET_CHANGED' });
-  r.session.commitInvocation?.(identity);
-  const second = (await r.session.observe()).observation;
-  const press = await prepare(second, true);
-  expect(press.identity).toEqual(resolved.identity);
-  // A same-label replacement after preparation cannot inherit or reach Enter.
-  ids.mockResolvedValueOnce([99]); r.world.fenced = false; r.world.log.length = 0;
-  await expect(r.session.invoke({ resolved: press, operation: { kind: 'press', key: 'Enter' }, resolvedValue: null, origin: second.origin, maxValueBytes: 1024, readRuleId: null, profile: 'learn', expect: second, invocationIdentity: { ...identity, admissionId: 'press', coordinate: { stepId: 'press', ordinal: 0 } }, pressInheritance: inherited }, r.world.control())).rejects.toMatchObject({ code: 'TARGET_CHANGED' });
-  expect(r.world.fenced).toBe(false); expect(r.world.log.some(call => call.method === 'press')).toBe(false);
-  await expect(prepare(second, true)).rejects.toMatchObject({ code: 'TARGET_CHANGED' });
-  await r.session.dispose();
-});
-
-it('combined read scope retains exact original observation preparation lineage', async () => {
-  const checkPublicSources = vi.fn(() => Promise.resolve(true));
-  const collected = page([n('heading', { name: 'Release', ref: 'e2' }), n('button', { name: 'Continue', ref: 'e1' })], { e2: elementFacts('h2'), e1: elementFacts('button', { scopeRefs: ['e2'] }) });
-  const r = rig({ script: { collected, backendIds: { e1: 11, e2: 12 }, candidateFacts: () => candidate() }, engines: { checkPublicSources, backendIdsForSelector: () => Promise.resolve([11]) } });
-  const original = (await r.session.observe()).observation;
-  expect(original.facts.e1?.scopeRefs).toEqual(['e2']);
-  const resolved = await r.session.prepareTarget({ ref: 'e1', documentId: original.documentId, generation: original.generation, origin: original.origin, operation: { kind: 'click' }, authoredLiteral: null });
-  expect(checkPublicSources).toHaveBeenCalledWith(expect.anything(), { ref: 'e1', sources: [{ ref: 'e2', name: 'Release', role: 'heading', mode: 'scope' }] }, []);
-  checkPublicSources.mockResolvedValue(false); r.world.log.length = 0;
-  await expect(r.session.invoke({ resolved, operation: { kind: 'click' }, resolvedValue: null, origin: original.origin, maxValueBytes: 1024, readRuleId: null, profile: 'learn', expect: original }, r.world.control())).rejects.toMatchObject({ code: 'TARGET_CHANGED' });
-  expect(r.world.fenced).toBe(false); expect(r.world.log.some(c => c.method === 'click')).toBe(false);
-  await r.session.dispose();
+describe('what a step leaves behind on the session (ADR-SC-008)', () => {
+  it('documentCurrent needs the same document, generation and origin; a new document counts in documentEpoch and ends currency; invalidate() ends it too, and the next observation is a higher generation', async () => {
+    const r = rig();
+    const first = (await r.session.observe()).observation;
+    const stamp = { documentId: first.documentId, generation: first.generation };
+    expect(r.session.documentCurrent(stamp, first.origin)).toBe(true);
+    expect(r.session.documentCurrent(stamp, 'https://other.example.test')).toBe(false);
+    expect(r.session.documentCurrent({ ...stamp, documentId: 'another' }, first.origin)).toBe(false);
+    expect(r.session.documentCurrent({ ...stamp, generation: first.generation + 1 }, first.origin)).toBe(false);
+    const epoch = r.session.documentEpoch();
+    r.navigate(true);
+    expect(r.session.documentEpoch()).toBe(epoch + 1);
+    expect(r.session.documentCurrent(stamp, first.origin)).toBe(false);
+    const second = (await r.session.observe()).observation;
+    expect(second.generation).toBeGreaterThan(first.generation);
+    r.session.invalidate();
+    expect(r.session.documentCurrent({ documentId: second.documentId, generation: second.generation }, second.origin)).toBe(false);
+    expect((await r.session.observe()).observation.generation).toBeGreaterThan(second.generation);
+  });
+  it('commitCapture masks a value a step captured in every later observation', async () => {
+    const value = 'Captured business value 4242';
+    const r = rig({ script: { collected: page([n('button', { name: 'Open', ref: 'e1' }, value)], { e1: elementFacts('button') }, { origin: 'https://example.test' }) } });
+    r.session.commitCapture(value);
+    const exported = await r.session.observe();
+    expect(JSON.stringify(exported.observation)).not.toContain(value);
+  });
 });

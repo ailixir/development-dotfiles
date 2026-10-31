@@ -3,7 +3,7 @@ import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 import {chromium} from 'playwright';
 import * as promises from 'node:fs/promises';
 import type * as PromiseFs from 'node:fs/promises';
-import {basename,dirname,join,resolve} from 'node:path';
+import {basename,dirname,join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {afterEach,expect,it,vi} from 'vitest';
 import corpusJson from '../../../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json' with {type:'json'};
@@ -15,6 +15,7 @@ import {GuidedLaunchFailure} from '../../src/run/guidedBrowser.js';
 import {readProcessTableWithArgs} from '../../src/run/tree.js';
 import type {GuidedBrowser} from '../../src/run/guidedBrowser.js';
 import {ProfileSafetyFixture,probeOwnedProfilePid,performLiveProfileRedirect} from '../helpers/profileSafetyFixture.js';
+import {evidencePath} from '../helpers/evidenceOut.js';
 // Typed view of the static JSON import: the file exceeds tsserver's 4 MiB non-TS limit, so ESLint's projectService types it as `error`.
 const corpus=corpusJson as unknown as PublicationDocument;
 const fault=vi.hoisted(()=>({unsafePreparation:false}));
@@ -66,8 +67,10 @@ it('a failed launch after context acquisition takes the hard teardown: no contex
  }finally{await promises.rm(root,{recursive:true,force:true});}
 });
 it('refuses a Default directory redirected after actual launch rather than accepting its newly canonical outside path',async()=>{
- const root=await promises.mkdtemp(join(tmpdir(),'guided-default-escape-'));vi.stubEnv('TMPDIR',root);const real=chromium.launchPersistentContext.bind(chromium);
- const evidenceRoot=resolve('../docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/native-runs');await promises.mkdir(evidenceRoot,{recursive:true});const evidence=await promises.mkdtemp(join(evidenceRoot,'redirect-'));
+ const root=await promises.mkdtemp(join(tmpdir(),'guided-default-escape-'));
+ // The evidence directory must be created before TMPDIR is stubbed: evidencePath() resolves under os.tmpdir(), and the fixture removes `root` before it persists its diagnostics.
+ const evidenceRoot=evidencePath('STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/profile-safety-fixture/native-runs');await promises.mkdir(evidenceRoot,{recursive:true});const evidence=await promises.mkdtemp(join(evidenceRoot,'redirect-'));
+ vi.stubEnv('TMPDIR',root);const real=chromium.launchPersistentContext.bind(chromium);
  const outside=join(root,'outside-default'),canary=join(outside,'fixture-canary'),canaryBytes=Buffer.from('profile-fixture-owned-canary');
  let profile:string|undefined,defaultIdentity:{dev:number;ino:number;uid:number}|undefined,canaryIdentity:{dev:number;ino:number}|undefined;
  const attackFacts={defaultRecreations:0,renamed:false,canaryCreated:false,symlinkInstalled:false,liveBefore:false,liveAfter:false,expectedRefusal:false,canaryUnchanged:false,outsideIdentityUnchanged:false};

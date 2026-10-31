@@ -173,6 +173,41 @@ export const SANDBOX_FLAG_SYNTAX = [
 
 const restrictedImport = (name, message) => ({ name, message });
 
+/** Syntax bans that hold in every file, `src/run/stepCode.ts` included. */
+const BASE_SYNTAX = [
+  {
+    selector: 'NewExpression[callee.name="Function"]',
+    message: 'The Function constructor turns strings into code (architecture §4.5).',
+  },
+  {
+    selector: 'CallExpression[callee.name="Function"]',
+    message: 'The Function constructor turns strings into code (architecture §4.5).',
+  },
+  {
+    selector: 'ImportExpression',
+    message:
+      'Dynamic import() is forbidden in package sources; artifact content must never reach a module loader (architecture §4.5).',
+  },
+  ...SANDBOX_FLAG_SYNTAX,
+];
+
+const ASYNC_FUNCTION_MESSAGE =
+  'The async function constructor turns strings into code. Exactly one file may use it: src/run/stepCode.ts (ADR-SC-008 D3.1).';
+
+/** The step-code construct. Banned everywhere except the one module that runs frozen step code. */
+export const ASYNC_FUNCTION_SYNTAX = [
+  { selector: 'NewExpression[callee.name="AsyncFunction"]', message: ASYNC_FUNCTION_MESSAGE },
+  { selector: 'CallExpression[callee.name="AsyncFunction"]', message: ASYNC_FUNCTION_MESSAGE },
+  {
+    selector: 'MemberExpression[property.name="constructor"][object.callee.property.name="getPrototypeOf"]',
+    message: ASYNC_FUNCTION_MESSAGE,
+  },
+  {
+    selector: 'MemberExpression[property.name="constructor"][object.expression.callee.property.name="getPrototypeOf"]',
+    message: ASYNC_FUNCTION_MESSAGE,
+  },
+];
+
 /** Rules that apply to every linted file in the package. */
 export const executionBoundaryRules = {
   'no-eval': 'error',
@@ -186,23 +221,7 @@ export const executionBoundaryRules = {
       message: 'Indirect eval is forbidden (architecture §4.5).',
     },
   ],
-  'no-restricted-syntax': [
-    'error',
-    {
-      selector: 'NewExpression[callee.name="Function"]',
-      message: 'The Function constructor turns strings into code (architecture §4.5).',
-    },
-    {
-      selector: 'CallExpression[callee.name="Function"]',
-      message: 'The Function constructor turns strings into code (architecture §4.5).',
-    },
-    {
-      selector: 'ImportExpression',
-      message:
-        'Dynamic import() is forbidden in package sources; artifact content must never reach a module loader (architecture §4.5).',
-    },
-    ...SANDBOX_FLAG_SYNTAX,
-  ],
+  'no-restricted-syntax': ['error', ...BASE_SYNTAX, ...ASYNC_FUNCTION_SYNTAX],
   'no-restricted-imports': [
     'error',
     {
@@ -251,4 +270,13 @@ export const browserModuleRules = {
       paths: FORBIDDEN_MODULES.map((name) => restrictedImport(name, MESSAGE_FOR_MODULE[name])),
     },
   ],
+};
+
+/**
+ * Override applied to `src/run/stepCode.ts` alone: the one module that may construct step code. It keeps every other ban of the
+ * directory, dynamic import() and the Function constructor included, and drops only the async function construct.
+ */
+export const stepCodeModuleRules = {
+  ...runDirectoryRules,
+  'no-restricted-syntax': ['error', ...BASE_SYNTAX],
 };

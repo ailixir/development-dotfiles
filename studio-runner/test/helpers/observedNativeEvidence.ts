@@ -2,7 +2,7 @@ import {constants} from 'node:fs';
 import {copyFile,lstat,mkdir,mkdtemp,readFile,realpath,writeFile} from 'node:fs/promises';
 import {createHash,randomUUID} from 'node:crypto';
 import {basename,extname,isAbsolute,join,relative,resolve,sep} from 'node:path';
-import {fileURLToPath} from 'node:url';
+import {evidenceRoot} from './evidenceOut.js';
 import type {ActionTiming,BridgeRecordingEvidence,Ledger} from '../../src/guided/types.js';
 
 type CaseName='partial-step'|`secret-${'valid'|'bad-origin'|'zero-password'|'two-passwords'|'focus-typeflip'|'oversize-frame'|'stopped-lease'}`;
@@ -10,8 +10,7 @@ type Role='base-guided'|'mixed-guided'|'ordinary-one'|'ordinary-two'|'secret-pre
 type Check='assertions'|'decoder'|'seek';
 type CheckState='NOT_REACHED'|'RUNNING'|'PASSED';
 type HashName='artifactHash'|'learnedPlanHash'|'publicationEvidenceHash'|'rawGraphHash'|'producerHash'|'excludedHash'|'availabilityHash'|'recipeHash'|'originHash';
-const repository=fileURLToPath(new URL('../../../',import.meta.url));
-const exportRoot=join(repository,'docs/qa/evidence/STUDIO-OBS-015/native-fixtures/r1');
+const evidenceBase=evidenceRoot(),exportRoot=join(evidenceBase,'STUDIO-OBS-015/native-fixtures/r1');
 const digest=(bytes:Uint8Array|string):string=>createHash('sha256').update(bytes).digest('hex');
 function requireFact(value:unknown):asserts value {if(!value)throw Error('NATIVE_EVIDENCE_INVALID_FACT');}
 function uuid(value:string):string {requireFact(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/u.test(value));return value;}
@@ -35,8 +34,8 @@ async function confined(root:string,path:string,allowMissing=false):Promise<bool
   requireFact(await realpath(absolute)===join(canonicalRoot,rel));return true;
 }
 async function prepareExportRoot():Promise<void> {
-  let current=repository;
-  for(const part of relative(repository,exportRoot).split(sep)){
+  let current=evidenceBase;
+  for(const part of relative(evidenceBase,exportRoot).split(sep)){
     current=join(current,part);
     try{await mkdir(current);}catch(error){if(!(error instanceof Error&&'code'in error&&error.code==='EEXIST'))throw Error('NATIVE_EVIDENCE_PATH_REFUSED');}
     const info=await lstat(current);requireFact(info.isDirectory()&&!info.isSymbolicLink());
@@ -72,7 +71,7 @@ export class ObservedNativeEvidence {
     this.records.push({role,admissionId:uuid(ledger.admission.admissionId),coordinate:{stepId:uuid(ledger.coordinate.stepId),ordinal:number(ledger.coordinate.ordinal)},state:ledger.state,outcomeCode:ledger.outcomeCode,attemptOrdinal:number(ledger.attemptOrdinal),contextRevision:number(ledger.contextRevision),operationHash:ledger.operationHash,authoredInputsHash:ledger.authoredInputsHash});
   }
   async finish(failed:boolean):Promise<boolean> {
-    await prepareExportRoot();await confined(repository,exportRoot);
+    await prepareExportRoot();await confined(evidenceBase,exportRoot);
     const destination=await mkdtemp(join(exportRoot,this.caseName+'-'));
     const files:unknown[]=[];let cleanupAllowed=!failed;
     const recovery=basename(this.ownedRoot);requireFact(/^(?:partial-prefix-native|secret-prefix-native)-[A-Za-z0-9]{6}$/u.test(recovery));
@@ -94,7 +93,7 @@ export class ObservedNativeEvidence {
         files.push({role:file.role,state:'COPIED_VERIFIED',path:name,byteLength:copied.byteLength,sha256:originalHash,privacy:file.secret?'VERIFIED_MASKED':'NONSECRET_FIXTURE',checks});
       }
       await writeFile(join(destination,'manifest.json'),JSON.stringify({...manifest('VERIFIED_EXPORT'),cleanupAllowed},null,2)+'\n',{flag:'wx'});
-      process.stdout.write('R1_NATIVE_EVIDENCE '+relative(repository,join(destination,'manifest.json'))+'\n');
+      process.stdout.write('R1_NATIVE_EVIDENCE '+relative(evidenceBase,join(destination,'manifest.json'))+'\n');
       return cleanupAllowed;
     }catch{
       // Keep every original on export failure. The marker contains no arbitrary exception data.

@@ -3,13 +3,14 @@ import {execFileSync,spawn} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {constants} from 'node:fs';
 import {copyFile,lstat,mkdir,mkdtemp,readFile,writeFile} from 'node:fs/promises';
-import {join,resolve} from 'node:path';
+import {join} from 'node:path';
 import {classifyNativeBlank,nativeControlMaxRowRuns} from '../helpers/nativeBlankSurface.js';
 import type {BlankSurface} from '../helpers/nativeBlankSurface.js';
+import {evidencePath} from '../helpers/evidenceOut.js';
 const MAX_NATIVE_BYTES=32*1024*1024,MAX_FRAMES=400;
 export async function nativeEvidenceDirectory(label:string):Promise<string>{
  if(!/^[a-z0-9-]+$/u.test(label))throw Error('NATIVE_DIAGNOSTIC_LABEL');
- const root=resolve('../docs/qa/evidence/STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs');await mkdir(root,{recursive:true});return mkdtemp(join(root,label+'-'));
+ const root=evidencePath('STUDIO-OBSERVED-NEXT/strict-qa-20261014/runner-remediation/padding-correction/native-runs');await mkdir(root,{recursive:true});return mkdtemp(join(root,label+'-'));
 }
 export async function nativeJson(directory:string,name:string,body:unknown):Promise<void>{await writeFile(join(directory,name),JSON.stringify(body,null,2)+'\n',{flag:'wx',mode:0o600});}
 export async function archiveNativeVideo(source:string,directory:string,name='selected-app.webm'):Promise<{path:string;bytes:number;sha256:string}>{

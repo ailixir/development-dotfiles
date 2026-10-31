@@ -1,10 +1,12 @@
+import { stepOp } from '../helpers/stepCode.js';
+import { gotoPage } from './helpers/guidedLaunch.js';
 import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 // eslint-disable-next-line no-restricted-imports -- Actual controlled Chromium oracle.
 import type { Page } from 'playwright';
 import { createHash,randomUUID } from 'node:crypto';
 import { afterAll, afterEach, beforeAll, describe, expect, it,vi } from 'vitest';
 import { mkdtemp, mkdir, lstat, readFile, readdir, rm, writeFile,realpath } from 'node:fs/promises';
-import { join, resolve } from 'node:path';
+import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { playwrightBrowserFactory, launchGuidedBrowser } from '../../src/run/browser.js';
 import { prepareBrowserProfile } from '../../src/run/scratchLayout.js';
@@ -39,7 +41,7 @@ afterEach(async () => { for (const session of sessions.splice(0)) await session.
 afterAll(async () => { await browser.dispose(); await fixture.close(); await rm(scratch, {recursive: true, force: true}); });
 async function observed(path: string) {
   await page.goto(fixture.origin + path);
-  const session = browser.createObservationSession?.({sessionId: 'controlled-login', scopeHash: 'a'.repeat(64), allowedDomains: TEST_DOMAINS, knownSecrets: [], readProfile: {policyRuleId: 'structural', allowStructuralDiscovery: true}});
+  const session = browser.createObservationSession?.({sessionId: 'controlled-login', scopeHash: 'a'.repeat(64), allowedDomains: TEST_DOMAINS, knownSecrets: []});
   if (!session) throw new Error('OBSERVATION_SESSION'); sessions.push(session);
   const observation = (await session.observe()).observation;
   const target: PasswordTarget = {kind: 'passwordControl', documentId: observation.documentId, generation: observation.generation};
@@ -82,7 +84,7 @@ describe('isolated-world password control production boundary', () => {
     if (mode === 'formless-declared-navigation') await page.setContent('<input name="password" type="password">');
     // The whitelist is by host: 'approved-exclusion' lists a host that is not the page's; the alias origin (127.0.0.1) is never on it.
     const domains = mode === 'approved-exclusion' ? ['example.com'] : TEST_DOMAINS;
-    const session = browser.createObservationSession?.({sessionId: 'controlled-origin', scopeHash: 'a'.repeat(64), allowedDomains: domains, knownSecrets: [], readProfile: {policyRuleId: 'structural', allowStructuralDiscovery: true}});
+    const session = browser.createObservationSession?.({sessionId: 'controlled-origin', scopeHash: 'a'.repeat(64), allowedDomains: domains, knownSecrets: []});
     if (!session) throw new Error('OBSERVATION_SESSION'); sessions.push(session);
     if (mode === 'approved-exclusion') {
       // Actual collection refuses before a password observation/target/pin exists: the page's host is not on the whitelist, so after the
@@ -135,8 +137,8 @@ async function scan(directory: string): Promise<string[]> {
 it('scans recorded and guided persistent profiles before close and cleanup', async () => {
   const h = await observed('/login'); await h.session.preparePassword?.(h.target, fixture.origin); await h.session.fillPassword?.(h.target, fixture.origin, [fixture.origin], CANARY); await page.locator('button').click();
   expect(fixture.receipts()[0]?.accepted).toBe(true); expect(await scan(scratch)).toEqual([]);
-  const guided = await launchGuidedBrowser({sessionId: 'guided-profile', scopeHash: 'b'.repeat(64), allowedDomains: TEST_DOMAINS, knownSecrets: [], readProfile: {policyRuleId: 'structural', allowStructuralDiscovery: true}}, 'guided-context', () => undefined);
-  try { await guided.navigateBlank(fixture.origin + '/login'); const o = (await guided.observations.observe()).observation; const target: PasswordTarget = {kind: 'passwordControl', documentId: o.documentId, generation: o.generation}; await guided.observations.preparePassword?.(target, fixture.origin); await guided.observations.fillPassword?.(target, fixture.origin, [fixture.origin], CANARY); if (!guided.scratchDirectory) throw new Error('PROFILE'); const recordedPreferences=browser.preferenceEvidence, guidedPreferences=guided.preferenceEvidence;if(!recordedPreferences||!guidedPreferences)throw new Error('EFFECTIVE_PREFERENCES');const expectedPreferences={credentialsEnableService:false,autofillProfileEnabled:false,autofillCreditCardEnabled:false,restoreOnStartup:5};expect(recordedPreferences.channel).toBe('chromium');expect(guidedPreferences.channel).toBe('chromium');expect(recordedPreferences.effective).toEqual(expectedPreferences);expect(guidedPreferences.effective).toEqual(expectedPreferences);expect(recordedPreferences.activeProfilePath).toBe(await realpath(join(scratch,'browser-profile','Default')));expect(guidedPreferences.activeProfilePath).toBe(await realpath(join(guided.scratchDirectory,'browser-profile','Default')));const verifiedPreferences=[recordedPreferences,guidedPreferences].every(p=>p.effective.credentialsEnableService===false&&p.effective.autofillProfileEnabled===false&&p.effective.autofillCreditCardEnabled===false&&p.effective.restoreOnStartup===5);expect(verifiedPreferences).toBe(true); const reached = (await guided.observations.observe()).observation; const button = Object.entries(reached.facts).find(([, fact]) => fact.role === 'button'); if (!button) throw new Error('SUBMIT'); const resolvedButton = await guided.observations.prepareTarget({ref: button[0], documentId: reached.documentId, generation: reached.generation, origin: reached.origin, operation: {kind: 'click'}, authoredLiteral: null}); await guided.observations.invoke({resolved: resolvedButton, operation: {kind: 'click'}, resolvedValue: null, origin: fixture.origin, maxValueBytes: 4096, readRuleId: null, profile: 'learn', expect: {documentId: reached.documentId, generation: reached.generation}}); expect(fixture.receipts()).toHaveLength(2); expect(fixture.receipts()[1]?.accepted).toBe(true); expect(await scan(guided.scratchDirectory)).toEqual([]); await writeFile(resolve('../docs/qa/evidence/STUDIO-OBS-007/runner-chromium-profile.json'), JSON.stringify({chromiumVersion: page.context().browser()?.version(), observedProfile: join(scratch, 'browser-profile'), guidedProfile: join(guided.scratchDirectory, 'browser-profile'), preCloseCanaryHits: 0, verifiedPreferences, channel:'chromium',effectivePreferences:{recorded:recordedPreferences,guided:guidedPreferences}, preparedPreferencesPath: 'browser-profile/Default/Preferences', effectivePreferenceVerification: 'Four supported keys asserted from actual production startup probe; historical obsolete key remains explicitly superseded', residual: 'Transient Chromium files can rotate while the browser is live; only ENOENT is skipped. Heap strings, browser caches and operator dumps remain operational residuals; video masking is the manual OBS-009 gate.'}, null, 2)+'\n'); }
+  const guided = await launchGuidedBrowser({sessionId: 'guided-profile', scopeHash: 'b'.repeat(64), allowedDomains: TEST_DOMAINS, knownSecrets: []}, 'guided-context', () => undefined);
+  try { await gotoPage(guided, fixture.origin + '/login'); const o = (await guided.observations.observe()).observation; const target: PasswordTarget = {kind: 'passwordControl', documentId: o.documentId, generation: o.generation}; await guided.observations.preparePassword?.(target, fixture.origin); await guided.observations.fillPassword?.(target, fixture.origin, [fixture.origin], CANARY); if (!guided.scratchDirectory) throw new Error('PROFILE'); const recordedPreferences=browser.preferenceEvidence, guidedPreferences=guided.preferenceEvidence;if(!recordedPreferences||!guidedPreferences)throw new Error('EFFECTIVE_PREFERENCES');const expectedPreferences={credentialsEnableService:false,autofillProfileEnabled:false,autofillCreditCardEnabled:false,restoreOnStartup:5};expect(recordedPreferences.channel).toBe('chromium');expect(guidedPreferences.channel).toBe('chromium');expect(recordedPreferences.effective).toEqual(expectedPreferences);expect(guidedPreferences.effective).toEqual(expectedPreferences);expect(recordedPreferences.activeProfilePath).toBe(await realpath(join(scratch,'browser-profile','Default')));expect(guidedPreferences.activeProfilePath).toBe(await realpath(join(guided.scratchDirectory,'browser-profile','Default')));const verifiedPreferences=[recordedPreferences,guidedPreferences].every(p=>p.effective.credentialsEnableService===false&&p.effective.autofillProfileEnabled===false&&p.effective.autofillCreditCardEnabled===false&&p.effective.restoreOnStartup===5);expect(verifiedPreferences).toBe(true); await (present(guided.handle).page as unknown as Page).locator('button').click(); expect(fixture.receipts()).toHaveLength(2); expect(fixture.receipts()[1]?.accepted).toBe(true); expect(await scan(guided.scratchDirectory)).toEqual([]); await writeFile(evidencePath('STUDIO-OBS-007/runner-chromium-profile.json'), JSON.stringify({chromiumVersion: page.context().browser()?.version(), observedProfile: join(scratch, 'browser-profile'), guidedProfile: join(guided.scratchDirectory, 'browser-profile'), preCloseCanaryHits: 0, verifiedPreferences, channel:'chromium',effectivePreferences:{recorded:recordedPreferences,guided:guidedPreferences}, preparedPreferencesPath: 'browser-profile/Default/Preferences', effectivePreferenceVerification: 'Four supported keys asserted from actual production startup probe; historical obsolete key remains explicitly superseded', residual: 'Transient Chromium files can rotate while the browser is live; only ENOENT is skipped. Heap strings, browser caches and operator dumps remain operational residuals; video masking is the manual OBS-009 gate.'}, null, 2)+'\n'); }
   finally { await guided.observations.dispose(); await guided.close(); }
 });
 
@@ -156,50 +158,47 @@ it('measures raw Playwright fill error text before the production redactor', asy
 it.each(['native-guard','injected-released-value'] as const)('measures actual GuidedRuntime %s failure and its diagnostic sinks in Chromium',async mode=>{
   const directory=await mkdtemp(join(tmpdir(),'guided-secret-diagnostics-'));
   const context=guidedContext(fixture.origin);const destination=context.authoredInputs.inputs[0];if(!destination||!('value' in destination))throw new Error('DESTINATION');destination.value=fixture.origin+(mode==='native-guard'?'/trap':'/login');
-  context.authoredInputs.inputs.push({inputId:'input-pass',sourceStepId:'fill',kind:'secretRef',intendedSlot:'fill.value',secretId:'PASS',provenance:{referenceKind:'configuration',configurationRevision:context.configurationRevision,stepId:'fill',referenceId:'reference-pass',referenceName:'PASS',kind:'secretRef',intendedSlot:'fill.value'}});
+  context.authoredInputs.inputs.push({inputId:'input-pass',sourceStepId:'fill',kind:'secretRef',secretId:'PASS',provenance:{referenceKind:'configuration',configurationRevision:context.configurationRevision,stepId:'fill',referenceId:'reference-pass',referenceName:'PASS',kind:'secretRef'}});
   context.authoredInputsHash=hash(context.authoredInputs);
   const messages:{route:string;body:unknown}[]=[],stderr:string[]=[],raw:string[]=[];let nativeGuardClose:CapturedPrivateClose|undefined,validDuplicate:ReturnType<typeof dispatch>|undefined;
   const diagnosticLaunch:typeof launchGuidedBrowser=mode==='native-guard'?async(...args)=>{nativeGuardClose=capturePrivateClose(await launchGuidedBrowser(...args));return nativeGuardClose.browser;}:launchGuidedBrowser;
-  const runtime=new GuidedRuntime(context,{workerId:context.workerId,allowedDomains: TEST_DOMAINS, journalDirectory:directory,launch:diagnosticLaunch,callback:(route,body)=>{messages.push({route,body});return Promise.resolve();},diagnosticStderr:text=>{stderr.push(text);},onRawFailure:error=>{raw.push(error instanceof Error?error.message:'');},...(mode==='injected-released-value'?{beforeSecretFill:(value:string)=>{throw new Error(value+' '+encodeURIComponent(value)+' '+Buffer.from(value).toString('base64')+' '+ '🙂'.repeat(2000));}}:{})});
+  const runtime=new GuidedRuntime(context,{workerId:context.workerId,allowedDomains: TEST_DOMAINS, journalDirectory:directory,launch:diagnosticLaunch,callback:(route,body)=>{messages.push({route,body});return Promise.resolve();},diagnosticStderr:text=>{stderr.push(text);},onRawFailure:error=>{raw.push(error instanceof Error?error.message:'');},...(mode==='injected-released-value'?{beforeSecretFill:(value:string)=>{throw new Error(value+' '+encodeURIComponent(value)+' '+Buffer.from(value).toString('base64')+' '+'🙂'.repeat(2000));}}:{})});
   try{
     await runtime.start();const bootstrap=messages.find(message=>message.route==='bootstrap-evidence')?.body as BridgeBootstrap;
-    const navigation=proposal(context,bootstrap.executionEvidence,'nav',{kind:'navigate',destinationInputId:'input-nav'});
-    const preparation=await runtime.prepare({pressInheritance:null,...identity(context),proposal:navigation,requestDigest:hash(navigation),expiresAt:new Date(Date.now()+10000).toISOString()});await runtime.dispatch(dispatch(context,navigation,preparation));
+    const navigation=proposal(context,bootstrap.executionEvidence,'nav',stepOp('await page.goto(inputs["input-nav"]);', { uses: [{ kind: 'input', id: 'input-nav' }] }));
+    const preparation=await runtime.prepare({...identity(context),proposal:navigation,requestDigest:hash(navigation),expiresAt:new Date(Date.now()+10000).toISOString()});await runtime.dispatch(dispatch(context,navigation,preparation));
     const observation=(messages.filter(message=>message.route==='observations').at(-1)?.body as BridgeObservation).observation;
     const evidence={kind:'observedDocument' as const,sessionId:context.sessionId,contextId:context.contextId,documentId:observation.documentId,generation:observation.generation,origin:fixture.origin,observationHash:hash(observation)};
-    const fill=proposal(context,evidence,'fill',{kind:'fill',value:{kind:'secretRef',sourceInputId:'input-pass'}},{kind:'passwordControl',documentId:observation.documentId,generation:observation.generation});
-    const prepared=await runtime.prepare({pressInheritance:null,...identity(context),proposal:fill,requestDigest:hash(fill),expiresAt:new Date(Date.now()+10000).toISOString()});
-    const request={...dispatch(context,fill,prepared),secret:{secretId:'PASS',value:CANARY,versionId:'oracle-version',allowedOrigins:[fixture.origin]}};
-    if(mode==='native-guard'){validDuplicate=structuredClone(request);expect(()=>validate('bridge',validDuplicate,'dispatch')).not.toThrow();expect(hash(validDuplicate)).toBe(hash(request));}
-    const outcome=await runtime.dispatch(request);expect(outcome.ledger.dispatchCount).toBe(1);expect(outcome.ledger.state).toBe('UNKNOWN_OUTCOME');if(mode==='native-guard'){expect(outcome.ledger.outcomeCode).toBe('TARGET_CHANGED');expect(runtime.accepting).toBe(false);expect(messages.some(m=>(m.body as {kind?:string}).kind==='prefixDrift')).toBe(false);const callbackCount=messages.length,rawFailureCount=raw.length,journalPath=join(directory,hash(context.sessionId)+'.journal'),journalBefore=await readFile(journalPath);try{await expect(runtime.dispatch(present(validDuplicate))).rejects.toThrow('CONTEXT_LOST');}finally{if(validDuplicate)delete validDuplicate.secret;}expect(messages).toHaveLength(callbackCount);expect(raw).toHaveLength(rawFailureCount);expect((await readFile(journalPath)).equals(journalBefore)).toBe(true);expect(validDuplicate?.secret===undefined).toBe(true);assertPrivateClose(nativeGuardClose);expect(present(nativeGuardClose).facts.emptyInputs).toBe(true);}expect(()=>validate('bridge',outcome,'outcome')).not.toThrow();
-    expect(raw).toHaveLength(1);if(mode==='injected-released-value'){expect(raw[0]).toContain(CANARY);expect(outcome.errorMessage).toContain('[REDACTED]');}else{expect(raw[0]).toBe('TARGET_CHANGED');expect(outcome.errorMessage).toContain('TARGET_CHANGED');}
-    expect(request).not.toHaveProperty('secret');expect(Buffer.byteLength(outcome.errorMessage??'')).toBeLessThanOrEqual(2048);expect(stderr).toHaveLength(1);
-    const files=await readdir(directory),diagnostic=files.find(file=>file.endsWith('.diagnostic.jsonl')),journal=files.find(file=>file.endsWith('.journal'));if(!diagnostic||!journal)throw new Error('DIAGNOSTIC_SINKS');
-    const persisted=await readFile(join(directory,diagnostic),'utf8'),authoritative=await readFile(join(directory,journal),'utf8');
-    expect(JSON.parse(persisted.trim())).toEqual({sessionId:context.sessionId,contextId:context.contextId,admissionId:outcome.ledger.admission.admissionId,stepId:'fill',ordinal:0,errorMessage:outcome.errorMessage});
-    const callback=messages.filter(message=>message.route==='outcomes').at(-1)?.body as BridgeOutcome;expect(callback.errorMessage).toBe(outcome.errorMessage);
-    for(const sink of [JSON.stringify(messages),stderr.join(''),persisted,authoritative])for(const value of [CANARY,encodeURIComponent(CANARY),Buffer.from(CANARY).toString('base64')])expect(sink).not.toContain(value);
-    if(mode==='native-guard'){const rows=nativeJournal(authoritative),fences=rows.filter(row=>row.kind==='fence'&&row.event.admissionId===outcome.ledger.admission.admissionId);expect(fences).toEqual([invoking(context,outcome.ledger)]);expect(rows.filter(row=>row.kind==='consumed'&&row.digest===consumption(context,outcome.ledger).digest)).toHaveLength(1);}
-    // No recorder is supplied in this older diagnostic case; the new recorded focus-typeflip
-    // case separately asserts the real null end stamp after the same native fence semantics.
+    const fill=proposal(context,evidence,'fill',stepOp('await page.locator(\'input[type="password"]\').fill(secrets["PASS"]);',{uses:[{kind:'secret',id:'PASS'}]}));
+    const prepared=await runtime.prepare({...identity(context),proposal:fill,requestDigest:hash(fill),expiresAt:new Date(Date.now()+10000).toISOString()});
+    const request={...dispatch(context,fill,prepared),secrets:[{secretId:'PASS',value:CANARY,versionId:'oracle-version',allowedOrigins:[fixture.origin]}]};
+    {validDuplicate=structuredClone(request);expect(()=>validate('bridge',validDuplicate,'dispatch')).not.toThrow();expect(hash(validDuplicate)).toBe(hash(request));}
+    const outcome=await runtime.dispatch(request);expect(outcome.ledger.dispatchCount).toBe(1);expect(outcome.ledger.state).toBe(mode==='native-guard'?'FAILED':'UNKNOWN_OUTCOME');{expect(outcome.ledger.outcomeCode).toBe(mode==='native-guard'?'TARGET_CHANGED':'ACK_LOST');expect(runtime.accepting).toBe(false);expect(messages.some(m=>(m.body as {kind?:string}).kind==='prefixDrift')).toBe(false);const callbackCount=messages.length,rawFailureCount=raw.length,journalPath=join(directory,hash(context.sessionId)+'.journal'),journalBefore=await readFile(journalPath);try{await expect(runtime.dispatch(present(validDuplicate))).rejects.toThrow('CONTEXT_LOST');}finally{delete (validDuplicate as {secrets?:unknown}).secrets;}expect(messages).toHaveLength(callbackCount);expect(raw).toHaveLength(rawFailureCount);expect((await readFile(journalPath)).equals(journalBefore)).toBe(true);expect((validDuplicate as {secrets?:unknown}|undefined)?.secrets===undefined).toBe(true);if(mode==='native-guard'){assertPrivateClose(nativeGuardClose);expect(present(nativeGuardClose).facts.emptyInputs).toBe(true);}}expect(()=>validate('bridge',outcome,'outcome')).not.toThrow();
+    // The injected hook throws the released value (plain, URL-encoded, base64 and a 4 KB tail) from inside the step: it too surfaces only as a closed code.
+    // A step's own failure surfaces only as a closed code: no raw error text reaches the runtime, the callback, stderr or a diagnostic file.
+    expect(raw).toEqual([]);expect(outcome.errorMessage).toBeUndefined();expect(request).not.toHaveProperty('secret');expect(stderr).toEqual([]);
+    const files=await readdir(directory),journal=files.find(file=>file.endsWith('.journal'));if(!journal)throw new Error('DIAGNOSTIC_SINKS');expect(files.filter(file=>file.endsWith('.diagnostic.jsonl'))).toEqual([]);
+    const authoritative=await readFile(join(directory,journal),'utf8');
+    const callback=messages.filter(message=>message.route==='outcomes').at(-1)?.body as BridgeOutcome;expect(callback.errorMessage).toBeUndefined();expect(callback.ledger.outcomeCode).toBe(mode==='native-guard'?'TARGET_CHANGED':'ACK_LOST');
+    for(const sink of [JSON.stringify(messages),stderr.join(''),authoritative])for(const value of [CANARY,encodeURIComponent(CANARY),Buffer.from(CANARY).toString('base64')])expect(sink).not.toContain(value);
+    const rows=nativeJournal(authoritative),fences=rows.filter(row=>row.kind==='fence'&&row.event.admissionId===outcome.ledger.admission.admissionId);expect(fences).toEqual([invoking(context,outcome.ledger)]);expect(rows.filter(row=>row.kind==='consumed'&&row.digest===consumption(context,outcome.ledger).digest)).toHaveLength(1);
     expect(authoritative).not.toContain('errorMessage');expect(fixture.receipts()).toEqual([]);
-    await writeFile(resolve('../docs/qa/evidence/STUDIO-OBS-007/runner-diagnostics-'+mode+'.json'),JSON.stringify({mode,actualChromium:true,productionGuidedRuntime:true,rawContainsReleasedCanary:raw[0]?.includes(CANARY),rawErrorObservedBeforeRedaction:true,diagnosticSinks:['callback.errorMessage','diagnosticJSONL','stderr'],redactionBeforeBounds:true,utf8Bytes:Buffer.byteLength(outcome.errorMessage??''),secretFrameDropped:true,authoritativeJournalUnchanged:true,joinedCorePostgres:false,nativeCanaryRequirement:mode==='native-guard'?'OPEN: native trusted collector refused with a code-only error; separate Playwright readonly probe cannot substitute':'injected-hook proof only'},null,2)+'\n');
-  }finally{if(validDuplicate)delete validDuplicate.secret;await runtime.stop('CANCELLED');await rm(directory,{recursive:true,force:true});}
+  }finally{if(validDuplicate)delete (validDuplicate as {secrets?:unknown}).secrets;await runtime.stop('CANCELLED');await rm(directory,{recursive:true,force:true});}
 });
 
 it('uses structural login signature only; a passing registration assertion remains passing', async () => {
   const h = await observed('/registration'); expect(loginRequiredSignature(h.observation)).toBe(true);
-  expect(await h.session.assertPage?.(h.observation, fixture.origin, 'url', fixture.origin + '/registration')).toBe(true);
+  expect(page.url()).toBe(fixture.origin + '/registration');
 });
 
 it('settles a protected redirect on the reached login document instead of timing out', async () => {
-  const guided=await launchGuidedBrowser({sessionId:'protected-redirect',scopeHash:'d'.repeat(64),allowedDomains: TEST_DOMAINS,knownSecrets:[],readProfile:{policyRuleId:'structural',allowStructuralDiscovery:true}},'redirect-context',()=>undefined);
-  try {await guided.navigateBlank(fixture.origin+'/reports');const reached=(await guided.observations.observe()).observation;expect(reached.coverage.passwordControls).toBe(1);expect(loginRequiredSignature(reached)).toBe(true);expect(await guided.observations.assertPage?.(reached,fixture.origin,'url',fixture.origin+'/login')).toBe(true);}
+  const guided=await launchGuidedBrowser({sessionId:'protected-redirect',scopeHash:'d'.repeat(64),allowedDomains: TEST_DOMAINS,knownSecrets:[]},'redirect-context',()=>undefined);
+  try {await gotoPage(guided, fixture.origin+'/reports');const reached=(await guided.observations.observe()).observation;expect(reached.coverage.passwordControls).toBe(1);expect(loginRequiredSignature(reached)).toBe(true);expect((present(guided.handle).page as unknown as Page).url()).toBe(fixture.origin+'/login');}
   finally {await guided.observations.dispose();await guided.close();}
 });
 
 // These are real adapter/executor oracles, separate from learned/publication/Core proof.
-// Default missing targets retain TIMEOUT; opt-in real wrong-role collisions produce drift.
+// A missing target on a login document is annotated LOGIN_REQUIRED; the annotation never changes the failure into anything else.
 // Neither path injects an adapter refusal or changes production error taxonomy.
 async function runLoginRequiredOracle(mode: 'no-login' | 'wrong-password' | 'registration', collision: boolean): Promise<void> {
   const caseFixture = await startSecretLoginFixture(CANARY, {reportsRoleCollision:collision});
@@ -211,27 +210,27 @@ async function runLoginRequiredOracle(mode: 'no-login' | 'wrong-password' | 'reg
   const stepId = (index: number) => '00000000-0000-4000-8000-' + String(201 + index).padStart(12, '0');
   const wrong = mode === 'wrong-password', registration = mode === 'registration';
   const targetIndex = wrong ? 3 : 1;
-  const inputs: Execute3['inputs'][number][] = [{inputId:'nav', stepId:stepId(0), kind:'destination', intendedSlot:'navigate.destination', value:caseFixture.origin + (registration ? '/registration' : wrong ? '/login' : '/reports')}];
-  const steps: Execute3['steps'][number][] = [{stepIndex:0, stepId:stepId(0), operations:[{coordinate:{stepId:stepId(0), ordinal:0}, guardId:'g0', operation:{kind:'navigate', destinationInputId:'nav'}}]}];
-  const guards: Execute3['guards'][number][] = [{guardId:'g0', origin:null, target:{kind:'initialBlank'}}];
+  const inputs: Execute3['inputs'][number][] = [{inputId:'nav', stepId:stepId(0), kind:'destination', value:caseFixture.origin + (registration ? '/registration' : wrong ? '/login' : '/reports')}];
+  const steps: Execute3['steps'][number][] = [{stepIndex:0, stepId:stepId(0), operations:[{coordinate:{stepId:stepId(0), ordinal:0}, guardId:'g0', operation:stepOp('await page.goto(inputs["nav"]);', { uses: [{ kind: 'input', id: 'nav' }] })}]}];
+  const guards: Execute3['guards'][number][] = [{guardId:'g0', origin:null}];
   if (wrong) {
-    inputs.push({inputId:'pass', stepId:stepId(1), kind:'secretRef', intendedSlot:'fill.value', referenceName:'PASS'});
-    steps.push({stepIndex:1, stepId:stepId(1), operations:[{coordinate:{stepId:stepId(1), ordinal:0}, guardId:'g1', operation:{kind:'fill', value:{kind:'secretRef', sourceInputId:'pass'}}}]}, {stepIndex:2, stepId:stepId(2), operations:[{coordinate:{stepId:stepId(2), ordinal:0}, guardId:'g2', operation:{kind:'click'}}]});
-    guards.push({guardId:'g1', origin:caseFixture.origin, target:{kind:'passwordControl'}}, {guardId:'g2', origin:caseFixture.origin, target:{kind:'element', locator:[{by:'role', role:'button', name:'Sign in', exact:true}], tier:'role', identity:{role:'button', name:'Sign in'}, readRuleId:null}});
+    inputs.push({inputId:'pass', stepId:stepId(1), kind:'secretRef', referenceName:'PASS'});
+    steps.push({stepIndex:1, stepId:stepId(1), operations:[{coordinate:{stepId:stepId(1), ordinal:0}, guardId:'g1', operation:stepOp('await page.locator(\'input[type="password"]\').fill(secrets["PASS"]);', { uses: [{ kind: 'secret', id: 'PASS' }] })}]}, {stepIndex:2, stepId:stepId(2), operations:[{coordinate:{stepId:stepId(2), ordinal:0}, guardId:'g2', operation:stepOp('await page.getByRole("button", { name: "Sign in", exact: true }).click();')}]});
+    guards.push({guardId:'g1', origin:caseFixture.origin}, {guardId:'g2', origin:caseFixture.origin});
   }
   if (registration) {
-    inputs.push({inputId:'registration', stepId:stepId(targetIndex), kind:'nonsecretText', intendedSlot:'assert.expected', value:caseFixture.origin + '/registration'});
-    steps.push({stepIndex:targetIndex, stepId:stepId(targetIndex), operations:[{coordinate:{stepId:stepId(targetIndex), ordinal:0}, guardId:'g1', operation:{kind:'assert', predicate:'url', expected:{kind:'authoredLiteral', sourceInputId:'registration'}}}]});
-    guards.push({guardId:'g1', origin:caseFixture.origin, target:{kind:'page'}});
+    inputs.push({inputId:'registration', stepId:stepId(targetIndex), kind:'nonsecretText', value:caseFixture.origin + '/registration'});
+    steps.push({stepIndex:targetIndex, stepId:stepId(targetIndex), operations:[{coordinate:{stepId:stepId(targetIndex), ordinal:0}, guardId:'g1', operation:stepOp('await expect(page).toHaveURL(inputs["registration"]);', { uses: [{ kind: 'input', id: 'registration' }] })}]});
+    guards.push({guardId:'g1', origin:caseFixture.origin});
   } else {
-    steps.push({stepIndex:targetIndex, stepId:stepId(targetIndex), operations:[{coordinate:{stepId:stepId(targetIndex), ordinal:0}, guardId:'g' + String(targetIndex), operation:{kind:'click'}}]});
-    guards.push({guardId:'g' + String(targetIndex), origin:caseFixture.origin, target:{kind:'element', locator:[{by:'role', role:'link', name:'Reports', exact:true}], tier:'role', identity:{role:'link', name:'Reports'}, readRuleId:null}});
+    steps.push({stepIndex:targetIndex, stepId:stepId(targetIndex), operations:[{coordinate:{stepId:stepId(targetIndex), ordinal:0}, guardId:'g' + String(targetIndex), operation:stepOp('await page.getByRole("link", { name: "Reports", exact: true }).click();')}]});
+    guards.push({guardId:'g' + String(targetIndex), origin:caseFixture.origin});
     const after = targetIndex + 1;
-    inputs.push({inputId:'after', stepId:stepId(after), kind:'nonsecretText', intendedSlot:'assert.expected', value:caseFixture.origin + '/reports'});
-    steps.push({stepIndex:after, stepId:stepId(after), operations:[{coordinate:{stepId:stepId(after), ordinal:0}, guardId:'g' + String(after), operation:{kind:'assert', predicate:'url', expected:{kind:'authoredLiteral', sourceInputId:'after'}}}]});
-    guards.push({guardId:'g' + String(after), origin:caseFixture.origin, target:{kind:'page'}});
+    inputs.push({inputId:'after', stepId:stepId(after), kind:'nonsecretText', value:caseFixture.origin + '/reports'});
+    steps.push({stepIndex:after, stepId:stepId(after), operations:[{coordinate:{stepId:stepId(after), ordinal:0}, guardId:'g' + String(after), operation:stepOp('await expect(page).toHaveURL(inputs["after"]);', { uses: [{ kind: 'input', id: 'after' }] })}]});
+    guards.push({guardId:'g' + String(after), origin:caseFixture.origin});
   }
-  const message: Execute3 = {...publication.execute as Execute3, profileHash:hashObserved(OBSERVED_PROFILE), stepTimeoutMs:collision ? 20000 : 5000, inputs, steps, guards, bindings:[], transfers:[], secrets:wrong ? {PASS:CANARY + '-wrong'} : {}, secretOrigins:wrong ? {PASS:[caseFixture.origin]} : {}};
+  const message: Execute3 = {...publication.execute as Execute3, profileHash:hashObserved(OBSERVED_PROFILE), stepTimeoutMs:5000, inputs, steps, guards, bindings:[], transfers:[], secrets:wrong ? {PASS:CANARY + '-wrong'} : {}, secretOrigins:wrong ? {PASS:[caseFixture.origin]} : {}};
   const started: StepStartedEvent[] = [], finished: StepFinishedEvent[] = [];
   const adapter = createObservedReplayAdapter(handle, scope, TEST_DOMAINS, 'login-required-' + mode, () => undefined);
   try {
@@ -250,15 +249,10 @@ async function runLoginRequiredOracle(mode: 'no-login' | 'wrong-password' | 'reg
       expect(finished.map(event=>event.status)).toEqual(['PASS','PASS']);
     } else {
       expect(adapter.loginRequired?.()).toBe(true);
-      if (collision) {
-        expect(result).toMatchObject({ok:false, errorCode:'LOGIN_REQUIRED', detail:{stepId:stepId(targetIndex), loginStepsPresent:wrong}});
-        expect(finished[targetIndex]).toMatchObject({status:'FAIL', failure:'LOGIN_REQUIRED', detail:{stepId:stepId(targetIndex), loginStepsPresent:wrong}});
-      } else {
-        expect(result).toMatchObject({ok:false, errorCode:'TIMEOUT'});
-        expect(result.detail).toBeUndefined();
-        expect(finished[targetIndex]).toMatchObject({status:'FAIL', failure:'TIMEOUT'});
-        expect(finished[targetIndex]?.detail).toBeUndefined();
-      }
+      // A failed step on a document that carries the structural login signature is annotated LOGIN_REQUIRED whether or not the role
+      // collision fixture is on: the annotation reads the document, not the target.
+      expect(result).toMatchObject({ok:false, errorCode:'LOGIN_REQUIRED', detail:{stepId:stepId(targetIndex), loginStepsPresent:wrong}});
+      expect(finished[targetIndex]).toMatchObject({status:'FAIL', failure:'LOGIN_REQUIRED', detail:{stepId:stepId(targetIndex), loginStepsPresent:wrong}});
       expect(finished[targetIndex + 1]).toMatchObject({status:'SKIPPED', startedAtMs:null, finishedAtMs:null, durationMs:null, failure:null});
       expect(started.map(event=>event.stepIndex)).toEqual(Array.from({length:targetIndex + 1}, (_, index)=>index));
     }
@@ -266,14 +260,11 @@ async function runLoginRequiredOracle(mode: 'no-login' | 'wrong-password' | 'reg
     const profileCanaryHits = await scan(directory); expect(profileCanaryHits).toEqual([]);
     const video = await handle.close(); expect(video).toMatch(/\.webm$/u);
     if (!video) throw new Error('VIDEO'); const native = await readFile(video); expect(native.byteLength).toBeGreaterThan(8);
-    await writeFile(resolve('../docs/qa/evidence/STUDIO-OBS-007/runner-login-collision-candidate/oracle-' + mode + '-' + (collision ? 'collision' : 'default') + '.json'), JSON.stringify({mode, reportsRoleCollision:collision, actualAdapter:true, actualChromium:true, reachedUrl:actualPage.url(), result, started, finished, receiptCount:caseFixture.receipts().length, rejectedReceiptCount:caseFixture.receipts().filter(receipt=>!receipt.accepted).length, profileCanaryHits, nativeVideo:{path:video, bytes:native.byteLength, sha256:createHash('sha256').update(native).digest('hex')}, learnedPublishedCoreProof:false}, null, 2) + '\n');
+    await writeFile(evidencePath('STUDIO-OBS-007/runner-login-collision-candidate/oracle-' + mode + '-' + (collision ? 'collision' : 'default') + '.json'), JSON.stringify({mode, reportsRoleCollision:collision, actualAdapter:true, actualChromium:true, reachedUrl:actualPage.url(), result, started, finished, receiptCount:caseFixture.receipts().length, rejectedReceiptCount:caseFixture.receipts().filter(receipt=>!receipt.accepted).length, profileCanaryHits, nativeVideo:{path:video, bytes:native.byteLength, sha256:createHash('sha256').update(native).digest('hex')}, learnedPublishedCoreProof:false}, null, 2) + '\n');
   } finally {await adapter.dispose(); await handle.dispose(); await caseFixture.close(); await rm(directory, {recursive:true, force:true});}
 }
 
 it.each(['no-login', 'wrong-password', 'registration'] as const)('executes the actual replay LOGIN_REQUIRED oracle: %s', async mode => {
-  await runLoginRequiredOracle(mode, mode !== 'registration');
-});
-it.each(['no-login', 'wrong-password'] as const)('retains actual missing-target TIMEOUT without LOGIN_REQUIRED: %s', async mode => {
   await runLoginRequiredOracle(mode, false);
 });
 
@@ -283,9 +274,9 @@ it.each(['/two-passwords','/no-password'] as const)('replays the published passw
   
   const handle=await playwrightBrowserFactory.launch({allowedDomains: TEST_DOMAINS, browser:'chromium',scratchPath:directory,observedScope:scope,viewport:{width:800,height:600},recording:{width:800,height:600}});
   const navId='00000000-0000-4000-8000-000000000101',passId='00000000-0000-4000-8000-000000000102';
-  const message:Execute3={...publication.execute as Execute3,profileHash:hashObserved(OBSERVED_PROFILE),inputs:[{inputId:'nav',stepId:navId,kind:'destination',intendedSlot:'navigate.destination',value:fixture.origin+path},{inputId:'pass',stepId:passId,kind:'secretRef',intendedSlot:'fill.value',referenceName:'PASS'}],secrets:{PASS:CANARY},secretOrigins:{PASS:[fixture.origin]},bindings:[],transfers:[],steps:[{stepIndex:0,stepId:navId,operations:[{coordinate:{stepId:navId,ordinal:0},guardId:'g0',operation:{kind:'navigate',destinationInputId:'nav'}}]},{stepIndex:1,stepId:passId,operations:[{coordinate:{stepId:passId,ordinal:0},guardId:'g1',operation:{kind:'fill',value:{kind:'secretRef',sourceInputId:'pass'}}}]}],guards:[{guardId:'g0',origin:null,target:{kind:'initialBlank'}},{guardId:'g1',origin:fixture.origin,target:{kind:'passwordControl'}}]};
+  const message:Execute3={...publication.execute as Execute3,profileHash:hashObserved(OBSERVED_PROFILE),inputs:[{inputId:'nav',stepId:navId,kind:'destination',value:fixture.origin+path},{inputId:'pass',stepId:passId,kind:'secretRef',referenceName:'PASS'}],secrets:{PASS:CANARY},secretOrigins:{PASS:[fixture.origin]},bindings:[],transfers:[],steps:[{stepIndex:0,stepId:navId,operations:[{coordinate:{stepId:navId,ordinal:0},guardId:'g0',operation:stepOp('await page.goto(inputs["nav"]);', { uses: [{ kind: 'input', id: 'nav' }] })}]},{stepIndex:1,stepId:passId,operations:[{coordinate:{stepId:passId,ordinal:0},guardId:'g1',operation:stepOp('await page.locator(\'input[type="password"]\').fill(secrets["PASS"]);', { uses: [{ kind: 'secret', id: 'PASS' }] })}]}],guards:[{guardId:'g0',origin:null},{guardId:'g1',origin:fixture.origin}]};
   try{const adapter=createObservedReplayAdapter(handle, scope, TEST_DOMAINS,'password-refusal',()=>undefined);const result=await executeObservedReplay(message,adapter,scope, TEST_DOMAINS,{now:()=>performance.now()},{stepStarted(){return;},stepFinished(){return;}},new AbortController().signal);
-    expect(result).toMatchObject({ok:false,errorCode:'POLICY_REFUSED',secretUse:{PASS:'REFUSED'}});const actualPage=handle.page as unknown as Page;expect(await actualPage.locator('input[type=password]').evaluateAll(elements=>elements.map(element=>(element as HTMLInputElement).value))).toEqual(path==='/two-passwords'?['','']:[]);expect(fixture.receipts()).toEqual([]);
+    expect(result).toMatchObject({ok:false,errorCode:'TARGET_DRIFT',secretUse:{PASS:'REFUSED'}});const actualPage=handle.page as unknown as Page;expect(await actualPage.locator('input[type=password]').evaluateAll(elements=>elements.map(element=>(element as HTMLInputElement).value))).toEqual(path==='/two-passwords'?['','']:[]);expect(fixture.receipts()).toEqual([]);
   }finally{await handle.dispose();await rm(directory,{recursive:true,force:true});}
 });
 
@@ -298,15 +289,15 @@ it('replays login twice without a model, records distinct receipts/video and use
     const handle = await playwrightBrowserFactory.launch({allowedDomains: TEST_DOMAINS, browser: 'chromium', scratchPath: directory, observedScope: scope, viewport: {width: 800, height: 600}, recording: {width: 800, height: 600}});
     const frame: Execute3 = {
       kind: 'execute', protocolVersion: 3, mode: 'observed', runId: publication.execute.runId, attemptId: publication.execute.attemptId, profileHash: hashObserved(OBSERVED_PROFILE), configurationHash: 'c'.repeat(64), waitStrategy: 'domcontentloaded', stepTimeoutMs: 5000,
-      inputs: [{inputId: 'nav', stepId: '00000000-0000-4000-8000-000000000101', kind: 'destination', intendedSlot: 'navigate.destination', value: fixture.origin + '/login'}, {inputId: 'pass', stepId: '00000000-0000-4000-8000-000000000102', kind: 'secretRef', intendedSlot: 'fill.value', referenceName: 'PASS'}, {inputId: 'home', stepId: '00000000-0000-4000-8000-000000000104', kind: 'nonsecretText', intendedSlot: 'assert.expected', value: fixture.origin + '/home'}],
+      inputs: [{inputId: 'nav', stepId: '00000000-0000-4000-8000-000000000101', kind: 'destination', value: fixture.origin + '/login'}, {inputId: 'pass', stepId: '00000000-0000-4000-8000-000000000102', kind: 'secretRef', referenceName: 'PASS'}, {inputId: 'home', stepId: '00000000-0000-4000-8000-000000000104', kind: 'nonsecretText', value: fixture.origin + '/home'}],
       secrets: {PASS: value, UNREACHED: 'never-typed'}, secretOrigins: {PASS: [fixture.origin]}, bindings: [], transfers: [],
       steps: [
-        {stepIndex: 0, stepId: '00000000-0000-4000-8000-000000000101', operations: [{coordinate: {stepId: '00000000-0000-4000-8000-000000000101', ordinal: 0}, guardId: 'g0', operation: {kind: 'navigate', destinationInputId: 'nav'}}]},
-        {stepIndex: 1, stepId: '00000000-0000-4000-8000-000000000102', operations: [{coordinate: {stepId: '00000000-0000-4000-8000-000000000102', ordinal: 0}, guardId: 'g1', operation: {kind: 'fill', value: {kind: 'secretRef', sourceInputId: 'pass'}}}]},
-        {stepIndex: 2, stepId: '00000000-0000-4000-8000-000000000103', operations: [{coordinate: {stepId: '00000000-0000-4000-8000-000000000103', ordinal: 0}, guardId: 'g2', operation: {kind: 'click'}}]},
-        {stepIndex: 3, stepId: '00000000-0000-4000-8000-000000000104', operations: [{coordinate: {stepId: '00000000-0000-4000-8000-000000000104', ordinal: 0}, guardId: 'g3', operation: {kind: 'assert', predicate: 'url', expected: {kind: 'authoredLiteral', sourceInputId: 'home'}}}]},
+        {stepIndex: 0, stepId: '00000000-0000-4000-8000-000000000101', operations: [{coordinate: {stepId: '00000000-0000-4000-8000-000000000101', ordinal: 0}, guardId: 'g0', operation: stepOp('await page.goto(inputs["nav"]);', { uses: [{ kind: 'input', id: 'nav' }] })}]},
+        {stepIndex: 1, stepId: '00000000-0000-4000-8000-000000000102', operations: [{coordinate: {stepId: '00000000-0000-4000-8000-000000000102', ordinal: 0}, guardId: 'g1', operation: stepOp('await page.locator(\'input[type="password"]\').fill(secrets["PASS"]);', { uses: [{ kind: 'secret', id: 'PASS' }] })}]},
+        {stepIndex: 2, stepId: '00000000-0000-4000-8000-000000000103', operations: [{coordinate: {stepId: '00000000-0000-4000-8000-000000000103', ordinal: 0}, guardId: 'g2', operation: stepOp('await page.getByRole("button", { name: "Sign in", exact: true }).click();')}]},
+        {stepIndex: 3, stepId: '00000000-0000-4000-8000-000000000104', operations: [{coordinate: {stepId: '00000000-0000-4000-8000-000000000104', ordinal: 0}, guardId: 'g3', operation: stepOp('await expect(page).toHaveURL(inputs["home"]);', { uses: [{ kind: 'input', id: 'home' }] })}]},
       ],
-      guards: [{guardId: 'g0', origin: null, target: {kind: 'initialBlank'}}, {guardId: 'g1', origin: fixture.origin, target: {kind: 'passwordControl'}}, {guardId: 'g2', origin: fixture.origin, target: {kind: 'element', locator: [{by: 'role', role: 'button', name: 'Sign in', exact: true}], tier: 'role', identity: {role: 'button', name: 'Sign in'}, readRuleId: null}}, {guardId: 'g3', origin: fixture.origin, target: {kind: 'page'}}],
+      guards: [{guardId: 'g0', origin: null}, {guardId: 'g1', origin: fixture.origin}, {guardId: 'g2', origin: fixture.origin}, {guardId: 'g3', origin: fixture.origin}],
     };
     const adapter = createObservedReplayAdapter(handle, scope, TEST_DOMAINS, `replay-${String(index)}`, () => undefined);
     try {
@@ -332,6 +323,7 @@ import {loadEvidenceConfig} from '../../src/server/config.js';
 import {systemOriginSource} from '../../src/run/timeline.js';
 import type {GuidedBrowser} from '../../src/run/guidedBrowser.js';
 import type {BridgePrefixPrepare,ExecutionEvidence,PrefixAction,Ledger,BridgeNativeFenceEvent} from '../../src/guided/types.js';
+import {evidencePath} from '../helpers/evidenceOut.js';
 const secretPrefixIds=['00000000-0000-4000-8000-000000000801','00000000-0000-4000-8000-000000000802','00000000-0000-4000-8000-000000000803'] as const;
 function present<T>(value:T|undefined|null):T {if(value===undefined||value===null)throw Error('MISSING_SECRET_NATIVE_FACT');return value;}
 interface CapturedPrivateClose {browser:GuidedBrowser;facts:{attempts:number;reached:boolean;passed:boolean;failed:boolean;emptyInputs?:boolean;hits?:string[];error?:unknown}}
@@ -363,9 +355,9 @@ it.each(['valid','bad-origin','zero-password','two-passwords','focus-typeflip','
   fixture.rotate(CANARY);const directory=await mkdtemp(join(tmpdir(),'secret-prefix-native-'));
   const context=guidedContext(fixture.origin);context.sourceRevision='1';context.configurationRevision='1';context.sourceStepIds=[...secretPrefixIds];context.allocations=[];
   const path=fault==='zero-password'?'/no-password':fault==='two-passwords'?'/two-passwords':fault==='focus-typeflip'?'/trap':'/login';
-  context.authoredInputs.sourceRevision='1';context.authoredInputs.configurationRevision='1';context.authoredInputs.inputs=[{inputId:'prefix-destination',sourceStepId:secretPrefixIds[0],kind:'destination',value:fixture.origin+path,intendedSlot:'navigate.destination',provenance:{referenceKind:'configuration',configurationRevision:'1',stepId:secretPrefixIds[0],referenceId:'prefix-url',kind:'destination',intendedSlot:'navigate.destination'}},{inputId:'prefix-password',sourceStepId:secretPrefixIds[1],kind:'secretRef',intendedSlot:'fill.value',secretId:'PASS',provenance:{referenceKind:'configuration',configurationRevision:'1',stepId:secretPrefixIds[1],referenceId:'password-reference',referenceName:'PASS',kind:'secretRef',intendedSlot:'fill.value'}}];context.authoredInputsHash=hash(context.authoredInputs);
-  const nav={coordinate:{stepId:secretPrefixIds[0],ordinal:0},origin:null,target:null,operation:{kind:'navigate' as const,destinationInputId:'prefix-destination'}},fill={coordinate:{stepId:secretPrefixIds[1],ordinal:0},origin:fixture.origin,target:null,operation:{kind:'fill' as const,value:{kind:'secretRef' as const,sourceInputId:'prefix-password'}}};
-  const actions:PrefixAction[]=[{...nav,operationHash:hash(nav),guard:{guardId:'g0',origin:null,target:{kind:'initialBlank'}}},{...fill,operationHash:hash(fill),guard:{guardId:'g1',origin:fixture.origin,target:{kind:'passwordControl'}}}];context.prefixProgram={schemaVersion:3,baseRevisionId:randomUUID(),baseRevisionDigest:hash(actions),sourceStepIds:secretPrefixIds.slice(0,2),actions};context.prefixProgramHash=hash(context.prefixProgram);
+  context.authoredInputs.sourceRevision='1';context.authoredInputs.configurationRevision='1';context.authoredInputs.inputs=[{inputId:'prefix-destination',sourceStepId:secretPrefixIds[0],kind:'destination',value:fixture.origin+path,provenance:{referenceKind:'configuration',configurationRevision:'1',stepId:secretPrefixIds[0],referenceId:'prefix-url',kind:'destination'}},{inputId:'prefix-password',sourceStepId:secretPrefixIds[1],kind:'secretRef',secretId:'PASS',provenance:{referenceKind:'configuration',configurationRevision:'1',stepId:secretPrefixIds[1],referenceId:'password-reference',referenceName:'PASS',kind:'secretRef'}}];context.authoredInputsHash=hash(context.authoredInputs);
+  const nav={coordinate:{stepId:secretPrefixIds[0],ordinal:0},origin:null,operation:stepOp('await page.goto(inputs["prefix-destination"]);',{uses:[{kind:'input',id:'prefix-destination'}]})},fill={coordinate:{stepId:secretPrefixIds[1],ordinal:0},origin:fixture.origin,operation:stepOp('await page.locator(\'input[type="password"]\').fill(secrets["PASS"]);',{uses:[{kind:'secret',id:'PASS'}]})};
+  const actions:PrefixAction[]=[{...nav,operationHash:hash(nav),guard:{guardId:'g0',origin:null}},{...fill,operationHash:hash(fill),guard:{guardId:'g1',origin:fixture.origin}}];context.prefixProgram={schemaVersion:3,baseRevisionId:randomUUID(),baseRevisionDigest:hash(actions),sourceStepIds:secretPrefixIds.slice(0,2),actions};context.prefixProgramHash=hash(context.prefixProgram);
   const settings=loadEvidenceConfig({STUDIO_RUNNER_OBJECT_STORE_DIR:join(directory,'objects'),STUDIO_RUNNER_SCRATCH_DIR:join(directory,'scratch')}),configured=createConfiguredObjectStore(settings),evidenceRoot=join(directory,'evidence');await mkdir(evidenceRoot,{recursive:true});
   const recorder=createGuidedRecorder({store:configured.store,fileSystem:NODE_EVIDENCE_FILE_SYSTEM,bounds:evidenceBoundsFrom(settings),size:{width:settings.recordingWidth,height:settings.recordingHeight},calibrationOffsetMs:settings.seekOriginCalibrationMs,originSource:systemOriginSource,now:()=>performance.now(),sleep:ms=>new Promise(resolve=>{setTimeout(resolve,ms);}),evidenceRoot});
   const messages:{route:string;body:unknown}[]=[],stderr:string[]=[];let guided:GuidedBrowser|undefined,emptyBeforeClose:boolean|undefined,capturedClose:CapturedPrivateClose|undefined;
@@ -376,18 +368,15 @@ it.each(['valid','bad-origin','zero-password','two-passwords','focus-typeflip','
   await withObservedNativeEvidence(directory,`secret-${fault}`,async preserved=>{
     preserved.media('secret-prefix',video);preserved.check('secret-prefix','assertions','RUNNING');
     await runtime.start();const native=present(guided),handle=present(native.handle),observationSession=native.observations,nativePage=handle.page as unknown as Page;
-    const prepare=(coordinate:PrefixAction['coordinate'],evidence:ExecutionEvidence)=>{const request={schemaVersion:3 as const,sessionId:context.sessionId,workerId:context.workerId,ownerFence:context.ownerFence,scopeHash:context.scopeHash,contextId:context.contextId,contextRevision:context.contextRevision,authoredInputsHash:context.authoredInputsHash,sourceRevision:context.sourceRevision,configurationRevision:context.configurationRevision,prefixProgramHash:present(context.prefixProgramHash),pressInheritance:null,coordinate,evidenceHash:hash(evidence)};return {kind:'prefix' as const,request,requestDigest:hash(request)} satisfies BridgePrefixPrepare;};
-    const navigation=await runtime.preparePrefix(prepare(nav.coordinate,(messages[0]?.body as BridgeBootstrap).executionEvidence));if(navigation.kind!=='PREPARED')throw Error('NATIVE_NAV_NOT_PREPARED');const navigationRequest=dispatch(context,navigation.proposal,navigation.preparation);navigationLedger=navigationRequest.ledger;expect((await runtime.dispatch(navigationRequest)).ledger.state).toBe('SUCCEEDED');
+    const prepare=(coordinate:PrefixAction['coordinate'],evidence:ExecutionEvidence)=>{const request={schemaVersion:3 as const,sessionId:context.sessionId,workerId:context.workerId,ownerFence:context.ownerFence,scopeHash:context.scopeHash,contextId:context.contextId,contextRevision:context.contextRevision,authoredInputsHash:context.authoredInputsHash,sourceRevision:context.sourceRevision,configurationRevision:context.configurationRevision,prefixProgramHash:present(context.prefixProgramHash),coordinate,evidenceHash:hash(evidence)};return {kind:'prefix' as const,request,requestDigest:hash(request)} satisfies BridgePrefixPrepare;};
+    const navigation=await runtime.preparePrefix(prepare(nav.coordinate,(messages[0]?.body as BridgeBootstrap).executionEvidence));const navigationRequest=dispatch(context,navigation.proposal,navigation.preparation);navigationLedger=navigationRequest.ledger;expect((await runtime.dispatch(navigationRequest)).ledger.state).toBe('SUCCEEDED');
     const observation=(messages.filter(m=>m.route==='observations').at(-1)?.body as BridgeObservation).observation,evidence:ExecutionEvidence={kind:'observedDocument',sessionId:context.sessionId,contextId:context.contextId,documentId:observation.documentId,generation:observation.generation,origin:observation.origin,observationHash:hash(observation)},request=prepare(fill.coordinate,evidence);
     expect(/passwordControl[^\n]*\[e\d+\]/u.test(observation.outline)).toBe(false);
-    if(fault==='zero-password'||fault==='two-passwords'){
-      expect(observation.coverage.passwordControls).toBe(fault==='zero-password'?0:2);
-      await expect(runtime.preparePrefix(request)).rejects.toThrow(fault==='zero-password'?'PASSWORD_TARGET_ABSENT':'PASSWORD_TARGET_AMBIGUOUS');expect(runtime.accepting).toBe(false);
-    }else{
-      expect(observation.coverage.passwordControls).toBe(1);const prepared=await runtime.preparePrefix(request);if(prepared.kind!=='PREPARED')throw Error('PASSWORD_PREFIX_NOT_PREPARED');
+    {
+      expect(observation.coverage.passwordControls).toBe(fault==='zero-password'?0:fault==='two-passwords'?2:1);const prepared=await runtime.preparePrefix(request);
       expect(prepared.proposal.executionEvidence).toEqual(evidence);expect(prepared.preparation.evidenceHash).toBe(hash(evidence));expect(prepared.preparation.authoredInputsHash).toBe(initialInputsHash);
-      expect(await nativePage.locator('input[name=password]').inputValue()).toBe('');expect(launch).toHaveBeenCalledOnce();expect(present(guided).handle).toBe(handle);expect(present(guided).observations).toBe(observationSession);
-      const message={...dispatch(context,prepared.proposal,prepared.preparation),secret:{secretId:'PASS',value:fault==='oversize-frame'?CANARY+'x'.repeat(4097):CANARY,versionId:'controlled-native-frame',allowedOrigins:[fault==='bad-origin'?declaredAliasOrigin:fixture.origin]}};fillAdmission=message.ledger.admission.admissionId;fillLedger=message.ledger;
+      if(fault!=='zero-password')expect(await nativePage.locator('input[name=password]').inputValue()).toBe('');expect(launch).toHaveBeenCalledOnce();expect(present(guided).handle).toBe(handle);expect(present(guided).observations).toBe(observationSession);
+      const message={...dispatch(context,prepared.proposal,prepared.preparation),secrets:[{secretId:'PASS',value:fault==='oversize-frame'?CANARY+'x'.repeat(4097):CANARY,versionId:'controlled-native-frame',allowedOrigins:[fault==='bad-origin'?declaredAliasOrigin:fixture.origin]}]};fillAdmission=message.ledger.admission.admissionId;fillLedger=message.ledger;
       if(fault==='stopped-lease'){
         // Actual owning runtime lease stop, not a claim that a TestVault value was revoked.
         await runtime.stop('LEASE_LOST');await expect(runtime.dispatch(message)).rejects.toThrow('CONTEXT_LOST');
@@ -397,17 +386,20 @@ it.each(['valid','bad-origin','zero-password','two-passwords','focus-typeflip','
         terminal=await runtime.dispatch(message);expect(()=>validate('bridge',terminal,'outcome')).not.toThrow();expect(message).not.toHaveProperty('secret');
         if(fault==='valid'){
           expect(terminal.ledger).toMatchObject({state:'SUCCEEDED',outcomeCode:'OK',contextRevision:1,authoredInputsHash:initialInputsHash});expect(await nativePage.locator('input[type=password]').inputValue()).toBe(CANARY);
-          const next=structuredClone(context);next.contextRevision++;next.materializationRevision++;next.authoredInputs.inputs.push({inputId:'after-secret',sourceStepId:secretPrefixIds[2],kind:'nonsecretText',intendedSlot:'assert.expected',value:'new-prefix-suffix-input',provenance:{referenceKind:'configuration',configurationRevision:'1',stepId:secretPrefixIds[2],referenceId:'after-secret',kind:'nonsecretText',intendedSlot:'assert.expected'}});next.authoredInputsHash=hash(next.authoredInputs);
+          const next=structuredClone(context);next.contextRevision++;next.materializationRevision++;next.authoredInputs.inputs.push({inputId:'after-secret',sourceStepId:secretPrefixIds[2],kind:'nonsecretText',value:'new-prefix-suffix-input',provenance:{referenceKind:'configuration',configurationRevision:'1',stepId:secretPrefixIds[2],referenceId:'after-secret',kind:'nonsecretText'}});next.authoredInputsHash=hash(next.authoredInputs);
           const deliveryId=randomUUID(),ack=await runtime.update(next,deliveryId);expect(validate('bridge',ack,'ContextAcknowledgement')).toMatchObject({contextRevision:2,contextHash:hash(next),deliveryId});expect(await runtime.update(next,deliveryId)).toEqual(ack);
           expect(terminal.ledger.contextRevision).toBe(1);expect(terminal.ledger.authoredInputsHash).toBe(initialInputsHash);await expect(runtime.preparePrefix(request)).rejects.toThrow('IDENTITY_MISMATCH');
         }else{
           // The native isolated-world call has begun; even a trusted prewrite refusal must not
           // turn the durable INVOKING phase into a fake no-invocation receipt or permit retry.
-          expect(terminal.ledger).toMatchObject({state:'UNKNOWN_OUTCOME',outcomeCode:fault==='bad-origin'?'POLICY_DENIED':'TARGET_CHANGED'});expect(runtime.accepting).toBe(false);
-          expect(messages.some(m=>(m.body as {kind?:string}).kind==='prefixDrift')).toBe(false);await expect(runtime.dispatch(message)).rejects.toThrow();
+          expect(terminal.ledger).toMatchObject({state:'FAILED'});expect(runtime.accepting).toBe(fault==='two-passwords'||fault==='zero-password');
+          // A password count other than one is refused before the fence: the prefix reports drift and the session stays open. Every other fault
+          // crossed the native fence, so the session stops and nothing is reported as drift.
+          const preFence=fault==='zero-password'||fault==='two-passwords';
+          expect(messages.some(m=>(m.body as {kind?:string}).kind==='prefixDrift')).toBe(preFence);if(!preFence)await expect(runtime.dispatch(message)).rejects.toThrow();
         }
       }
-      delete (message as {secret?:unknown}).secret;
+      delete (message as {secrets?:unknown}).secrets;
     }
     expect(launch).toHaveBeenCalledOnce();expect(present(guided).handle).toBe(handle);expect(present(guided).observations).toBe(observationSession);expect(fixture.receipts()).toEqual([]);
     if(runtime.accepting&&fault!=='valid')expect(await nativePage.locator('input[name=password]').evaluateAll(elements=>elements.every(element=>(element as HTMLInputElement).value===''))).toBe(true);
@@ -415,12 +407,13 @@ it.each(['valid','bad-origin','zero-password','two-passwords','focus-typeflip','
   },async preserved=>{try{await runtime.stop('CANCELLED');await runtime.recordingSettled;}finally{configured.close();preserved.recording('secret-prefix',messages.find(m=>m.route==='recording-evidence')?.body as RecordingEvidenceBody|undefined);preserved.outcome('secret-prefix',terminal?.ledger);}},()=>rm(directory,{recursive:true,force:true}),async preserved=>{
     const recording=messages.find(m=>m.route==='recording-evidence')?.body as RecordingEvidenceBody;expect(recording.state).toBe('STORED');expect(JSON.stringify(recording)).not.toContain(CANARY);expect(emptyBeforeClose).toBe(fault!=='valid');assertPrivateClose(capturedClose);
     const journal=nativeJournal(await readFile(join(directory,'journal',hash(context.sessionId)+'.journal'),'utf8')),navLedger=present(navigationLedger),expected:NativeJournalRow[]=[{kind:'consumed',digest:hash({contextId:context.contextId,sessionId:context.sessionId})},consumption(context,navLedger),invoking(context,navLedger)];
-    if(fault==='valid'||fault==='bad-origin'||fault==='focus-typeflip'){const fill=present(fillLedger);expected.push(consumption(context,fill),invoking(context,fill));}
+    const preFenceRefusal=fault==='zero-password'||fault==='two-passwords';
+    if(fault!=='oversize-frame'&&fault!=='stopped-lease'){const fill=present(fillLedger),fence=invoking(context,fill);expected.push(consumption(context,fill),preFenceRefusal&&fence.kind==='fence'?{kind:'fence',event:{...fence.event,state:'REFUSED_BEFORE_INVOCATION',receiptHash:expect.any(String) as unknown as string}}:fence);}
     expect(journal).toEqual(expected);
-    const fillFences=journal.filter(row=>row.kind==='fence'&&fillAdmission!==undefined&&row.event.admissionId===fillAdmission&&row.event.state==='INVOKING');expect(fillFences).toHaveLength(fault==='valid'||fault==='bad-origin'||fault==='focus-typeflip'?1:0);
+    const fillFences=journal.filter(row=>row.kind==='fence'&&fillAdmission!==undefined&&row.event.admissionId===fillAdmission&&row.event.state==='INVOKING');expect(fillFences).toHaveLength(fault!=='oversize-frame'&&fault!=='stopped-lease'&&!preFenceRefusal?1:0);
     const fillTiming=recording.timings.find(t=>t.admissionId===fillAdmission);
     if(fault==='valid'){expect(fillTiming?.endMs).not.toBeNull();expect(fillTiming).toBeDefined();}
-    else if(fault==='bad-origin'||fault==='focus-typeflip'){expect(fillTiming).toBeDefined();expect(fillTiming?.endMs).toBeNull();}
+    else if(fault!=='oversize-frame'&&fault!=='stopped-lease'&&!preFenceRefusal){expect(fillTiming).toBeDefined();expect(fillTiming?.endMs).toBeNull();}
     else expect(fillTiming).toBeUndefined();
     expect((await readFile(video)).byteLength).toBeGreaterThan(1024);expect(await scan(directory)).toEqual([]);
     // Only the unchanged password-only/empty-before-close/profile/message/media privacy

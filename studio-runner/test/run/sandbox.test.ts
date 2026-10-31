@@ -52,6 +52,12 @@ const SKIP_DIRECTORIES = new Set([
   'lint',
 ]);
 
+/**
+ * Recorded run output (HARs, grounding runs; untracked, 1.7 GB, no source): reading it times the scan out.
+ * Package-relative, so no other directory called `runs` is skipped.
+ */
+const SKIP_PATHS = new Set([join('evaluation', 'grounding', 'runs')]);
+
 /** This file assembles the needles at run time; reading its own source would be circular. */
 const SELF_REFERENTIAL_FILES = new Set([join('test', 'run', 'sandbox.test.ts')]);
 
@@ -93,7 +99,7 @@ function everyFile(directory: string, into: string[] = []): string[] {
   for (const entry of readdirSync(directory)) {
     const full = join(directory, entry);
     if (statSync(full).isDirectory()) {
-      if (SKIP_DIRECTORIES.has(entry)) continue;
+      if (SKIP_DIRECTORIES.has(entry) || SKIP_PATHS.has(relative(packageRoot, full))) continue;
       everyFile(full, into);
       continue;
     }

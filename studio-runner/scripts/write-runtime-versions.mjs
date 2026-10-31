@@ -115,14 +115,6 @@ export function writeRuntimeVersionsFile(input) {
     const canonical=v=>v===null||typeof v!=='object'?JSON.stringify(v):Array.isArray(v)?'['+v.map(canonical).join(',')+']':'{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')+'}';
     const hash=v=>createHash('sha256').update(canonical(v)).digest('hex');
     const references=Object.fromEntries(readdirSync(fixtureRoot).filter(n=>n.endsWith('.json')).sort().map(n=>[n,JSON.parse(readFileSync(join(fixtureRoot,n),'utf8'))]));
-    const packagedChoice=references['accepted-observed-choice.json'];
-    if(!packagedChoice||packagedChoice.basis?.preparations?.filter(p=>p.observedChoice?.version===1).length!==1)throw new Error('Observed choice reference evidence is missing or invalid.');
-    const choicePath=join(input.root,'..','docs','specs','studio-observed-authoring','contracts','v3','publication-fixtures.json');
-    if(existsSync(choicePath)){
-      const choice=JSON.parse(readFileSync(choicePath,'utf8')).observedChoice;
-      if(!choice||choice.basis?.preparations?.filter(p=>p.observedChoice?.version===1).length!==1)throw new Error('Observed choice reference evidence is missing or invalid.');
-      if(hash(choice)!==hash(packagedChoice))throw new Error('Observed choice reference evidence is stale.');
-    }
     writeFileSync(join(input.root,'dist','observed-reference.json'),JSON.stringify(references)+'\n');
     runtimeVersions.observedSchemaBundleHash=hash(JSON.parse(readFileSync(schemasPath,'utf8')));
     runtimeVersions.observedReferenceBundleHash=hash(references);

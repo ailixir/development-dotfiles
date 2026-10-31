@@ -25,6 +25,8 @@ interface Requests {
 const requests = (await import(new URL('../../evaluation/grounding/lib/requests.mjs', import.meta.url).href)) as Requests;
 
 const CAPTURED = '/private/tmp/claude-501/-Users-brunobuger-orca-workspaces-put-checks-ui-studio/ae64f648-5f71-4252-a09f-ba8184d1e60f/scratchpad/perf/bench/bodies/';
+// The captures live in a past session's scratch directory; once that is emptied (it exists, with no files) the golden cases have nothing to replay and skip.
+const HAVE_CAPTURES = existsSync(CAPTURED) && readdirSync(CAPTURED).some(file => file.endsWith('.req.json'));
 const loopbackOrAny = (url: string) => /^https?:\/\/127\.0\.0\.1:\d+\//u.test(url) || requests.makeAllows()(url);
 const strip = (items: Record<string, unknown>[], key: string) => items.map(item => Object.fromEntries(Object.entries(item).filter(([name]) => name !== key)));
 
@@ -71,7 +73,7 @@ describe('sourceReferences suggestions (GuidedAuthoredUriCandidates port)', () =
     }
   });
 
-  describe.skipIf(!existsSync(CAPTURED))('golden: every captured initial SOURCE_PLAN body', () => {
+  describe.skipIf(!HAVE_CAPTURES)('golden: every captured initial SOURCE_PLAN body', () => {
     it('matches sourceReferences exactly (order included) and rebuilds the whole context', () => {
       let checked = 0; let references = 0;
       for (const file of readdirSync(CAPTURED).filter(f => f.endsWith('.req.json'))) {
@@ -166,7 +168,7 @@ describe('NEXT_ACTION context (GuidedPromptAssembler.buildPositiveContext + admi
     expect(reply.needs[0]).not.toHaveProperty('bindingId');
   });
 
-  describe.skipIf(!existsSync(CAPTURED))('golden: replaying captured sessions through admitPlan', () => {
+  describe.skipIf(!HAVE_CAPTURES)('golden: replaying captured sessions through admitPlan', () => {
     it('reproduces obligations, inputs, needs and coordinate for at least 98% of the captured NEXT_ACTION bodies', () => {
       const ids = readdirSync(CAPTURED).filter(f => f.endsWith('.req.json')).map(f => parseInt(f, 10)).sort((a, b) => a - b);
       const planBySession = new Map<string, unknown>();

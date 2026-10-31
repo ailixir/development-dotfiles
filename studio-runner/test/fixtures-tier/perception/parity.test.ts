@@ -10,7 +10,7 @@ import { collectPage, type CollectedPage } from '../../../src/run/perceptionInPa
 import { openEngine, runOnEngine } from '../../../src/run/playwrightEngine.js';
 import { PrivateInventory } from '../../../src/run/privateInventory.js';
 import { differencesFrom, loadBaseline, loadCollected, loadDifferences, sha256 } from '../../fixtures/perception-parity/parity.js';
-import { validatePublicObservation } from '../../../src/validator/pressInheritance.js';
+import { validatePublicObservation } from '../../../src/validator/observedSnapshots.js';
 import { shownRefsOf } from '../../../src/validator/outlineRefs.js';
 import { packageRoot } from '../../helpers/corpus.js';
 import { cdpOf, environmentFingerprint, guardDist, launchChromium, openPage } from './harness.js';
@@ -49,6 +49,8 @@ describe('AC1 layer 2: live parity with the spike baseline', () => {
 
   it.each(cases.map((c) => [c.key, c] as const))('%s', async (_key, c) => {
     const html = readFileSync(join(packageRoot, c.source), 'utf8');
+    // The spike's recorded facts predate frameTitle (layer 1 prints the nameless iframe line); only the live collection carries the frame's title.
+    const titled = c.key.startsWith('observed/e3/frame.html');
     expect(sha256(html), 'the page changed since the baseline was captured').toBe(c.htmlSha256);
     const page = await openPage(browser, html);
     try {
@@ -57,8 +59,8 @@ describe('AC1 layer 2: live parity with the spike baseline', () => {
       const probe = await openEngine(cdp);
       const live = await runOnEngine(probe, collectPage) as CollectedPage;
       const originalFacts = Object.fromEntries(Object.entries(live.facts).map(([ref, fact]) => {
-        // Only the three new internal native certificates are outside frozen COLLECT's shape.
-        return [ref, Object.fromEntries(Object.entries(fact).filter(([key]) => !['nativeTextRoot','scopeRefs','readScope'].includes(key)))];
+        // Only the internal native certificates and markers are outside frozen COLLECT's shape (directValueOnly marks a native input's own value, frameTitle carries an iframe's title for the withholding match).
+        return [ref, Object.fromEntries(Object.entries(fact).filter(([key]) => !['nativeTextRoot','scopeRefs','readScope','directValueOnly','frameTitle'].includes(key)))];
       }));
       expect({ ...live, facts: originalFacts }).toEqual(collected[c.id]);
       const inventory = new PrivateInventory();
@@ -116,12 +118,13 @@ describe('AC1 layer 2: live parity with the spike baseline', () => {
             }
           }
         }
-        const allowed = new Set([...c.pass.outline.split('\n'), ...(differences.outline[c.key]?.added ?? [])]);
+        const allowed = new Set([...c.pass.outline.split('\n'), ...(differences.outline[c.key]?.added ?? []), ...(titled ? ['    - iframe "Comment form" [e5]'] : [])]);
         for (const line of oldOutline.split('\n')) if (!/^… [0-9]+ more nodes not shown$/u.test(line)) expect(allowed.has(line), line).toBe(true);
       }
       const documentedOutline = differences.outline[c.key];
-      if (dropped.length === 0) expect(actual.outline, c.key).toEqual(documentedOutline ? { removed: documentedOutline.removed, added: documentedOutline.added } : null);
-      expect(actual.facts, c.key).toEqual(Object.fromEntries([...Object.entries(differences.facts[c.key] ?? {}).filter(([ref]) => !dropped.includes(ref)).map(([ref, entry]) => [ref, entry.fields]), ...dropped.map(ref => [ref, ['missing']])]));
+      const documentedAdded = (documentedOutline?.added ?? []).map(line => titled ? line.replace('- iframe [', '- iframe "Comment form" [') : line);
+      if (dropped.length === 0) expect(actual.outline, c.key).toEqual(documentedOutline ? { removed: documentedOutline.removed, added: documentedAdded } : null);
+      expect(actual.facts, c.key).toEqual(Object.fromEntries([...Object.entries(differences.facts[c.key] ?? {}).filter(([ref]) => !dropped.includes(ref)).map(([ref, entry]) => [ref, entry.fields]), ...(titled ? [['e5', ['extra']]] : []), ...dropped.map(ref => [ref, ['missing']])]));
       expect(actual.siblings, c.key).toEqual(Object.fromEntries(Object.entries(differences.siblings[c.key] ?? {}).filter(([ref]) => !dropped.includes(ref))));
       expect(perception.outline.projected).toBe(c.pass.projection.projected);
       expect(perception.outline.projectionTier).toBe(c.pass.projection.tier);

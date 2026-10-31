@@ -2,15 +2,14 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 // eslint-disable-next-line no-restricted-imports -- Real Chromium types for the perception tier; the production import stays in src/run/browser.ts only.
 import type { Browser, Page } from 'playwright';
 
-import { CLOSED_ACTION_CODES } from '../../../src/run/closedError.js';
 import { guardDist, launchChromium } from './harness.js';
-import { html, invoke, open, prepare, rejection, serve, TestControl, type Opened, type Operation, type Served } from './cutover-support.js';
+import { html, launchStepRun, open, serve, type Opened, type Served } from './cutover-support.js';
 
 /**
- * ADR-SC-007 WI-4 D-15 / AC9: no Playwright error text reaches any output. A page carries canaries in an overlay (text and
+ * ADR-SC-007 WI-4 D-15 / AC9: no Playwright error text reaches any output of a step. A page carries canaries in an overlay (text and
  * attributes), in a prefilled value attribute, in a data attribute and in the typed literal. Playwright's own errors for the
- * same page state DO carry them (the control: the test can see a leak); the error that leaves the boundary is a bare closed
- * code, with no message text, cause or stack text from the page.
+ * same page state DO carry them (the control: the test can see a leak); the step that leaves the runner carries a bare closed
+ * code and method names, with no message text, cause or stack text from the page.
  */
 
 guardDist();
@@ -92,22 +91,21 @@ async function rawError(page: Page, name: Name): Promise<Error> {
 
 interface Row {
   readonly name: Name;
-  readonly role: string;
-  readonly label: string;
-  readonly operation: Operation;
-  readonly value: string | null;
-  readonly authored: string | null;
-  /** Post-fence failures are UNKNOWN_OUTCOME; read and assert end before the fence. */
+  /** The step code a model would write for this action. */
+  readonly code: string;
+  /** What the step ends with on the mutated page (a closed code, never page text). */
+  readonly closedCode: string;
+  /** Post-fence failures are OUTCOME_UNKNOWN; a missing target, a hidden read and a failed assert end before the fence or as an assertion. */
   readonly fenced: boolean;
 }
 const rows: readonly Row[] = [
-  { name: 'click', role: 'button', label: 'Pay now', operation: { kind: 'click' }, value: null, authored: null, fenced: true },
-  { name: 'fill', role: 'textbox', label: 'Account', operation: { kind: 'fill', value: { kind: 'authoredLiteral', sourceInputId: 'x' } }, value: TYPED, authored: null, fenced: true },
-  { name: 'selectOption', role: 'combobox', label: 'Plan', operation: { kind: 'selectOption', value: { kind: 'authoredLiteral', sourceInputId: 'x' } }, value: 'Beta', authored: 'Beta', fenced: true },
-  { name: 'press', role: 'textbox', label: `Search ${TEXT}`, operation: { kind: 'press', key: 'Enter' }, value: null, authored: null, fenced: true },
-  { name: 'check', role: 'checkbox', label: 'Agree', operation: { kind: 'check' }, value: null, authored: null, fenced: true },
-  { name: 'read', role: 'cell', label: 'Readable cell', operation: { kind: 'read', bindingId: 'b', recipe: { kind: 'visibleText', classification: 'permittedBusinessData', policyRuleId: 'replaced-below' } }, value: null, authored: null, fenced: false },
-  { name: 'assert', role: 'heading', label: `Heading ${TEXT}`, operation: { kind: 'assert', predicate: 'visible', expected: null }, value: null, authored: null, fenced: false },
+  { name: 'click', code: "await page.locator('#click').click();", closedCode: 'OUTCOME_UNKNOWN', fenced: true },
+  { name: 'fill', code: `await page.locator('#fill').fill('${TYPED}');`, closedCode: 'OUTCOME_UNKNOWN', fenced: true },
+  { name: 'selectOption', code: "await page.locator('#select').selectOption({ index: 1 });", closedCode: 'OUTCOME_UNKNOWN', fenced: true },
+  { name: 'press', code: `await page.getByRole('textbox', { name: 'Search ${TEXT}', exact: true }).press('Enter');`, closedCode: 'TARGET_DRIFT', fenced: false },
+  { name: 'check', code: "await page.locator('#check').check();", closedCode: 'OUTCOME_UNKNOWN', fenced: true },
+  { name: 'read', code: "await page.locator('#read').waitFor({ state: 'visible' });", closedCode: 'TARGET_DRIFT', fenced: false },
+  { name: 'assert', code: "await expect(page.locator('#assert')).toBeVisible();", closedCode: 'ASSERTION_FAILED', fenced: false },
 ];
 
 describe('WI-4 canary matrix: Playwright error text stays behind the closed boundary', () => {
@@ -133,30 +131,18 @@ describe('WI-4 canary matrix: Playwright error text stays behind the closed boun
     const raw = await rawError(control.page, row.name);
     expect(CANARIES.some((canary) => raw.message.includes(canary)), `the raw ${row.name} error must show a canary or this test cannot see a leak: ${raw.message.slice(0, 200)}`).toBe(true);
 
-    // The boundary: the same state through the production session.
-    const created = await open(browser, served, '/canary');
-    opened.push(created);
-    const exported = await created.session.observe(undefined, false);
-    const rule = exported.observation.readRuleId ?? '';
-    const operation: Operation = row.operation.kind === 'read' ? { ...row.operation, recipe: { kind: 'visibleText', classification: 'permittedBusinessData', policyRuleId: rule } } : row.operation;
-    const prepared = await prepare(created, row.role, row.label, operation, row.authored, exported);
-    const fence = new TestControl(row.fenced ? () => mutate(created.page, row.name) : () => undefined);
-    if (!row.fenced) await mutate(created.page, row.name);
-    const error = await rejection(invoke(created, prepared, operation, { value: row.value, readRuleId: row.name === 'read' ? rule : null, control: fence }));
-    expect(error, `the ${row.name} must fail on the mutated page`).not.toBeNull();
-    const thrown = error as Error & { code?: unknown };
-    expect(thrown.name).toBe('ClosedActionError');
-    expect(thrown.message).toBe(thrown.code);
-    expect(CLOSED_ACTION_CODES as readonly string[]).toContain(thrown.message);
-    expect(thrown.cause).toBeUndefined();
-    const everything = [thrown.message, thrown.stack ?? '', JSON.stringify(thrown, Object.getOwnPropertyNames(thrown)), String(thrown)].join('\n');
-    for (const canary of CANARIES) expect(everything, `the ${row.name} error leaks ${canary}`).not.toContain(canary);
-    if (row.fenced) {
-      expect(fence.fenced).toBe(1);
-      expect(thrown.message).toBe('UNKNOWN_OUTCOME');
-    } else {
-      expect(fence.fenced).toBe(0);
-      expect(thrown.message).toBe('TARGET_CHANGED');
-    }
+    // The boundary: the same page state through the step runner. The step ends with a closed code and a receipt of method names only.
+    const run = await launchStepRun();
+    try {
+      const target = run.handle.stepApi?.page as Page | undefined;
+      if (!target) throw new Error('PAGE');
+      await target.goto(`${served.origin}/canary`);
+      await mutate(target, row.name);
+      const outcome = await run.step(row.code, { remainingMs: 3000 });
+      expect(outcome.receipt.closedCode, `the ${row.name} must fail on the mutated page`).toBe(row.closedCode);
+      expect(outcome.receipt.fenceCrossed).toBe(row.fenced);
+      const everything = JSON.stringify(outcome);
+      for (const canary of CANARIES) expect(everything, `the ${row.name} outcome leaks ${canary}`).not.toContain(canary);
+    } finally { await run.dispose(); }
   }, 60_000);
 });

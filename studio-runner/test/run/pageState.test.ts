@@ -1,5 +1,4 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ALL_DOMAINS } from '../../src/allowedDomains.js';
 import { installPageState } from '../../src/run/pageStateInPage.js';
 
 /**
@@ -31,7 +30,6 @@ function stubPage(hostname: string, title = 'Home'): Page {
 }
 afterEach(() => { vi.unstubAllGlobals(); });
 
-const TARGET = { documentId: 'doc', generation: 1 };
 const stamped = (domains: readonly string[]) => { const page = installPageState({ allowedDomains: domains }); page.stamp('doc', 1, page.revision()); return page; };
 
 it('document identity survives hash and ordinary mutations but cannot be rebased onto a replacement root', () => {
@@ -48,60 +46,7 @@ it('document identity survives hash and ordinary mutations but cannot be rebased
   expect(state.sameDocument()).toBe(false);
 });
 
-describe('the navigation whitelist inside the page (matched on location.hostname)', () => {
-  it('allow-all: author-directed navigation reaches any host, but still refuses userinfo and a foreign scheme', () => {
-    const page = stubPage('www.citi.com'), state = stamped(ALL_DOMAINS);
-    state.navigate(TARGET, 'https://www.citi.com', 'https://elsewhere.example/next');
-    expect(page.assign).toHaveBeenCalledWith('https://elsewhere.example/next');
-    for (const destination of ['https://user@citi.com/', 'javascript:alert(1)', 'data:text/html,x']) {
-      expect(() => { state.navigate(TARGET, 'https://www.citi.com', destination); }, destination).toThrow('TARGET_CHANGED');
-    }
-    expect(page.assign).toHaveBeenCalledTimes(1);
-    state.dispose();
-  });
-
-  it('refuses author-directed navigation to a host off the list, and destinations with userinfo or a foreign scheme', () => {
-    const page = stubPage('www.citi.com'), state = stamped(['citi.com']);
-    state.navigate(TARGET, 'https://www.citi.com', 'https://login.citi.com/next');
-    for (const destination of ['https://evil.com/', 'https://citi.com.evil.com/', 'https://user@citi.com/', 'https://citi.com@evil.com/', 'javascript:alert(1)', 'data:text/html,x']) {
-      expect(() => { state.navigate(TARGET, 'https://www.citi.com', destination); }, destination).toThrow('TARGET_CHANGED');
-    }
-    expect(page.assign).toHaveBeenCalledTimes(1);
-    state.dispose();
-  });
-});
-
-describe('the page-level steps hold the page identity gate', () => {
-  it('pageMatches needs the stamped document and generation, the expected origin and an unchanged DOM revision', () => {
-    const page = stubPage('www.citi.com'), state = stamped(['citi.com']);
-    expect(state.pageMatches(TARGET, 'https://www.citi.com')).toBe(true);
-    expect(state.pageMatches({ documentId: 'other', generation: 1 }, 'https://www.citi.com')).toBe(false);
-    expect(state.pageMatches({ documentId: 'doc', generation: 2 }, 'https://www.citi.com')).toBe(false);
-    expect(state.pageMatches(TARGET, 'https://elsewhere.example')).toBe(false);
-    page.mutate();
-    expect(state.pageMatches(TARGET, 'https://www.citi.com')).toBe(false);
-    expect(() => { state.navigate(TARGET, 'https://www.citi.com', 'https://login.citi.com/'); }).toThrow('TARGET_CHANGED');
-    expect(page.assign).not.toHaveBeenCalled();
-  });
-
-  it('a revision read before the page changed does not stamp the changed page', () => {
-    const page = stubPage('www.citi.com'), state = installPageState({ allowedDomains: ['citi.com'] });
-    const before = state.revision();
-    page.mutate();
-    state.stamp('doc', 1, before); // the page changed between the read and the stamp: the stamp is already stale
-    expect(state.pageMatches(TARGET, 'https://www.citi.com')).toBe(false);
-  });
-
-  it('assertPage compares the url or the title only on the matching page, and refuses a stale one', () => {
-    const page = stubPage('www.citi.com', 'Welcome'), state = stamped(['citi.com']);
-    expect(state.assertPage(TARGET, 'https://www.citi.com', 'title', 'Welcome')).toBe(true);
-    expect(state.assertPage(TARGET, 'https://www.citi.com', 'title', 'Other')).toBe(false);
-    expect(state.assertPage(TARGET, 'https://www.citi.com', 'url', 'https://www.citi.com/page')).toBe(true);
-    expect(state.assertPage(TARGET, 'https://www.citi.com', 'url', 'https://www.citi.com/elsewhere')).toBe(false);
-    page.mutate();
-    expect(() => state.assertPage(TARGET, 'https://www.citi.com', 'title', 'Welcome')).toThrow('TARGET_CHANGED');
-  });
-
+describe('the page-level state holds the page identity gate',()=>{
   it('stable reports a quiet page as stable and a page that changed since the revision as not', async () => {
     vi.useFakeTimers();
     try {

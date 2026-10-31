@@ -24,8 +24,8 @@ else {
  const settings=loadEvidenceConfig({STUDIO_RUNNER_OBJECT_STORE_DIR:join(root,'objects'),STUDIO_RUNNER_SCRATCH_DIR:join(root,'scratch')}),store=createConfiguredObjectStore(settings);
  const recorder=createGuidedRecorder({recordingScratch:scratch,store:store.store,fileSystem:NODE_EVIDENCE_FILE_SYSTEM,bounds:evidenceBoundsFrom(settings),size:{width:1280,height:720},calibrationOffsetMs:0,originSource:systemOriginSource,now:()=>performance.now(),sleep:ms=>new Promise(resolve=>setTimeout(resolve,ms))});
  const recording=await recorder.open({sessionId:'kill-session',csiId:'fixture-csi',maxSessionSeconds:600});
- const browser=await launchGuidedBrowser({sessionId:'kill-session',scopeHash:'a'.repeat(64),allowedDomains: TEST_DOMAINS,rules:[],knownSecrets:[],readProfile:{policyRuleId:'structural',allowStructuralDiscovery:true,readGrants:[]}},'kill-context',()=>{/* context loss is observed by the parent timeout */},recording.launchRequest());
- await browser.navigateBlank(origin+'/login');
+ const browser=await launchGuidedBrowser({sessionId:'kill-session',scopeHash:'a'.repeat(64),allowedDomains: TEST_DOMAINS,rules:[],knownSecrets:[]},'kill-context',()=>{/* context loss is observed by the parent timeout */},recording.launchRequest());
+ await browser.handle.page.goto(origin+'/login');
  process.send?.({kind:'profile',profile:browser.scratchDirectory});
  const observation=await browser.observations.observe();
  if(observation.observation.coverage.passwordControls!==1)throw Error('LOGIN_NOT_OBSERVED');

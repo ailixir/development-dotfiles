@@ -298,14 +298,12 @@ vitest run --config vitest.perception.config.ts        # the package script is `
 - **`dist/` is not touched, and that is the point of this stage being separate from stage 6.** Stage 6 runs
   `test:fixtures`, whose `globalSetup` re-emits `dist/`; a running runner loads `dist/`. This tier has no
   `globalSetup`, and every file of it signs the `dist/` tree before and after and fails if it changed.
-- **Covers:** the perception modules of ADR-SC-007 (`src/run/perceive.ts`, `locatorSynth.ts`,
-  `playwrightEngine.ts`, `privateInventory.ts`, and the page programs in `perceptionInPage.ts`, which the unit tier
-  cannot execute and therefore excludes from its coverage): parity with the spike baseline, the D1/D2 leak
-  canaries, engine-versus-public-API locator conformance, and the live option check. Since ADR-SC-007 WI-4 it also
-  covers the cut-over: the page-state program (`src/run/pageStateInPage.ts`, likewise excluded from unit coverage),
-  the observation session's real-page behaviour (`cutover-observe`), the executor's actions and refusals
-  (`cutover-act`, `cutover-read`, `canary-boundary`) and the identity check against recorded aria snapshots
-  (`identity-snapshots`).
+- **Covers:** the perception modules (`src/run/perceive.ts`, `playwrightEngine.ts`, `privateInventory.ts`, and the
+  page programs in `perceptionInPage.ts`, which the unit tier cannot execute and therefore excludes from its
+  coverage): parity with the spike baseline, the D1/D2 leak canaries and the generated-content quarantine. Since
+  ADR-SC-007 WI-4 it also covers the page-state program (`src/run/pageStateInPage.ts`, likewise excluded from unit
+  coverage) and the observation session's real-page behaviour (`cutover-observe`). Since ADR-SC-008 it covers
+  generated step code on a real page (`stepCodeLive`, `stepRunLive`, `secretFillLive`, `canary-boundary`).
 - **Fails closed:** no `skipIf` in the tier, and its wiring is watched from the default run (stage 4,
   `test/run/importBoundary.test.ts`): deleting the config, the script, the `test:fixtures` exclude, the
   tier's files or this entry reddens the default test run.

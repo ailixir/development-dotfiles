@@ -140,7 +140,6 @@ export interface GuidedBrowser {
   readonly evidence: ExecutionEvidence;
   readonly observations: ObservationSession;
   readonly blankMatches: () => Promise<boolean>;
-  readonly navigateBlank: (destination: string) => Promise<void>;
   /**
    * Closes a browser whose start completed: a graceful `context.close()` bounded by {@link GUIDED_CLOSE_GRACE_MS}, then always
    * {@link terminate}. Settles only when the browser is confirmed gone; rejects `CONTEXT_LOST` on a survivor or an unreadable
@@ -181,7 +180,7 @@ export interface GuidedBrowser {
 }
 
 /** Why an already running guided browser reported itself lost. Closed vocabulary, no free text. */
-export type GuidedLossReason = 'PAGE_CRASH' | 'EXTRA_PAGE' | 'BROWSER_DISCONNECTED';
+export type GuidedLossReason = 'PAGE_CRASH' | 'BROWSER_DISCONNECTED';
 
 /** Last launch step entered before a launch failure. Closed vocabulary, no free text. */
 export type GuidedLaunchPhase = 'PROFILE' | 'PROCESS' | 'PROBE' | 'STARTUP_PAGE' | 'APP_PAGE' | 'BLANK_DOCUMENT';

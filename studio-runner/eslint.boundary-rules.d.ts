@@ -12,6 +12,8 @@ export declare const MESSAGE_FOR_MODULE: Record<string, string>;
 export declare const RUN_ONLY_MODULES: string[];
 export declare const PLAYWRIGHT_MODULES: string[];
 export declare const SANDBOX_FLAG_SYNTAX: readonly { selector: string; message: string }[];
+export declare const ASYNC_FUNCTION_SYNTAX: readonly { selector: string; message: string }[];
 export declare const executionBoundaryRules: Linter.RulesRecord;
 export declare const runDirectoryRules: Linter.RulesRecord;
 export declare const browserModuleRules: Linter.RulesRecord;
+export declare const stepCodeModuleRules: Linter.RulesRecord;

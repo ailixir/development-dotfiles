@@ -1,5 +1,6 @@
-import type { AuthoringSnapshotIdentity, Configuration, Declaration, LearnedPlan, ValidationBasis, PrefixProgram } from '../executor/observedOperations.js';
+import type { AuthoringSnapshotIdentity, Configuration, Declaration, LearnedPlan, ObservedPage, ValidationBasis, PrefixProgram } from '../executor/observedOperations.js';
 import { demand, equalObserved, hashObserved } from './observedReferencePolicy.js';
+import { shownRefsOf } from './outlineRefs.js';
 const same = (a: unknown, b: unknown): void => { demand(equalObserved(a, b), 'EVIDENCE_MISMATCH'); };
 function omit<T extends object,K extends keyof T>(value:T,keys:readonly K[]):Omit<T,K> { const excluded=new Set<PropertyKey>(keys);return Object.fromEntries(Object.entries(value).filter(([key])=>!excluded.has(key))) as Omit<T,K>; }
 const sort = (a: string, b: string): number => Buffer.compare(Buffer.from(a), Buffer.from(b));
@@ -46,7 +47,7 @@ export function stepSnapshots(identity: AuthoringSnapshotIdentity, configuration
   return Object.fromEntries(identity.authoring.steps.map((step,index) => {
     const actions = plan.actions.filter(a => a.coordinate.stepId === step.id).sort((a,b) => a.coordinate.ordinal-b.coordinate.ordinal).map(a => omit(a,['admissionId']));
     const producedBindings = plan.bindings.filter(b => b.producer.stepId === step.id).sort((a,b) => a.producer.ordinal-b.producer.ordinal || sort(a.bindingId,b.bindingId)).map(b => ({...omit(b,['consumers']),provenance:omit(b.provenance,['sessionId','producerAdmissionId'])}));
-    const consumedBindings = plan.bindings.flatMap(b => b.consumers).filter(e => e.coordinate.stepId === step.id).sort((a,b) => a.coordinate.ordinal-b.coordinate.ordinal || sort(a.argumentSlot,b.argumentSlot) || sort(a.bindingId,b.bindingId)).map(e => omit(e,['producerAdmissionId','consumerAdmissionId']));
+    const consumedBindings = plan.bindings.flatMap(b => b.consumers).filter(e => e.coordinate.stepId === step.id).sort((a,b) => a.coordinate.ordinal-b.coordinate.ordinal || sort(a.bindingId,b.bindingId)).map(e => omit(e,['producerAdmissionId','consumerAdmissionId']));
     return [step.id, hashObserved({ domain: 'studio.step-snapshot', version: 1, stepId: step.id, inputChain: chains[index], learnedStepHash: hashObserved({ actions, producedBindings, consumedBindings }) })];
   }));
 }
@@ -96,4 +97,53 @@ export function deriveSnapshotMaps(b: ValidationBasis, plan: Pick<LearnedPlan,'a
   });
   same(retained,change.retainedPrefixAdmissionIds);same(hashObserved(retained),change.retainedPrefixAdmissionsHash);
   return {stepSnapshotHashes,reusedFrom,incremental:{baseRevisionId:pin.revisionId,initialFirstLearnStepId:initial.initialFirstLearnStepId,effectiveFirstLearnStepId:change.effectiveFirstLearnStepId,retainedPrefixAdmissionIds:retained,driftReceiptHash:change.driftReceiptHash}};
+}
+
+type Fact = ObservedPage['facts'][string];
+const SOURCE_ROLES = new Set(['form','dialog','alertdialog','region','search','navigation','main','row','article','listitem','group','table','grid','tabpanel','menu','toolbar','banner','contentinfo','complementary','list','heading','cell','gridcell','rowheader','columnheader','text','paragraph','strong','status','link']);
+/** The text of the fact's single ownText segment (the part of the evidence the node itself carries), checked for bounds and code points. */
+export function ownText(fact: Fact): string {
+  const parts = fact.evidenceSegments.filter(p => p.field === 'ownText');
+  demand(parts.length <= 1, 'EVIDENCE_MISMATCH');
+  const part = parts[0]; if (!part) return '';
+  const { start, end } = part, text = fact.evidence;
+  const boundary = (i: number): boolean => i === 0 || i === text.length || !(text.charCodeAt(i - 1) >= 0xd800 && text.charCodeAt(i - 1) <= 0xdbff && text.charCodeAt(i) >= 0xdc00 && text.charCodeAt(i) <= 0xdfff);
+  demand(start >= 0 && end >= start && end <= text.length && boundary(start) && boundary(end) && part.purpose === undefined, 'EVIDENCE_MISMATCH');
+  return text.slice(start, end);
+}
+/** Validate the full current class before matching even one selected ref. Ref order comes from the outline after removing quoted strings, never from object key order or a bracket in a label. */
+export function validatePublicObservation(o: ObservedPage): void {
+  const refs = [...shownRefsOf(o.outline)];
+  const firstLineByRef = new Map<string,string>();
+  for (const line of o.outline.split('\n')) {
+    const bare = line.replace(/"(?:[^"\\]|\\.)*"/gu, '""');
+    for (const match of bare.matchAll(/\[([A-Za-z0-9_-]+)\]/gu)) if (match[1] !== undefined && !firstLineByRef.has(match[1])) firstLineByRef.set(match[1], line);
+  }
+  const groups = new Map<string, { ref: string; fact: Fact }[]>();
+  for (const ref of refs) {
+    const fact = o.facts[ref]; demand(fact, 'EVIDENCE_MISMATCH');
+    const key = hashObserved([fact.role, fact.name, fact.evidence]);
+    const group = groups.get(key) ?? []; group.push({ ref, fact }); groups.set(key, group);
+    ownText(fact);
+  }
+  for (const group of groups.values()) for (const [index, { ref, fact }] of group.entries()) {
+    if (group.length === 1) demand(fact.ordinal === undefined, 'EVIDENCE_MISMATCH');
+    else same(fact.ordinal, { index: index + 1, count: group.length });
+    const line = firstLineByRef.get(ref);
+    if (fact.ordinal) demand(line?.includes(`{ordinal=${String(fact.ordinal.index)}/${String(fact.ordinal.count)}}`), 'EVIDENCE_MISMATCH');
+  }
+  for (const [ref, fact] of Object.entries(o.facts)) {
+    const sources = fact.scopeRefs;
+    if (sources) {
+      demand(sources.length >= 1 && sources.length <= 8 && new Set(sources).size === sources.length, 'EVIDENCE_MISMATCH');
+      for (const sourceRef of sources) {
+        const source = o.facts[sourceRef];
+        demand(sourceRef !== ref && source && source.nameComplete && source.name !== '' && Array.from(source.name).length <= 80
+          && SOURCE_ROLES.has(source.role) && !source.editable && !['textbox','searchbox','combobox','checkbox','button'].includes(source.role), 'EVIDENCE_MISMATCH');
+        const sourceLine = firstLineByRef.get(sourceRef);
+        demand(sourceLine && !sourceLine.includes('{value withheld}'), 'EVIDENCE_MISMATCH');
+      }
+    }
+    if (fact.nearSource) demand(fact.evidenceSegments.some(s => s.field === 'near' && s.purpose === 'READ_ASSERT_ONLY'), 'EVIDENCE_MISMATCH');
+  }
 }

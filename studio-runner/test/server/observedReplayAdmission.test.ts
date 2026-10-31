@@ -1,3 +1,4 @@
+import { controlWindowJob as sharedControlWindowJob } from '../helpers/stepCode.js';
 import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 import {mutableCurrentJob} from '../helpers/currentWorlds.js';
 import {createFakeScheduler} from '../helpers/scheduler.js';
@@ -10,8 +11,7 @@ import type {ScratchStore} from '../../src/server/adapters.js';
 import {createFsScratchStore} from '../../src/server/scratch.js';
 import type {BrowserLauncher} from '../../src/server/adapters.js';
 import {ackRequestsCancel} from '../../src/reporting/reportClient.js';
-import type {ObservedJob,Artifact3,Scope,BuildIdentity} from '../../src/executor/observedOperations.js';
-import {OBSERVED_PROFILE} from '../../src/validator/observedReferencePolicy.js';
+import type {ObservedJob,BuildIdentity} from '../../src/executor/observedOperations.js';
 import { describe, it, expect } from 'vitest';
 import {publicationFixture as fixture} from '../helpers/publicationFixture.js';
 import { createApplication } from '../../src/server/application.js';
@@ -23,7 +23,7 @@ import type { } from '../../src/executor/observedOperations.js';
 import { createFakeScratchStore } from '../helpers/runner.js';
 import type { HttpOutcome } from '../../src/reporting/httpClient.js';
 import { CONTROL_WINDOW_MARGIN_MS } from '../../src/server/runCoordinator.js';
-import {hashObserved,OBSERVED_SCHEMA_BUNDLE_HASH} from '../../src/validator/observedReferencePolicy.js';
+import {OBSERVED_SCHEMA_BUNDLE_HASH} from '../../src/validator/observedReferencePolicy.js';
 const currentBuild={...fixture.build,schemaBundleHash:OBSERVED_SCHEMA_BUNDLE_HASH};
 function job(){return mutableCurrentJob(currentBuild);}
 
@@ -106,34 +106,7 @@ it('delivers pre-Ready FINAL from ADMITTED without an invalid PROGRESS transitio
     expect(logs.lines.join('\n')).not.toContain('ownership_lost');expect(await scratch.list()).toEqual([]);
 });
 
-const CONTROL_WINDOW_CANARY='control-window-unit-only';
-const controlWindowStepId=(index:number)=>'00000000-0000-4000-8000-'+String(301+index).padStart(12,'0');
-function controlWindowJob(origin:string,build:BuildIdentity,timeoutSeconds=10):{job:ObservedJob}{
-  const job=structuredClone(fixture.job) as ObservedJob;
-  const scope:Scope={...job.binding.scope,initialContext:{kind:'initialBlank'}};
-  
-  const configuration={...job.configuration,timeoutSeconds,waitStrategy:'domcontentloaded' as const,viewport:{width:800,height:600}};
-  const inputRecipes:Artifact3['inputRecipes']=[{inputId:'nav',stepId:controlWindowStepId(0),kind:'destination',intendedSlot:'navigate.destination',provenance:{kind:'sourceSpan',start:0,end:1,sourceHash:job.artifact.sourceHash}},...(['PASS','NEXT'] as const).map((referenceName,index)=>({inputId:referenceName.toLowerCase(),stepId:controlWindowStepId(index+1),kind:'secretRef' as const,intendedSlot:'fill.value' as const,provenance:{kind:'configuration' as const,referenceId:'reference-'+referenceName,referenceName}}))];
-  const steps:Artifact3['steps']=[{stepIndex:0,stepId:controlWindowStepId(0),operations:[{coordinate:{stepId:controlWindowStepId(0),ordinal:0},guardId:'g0',operation:{kind:'navigate',destinationInputId:'nav'}}]},...(['pass','next'] as const).map((input,index)=>({stepIndex:index+1,stepId:controlWindowStepId(index+1),operations:[{coordinate:{stepId:controlWindowStepId(index+1),ordinal:0},guardId:'g'+String(index+1),operation:{kind:'fill' as const,value:{kind:'secretRef' as const,sourceInputId:input}}}]})),{stepIndex:3,stepId:controlWindowStepId(3),operations:[{coordinate:{stepId:controlWindowStepId(3),ordinal:0},guardId:'g3',operation:{kind:'click'}}]}];
-  const guards:Artifact3['guards']=[{guardId:'g0',origin:null,target:{kind:'initialBlank'}},{guardId:'g1',origin,target:{kind:'passwordControl'}},{guardId:'g2',origin,target:{kind:'passwordControl'}},{guardId:'g3',origin,target:{kind:'element',locator:[{by:'role',role:'button',name:'Continue',exact:true}],tier:'role',identity:{role:'button',name:'Continue'},readRuleId:null}}];
-  const {principalId,...requirements}=scope;
-  const actions:Artifact3['learnedPlan']['actions']=steps.flatMap(step=>step.operations.map(action=>{
-    const guard=guards.find(g=>g.guardId===action.guardId);if(!guard)throw Error('GUARD');
-    if(guard.origin===null){
-      if(action.operation.kind!=='navigate'||action.coordinate.ordinal!==0)throw Error('BLANK_ACTION');
-      const projection={coordinate:{stepId:action.coordinate.stepId,ordinal:0 as const},origin:null,target:null,operation:action.operation};
-      return {...projection,admissionId:'control-admission-'+String(step.stepIndex),operationHash:hashObserved(projection)};
-    }
-    const projection={coordinate:action.coordinate,origin:guard.origin,target:guard.target.kind==='element'?{locator:guard.target.locator,tier:guard.target.tier,identity:guard.target.identity}:null,operation:action.operation};
-    return {...projection,admissionId:'control-admission-'+String(step.stepIndex),operationHash:hashObserved(projection)};
-  }));
-  const learnedPlan={...job.artifact.learnedPlan,sourceSteps:steps.map(s=>s.stepId),actions,bindings:[]};
-  const learnedPlanHash=hashObserved(learnedPlan),configurationHash=hashObserved(configuration);
-  const artifact:Artifact3={...job.artifact,configurationHash,learnedPlan,learnedPlanHash,inputRecipes,steps,guards,replayPolicy:{...job.artifact.replayPolicy,learnedPlanHash,scope:requirements,inputs:inputRecipes,bindings:[],transfers:[]}};
-  const now=Date.now(),scopeHash=hashObserved(scope);
-  const binding={...job.binding,artifactHash:hashObserved(artifact),configurationHash,learnedPlanHash,referencePolicyHash:hashObserved(artifact.replayPolicy),publicationEvidenceHash:artifact.replayPolicy.publicationEvidenceHash,requiredBuild:build,requiredProfile:OBSERVED_PROFILE,scope,scopeHash,principalId,startedAt:new Date(now).toISOString(),replayGrant:{...job.binding.replayGrant,scopeHash,profileHash:hashObserved(OBSERVED_PROFILE),buildHash:hashObserved(build),issuedAt:new Date(now).toISOString(),expiresAt:new Date(now+30000).toISOString()}};
-  return {job:{...job,binding,artifact,configuration,inputs:[{inputId:'nav',value:origin+'/login'}],secrets:{PASS:CONTROL_WINDOW_CANARY,NEXT:CONTROL_WINDOW_CANARY+'-next'},secretOrigins:{PASS:[origin],NEXT:[origin]},runtime:{stepTimeoutMs:timeoutSeconds*1000,totalRuntimeMs:20000},recording:{width:800,height:600}}};
-}
+const controlWindowJob=(origin:string,build:BuildIdentity,timeoutSeconds=10):{job:ObservedJob}=>sharedControlWindowJob(fixture.job as ObservedJob,origin,build,timeoutSeconds);
 
 // STUDIO-OBS-015 G (aria-g-ruling01): every contract-valid timeoutSeconds reaches ordinary admission
 // under the default runner configuration. Before the ceiling fix, 31 and 120 were refused locally

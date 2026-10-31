@@ -330,8 +330,12 @@ function buildDrafts(collected: CollectedPage, matcher: PrivateMatcher, counters
       return [makeDraft('unsupported', { what: 'shadowRoot', opaquePublicSource: true })];
     }
     if (role === 'iframe') {
-      counters.unsupported++;
-      return [makeDraft('unsupported', { what: 'iframe' })];
+      // A frame is one line with its title and a ref, never its content (ADR-SC-008 D7 ruling 2): the content is not read and nothing below it is shown.
+      const title = norm1(f?.frameTitle ?? node.name), hit = matcher.hit(title);
+      if (hit) counters.withheldPrivate++;
+      const kept = Boolean(node.ref) && hit;
+      return [makeDraft('node', { role, name: hit ? '' : title, rawName: hit ? '' : title, ref: node.ref, states: [], box: node.box ?? null, interactive: false, clickable: false, withheld: kept, cleared: kept,
+        tag: f?.tag, children: [], lostBelow: 0, ownTextUnknown: true, ghostNames: kept ? [title] : [] })];
     }
     if (f?.password) {
       counters.passwordControls++;
@@ -1098,7 +1102,7 @@ function guardJoined(n: RenderedNode, matcher: PrivateMatcher, counters: Sanitiz
 // Rendering.
 
 /** Refs are shown on lines the model may legitimately name: controls, named nodes, clickable generics and text. Not bare containers. */
-const showRef = (n: RenderedNode): boolean => n.ref !== undefined && (n.interactive || n.clickable || n.withheld || Boolean(n.name) || n.role === 'heading' || n.role === 'img' || n.directTextAssertion === true || n.linkValueCell === true);
+const showRef = (n: RenderedNode): boolean => n.ref !== undefined && (n.interactive || n.clickable || n.withheld || Boolean(n.name) || n.role === 'heading' || n.role === 'img' || n.role === 'iframe' || n.directTextAssertion === true || n.linkValueCell === true);
 
 /** The ref a rendered line shows, if any. */
 export function shownRef(n: RenderedNode): string | undefined {
@@ -1505,7 +1509,7 @@ export function deriveFacts(tree: RenderedTree, shown: ReadonlySet<number>): { f
     const ownTextComplete = !n.withheld && !n.cleared && !n.ownTextUnknown
       && (n.kind !== 'text' || n.text === '' || ownPart !== undefined && evidence.slice(ownPart.start, ownPart.end) === n.text)
       && (own === '' || ownPart !== undefined && evidence.slice(ownPart.start, ownPart.end) === own);
-    const entry: { role: string; name: string; editable: boolean; evidence: string; text?: string; nameComplete: boolean; ownTextComplete: boolean; ordinal?: { index: number; count: number }; scopeRefs?: string[]; readScope?: NonNullable<ElementFacts['readScope']>; nearSource?: 'WITHHELD_ADJACENT_PUBLIC' } = {
+    const entry: { role: string; name: string; editable: boolean; evidence: string; text?: string; nameComplete: boolean; ownTextComplete: boolean; ordinal?: { index: number; count: number }; scopeRefs?: string[]; nearSource?: 'WITHHELD_ADJACENT_PUBLIC' } = {
       role: n.role || (n.kind === 'text' ? 'text' : n.role), name: bound(n.rawName, 256), editable, evidence, nameComplete, ownTextComplete,
       ...(n.ordinal ? { ordinal: n.ordinal } : {}),
     };
@@ -1514,10 +1518,6 @@ export function deriveFacts(tree: RenderedTree, shown: ReadonlySet<number>): { f
       entry.text = bound([own, ...printedTexts(n)].filter((part) => part !== '').join(' '), 256);
     }
     facts[ref] = entry;
-    const completePublic = (node: RenderedNode): boolean => !node.withheld && !node.cleared && !node.ownTextUnknown
-      && Array.from(node.rawName).length <= 256 && Array.from(node.text).length <= 256
-      && ['node','text'].includes(node.kind) && node.kids.every(i => { const child = nodes[i]; return child !== undefined && completePublic(child); });
-    if (n.directTextAssertion && ownTextComplete && own !== '' && n.rawName === '' && completePublic(n)) Object.assign(entry, { directTextAssertion: true, text: own });
     segments[ref] = parts;
   }
   const sourceNodes = new Map(nodes.flatMap(n => { const ref = shownRef(n); return ref ? [[ref, n] as const] : []; }));
@@ -1532,8 +1532,9 @@ export function deriveFacts(tree: RenderedTree, shown: ReadonlySet<number>): { f
     const scopeRefs = n.scopeRefs;
     const readScope = n.readScope;
     if (scopeRefs?.length && scopeRefs.length <= 8 && scopeRefs.every(r => cleanSource(r, ref))) Object.assign(fact, { scopeRefs });
-    if (readScope && readScope.sourceRefs.length <= 8 && readScope.sourceRefs.every(r => cleanSource(r, ref))) Object.assign(fact, { readScope });
-    if (n.nearReadOnly && n.near && readScope?.relation === 'R7_ADJACENT_PUBLIC' && fact.readScope) Object.assign(fact, { nearSource: 'WITHHELD_ADJACENT_PUBLIC' });
+    // The read scope itself is no longer exported (contract v3 dropped readScope, tableTitleRef, directTextAssertion and readRuleId); only the marker that
+    // this fact's near text came from a withheld adjacent public source stays.
+    if (n.nearReadOnly && n.near && readScope?.relation === 'R7_ADJACENT_PUBLIC' && readScope.sourceRefs.length <= 8 && readScope.sourceRefs.every(r => cleanSource(r, ref))) Object.assign(fact, { nearSource: 'WITHHELD_ADJACENT_PUBLIC' });
   }
   return { facts, segments };
 }
