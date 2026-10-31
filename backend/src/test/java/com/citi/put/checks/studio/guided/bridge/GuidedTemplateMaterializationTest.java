@@ -17,10 +17,10 @@ class GuidedTemplateMaterializationTest {
         Map.of(
             "cfg-fill",
             new GuidedSourceReferenceValidator.ConfigurationValue(
-                "Citi", STEP, "nonsecretText", "fill.value", "s", true, "BANK"),
+                "Citi", STEP, "nonsecretText", "s", true, "BANK"),
             "cfg-select",
             new GuidedSourceReferenceValidator.ConfigurationValue(
-                "Citi", STEP, "nonsecretText", "selectOption.value", "s", true, "BANK"));
+                "Citi", STEP, "nonsecretText", "s", true, "BANK"));
     return new GuidedSourceReferenceValidator.Sources(
         "1",
         "1",
@@ -51,7 +51,7 @@ class GuidedTemplateMaterializationTest {
     assertThat(found.get(0).path("referenceKind").asText()).isEqualTo("configuration");
     assertThat(found.get(0).path("referenceId").asText()).isEqualTo("cfg-fill");
     assertThat(found.get(0).path("kind").asText()).isEqualTo("nonsecretText");
-    assertThat(found.get(0).path("intendedSlot").asText()).isEqualTo("fill.value");
+    assertThat(found.get(0).has("intendedSlot")).isFalse();
     assertThat(found.get(0).path("configurationRevision").asText()).isEqualTo("1");
   }
 

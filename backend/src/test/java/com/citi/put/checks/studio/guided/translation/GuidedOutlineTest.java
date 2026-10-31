@@ -121,7 +121,7 @@ class GuidedOutlineTest {
   @Test
   void anObservationIsConsistentWhenItsFactsAreExactlyTheShownRefs() {
     ObjectNode observation =
-        observation("- button \"Save\" [e1]\n- link \"Home\" [e2]", "e1", "e2");
+        observation("- button \"Save\" [e1]\n- button \"Home\" [e2]", "e1", "e2");
     GuidedOutline.requireConsistent(observation);
   }
 
@@ -130,7 +130,7 @@ class GuidedOutlineTest {
     for (ObjectNode bad :
         List.of(
             observation("- button \"Save\" [e1]", "e1", "e2"),
-            observation("- button \"Save\" [e1]\n- link \"Home\" [e2]", "e1"),
+            observation("- button \"Save\" [e1]\n- button \"Home\" [e2]", "e1"),
             observation("- button \"Save\" [e1]", "e9"))) {
       assertThatThrownBy(() -> GuidedOutline.requireConsistent(bad))
           .isInstanceOfSatisfying(
@@ -160,9 +160,9 @@ class GuidedOutlineTest {
       facts
           .putObject(ref)
           .put("role", "button")
-          .put("name", "n")
+          .put("name", "n" + ref)
           .put("editable", false)
-          .put("evidence", "n")
+          .put("evidence", "n" + ref)
           .putArray("evidenceSegments");
     }
     return observation;

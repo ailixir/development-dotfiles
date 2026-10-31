@@ -229,6 +229,24 @@ public final class GuidedPublicationEvidenceFixture {
 
   private record Exercise(ObjectNode coordinate, ObjectNode operation, int referenceIndex) {}
 
+  /** The frozen step record (ADR-SC-008 D2): opaque code, what it captures and uses, its hash. */
+  private static ObjectNode stepRecord(String code, ArrayNode uses) {
+    ObjectNode operation = C.object().put("kind", "step").put("code", code);
+    operation.putArray("captures");
+    operation.set("uses", uses);
+    operation.put("sourceHash", GuidedContracts.hash(operation.path("code")));
+    return operation;
+  }
+
+  private static boolean usesSecret(JsonNode operation) {
+    for (JsonNode use : operation.path("uses")) {
+      if (use.path("kind").asText().equals("secret")) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /**
    * Caller retains reserve/claim/finish/commit; this method only supplies complete exercised facts.
    */
@@ -303,7 +321,10 @@ public final class GuidedPublicationEvidenceFixture {
           int stepIndex = 0;
           for (JsonNode step : manifest.path("sourceSteps")) {
             String stepId = step.path("stepId").asText();
-            int ordinal = 0;
+            // ADR-SC-008: one step is one action at ordinal 0; what it uses is named by `uses`.
+            ArrayNode uses = C.object().putArray("uses");
+            StringBuilder code = new StringBuilder();
+            int stepReference = -1;
             if (stepIndex == 0) {
               var matcher = URL.matcher(step.path("text").asText());
               String destination;
@@ -317,14 +338,12 @@ public final class GuidedPublicationEvidenceFixture {
                         .put("stepId", stepId)
                         .put("startUtf16", matcher.start())
                         .put("endUtf16", matcher.end())
-                        .put("kind", "destination")
-                        .put("intendedSlot", "navigate.destination");
+                        .put("kind", "destination");
               } else {
                 JsonNode selected = null;
                 for (JsonNode candidate : manifest.path("configurationReferences")) {
                   if (candidate.path("stepId").asText().equals(stepId)
                       && candidate.path("kind").asText().equals("destination")
-                      && candidate.path("intendedSlot").asText().equals("navigate.destination")
                       && URL.matcher(
                               manifest
                                   .path("configurationValues")
@@ -373,14 +392,11 @@ public final class GuidedPublicationEvidenceFixture {
                       .put("inputId", inputId)
                       .put("sourceStepId", stepId)
                       .put("kind", "destination")
-                      .put("value", destination)
-                      .put("intendedSlot", "navigate.destination");
+                      .put("value", destination);
               input.set("provenance", provenance);
-              exercises.add(
-                  new Exercise(
-                      C.object().put("stepId", stepId).put("ordinal", ordinal++),
-                      C.object().put("kind", "navigate").put("destinationInputId", inputId),
-                      reference));
+              uses.addObject().put("kind", "input").put("id", inputId);
+              code.append("await page.goto(inputs[\"").append(inputId).append("\"]);");
+              stepReference = reference;
             }
             for (JsonNode configured : manifest.path("configurationReferences")) {
               if (!configured.path("stepId").asText().equals(stepId)
@@ -402,19 +418,21 @@ public final class GuidedPublicationEvidenceFixture {
                       .put("inputId", inputId)
                       .put("sourceStepId", stepId)
                       .put("kind", "secretRef")
-                      .put("secretId", configured.path("referenceName").asText())
-                      .put("intendedSlot", "fill.value");
+                      .put("secretId", configured.path("referenceName").asText());
               input.set("provenance", provenance);
-              ObjectNode fill = C.object().put("kind", "fill");
-              fill.putObject("value").put("kind", "secretRef").put("sourceInputId", inputId);
-              exercises.add(
-                  new Exercise(
-                      C.object().put("stepId", stepId).put("ordinal", ordinal++), fill, reference));
+              uses.addObject()
+                  .put("kind", "secret")
+                  .put("id", configured.path("referenceName").asText());
+              code.append("await page.getByLabel(\"Password\").fill(secrets[\"")
+                  .append(configured.path("referenceName").asText())
+                  .append("\"]);");
+              if (stepReference < 0) {
+                stepReference = reference;
+              }
             }
             for (JsonNode configured : manifest.path("configurationReferences")) {
               if (!configured.path("stepId").asText().equals(stepId)
-                  || !configured.path("kind").asText().equals("nonsecretText")
-                  || !configured.path("intendedSlot").asText().equals("assert.expected")) {
+                  || !configured.path("kind").asText().equals("nonsecretText")) {
                 continue;
               }
               JsonNode value =
@@ -442,30 +460,24 @@ public final class GuidedPublicationEvidenceFixture {
                       .put("inputId", inputId)
                       .put("sourceStepId", stepId)
                       .put("kind", "nonsecretText")
-                      .put("value", value.asText())
-                      .put("intendedSlot", "assert.expected");
+                      .put("value", value.asText());
               input.set("provenance", provenance);
-              ObjectNode assertion = C.object().put("kind", "assert").put("predicate", "title");
-              assertion
-                  .putObject("expected")
-                  .put("kind", "authoredLiteral")
-                  .put("sourceInputId", inputId);
-              exercises.add(
-                  new Exercise(
-                      C.object().put("stepId", stepId).put("ordinal", ordinal++),
-                      assertion,
-                      reference));
+              uses.addObject().put("kind", "input").put("id", inputId);
+              code.append("await expect(page).toHaveTitle(inputs[\"")
+                  .append(inputId)
+                  .append("\"]);");
+              if (stepReference < 0) {
+                stepReference = reference;
+              }
             }
-            if (ordinal == 0) {
-              exercises.add(
-                  new Exercise(
-                      C.object().put("stepId", stepId).put("ordinal", 0),
-                      C.object().put("kind", "press").put("key", "Enter"),
-                      -1));
+            if (code.length() == 0) {
+              code.append("await page.keyboard.press(\"Enter\");");
             }
-            if (ordinal > 8) {
-              throw new IllegalArgumentException("Fixture exceeds semantic statement limit");
-            }
+            exercises.add(
+                new Exercise(
+                    C.object().put("stepId", stepId).put("ordinal", 0),
+                    stepRecord(code.toString(), uses),
+                    stepReference));
             stepIndex++;
           }
           if (exercises.size() > 200) {
@@ -487,24 +499,22 @@ public final class GuidedPublicationEvidenceFixture {
                             .toString())
                     .put("stepId", exercise.coordinate().path("stepId").asText())
                     .put("occurrence", exercise.coordinate().path("ordinal").asInt())
-                    .put("operationKind", exercise.operation().path("kind").asText())
-                    .put(
-                        "targetIntent",
-                        exercise.operation().path("kind").asText().equals("fill")
-                            ? "password"
-                            : "page")
+                    .put("targetIntent", "page")
                     .putNull("scopeIntent")
                     .putNull("needId");
-            if (exercise.operation().path("kind").asText().equals("assert")) {
-              meaning.put("predicate", "title");
-            } else {
-              meaning.putNull("predicate");
-            }
+            meaning.putArray("uses");
             if (exercise.referenceIndex() < 0) {
               meaning.putNull("referenceIndex");
             } else {
               meaning.put("referenceIndex", exercise.referenceIndex());
             }
+          }
+          ArrayNode stepSections = plan.putArray("stepSections");
+          for (JsonNode step : manifest.path("sourceSteps")) {
+            stepSections
+                .addObject()
+                .put("stepId", step.path("stepId").asText())
+                .putArray("sections");
           }
           com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlan.validate(C, plan);
           if (jdbc.queryForObject(
@@ -618,8 +628,7 @@ public final class GuidedPublicationEvidenceFixture {
           for (int i = 0; i < exercises.size(); i++) {
             Exercise exercise = exercises.get(i);
             String preparation = id + "-preparation-" + i, admission = id + "-admission-" + i;
-            boolean first = i == 0,
-                password = exercise.operation().path("kind").asText().equals("fill");
+            boolean first = i == 0, password = usesSecret(exercise.operation());
             ObjectNode observed =
                 first ? null : observation(id, scopeHash, id + "-document", i, origin, password);
             ObjectNode execution =
@@ -639,11 +648,6 @@ public final class GuidedPublicationEvidenceFixture {
             proposal.set("coordinate", exercise.coordinate());
             proposal.set("operation", exercise.operation());
             proposal.set("executionEvidence", execution);
-            proposal
-                .putObject("target")
-                .put("kind", password ? "passwordControl" : "page")
-                .put("documentId", execution.path("documentId").asText())
-                .put("generation", i);
             String digest = GuidedContracts.hash(proposal);
             ObjectNode proof =
                 C.object()
@@ -658,15 +662,12 @@ public final class GuidedPublicationEvidenceFixture {
                     .put(
                         "configurationRevision",
                         base.document().path("configurationRevision").asText())
-                    .putNull("pressInheritance")
                     .put("preparationId", preparation)
                     .put("requestDigest", digest)
                     .put("evidenceHash", GuidedContracts.hash(execution))
                     .put("authoredInputsHash", inputsHash)
                     .put("expiresAt", PublicationContracts.time(Instant.now().plusSeconds(30)));
             proof.putObject("versions").put("contract", 3);
-            // A page or password-control action reports no element target.
-            proof.putNull("target");
             current = sessions.lock(id);
             current.progress().set("executionEvidence", execution);
             if (observed != null) {
@@ -690,7 +691,6 @@ public final class GuidedPublicationEvidenceFixture {
             ObjectNode operation = C.object();
             operation.set("coordinate", exercise.coordinate());
             operation.set("origin", execution.path("origin"));
-            operation.putNull("target");
             operation.set("operation", exercise.operation());
             ObjectNode ledger =
                 C.object()
@@ -706,15 +706,11 @@ public final class GuidedPublicationEvidenceFixture {
                     .put("state", "SUCCEEDED")
                     .put("dispatchCount", 1)
                     .put("outcomeCode", "OK")
-                    .putNull("assertionPassed")
                     .put("evidenceHash", GuidedContracts.hash(execution))
                     .put("authoredInputsHash", inputsHash)
                     .put("contextRevision", 1)
                     .put("preparationId", preparation)
                     .put("attemptOrdinal", 0);
-            if (exercise.operation().path("kind").asText().equals("assert")) {
-              ledger.put("assertionPassed", true);
-            }
             ledger.set("coordinate", exercise.coordinate());
             ledger.set("executionEvidence", execution);
             ObjectNode decision =

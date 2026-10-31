@@ -1,7 +1,6 @@
 package com.citi.put.checks.studio.guided.session;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
@@ -150,8 +149,7 @@ class GuidedIncrementalQualifiedPlanIT {
     repository = new GuidedSessionRepository(jdbc, tx, C);
     store = new GuidedTranslationStore(jdbc, C);
     translationProperties =
-        new GuidedTranslationProperties(
-            true, 65536, 4096, 60, "worker-1", false, (int) BASE_MILLIS);
+        new GuidedTranslationProperties(true, 65536, 4096, 60, "worker-1", (int) BASE_MILLIS);
     var prompts =
         new GuidedPromptAssembler(C, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     seedSource();
@@ -339,10 +337,10 @@ class GuidedIncrementalQualifiedPlanIT {
               .addObject()
               .put("stepId", stepId)
               .put("occurrence", 0)
-              .put("operationKind", "click")
               .put("targetIntent", "Open");
       obligation.put("scopeIntent", scopeIntent);
-      obligation.putNull("referenceIndex").putNull("needId").putNull("predicate");
+      obligation.putNull("referenceIndex").putNull("needId");
+      obligation.putArray("uses");
       return new GuidedModelResponse(GuidedModelResponse.Code.OK, proposal, null, null, "model");
     };
   }
@@ -374,28 +372,11 @@ class GuidedIncrementalQualifiedPlanIT {
         .isFalse();
   }
 
-  @Test
-  void theIncrementalSourcePlanStillRefusesAQualifierTheStepTextDoesNotSay() throws Exception {
-    fixture("Click Open in Primary workspace");
-    gateway.script.addAll(
-        List.of(
-            clickOpen("Billing workspace"),
-            clickOpen("Billing workspace"),
-            clickOpen("Billing workspace")));
-
-    assertThatThrownBy(this::replan)
-        .isInstanceOfSatisfying(
-            GuidedSessionException.class,
-            e -> {
-              assertThat(e.getMessage()).isEqualTo("INVALID_CONTRACT");
-              assertThat(e.status()).isEqualTo(422);
-            });
-
-    assertThat(rows()).hasSize(3).allMatch(row -> row.contains("REJECTED"));
-    assertThat(acceptedPlan().path("obligations").isMissingNode() || acceptedPlan().isNull())
-        .as("nothing was accepted")
-        .isTrue();
-  }
+  // Disposition: "theIncrementalSourcePlanStillRefusesAQualifierTheStepTextDoesNotSay" is deleted.
+  // SC008-E3
+  // dropped the requireScopeIntent phrase check (scopeIntent is a prompt hint now: textual or
+  // null),
+  // so the server no longer refuses a qualifier the step text does not say.
 
   // ── support ────────────────────────────────────────────────────────────────────────────────
 
@@ -513,7 +494,7 @@ class GuidedIncrementalQualifiedPlanIT {
               .put("configurationRevision", current.path("configurationRevision").asText())
               .put("modelDataPolicyId", "INPUT-POLICY-01-A")
               .putNull("valueTransferPolicyId");
-      scope.putArray("capabilities").add("observe").add("click");
+      scope.putArray("capabilities").add("observe").add("step");
       var approved = classifier.classify(current, scope);
       var steps = JSON.createArrayNode();
       for (JsonNode step : approved.path("sourceSteps")) {

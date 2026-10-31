@@ -320,57 +320,6 @@ class IncrementalPublicationConformanceTest {
   }
 
   @Test
-  void issuedPrefixReadObservationRemainsAnchoredWithoutAnEffectiveReadAction() throws Exception {
-    JsonNode vector = null;
-    for (JsonNode row : document().path("graphTimingConformance").path("graphCases")) {
-      if (row.path("name").asText().equals("unperformed-read")) {
-        vector = row;
-      }
-    }
-    assertThat(vector).isNotNull();
-    JsonNode basis = vector.path("basis"), before = basis.deepCopy();
-    String issuedHash = basis.path("observations").get(0).path("observationHash").asText();
-    for (JsonNode action : basis.path("actions")) {
-      assertThat(action.path("ledger").path("executionEvidence").path("observationHash").asText())
-          .isNotEqualTo(issuedHash);
-    }
-    new GuidedBasisValidator(C).validate(basis);
-    assertThat(basis).isEqualTo(before);
-  }
-
-  @Test
-  void historicalChoiceCaptureAnchorsItsOlderObservationButAnUnusedSnapshotDoesNot()
-      throws Exception {
-    ObjectNode basis = document().path("observedChoice").path("basis").deepCopy();
-    JsonNode before = basis.deepCopy();
-    new GuidedBasisValidator(C).validate(basis);
-    assertThat(basis).isEqualTo(before);
-    boolean removed = false;
-    for (JsonNode prepared : basis.path("preparations")) {
-      if (prepared.has("observedChoice")) {
-        String hash =
-            prepared
-                .path("observedChoice")
-                .path("context")
-                .path("questionCapture")
-                .path("observationHash")
-                .asText();
-        for (JsonNode action : basis.path("actions")) {
-          assertThat(
-                  action.path("ledger").path("executionEvidence").path("observationHash").asText())
-              .isNotEqualTo(hash);
-        }
-        ((ObjectNode) prepared).remove("observedChoice");
-        removed = true;
-      }
-    }
-    assertThat(removed).isTrue();
-    assertThatThrownBy(() -> new GuidedBasisValidator(C).validate(basis))
-        .isInstanceOf(GuidedSessionException.class)
-        .hasMessage("EVIDENCE_MISMATCH");
-  }
-
-  @Test
   void unusedMaterializedInputNeverBecomesFutureReplayRecipe() throws Exception {
     JsonNode vector = document().path("snapshotCorrection").path("positives").get(1);
     JsonNode basis = vector.path("basis"), before = basis.deepCopy();
@@ -564,7 +513,7 @@ class IncrementalPublicationConformanceTest {
         }
       }
       assertThat(pointers).doesNotHaveDuplicates();
-      assertThat(pointers).hasSize(new int[] {79, 173, 285}[parentIndex]);
+      assertThat(pointers).hasSize(new int[] {73, 157, 259}[parentIndex]);
       ObjectNode originalEnvelope = expectedPublicationEvidencePreimage(basis);
       assertThat(GuidedContracts.hash(originalEnvelope))
           .isEqualTo(artifact.path("replayPolicy").path("publicationEvidenceHash").asText());
@@ -597,7 +546,7 @@ class IncrementalPublicationConformanceTest {
       assertThat(basis).isEqualTo(before);
       total += pointers.size();
     }
-    assertThat(total).isEqualTo(537);
+    assertThat(total).isEqualTo(489);
   }
 
   @ParameterizedTest(name = "recomputed commitment cannot bypass semantic join {0}")
@@ -782,10 +731,10 @@ class IncrementalPublicationConformanceTest {
     org.mockito.Mockito.verifyNoInteractions(jdbc);
   }
 
-  @ParameterizedTest(name = "current prefix and illegal reuse at drift j, parent {0}")
-  @org.junit.jupiter.params.provider.ValueSource(ints = {2, 3})
-  void driftJReconstructsCurrentPrefixButNeverGrantsReuseAtTheDriftStep(int parentIndex)
-      throws Exception {
+  /** Parent 2 is the admitted drift; SC008-E5 deleted the pre-admission parent that was 3. */
+  @Test
+  void driftJReconstructsCurrentPrefixButNeverGrantsReuseAtTheDriftStep() throws Exception {
+    final int parentIndex = 2;
     JsonNode parent = document().path("incrementalContracts").path("basisCases").get(parentIndex);
     JsonNode basis = parent.path("basis"), before = basis.deepCopy();
     JsonNode expected = parent.path("expectedArtifact"),

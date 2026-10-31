@@ -44,7 +44,8 @@ public final class GuidedPublicationBaseRepository {
         jdbc.query(
             "SELECT"
                 + " id,csi_id,source_revision,configuration_revision,publication_epoch,"
-                + "confirmed_revision_id,authoring::text,browser,viewport_width,viewport_height,"
+                + "COALESCE(candidate_revision_id,confirmed_revision_id),authoring::text,browser,"
+                + "viewport_width,viewport_height,"
                 + "timeout_seconds,wait_strategy,environment,deleted_at,quarantined_at,variables::text"
                 + " FROM ui_tests WHERE id=? FOR UPDATE",
             (rs, n) -> {

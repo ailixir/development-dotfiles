@@ -36,8 +36,7 @@ class GuidedActionLedgerTest {
                 .deepCopy()
                 .put("state", "UNKNOWN_OUTCOME")
                 .put("dispatchCount", 1)
-                .put("outcomeCode", cause)
-                .putNull("assertionPassed");
+                .put("outcomeCode", cause);
     assertThatCode(() -> ledger.verifyReport(original, report)).doesNotThrowAnyException();
   }
 
@@ -50,8 +49,7 @@ class GuidedActionLedgerTest {
                 .deepCopy()
                 .put("state", "UNKNOWN_OUTCOME")
                 .put("dispatchCount", 1)
-                .put("outcomeCode", cause)
-                .putNull("assertionPassed");
+                .put("outcomeCode", cause);
     assertThatThrownBy(() -> ledger.verifyReport(original, report)).hasMessage("INVALID_CONTRACT");
   }
 
@@ -63,12 +61,11 @@ class GuidedActionLedgerTest {
                 .deepCopy()
                 .put("state", "UNKNOWN_OUTCOME")
                 .put("dispatchCount", 1)
-                .put("outcomeCode", "TARGET_CHANGED")
-                .putNull("assertionPassed");
+                .put("outcomeCode", "TARGET_CHANGED");
     var noConsume = report.deepCopy().put("dispatchCount", 0);
     assertThatThrownBy(() -> ledger.verifyReport(original, noConsume))
         .hasMessage("INVALID_CONTRACT");
-    var forgedAssertion = report.deepCopy().put("assertionPassed", true);
+    var forgedAssertion = report.deepCopy().put("forgedField", true);
     assertThatThrownBy(() -> ledger.verifyReport(original, forgedAssertion))
         .hasMessage("INVALID_CONTRACT");
     var staleOwner = report.deepCopy().put("ownerFence", original.path("ownerFence").asLong() + 1);
@@ -81,8 +78,7 @@ class GuidedActionLedgerTest {
         .deepCopy()
         .put("state", "UNKNOWN_OUTCOME")
         .put("dispatchCount", 1)
-        .put("outcomeCode", "TARGET_CHANGED")
-        .putNull("assertionPassed");
+        .put("outcomeCode", "TARGET_CHANGED");
   }
 
   @Test
@@ -197,7 +193,9 @@ class GuidedActionLedgerTest {
         .when(controlled)
         .validate(org.mockito.ArgumentMatchers.eq("ledger"), org.mockito.ArgumentMatchers.any());
     assertThat(current.prepareReport(report)).isNull();
-    assertThatThrownBy(() -> current.verifyReport(original, report, null)).isSameAs(unexpected);
+    assertThatThrownBy(
+            () -> current.verifyReport(original, report, (GuidedActionLedger.PreparedReport) null))
+        .isSameAs(unexpected);
     Error fatal = new AssertionError("fixed-fatal-control");
     org.mockito.Mockito.doThrow(fatal)
         .when(controlled)
@@ -290,5 +288,65 @@ class GuidedActionLedgerTest {
             org.mockito.ArgumentMatchers.any(Object.class),
             org.mockito.ArgumentMatchers.any(Object.class));
     assertThatThrownBy(() -> repository.saveAction(report, prepared)).isSameAs(sqlFailure);
+  }
+
+  /**
+   * ADR-SC-008 D5: the receipt's closed code is the truth and the coarse ledger enum is derived
+   * from it by one table. That table is the frozen contract's own ({@code LEDGER_FROM_CLOSED_CODE}
+   * in the contract checker), read here rather than restated, so the two cannot drift: every closed
+   * code of {@code step-receipt.schema.json} has a row there, and {@code derive} returns exactly
+   * that row.
+   */
+  @Test
+  void theReceiptClosedCodeDerivesTheLedgerOutcomeFromTheContractCheckersTable() throws Exception {
+    String checker =
+        java.nio.file.Files.readString(
+            java.nio.file.Path.of("..", "tools", "check-studio-observed-contracts.cjs"));
+    int start = checker.indexOf("LEDGER_FROM_CLOSED_CODE = Object.freeze({");
+    assertThat(start).as("the contract checker still holds the table").isGreaterThan(0);
+    String block = checker.substring(start, checker.indexOf("});", start));
+    var row = java.util.regex.Pattern.compile("([A-Z_]+): \\['([A-Z_]+)', '([A-Z_]+)'\\]");
+    var matcher = row.matcher(block);
+    java.util.Map<String, String[]> table = new java.util.LinkedHashMap<>();
+    while (matcher.find()) {
+      table.put(matcher.group(1), new String[] {matcher.group(2), matcher.group(3)});
+    }
+    var schemaCodes = new java.util.TreeSet<String>();
+    for (var node :
+        new GuidedContracts()
+            .parse(
+                java.nio.file.Files.readString(
+                    java.nio.file.Path.of(
+                        "..",
+                        "docs",
+                        "specs",
+                        "studio-observed-authoring",
+                        "contracts",
+                        "v3",
+                        "step-receipt.schema.json")))
+            .path("properties")
+            .path("closedCode")
+            .path("oneOf")
+            .get(0)
+            .path("enum")) {
+      schemaCodes.add(node.asText());
+    }
+    // PASSWORD_CONTROL_READ_REFUSED and the others the receipt schema lists all have a row.
+    assertThat(table.keySet()).containsExactlyInAnyOrderElementsOf(schemaCodes);
+    for (var entry : table.entrySet()) {
+      var outcome =
+          GuidedActionLedger.derive(
+              com.fasterxml.jackson.databind.node.TextNode.valueOf(entry.getKey()));
+      assertThat(new String[] {outcome.state(), outcome.outcomeCode()})
+          .as(entry.getKey())
+          .containsExactly(entry.getValue());
+    }
+    assertThat(GuidedActionLedger.derive(new GuidedContracts().parse("null")))
+        .isEqualTo(new GuidedActionLedger.Outcome("SUCCEEDED", "OK"));
+    assertThatThrownBy(
+            () ->
+                GuidedActionLedger.derive(
+                    com.fasterxml.jackson.databind.node.TextNode.valueOf("NOT_A_CODE")))
+        .hasMessage("INVALID_CONTRACT");
   }
 }

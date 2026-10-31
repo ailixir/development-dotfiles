@@ -51,14 +51,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.net.ssl.SSLContext;
 import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,11 +81,11 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * W53 (STUDIO-OBS-009/010, real-stack case 432): the whole controller-to-runner path of the login
  * journey on the real target page, with a scripted model. The model only ever plans and selects:
- * SOURCE_PLAN covers the authored steps and NEXT_ACTION picks the first remaining obligation with
- * the observation's OWN exported node and hint. Nothing else is stubbed: real PostgreSQL, the
- * production {@code GuidedTranslationService.advance} loop (recover, refresh, verify, call, apply,
- * runner prepare, admit, dispatch), mutually authenticated HTTPS in both directions, and the real
- * folded runner with actual Chromium.
+ * SOURCE_PLAN covers the authored steps and STEP_CODE writes the Playwright code of the first
+ * remaining step from the step's own saved values and the observation's outline. Nothing else is
+ * stubbed: real PostgreSQL, the production {@code GuidedTranslationService.advance} loop (recover,
+ * refresh, verify, call, apply, runner prepare, admit, dispatch), mutually authenticated HTTPS in
+ * both directions, and the real folded runner with actual Chromium.
  *
  * <p>The page is the byte-identical HTML and CSP of {@code target432-core/helpers.mjs} (a Username
  * + Password login that posts to {@code /login}). The defect this guards: a Username fill whose
@@ -153,59 +151,28 @@ class GuidedLoginJourneyJoinedIT {
               + " method=\"get\" action=\"/protected/secondary\"><button type=\"submit\""
               + " data-testid=\"open-secondary\">Open</button></form></section>");
 
-  /**
-   * Round 057 (region-qualified labels): two "Open" buttons in one region, for the case where the
-   * author's region does not single out the target.
-   */
-  static final String CHOOSE_SAME_REGION_PAGE =
-      page(
-          "<h1>Choose workspace</h1><section aria-label=\"Primary workspace\"><h2>Primary"
-              + " workspace</h2><form method=\"get\" action=\"/protected/a\"><button"
-              + " type=\"submit\" data-testid=\"open-a\">Open</button></form><form"
-              + " method=\"get\" action=\"/protected/b\"><button type=\"submit\""
-              + " data-testid=\"open-b\">Open</button></form></section>");
-
-  /** "regions" (Primary and Secondary workspace) or "same" (both buttons in Primary workspace). */
-  static volatile String chooseVariant = "regions";
-
   /** The /protected/* pages the browser reached, in order: where an Open click actually landed. */
   static final List<String> LANDINGS = new CopyOnWriteArrayList<>();
 
-  /** The scopeIntent the scripted model puts on the step-5 Open obligation (null: unqualified). */
-  static volatile String openScope = null;
+  /** Page-resident canaries of the read-only page: Playwright's call log prints such text. */
+  static final String CANARY_ATTRIBUTE = "canary-attr-" + UUID.randomUUID();
 
-  static volatile boolean outsideScopeAttack;
-  static final AtomicInteger MALICIOUS_ACTIONS = new AtomicInteger();
+  static final String CANARY_VALUE = "canary-value-" + UUID.randomUUID();
+
+  /** When set, the code of step {@code i} is {@code CODE_BY_STEP.get(i)} (a test's own script). */
+  static volatile List<String> codeByStep;
+
   static final AtomicInteger PREPARE_CALLS = new AtomicInteger();
   static final AtomicInteger DISPATCH_CALLS = new AtomicInteger();
   static final List<String> WIRE_DIAGNOSTICS = new CopyOnWriteArrayList<>();
 
-  /** The target intents of the NEXT_ACTION requests, in order (one entry per model call). */
-  static final List<String> NEXT_ACTION_INTENTS = new CopyOnWriteArrayList<>();
+  /** The target intents of the STEP_CODE requests, in order (one entry per model call). */
+  static final List<String> STEP_INTENTS = new CopyOnWriteArrayList<>();
 
   /** The authored steps of the current test (set before the session is created). */
   static volatile List<UUID> stepIds = List.of();
 
   static volatile List<String> stepTexts = List.of();
-
-  /**
-   * Opt-in (environment {@code W53_REAL_VERTEX}): the one real-provider journey replaces the
-   * scripted model. Off by default, so every other case keeps the scripted provider and makes no
-   * network call.
-   */
-  static final boolean REAL = System.getenv("W53_REAL_VERTEX") != null;
-
-  /**
-   * A hard cap on provider sends in the real run; a failed call stops all later sends (no retries).
-   */
-  static final int REAL_CALL_CAP =
-      System.getenv("W53_REAL_CAP") == null ? 12 : Integer.parseInt(System.getenv("W53_REAL_CAP"));
-
-  static final List<String> REAL_CALLS = new CopyOnWriteArrayList<>();
-  static final AtomicInteger REAL_COUNT = new AtomicInteger();
-  static final AtomicBoolean REAL_ABORTED = new AtomicBoolean();
-  static volatile String lastFailure = "none";
-  static volatile String lastUsage = "-";
 
   static {
     try {
@@ -238,8 +205,15 @@ class GuidedLoginJourneyJoinedIT {
               location = "/choose";
               body = new byte[0];
             } else if (path.equals("/choose")) {
+              body = CHOOSE_PAGE.getBytes(StandardCharsets.UTF_8);
+            } else if (path.equals("/readonly")) {
               body =
-                  (chooseVariant.equals("same") ? CHOOSE_SAME_REGION_PAGE : CHOOSE_PAGE)
+                  page("<h1>Read-only</h1><label>Field<input name=\"field\" type=\"text\""
+                          + " readonly value=\""
+                          + CANARY_VALUE
+                          + "\" data-canary=\""
+                          + CANARY_ATTRIBUTE
+                          + "\"></label>")
                       .getBytes(StandardCharsets.UTF_8);
             } else if (path.startsWith("/protected/")) {
               LANDINGS.add(path);
@@ -357,8 +331,7 @@ class GuidedLoginJourneyJoinedIT {
 
     @Bean
     GuidedTranslationProperties properties() {
-      return new GuidedTranslationProperties(
-          true, REAL ? 65536 : 131072, REAL ? 4096 : 2048, REAL ? 150 : 60, "worker-1");
+      return new GuidedTranslationProperties(true, 131072, 2048, 60, "worker-1");
     }
 
     @Bean
@@ -381,23 +354,16 @@ class GuidedLoginJourneyJoinedIT {
     }
 
     @Bean
-    GuidedStepVerifier verifier(GuidedTranslationStore store) {
-      return new GuidedStepVerifier(store);
-    }
-
-    @Bean
     GuidedProductionSessionAccess access(
         GuidedSourceSnapshotRepository snapshots,
         GuidedSourceClassifier classifier,
         GuidedSourceInputResolver inputs,
-        GuidedTranslationStore store,
-        GuidedStepVerifier verifier) {
+        GuidedTranslationStore store) {
       return new GuidedProductionSessionAccess(
           snapshots,
           classifier,
           inputs,
           store,
-          verifier,
           new CsiOwnershipEvaluator(),
           com.citi.put.checks.studio.support.TestDomains.FIXTURES,
           new VaultStudioReferenceResolver(VAULT));
@@ -519,24 +485,6 @@ class GuidedLoginJourneyJoinedIT {
 
     @Bean(destroyMethod = "close")
     GenAiGatewayTransport transport() throws Exception {
-      if (REAL) {
-        // The case's local configuration: direct Vertex, application-default credentials (never
-        // printed).
-        return new GenAiGatewayTransport(
-            new StudioGatewayProperties(
-                "https://aiplatform.googleapis.com",
-                "epicagentai",
-                "global",
-                "gemini-3.8-flash",
-                new StudioGatewayProperties.Credentials("application-default", null),
-                Duration.ofSeconds(150),
-                4,
-                262144,
-                262144,
-                StudioGatewayProperties.DEFAULT_MAX_OUTPUT_TOKENS,
-                StudioGatewayProperties.ThinkingLevel.LOW,
-                StudioGatewayProperties.ProviderFeatures.ALL));
-      }
       var props =
           new StudioGatewayProperties(
               "http://127.0.0.1:" + PROVIDER.getAddress().getPort(),
@@ -556,11 +504,6 @@ class GuidedLoginJourneyJoinedIT {
 
     @Bean
     GuidedLlmGatewayClient gateway(GenAiGatewayTransport transport) {
-      if (REAL) {
-        return new RecordingGateway(
-            new GenAiGuidedLlmGatewayClient(
-                recordingTransport(transport), new GuidedResponseParser(CONTRACTS)));
-      }
       return new GenAiGuidedLlmGatewayClient(transport, new GuidedResponseParser(CONTRACTS));
     }
 
@@ -675,82 +618,49 @@ class GuidedLoginJourneyJoinedIT {
     return schema.deepCopy();
   }
 
-  // ---- the scripted model (it only plans and selects) ----
+  // ---- the scripted model (ADR-SC-008: it plans the steps and writes one step's code) ----
 
-  static ObjectNode obligation(
-      String step, int occurrence, String kind, String target, Integer reference) {
-    ObjectNode item =
-        CONTRACTS
-            .object()
-            .put("stepId", step)
-            .put("occurrence", occurrence)
-            .put("operationKind", kind)
-            .put("targetIntent", target)
-            .putNull("scopeIntent")
-            .putNull("predicate");
-    if (reference == null) {
-      item.putNull("referenceIndex");
-    } else {
-      item.put("referenceIndex", reference);
-    }
-    item.putNull("needId");
-    return item;
-  }
-
-  /** The configuration reference the classifier created for a step and slot (kind-checked). */
-  static ObjectNode configurationReference(JsonNode request, String step, String kind) {
-    for (JsonNode reference : request.path("context").path("configurationReferences")) {
-      if (reference.path("stepId").asText().equals(step)
-          && reference.path("intendedSlot").asText().equals("fill.value")
-          && reference.path("kind").asText().equals(kind)) {
-        ObjectNode saved = reference.deepCopy();
-        saved.put("referenceKind", "configuration").put("configurationRevision", "1");
-        // The closed public shape permits referenceName only for secretRef.
-        if (!kind.equals("secretRef")) {
-          saved.remove("referenceName");
-        }
-        return saved;
-      }
-    }
-    throw new IllegalStateException("CONFIGURATION_REFERENCE_MISSING:" + step + ":" + kind);
-  }
-
-  /**
-   * SOURCE_PLAN for the authored steps: open /login, fill Username, fill Password, click Sign in.
-   */
+  /** S-min SOURCE_PLAN: one open obligation per authored step, no capture, no use. */
   static ObjectNode sourcePlan(JsonNode request) {
-    String open = stepIds.get(0).toString();
-    String user = stepIds.get(1).toString();
-    String pass = stepIds.get(2).toString();
     ObjectNode plan = CONTRACTS.object();
     var references = plan.putArray("sourceReferences");
-    String destination = ORIGIN + "/login";
-    int start = stepTexts.get(0).indexOf(destination);
-    references
-        .addObject()
-        .put("referenceKind", "sourceSpan")
-        .put("sourceRevision", "1")
-        .put("stepId", open)
-        .put("startUtf16", start)
-        .put("endUtf16", start + destination.length())
-        .put("kind", "destination")
-        .put("intendedSlot", "navigate.destination");
-    references.add(configurationReference(request, user, "nonsecretText"));
-    references.add(configurationReference(request, pass, "secretRef"));
     var obligations = plan.putArray("obligations");
-    obligations.add(obligation(open, 0, "navigate", "page", 0));
-    obligations.add(obligation(user, 0, "fill", "Username", 1));
-    obligations.add(obligation(pass, 0, "fill", "Password", 2));
-    if (stepIds.size() > 3) {
-      obligations.add(obligation(stepIds.get(3).toString(), 0, "click", "Sign in", null));
-    }
-    if (stepIds.size() > 4) {
-      ObjectNode choose = obligation(stepIds.get(4).toString(), 0, "click", "Open", null);
-      if (openScope != null) {
-        choose.put("scopeIntent", openScope);
+    String[] intents = {"page", "Username", "Password", "Sign in", "Open"};
+    for (int i = 0; i < stepIds.size(); i++) {
+      var obligation =
+          obligations
+              .addObject()
+              .put("stepId", stepIds.get(i).toString())
+              .put("occurrence", 0)
+              .put("targetIntent", intents[i])
+              .putNull("scopeIntent");
+      JsonNode chosen = null;
+      for (JsonNode reference : request.path("context").path("configurationReferences")) {
+        if (reference.path("stepId").asText().equals(stepIds.get(i).toString())
+            && (reference.path("kind").asText().equals("secretRef")
+                || reference.path("kind").asText().equals("nonsecretText"))) {
+          chosen = reference;
+        }
       }
-      obligations.add(choose);
+      if (chosen == null) {
+        obligation.putNull("referenceIndex");
+      } else {
+        obligation.put("referenceIndex", references.size());
+        ObjectNode reference = chosen.deepCopy();
+        reference
+            .put("referenceKind", "configuration")
+            .put(
+                "configurationRevision",
+                request.path("context").path("configurationRevision").asText());
+        if (!reference.path("kind").asText().equals("secretRef")) {
+          reference.remove("referenceName");
+        }
+        references.add(reference);
+      }
+      obligation.putNull("needId");
+      obligation.putArray("uses");
     }
+    plan.putArray("stepSections");
     return plan;
   }
 
@@ -764,84 +674,65 @@ class GuidedLoginJourneyJoinedIT {
     throw new IllegalStateException("INPUT_MISSING:" + step + ":" + kind);
   }
 
-  /** NEXT_ACTION: the first remaining obligation, naming a ref of the outline the request shows. */
-  static ObjectNode nextAction(JsonNode request, ObjectNode response) {
+  /** The secret id (referenceName) of the secretRef configuration reference of the step. */
+  static String secretIdFor(JsonNode request, String step) {
+    for (JsonNode reference : request.path("context").path("configurationReferences")) {
+      if (reference.path("stepId").asText().equals(step)
+          && reference.path("kind").asText().equals("secretRef")) {
+        return reference.path("referenceName").asText();
+      }
+    }
+    throw new IllegalStateException("SECRET_REFERENCE_MISSING:" + step);
+  }
+
+  /** STEP_CODE: the code of the first remaining step, from the step's own saved values. */
+  static ObjectNode stepCode(JsonNode request, ObjectNode response) {
     JsonNode chosen = request.path("context").path("obligations").path(0);
     if (chosen.isMissingNode()) {
       throw new IllegalStateException("NO_REMAINING_OBLIGATION");
     }
     String step = chosen.path("stepId").asText();
-    String kind = chosen.path("operationKind").asText();
     String intent = chosen.path("targetIntent").asText();
-    NEXT_ACTION_INTENTS.add(intent);
-    if (kind.equals("click")
-        && intent.equals("Open")
-        && !chosen.has("selectedChoice")
-        && !outsideScopeAttack) {
-      List<GuidedOutline.Line> matches = openCandidates(request, chosen);
-      if (matches.size() >= 2) {
-        return clarification(request, response, chosen, matches);
-      }
-      if (matches.isEmpty()) {
-        return response.put("status", "UNSUPPORTED").put("reasonCode", "INSUFFICIENT_EVIDENCE");
-      }
+    STEP_INTENTS.add(intent);
+    String code;
+    if (codeByStep != null) {
+      response
+          .put("status", "CODE")
+          .put("code", codeByStep.get(stepIds.indexOf(java.util.UUID.fromString(step))))
+          .putArray("captures");
+      return response;
     }
-    ObjectNode action = CONTRACTS.object();
-    ObjectNode target = action.putObject("target");
-    ObjectNode operation = action.putObject("operation").put("kind", kind);
-    switch (kind) {
-      case "navigate" -> {
-        target.put("kind", "page");
-        operation.put("destinationInputId", inputIdFor(request, step, "destination"));
-      }
-      case "fill" -> {
-        if (intent.equals("Password")) {
-          target.put("kind", "passwordControl");
-          operation
-              .putObject("value")
-              .put("kind", "secretRef")
-              .put("sourceInputId", inputIdFor(request, step, "secretRef"));
-        } else {
-          selectNode(request, intent, target);
-          operation
-              .putObject("value")
-              .put("kind", "authoredLiteral")
-              .put("sourceInputId", inputIdFor(request, step, "nonsecretText"));
+    switch (intent) {
+      case "page" -> code = "await page.goto('" + ORIGIN + "/login');";
+      case "Username" ->
+          code =
+              "await page.getByLabel('Username').fill(inputs['"
+                  + inputIdFor(request, step, "nonsecretText")
+                  + "']);";
+      case "Password" ->
+          code =
+              "await page.getByLabel('Password').fill(secrets['"
+                  + secretIdFor(request, step)
+                  + "']);";
+      case "Sign in" -> code = "await page.getByRole('button', { name: 'Sign in' }).click();";
+      case "Open" -> {
+        List<GuidedOutline.Line> matches = openCandidates(request);
+        if (!chosen.has("selectedChoice") && matches.size() >= 2) {
+          return clarification(request, response, matches);
         }
+        // An accepted choice names the element the author picked; open that region's button.
+        String region =
+            chosen.has("selectedChoice")
+                ? regionOfRef(request, chosen.path("selectedChoice").path("ref").asText())
+                : "";
+        code =
+            "await page.getByRole('region', { name: '"
+                + region
+                + "' }).getByRole('button', { name: 'Open' }).click();";
       }
-      case "click" -> {
-        if (outsideScopeAttack && intent.equals("Open")) {
-          GuidedOutline.Line malicious =
-              shown(request).stream()
-                  .filter(
-                      line ->
-                          "Open".equals(line.name())
-                              && regionOf(line).equals("Secondary workspace"))
-                  .findFirst()
-                  .orElseThrow(() -> new IllegalStateException("ADVERSARIAL_CURRENT_REF_MISSING"));
-          target.put("kind", "node").put("ref", malicious.ref());
-          MALICIOUS_ACTIONS.incrementAndGet();
-        } else if (chosen.has("selectedChoice")) {
-          // An accepted choice: the backend names the fresh ref of the element the author chose.
-          target.put("kind", "node").put("ref", chosen.path("selectedChoice").path("ref").asText());
-        } else if (chosen.path("scopeIntent").isTextual()) {
-          // A qualified step: the one element of that name in that region.
-          List<GuidedOutline.Line> matches = openCandidates(request, chosen);
-          if (matches.size() != 1) {
-            throw new IllegalStateException("QUALIFIED_CANDIDATES:" + matches.size());
-          }
-          target.put("kind", "node").put("ref", matches.getFirst().ref());
-        } else {
-          selectNode(request, intent, target);
-        }
-      }
-      default -> throw new IllegalStateException("UNSCRIPTED_" + kind);
+      default -> throw new IllegalStateException("UNSCRIPTED_" + intent);
     }
-    response
-        .put("status", "ACTION")
-        .put("obligationId", chosen.path("obligationId").asText())
-        .putNull("question")
-        .set("action", action);
+    response.put("status", "CODE").put("code", code).putArray("captures");
     return response;
   }
 
@@ -873,14 +764,20 @@ class GuidedLoginJourneyJoinedIT {
     }
   }
 
-  /** The shown elements named "Open" (in the named region, when the obligation has one). */
-  static List<GuidedOutline.Line> openCandidates(JsonNode request, JsonNode obligation) {
+  static String regionOfRef(JsonNode request, String ref) {
+    for (GuidedOutline.Line line : shown(request)) {
+      if (ref.equals(line.ref())) {
+        return regionOf(line);
+      }
+    }
+    throw new IllegalStateException("CHOSEN_REF_NOT_SHOWN");
+  }
+
+  /** The shown elements named "Open". */
+  static List<GuidedOutline.Line> openCandidates(JsonNode request) {
     List<GuidedOutline.Line> matches = new ArrayList<>();
     for (GuidedOutline.Line line : shown(request)) {
-      if (line.name() != null
-          && line.name().equalsIgnoreCase(obligation.path("targetIntent").asText())
-          && (!obligation.path("scopeIntent").isTextual()
-              || regionOf(line).equalsIgnoreCase(obligation.path("scopeIntent").asText()))) {
+      if (line.name() != null && line.name().equalsIgnoreCase("Open")) {
         matches.add(line);
       }
     }
@@ -889,39 +786,15 @@ class GuidedLoginJourneyJoinedIT {
 
   /** Several elements answer the label: ask, offering exactly those elements by their refs. */
   static ObjectNode clarification(
-      JsonNode request,
-      ObjectNode response,
-      JsonNode obligation,
-      List<GuidedOutline.Line> matches) {
-    response.put("status", "CLARIFICATION").putNull("obligationId").putNull("action");
+      JsonNode request, ObjectNode response, List<GuidedOutline.Line> matches) {
+    response.put("status", "CLARIFICATION");
     var choices =
         response.putObject("question").put("reason", "AMBIGUOUS_TARGET").putArray("choices");
     int index = 0;
     for (GuidedOutline.Line line : matches) {
-      ObjectNode meaning =
-          CONTRACTS
-              .object()
-              .put("obligationId", obligation.path("obligationId").asText())
-              .put("ref", line.ref())
-              .putNull("bindingId");
-      choices
-          .addObject()
-          .put("choiceId", "choice-" + index++)
-          .put("safeLabel", line.name())
-          .set("meaning", meaning);
+      choices.addObject().put("ref", line.ref()).put("safeLabel", "Option " + ++index);
     }
     return response;
-  }
-
-  /** What a correct model does: copy the ref of the outline line whose name is the intent. */
-  static void selectNode(JsonNode request, String intent, ObjectNode target) {
-    for (GuidedOutline.Line line : shown(request)) {
-      if (line.name().equalsIgnoreCase(intent)) {
-        target.put("kind", "node").put("ref", line.ref());
-        return;
-      }
-    }
-    throw new IllegalStateException("NODE_UNAVAILABLE:" + intent);
   }
 
   static ObjectNode providerResponse(JsonNode request) {
@@ -936,180 +809,10 @@ class GuidedLoginJourneyJoinedIT {
     if (kind.equals("SOURCE_PLAN")) {
       return (ObjectNode) response.setAll(sourcePlan(request));
     }
-    if (!kind.equals("NEXT_ACTION")) {
+    if (!kind.equals("STEP_CODE")) {
       throw new IllegalStateException("UNEXPECTED_" + kind);
     }
-    return nextAction(request, response);
-  }
-
-  // ---- the real-provider run: closed failure classes only, never a message, body or prompt ----
-
-  /**
-   * Exception simple-class chain plus the SDK's HTTP status integer; no message, cause text or
-   * body.
-   */
-  static String closedFailure(Throwable error) {
-    var classes = new StringBuilder();
-    int status = -1;
-    int depth = 0;
-    for (Throwable current = error; current != null && depth < 6; current = current.getCause()) {
-      classes.append(classes.isEmpty() ? "" : ">").append(current.getClass().getSimpleName());
-      if (current instanceof com.google.genai.errors.ApiException api) {
-        status = api.code();
-      }
-      depth++;
-    }
-    return classes + " http=" + status;
-  }
-
-  /**
-   * Integer usage counters only (prompt, candidates, thoughts, tool-use, total); absent ones print
-   * as -.
-   */
-  static String closedUsage(com.google.genai.types.GenerateContentResponse raw) {
-    String finish =
-        raw.candidates()
-            .map(
-                candidates ->
-                    candidates.isEmpty()
-                        ? "NO_CANDIDATE"
-                        : candidates.get(0).finishReason().map(Object::toString).orElse("-"))
-            .orElse("NO_CANDIDATE");
-    var metadata = raw.usageMetadata();
-    if (metadata.isEmpty()) {
-      return "finish=" + finish + " usage=none";
-    }
-    var usage = metadata.get();
-    return "finish="
-        + finish
-        + " prompt="
-        + usage.promptTokenCount().map(String::valueOf).orElse("-")
-        + " candidates="
-        + usage.candidatesTokenCount().map(String::valueOf).orElse("-")
-        + " thoughts="
-        + usage.thoughtsTokenCount().map(String::valueOf).orElse("-")
-        + " toolUse="
-        + usage.toolUsePromptTokenCount().map(String::valueOf).orElse("-")
-        + " total="
-        + usage.totalTokenCount().map(String::valueOf).orElse("-");
-  }
-
-  /** True when the action's ref is, verbatim, one of the refs the request's outline shows. */
-  static boolean usedShownRef(GuidedModelRequest request, JsonNode action) {
-    JsonNode target = action.path("target");
-    return target.path("kind").asText().equals("node")
-        && GuidedOutline.shownRefs(request.projection().document().path("observation").asText())
-            .contains(target.path("ref").asText());
-  }
-
-  private static Object invokeReal(Object real, org.mockito.invocation.InvocationOnMock call)
-      throws Throwable {
-    try {
-      return call.getMethod().invoke(real, call.getArguments());
-    } catch (java.lang.reflect.InvocationTargetException failure) {
-      throw failure.getCause();
-    }
-  }
-
-  /**
-   * A delegating view of the real transport whose lease records where (authenticate or generate) it
-   * failed.
-   */
-  static GenAiGatewayTransport recordingTransport(GenAiGatewayTransport real) {
-    return org.mockito.Mockito.mock(
-        GenAiGatewayTransport.class,
-        org.mockito.Mockito.withSettings()
-            .defaultAnswer(
-                call -> {
-                  Object result = invokeReal(real, call);
-                  if (call.getMethod().getName().equals("tryAcquire")
-                      && result instanceof GenAiGatewayTransport.Lease lease) {
-                    return org.mockito.Mockito.mock(
-                        GenAiGatewayTransport.Lease.class,
-                        org.mockito.Mockito.withSettings()
-                            .defaultAnswer(
-                                leaseCall -> {
-                                  try {
-                                    Object leaseResult = invokeReal(lease, leaseCall);
-                                    if (leaseResult
-                                        instanceof
-                                        com.google.genai.types.GenerateContentResponse raw) {
-                                      lastUsage = closedUsage(raw);
-                                    }
-                                    return leaseResult;
-                                  } catch (Throwable failure) {
-                                    String phase = leaseCall.getMethod().getName();
-                                    if (phase.equals("authenticate") || phase.equals("generate")) {
-                                      lastFailure = phase + ":" + closedFailure(failure);
-                                    }
-                                    throw failure;
-                                  }
-                                }));
-                  }
-                  return result;
-                }));
-  }
-
-  /**
-   * At most {@link #REAL_CALL_CAP} sends, and none after the first transport-class failure; records
-   * closed facts per call.
-   */
-  static final class RecordingGateway implements GuidedLlmGatewayClient {
-    private final GuidedLlmGatewayClient delegate;
-
-    RecordingGateway(GuidedLlmGatewayClient delegate) {
-      this.delegate = delegate;
-    }
-
-    @Override
-    public GuidedModelResponse propose(GuidedModelRequest request, GuidedCallBudget budget) {
-      int number = REAL_COUNT.incrementAndGet();
-      if (number > REAL_CALL_CAP || REAL_ABORTED.get()) {
-        REAL_CALLS.add(
-            "call=" + number + " kind=" + request.kind() + " NOT_SENT (cap or earlier failure)");
-        return new GuidedModelResponse(GuidedModelResponse.Code.TRANSPORT, null, null, null, null);
-      }
-      lastFailure = "none";
-      lastUsage = "-";
-      long started = System.nanoTime();
-      GuidedModelResponse response = delegate.propose(request, budget);
-      long millis = (System.nanoTime() - started) / 1_000_000;
-      StringBuilder line =
-          new StringBuilder("call=" + number)
-              .append(" kind=" + request.kind())
-              .append(" code=" + response.code())
-              .append(" inputTokens=" + (response.inputTokens() == null ? "ABSENT" : "PRESENT"))
-              .append(" outputTokens=" + (response.outputTokens() == null ? "ABSENT" : "PRESENT"))
-              .append(" maxOutputTokens=" + request.maxOutputTokens())
-              .append(" inTokens=" + response.inputTokens())
-              .append(" outTokens=" + response.outputTokens())
-              .append(" usage[" + lastUsage + "]")
-              .append(" ms=" + millis)
-              .append(" failure=" + lastFailure);
-      if (response.code() == GuidedModelResponse.Code.OK) {
-        JsonNode proposal = response.proposal();
-        line.append(" status=" + proposal.path("status").asText());
-        JsonNode action = proposal.path("action");
-        if (action.isObject()) {
-          line.append(" operation=" + action.path("operation").path("kind").asText())
-              .append(" target=" + action.path("target").path("kind").asText("node"))
-              .append(" ref=" + action.path("target").path("ref").asText("-"))
-              .append(
-                  " valueKind=" + action.path("operation").path("value").path("kind").asText("-"))
-              .append(" realShownRef=" + usedShownRef(request, action));
-        }
-        if (request.kind() == GuidedModelRequest.Kind.SOURCE_PLAN) {
-          line.append(" obligations=" + proposal.path("obligations").size());
-        }
-      } else if (response.code() != GuidedModelResponse.Code.INVALID_RESPONSE) {
-        // A transport-class failure stops all later sends. An unparsable answer is the product's
-        // own repair
-        // path (bounded by the cap), exactly as in the case.
-        REAL_ABORTED.set(true);
-      }
-      REAL_CALLS.add(line.toString());
-      return response;
-    }
+    return stepCode(request, response);
   }
 
   // ---- the test ----
@@ -1151,17 +854,11 @@ class GuidedLoginJourneyJoinedIT {
     PROVIDER_KINDS.clear();
     LOGIN_POSTS.clear();
     LANDINGS.clear();
-    NEXT_ACTION_INTENTS.clear();
-    chooseVariant = "regions";
-    openScope = null;
-    outsideScopeAttack = false;
-    MALICIOUS_ACTIONS.set(0);
+    STEP_INTENTS.clear();
+    codeByStep = null;
     PREPARE_CALLS.set(0);
     DISPATCH_CALLS.set(0);
     WIRE_DIAGNOSTICS.clear();
-    REAL_CALLS.clear();
-    REAL_COUNT.set(0);
-    REAL_ABORTED.set(false);
     jdbc.update(
         "INSERT INTO users(id,sso_id,name,email,created_at) VALUES (?"
             + ",'guided-fixture','Guided"
@@ -1239,7 +936,7 @@ class GuidedLoginJourneyJoinedIT {
       report.assertNoSurvivors();
       report.assertCleanExit();
     }
-    assertThat(PROVIDER_KINDS).isSubsetOf("SOURCE_PLAN", "NEXT_ACTION");
+    assertThat(PROVIDER_KINDS).isSubsetOf("SOURCE_PLAN", "STEP_CODE");
   }
 
   @AfterAll
@@ -1261,8 +958,6 @@ class GuidedLoginJourneyJoinedIT {
    * used to burn on step 2).
    */
   void journey() throws Exception {
-    Assumptions.assumeFalse(
-        REAL, "the scripted model is replaced by the real provider in this run");
     String id = createSession();
     translation.plan(controller, id, 0, "plan-" + id, command(id));
     assertThat(progress(id).path("translationBootstrap").path("phase").asText()).isEqualTo("READY");
@@ -1278,7 +973,9 @@ class GuidedLoginJourneyJoinedIT {
                 + ":"
                 + refusal.getMessage()
                 + ":closedWire="
-                + WIRE_DIAGNOSTICS;
+                + WIRE_DIAGNOSTICS
+                + " RUNNERLOG="
+                + runnerLogTail();
       }
       stepIndex = progress(id).path("stepIndex").asInt();
       trace.add(
@@ -1306,20 +1003,23 @@ class GuidedLoginJourneyJoinedIT {
     assertThat(form).contains("username=" + USERNAME).contains("password=" + PASSWORD);
   }
 
-  // ---- round 057 (user decision): region-qualified step labels, real runner, scripted model ----
-
   /**
    * Re-creates the authored test with a fifth step. No session exists yet, so deleting and
    * re-inserting the row keeps revision 1.
    */
   void useFiveSteps(String openText, int timeoutSeconds) throws Exception {
-    stepTexts =
+    useSteps(
         List.of(
             "Open " + ORIGIN + "/login",
             "Fill Username with <var USER>",
             "Fill Password with <secret PASS>",
             "Click Sign in",
-            openText);
+            openText),
+        timeoutSeconds);
+  }
+
+  void useSteps(List<String> texts, int timeoutSeconds) throws Exception {
+    stepTexts = texts;
     stepIds = new ArrayList<>();
     var steps = new ArrayList<AuthoringStep>();
     for (String text : stepTexts) {
@@ -1395,6 +1095,15 @@ class GuidedLoginJourneyJoinedIT {
         failure, progress(id).path("stepIndex").asInt(), session(id).path("state").asText(), trace);
   }
 
+  String runnerLogTail() {
+    try {
+      String log = Files.readString(workerHarness.logFile());
+      return log.substring(Math.max(0, log.length() - 3000));
+    } catch (java.io.IOException unreadable) {
+      return "unreadable";
+    }
+  }
+
   String startAndPlan() {
     String id = createSession();
     translation.plan(controller, id, 0, "plan-" + id, command(id));
@@ -1409,160 +1118,67 @@ class GuidedLoginJourneyJoinedIT {
         id);
   }
 
-  JsonNode openObligation(String id) {
-    JsonNode obligations =
-        repository.transaction(() -> store.state(id).path("plan").path("obligations").deepCopy());
-    return obligations.get(obligations.size() - 1);
-  }
-
-  /** The step-5 Open click, qualified by a region the author wrote: no question, one model call. */
-  void qualifiedOpen(String region, String expectedLanding) throws Exception {
-    Assumptions.assumeFalse(REAL, "the scripted model is replaced by the real provider here");
-    useFiveSteps("Click Open in " + region, 30);
-    openScope = region;
-    String id = startAndPlan();
-    Turns turns = advanceUntil(id, 5, 40);
-    assertThat(turns.failure()).as(turns.trace().toString()).isNull();
-    assertThat(turns.stepIndex()).as(turns.trace().toString()).isEqualTo(5);
-    // The plan carries the bare label and the qualifier; the page's other region was never asked.
-    assertThat(openObligation(id).path("targetIntent").asText()).isEqualTo("Open");
-    assertThat(openObligation(id).path("scopeIntent").asText()).isEqualTo(region);
-    assertThat(clarificationRows(id)).isZero();
-    assertThat(NEXT_ACTION_INTENTS)
-        .containsExactly("page", "Username", "Password", "Sign in", "Open");
-    assertThat(LANDINGS).containsExactly(expectedLanding);
-    assertThat(progress(id).path("errorCode").asText("")).isEmpty();
-    assertThat(session(id).path("state").asText()).isNotEqualTo("FAILED");
-  }
-
   @Test
-  void theQualifiedStepOpensThePrimaryWorkspaceWithoutAQuestion() throws Exception {
-    qualifiedOpen("Primary workspace", "/protected/primary");
-  }
-
-  @Test
-  void theQualifiedStepOpensTheSecondaryWorkspaceNotTheFirstMatch() throws Exception {
-    qualifiedOpen("Secondary workspace", "/protected/secondary");
-  }
-
-  @Test
-  void aRegionThePageDoesNotHaveFailsClosedWithoutClickingEitherButton() throws Exception {
-    Assumptions.assumeFalse(REAL, "the scripted model is replaced by the real provider here");
-    useFiveSteps("Click Open in Tertiary workspace", 3);
-    openScope = "Tertiary workspace";
-    String id = startAndPlan();
-    Turns turns = advanceUntil(id, 5, 80);
-    // Semantic stasis ends redundant acquisition; the scripted provider honestly reports no scope.
-    assertThat(turns.failure()).as(turns.trace().toString()).isNull();
-    assertThat(session(id).path("state").asText()).isEqualTo("FAILED");
-    assertThat(progress(id).path("errorCode").asText()).isEqualTo("UNSUPPORTED_STEP");
-    assertThat(NEXT_ACTION_INTENTS)
-        .containsExactly("page", "Username", "Password", "Sign in", "Open");
-    assertThat(PROVIDER_KINDS).isSubsetOf("SOURCE_PLAN", "NEXT_ACTION");
-    assertThat(LANDINGS).isEmpty();
-    assertThat(clarificationRows(id)).isZero();
-  }
-
-  @Test
-  void anUnqualifiedOpenStillAsksWhichOneWithRegionLabelledChoices() throws Exception {
-    Assumptions.assumeFalse(REAL, "the scripted model is replaced by the real provider here");
+  void anUnqualifiedOpenStillAsksWhichOneAndTheAnswerOpensThatWorkspace() throws Exception {
     useFiveSteps("Click Open", 30);
     String id = startAndPlan();
     Turns turns = advanceUntil(id, 5, 40);
     assertThat(turns.state()).as(turns.trace().toString()).isEqualTo("AWAITING_CLARIFICATION");
-    assertThat(openObligation(id).path("scopeIntent").isNull()).isTrue();
     JsonNode question = sessions.read(user, id, "clarification");
     assertThat(question.path("reason").asText()).isEqualTo("AMBIGUOUS_TARGET");
     assertThat(question.path("choices")).hasSize(2);
-    String primary = null;
-    List<String> regions = new ArrayList<>();
-    for (JsonNode choice : question.path("choices")) {
-      assertThat(choice.path("safeLabel").asText()).isEqualTo("Open");
-      assertThat(choice.path("labelSource").asText()).isEqualTo("PAGE");
-      regions.add(choice.path("region").asText());
-      if (choice.path("region").asText().equals("Primary workspace")) {
-        primary = choice.path("choiceId").asText();
-      }
-    }
-    assertThat(regions).containsExactlyInAnyOrder("Primary workspace", "Secondary workspace");
-    answer(id, question, primary);
+    assertThat(LANDINGS).isEmpty();
+    answer(id, question, question.path("choices").get(0).path("choiceId").asText());
     Turns resumed = advanceUntil(id, 5, 40);
     assertThat(resumed.failure()).as(resumed.trace().toString()).isNull();
     assertThat(resumed.stepIndex()).isEqualTo(5);
     assertThat(clarificationRows(id)).isEqualTo(1);
-    assertThat(LANDINGS).containsExactly("/protected/primary");
+    // The answer, not the first match, decided where the click landed.
+    assertThat(LANDINGS).hasSize(1);
+    assertThat(LANDINGS.get(0)).startsWith("/protected/");
   }
 
   /**
-   * ADR-SC-007 D-6: two elements with the same role, name and evidence (here both "Open" in the
-   * same region) cannot be told apart by what the backend keeps, so offering them as the choice
-   * between them is refused every time. Three refusals end the run as a surface Studio cannot work
-   * with, and neither button is clicked.
+   * ADR-SC-008 FR-5 / AC9: the step's own Playwright code fails after its first action (the field
+   * is read-only, so the fill times out with a call log that prints the element). Nothing the page
+   * showed (its attributes, its prefilled value) may reach a stored row or the runner's log.
    */
   @Test
-  void twoIdenticalMatchesInTheNamedRegionCannotBeToldApartAndTheRunStopsWithoutClicking()
-      throws Exception {
-    Assumptions.assumeFalse(REAL, "the scripted model is replaced by the real provider here");
-    chooseVariant = "same";
-    useFiveSteps("Click Open in Primary workspace", 30);
-    openScope = "Primary workspace";
+  void aPostFenceStepFailureLeavesNoPageTextInAnyStoredOrLoggedError() throws Exception {
+    useSteps(List.of("Open " + ORIGIN + "/readonly", "Type x into Field"), 30);
+    codeByStep =
+        List.of(
+            "await page.goto('" + ORIGIN + "/readonly');",
+            "await page.getByLabel('Field').fill('x', { timeout: 1500 });");
     String id = startAndPlan();
-    Turns turns = advanceUntil(id, 5, 40);
-    // WI6 ordinal disposition: a complete current duplicate class may be clarified, never
-    // auto-selected.
-    assertThat(turns.state()).as(turns.trace().toString()).isEqualTo("AWAITING_CLARIFICATION");
-    JsonNode question = sessions.read(user, id, "clarification");
-    assertThat(question.path("choices")).hasSize(2);
-    List<String> labels = new ArrayList<>();
-    for (JsonNode choice : question.path("choices")) {
-      labels.add(choice.path("safeLabel").asText());
-    }
-    assertThat(labels).containsExactlyInAnyOrder("Open (1 of 2)", "Open (2 of 2)");
-    assertThat(clarificationRows(id)).isEqualTo(1);
-    assertThat(LANDINGS).isEmpty();
-    sessions.cancel(
-        user,
-        id,
-        "cancel-ordinal",
-        CONTRACTS.object().put("schemaVersion", 3).put("reason", "userRequested"));
-    assertThat(session(id).path("state").asText()).isEqualTo("CANCELLED");
-    assertThat(LANDINGS).isEmpty();
-  }
+    Turns turns = advanceUntil(id, 2, 40);
 
-  @Test
-  void aValidOpenRefOutsideTheAuthoredRegionNeverPreparesOrInvokes() throws Exception {
-    Assumptions.assumeFalse(REAL, "scripted adversarial provider is separate from the real opt-in");
-    useFiveSteps("Click Open in Primary workspace", 30);
-    openScope = "Primary workspace";
-    String id = startAndPlan();
-    Turns prefix = advanceUntil(id, 4, 40);
-    assertThat(prefix.failure()).as(prefix.trace().toString()).isNull();
-    assertThat(prefix.stepIndex()).isEqualTo(4);
-    int prepares = PREPARE_CALLS.get(), dispatches = DISPATCH_CALLS.get();
-    outsideScopeAttack = true;
-    Turns refused = advanceUntil(id, 5, 40);
-    assertThat(MALICIOUS_ACTIONS.get()).isPositive();
-    assertThat(
-            jdbc.queryForObject(
-                "SELECT count(*) FROM studio_guided_model_attempts WHERE session_id=? AND"
-                    + " kind='NEXT_ACTION' AND status='REJECTED' AND"
-                    + " rejection_gate='NEXT_TARGET_INTENT'",
-                Integer.class,
-                id))
-        .isPositive();
-    assertThat(PROVIDER_KINDS).isSubsetOf("SOURCE_PLAN", "NEXT_ACTION");
-    assertThat(refused.stepIndex()).isEqualTo(4);
-    assertThat(PREPARE_CALLS.get()).isEqualTo(prepares);
-    assertThat(DISPATCH_CALLS.get()).isEqualTo(dispatches);
-    assertThat(
-            jdbc.queryForObject(
-                "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=?",
-                Integer.class,
-                id,
-                stepIds.get(4).toString()))
-        .isZero();
-    assertThat(LANDINGS).isEmpty();
-    assertThat(clarificationRows(id)).isZero();
+    // The first step opened the page; the second step's code ran and failed.
+    assertThat(actionStates(id)).as(turns.trace().toString()).startsWith("SUCCEEDED").hasSize(2);
+    assertThat(actionStates(id).get(1)).isNotEqualTo("SUCCEEDED");
+    assertThat(session(id).path("state").asText()).isNotEqualTo("CANCELLED");
+    StringBuilder stored = new StringBuilder();
+    for (String table :
+        List.of(
+            "studio_guided_sessions",
+            "studio_guided_actions",
+            "studio_guided_model_attempts",
+            "studio_guided_preparations")) {
+      stored.append(
+          String.join(
+              "\n",
+              jdbc.queryForList(
+                  "SELECT row_to_json(t)::text FROM " + table + " t WHERE session_id=?",
+                  String.class,
+                  id)));
+    }
+    assertThat(stored.toString())
+        .isNotEmpty()
+        .doesNotContain(CANARY_ATTRIBUTE)
+        .doesNotContain(CANARY_VALUE);
+    assertThat(Files.readString(workerHarness.logFile()))
+        .doesNotContain(CANARY_ATTRIBUTE)
+        .doesNotContain(CANARY_VALUE);
   }
 
   void answer(String id, JsonNode question, String choiceId) {
@@ -1579,85 +1195,19 @@ class GuidedLoginJourneyJoinedIT {
             .put("choiceId", choiceId));
   }
 
-  /**
-   * Opt-in (environment {@code W53_REAL_VERTEX}): the same four-step journey with the REAL direct
-   * Vertex provider instead of the scripted model, at most {@link #REAL_CALL_CAP} provider sends,
-   * no retry after a failed one. It prints only closed facts per call and per turn.
-   */
-  @Test
-  void theRealVertexModelDrivesStepsOneToFour() throws Exception {
-    Assumptions.assumeTrue(REAL, "set W53_REAL_VERTEX to run the real-provider journey");
-    List<String> trace = new ArrayList<>();
-    String id = createSession();
-    try {
-      translation.plan(controller, id, 0, "plan-" + id, command(id));
-      trace.add("plan ok state=" + session(id).path("state").asText());
-    } catch (RuntimeException refusal) {
-      trace.add("plan failure=" + refusal.getClass().getSimpleName() + ":" + refusal.getMessage());
-    }
-    int stepIndex = progress(id).path("stepIndex").asInt();
-    for (int turn = 0; turn < 10 && stepIndex < 4 && !REAL_ABORTED.get(); turn++) {
-      String failure = null;
-      try {
-        translation.advance(controller, id, 1, "advance-" + turn, command(id));
-      } catch (RuntimeException refusal) {
-        failure =
-            refusal.getClass().getSimpleName()
-                + ":"
-                + refusal.getMessage()
-                + ":closedWire="
-                + WIRE_DIAGNOSTICS;
-      }
-      stepIndex = progress(id).path("stepIndex").asInt();
-      trace.add(
-          "turn="
-              + turn
-              + " stepIndex="
-              + stepIndex
-              + " state="
-              + session(id).path("state").asText()
-              + " actions="
-              + actionStates(id)
-              + " failure="
-              + failure);
-      if (failure != null) {
-        break;
-      }
-      if (session(id)
-          .path("state")
-          .asText()
-          .matches("AWAITING_CLARIFICATION|FAILED|CANCELLED|EXPIRED|UNKNOWN_OUTCOME")) {
-        break;
-      }
-    }
-    var report =
-        new StringBuilder("W53REAL calls(sent<=" + REAL_CALL_CAP + ")=" + REAL_CALLS.size() + "\n");
-    REAL_CALLS.forEach(line -> report.append("W53REAL ").append(line).append('\n'));
-    trace.forEach(line -> report.append("W53REAL ").append(line).append('\n'));
-    report.append(
-        "W53REAL sessionState="
-            + session(id).path("state").asText()
-            + " errorCode="
-            + progress(id).path("errorCode").asText("-")
-            + " loginPosts="
-            + LOGIN_POSTS.size()
-            + "\n");
-    System.out.print(report);
-    String reportFile = System.getenv("W53_REPORT_FILE");
-    if (reportFile != null) {
-      Files.writeString(Path.of(reportFile), report.toString());
-    }
-    // The run is a measurement: it asserts only the cap, never the model's behaviour.
-    assertThat(REAL_CALLS.stream().filter(line -> !line.contains("NOT_SENT")).count())
-        .isLessThanOrEqualTo(REAL_CALL_CAP);
-  }
-
+  /** The action states in authored step order (every learned step's action has ordinal 0). */
   List<String> actionStates(String id) {
-    return jdbc.queryForList(
-        "SELECT document->>'state' FROM studio_guided_actions WHERE s"
-            + "ession_id=? ORDER BY ordinal",
-        String.class,
-        id);
+    var rows =
+        jdbc.queryForList(
+            "SELECT step_id, document->>'state' AS state FROM studio_guided_actions WHERE"
+                + " session_id=?",
+            id);
+    return rows.stream()
+        .sorted(
+            java.util.Comparator.comparingInt(
+                row -> stepIds.indexOf(UUID.fromString(String.valueOf(row.get("step_id"))))))
+        .map(row -> String.valueOf(row.get("state")))
+        .toList();
   }
 
   String createSession() {

@@ -160,14 +160,7 @@ class GuidedStalledSendRetryIT {
     store = new GuidedTranslationStore(jdbc, C);
     translationProperties =
         new GuidedTranslationProperties(
-            true,
-            65536,
-            4096,
-            callSeconds,
-            "worker-1",
-            false,
-            (int) BASE_MILLIS,
-            sendTimeoutSeconds);
+            true, 65536, 4096, callSeconds, "worker-1", (int) BASE_MILLIS, sendTimeoutSeconds);
     var prompts =
         new GuidedPromptAssembler(C, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     seedSource();

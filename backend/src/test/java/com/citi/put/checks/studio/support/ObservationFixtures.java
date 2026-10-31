@@ -22,10 +22,10 @@ public final class ObservationFixtures {
 
   public static final String SESSION_ID = "session-1";
   public static final String SCOPE_HASH =
-      "d842cad638aae0892cd572253cca4eefc5c31c2713dd237ec254ab163ca7aa6b";
+      "c492d7554d0bf7482f4e9afee2054800284d407483891e8b91c7fc985803b01c";
   public static final String ORIGIN = "https://orders.example.test";
 
-  /** Starts an observation: {@code document-1}, generation 1, no elements, no read grant. */
+  /** Starts an observation: {@code document-1}, generation 1, no elements. */
   public static Builder observation() {
     return new Builder();
   }
@@ -49,32 +49,9 @@ public final class ObservationFixtures {
     return fact;
   }
 
-  /**
-   * The ResolvedTarget the runner reports on a preparation proof: a one-step test-id locator, the
-   * tier that found it, and the {role, name} identity the backend cross-checks against the fact.
-   */
-  public static ObjectNode resolvedTarget(String testId, String role, String name) {
-    ObjectNode target = C.object();
-    target.putArray("locator").addObject().put("by", "testId").put("value", testId);
-    target.put("tier", "testId");
-    ObjectNode identity = target.putObject("identity").put("role", role);
-    if (name == null) {
-      identity.putNull("name");
-    } else {
-      identity.put("name", name);
-    }
-    return target;
-  }
-
-  /** The model-facing target of a node action: {@code {kind: node, ref}}. */
-  public static ObjectNode nodeRef(String ref) {
-    return C.object().put("kind", "node").put("ref", ref);
-  }
-
   public static final class Builder {
     private final StringBuilder outline = new StringBuilder("- document");
     private final ObjectNode facts = C.object();
-    private String readRuleId;
     private int withheld;
     private int unsupported;
     private int passwords;
@@ -116,11 +93,6 @@ public final class ObservationFixtures {
     public Builder line(String rawOutlineLine) {
       outline.append('\n').append(rawOutlineLine);
       shownLines++;
-      return this;
-    }
-
-    public Builder readRuleId(String readRuleId) {
-      this.readRuleId = readRuleId;
       return this;
     }
 
@@ -190,11 +162,6 @@ public final class ObservationFixtures {
           .put("shownNodes", shownLines)
           .put("notShown", notShown)
           .put("outlineBytes", text.getBytes(StandardCharsets.UTF_8).length);
-      if (readRuleId == null) {
-        observation.putNull("readRuleId");
-      } else {
-        observation.put("readRuleId", readRuleId);
-      }
       observation.put("outline", text);
       observation.set("facts", facts.deepCopy());
       return observation;

@@ -49,7 +49,6 @@ class GuidedWireContractTest {
           "state",
           "dispatchCount",
           "outcomeCode",
-          "assertionPassed",
           "executionEvidence",
           "evidenceHash",
           "authoredInputsHash",
@@ -115,7 +114,7 @@ class GuidedWireContractTest {
   @Test
   void currentEpochsPreserveNamedOriginalPropertySetsAndExactApprovedAdditions() throws Exception {
     org.assertj.core.api.Assertions.assertThat(ORIGINAL_SESSION_PROPERTIES.size()).isEqualTo(14);
-    org.assertj.core.api.Assertions.assertThat(ORIGINAL_LEDGER_PROPERTIES.size()).isEqualTo(20);
+    org.assertj.core.api.Assertions.assertThat(ORIGINAL_LEDGER_PROPERTIES.size()).isEqualTo(19);
     org.assertj.core.api.Assertions.assertThat(ORIGINAL_BASIS_PROPERTIES.size()).isEqualTo(33);
     org.assertj.core.api.Assertions.assertThat(ADDED_SESSION_PROPERTIES.size()).isEqualTo(2);
     org.assertj.core.api.Assertions.assertThat(ADDED_LEDGER_PROPERTIES.size()).isEqualTo(1);
@@ -149,7 +148,7 @@ class GuidedWireContractTest {
             original.getSchemaNode(),
             ORIGINAL_LEDGER_PROPERTIES,
             ADDED_LEDGER_PROPERTIES,
-            21);
+            20);
       } else if (name.equals("v3/replay-validation")) {
         Object basis = compiledObjects(plan).get("validationBasis");
         assertCurrentPropertyUnion(
@@ -161,7 +160,7 @@ class GuidedWireContractTest {
         Object preparations = compiledArrays(basis).get("preparations");
         JsonSchema item = (JsonSchema) currentRecordField(preparations, "item");
         org.assertj.core.api.Assertions.assertThat(item.getSchemaNode().path("properties").size())
-            .isEqualTo(7);
+            .isEqualTo(6);
         org.assertj.core.api.Assertions.assertThat(compiledItemObject(preparations)).isNull();
         // The observation inside the basis is a finite plan of its 12 properties; its facts are
         // one property, not a compiled array.
@@ -967,7 +966,7 @@ class GuidedWireContractTest {
 
   private void addHybridCase(List<OutcomeCase> cases, java.util.Map<String, ObjectNode> controls) {
     ObjectNode hybrid = controls.get("ORD-BLANK").deepCopy().put("kind", "prefixDrift");
-    hybrid.set("receipt", controls.get("PRE-NULL").path("receipt").deepCopy());
+    hybrid.set("receipt", controls.get("ADMITTED-LEDGER").path("receipt").deepCopy());
     cases.add(new OutcomeCase("HYBRID", hybrid, false, false));
   }
 
@@ -990,23 +989,18 @@ class GuidedWireContractTest {
                 Path.of(
                     "../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json")));
     JsonNode publicationBefore = publications.deepCopy();
-    for (String name : List.of("preAdmissionDrift", "admittedDrift")) {
-      JsonNode basisCase =
-          java.util.stream.StreamSupport.stream(
-                  publications.at("/incrementalContracts/basisCases").spliterator(), false)
-              .filter(row -> row.path("name").asText().equals(name))
-              .findFirst()
-              .orElseThrow();
-      JsonNode incremental = basisCase.at("/basis/incrementalEvidence");
-      ObjectNode envelope = contracts.object().put("kind", "prefixDrift");
-      envelope.set("receipt", incremental.path("driftReceipt").deepCopy());
-      envelope.set(
-          "ledger",
-          name.equals("preAdmissionDrift")
-              ? com.fasterxml.jackson.databind.node.NullNode.instance
-              : incremental.at("/excludedAttempts/0/action/ledger").deepCopy());
-      controls.put(name.equals("preAdmissionDrift") ? "PRE-NULL" : "ADMITTED-LEDGER", envelope);
-    }
+    // SC008-E5 P3: the pre-admission drift is gone; a drift receipt always carries its ledger.
+    JsonNode basisCase =
+        java.util.stream.StreamSupport.stream(
+                publications.at("/incrementalContracts/basisCases").spliterator(), false)
+            .filter(row -> row.path("name").asText().equals("admittedDrift"))
+            .findFirst()
+            .orElseThrow();
+    JsonNode incremental = basisCase.at("/basis/incrementalEvidence");
+    ObjectNode envelope = contracts.object().put("kind", "prefixDrift");
+    envelope.set("receipt", incremental.path("driftReceipt").deepCopy());
+    envelope.set("ledger", incremental.at("/excludedAttempts/0/action/ledger").deepCopy());
+    controls.put("ADMITTED-LEDGER", envelope);
     // Whole catalogues intentionally retain invalid vectors; deep-copy equality preserves code
     // units.
     // Each selected lawful parent still has its own exact canonical-byte and hash witness.
@@ -1230,19 +1224,9 @@ class GuidedWireContractTest {
         new OutcomeCase(
             "CLOSED-ORD-OBS-READ:/availability",
             outcomeChange(
-                controls.get("ORD-OBS-READ"), "/availability/unexpected", contracts.parse("true")),
-            false,
-            false));
-    cases.add(
-        new OutcomeCase(
-            "CLOSED-PRE-NULL:/receipt",
-            outcomeChange(controls.get("PRE-NULL"), "/receipt/unexpected", contracts.parse("true")),
-            false,
-            false));
-    cases.add(
-        new OutcomeCase(
-            "CLOSED-PRE-NULL:root",
-            outcomeChange(controls.get("PRE-NULL"), "/unexpected", contracts.parse("true")),
+                controls.get("ORD-OBS-READ"),
+                "/availability/0/unexpected",
+                contracts.parse("true")),
             false,
             false));
     addAbsentFieldCase(
@@ -1264,13 +1248,6 @@ class GuidedWireContractTest {
         "/ledger",
         "preparationId",
         "REQUIRED-ORD-BLANK:/ledger/preparationId");
-    addAbsentFieldCase(
-        cases,
-        controls,
-        "ORD-BLANK",
-        "/ledger",
-        "assertionPassed",
-        "REQUIRED-ORD-BLANK:/ledger/assertionPassed");
     addAbsentFieldCase(
         cases,
         controls,
@@ -1303,16 +1280,9 @@ class GuidedWireContractTest {
         cases,
         controls,
         "ORD-OBS-READ",
-        "/availability",
+        "/availability/0",
         "producerAdmissionId",
         "REQUIRED-ORD-OBS-READ:/availability/producerAdmissionId");
-    addAbsentFieldCase(
-        cases,
-        controls,
-        "PRE-NULL",
-        "/receipt",
-        "requestDigest",
-        "REQUIRED-PRE-NULL:/receipt/requestDigest");
     addAbsentFieldCase(
         cases,
         controls,
@@ -1332,21 +1302,7 @@ class GuidedWireContractTest {
             outcomeChange(controls.get("ORD-OBS-READ"), "/availability", contracts.parse("1")),
             false,
             false));
-    cases.add(
-        new OutcomeCase(
-            "AVAIL-MALFORMED/array",
-            outcomeChange(controls.get("ORD-OBS-READ"), "/availability", contracts.parse("[]")),
-            false,
-            false));
-    cases.add(
-        new OutcomeCase(
-            "PHASE-pre-nonnull",
-            outcomeChange(
-                controls.get("PRE-NULL"),
-                "/ledger",
-                controls.get("ADMITTED-LEDGER").path("ledger").deepCopy()),
-            false,
-            false));
+    // SC008-E5: availability is an array (0..8), so [] is the lawful empty value.
     cases.add(
         new OutcomeCase(
             "PHASE-admitted-null",
@@ -1362,14 +1318,15 @@ class GuidedWireContractTest {
     cases.add(
         new OutcomeCase(
             "PHASE-bad-envelopekind",
-            outcomeChange(controls.get("PRE-NULL"), "/kind", contracts.parse("\"ordinary\"")),
+            outcomeChange(
+                controls.get("ADMITTED-LEDGER"), "/kind", contracts.parse("\"ordinary\"")),
             false,
             false));
     cases.add(
         new OutcomeCase(
             "PHASE-bad-phase",
             outcomeChange(
-                controls.get("PRE-NULL"), "/receipt/phase", contracts.parse("\"UNKNOWN\"")),
+                controls.get("ADMITTED-LEDGER"), "/receipt/phase", contracts.parse("\"UNKNOWN\"")),
             false,
             false));
     cases.add(
@@ -1391,14 +1348,17 @@ class GuidedWireContractTest {
     cases.add(
         new OutcomeCase(
             "PHASE-receipt-fence",
-            outcomeChange(controls.get("PRE-NULL"), "/receipt/ownerFence", contracts.parse("0")),
+            outcomeChange(
+                controls.get("ADMITTED-LEDGER"), "/receipt/ownerFence", contracts.parse("0")),
             false,
             false));
     cases.add(
         new OutcomeCase(
             "PHASE-receipt-context",
             outcomeChange(
-                controls.get("PRE-NULL"), "/receipt/contextRevision", contracts.parse("202")),
+                controls.get("ADMITTED-LEDGER"),
+                "/receipt/contextRevision",
+                contracts.parse("202")),
             false,
             false));
     addHybridCase(cases, controls);
@@ -1580,7 +1540,7 @@ class GuidedWireContractTest {
     settings.put("CONFIG-discriminator", config -> config.setOpenAPI3StyleDiscriminators(true));
     JsonNode prefix =
         outcomeCases().stream()
-            .filter(row -> row.id().equals("PRE-NULL"))
+            .filter(row -> row.id().equals("ADMITTED-LEDGER"))
             .findFirst()
             .orElseThrow()
             .value();
@@ -1617,7 +1577,7 @@ class GuidedWireContractTest {
     ObjectNode pre =
         (ObjectNode)
             outcomeCases().stream()
-                .filter(row -> row.id().equals("PRE-NULL"))
+                .filter(row -> row.id().equals("ADMITTED-LEDGER"))
                 .findFirst()
                 .orElseThrow()
                 .value();
@@ -1781,13 +1741,14 @@ class GuidedWireContractTest {
     String inputBefore = GuidedContracts.canonical(fixture);
     String fixtureHash = GuidedContracts.hash(fixture);
     org.assertj.core.api.Assertions.assertThat(fixtureHash)
-        // ADR-SC-007: the ledger operationHash of this fixture is over the reported target.
-        .isEqualTo("d255a81445bb0af6d93f64970227f34e2186d0abf27ae1438ff1f9538753ddbd");
+        // SC008-E5: the fixture gained receipt and secretUse, lost ledger.assertionPassed and was
+        // resealed once (new operationHash over the step record).
+        .isEqualTo("6ebebc1c803f87c29f0e7fec07d2bd21a577a470f2dfb1b7f11a34fb1240bf7e");
     org.assertj.core.api.Assertions.assertThat(fixture.path("ledger").path("state").asText())
         .isEqualTo("SUCCEEDED");
     org.assertj.core.api.Assertions.assertThat(fixture.path("ledger").path("outcomeCode").asText())
         .isEqualTo("OK");
-    org.assertj.core.api.Assertions.assertThat(fixture.path("availability").isNull()).isTrue();
+    org.assertj.core.api.Assertions.assertThat(fixture.path("availability").isEmpty()).isTrue();
     org.assertj.core.api.Assertions.assertThat(fixture.has("errorMessage")).isFalse();
     JsonNode evidence = fixture.path("ledger").path("executionEvidence");
     org.assertj.core.api.Assertions.assertThat(evidence.path("kind").asText())
@@ -1852,13 +1813,14 @@ class GuidedWireContractTest {
     org.assertj.core.api.Assertions.assertThat(expanded.path("oneOf").isArray()).isTrue();
     org.assertj.core.api.Assertions.assertThat(expanded.path("oneOf").size()).isEqualTo(2);
     org.assertj.core.api.Assertions.assertThat(rootHash)
-        .isEqualTo("95f7878408ce7d089646898aef3d528bc2e3c62d7f2bf8f228134556dfe451e8");
+        // SC008-E5 reseal; equals GuidedContracts.OUTCOME_SCHEMA_EPOCH.
+        .isEqualTo("c05da0f10a7b5c57b1886ffde9a718b9211f56e866c9fdc8e09667d38fcbe35b");
     JsonNode ordinaryNode = expanded.path("oneOf").get(0);
     JsonNode prefixNode = expanded.path("oneOf").get(1);
     org.assertj.core.api.Assertions.assertThat(GuidedContracts.hash(ordinaryNode))
-        .isEqualTo("be738fd98792fed35821849ce6e9e50abbad334a03de282df3261494192497f1");
+        .isEqualTo("406f1d8d0143abdc41fe0b670181baa4a3cae40c29d3228f5d64e0154deb8019");
     org.assertj.core.api.Assertions.assertThat(GuidedContracts.hash(prefixNode))
-        .isEqualTo("3547f2fbe5f29e0197f7fa326eaa5a2e3da92bbe164a2deb9a74043751a872c0");
+        .isEqualTo("13607e9867b94d0675dba793b27f9b7d79d2b9e80d373fe319adea7a21332975");
     var originalConfig = whole.getValidationContext().getConfig();
     JsonSchema ordinary =
         JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7)
@@ -1997,21 +1959,6 @@ class GuidedWireContractTest {
       cases.add(contracts.parse("1"));
       if (replay) {
         requestArrayCases(document, original, cases);
-        ObjectNode conditional = document.deepCopy();
-        conditional
-            .withObject("/validationBasis/inputs/0")
-            .put("kind", "secretRef")
-            .put("intendedSlot", "assert.expected");
-        org.assertj.core.api.Assertions.assertThat(originalAccepts(original, conditional))
-            .isFalse();
-        cases.add(conditional);
-        ObjectNode allowedConditional = conditional.deepCopy();
-        allowedConditional
-            .withObject("/validationBasis/inputs/0")
-            .put("intendedSlot", "fill.value");
-        org.assertj.core.api.Assertions.assertThat(originalAccepts(original, allowedConditional))
-            .isTrue();
-        cases.add(allowedConditional);
         ObjectNode unknownOperation = document.deepCopy();
         unknownOperation
             .withObject("/artifact/steps/0/operations/0/operation")
@@ -2182,6 +2129,54 @@ class GuidedWireContractTest {
         .hasMessage("INVALID_CONTRACT");
   }
 
+  /** The retired op/slot/capability shapes stay refused; each case has a valid control. */
+  @Test
+  void rejectsRetiredAndMalformedNewShapeInput() throws Exception {
+    JsonNode documents =
+        contracts
+            .parse(
+                Files.readString(
+                    Path.of("../docs/specs/studio-observed-authoring/contracts/v3/fixtures.json")))
+            .path("documents");
+    ObjectNode session = documents.path("session").deepCopy();
+    contracts.validate("v3/session", session);
+    ((ObjectNode) session.path("scope")).putArray("capabilities").add("observe").add("navigate");
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () -> contracts.validate("v3/session", session))
+        .hasMessage("INVALID_CONTRACT");
+
+    ObjectNode reference = documents.path("sourceReference").deepCopy();
+    contracts.validate("v3/source-reference", reference);
+    reference.put("intendedSlot", "fill.value");
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () -> contracts.validate("v3/source-reference", reference))
+        .hasMessage("INVALID_CONTRACT");
+
+    ObjectNode selection = contracts.object();
+    selection.putArray("sourceReferences");
+    selection.putArray("needs");
+    ObjectNode obligation =
+        selection
+            .putArray("obligations")
+            .addObject()
+            .put("stepId", "step")
+            .put("occurrence", 0)
+            .put("targetIntent", "Submit");
+    obligation.putNull("scopeIntent").putNull("referenceIndex").putNull("needId");
+    obligation.putArray("uses");
+    contracts.validate("v3/source-selection", selection);
+    ObjectNode withoutUses = selection.deepCopy();
+    ((ObjectNode) withoutUses.path("obligations").get(0)).remove("uses");
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () -> contracts.validate("v3/source-selection", withoutUses))
+        .hasMessage("INVALID_CONTRACT");
+    ObjectNode withKind = selection.deepCopy();
+    ((ObjectNode) withKind.path("obligations").get(0)).put("operationKind", "click");
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () -> contracts.validate("v3/source-selection", withKind))
+        .hasMessage("INVALID_CONTRACT");
+  }
+
   private void assertNativePlan(Object plan) throws Exception {
     org.assertj.core.api.Assertions.assertThat(compiledAlternatives(plan)).isEmpty();
     org.assertj.core.api.Assertions.assertThat(compiledPropertyCount(plan)).isZero();
@@ -2192,11 +2187,12 @@ class GuidedWireContractTest {
 
   private void assertFinitePlan(String name, Object plan) throws Exception {
     org.assertj.core.api.Assertions.assertThat(compiledAlternatives(plan)).isEmpty();
-    // ADR-SC-007: an observation has 12 properties (the node array became outline + facts).
+    // ADR-SC-007: an observation has 12 properties (the node array became outline + facts);
+    // SC008-E5 dropped observation.readRuleId (11) and ledger.assertionPassed (20).
     int expected =
         name.equals("v3/session")
             ? 16
-            : name.equals("v3/ledger") ? 21 : name.equals("v3/observation") ? 12 : 9;
+            : name.equals("v3/ledger") ? 20 : name.equals("v3/observation") ? 11 : 9;
     org.assertj.core.api.Assertions.assertThat(compiledPropertyCount(plan)).isEqualTo(expected);
     var objects = compiledObjects(plan);
     if (name.equals("v3/replay-validation")) {

@@ -26,9 +26,8 @@ public record GuidedTranslationProperties(
     @DefaultValue("4096") int maxOutputTokens,
     @DefaultValue("60") int callSeconds,
     @DefaultValue("worker-1") String workerId,
-    @DefaultValue("false") boolean verifySteps,
     @DefaultValue("2000") int transientBackoffMillis,
-    @DefaultValue("50") int sendTimeoutSeconds) {
+    @DefaultValue("20") int sendTimeoutSeconds) {
   @org.springframework.boot.context.properties.bind.ConstructorBinding
   public GuidedTranslationProperties {
     if (maxInputBytes < 1
@@ -62,20 +61,29 @@ public record GuidedTranslationProperties(
   }
 
   /**
-   * The longest one continuation POST can run on the server: every model request it issues makes up
-   * to three attempts, each bounded by the call budget plus the settlement margin, with the
-   * transient backoff ({@code base << 0} then {@code base << 1}) between them. A POST issues one
-   * model request, or two with {@code verifySteps} (a next-action proposal followed by its
-   * verification); the rest of it is runner and database work, covered by a fixed margin. The
+   * The runner prepare (syntax admission) that follows each STEP_CODE reply: one transport window.
+   */
+  static final Duration PREPARE_WINDOW = Duration.ofSeconds(15);
+
+  /**
+   * The longest one continuation POST can run on the server: the step's one pool of three STEP_CODE
+   * requests, each bounded by the call budget plus the settlement margin, the runner prepare that
+   * follows it, and the transient backoff ({@code base << 0} then {@code base << 1}) between
+   * attempts; the rest of it is runner and database work, covered by a fixed margin. The
    * coordinator waits this long, so it never gives up on a request that is still running and
    * re-drives the session over it.
    *
    * @return the coordinator's per-POST timeout
    */
   public Duration continuationTimeout() {
-    Duration attempt = Duration.ofSeconds(callSeconds).plus(GuidedTranslationService.SETTLE_MARGIN);
-    Duration request = attempt.multipliedBy(3).plusMillis(3L * transientBackoffMillis);
-    return request.multipliedBy(verifySteps ? 2 : 1).plus(Duration.ofSeconds(30));
+    Duration attempt =
+        Duration.ofSeconds(callSeconds)
+            .plus(GuidedTranslationService.SETTLE_MARGIN)
+            .plus(PREPARE_WINDOW);
+    return attempt
+        .multipliedBy(3)
+        .plusMillis(3L * transientBackoffMillis)
+        .plus(Duration.ofSeconds(30));
   }
 
   public GuidedTranslationProperties(
@@ -84,31 +92,13 @@ public record GuidedTranslationProperties(
       int maxOutputTokens,
       int callSeconds,
       String workerId,
-      boolean verifySteps,
       int transientBackoffMillis) {
     this(
-        enabled,
-        maxInputBytes,
-        maxOutputTokens,
-        callSeconds,
-        workerId,
-        verifySteps,
-        transientBackoffMillis,
-        50);
+        enabled, maxInputBytes, maxOutputTokens, callSeconds, workerId, transientBackoffMillis, 20);
   }
 
   public GuidedTranslationProperties(
       boolean enabled, int maxInputBytes, int maxOutputTokens, int callSeconds, String workerId) {
-    this(enabled, maxInputBytes, maxOutputTokens, callSeconds, workerId, false);
-  }
-
-  public GuidedTranslationProperties(
-      boolean enabled,
-      int maxInputBytes,
-      int maxOutputTokens,
-      int callSeconds,
-      String workerId,
-      boolean verifySteps) {
-    this(enabled, maxInputBytes, maxOutputTokens, callSeconds, workerId, verifySteps, 2000);
+    this(enabled, maxInputBytes, maxOutputTokens, callSeconds, workerId, 2000);
   }
 }

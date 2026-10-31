@@ -563,40 +563,47 @@ public class HttpRunnerDispatchClient implements RunnerDispatchClient {
   }
 
   public JsonNode send(String operation, JsonNode body, String key) {
-    return send(operation, body, key, null, null, null);
+    return send(operation, body, key, null, null);
   }
 
   public JsonNode send(
       String operation, JsonNode body, String key, java.time.Instant callerDeadline) {
-    return send(operation, body, key, null, null, callerDeadline);
+    return send(operation, body, key, null, callerDeadline);
   }
 
-  public JsonNode sendSecret(
-      JsonNode body, JsonNode metadata, com.citi.put.checks.studio.secrets.SecretValue secret) {
-    return sendSecret(body, metadata, secret, null);
-  }
+  /** One secret of a dispatch: its safe metadata and the owned value, erased once it is sent. */
+  public record SecretEnvelope(
+      JsonNode metadata, com.citi.put.checks.studio.secrets.SecretValue value) {}
 
-  public JsonNode sendSecret(
-      JsonNode body,
-      JsonNode metadata,
-      com.citi.put.checks.studio.secrets.SecretValue secret,
-      java.time.Instant callerDeadline) {
+  /** The most secrets one step dispatch carries. */
+  private static final int MAX_DISPATCH_SECRETS = 8;
+
+  /**
+   * Sends a dispatch that carries 1 to 8 secrets, each {@code {secretId, value, versionId,
+   * allowedOrigins}}. Every value is erased on every path, including a refusal made before the
+   * send.
+   */
+  public JsonNode sendSecrets(
+      JsonNode body, java.util.List<SecretEnvelope> secrets, java.time.Instant callerDeadline) {
     try {
+      var ids = new java.util.HashSet<String>();
       require(
-          body.path("proposal").path("operation").path("kind").asText().equals("fill")
-              && body.path("proposal")
-                  .path("operation")
-                  .path("value")
-                  .path("kind")
-                  .asText()
-                  .equals("secretRef")
-              && secret.length() >= 1
-              && secret.length() <= 4096,
+          secrets != null
+              && !secrets.isEmpty()
+              && secrets.size() <= MAX_DISPATCH_SECRETS
+              && secrets.stream()
+                  .allMatch(
+                      envelope ->
+                          envelope.value().length() >= 1
+                              && envelope.value().length() <= 4096
+                              && ids.add(envelope.metadata().path("secretId").asText())),
           "INVALID_CONTRACT",
           422);
-      return send("dispatch", body, UUID.randomUUID().toString(), metadata, secret, callerDeadline);
+      return send("dispatch", body, UUID.randomUUID().toString(), secrets, callerDeadline);
     } finally {
-      secret.close();
+      if (secrets != null) {
+        secrets.forEach(envelope -> envelope.value().close());
+      }
     }
   }
 
@@ -604,8 +611,7 @@ public class HttpRunnerDispatchClient implements RunnerDispatchClient {
       String operation,
       JsonNode body,
       String key,
-      JsonNode secretMetadata,
-      com.citi.put.checks.studio.secrets.SecretValue secret,
+      java.util.List<SecretEnvelope> secrets,
       java.time.Instant callerDeadline) {
     require(guidedClient != null && contracts != null, "RUNTIME_INCOMPATIBLE", 409);
     long deadline = transportDeadline(callerDeadline);
@@ -647,13 +653,18 @@ public class HttpRunnerDispatchClient implements RunnerDispatchClient {
       var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
       var wire = new java.util.LinkedHashMap<String, Object>();
       body.fields().forEachRemaining(entry -> wire.put(entry.getKey(), entry.getValue()));
-      if (secret != null) {
-        var envelope = new java.util.LinkedHashMap<String, Object>();
-        secretMetadata
-            .fields()
-            .forEachRemaining(entry -> envelope.put(entry.getKey(), entry.getValue()));
-        envelope.put("value", secret);
-        wire.put("secret", envelope);
+      if (secrets != null) {
+        var wired = new java.util.ArrayList<java.util.Map<String, Object>>();
+        for (SecretEnvelope secret : secrets) {
+          var envelope = new java.util.LinkedHashMap<String, Object>();
+          secret
+              .metadata()
+              .fields()
+              .forEachRemaining(entry -> envelope.put(entry.getKey(), entry.getValue()));
+          envelope.put("value", secret.value());
+          wired.add(envelope);
+        }
+        wire.put("secrets", wired);
       }
       requestBytes = com.citi.put.checks.studio.secrets.SecretWireWriter.bytes(mapper, wire);
     } catch (java.io.IOException failure) {
@@ -785,8 +796,8 @@ public class HttpRunnerDispatchClient implements RunnerDispatchClient {
         }
       } finally {
         owned.close();
-        if (secret != null) {
-          secret.close();
+        if (secrets != null) {
+          secrets.forEach(secret -> secret.value().close());
         }
       }
     }
@@ -856,38 +867,34 @@ public class HttpRunnerDispatchClient implements RunnerDispatchClient {
   }
 
   /**
-   * Classifies a runner's 409 to an ORDINARY prepare (ADR-SC-007 D8). Only a body that validates
-   * against the closed {@code v3/bridge#/definitions/refusal} with code {@code PREPARATION_DENIED}
-   * and one of three closed reasons is a definite, no-effect refusal; each ends the run with a
-   * public code that already exists and never re-asks the model:
+   * Classifies a runner's 409 to an ORDINARY prepare. Only a body that validates against the closed
+   * {@code v3/bridge#/definitions/refusal} with code {@code PREPARATION_DENIED} and one of two
+   * closed reasons is a definite, no-effect refusal the model can repair:
    *
    * <ul>
-   *   <li>{@code OPTION_NOT_PRESENT} (the authored literal is not among the live options): {@code
-   *       TARGET_MISMATCH};
-   *   <li>{@code NO_DURABLE_LOCATOR} (no durable locator for the picked element) and {@code
-   *       READ_NOT_ALLOWED} (the kept read profile refuses the read): {@code UNSUPPORTED_SURFACE}.
+   *   <li>{@code STEP_SYNTAX} (the step code does not construct) and {@code STEP_PRE_FENCE} (it
+   *       failed before its first effectful call): {@code INVALID_CONTRACT} 422 whose {@code
+   *       messageCode} is the reason, carrying the position the runner named and, for the pre-fence
+   *       refusal, how many elements its locator matched.
    * </ul>
    *
-   * The reason is the {@code messageCode}. Every other body, an unknown reason, a non-conforming or
-   * oversize body stays {@code UNKNOWN_OUTCOME}. The body is never logged or echoed.
+   * {@code SOURCE_HASH_MISMATCH}, every other body, an unknown reason, a non-conforming or oversize
+   * body stays {@code UNKNOWN_OUTCOME}. The body is never logged or echoed.
    */
   private GuidedSessionException prepareRefusal(byte[] reply) {
     try {
       JsonNode refusal = contracts.parseWire(reply);
       contracts.validate("v3/bridge#/definitions/refusal", refusal);
       String reason = refusal.path("reason").asText("");
-      if (refusal.path("code").asText().equals("PREPARATION_DENIED")) {
-        switch (reason) {
-          case "OPTION_NOT_PRESENT" -> {
-            return new GuidedSessionException("TARGET_MISMATCH", 422, reason, false, null);
-          }
-          case "NO_DURABLE_LOCATOR", "READ_NOT_ALLOWED" -> {
-            return new GuidedSessionException("UNSUPPORTED_SURFACE", 422, reason, false, null);
-          }
-          default -> {
-            // Not one of the closed prepare reasons.
-          }
-        }
+      if (refusal.path("code").asText().equals("PREPARATION_DENIED")
+          && (reason.equals("STEP_SYNTAX") || reason.equals("STEP_PRE_FENCE"))) {
+        return new GuidedSessionException(
+            "INVALID_CONTRACT",
+            422,
+            reason,
+            integer(refusal.path("line")),
+            integer(refusal.path("column")),
+            integer(refusal.path("matchCount")));
       }
     } catch (RuntimeException unclassified) {
       // Not a closed refusal: transport uncertainty.
@@ -895,6 +902,10 @@ public class HttpRunnerDispatchClient implements RunnerDispatchClient {
       java.util.Arrays.fill(reply, (byte) 0);
     }
     return new GuidedSessionException("UNKNOWN_OUTCOME", 409);
+  }
+
+  private static Integer integer(JsonNode value) {
+    return value.isInt() ? value.intValue() : null;
   }
 
   private static long transportDeadline(java.time.Instant callerDeadline) {

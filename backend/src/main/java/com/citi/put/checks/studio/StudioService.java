@@ -70,6 +70,9 @@ public class StudioService {
   private final StudioDispatchLedgerStatements ledgerStatements;
 
   @org.springframework.beans.factory.annotation.Autowired(required = false)
+  private com.citi.put.checks.studio.dispatch.StudioProofPromotionService proofs;
+
+  @org.springframework.beans.factory.annotation.Autowired(required = false)
   private com.citi.put.checks.studio.guided.publication.ObservedReplayAuthorizer observedReplay;
 
   /**
@@ -184,9 +187,10 @@ public class StudioService {
     return studioRepository
         .findPage(query, readable.orElse(null), pageable)
         .map(
-            test ->
-                UITestDto.forList(
-                    test, readiness == null ? null : readiness.readiness(test.getId())));
+            test -> {
+              StudioReadiness state = readiness == null ? null : readiness.readiness(test.getId());
+              return UITestDto.forList(test, state, verificationOf(test, state));
+            });
   }
 
   /**
@@ -449,7 +453,17 @@ public class StudioService {
       String id = readiness.change(test.getId()).firstChangedStepId();
       boundary = id == null ? null : UUID.fromString(id);
     }
-    return UITestDto.from(test, confirmed, state, boundary);
+    return UITestDto.from(test, confirmed, state, boundary, verificationOf(test, state));
+  }
+
+  /** The proof state of a recorded revision; non-null exactly when the draft is RECORDED. */
+  private UITestDto.Verification verificationOf(UITest test, StudioReadiness state) {
+    if (state != StudioReadiness.RECORDED || proofs == null) {
+      return null;
+    }
+    UUID candidate = readiness.pointers(test.getId()).candidate();
+    var verification = proofs.verification(test.getId(), candidate);
+    return new UITestDto.Verification(verification.state(), verification.firstUnverifiedStepId());
   }
 
   private AuthoringDraft authoringDraft(UITest test) {
@@ -613,11 +627,7 @@ public class StudioService {
     AuthoringRevisionInputs inputs =
         readJson(test.getAuthoringRevisionInputs(), AuthoringRevisionInputs.class);
     return new AuthoringV2Response(
-        authoring.authoringSchemaVersion(),
-        authoring.globalContext(),
-        authoring.steps(),
-        inputs,
-        null);
+        authoring.authoringSchemaVersion(), authoring.globalContext(), authoring.steps(), inputs);
   }
 
   private static AuthoringRevisionInputs revisionInputs(UITest test, AuthoringV2Request authoring) {
@@ -733,22 +743,74 @@ public class StudioService {
 
     UUID executionId;
     try {
+      UUID runnable = readiness.runnableRevisionId(testId);
       UITestRevision current =
-          test.getConfirmedRevisionId() == null
-              ? null
-              : revisionRepository.findById(test.getConfirmedRevisionId()).orElse(null);
+          runnable == null ? null : revisionRepository.findById(runnable).orElse(null);
       if (current != null && current.getArtifactSchemaVersion() >= 2) {
         if (observedReplay == null) {
           throw new StudioConflictException(
               "RUNTIME_INCOMPATIBLE", "Observed replay is unavailable");
         }
-        var grant = observedReplay.authorize(testId, auth, request);
+        var grant = observedReplay.authorize(testId, runnable, auth, request);
         executionId =
             acceptanceService.acceptObserved(
                 testId, grant.binding().path("principalId").asText(), idempotencyKey, grant);
       } else {
         executionId = acceptanceService.accept(testId, principal, idempotencyKey);
       }
+    } catch (StudioAcceptanceService.IdempotencyRaceException race) {
+      executionId =
+          acceptanceService.resolveIdempotencyRace(
+              testId, race.getPrincipal(), race.getIdempotencyKey());
+    }
+    return findExecutionById(executionId);
+  }
+
+  /**
+   * "Verify again": re-runs the model-free proof of the recorded revision (ADR-SC-008 D5, FR-12).
+   * Offered only while the test is RECORDED and its verification is INCOMPLETE (a proof that was
+   * refused, cancelled, timed out or never started); a running proof and a FAILED proof are 409
+   * {@code VERIFY_NOT_AVAILABLE} (D-4). Authorization, idempotency and the race resolution are
+   * those of {@link #executeTest}.
+   */
+  @Transactional(propagation = Propagation.NOT_SUPPORTED)
+  public ExecutionSnapshotDto verifyRecorded(
+      UUID testId,
+      Authentication auth,
+      String idempotencyKey,
+      jakarta.servlet.http.HttpServletRequest request) {
+    UITest test = studioRepository.findById(testId).orElseThrow(StudioAccessDeniedException::new);
+    requireExecute(auth, test.getCsiId());
+    if (observedReplay == null || proofs == null) {
+      throw new StudioConflictException("RUNTIME_INCOMPATIBLE", "Observed replay is unavailable");
+    }
+    // A retry of an accepted request is answered with that execution, whatever the state is now.
+    // The ledger stores the Core user id the grant carries, not the e-mail.
+    Optional<UUID> earlier =
+        acceptanceService.acceptedUnderKey(extractIdentity(auth).userId(), idempotencyKey);
+    if (earlier.isPresent()) {
+      return findExecutionById(earlier.get());
+    }
+    if (readiness.readiness(testId) != StudioReadiness.RECORDED) {
+      throw new StudioConflictException(
+          "NOT_RECORDED", "The draft has no recorded revision to verify");
+    }
+    UUID candidate = readiness.pointers(testId).candidate();
+    if (!com.citi.put.checks.studio.dispatch.StudioProofPromotionService.Verification.INCOMPLETE
+        .equals(proofs.verification(testId, candidate).state())) {
+      throw new StudioConflictException(
+          "VERIFY_NOT_AVAILABLE", "The proof of the recorded revision is running or has failed");
+    }
+    UUID executionId;
+    try {
+      var grant = observedReplay.authorize(testId, candidate, auth, request);
+      executionId =
+          acceptanceService.acceptVerify(
+              testId,
+              grant.binding().path("principalId").asText(),
+              idempotencyKey,
+              grant,
+              candidate);
     } catch (StudioAcceptanceService.IdempotencyRaceException race) {
       executionId =
           acceptanceService.resolveIdempotencyRace(

@@ -122,8 +122,15 @@ class StudioContractTest {
   // operations stay 32.
   // old "35d42df7d2dca7099e3be1cc98fa2993bea8a6f3271007fb7738726ffa5afc7a".
   // new "cd28f40b3e96c6e6c9ffd34afdf704702a2a6c6cd01eeee00c76acb8abf9b663".
+  // SC008-E5: UITest/UITestListItem readiness gains RECORDED and the verification object,
+  // verifyRecordedRevision is added
+  // (32 -> 33 operations), StepResult/RunnerStepState gain the receipt, ExecutionSnapshot gains
+  // diagnostic, and the dead review
+  // projection is removed.
+  // old "cd28f40b3e96c6e6c9ffd34afdf704702a2a6c6cd01eeee00c76acb8abf9b663".
+  // new "b3e9a44dd59ab7fec444349cffafed4cdc4bb78f88bdacd772294017ea1de1a8".
   private static final String BASE_SHA256 =
-      "cd28f40b3e96c6e6c9ffd34afdf704702a2a6c6cd01eeee00c76acb8abf9b663";
+      "b3e9a44dd59ab7fec444349cffafed4cdc4bb78f88bdacd772294017ea1de1a8";
 
   private static Map<String, Object> contract;
 
@@ -323,6 +330,8 @@ class StudioContractTest {
     expected.put("POST /internal/studio/executions/{id}/progress", "200,400,401,403,409,413");
     expected.put("POST /tests", "201,400,401,403");
     expected.put("POST /tests/{id}/execute", "202,400,401,403,409,429,503");
+    // SC008-E5: re-run the proof of the recorded revision (verifyRecordedRevision).
+    expected.put("POST /tests/{id}/verify", "202,400,401,403,409,429,503");
     expected.put("POST /tests/{id}/secrets", "201,400,401,403,409,503");
     // STUDIO-OBS-008 P1: one saved test's runtime capabilities; absent and denied both answer 403.
     expected.put("GET /tests/{id}/capabilities", "200,400,401,403");
@@ -363,10 +372,11 @@ class StudioContractTest {
     // STUDIO-GOV-001.3 (-5 guided-policies operations) and STUDIO-GOV-001.2 (-8 Studio schedule
     // operations; UI tests are scheduled through /api/v1/schedules, which is not part of this
     // document) re-anchor: 45 -> 32 (STUDIO-UNIFY-001.6's readLatestGuidedAttempts included).
+    // SC008-E5 re-anchor: 32 -> 33 (verifyRecordedRevision).
     // The total, asserted separately. Without it, both comparisons below could agree on a set that
     // had silently shrunk to nothing on both sides at once.
-    assertThat(declared).as("the document declares a different number of operations").hasSize(32);
-    assertThat(expected).hasSize(32);
+    assertThat(declared).as("the document declares a different number of operations").hasSize(33);
+    assertThat(expected).hasSize(33);
 
     assertThat(declared.keySet())
         .as("an operation the document declares that this copy does not name")

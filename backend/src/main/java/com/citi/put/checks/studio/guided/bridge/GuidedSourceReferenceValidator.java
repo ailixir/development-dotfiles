@@ -63,18 +63,12 @@ public final class GuidedSourceReferenceValidator {
       String value,
       String stepId,
       String kind,
-      String intendedSlot,
       String scopeHash,
       boolean approvedNonsecret,
       String referenceName) {
     public ConfigurationValue(
-        String value,
-        String stepId,
-        String kind,
-        String intendedSlot,
-        String scopeHash,
-        boolean approvedNonsecret) {
-      this(value, stepId, kind, intendedSlot, scopeHash, approvedNonsecret, null);
+        String value, String stepId, String kind, String scopeHash, boolean approvedNonsecret) {
+      this(value, stepId, kind, scopeHash, approvedNonsecret, null);
     }
   }
 
@@ -119,15 +113,11 @@ public final class GuidedSourceReferenceValidator {
         "REVISION_CONFLICT",
         409);
     String step = candidate.path("stepId").asText(), kind = candidate.path("kind").asText();
-    String slot = candidate.path("intendedSlot").asText();
     boolean stepExists = false;
     for (JsonNode sourceStep : session.path("sourceSteps")) {
       stepExists |= sourceStep.path("stepId").asText().equals(step);
     }
-    require(
-        stepExists && (kind.equals("destination") == slot.equals("navigate.destination")),
-        "INVALID_CONTRACT",
-        422);
+    require(stepExists, "INVALID_CONTRACT", 422);
     String value;
     if (candidate.path("referenceKind").asText().equals("sourceSpan")) {
       require(
@@ -168,14 +158,12 @@ public final class GuidedSourceReferenceValidator {
               && (config.approvedNonsecret() || kind.equals("secretRef"))
               && config.stepId().equals(step)
               && config.kind().equals(kind)
-              && config.intendedSlot().equals(slot)
               && config.scopeHash().equals(session.path("scopeHash").asText()),
           "FORBIDDEN_SCOPE",
           403);
       if (kind.equals("secretRef")) {
         require(
-            slot.equals("fill.value")
-                && candidate.path("referenceName").asText().equals(config.referenceName())
+            candidate.path("referenceName").asText().equals(config.referenceName())
                 && com.citi.put.checks.studio.secrets.StudioVaultProvider.isValidSecretName(
                     config.referenceName()),
             "FORBIDDEN_SCOPE",
@@ -183,11 +171,10 @@ public final class GuidedSourceReferenceValidator {
         ObjectNode input =
             contracts
                 .object()
-                .put("inputId", UUID.randomUUID().toString())
+                .put("inputId", inputId(candidate))
                 .put("sourceStepId", step)
                 .put("kind", "secretRef")
-                .put("secretId", config.referenceName())
-                .put("intendedSlot", "fill.value");
+                .put("secretId", config.referenceName());
         input.set("provenance", candidate.deepCopy());
         return input;
       }
@@ -204,13 +191,23 @@ public final class GuidedSourceReferenceValidator {
     ObjectNode input =
         contracts
             .object()
-            .put("inputId", UUID.randomUUID().toString())
+            .put("inputId", inputId(candidate))
             .put("sourceStepId", step)
             .put("kind", kind)
-            .put("value", value)
-            .put("intendedSlot", slot);
+            .put("value", value);
     input.set("provenance", candidate.deepCopy());
     return input;
+  }
+
+  /**
+   * The key step code reads an input by. A configuration reference keeps its own id, so the model
+   * can match an input to the reference (and its name) the prompt lists; a span of the step text
+   * gets a fresh id.
+   */
+  private static String inputId(JsonNode candidate) {
+    return candidate.path("referenceKind").asText().equals("configuration")
+        ? candidate.path("referenceId").asText()
+        : UUID.randomUUID().toString();
   }
 
   private static String variableValue(Sources sources, String step, String name) {

@@ -6,6 +6,7 @@ import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.guided.session.GuidedIncrementalStore;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import java.util.HashSet;
 import java.util.Set;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -204,8 +205,7 @@ public final class GuidedPlanHistoryAudit {
   private boolean importedReadAfter(JsonNode session, String binding, JsonNode transition) {
     for (JsonNode action :
         incremental.program(session.path("sessionId").asText()).path("actions")) {
-      if (action.path("operation").path("kind").asText().equals("read")
-          && action.path("operation").path("bindingId").asText().equals(binding)) {
+      if (contains(action.path("operation").path("captures"), TextNode.valueOf(binding))) {
         return after(
             session,
             action.path("coordinate").path("stepId").asText(),
@@ -221,17 +221,22 @@ public final class GuidedPlanHistoryAudit {
     for (JsonNode action :
         incremental.program(session.path("sessionId").asText()).path("actions")) {
       JsonNode operation = action.path("operation");
-      String kind = operation.path("kind").asText(),
-          field = kind.equals("assert") ? "expected" : "value";
       if (action.path("coordinate").path("stepId").equals(consumer.path("stepId"))
-          && (kind + "." + field).equals(consumer.path("argumentSlot").asText())
-          && operation.path(field).path("kind").asText().equals("binding")
-          && operation.path(field).path("bindingId").asText().equals(binding)
+          && operationUses(operation, binding)
           && after(
               session,
               action.path("coordinate").path("stepId").asText(),
               action.path("coordinate").path("ordinal").asInt(),
               transition)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static boolean operationUses(JsonNode operation, String binding) {
+    for (JsonNode use : operation.path("uses")) {
+      if (use.path("kind").asText().equals("binding") && use.path("id").asText().equals(binding)) {
         return true;
       }
     }
@@ -248,10 +253,7 @@ public final class GuidedPlanHistoryAudit {
             binding)) {
       JsonNode edge = contracts.parse(document);
       if (retained.contains(edge.path("consumerAdmissionId").asText())) {
-        result.add(
-            edge.path("coordinate").path("stepId").asText()
-                + "\u0000"
-                + edge.path("argumentSlot").asText());
+        result.add(edge.path("coordinate").path("stepId").asText());
       }
     }
     return result;
@@ -309,6 +311,6 @@ public final class GuidedPlanHistoryAudit {
   }
 
   private static String pair(JsonNode pair) {
-    return pair.path("stepId").asText() + "\u0000" + pair.path("argumentSlot").asText();
+    return pair.path("stepId").asText();
   }
 }

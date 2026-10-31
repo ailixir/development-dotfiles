@@ -178,7 +178,7 @@ public final class ObservedPublicationFixture {
 
   /**
    * Publishes the draft's current source and configuration as an observed revision and makes it the
-   * draft's confirmed revision.
+   * draft's confirmed revision (standing in for a passed proof).
    *
    * @param testId the draft; its authoring is promoted first if it has none
    * @param variables the plain variable names the revision declares
@@ -315,6 +315,13 @@ public final class ObservedPublicationFixture {
           sessions.lock(sessionId);
           publications.commit(commit, Instant.now());
         });
+    // Commit records the revision; this fixture stands in for its passed proof so the draft is
+    // runnable (ADR-SC-008 D5). Tests of the recorded state use the publisher instead.
+    jdbc.update(
+        "UPDATE ui_tests SET confirmed_revision_id=candidate_revision_id,"
+            + " candidate_revision_id=NULL WHERE id=? AND candidate_revision_id=?",
+        testId,
+        revisionId);
     return revisionId;
   }
 
@@ -374,13 +381,7 @@ public final class ObservedPublicationFixture {
             .put("configurationRevision", current.path("configurationRevision").asText())
             .put("modelDataPolicyId", "labels-only-1")
             .putNull("valueTransferPolicyId");
-    scope
-        .putArray("capabilities")
-        .add("observe")
-        .add("navigate")
-        .add("press")
-        .add("fill")
-        .add("assert");
+    scope.putArray("capabilities").add("observe").add("step");
     session.putObject("versions").put("contract", 3);
     session.set(
         "limits",

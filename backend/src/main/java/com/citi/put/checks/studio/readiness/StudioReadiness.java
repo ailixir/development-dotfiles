@@ -13,6 +13,11 @@ public enum StudioReadiness {
   /** The confirmed observed revision matches the draft and replays model-free. */
   READY,
   /**
+   * A revision was learned and recorded and matches the draft, but its model-free proof has not
+   * passed: not confirmed, not scheduled. A manual Run of it is a labelled diagnostic.
+   */
+  RECORDED,
+  /**
    * A published revision exists and a step changed; carries the first changed step. Reserved for
    * STUDIO-OBS-015, which owns the detection: this server never emits it yet.
    */

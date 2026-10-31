@@ -20,4 +20,17 @@ public record RunnerStepState(
     Double startedAtMs,
     Double finishedAtMs,
     Double durationMs,
-    String failure) {}
+    String failure,
+    com.fasterxml.jackson.databind.JsonNode receipt) {
+
+  /** A step state from a runner that sends no receipt. */
+  public RunnerStepState(
+      Integer stepIndex,
+      String status,
+      Double startedAtMs,
+      Double finishedAtMs,
+      Double durationMs,
+      String failure) {
+    this(stepIndex, status, startedAtMs, finishedAtMs, durationMs, failure, null);
+  }
+}

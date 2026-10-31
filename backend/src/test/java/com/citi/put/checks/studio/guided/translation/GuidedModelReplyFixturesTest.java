@@ -56,7 +56,7 @@ class GuidedModelReplyFixturesTest {
     // The one deliberate negative: a SOURCE_PLAN reply with needs that the strict schema refuses.
     assertThat(offenders)
         .allMatch(
-            path -> path.contains("planning-fixtures.json/cases/50/value"),
+            path -> path.contains("planning-fixtures.json/cases/48/value"),
             String.valueOf(offenders));
     assertThat(offenders).hasSizeLessThanOrEqualTo(1);
   }

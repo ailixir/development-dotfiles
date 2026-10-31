@@ -77,44 +77,43 @@ public final class GuidedIncrementalStore {
                     String.class,
                     base,
                     ids.toString()));
-    for (JsonNode action : program.path("actions")) {
-      if (action.path("operation").path("kind").asText().equals("navigate")) {
-        JsonNode recipe =
-            com.citi.put.checks.studio.guided.publication.GuidedPlanBuilder.unique(
-                change.baseArtifact().path("inputRecipes"),
-                "inputId",
-                action.path("operation").path("destinationInputId").asText());
-        String destination = null;
-        JsonNode provenance = recipe.path("provenance");
-        if (provenance.path("kind").asText().equals("sourceSpan")) {
-          var source =
-              change.authoring().steps().stream()
-                  .filter(step -> step.id().toString().equals(recipe.path("stepId").asText()))
-                  .findFirst()
-                  .orElseThrow();
-          int start = provenance.path("start").asInt(-1), end = provenance.path("end").asInt(-1);
-          require(
-              start >= 0 && end > start && end <= source.text().length(),
-              "REFERENCE_MISMATCH",
-              422);
-          destination = source.text().substring(start, end);
-        } else {
-          String variables =
-              jdbc.queryForObject(
-                  "SELECT variables::text FROM ui_tests WHERE id=?",
-                  String.class,
-                  UUID.fromString(request.path("testId").asText()));
-          for (var variable :
-              com.citi.put.checks.studio.dto.CanonicalStudioCodec.parseVariables(variables)) {
-            if (variable.kind().equals("plain")
-                && variable.name().equals(provenance.path("referenceName").asText())) {
-              destination = variable.value();
-            }
+    var prefixSteps = new java.util.HashSet<String>();
+    program.path("sourceStepIds").forEach(step -> prefixSteps.add(step.asText()));
+    for (JsonNode recipe : change.baseArtifact().path("inputRecipes")) {
+      if (!recipe.path("kind").asText().equals("destination")
+          || !prefixSteps.contains(recipe.path("stepId").asText())) {
+        continue;
+      }
+      String destination = null;
+      JsonNode provenance = recipe.path("provenance");
+      if (provenance.path("kind").asText().equals("sourceSpan")) {
+        var source =
+            change.authoring().steps().stream()
+                .filter(step -> step.id().toString().equals(recipe.path("stepId").asText()))
+                .findFirst()
+                .orElseThrow();
+        int start = provenance.path("start").asInt(-1), end = provenance.path("end").asInt(-1);
+        require(
+            start >= 0 && end > start && end <= source.text().length(), "REFERENCE_MISMATCH", 422);
+        destination = source.text().substring(start, end);
+      } else {
+        String variables =
+            jdbc.queryForObject(
+                "SELECT variables::text FROM ui_tests WHERE id=?",
+                String.class,
+                UUID.fromString(request.path("testId").asText()));
+        for (var variable :
+            com.citi.put.checks.studio.dto.CanonicalStudioCodec.parseVariables(variables)) {
+          if (variable.kind().equals("plain")
+              && variable.name().equals(provenance.path("referenceName").asText())) {
+            destination = variable.value();
           }
         }
-        require(destination != null, "MISSING_SOURCE", 409);
-        requireAllowed(destination, domains);
       }
+      require(destination != null, "MISSING_SOURCE", 409);
+      requireAllowed(destination, domains);
+    }
+    for (JsonNode action : program.path("actions")) {
       // The reused prefix replays on the origin each step learned on, which must be on the
       // deployment's list as it stands now.
       JsonNode origin = action.path("origin");
@@ -191,14 +190,16 @@ public final class GuidedIncrementalStore {
     String id = session.path("sessionId").asText();
     JsonNode artifact = baseArtifact(id);
     var used = new java.util.HashSet<String>();
+    var usedSecrets = new java.util.HashSet<String>();
     for (JsonNode action : program(id).path("actions")) {
-      JsonNode operation = action.path("operation");
-      if (operation.has("destinationInputId")) {
-        used.add(operation.path("destinationInputId").asText());
-      }
-      for (String slot : List.of("value", "expected")) {
-        if (operation.path(slot).has("sourceInputId")) {
-          used.add(operation.path(slot).path("sourceInputId").asText());
+      for (JsonNode use : action.path("operation").path("uses")) {
+        if (use.path("kind").asText().equals("input")) {
+          used.add(use.path("id").asText());
+        } else if (use.path("kind").asText().equals("secret")) {
+          usedSecrets.add(
+              action.path("coordinate").path("stepId").asText()
+                  + "\u0000"
+                  + use.path("id").asText());
         }
       }
     }
@@ -206,11 +207,17 @@ public final class GuidedIncrementalStore {
     java.util.Map<String, String> stable = new java.util.HashMap<>();
     for (JsonNode recipe : artifact.path("inputRecipes")) {
       String inputId = recipe.path("inputId").asText();
-      if (!used.remove(inputId)) {
+      boolean secret = recipe.path("kind").asText().equals("secretRef");
+      if (secret
+          ? !usedSecrets.remove(
+              recipe.path("stepId").asText()
+                  + "\u0000"
+                  + recipe.path("provenance").path("referenceName").asText())
+          : !used.remove(inputId)) {
         continue;
       }
       ObjectNode reference = contracts.object();
-      for (String field : List.of("stepId", "kind", "intendedSlot")) {
+      for (String field : List.of("stepId", "kind")) {
         reference.set(field, recipe.path(field));
       }
       JsonNode provenance = recipe.path("provenance");
@@ -238,7 +245,7 @@ public final class GuidedIncrementalStore {
           "REFERENCE_MISMATCH",
           422);
     }
-    require(used.isEmpty(), "MISSING_SOURCE", 409);
+    require(used.isEmpty() && usedSecrets.isEmpty(), "MISSING_SOURCE", 409);
     return new PrefixInputs(references, java.util.Map.copyOf(stable));
   }
 
@@ -263,38 +270,28 @@ public final class GuidedIncrementalStore {
     result.set("sourceReferences", inputs.references());
     ArrayNode obligations = result.putArray("obligations");
     ArrayNode needs = result.putArray("needs");
+    result.putArray("stepSections");
     var needed = new java.util.HashSet<String>();
     var prefixSteps = new java.util.HashSet<String>();
     program(id).path("sourceStepIds").forEach(step -> prefixSteps.add(step.asText()));
+    var actionSteps = new java.util.HashSet<String>();
     for (JsonNode action : program(id).path("actions")) {
-      JsonNode matched = null;
-      for (JsonNode candidate : old.path("obligations")) {
-        if (candidate.path("stepId").equals(action.path("coordinate").path("stepId"))
-            && candidate.path("occurrence").equals(action.path("coordinate").path("ordinal"))) {
-          require(matched == null, "EVIDENCE_MISMATCH", 409);
-          matched = candidate;
-        }
+      actionSteps.add(action.path("coordinate").path("stepId").asText());
+    }
+    // One action realises a step; every obligation that describes the step is imported with it.
+    for (JsonNode candidate : old.path("obligations")) {
+      if (!prefixSteps.contains(candidate.path("stepId").asText())) {
+        continue;
       }
-      require(
-          matched != null
-              && matched.path("operationKind").equals(action.path("operation").path("kind")),
-          "OPERATION_MISMATCH",
-          409);
-      ObjectNode meaning = matched.deepCopy();
+      require(actionSteps.contains(candidate.path("stepId").asText()), "OPERATION_MISMATCH", 409);
+      ObjectNode meaning = candidate.deepCopy();
       if (!meaning.path("referenceIndex").isNull()) {
-        JsonNode operation = action.path("operation");
-        String inputId = operation.path("destinationInputId").asText();
-        if (inputId.isEmpty()) {
-          inputId =
-              operation
-                  .path(operation.path("kind").asText().equals("assert") ? "expected" : "value")
-                  .path("sourceInputId")
-                  .asText();
-        }
+        JsonNode reference =
+            old.path("sourceReferences").get(meaning.path("referenceIndex").asInt());
+        require(reference != null, "MISSING_SOURCE", 409);
         int index = -1;
         for (int at = 0; at < inputs.references().size(); at++) {
-          if (inputId.equals(
-              inputs.stableIds().get(GuidedContracts.hash(inputs.references().get(at))))) {
+          if (referenceKey(reference).equals(referenceKey(inputs.references().get(at)))) {
             index = at;
           }
         }
@@ -321,6 +318,17 @@ public final class GuidedIncrementalStore {
     }
     com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlan.validate(contracts, result);
     return result;
+  }
+
+  /** What names a source reference regardless of the revision it was read at. */
+  private static String referenceKey(JsonNode reference) {
+    return reference.path("stepId").asText()
+        + "\u0000"
+        + reference.path("kind").asText()
+        + "\u0000"
+        + (reference.path("referenceKind").asText().equals("sourceSpan")
+            ? reference.path("startUtf16").asText() + ":" + reference.path("endUtf16").asText()
+            : reference.path("referenceId").asText());
   }
 
   public ObjectNode relearnedFrom(String id) {
@@ -351,21 +359,7 @@ public final class GuidedIncrementalStore {
   }
 
   public ObjectNode issue(
-      JsonNode session,
-      JsonNode context,
-      JsonNode coordinate,
-      JsonNode evidenceHash,
-      JsonNode pressInheritance) {
-    return issue(session, context, coordinate, evidenceHash, pressInheritance, null);
-  }
-
-  public ObjectNode issue(
-      JsonNode session,
-      JsonNode context,
-      JsonNode coordinate,
-      JsonNode evidenceHash,
-      JsonNode pressInheritance,
-      JsonNode assertSourceBinding) {
+      JsonNode session, JsonNode context, JsonNode coordinate, JsonNode evidenceHash) {
     String id = session.path("sessionId").asText();
     require(pending(id), "REVISION_CONFLICT", 409);
     ObjectNode request = contracts.object();
@@ -386,10 +380,6 @@ public final class GuidedIncrementalStore {
     request.put("prefixProgramHash", GuidedContracts.hash(program(id)));
     request.set("coordinate", coordinate);
     request.set("evidenceHash", evidenceHash);
-    request.set("pressInheritance", pressInheritance);
-    if (assertSourceBinding != null && !assertSourceBinding.isNull()) {
-      request.set("assertSourceBinding", assertSourceBinding);
-    }
     contracts.validate("v3/bridge#/definitions/PrefixRequestIdentity", request);
     String digest = GuidedContracts.hash(request);
     var old =
@@ -446,9 +436,8 @@ public final class GuidedIncrementalStore {
 
   /**
    * The pure check of a prefix preparation against the verified learned program. The identity is
-   * the single operation identity: coordinate, origin, the target the runner reported for this
-   * preparation, and the operation. The proposal's ref, document and generation are not hashed, so
-   * a replay on a later generation resolves a fresh ref to the same learned operation.
+   * the single operation identity: coordinate, origin and the operation. The proposal's document
+   * and generation are not hashed, so a replay on a later generation runs the same learned step.
    */
   public static void verifyPrepared(JsonNode program, JsonNode request, JsonNode response) {
     require(
@@ -458,23 +447,6 @@ public final class GuidedIncrementalStore {
     if (!response.path("kind").asText().equals("PREPARED")) {
       return;
     }
-    require(
-        GuidedContracts.same(
-            response.path("preparation").path("pressInheritance"),
-            request.path("request").path("pressInheritance")),
-        "EVIDENCE_MISMATCH",
-        409);
-    JsonNode issued = request.path("request"), prepared = response.path("preparation");
-    boolean sourceBinding = issued.has("assertSourceBinding");
-    require(
-        sourceBinding == prepared.has("assertSourceBinding")
-            && (!sourceBinding
-                || issued.path("assertSourceBinding").isObject()
-                    && prepared.path("assertSourceBinding").isObject()
-                    && GuidedContracts.same(
-                        prepared.path("assertSourceBinding"), issued.path("assertSourceBinding"))),
-        "EVIDENCE_MISMATCH",
-        409);
     JsonNode proposal = response.path("proposal");
     JsonNode expected = null;
     for (JsonNode action : program.path("actions")) {
@@ -490,8 +462,7 @@ public final class GuidedIncrementalStore {
         "OPERATION_MISMATCH",
         409);
     require(
-        GuidedOperationIdentity.of(proposal, response.path("preparation").path("target"))
-            .equals(expected.path("operationHash").asText()),
+        GuidedOperationIdentity.of(proposal).equals(expected.path("operationHash").asText()),
         "OPERATION_MISMATCH",
         409);
     require(

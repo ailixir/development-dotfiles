@@ -47,7 +47,7 @@ public final class GuidedBindingStore {
     require(stepIndex(session, producerStep) >= 0, "BINDING_ORDER", 422);
     for (JsonNode consumer : consumers) {
       require(
-          stepIndex(session, consumer.path("stepId").asText()) >= stepIndex(session, producerStep),
+          stepIndex(session, consumer.path("stepId").asText()) > stepIndex(session, producerStep),
           "BINDING_ORDER",
           422);
     }
@@ -157,150 +157,161 @@ public final class GuidedBindingStore {
     return request;
   }
 
+  /**
+   * A step's captures must be bindings allocated to its step with no producer yet; every entry it
+   * uses must exist: a binding produced earlier on the same origin by this runtime, an authored
+   * input bound to this step, or a secret input bound to this step.
+   */
   public void validateAction(JsonNode session, JsonNode proposal, JsonNode context) {
     JsonNode operation = proposal.path("operation");
-    String kind = operation.path("kind").asText();
     String id = session.path("sessionId").asText();
-    if (kind.equals("read")) {
-      JsonNode allocation = allocation(id, operation.path("bindingId").asText());
+    String step = proposal.path("coordinate").path("stepId").asText();
+    for (JsonNode capture : operation.path("captures")) {
+      JsonNode allocation = allocation(id, capture.asText());
       require(
-          allocation.path("producerStepId").equals(proposal.path("coordinate").path("stepId"))
+          allocation.path("producerStepId").asText().equals(step)
               && jdbc.queryForObject(
                       "SELECT count(*) FROM studio_guided_producers WHERE session_id=? AND binding_id=?",
                       Integer.class,
                       id,
-                      operation.path("bindingId").asText())
+                      capture.asText())
                   == 0,
           "BINDING_ORDER",
           422);
     }
-    JsonNode reference = operation.path(kind.equals("assert") ? "expected" : "value");
-    if (reference.path("kind").asText().equals("binding")) {
-      String binding = reference.path("bindingId").asText();
-      JsonNode allocated = allocation(id, binding);
-      String slot = kind + (kind.equals("assert") ? ".expected" : ".value");
-      ObjectNode expected =
-          contracts
-              .object()
-              .put("stepId", proposal.path("coordinate").path("stepId").asText())
-              .put("argumentSlot", slot);
-      require(contains(allocated.path("consumers"), expected), "BINDING_ORDER", 422);
-      JsonNode producer = producer(id, binding);
-      require(
-          before(session, producer.path("coordinate"), proposal.path("coordinate"))
-              && producer.path("origin").equals(proposal.path("executionEvidence").path("origin")),
-          "BINDING_ORDER",
-          422);
-      for (String field : java.util.List.of("contextId", "workerId", "ownerFence")) {
+    for (JsonNode use : operation.path("uses")) {
+      String kind = use.path("kind").asText(), key = use.path("id").asText();
+      if (kind.equals("binding")) {
+        JsonNode allocated = allocation(id, key);
+        ObjectNode expected = contracts.object().put("stepId", step);
+        require(contains(allocated.path("consumers"), expected), "BINDING_ORDER", 422);
+        JsonNode producer = producer(id, key);
         require(
-            producer.path("availability").path(field).equals(context.path(field)),
-            "STALE_FENCE",
-            409);
+            before(session, producer.path("coordinate"), proposal.path("coordinate"))
+                && producer
+                    .path("origin")
+                    .equals(proposal.path("executionEvidence").path("origin")),
+            "BINDING_ORDER",
+            422);
+        for (String field : java.util.List.of("contextId", "workerId", "ownerFence")) {
+          require(
+              producer.path("availability").path(field).equals(context.path(field)),
+              "STALE_FENCE",
+              409);
+        }
+        continue;
       }
-    }
-    String inputId =
-        kind.equals("navigate")
-            ? operation.path("destinationInputId").asText()
-            : reference.path("sourceInputId").asText();
-    if (!inputId.isEmpty()) {
+      boolean secret = kind.equals("secret");
       JsonNode input = null;
       for (JsonNode item : context.path("authoredInputs").path("inputs")) {
-        if (item.path("inputId").asText().equals(inputId)) {
+        if (secret
+            ? item.path("secretId").asText().equals(key)
+            : item.path("inputId").asText().equals(key)) {
           input = item;
         }
       }
-      String slot =
-          kind.equals("navigate")
-              ? "navigate.destination"
-              : kind + (kind.equals("assert") ? ".expected" : ".value");
       require(
           input != null
-              && input.path("sourceStepId").equals(proposal.path("coordinate").path("stepId"))
-              && input.path("intendedSlot").asText().equals(slot)
-              && (input.path("kind").asText().equals("secretRef")
-                  == reference.path("kind").asText().equals("secretRef"))
-              && (!input.path("kind").asText().equals("secretRef")
-                  || kind.equals("fill")
-                      && proposal.path("target").path("kind").asText().equals("passwordControl")),
+              && input.path("sourceStepId").asText().equals(step)
+              && input.path("kind").asText().equals("secretRef") == secret,
           "FORBIDDEN_SCOPE",
           403);
     }
   }
 
+  /** One consumer edge per binding the step reads. */
   public void attachConsumer(JsonNode session, JsonNode proposal, JsonNode ledger) {
-    JsonNode op = proposal.path("operation");
-    String kind = op.path("kind").asText();
-    JsonNode reference = op.path(kind.equals("assert") ? "expected" : "value");
-    if (!reference.path("kind").asText().equals("binding")) {
-      return;
+    String id = session.path("sessionId").asText();
+    String admission = ledger.path("admission").path("admissionId").asText();
+    for (JsonNode use : proposal.path("operation").path("uses")) {
+      if (!use.path("kind").asText().equals("binding")) {
+        continue;
+      }
+      String binding = use.path("id").asText();
+      JsonNode producer = producer(id, binding);
+      ObjectNode edge =
+          contracts
+              .object()
+              .put("bindingId", binding)
+              .put("producerAdmissionId", producer.path("producerAdmissionId").asText())
+              .put("consumerAdmissionId", admission)
+              .put("destinationOrigin", proposal.path("executionEvidence").path("origin").asText())
+              .put("transferPolicy", "sameOrigin");
+      edge.set("coordinate", proposal.path("coordinate"));
+      contracts.validate("v3/consumer-edge", edge);
+      jdbc.update(
+          "INSERT INTO studio_guided_consumer_edges(session_id,consumer_admission_id,binding_id,"
+              + "producer_admission_id,document) VALUES (?,?,?,?,?::jsonb)",
+          id,
+          admission,
+          binding,
+          producer.path("producerAdmissionId").asText(),
+          edge.toString());
+      materialization.bump(id);
     }
-    String id = session.path("sessionId").asText(), binding = reference.path("bindingId").asText();
-    JsonNode producer = producer(id, binding);
-    String slot = kind + (kind.equals("assert") ? ".expected" : ".value"),
-        admission = ledger.path("admission").path("admissionId").asText();
-    ObjectNode edge =
-        contracts
-            .object()
-            .put("bindingId", binding)
-            .put("producerAdmissionId", producer.path("producerAdmissionId").asText())
-            .put("consumerAdmissionId", admission)
-            .put("argumentSlot", slot)
-            .put("destinationOrigin", proposal.path("executionEvidence").path("origin").asText())
-            .put("transferPolicy", "sameOrigin");
-    edge.set("coordinate", proposal.path("coordinate"));
-    contracts.validate("v3/consumer-edge", edge);
-    jdbc.update(
-        "INSERT INTO studio_guided_consumer_edges(session_id,consumer_admission_id,a"
-            + "rgument_slot,binding_id,producer_admission_id,document) VALUES "
-            + "(?,?,?,?,?,?::jsonb)",
-        id,
-        admission,
-        slot,
-        binding,
-        producer.path("producerAdmissionId").asText(),
-        edge.toString());
-    materialization.bump(id);
   }
 
+  /**
+   * A step that succeeded commits one producer row per declared capture, each backed by the
+   * runner's availability receipt for that binding.
+   */
   public void successfulRead(
-      JsonNode session, JsonNode proposal, JsonNode ledger, JsonNode receipt, JsonNode context) {
-    contracts.validate("v3/availability", receipt);
+      JsonNode session,
+      JsonNode proposal,
+      JsonNode ledger,
+      JsonNode availability,
+      JsonNode context) {
     String id = session.path("sessionId").asText(),
-        binding = proposal.path("operation").path("bindingId").asText(),
         admission = ledger.path("admission").path("admissionId").asText();
+    JsonNode captures = proposal.path("operation").path("captures");
     require(
-        receipt.path("bindingId").asText().equals(binding)
-            && receipt.path("producerAdmissionId").asText().equals(admission),
+        availability.isArray() && availability.size() == captures.size(),
         "IDEMPOTENCY_CONFLICT",
         409);
-    for (String field : java.util.List.of("contextId", "workerId", "ownerFence")) {
-      require(receipt.path(field).equals(context.path(field)), "STALE_FENCE", 409);
+    for (JsonNode binding : captures) {
+      JsonNode receipt = null;
+      for (JsonNode candidate : availability) {
+        if (candidate.path("bindingId").equals(binding)) {
+          require(receipt == null, "IDEMPOTENCY_CONFLICT", 409);
+          receipt = candidate;
+        }
+      }
+      require(receipt != null, "IDEMPOTENCY_CONFLICT", 409);
+      contracts.validate("v3/availability", receipt);
+      require(
+          receipt.path("producerAdmissionId").asText().equals(admission),
+          "IDEMPOTENCY_CONFLICT",
+          409);
+      for (String field : java.util.List.of("contextId", "workerId", "ownerFence")) {
+        require(receipt.path(field).equals(context.path(field)), "STALE_FENCE", 409);
+      }
+      ObjectNode producer =
+          contracts
+              .object()
+              .put("bindingId", binding.asText())
+              .put("producerAdmissionId", admission);
+      producer.set("coordinate", proposal.path("coordinate"));
+      producer.set("origin", proposal.path("executionEvidence").path("origin"));
+      producer.set("availability", receipt);
+      contracts.validate("v3/producer", producer);
+      var found =
+          jdbc.queryForList(
+              "SELECT document::text FROM studio_guided_producers WHERE session_id=? AND binding_id=?",
+              String.class,
+              id,
+              binding.asText());
+      if (!found.isEmpty()) {
+        require(contracts.parse(found.getFirst()).equals(producer), "IDEMPOTENCY_CONFLICT", 409);
+        continue;
+      }
+      jdbc.update(
+          "INSERT INTO studio_guided_producers(session_id,binding_id,admission_id,document) VALUES (?,?,?,?::jsonb)",
+          id,
+          binding.asText(),
+          admission,
+          producer.toString());
+      materialization.bump(id);
     }
-    ObjectNode producer =
-        contracts.object().put("bindingId", binding).put("producerAdmissionId", admission);
-    producer.set("coordinate", proposal.path("coordinate"));
-    producer.set("origin", proposal.path("executionEvidence").path("origin"));
-    producer.set("recipe", proposal.path("operation").path("recipe"));
-    producer.set("availability", receipt);
-    contracts.validate("v3/producer", producer);
-    var found =
-        jdbc.queryForList(
-            "SELECT document::text FROM studio_guided_producers WHERE session_id=? AND binding_id=?",
-            String.class,
-            id,
-            binding);
-    if (!found.isEmpty()) {
-      require(contracts.parse(found.getFirst()).equals(producer), "IDEMPOTENCY_CONFLICT", 409);
-      return;
-    }
-    jdbc.update(
-        "INSERT INTO studio_guided_producers(session_id,binding_id,admission_id,docu"
-            + "ment) VALUES (?,?,?,?::jsonb)",
-        id,
-        binding,
-        admission,
-        producer.toString());
-    materialization.bump(id);
   }
 
   private JsonNode allocation(String id, String binding) {

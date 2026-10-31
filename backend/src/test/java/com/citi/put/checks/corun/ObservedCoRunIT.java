@@ -433,47 +433,35 @@ class ObservedCoRunIT {
     public GuidedModelResponse propose(GuidedModelRequest request, GuidedCallBudget budget) {
       JsonNode context = request.projection().document();
       ObjectNode reply = JSON.createObjectNode();
+      reply
+          .put("schemaVersion", 3)
+          .put("kind", request.kind().name())
+          .put("requestId", request.requestId());
       switch (request.kind()) {
         case SOURCE_PLAN -> {
           sourcePlans.incrementAndGet();
           JsonNode step = context.path("sourceSteps").get(0);
-          String text = step.path("text").asText();
-          int start = text.indexOf("http");
-          ArrayNode references = reply.putArray("sourceReferences");
-          references
-              .addObject()
-              .put("referenceKind", "sourceSpan")
-              .put("sourceRevision", context.path("sourceRevision").asText("1"))
-              .put("stepId", step.path("stepId").asText())
-              .put("startUtf16", start)
-              .put("endUtf16", text.length())
-              .put("kind", "destination")
-              .put("intendedSlot", "navigate.destination");
+          reply.putArray("sourceReferences");
           reply
               .putArray("obligations")
               .addObject()
               .put("stepId", step.path("stepId").asText())
               .put("occurrence", 0)
-              .put("operationKind", "navigate")
               .put("targetIntent", "page")
               .putNull("scopeIntent")
-              .putNull("predicate")
+              .putNull("referenceIndex")
               .putNull("needId")
-              .put("referenceIndex", 0);
+              .putArray("uses");
+          reply.putArray("stepSections");
         }
-        case NEXT_ACTION -> {
+        case STEP_CODE -> {
           nextActions.incrementAndGet();
-          JsonNode obligation = context.path("obligations").get(0);
+          String text = context.path("sourceSteps").get(0).path("text").asText();
+          String address = text.substring(text.indexOf("http")).replaceAll("[\\s.]+$", "");
           reply
-              .put("status", "ACTION")
-              .put("obligationId", obligation.path("obligationId").asText())
-              .putNull("question");
-          ObjectNode action = reply.putObject("action");
-          action
-              .putObject("operation")
-              .put("kind", "navigate")
-              .put("destinationInputId", context.path("inputs").get(0).path("inputId").asText());
-          action.putObject("target").put("kind", "page");
+              .put("status", "CODE")
+              .put("code", "await page.goto('" + address + "');")
+              .putArray("captures");
         }
         default -> {
           others.incrementAndGet();
@@ -2333,13 +2321,7 @@ class ObservedCoRunIT {
               .put("configurationRevision", current.path("configurationRevision").asText())
               .put("modelDataPolicyId", "labels-only-1")
               .putNull("valueTransferPolicyId");
-      scope
-          .putArray("capabilities")
-          .add("observe")
-          .add("navigate")
-          .add("press")
-          .add("fill")
-          .add("assert");
+      scope.putArray("capabilities").add("observe").add("step");
       session.putObject("versions").put("contract", 3);
       session.set(
           "limits",

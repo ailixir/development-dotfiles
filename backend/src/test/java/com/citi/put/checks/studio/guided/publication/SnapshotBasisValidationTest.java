@@ -402,8 +402,8 @@ class SnapshotBasisValidationTest {
             },
             new String[] {
               "65/plan/semantic-change",
-              ARTIFACT + "/learnedPlan/actions/0/operation/destinationInputId",
-              "input-other",
+              ARTIFACT + "/learnedPlan/actions/0/operation/code",
+              "await page.goto('https://other.example.test');",
               "learnedPlanHash"
             },
             new String[] {
@@ -471,10 +471,12 @@ class SnapshotBasisValidationTest {
           basis,
           "incrementalEvidence/program/"
               + (kind.equals("guard")
-                  // ADR-SC-007: a guard target is the runner-reported locator, tier and identity.
-                  ? "actions/1/guard/target/identity/role"
-                  : "actions/0/operation/destinationInputId"),
-          kind.equals("guard") ? M.valueToTree("other-role") : M.valueToTree("other-input"));
+                  // SC008-E5: the guard is {guardId, origin}; the operation is the step record.
+                  ? "actions/1/guard/guardId"
+                  : "actions/0/operation/code"),
+          kind.equals("guard")
+              ? M.valueToTree("other-guard")
+              : M.valueToTree("await page.goto('/x');"));
       put(
           basis,
           "incrementalEvidence/plan/prefixProgramHash",

@@ -53,7 +53,7 @@ class GuidedSourceClassifierTest {
   }
 
   @Test
-  void secretReferenceEmissionHasOnlyIdAndFillSlotWithTokenExcludedFromApprovedRegions() {
+  void secretReferenceEmissionHasOnlyIdAndNoSlotWithTokenExcludedFromApprovedRegions() {
     var draft = current("Enter <secret PASS> as password");
     draft
         .withArray("variables")
@@ -64,7 +64,7 @@ class GuidedSourceClassifierTest {
     var manifest = classifier().classify(draft, scope());
     var reference = manifest.path("configurationReferences").get(0);
     assertThat(reference.path("kind").asText()).isEqualTo("secretRef");
-    assertThat(reference.path("intendedSlot").asText()).isEqualTo("fill.value");
+    assertThat(reference.has("intendedSlot")).isFalse();
     assertThat(reference.path("referenceName").asText()).isEqualTo("PASS");
     assertThat(
             manifest
@@ -106,7 +106,7 @@ class GuidedSourceClassifierTest {
         .doesNotContain("FORBIDDEN_SAVED_VALUE");
     assertThat(result.path("configurationValues").toString()).contains("FORBIDDEN_SAVED_VALUE");
     assertThat(result.path("sourceSteps").get(0).path("regions").size()).isEqualTo(1);
-    assertThat(result.path("configurationReferences").size()).isEqualTo(4);
+    assertThat(result.path("configurationReferences").size()).isEqualTo(2);
   }
 
   @Test
@@ -183,7 +183,7 @@ class GuidedSourceClassifierTest {
         .put("secretId", "vault-id");
     ObjectNode classified = classifier().classify(draft, scope());
     assertThat(classified.path("sourceSteps").get(0).path("text").textValue()).isEqualTo(source);
-    assertThat(classified.path("configurationValues").size()).isEqualTo(5);
+    assertThat(classified.path("configurationValues").size()).isEqualTo(3);
     var approved = classified.path("sourceSteps").get(0).path("regions");
     for (JsonNode region : approved) {
       assertThat(

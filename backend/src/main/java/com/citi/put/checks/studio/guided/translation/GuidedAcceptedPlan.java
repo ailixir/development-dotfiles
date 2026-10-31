@@ -28,14 +28,16 @@ public final class GuidedAcceptedPlan {
   public static void validateBeforeAllocation(GuidedContracts contracts, JsonNode plan) {
     require(
         plan.isObject()
-            && plan.size() == 3
+            && plan.size() == 4
             && plan.has("sourceReferences")
             && plan.has("obligations")
-            && plan.has("needs"),
+            && plan.has("needs")
+            && plan.has("stepSections"),
         "INVALID_CONTRACT",
         422);
     contracts.validate(ACCEPTED + "/properties/sourceReferences", plan.path("sourceReferences"));
     contracts.validate(ACCEPTED + "/properties/obligations", plan.path("obligations"));
+    contracts.validate(ACCEPTED + "/properties/stepSections", plan.path("stepSections"));
     require(
         plan.path("needs").isArray() && plan.path("needs").size() <= 32, "INVALID_CONTRACT", 422);
     for (JsonNode need : plan.path("needs")) {
@@ -81,13 +83,7 @@ public final class GuidedAcceptedPlan {
           422);
       Set<String> consumers = new HashSet<>();
       for (JsonNode consumer : need.path("consumers")) {
-        require(
-            consumers.add(
-                consumer.path("stepId").asText()
-                    + "\u0000"
-                    + consumer.path("argumentSlot").asText()),
-            "REFERENCE_MISMATCH",
-            422);
+        require(consumers.add(consumer.path("stepId").asText()), "REFERENCE_MISMATCH", 422);
       }
     }
   }

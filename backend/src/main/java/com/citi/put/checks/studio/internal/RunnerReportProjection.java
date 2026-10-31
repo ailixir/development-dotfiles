@@ -517,7 +517,8 @@ public final class RunnerReportProjection {
               // No calibration, no origin, no re-basing: round the reading and persist it.
               round(step.startedAtMs()),
               round(step.durationMs()),
-              timedOutStepMessage(step, terminalErrorCode)));
+              timedOutStepMessage(step, terminalErrorCode),
+              step.receipt()));
     }
     // A runner that reported a step index the revision does not have is a divergence, not a step.
     for (Integer index : reported.keySet()) {

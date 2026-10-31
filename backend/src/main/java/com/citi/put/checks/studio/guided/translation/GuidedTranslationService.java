@@ -11,7 +11,6 @@ import com.citi.put.checks.studio.guided.session.GuidedSessionRepository;
 import com.citi.put.checks.studio.guided.session.GuidedSessionService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -23,8 +22,8 @@ import org.springframework.security.core.Authentication;
 public final class GuidedTranslationService {
   private final GuidedSessionService sessions;
 
-  /** Identical proposals for one obligation the runner may refuse before the step ends. */
-  private static final int MAX_REFUSED_PROPOSALS = 2;
+  /** One pool of STEP_CODE requests per step: rejections, retries and prepare refusals share it. */
+  static final int STEP_CODE_POOL = 3;
 
   private final GuidedSessionRepository repository;
   private final GuidedTranslationStore store;
@@ -409,17 +408,7 @@ public final class GuidedTranslationService {
                           current.document(),
                           context,
                           next.path("coordinate"),
-                          current.progress().path("evidenceHash"),
-                          GuidedPressInheritance.prefix(
-                              jdbc(),
-                              contracts,
-                              id,
-                              store.state(id).path("manifest"),
-                              store.state(id).path("plan"),
-                              next,
-                              current.progress().path("observation"),
-                              context),
-                          sessions.prefixAssertSourceBinding(controller, id, fence, next)));
+                          current.progress().path("evidenceHash")));
               return result;
             });
     if (captured.has("done")) {
@@ -565,7 +554,6 @@ public final class GuidedTranslationService {
                   }
                 }
                 require(meaning != null, "EVIDENCE_MISMATCH", 409);
-                guardAction(current, proposal, null);
                 return store.reserveObligation(
                     current.document(), meaning.path("obligationId").asText(), proposal);
               });
@@ -893,38 +881,13 @@ public final class GuidedTranslationService {
     if (status.equals("AWAITING_CLARIFICATION") || status.equals("FINALIZING")) {
       return safe(state.path("document"));
     }
-    // Recover every durable in-flight association before requesting a new action.
+    // Recover every durable in-flight association before requesting a new step.
     JsonNode recovered = recover(controller, id, fence);
     if (recovered != null) {
       return recovered;
     }
-    // A runner that refuses prepare for a reserved proposal leaves it unadmitted; asking the model
-    // for the same obligation again only repeats the refusal until the budget is gone.
-    boolean refusedRepeatedly =
-        sessions.translationTransaction(
-            controller,
-            id,
-            fence,
-            current ->
-                store.repeatedUnadmittedProposals(
-                        id,
-                        current
-                            .document()
-                            .path("sourceSteps")
-                            .get(current.progress().path("stepIndex").asInt())
-                            .path("stepId")
-                            .asText())
-                    >= MAX_REFUSED_PROPOSALS - 1);
-    if (refusedRepeatedly) {
-      sessions.failTranslation(controller, id, fence, "UNSUPPORTED_SURFACE");
-      // The session just ended: read its document back without the active-session guard.
-      return safe(sessions.secretSession(id));
-    }
-    boolean pendingAcquisition =
-        sessions.translationTransaction(controller, id, fence, store::acquisitionPending);
-    if (!pendingAcquisition
-        && (state.path("translation").path("continuation").asText().equals("REFRESH")
-            || status.equals("OBSERVING"))) {
+    if (state.path("translation").path("continuation").asText().equals("REFRESH")
+        || status.equals("OBSERVING")) {
       refresh(controller, id, fence);
       sessions.translationTransaction(
           controller,
@@ -954,155 +917,101 @@ public final class GuidedTranslationService {
                           action ->
                               action.path("coordinate").path("stepId").asText().equals(stepId))
                       .toList();
-              return new GuidedStepVerifier(store)
-                  .complete(current.document(), contracts.object().put("stepId", stepId), actions);
+              return store.stepFulfilled(id, stepId, actions);
             });
     if (fulfilled) {
-      return complete(controller, id, fence, key + "-verify");
+      return sessions.translationTransaction(
+          controller, id, fence, current -> completeCurrent(controller, id, fence, current));
     }
-    if (!acquireBeforeProposal(controller, id, fence)) {
-      return safe(
-          sessions.translationTransaction(
-              controller, id, fence, current -> current.document().deepCopy()));
-    }
+    requireWorkableObservation(controller, id, fence);
+    StepAttempt attempt = new StepAttempt();
     JsonNode result =
         call(
             controller,
             id,
             fence,
             key,
-            GuidedModelRequest.Kind.NEXT_ACTION,
-            (current, response, attemptIdentity, capture) -> {
-              return applyNextAction(
-                  controller, id, fence, current, response, attemptIdentity, capture);
-            });
-    if (result.path("complete").asBoolean()) {
-      return complete(controller, id, fence, key + "-verify");
-    }
+            GuidedModelRequest.Kind.STEP_CODE,
+            (current, response, attemptIdentity, capture) ->
+                applyStepCode(
+                    controller, id, fence, current, response, attemptIdentity, capture, attempt),
+            attempt);
     if (result.has("admissionKey")) {
-      return admitAndDispatch(controller, id, fence, result);
+      return admitStep(controller, id, fence, attempt, result);
     }
     return result;
   }
 
-  private JsonNode applyNextAction(
+  /**
+   * One STEP_CODE reply is applied: a clarification becomes a question (or ends the run when the
+   * model has nothing to choose from); code becomes the step's proposal. Nothing is reserved here:
+   * the runner has not yet admitted the code, and a reservation can never be replaced.
+   */
+  private JsonNode applyStepCode(
       Authentication controller,
       String id,
       long fence,
       GuidedSessionRepository.Session current,
       JsonNode response,
       JsonNode attemptIdentity,
-      GuidedRefusalDiagnostics.Capture capture) {
+      GuidedRefusalDiagnostics.Capture capture,
+      StepAttempt attempt) {
+    ObjectNode plan = (ObjectNode) store.state(id).path("plan");
+    String stepId =
+        current
+            .document()
+            .path("sourceSteps")
+            .get(current.progress().path("stepIndex").asInt())
+            .path("stepId")
+            .asText();
+    List<JsonNode> obligations = new ArrayList<>();
+    for (JsonNode obligation : plan.path("obligations")) {
+      if (obligation.path("stepId").asText().equals(stepId)) {
+        obligations.add(obligation);
+      }
+    }
     if (response.path("status").asText().equals("CLARIFICATION")) {
-      return GuidedRefusalDiagnostics.call(
+      JsonNode choices = response.path("question").path("choices");
+      if (choices.isEmpty()
+          && response.path("question").path("reason").asText().equals("INSUFFICIENT_EVIDENCE")) {
+        // The model found nothing to choose from: the target is absent. Same end as a refusal.
+        if (!sessions.annotateLoginFailure(controller, id, fence)) {
+          sessions.failTranslation(controller, id, fence, "MISSING_SOURCE");
+        }
+        return safe(repository.lock(id).document());
+      }
+      GuidedRefusalDiagnostics.requireCaptured(
+          choices.size() >= 2,
+          "INVALID_CONTRACT",
+          422,
           capture,
-          GuidedRefusalDiagnostics.Gate.NEXT_QUESTION_CALL,
-          () ->
-              question(
-                  controller,
-                  current,
-                  response.path("question"),
-                  "observed",
-                  attemptIdentity,
-                  capture));
+          GuidedRefusalDiagnostics.Gate.STEP_CHOICES);
+      attempt.hint = "a clarification needs at least 2 choices";
+      return question(
+          controller, current, response.path("question"), "observed", attemptIdentity, capture);
     }
-    if (response.path("status").asText().equals("COMPLETE")) {
-      return contracts.object().put("complete", true);
-    }
-    ObjectNode plan =
-        GuidedRefusalDiagnostics.call(
-            capture,
-            GuidedRefusalDiagnostics.Gate.NEXT_PLAN_ACCESS_CALL,
-            () -> (ObjectNode) store.state(id).path("plan"));
-    GuidedRefusalDiagnostics.call(
-        capture,
-        GuidedRefusalDiagnostics.Gate.NEXT_SOURCE_SELECTION_CALL,
-        () -> {
-          validator.sourceSelections(current.document(), plan, sourceSelections(current));
-          return null;
-        });
-    String obligationId = response.path("obligationId").asText();
-    JsonNode obligation =
-        GuidedRefusalDiagnostics.call(
-            capture,
-            GuidedRefusalDiagnostics.Gate.NEXT_OBLIGATION_LOOKUP_CALL,
-            () -> validator.remaining(plan, obligationId));
-    ObjectNode existing =
-        GuidedRefusalDiagnostics.call(
-            capture,
-            GuidedRefusalDiagnostics.Gate.NEXT_ASSOCIATION_LOOKUP_CALL,
-            () -> store.obligation(id, obligationId));
-    if (existing != null
-        && !existing.path("admissionId").isNull()
-        && !existing.path("admissionId").asText().isBlank()) {
-      return existing;
-    }
+    validator.sourceSelections(current.document(), plan, sourceSelections(current));
     ObjectNode context =
         GuidedRefusalDiagnostics.call(
             capture,
-            GuidedRefusalDiagnostics.Gate.NEXT_RUNNER_CONTEXT_CALL,
+            GuidedRefusalDiagnostics.Gate.STEP_CONTRACT,
             () -> sessions.runnerContext(controller, id, fence));
-    JsonNode proposal =
-        GuidedRefusalDiagnostics.call(
-            capture,
-            GuidedRefusalDiagnostics.Gate.NEXT_MATERIALIZE_CALL,
-            () ->
-                validator.materializeAction(
-                    current.document(),
-                    current.progress(),
-                    obligation,
-                    response.path("action"),
-                    context,
-                    attemptIdentity,
-                    store.state(id).path("planRevision").asLong(),
-                    capture));
-    GuidedRefusalDiagnostics.call(
-        capture,
-        GuidedRefusalDiagnostics.Gate.NEXT_VALIDATE_ACTION_CALL,
-        () -> {
-          ObjectNode groundedProgress = current.progress().deepCopy();
-          JsonNode sourceBinding = sessions.assertSourceBinding(controller, id, fence, proposal);
-          if (!sourceBinding.isNull()) {
-            groundedProgress.set("assertSourceBinding", sourceBinding);
-          }
-          validator.action(
-              current.document(),
-              groundedProgress,
-              plan,
-              GuidedRefusalDiagnostics.call(
-                  capture,
-                  GuidedRefusalDiagnostics.Gate.NEXT_EFFECTIVE_CHOICE_CALL,
-                  () -> effectiveObligation(current, obligation)),
-              proposal,
-              context,
-              authoredLiteral(store.state(id).path("manifest"), plan, obligation),
-              capture);
-          return null;
-        });
-    GuidedRefusalDiagnostics.call(
-        capture,
-        GuidedRefusalDiagnostics.Gate.NEXT_POLICY_CALL,
-        () -> {
-          guardAction(current, proposal, attemptIdentity);
-          return null;
-        });
-    return GuidedRefusalDiagnostics.call(
-        capture,
-        GuidedRefusalDiagnostics.Gate.NEXT_RESERVATION_CALL,
-        () -> store.reserveObligation(current.document(), obligationId, proposal));
-  }
-
-  /**
-   * The authored literal an obligation expects (the quoted source span of its reference), for the
-   * G2 text gate; null when it has no source reference or the reference is a saved or secret value.
-   */
-  private static String authoredLiteral(JsonNode manifest, JsonNode plan, JsonNode obligation) {
-    if (!obligation.path("referenceIndex").isIntegralNumber()) {
-      return null;
-    }
-    JsonNode reference =
-        plan.path("sourceReferences").get(obligation.path("referenceIndex").asInt());
-    return reference == null ? null : GuidedSourceInputResolver.literalOf(manifest, reference);
+    attempt.hint =
+        "expected captures " + GuidedProposalValidator.producedBindings(plan, obligations);
+    ObjectNode proposal =
+        validator.stepProposal(
+            current.document(),
+            current.progress(),
+            plan,
+            obligations,
+            response,
+            context,
+            attemptIdentity,
+            store.state(id).path("planRevision").asLong(),
+            capture);
+    attempt.code = proposal.path("operation").path("code").asText();
+    attempt.proposal = proposal;
+    return contracts.object().put("admissionKey", "pending").set("proposal", proposal);
   }
 
   public JsonNode context(Authentication controller, String id, long fence, JsonNode command) {
@@ -1123,7 +1032,7 @@ public final class GuidedTranslationService {
                   current,
                   UUID.randomUUID().toString(),
                   1,
-                  GuidedModelRequest.Kind.NEXT_ACTION,
+                  GuidedModelRequest.Kind.STEP_CODE,
                   List.of())
               .projection()
               .document();
@@ -1156,7 +1065,6 @@ public final class GuidedTranslationService {
         current -> {
           checkCommand(current, command);
           require(bootstrapReady(current), "RUNTIME_INCOMPATIBLE", 409);
-          require(!store.acquisitionOpen(current), "STALE_GENERATION", 409);
           require(
               current.document().path("state").asText().equals("PROPOSING"),
               "STALE_GENERATION",
@@ -1222,8 +1130,7 @@ public final class GuidedTranslationService {
                   response,
                   window,
                   store.state(id).path("manifest").path("sourceSteps"),
-                  store.state(id).path("plan"),
-                  null);
+                  store.state(id).path("plan"));
           inputs.validate(
               current.document(),
               store.state(id).path("manifest"),
@@ -1421,7 +1328,6 @@ public final class GuidedTranslationService {
               successful |=
                   edge.path("bindingId").equals(old.path("bindingId"))
                       && edge.path("coordinate").path("stepId").equals(oldConsumer.path("stepId"))
-                      && edge.path("argumentSlot").equals(oldConsumer.path("argumentSlot"))
                       && retained.contains(edge.path("consumerAdmissionId").asText());
             }
             if (successful) {
@@ -1498,6 +1404,17 @@ public final class GuidedTranslationService {
             .thenComparingInt(obligation -> obligation.path("occurrence").asInt()));
     obligations.removeAll();
     ordered.forEach(obligations::add);
+    var sections = result.putArray("stepSections");
+    java.util.Set<String> sectioned = new java.util.HashSet<>();
+    for (JsonNode picked : selected.path("stepSections")) {
+      sectioned.add(picked.path("stepId").asText());
+      sections.add(picked.deepCopy());
+    }
+    for (JsonNode picked : previous.path("stepSections")) {
+      if (sectioned.add(picked.path("stepId").asText())) {
+        sections.add(picked.deepCopy());
+      }
+    }
     GuidedAcceptedPlan.validateBeforeAllocation(contracts, result);
     return result;
   }
@@ -1544,6 +1461,16 @@ public final class GuidedTranslationService {
       Instant deadline,
       String translator) {}
 
+  /** What one STEP_CODE pool carries between its attempts and out to the caller. */
+  private static final class StepAttempt {
+    /** A short, closed hint for the next repair (the expected capture ids, a count). */
+    String hint = "";
+
+    String code;
+    JsonNode proposal;
+    JsonNode proof;
+  }
+
   private JsonNode call(
       Authentication controller,
       String id,
@@ -1551,12 +1478,45 @@ public final class GuidedTranslationService {
       String key,
       GuidedModelRequest.Kind kind,
       ModelApplication apply) {
+    return call(controller, id, fence, key, kind, apply, null);
+  }
+
+  /**
+   * One model request pool. SOURCE_PLAN: three attempts, a rejected reply is re-asked with its
+   * closed code. STEP_CODE ({@code step} non-null): one pool of {@link #STEP_CODE_POOL} requests
+   * per step, shared by validator rejections, transient retries and runner prepare refusals; the
+   * repair carries the closed code, stage, position and a short hint, never page data.
+   */
+  private JsonNode call(
+      Authentication controller,
+      String id,
+      long fence,
+      String key,
+      GuidedModelRequest.Kind kind,
+      ModelApplication apply,
+      StepAttempt step) {
     List<String> repairs = new ArrayList<>();
-    for (int index = 1; index <= 3; index++) {
+    JsonNode stepRepair = null;
+    int pool = 3;
+    if (step != null) {
+      int spent =
+          sessions.translationTransaction(
+              controller,
+              id,
+              fence,
+              current -> store.stepCodeRequests(id, current.progress().path("stepIndex").asInt()));
+      if (spent >= STEP_CODE_POOL) {
+        sessions.failTranslation(controller, id, fence, "INVALID_CONTRACT", "STEP_SYNTAX");
+        throw new GuidedSessionException("INVALID_CONTRACT", 422);
+      }
+      pool = STEP_CODE_POOL - spent;
+    }
+    for (int index = 1; index <= pool; index++) {
       final int attemptNumber = index;
+      final JsonNode repairNow = stepRepair;
       String translator = UUID.randomUUID().toString();
       GuidedPromptAssembler.PreparedProjection prepared = null;
-      if (preparationCapability != null) {
+      if (preparationCapability != null && kind == GuidedModelRequest.Kind.SOURCE_PLAN) {
         try {
           ObjectNode captured =
               sessions.translationTransaction(
@@ -1593,11 +1553,6 @@ public final class GuidedTranslationService {
                       !current.document().path("state").asText().equals("AWAITING_CLARIFICATION"),
                       "INVALID_CONTRACT",
                       409);
-                  require(
-                      kind != GuidedModelRequest.Kind.NEXT_ACTION
-                          || !store.acquisitionOpen(current),
-                      "STALE_GENERATION",
-                      409);
                   JsonNode abandoned = store.state(id).path("activeAttempt");
                   String effectiveKey = key;
                   boolean nestedSettlement = false;
@@ -1625,7 +1580,13 @@ public final class GuidedTranslationService {
                           : current;
                   GuidedModelRequest request =
                       request(
-                          freshInputOwner, effectiveKey, attemptNumber, kind, repairs, candidate);
+                          freshInputOwner,
+                          effectiveKey,
+                          attemptNumber,
+                          kind,
+                          repairs,
+                          candidate,
+                          repairNow);
                   ObjectNode projectionDocument;
                   Integer preparedBytes = candidate == null ? null : candidate.bytesFor(request);
                   int bytes;
@@ -1633,23 +1594,8 @@ public final class GuidedTranslationService {
                     projectionDocument = request.projection().document();
                     bytes = preparedBytes;
                   } else {
-                    ObjectNode payload =
-                        contracts
-                            .object()
-                            .put("kind", request.kind().name())
-                            .put("requestId", request.requestId())
-                            .put("attempt", request.attempt());
                     projectionDocument = request.projection().document();
-                    payload.set("context", projectionDocument);
-                    ObjectNode wireBound =
-                        contracts
-                            .object()
-                            .put("contents", payload.toString())
-                            .put("systemInstruction", request.outputContract());
-                    wireBound.set("responseJsonSchema", request.responseSchema());
-                    // Count escaped content plus actual supplied schema; allowance covers SDK field
-                    // wrappers.
-                    bytes = wireBound.toString().getBytes(StandardCharsets.UTF_8).length + 2048;
+                    bytes = prompts.wireBytes(request);
                   }
                   if (bytes > properties.maxInputBytes()) {
                     GuidedGuardProvenance.observe(Guard.REQUEST_INPUT_SIZE, () -> id);
@@ -1721,23 +1667,9 @@ public final class GuidedTranslationService {
       // Commit numeric overage/terminal stop before refusal. Never throw inside that transaction.
       require(reserved != null, "BUDGET_EXCEEDED", 429);
       if (!reserved.attempt().send()) {
-        JsonNode old = reserved.attempt().identity().path("result");
-        require(!old.isMissingNode() && !old.isNull(), "IDEMPOTENCY_CONFLICT", 409);
-        return sessions.translationTransaction(
-            controller,
-            id,
-            fence,
-            current -> {
-              require(
-                  reserved.attempt().identity().path("status").asText().equals("APPLIED")
-                      && old.path("kind").asText().equals("NEXT_ACTION")
-                      && old.path("status").asText().equals("ACTION"),
-                  "IDEMPOTENCY_CONFLICT",
-                  409);
-              ObjectNode prior = store.obligation(id, old.path("obligationId").asText());
-              require(prior != null, "IDEMPOTENCY_CONFLICT", 409);
-              return prior;
-            });
+        // A replay of an applied attempt cannot rebuild its proposal: the page has moved on. The
+        // coordinator re-drives with a new key; recover() resumes whatever was reserved.
+        throw new GuidedSessionException("IDEMPOTENCY_CONFLICT", 409);
       }
       int send =
           sessions.translationTransaction(
@@ -1747,9 +1679,6 @@ public final class GuidedTranslationService {
               current -> {
                 if (!sessions.reconcileLateModelUsageLocked(current)) {
                   return -1;
-                }
-                if (kind == GuidedModelRequest.Kind.NEXT_ACTION && store.acquisitionOpen(current)) {
-                  return 0;
                 }
                 return store.currentAttempt(
                             current.document(),
@@ -1788,8 +1717,8 @@ public final class GuidedTranslationService {
       }
       final GuidedModelResponse received = response;
       // ADR-SC-007 D5: one recorder per apply, created outside the apply transaction so what it
-      // kept
-      // survives a rollback. It chains the opt-in private-diagnostics capture when there is one.
+      // kept survives a rollback. It chains the opt-in private-diagnostics capture when there is
+      // one.
       final GuidedGateRecorder recorder =
           new GuidedGateRecorder(diagnostic.enabled() ? diagnostic : null);
       try {
@@ -1841,29 +1770,15 @@ public final class GuidedTranslationService {
                     return contracts.object().put("rejected", true);
                   }
                   if (received.proposal().path("status").asText().equals("UNSUPPORTED")) {
-                    if (kind == GuidedModelRequest.Kind.NEXT_ACTION
-                        && java.util.Set.of("MISSING_SOURCE", "INSUFFICIENT_EVIDENCE")
-                            .contains(received.proposal().path("reasonCode").asText())
-                        && sessions.annotateLoginFailure(controller, id, fence)) {
-                      store.finishAttempt(
-                          id,
-                          reserved.attempt().attemptId(),
-                          "APPLIED",
-                          received.proposal(),
-                          received.inputTokens(),
-                          received.outputTokens());
-                      return safe(repository.lock(id).document());
-                    }
-                    // The model's closed refusal names why it cannot do the step: a missing value
-                    // is MISSING_SOURCE, anything else is a step Studio cannot do yet, never a
-                    // "runtime incompatible" that names no cause.
+                    // The model's closed refusal of the plan: a missing value is MISSING_SOURCE,
+                    // anything else is a request Studio cannot plan yet.
                     sessions.failTranslation(
                         controller,
                         id,
                         fence,
                         received.proposal().path("reasonCode").asText().equals("MISSING_SOURCE")
                             ? "MISSING_SOURCE"
-                            : "UNSUPPORTED_STEP");
+                            : "UNSUPPORTED_SURFACE");
                     store.finishAttempt(
                         id,
                         reserved.attempt().attemptId(),
@@ -1886,33 +1801,44 @@ public final class GuidedTranslationService {
                           fresh,
                           received.proposal(),
                           authority,
-                          kind == GuidedModelRequest.Kind.NEXT_ACTION
+                          kind == GuidedModelRequest.Kind.STEP_CODE
                               ? recorder
                               : GuidedRefusalDiagnostics.Capture.NONE);
                   diagnostic.applicationReturned();
-                  boolean admittedAction =
-                      kind == GuidedModelRequest.Kind.NEXT_ACTION
-                          && received.proposal().path("status").asText().equals("ACTION");
                   store.finishAttempt(
                       id,
                       reserved.attempt().attemptId(),
                       "APPLIED",
                       received.proposal(),
                       received.inputTokens(),
-                      received.outputTokens(),
-                      null,
-                      null,
-                      admittedAction && recorder.intentPath() != null
-                          ? recorder.intentPath().name()
-                          : null,
-                      admittedAction && recorder.intentPath() != null
-                          ? recorder.intentFields()
-                          : null);
+                      received.outputTokens());
                   return result;
                 });
         require(!applied.path("superseded").asBoolean(), "STALE_GENERATION", 409);
         if (!applied.path("rejected").asBoolean()) {
-          return applied;
+          if (step == null || !applied.has("admissionKey")) {
+            return applied;
+          }
+          // The runner's prepare is the syntax admission. It runs outside every transaction and
+          // shares this pool: a refusal it can repair is the next attempt's repair input.
+          JsonNode refusal = prepareStep(controller, id, fence, applied, step);
+          if (refusal == null) {
+            return applied;
+          }
+          stepRepair = refusal;
+          if (index == pool) {
+            sessions.failTranslation(
+                controller, id, fence, "INVALID_CONTRACT", refusal.path("gate").asText());
+            throw new GuidedSessionException("INVALID_CONTRACT", 422);
+          }
+          if (refusal.path("stage").asText().equals("PRE_FENCE")
+              && !onBlankDocument(controller, id, fence)) {
+            // The prepare ran the step's code, so the page and its certificates are stale. A
+            // session still on its initial blank document has no page to observe.
+            refresh(controller, id, fence);
+          }
+          stepRepair = ((ObjectNode) refusal).without(List.of("gate"));
+          continue;
         }
       } catch (GuidedSessionException failure) {
         GuidedRejectionDiagnostics.log(kind, index, received.proposal(), failure);
@@ -1945,11 +1871,9 @@ public final class GuidedTranslationService {
                         received.outputTokens(),
                         GuidedTranslationStore.applyRejectionReason(failure.getMessage()),
                         recorder.firstGate() != null
-                                && recorder.firstGate().name().startsWith("NEXT_")
+                                && recorder.firstGate().name().startsWith("STEP_")
                             ? recorder.firstGate().name()
-                            : null,
-                        null,
-                        null);
+                            : null);
                     diagnostic.rejectedAfterCommit(true);
                     return true;
                   });
@@ -1969,7 +1893,7 @@ public final class GuidedTranslationService {
               });
         }
         if (rejected
-            && kind == GuidedModelRequest.Kind.NEXT_ACTION
+            && kind == GuidedModelRequest.Kind.STEP_CODE
             && java.util.Set.of(
                     "INVALID_CONTRACT",
                     "POLICY_DENIED",
@@ -1981,9 +1905,20 @@ public final class GuidedTranslationService {
           return safe(sessions.secretSession(id));
         }
         if (rejected
-            && index < 3
+            && index < pool
             && List.of("INVALID_CONTRACT", "BINDING_ORDER").contains(failure.getMessage())) {
-          repairs.add(failure.getMessage());
+          if (step != null) {
+            stepRepair =
+                repairObject(
+                    failure.getMessage(),
+                    "SYNTAX",
+                    null,
+                    null,
+                    gateFacts(recorder.firstGate(), step.hint),
+                    received.proposal().path("code"));
+          } else {
+            repairs.add(failure.getMessage());
+          }
           continue;
         }
         stopRejected(controller, id, fence, failure, recorder.firstGate());
@@ -1991,20 +1926,98 @@ public final class GuidedTranslationService {
       }
       // Round 053 (b), extended by round 067: a definite-transient provider failure (refused/reset,
       // HTTP 429/503, or a pre-response stall at the per-send cap) may be followed by a new
-      // persisted, charged attempt in the same three-proposal pool. The
-      // REJECTED row above is committed and no transaction is open here; the next iteration
-      // re-runs every guard (lock, fence, deadline, source revision, budget fit, reservation).
-      if (received.reason().definiteTransient() && index < 3 && backoffBeforeAttempt(index + 1)) {
+      // persisted, charged attempt in the same pool. The REJECTED row above is committed and no
+      // transaction is open here; the next iteration re-runs every guard (lock, fence, deadline,
+      // source revision, budget fit, reservation).
+      if (received.reason().definiteTransient()
+          && index < pool
+          && backoffBeforeAttempt(index + 1)) {
         continue;
       }
-      if (received.code() != GuidedModelResponse.Code.INVALID_RESPONSE || index == 3) {
+      if (received.code() != GuidedModelResponse.Code.INVALID_RESPONSE || index == pool) {
         String code = received.reason().failureCode();
         sessions.failTranslation(controller, id, fence, code);
         throw modelFailure(code);
       }
-      repairs.add("INVALID_RESPONSE");
+      if (step != null) {
+        stepRepair =
+            repairObject(
+                "INVALID_CONTRACT",
+                "SYNTAX",
+                null,
+                null,
+                "the reply did not match the schema",
+                null);
+      } else {
+        repairs.add("INVALID_RESPONSE");
+      }
     }
     throw new GuidedSessionException("BUDGET_EXCEEDED", 429);
+  }
+
+  /**
+   * The runner prepare of the proposal that was just applied, run outside every transaction.
+   * Returns null when the runner accepted the code (the preparation proof is kept on {@code step});
+   * returns the repair input (plus the closed {@code gate}) for a refusal the model can repair; any
+   * other failure propagates.
+   */
+  private JsonNode prepareStep(
+      Authentication controller, String id, long fence, JsonNode applied, StepAttempt step) {
+    try {
+      step.proof = dispatch.prepareStep(controller, id, fence, applied.path("proposal"));
+      return null;
+    } catch (GuidedSessionException refusal) {
+      if (!repairable(refusal)) {
+        throw refusal;
+      }
+      boolean pre = refusal.messageCode().equals("STEP_PRE_FENCE");
+      String facts =
+          pre
+              ? "the code failed before its first action; its target matched "
+                  + (refusal.matchCount() == null ? "an unknown number of" : refusal.matchCount())
+                  + " elements"
+              : "the code does not parse";
+      ObjectNode repair =
+          repairObject(
+              pre ? "TARGET_DRIFT" : "STEP_SYNTAX",
+              pre ? "PRE_FENCE" : "SYNTAX",
+              refusal.line(),
+              refusal.column(),
+              facts,
+              applied.path("proposal").path("operation").path("code"));
+      repair.put("gate", refusal.messageCode());
+      return repair;
+    }
+  }
+
+  private ObjectNode repairObject(
+      String closedCode,
+      String stage,
+      Integer line,
+      Integer column,
+      String facts,
+      JsonNode previousCode) {
+    ObjectNode repair = contracts.object().put("closedCode", closedCode).put("stage", stage);
+    if (line == null) {
+      repair.putNull("line");
+    } else {
+      repair.put("line", line);
+    }
+    if (column == null) {
+      repair.putNull("column");
+    } else {
+      repair.put("column", column);
+    }
+    String bounded = facts == null ? "" : facts;
+    repair.put("facts", bounded.length() <= 256 ? bounded : bounded.substring(0, 256));
+    String code = previousCode != null && previousCode.isTextual() ? previousCode.asText() : "";
+    repair.put("previousCode", code.length() <= 16384 ? code : "");
+    return repair;
+  }
+
+  private static String gateFacts(GuidedRefusalDiagnostics.Gate gate, String hint) {
+    String text = (gate == null ? "REJECTED" : gate.name()) + (hint.isEmpty() ? "" : ": " + hint);
+    return text.length() <= 256 ? text : text.substring(0, 256);
   }
 
   /** MODEL_UNAVAILABLE is a retryable 503, as VAULT_UNAVAILABLE; MODEL_REFUSED a definite 422. */
@@ -2055,64 +2068,10 @@ public final class GuidedTranslationService {
     }
   }
 
-  /**
-   * STUDIO-OBS-014 AC-4/5 (AR-2 a): the action guard on a structurally valid proposal. A refusal is
-   * {@code 422 POLICY_DENIED} with the closed {@link GuidedPolicyReason} as its message code,
-   * audited at the decision (AC-10), and goes through the existing rejected-proposal path (login
-   * annotation, then the terminal mapping in {@link #stopRejected}).
-   */
-  private void guardAction(
-      GuidedSessionRepository.Session current, JsonNode proposal, JsonNode attemptIdentity) {
-    String id = current.document().path("sessionId").asText();
-    var decision =
-        GuidedActionGuard.evaluateProposal(
-            current.progress(), store.state(id).path("manifest"), proposal);
-    if (decision.refused()
-        && GuidedPressInheritance.derive(
-                jdbc(),
-                contracts,
-                id,
-                store.state(id).path("manifest"),
-                store.state(id).path("plan"),
-                proposal,
-                current.progress().path("observation"),
-                new com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService(
-                        jdbc(), contracts, sessions.allowedDomains())
-                    .context(current.document()))
-            .isNull()) {
-      JsonNode named =
-          current
-              .progress()
-              .path("observation")
-              .path("facts")
-              .path(proposal.path("target").path("ref").asText());
-      com.citi.put.checks.studio.guided.audit.StudioActionAudit.guidedActionRefused(
-          current.document(),
-          attemptIdentity == null ? null : attemptIdentity.path("attemptId").asText(null),
-          proposal,
-          named,
-          decision.refusal().name());
-      throw new GuidedSessionException(
-          "POLICY_DENIED", 422, decision.refusal().name(), false, null);
-    }
-  }
-
   private void stopRejected(
       Authentication controller, String id, long fence, GuidedSessionException failure) {
     stopRejected(controller, id, fence, failure, null);
   }
-
-  /**
-   * The grounding gates whose exhausted repair loop ends the run as UNSUPPORTED_SURFACE (ADR D3).
-   */
-  private static final java.util.Set<GuidedRefusalDiagnostics.Gate> GROUNDING_GATES =
-      java.util.Set.of(
-          GuidedRefusalDiagnostics.Gate.NEXT_TARGET_REF,
-          GuidedRefusalDiagnostics.Gate.NEXT_TARGET_INTENT,
-          GuidedRefusalDiagnostics.Gate.NEXT_OPERATION_TARGET,
-          GuidedRefusalDiagnostics.Gate.NEXT_ASSERT_TEXT_ABSENT,
-          GuidedRefusalDiagnostics.Gate.NEXT_SELECTED_CHOICE,
-          GuidedRefusalDiagnostics.Gate.NEXT_READ_RULE);
 
   private void stopRejected(
       Authentication controller,
@@ -2121,25 +2080,10 @@ public final class GuidedTranslationService {
       GuidedSessionException failure,
       GuidedRefusalDiagnostics.Gate firstGate) {
     String code = failure.getMessage();
-    // AR-2 a: a POLICY_DENIED that carries a governed reason ends FAILED with errorCode
-    // POLICY_DENIED. Every other POLICY_DENIED (the password-control refusals) keeps today's
-    // mapping to INVALID_CONTRACT, so OBS-007 behaviour is unchanged.
-    boolean governed =
-        code.equals("POLICY_DENIED") && GuidedPolicyReason.of(failure.messageCode()) != null;
     String terminalCode =
-        governed
-            ? "POLICY_DENIED"
-            : java.util.Set.of("EVIDENCE_MISMATCH", "POLICY_DENIED", "REFERENCE_MISMATCH")
-                    .contains(code)
-                ? "INVALID_CONTRACT"
-                : code;
-    // ADR-SC-007 D3: a model that kept naming something the grounding gates refuse is a part of the
-    // page Studio cannot work with, not a malformed reply.
-    if (terminalCode.equals("INVALID_CONTRACT")
-        && firstGate != null
-        && GROUNDING_GATES.contains(firstGate)) {
-      terminalCode = "UNSUPPORTED_SURFACE";
-    }
+        java.util.Set.of("EVIDENCE_MISMATCH", "POLICY_DENIED", "REFERENCE_MISMATCH").contains(code)
+            ? "INVALID_CONTRACT"
+            : code;
     if (!List.of(
             "BUDGET_EXCEEDED",
             "UNSUPPORTED_SURFACE",
@@ -2147,8 +2091,7 @@ public final class GuidedTranslationService {
             "INVALID_CONTRACT",
             "RUNTIME_INCOMPATIBLE",
             "REVISION_CONFLICT",
-            "BINDING_ORDER",
-            "POLICY_DENIED")
+            "BINDING_ORDER")
         .contains(terminalCode)) {
       return;
     }
@@ -2165,7 +2108,7 @@ public final class GuidedTranslationService {
       int attempt,
       GuidedModelRequest.Kind kind,
       List<String> repairs) {
-    return request(current, key, attempt, kind, repairs, null);
+    return request(current, key, attempt, kind, repairs, null, null);
   }
 
   private GuidedModelRequest request(
@@ -2174,8 +2117,10 @@ public final class GuidedTranslationService {
       int attempt,
       GuidedModelRequest.Kind kind,
       List<String> repairs,
-      GuidedPromptAssembler.PreparedProjection prepared) {
-    return capturePromptInputsLocked(current, kind).complete(key, attempt, kind, repairs, prepared);
+      GuidedPromptAssembler.PreparedProjection prepared,
+      JsonNode stepRepair) {
+    return capturePromptInputsLocked(current, kind)
+        .complete(key, attempt, kind, repairs, prepared, stepRepair);
   }
 
   private final class PromptInputs {
@@ -2208,7 +2153,35 @@ public final class GuidedTranslationService {
         int attempt,
         GuidedModelRequest.Kind kind,
         List<String> repairs,
-        GuidedPromptAssembler.PreparedProjection prepared) {
+        GuidedPromptAssembler.PreparedProjection prepared,
+        JsonNode stepRepair) {
+      if (kind == GuidedModelRequest.Kind.STEP_CODE) {
+        String stepId =
+            session
+                .path("sourceSteps")
+                .get(progress.path("stepIndex").asInt())
+                .path("stepId")
+                .asText();
+        List<String> sections = new ArrayList<>();
+        for (JsonNode picked : state.path("plan").path("stepSections")) {
+          if (picked.path("stepId").asText().equals(stepId)) {
+            picked.path("sections").forEach(section -> sections.add(section.asText()));
+          }
+        }
+        return prompts.assembleStepCode(
+            key,
+            attempt,
+            session,
+            progress,
+            state,
+            safeInputs,
+            remaining,
+            selections,
+            sections,
+            stepRepair,
+            properties.maxInputBytes(),
+            properties.maxOutputTokens());
+      }
       return prompts.completePreparedOrOriginal(
           preparationCapability,
           prepared,
@@ -2226,6 +2199,34 @@ public final class GuidedTranslationService {
     }
   }
 
+  /**
+   * What the model may see of one authored input: its id, step and kind, plus the name the author
+   * gave it (the {@code <var NAME>} token, found through the configuration reference the input came
+   * from) and, for a secret, its secretId. Never a value. A step with several tokens maps each
+   * token to {@code inputs['<inputId>']} through the name; a literal the author typed has no name.
+   */
+  static ObjectNode projectInput(
+      GuidedContracts contracts, JsonNode input, JsonNode configurationReferences) {
+    ObjectNode safe = contracts.object();
+    for (String field : List.of("inputId", "sourceStepId", "kind")) {
+      safe.set(field, input.path(field));
+    }
+    JsonNode provenance = input.path("provenance");
+    if (provenance.path("referenceKind").asText().equals("configuration")) {
+      for (JsonNode reference : configurationReferences) {
+        if (reference.path("referenceId").equals(provenance.path("referenceId"))
+            && reference.path("referenceName").isTextual()) {
+          safe.set("name", reference.path("referenceName"));
+          break;
+        }
+      }
+    }
+    if (input.path("kind").asText().equals("secretRef") && input.path("secretId").isTextual()) {
+      safe.set("secretId", input.path("secretId"));
+    }
+    return safe;
+  }
+
   private PromptInputs capturePromptInputsLocked(
       GuidedSessionRepository.Session current, GuidedModelRequest.Kind kind) {
     String id = current.document().path("sessionId").asText();
@@ -2238,17 +2239,13 @@ public final class GuidedTranslationService {
       // This method runs under the session/source lock; context retrieval never calls the runner.
       var context = materialized(current);
       for (JsonNode input : context.path("authoredInputs").path("inputs")) {
-        ObjectNode safe = contracts.object();
-        for (String field : List.of("inputId", "sourceStepId", "kind", "intendedSlot")) {
-          safe.set(field, input.path(field));
-        }
-        safeInputs.add(safe);
+        safeInputs.add(
+            projectInput(contracts, input, state.path("manifest").path("configurationReferences")));
       }
       progress.set("authoredInputsHash", context.path("authoredInputsHash"));
       progress.set("contextRevision", context.path("contextRevision"));
     }
     var remaining = contracts.object().putArray("items");
-    int ordinal = 0;
     String step =
         current
             .document()
@@ -2256,24 +2253,13 @@ public final class GuidedTranslationService {
             .get(current.progress().path("stepIndex").asInt())
             .path("stepId")
             .asText();
-    List<ObjectNode> actions = repository.effectiveActions(id);
     for (JsonNode obligation : state.path("plan").path("obligations")) {
-      if (!obligation.path("stepId").asText().equals(step)) {
-        continue;
-      }
-      boolean done =
-          actions.stream()
-              .anyMatch(
-                  a ->
-                      a.path("coordinate").path("stepId").asText().equals(step)
-                          && a.path("coordinate")
-                              .path("ordinal")
-                              .equals(obligation.path("occurrence"))
-                          && a.path("state").asText().equals("SUCCEEDED"));
-      if (done) {
-        ordinal++;
-      } else {
-        remaining.add(effectiveObligation(current, obligation));
+      if (obligation.path("stepId").asText().equals(step)) {
+        // Only the occurrence-0 anchor carries an accepted choice back to the model.
+        remaining.add(
+            obligation.path("occurrence").asInt() == 0
+                ? effectiveObligation(current, obligation)
+                : obligation);
       }
     }
     if (kind == GuidedModelRequest.Kind.SOURCE_PLAN
@@ -2284,7 +2270,7 @@ public final class GuidedTranslationService {
     if (kind == GuidedModelRequest.Kind.SOURCE_PLAN && repository.incremental().hasBase(id)) {
       progress.set("learningWindow", repository.incremental().learningWindow(current.document()));
     }
-    progress.put("translationOrdinal", ordinal);
+    progress.put("translationOrdinal", 0);
     return new PromptInputs(
         current.document(), progress, state, safeInputs, remaining, sourceSelections(current));
   }
@@ -2327,13 +2313,13 @@ public final class GuidedTranslationService {
   }
 
   /**
-   * ADR-SC-007 D6: the obligation as the next NEXT_ACTION sees it. Where the author has accepted an
-   * observed choice for it (the latest accepted answer per obligation), the stored semantic
-   * selection is re-established against the current facts by a count: exactly one equal fact makes
-   * the obligation carry {@code selectedChoice} {role, name, ref} for the model (the ref is the
-   * fresh fact the backend matched); zero or several make it carry {@code reconfirm: true}, so only
-   * a new question is admissible. The stored triple, evidence included, stays on the internal
-   * property {@code selection} that the prompt allow-list does not copy.
+   * ADR-SC-007 D6: the obligation as the next STEP_CODE request sees it. Where the author has
+   * accepted an observed choice for it (the latest accepted answer per obligation), the stored
+   * semantic selection is re-established against the current facts by a count: exactly one equal
+   * fact makes the obligation carry {@code selectedChoice} {role, name, ref} for the model (the ref
+   * is the fresh fact the backend matched); zero or several make it carry {@code reconfirm: true},
+   * so only a new question is admissible. The stored triple, evidence included, stays on the
+   * internal property {@code selection} that the prompt allow-list does not copy.
    */
   ObjectNode effectiveObligation(GuidedSessionRepository.Session current, JsonNode obligation) {
     ObjectNode effective = ((ObjectNode) obligation).deepCopy();
@@ -2357,17 +2343,17 @@ public final class GuidedTranslationService {
         JsonNode selection = mapping.path("selection");
         effective.set("selection", selection.deepCopy());
         List<String> matches =
-            GuidedGates.matchingRefs(
+            GuidedObservationFacts.matchingRefs(
                 current.progress().path("observation").path("facts"),
-                GuidedGates.selectionOf(selection));
+                GuidedObservationFacts.selectionOf(selection));
         if (matches.size() == 1) {
           effective
               .putObject("selectedChoice")
               .put("role", selection.path("role").asText())
               .put(
                   "name",
-                  GuidedGates.bound(
-                      selection.path("name").asText(), GuidedGates.OUTLINE_NAME_CHARS))
+                  GuidedObservationFacts.bound(
+                      selection.path("name").asText(), GuidedObservationFacts.OUTLINE_NAME_CHARS))
               .put("ref", matches.getFirst());
           if (selection.has("ordinal")) {
             effective
@@ -2417,6 +2403,9 @@ public final class GuidedTranslationService {
       String phase,
       JsonNode attemptIdentity,
       GuidedRefusalDiagnostics.Capture gates) {
+    if (phase.equals("observed")) {
+      candidate = observedChoices(current, candidate);
+    }
     ObjectNode question =
         contracts
             .object()
@@ -2512,7 +2501,7 @@ public final class GuidedTranslationService {
             "INVALID_CONTRACT",
             422,
             gates,
-            GuidedRefusalDiagnostics.Gate.NEXT_TARGET_REF);
+            GuidedRefusalDiagnostics.Gate.STEP_TARGET_REF);
         pageNode = facts.path(ref);
         selection = contracts.object();
         selection.put("role", pageNode.path("role").asText());
@@ -2521,17 +2510,18 @@ public final class GuidedTranslationService {
         if (pageNode.has("ordinal")) {
           selection.set("ordinal", pageNode.path("ordinal").deepCopy());
         }
-        String scopeHash = GuidedGates.scopeHash(facts, pageNode);
+        String scopeHash = GuidedObservationFacts.scopeHash(facts, pageNode);
         if (scopeHash != null) {
           selection.put("scopeHash", scopeHash);
         }
         GuidedRefusalDiagnostics.requireCaptured(
-            GuidedGates.matchingRefs(facts, GuidedGates.selectionOf(facts, pageNode))
+            GuidedObservationFacts.matchingRefs(
+                    facts, GuidedObservationFacts.selectionOf(facts, pageNode))
                 .equals(List.of(ref)),
             "INVALID_CONTRACT",
             422,
             gates,
-            GuidedRefusalDiagnostics.Gate.NEXT_SELECTED_CHOICE);
+            GuidedRefusalDiagnostics.Gate.STEP_SELECTED_CHOICE);
         JsonNode disputed =
             validator.remaining(
                 store.state(current.document().path("sessionId").asText()).path("plan"),
@@ -2556,7 +2546,6 @@ public final class GuidedTranslationService {
                 && disputed.path("occurrence").asLong() == ordinal,
             "BINDING_ORDER",
             422);
-        require(GuidedGates.scopeSatisfied(disputed, facts, pageNode), "INVALID_CONTRACT", 422);
         question.withObject("/coordinate").set("stepId", disputed.path("stepId"));
         question.withObject("/coordinate").set("ordinal", disputed.path("occurrence"));
         label = pageNode.path("name").asText(pageNode.path("role").asText());
@@ -2581,7 +2570,8 @@ public final class GuidedTranslationService {
                     + pageNode.path("ordinal").path("count").asInt()
                     + ")";
             label =
-                GuidedGates.bound(label, 256 - suffix.codePointCount(0, suffix.length())) + suffix;
+                GuidedObservationFacts.bound(label, 256 - suffix.codePointCount(0, suffix.length()))
+                    + suffix;
           }
         }
         // Every observed-phase choice names a page element: PAGE, with that element's role and
@@ -2614,27 +2604,52 @@ public final class GuidedTranslationService {
       }
     }
     contracts.validate("v3/clarification", question);
-    JsonNode capture =
-        phase.equals("observed")
-            ? questionCapture(controller, current, candidate, attemptIdentity)
-            : null;
-    try {
-      return sessions.translationQuestion(
-          controller,
-          current.document().path("sessionId").asText(),
-          current.document().path("owner").path("fence").asLong(),
-          question.path("clarificationId").asText(),
-          question,
-          meanings,
-          capture);
-    } catch (org.springframework.dao.DataAccessException failure) {
-      if (capture == null) {
-        throw failure;
+    return sessions.translationQuestion(
+        controller,
+        current.document().path("sessionId").asText(),
+        current.document().path("owner").path("fence").asLong(),
+        question.path("clarificationId").asText(),
+        question,
+        meanings);
+  }
+
+  /**
+   * The model names only refs and labels. The step's occurrence-0 obligation (and, when it produces
+   * a value, that value's binding) is the meaning every choice carries: an accepted choice comes
+   * back as the selectedChoice of that obligation.
+   */
+  private ObjectNode observedChoices(GuidedSessionRepository.Session current, JsonNode candidate) {
+    String id = current.document().path("sessionId").asText();
+    JsonNode plan = store.state(id).path("plan");
+    String stepId =
+        current
+            .document()
+            .path("sourceSteps")
+            .get(current.progress().path("stepIndex").asInt())
+            .path("stepId")
+            .asText();
+    JsonNode anchor = GuidedProposalValidator.anchor(plan, stepId);
+    require(anchor != null, "BINDING_ORDER", 422);
+    List<String> produced = GuidedProposalValidator.producedBindings(plan, List.of(anchor));
+    ObjectNode converted = contracts.object().put("reason", candidate.path("reason").asText());
+    var choices = converted.putArray("choices");
+    for (JsonNode choice : candidate.path("choices")) {
+      ObjectNode meaning =
+          contracts
+              .object()
+              .put("obligationId", anchor.path("obligationId").asText())
+              .put("ref", choice.path("ref").asText());
+      if (produced.isEmpty()) {
+        meaning.putNull("bindingId");
+      } else {
+        meaning.put("bindingId", produced.getFirst());
       }
-      // Propagate through the original apply transaction so PostgreSQL rolls it back. The
-      // outer call handler then commits received usage in a separate settlement transaction.
-      throw new GuidedSessionException("EVIDENCE_MISMATCH", 422);
+      choices
+          .addObject()
+          .put("safeLabel", choice.path("safeLabel").asText())
+          .set("meaning", meaning);
     }
+    return converted;
   }
 
   /**
@@ -2671,54 +2686,12 @@ public final class GuidedTranslationService {
     return com.fasterxml.jackson.databind.node.NullNode.instance;
   }
 
-  private JsonNode questionCapture(
-      Authentication controller,
-      GuidedSessionRepository.Session current,
-      JsonNode candidate,
-      JsonNode attempt) {
-    require(attempt != null, "EVIDENCE_MISMATCH", 422);
-    String id = current.document().path("sessionId").asText();
-    JsonNode state = store.state(id), evidence = attempt.path("executionEvidence");
-    JsonNode context =
-        sessions.runnerContext(
-            controller, id, current.document().path("owner").path("fence").asLong());
-    require(
-        attempt.path("kind").asText().equals("NEXT_ACTION")
-            && attempt.path("scope").equals(current.document().path("scope"))
-            && attempt.path("scopeHash").equals(current.document().path("scopeHash"))
-            && attempt.path("owner").path("workerId").equals(context.path("workerId"))
-            && attempt.path("owner").path("fence").equals(context.path("ownerFence"))
-            && attempt.path("planRevision").asLong() == state.path("planRevision").asLong()
-            && attempt.path("expectedContextRevision").equals(context.path("contextRevision"))
-            && attempt.path("expectedAuthoredInputsHash").equals(context.path("authoredInputsHash"))
-            && evidence.equals(current.progress().path("executionEvidence"))
-            && evidence.path("kind").asText().equals("observedDocument")
-            && evidence.path("contextId").equals(context.path("contextId"))
-            && evidence.path("observationHash").equals(current.progress().path("observationHash")),
-        "STALE_GENERATION",
-        409);
-    ObjectNode capture =
-        contracts
-            .object()
-            .put("version", 1)
-            .put("planRevision", state.path("planRevision").asText())
-            .put("planHash", GuidedContracts.hash(state.path("plan")))
-            .put("evidenceHash", GuidedContracts.hash(evidence))
-            .put("modelQuestionHash", GuidedContracts.hash(candidate));
-    for (String key : List.of("attemptId", "requestId", "attempt", "executionEvidence")) {
-      capture.set(key, attempt.path(key));
-    }
-    capture.set(
-        "obligationId", candidate.path("choices").get(0).path("meaning").path("obligationId"));
-    for (String key :
-        List.of("contextId", "contextRevision", "workerId", "ownerFence", "authoredInputsHash")) {
-      capture.set(key, context.path(key));
-    }
-    capture.set("observationHash", evidence.path("observationHash"));
-    contracts.validate("v3/replay-validation#/definitions/QuestionCapture1", capture);
-    return capture;
-  }
-
+  /**
+   * Resumes every durable in-flight association: an ADMITTED action is dispatched; a reservation
+   * committed but not admitted (a crash between reserve and admit) is prepared and admitted again
+   * from its stored proposal. A prepare refusal of that stored proposal ends the run: it was
+   * reserved because the runner had already accepted it.
+   */
   private JsonNode recover(Authentication controller, String id, long fence) {
     List<ObjectNode> associations =
         sessions.translationTransaction(controller, id, fence, current -> store.obligations(id));
@@ -2726,6 +2699,10 @@ public final class GuidedTranslationService {
     for (ObjectNode association : associations) {
       if (association.path("admissionId").isNull()
           || association.path("admissionId").asText().isBlank()) {
+        JsonNode resumed = resumeUnadmitted(controller, id, fence, association);
+        if (resumed != null) {
+          return resumed;
+        }
         continue;
       }
       for (JsonNode action : actions) {
@@ -2733,7 +2710,7 @@ public final class GuidedTranslationService {
           continue;
         }
         if (action.path("state").asText().equals("ADMITTED")) {
-          return admitAndDispatch(controller, id, fence, association);
+          return dispatchAdmitted(controller, id, fence, association, action);
         }
         require(action.path("state").asText().equals("SUCCEEDED"), "UNKNOWN_OUTCOME", 409);
       }
@@ -2741,32 +2718,91 @@ public final class GuidedTranslationService {
     return null;
   }
 
-  private JsonNode admitAndDispatch(
-      Authentication controller, String id, long fence, JsonNode association) {
+  private JsonNode resumeUnadmitted(
+      Authentication controller, String id, long fence, ObjectNode association) {
+    JsonNode proposal = association.path("proposal");
+    boolean onThisStep =
+        sessions.translationTransaction(
+            controller,
+            id,
+            fence,
+            session ->
+                proposal
+                    .path("coordinate")
+                    .path("stepId")
+                    .asText()
+                    .equals(
+                        session
+                            .document()
+                            .path("sourceSteps")
+                            .get(session.progress().path("stepIndex").asInt())
+                            .path("stepId")
+                            .asText()));
+    if (!onThisStep) {
+      return null;
+    }
     JsonNode admission;
     try {
       admission =
           dispatch.prepareAndAdmit(
-              controller,
-              id,
-              fence,
-              association.path("admissionKey").asText(),
-              association.path("proposal"));
+              controller, id, fence, association.path("admissionKey").asText(), proposal);
     } catch (GuidedSessionException refusal) {
-      // ADR-SC-007 D8: a closed runner refusal at prepare ends the run, with the public code and
-      // the
-      // runner-time gate that refused; the model is not asked again.
-      String gate = runnerGate(refusal.messageCode());
-      if (gate != null
-          && List.of("TARGET_MISMATCH", "UNSUPPORTED_SURFACE").contains(refusal.getMessage())) {
+      if (repairable(refusal)) {
         try {
-          sessions.failTranslation(controller, id, fence, refusal.getMessage(), gate);
+          sessions.failTranslation(
+              controller, id, fence, "INVALID_CONTRACT", refusal.messageCode());
         } catch (GuidedSessionException noCurrentAuthority) {
           // Never revive expired or replaced authority.
         }
       }
       throw refusal;
     }
+    return dispatchAdmitted(controller, id, fence, association, admission);
+  }
+
+  /** A prepare refusal the model can repair: the code did not construct, or missed its target. */
+  private static boolean repairable(GuidedSessionException refusal) {
+    return refusal.getMessage().equals("INVALID_CONTRACT")
+        && java.util.Set.of("STEP_SYNTAX", "STEP_PRE_FENCE").contains(refusal.messageCode());
+  }
+
+  /** Reserves the prepared proposal on the step's anchor obligation, admits it and dispatches. */
+  private JsonNode admitStep(
+      Authentication controller, String id, long fence, StepAttempt attempt, JsonNode result) {
+    JsonNode proposal = result.path("proposal");
+    ObjectNode association;
+    try {
+      association =
+          sessions.translationTransaction(
+              controller,
+              id,
+              fence,
+              current ->
+                  store.reserveObligation(
+                      current.document(),
+                      GuidedProposalValidator.anchor(
+                              store.state(id).path("plan"),
+                              proposal.path("coordinate").path("stepId").asText())
+                          .path("obligationId")
+                          .asText(),
+                      proposal));
+    } catch (GuidedSessionException failure) {
+      stopRejected(controller, id, fence, failure);
+      return repository.transaction(() -> safe(repository.lock(id).document()));
+    }
+    JsonNode admission =
+        dispatch.admitPrepared(
+            controller,
+            id,
+            fence,
+            association.path("admissionKey").asText(),
+            proposal,
+            attempt.proof);
+    return dispatchAdmitted(controller, id, fence, association, admission);
+  }
+
+  private JsonNode dispatchAdmitted(
+      Authentication controller, String id, long fence, JsonNode association, JsonNode admission) {
     if (admission.path("dispatchCount").asInt() > 0) {
       return admission;
     }
@@ -2782,42 +2818,64 @@ public final class GuidedTranslationService {
         controller, id, fence, association.path("admissionKey").asText() + "-dispatch", request);
   }
 
-  /** The runner-time gate a closed prepare refusal names, or null for any other refusal. */
-  private static String runnerGate(String reason) {
-    return switch (reason == null ? "" : reason) {
-      case "OPTION_NOT_PRESENT" -> "RUNNER_OPTION_NOT_PRESENT";
-      case "NO_DURABLE_LOCATOR" -> "RUNNER_NO_DURABLE_LOCATOR";
-      case "READ_NOT_ALLOWED" -> "RUNNER_READ_NOT_ALLOWED";
-      default -> null;
-    };
+  /**
+   * The page the runner reported must be one Studio can work with before any model call: an
+   * observation with no element the model could name while the runner reported regions it cannot
+   * represent is a surface Studio cannot work with.
+   */
+  private void requireWorkableObservation(Authentication controller, String id, long fence) {
+    try {
+      sessions.translationTransaction(
+          controller,
+          id,
+          fence,
+          current -> {
+            checkPins(id);
+            require(bootstrapReady(current), "RUNTIME_INCOMPATIBLE", 409);
+            JsonNode observation = current.progress().path("observation");
+            JsonNode facts = observation.path("facts");
+            if (blankDocument(current.progress())) {
+              // Turn 0: the page is still the initial blank document, which has no valid
+              // observation (a blank page has no http(s) origin). The model gets observation null
+              // and writes the first step, typically the navigation.
+              return null;
+            }
+            require(
+                observation.isObject()
+                    && observation.path("outline").isTextual()
+                    && facts.isObject()
+                    && !(facts.isEmpty()
+                        && observation.path("coverage").path("unsupportedRegions").asInt() > 0),
+                "UNSUPPORTED_SURFACE",
+                422);
+            return null;
+          });
+    } catch (GuidedSessionException failure) {
+      if (List.of(
+              "RUNTIME_INCOMPATIBLE",
+              "STALE_GENERATION",
+              "REVISION_CONFLICT",
+              "UNSUPPORTED_SURFACE")
+          .contains(failure.getMessage())) {
+        try {
+          sessions.failTranslation(controller, id, fence, failure.getMessage());
+        } catch (GuidedSessionException stopped) {
+          /* Never revive expired/replaced authority. */
+        }
+      }
+      throw failure;
+    }
   }
 
-  private JsonNode complete(Authentication controller, String id, long fence, String key) {
-    if (!properties.verifySteps()) {
-      return sessions.translationTransaction(
-          controller, id, fence, current -> completeCurrent(controller, id, fence, current));
-    }
-    return call(
-        controller,
-        id,
-        fence,
-        key,
-        GuidedModelRequest.Kind.VERIFY_STEP,
-        (current, verification, attemptIdentity, capture) -> {
-          String step =
-              current
-                  .document()
-                  .path("sourceSteps")
-                  .get(current.progress().path("stepIndex").asInt())
-                  .path("stepId")
-                  .asText();
-          require(
-              verification.path("complete").asBoolean()
-                  && verification.path("stepId").asText().equals(step),
-              "INVALID_CONTRACT",
-              422);
-          return completeCurrent(controller, id, fence, current);
-        });
+  /** No observation yet and the execution evidence is still the initial blank document. */
+  private static boolean blankDocument(JsonNode progress) {
+    return !progress.path("observation").isObject()
+        && progress.path("executionEvidence").path("kind").asText().equals("initialBlank");
+  }
+
+  private boolean onBlankDocument(Authentication controller, String id, long fence) {
+    return sessions.translationTransaction(
+        controller, id, fence, current -> blankDocument(current.progress()));
   }
 
   private JsonNode completeCurrent(
@@ -2834,140 +2892,6 @@ public final class GuidedTranslationService {
             controller, id, fence, "complete-" + step, contracts.object().put("stepId", step));
     store.continuation(
         id, result.path("state").asText().equals("FINALIZING") ? "FINALIZING" : "REFRESH");
-    return result;
-  }
-
-  private JsonNode nextAcquisitionObligation(
-      GuidedSessionRepository.Session current, JsonNode state) {
-    JsonNode step =
-        current.document().path("sourceSteps").path(current.progress().path("stepIndex").asInt());
-    JsonNode next = null;
-    List<ObjectNode> actions = repository.actions(current.document().path("sessionId").asText());
-    for (JsonNode obligation : state.path("plan").path("obligations")) {
-      if (!obligation.path("stepId").equals(step.path("stepId"))) {
-        continue;
-      }
-      boolean complete =
-          actions.stream()
-              .anyMatch(
-                  a ->
-                      a.path("state").asText().equals("SUCCEEDED")
-                          && a.path("coordinate").path("stepId").equals(obligation.path("stepId"))
-                          && a.path("coordinate")
-                              .path("ordinal")
-                              .equals(obligation.path("occurrence")));
-      if (!complete
-          && (next == null
-              || obligation.path("occurrence").asLong() < next.path("occurrence").asLong())) {
-        next = obligation;
-      }
-    }
-    require(next != null, "BINDING_ORDER", 422);
-    return effectiveObligation(current, next);
-  }
-
-  /** Availability is only a reason to defer inference, never an executable target selection. */
-  static boolean acquisitionAvailable(JsonNode progress, JsonNode obligation) {
-    return acquisitionAvailable(progress, obligation, null);
-  }
-
-  static boolean acquisitionAvailable(
-      JsonNode progress, JsonNode obligation, JsonNode acceptedPlan) {
-    String operation = obligation.path("operationKind").asText();
-    if (operation.equals("navigate")
-        || operation.equals("assert")
-            && List.of("url", "title").contains(obligation.path("predicate").asText())) {
-      return true;
-    }
-    JsonNode observation = progress.path("observation");
-    JsonNode facts = observation.path("facts");
-    // ADR-SC-007: an observation is an outline plus facts. One with no element the model could name
-    // while the runner reported regions it cannot represent is a surface Studio cannot work with.
-    require(
-        observation.isObject()
-            && observation.path("outline").isTextual()
-            && facts.isObject()
-            && !(facts.isEmpty()
-                && observation.path("coverage").path("unsupportedRegions").asInt() > 0),
-        "UNSUPPORTED_SURFACE",
-        422);
-    // No read can be learned on a page the runner holds no read grant for: fail before any model
-    // call.
-    require(
-        !operation.equals("read") || observation.path("readRuleId").isTextual(),
-        "UNSUPPORTED_SURFACE",
-        422);
-    if (acceptedSecretFill(acceptedPlan, obligation)) {
-      JsonNode count = observation.path("coverage").path("passwordControls");
-      // This count permits inference only. The live prepare/fill resolver remains authoritative.
-      return count.isIntegralNumber() && count.canConvertToInt() && count.intValue() == 1;
-    }
-    JsonNode selection = obligation.path("selection");
-    if (selection.isObject()) {
-      for (String ref : GuidedGates.matchingRefs(facts, GuidedGates.selectionOf(selection))) {
-        // Availability never restores an accepted choice outside the current authored qualifier.
-        if (GuidedGates.scopeSatisfied(obligation, facts, facts.path(ref))) {
-          return true;
-        }
-      }
-    }
-    // Without a selection, or when it matches nothing now: the target is available when some fact
-    // passes the intent gate, so the model can pick it or be asked to reconfirm.
-    String intent = obligation.path("targetIntent").asText();
-    GuidedGates.requireCoherentOrdinals(facts);
-    for (JsonNode fact : facts) {
-      if (GuidedGates.scopeSatisfied(obligation, facts, fact)
-          && (GuidedGates.intent(operation, intent, GuidedGates.of(fact)).passed()
-              || operation.equals("read")
-                  && obligation.path("scopeIntent").isTextual()
-                  && GuidedGates.readFallbackEligible(fact))) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private static boolean acceptedSecretFill(JsonNode plan, JsonNode obligation) {
-    if (plan == null
-        || !plan.isObject()
-        || !obligation.path("operationKind").asText().equals("fill")) {
-      return false;
-    }
-    JsonNode index = obligation.path("referenceIndex"), references = plan.path("sourceReferences");
-    if (!index.isIntegralNumber()
-        || !index.canConvertToInt()
-        || !references.isArray()
-        || index.intValue() < 0
-        || index.intValue() >= references.size()) {
-      return false;
-    }
-    JsonNode reference = references.get(index.intValue());
-    if (!reference.path("referenceKind").asText().equals("configuration")
-        || !reference.path("kind").asText().equals("secretRef")
-        || !reference.path("stepId").equals(obligation.path("stepId"))
-        || !reference.path("intendedSlot").asText().equals("fill.value")) {
-      return false;
-    }
-    for (JsonNode accepted : plan.path("obligations")) {
-      if (accepted.path("operationKind").equals(obligation.path("operationKind"))
-          && accepted.path("stepId").equals(obligation.path("stepId"))
-          && accepted.path("occurrence").equals(obligation.path("occurrence"))
-          && accepted.path("referenceIndex").equals(index)
-          && accepted.path("obligationId").equals(obligation.path("obligationId"))) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private ObjectNode acquisitionRequest(GuidedSessionRepository.Session current, JsonNode state) {
-    ObjectNode result =
-        new com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService(
-                jdbc(), contracts, sessions.allowedDomains())
-            .identity(materialized(current));
-    result.set("expectedGeneration", current.progress().path("generation"));
-    result.set("focus", focusFor(current, state));
-    contracts.validate("v3/observation-refresh", result);
     return result;
   }
 
@@ -3032,133 +2956,6 @@ public final class GuidedTranslationService {
       }
     }
     return GuidedObservationFocus.focus(text, GuidedObservationFocus.intentsOf(chosen));
-  }
-
-  private boolean acquireBeforeProposal(Authentication controller, String id, long fence) {
-    try {
-      long startedNanos = System.nanoTime();
-      GuidedTranslationStore.AcquisitionClaim claim =
-          sessions.translationTransaction(
-              controller,
-              id,
-              fence,
-              current -> {
-                checkPins(id);
-                require(bootstrapReady(current), "RUNTIME_INCOMPATIBLE", 409);
-                JsonNode state = store.state(id),
-                    obligation = nextAcquisitionObligation(current, state);
-                boolean available =
-                    acquisitionAvailable(current.progress(), obligation, state.path("plan"));
-                return store.acquire(
-                    current,
-                    state,
-                    obligation,
-                    available,
-                    available || store.acquisitionPending(current)
-                        ? null
-                        : acquisitionRequest(current, state));
-              });
-      if (claim.disposition() == GuidedTranslationStore.AcquisitionDisposition.REFUSED) {
-        sessions.failTranslation(controller, id, fence, claim.errorCode());
-        throw new GuidedSessionException(claim.errorCode(), 429);
-      }
-      if (claim.disposition() == GuidedTranslationStore.AcquisitionDisposition.READY) {
-        return true;
-      }
-      if (claim.disposition() == GuidedTranslationStore.AcquisitionDisposition.WAIT) {
-        return false;
-      }
-      JsonNode response = observeAcquisition(controller, id, fence, claim, startedNanos);
-      if (response == null) {
-        return false;
-      }
-      var settled =
-          sessions.translationTransaction(
-              controller,
-              id,
-              fence,
-              current -> {
-                checkPins(id);
-                require(bootstrapReady(current), "RUNTIME_INCOMPATIBLE", 409);
-                JsonNode state = store.state(id),
-                    obligation = nextAcquisitionObligation(current, state);
-                return store.settleAcquisition(
-                    current,
-                    state,
-                    obligation,
-                    claim,
-                    response,
-                    acquisitionAvailable(current.progress(), obligation, state.path("plan")));
-              });
-      if (settled.disposition() == GuidedTranslationStore.AcquisitionDisposition.REFUSED) {
-        sessions.failTranslation(controller, id, fence, settled.errorCode());
-        throw new GuidedSessionException(settled.errorCode(), 429);
-      }
-      return settled.disposition() == GuidedTranslationStore.AcquisitionDisposition.READY;
-    } catch (GuidedSessionException failure) {
-      // A late usage receipt remains durable even when a readiness identity/cap refuses.
-      sessions.reconcileLateModelUsage(controller, id, fence);
-      if (List.of(
-              "BUDGET_EXCEEDED",
-              "MISSING_SOURCE",
-              "INVALID_CONTRACT",
-              "RUNTIME_INCOMPATIBLE",
-              "REVISION_CONFLICT",
-              "BINDING_ORDER",
-              "STALE_GENERATION",
-              "UNSUPPORTED_SURFACE")
-          .contains(failure.getMessage())) {
-        try {
-          sessions.failTranslation(controller, id, fence, failure.getMessage());
-        } catch (GuidedSessionException stopped) {
-          /* Never revive expired/replaced authority. */
-        }
-      }
-      throw failure;
-    }
-  }
-
-  private JsonNode observeAcquisition(
-      Authentication controller,
-      String id,
-      long fence,
-      GuidedTranslationStore.AcquisitionClaim claim,
-      long startedNanos) {
-    long remaining = claim.remainingMs() * 1_000_000L - (System.nanoTime() - startedNanos);
-    require(
-        GuidedGuardProvenance.passing(remaining > 0, Guard.PASSIVE_REMAINING, () -> id),
-        "BUDGET_EXCEEDED",
-        429);
-    var task =
-        new java.util.concurrent.FutureTask<JsonNode>(
-            () -> dispatch.observe(controller, id, fence, claim.key(), claim.request()));
-    Thread.ofVirtual().name("guided-passive-observation").start(task);
-    try {
-      return task.get(
-          Math.min(remaining, java.time.Duration.ofSeconds(15).toNanos()),
-          java.util.concurrent.TimeUnit.NANOSECONDS);
-    } catch (java.util.concurrent.TimeoutException timeout) {
-      GuidedGuardProvenance.observe(Guard.PASSIVE_WAIT_TIMEOUT, () -> id);
-      throw new GuidedSessionException("BUDGET_EXCEEDED", 429);
-    } catch (InterruptedException interrupted) {
-      Thread.currentThread().interrupt();
-      GuidedGuardProvenance.observe(Guard.PASSIVE_WAIT_INTERRUPTED, () -> id);
-      throw new GuidedSessionException("BUDGET_EXCEEDED", 429);
-    } catch (java.util.concurrent.ExecutionException failed) {
-      if (failed.getCause() instanceof GuidedSessionException refusal) {
-        // This read-only refresh remains one durable pending key; never treat it as a new poll.
-        if (refusal.getMessage().equals("UNKNOWN_OUTCOME")) {
-          return null;
-        }
-        throw refusal;
-      }
-      return null;
-    } finally {
-      // Interruption is best effort. Any late callback still has to pass durable deadline/fences.
-      if (!task.isDone()) {
-        task.cancel(true);
-      }
-    }
   }
 
   private void refresh(Authentication controller, String id, long fence) {

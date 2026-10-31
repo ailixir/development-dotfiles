@@ -8,18 +8,16 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 
-/** V2 source plus optional immutable-revision and review projections. */
+/** V2 source plus the optional immutable-revision inputs. */
 @JsonIgnoreProperties(ignoreUnknown = false)
 public record AuthoringV2Response(
     @Min(2) @Max(2) int authoringSchemaVersion,
     @Valid GlobalAuthoringContext globalContext,
     @NotNull @Size(max = 100) List<@Valid AuthoringStep> steps,
-    @Valid AuthoringRevisionInputs revisionInputs,
-    List<@Valid ResolvedStepReview> review) {
+    @Valid AuthoringRevisionInputs revisionInputs) {
 
   public AuthoringV2Response {
     globalContext = globalContext == null ? GlobalAuthoringContext.empty() : globalContext;
     steps = steps == null ? null : List.copyOf(steps);
-    review = review == null ? null : List.copyOf(review);
   }
 }

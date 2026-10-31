@@ -206,7 +206,7 @@ class GuidedPublicationAuthorityIT {
       var joined =
           pending.jdbc.queryForList(
               "SELECT a.admission_id,a.document::text AS"
-                  + " ledger_document,e.argument_slot,p.preparation_id,o.obligation_id,"
+                  + " ledger_document,p.preparation_id,o.obligation_id,"
                   + "a.proposal::text AS action_proposal,e.document::text AS edge_document,al.document::text AS"
                   + " allocation_document,"
                   + "pr.document::text AS producer_document,pa.document::text AS producer_ledger,p.proof::text AS"
@@ -238,8 +238,8 @@ class GuidedPublicationAuthorityIT {
           meaning = C.parse((String) row.get("obligation_meaning"));
       assertThat(actualPending.path("attemptOrdinal").asInt()).isZero();
       assertThat(actualPending.path("preparationId").asText()).isEqualTo(row.get("preparation_id"));
-      assertThat(proposal.path("operation").path("kind").asText()).isEqualTo("fill");
-      assertThat(proposal.path("operation").path("value").path("kind").asText())
+      assertThat(proposal.path("operation").path("kind").asText()).isEqualTo("step");
+      assertThat(proposal.path("operation").path("uses").path(0).path("kind").asText())
           .isEqualTo("binding");
       assertThat(proposal.path("coordinate")).isEqualTo(actualPending.path("coordinate"));
       assertThat(GuidedContracts.hash(proposal))
@@ -270,7 +270,7 @@ class GuidedPublicationAuthorityIT {
       assertThat(allocation.path("producerStepId"))
           .isEqualTo(producer.path("coordinate").path("stepId"));
       assertThat(allocation.path("bindingId"))
-          .isEqualTo(proposal.path("operation").path("value").path("bindingId"));
+          .isEqualTo(proposal.path("operation").path("uses").path(0).path("id"));
       ObjectNode exactEdge =
           C.object()
               .put("bindingId", allocation.path("bindingId").asText())
@@ -280,12 +280,10 @@ class GuidedPublicationAuthorityIT {
               .put(
                   "consumerAdmissionId",
                   actualPending.path("admission").path("admissionId").asText())
-              .put("argumentSlot", "fill.value")
               .put("destinationOrigin", proposal.path("executionEvidence").path("origin").asText())
               .put("transferPolicy", "sameOrigin");
       exactEdge.set("coordinate", actualPending.path("coordinate"));
       assertThat(edge).isEqualTo(exactEdge);
-      assertThat(row.get("argument_slot")).isEqualTo("fill.value");
       assertThat(producer.path("origin"))
           .isEqualTo(proposal.path("executionEvidence").path("origin"));
       for (String field : List.of("contextId", "workerId", "ownerFence")) {
@@ -295,8 +293,7 @@ class GuidedPublicationAuthorityIT {
       }
       int pairs = 0;
       for (JsonNode intent : allocation.path("consumers")) {
-        if (intent.path("stepId").equals(actualPending.path("coordinate").path("stepId"))
-            && intent.path("argumentSlot").asText().equals("fill.value")) {
+        if (intent.path("stepId").equals(actualPending.path("coordinate").path("stepId"))) {
           pairs++;
         }
       }
@@ -359,7 +356,8 @@ class GuidedPublicationAuthorityIT {
                 .isEqualTo(actualPending.path("coordinate").path("stepId"));
             assertThat(meaning.path("occurrence"))
                 .isEqualTo(actualPending.path("coordinate").path("ordinal"));
-            assertThat(meaning.path("needId")).isEqualTo(allocation.path("needId"));
+            // ADR-SC-008: the consuming step names the need it reads in `uses`.
+            assertThat(meaning.path("uses").path(0)).isEqualTo(allocation.path("needId"));
             var order = new java.util.ArrayList<String>();
             current.path("sourceSteps").forEach(step -> order.add(step.path("stepId").asText()));
             int producerIndex = order.indexOf(producer.path("coordinate").path("stepId").asText()),
@@ -454,7 +452,7 @@ class GuidedPublicationAuthorityIT {
                 .isEqualTo(1);
             assertThat(
                     db.jdbc.queryForObject(
-                        "SELECT confirmed_revision_id FROM ui_tests WHERE id=?",
+                        "SELECT candidate_revision_id FROM ui_tests WHERE id=?",
                         UUID.class,
                         db.testId))
                 .isEqualTo(command.revisionId());
@@ -740,7 +738,7 @@ class GuidedPublicationAuthorityIT {
               int selected = 0;
               for (JsonNode value : manifest.path("configurationValues")) {
                 if (value.path("referenceName").asText().equals("saved-label")) {
-                  // The classifier freezes all four legal slots for this exact declaration.
+                  // The classifier freezes every use of this exact declaration.
                   // Change each copy together so refusal proves the declaration hash join,
                   // rather than stopping at inconsistent duplicate configuration values.
                   if (mutation.equals("manifest-private-plain")) {
@@ -752,8 +750,8 @@ class GuidedPublicationAuthorityIT {
                 }
               }
               assertThat(selected)
-                  .as("the positive parent freezes every slot for its exact declared private value")
-                  .isEqualTo(4);
+                  .as("the positive parent freezes every use of its exact declared private value")
+                  .isEqualTo(2);
             }
             case "manifest-authored-context" -> {
               ((ObjectNode)
@@ -840,7 +838,7 @@ class GuidedPublicationAuthorityIT {
               .isEqualTo(1);
           assertThat(
                   db.jdbc.queryForObject(
-                      "SELECT confirmed_revision_id FROM ui_tests WHERE id=?",
+                      "SELECT candidate_revision_id FROM ui_tests WHERE id=?",
                       UUID.class,
                       db.testId))
               .isEqualTo(command.revisionId());

@@ -9,8 +9,7 @@ import static org.mockito.Mockito.when;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.guided.session.GuidedSessionException;
 import com.citi.put.checks.studio.guided.session.GuidedSessionRepository;
-import com.citi.put.checks.studio.guided.translation.GuidedGates.Selection;
-import com.citi.put.checks.studio.guided.translation.GuidedRefusalDiagnostics.Gate;
+import com.citi.put.checks.studio.guided.translation.GuidedObservationFacts.Selection;
 import com.citi.put.checks.studio.support.ObservationFixtures;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -21,24 +20,67 @@ import org.junit.jupiter.api.Test;
 /**
  * ADR-SC-007 D-6: an author's earlier choice is re-established against the fresh facts by a count
  * and never by position. One equal fact carries the choice to the model as {role, name, ref}; zero
- * or several make the obligation a re-confirmation, for which no ACTION is admissible. Pure: the
- * real validator, gates and schemas, and a translation service whose collaborators are doubles.
+ * or several make the obligation a re-confirmation, so the model must ask again. Pure: the real
+ * validator and schemas, and a translation service whose collaborators are doubles.
  */
 class GuidedClarificationSelectionTest {
-  private static final GuidedContracts C = ActionHarness.C;
+  private static final GuidedContracts C = new GuidedContracts();
   private static final String CLARIFICATION = "clarification-1";
 
-  private static ObjectNode click() {
-    return C.object().put("kind", "click");
+  /** One session, one step, one observation and the step's occurrence-0 obligation. */
+  private static final class World {
+    final ObjectNode session = C.object().put("sessionId", ObservationFixtures.SESSION_ID);
+    final ObjectNode progress = C.object();
+    final ObjectNode obligation = C.object();
+
+    World(ObservationFixtures.Builder observation, String intent) {
+      session.putArray("sourceSteps").addObject().put("stepId", "step-1");
+      progress.put("stepIndex", 0);
+      progress.set("observation", numbered(observation.build()));
+      obligation
+          .put("obligationId", "obligation-1")
+          .put("stepId", "step-1")
+          .put("occurrence", 0)
+          .put("targetIntent", intent)
+          .putNull("scopeIntent")
+          .putNull("referenceIndex")
+          .putNull("needId")
+          .putArray("uses");
+    }
   }
 
-  private static ActionHarness harness(
-      ObservationFixtures.Builder observation, String kind, String intent) {
-    return new ActionHarness(observation.build(), kind, intent);
+  /** The runner numbers elements that look alike; the fixtures do it the same way. */
+  private static ObjectNode numbered(ObjectNode observation) {
+    java.util.Map<String, List<ObjectNode>> groups = new java.util.LinkedHashMap<>();
+    observation
+        .path("facts")
+        .forEach(
+            fact ->
+                groups
+                    .computeIfAbsent(
+                        fact.path("role").asText()
+                            + "\u0000"
+                            + fact.path("name").asText()
+                            + "\u0000"
+                            + fact.path("evidence").asText(),
+                        key -> new java.util.ArrayList<>())
+                    .add((ObjectNode) fact));
+    for (List<ObjectNode> group : groups.values()) {
+      if (group.size() > 1) {
+        for (int at = 0; at < group.size(); at++) {
+          group.get(at).putObject("ordinal").put("index", at + 1).put("count", group.size());
+        }
+      }
+    }
+    return observation;
+  }
+
+  private static World harness(ObservationFixtures.Builder observation, String intent) {
+    return new World(observation, intent);
   }
 
   /** The obligation as the model sees it after the author accepted the given semantic choice. */
-  private static ObjectNode effective(ActionHarness harness, Selection accepted) {
+  private static ObjectNode effective(World harness, Selection accepted) {
     GuidedClarificationContextStore questions = mock(GuidedClarificationContextStore.class);
     ObjectNode row = C.object().put("acceptedChoiceId", "choice-1");
     row.putObject("context").put("clarificationId", CLARIFICATION);
@@ -62,7 +104,7 @@ class GuidedClarificationSelectionTest {
             C,
             null,
             null,
-            harness.validator,
+            new GuidedProposalValidator(C),
             null,
             new GuidedTranslationProperties(true, 98304, 4096, 20, "worker"),
             Clock.systemUTC());
@@ -75,73 +117,29 @@ class GuidedClarificationSelectionTest {
   }
 
   @Test
-  void matchingRefsIsACountOverRoleNameAndEvidenceInFactsOrder() {
-    JsonNode facts =
-        ObservationFixtures.observation()
-            .element("e1", "button", "Save")
-            .element("e2", "button", "Save")
-            .element("e3", "button", "Save changes")
-            .element("e4", "link", "Save")
-            .withFact("e5", ObservationFixtures.fact("button", "Save", false, "kept"))
-            .build()
-            .path("facts");
-    assertThat(GuidedGates.matchingRefs(facts, save())).containsExactly("e1", "e2", "e5");
-    assertThat(
-            GuidedGates.matchingRefs(
-                facts, new Selection("button", "Save changes", "Save changes")))
-        .containsExactly("e3");
-    assertThat(GuidedGates.matchingRefs(facts, new Selection("link", "Save", "Save")))
-        .containsExactly("e4");
-    assertThat(GuidedGates.matchingRefs(facts, new Selection("button", "Delete", "Delete")))
-        .isEmpty();
-    // Same name, different evidence is a different element.
-    ObjectNode other = ObservationFixtures.fact("button", "Save", false, null);
-    other.put("evidence", "Save in the order form");
-    JsonNode two =
-        ObservationFixtures.observation()
-            .element("e1", "button", "Save")
-            .withFact("e2", other)
-            .build()
-            .path("facts");
-    assertThat(GuidedGates.matchingRefs(two, save())).containsExactly("e1");
-    assertThat(GuidedGates.matchingRefs(null, save())).isEmpty();
-    assertThat(GuidedGates.matchingRefs(C.object(), save())).isEmpty();
-  }
-
-  @Test
-  void oneMatchCarriesTheFreshRefAndOnlyThatFactIsAdmitted() {
-    ActionHarness harness =
+  void oneMatchCarriesTheFreshRefOfThatFactOnly() {
+    World harness =
         harness(
             ObservationFixtures.observation()
                 .element("e1", "button", "Cancel")
                 .element("e2", "button", "Save")
                 .element("e3", "button", "Save changes"),
-            "click",
             "Save");
     ObjectNode obligation = effective(harness, save());
     assertThat(obligation.has("reconfirm")).isFalse();
     assertThat(obligation.path("selectedChoice").path("ref").asText()).isEqualTo("e2");
-    harness.obligation.setAll(obligation);
-    assertThat(harness.refusal(ActionHarness.selection("e2", click()))).isNull();
-    assertThat(harness.intentPaths).containsExactly(GuidedGates.IntentPath.SELECTED_CHOICE);
-    // "Save changes" would pass the intent words of "Save", but the author chose another element.
-    GuidedSessionException refusal = harness.refusal(ActionHarness.selection("e3", click()));
-    assertThat(refusal).isNotNull();
-    assertThat(refusal.getMessage()).isEqualTo("INVALID_CONTRACT");
-    assertThat(harness.lastGate()).isEqualTo(Gate.NEXT_SELECTED_CHOICE);
-    assertThat(harness.refusal(ActionHarness.selection("e1", click()))).isNotNull();
-    assertThat(harness.lastGate()).isEqualTo(Gate.NEXT_SELECTED_CHOICE);
+    assertThat(obligation.path("selectedChoice").path("role").asText()).isEqualTo("button");
   }
 
   @Test
   void theModelFacingSelectionCarriesRoleBoundedNameAndRefOnly() {
     String longName = "N".repeat(300);
-    ActionHarness harness =
-        harness(ObservationFixtures.observation().element("e7", "button", longName), "click", "N");
+    World harness =
+        harness(ObservationFixtures.observation().element("e7", "button", longName), "N");
     ObjectNode obligation = effective(harness, new Selection("button", longName, longName));
     JsonNode choice = obligation.path("selectedChoice");
     assertThat(choice.fieldNames()).toIterable().containsExactlyInAnyOrder("role", "name", "ref");
-    assertThat(choice.path("name").asText()).hasSize(GuidedGates.OUTLINE_NAME_CHARS);
+    assertThat(choice.path("name").asText()).hasSize(GuidedObservationFacts.OUTLINE_NAME_CHARS);
     assertThat(choice.path("ref").asText()).isEqualTo("e7");
     // The stored triple, evidence included, stays on the internal property.
     assertThat(obligation.path("selection").path("evidence").asText()).isEqualTo(longName);
@@ -150,81 +148,34 @@ class GuidedClarificationSelectionTest {
 
   @Test
   void severalIdenticalMatchesNeverTakeTheFirst() {
-    ActionHarness harness =
+    World harness =
         harness(
             ObservationFixtures.observation()
                 .element("e1", "button", "Save")
                 .element("e2", "button", "Save"),
-            "click",
             "Save");
     ObjectNode obligation = effective(harness, save());
     assertThat(obligation.path("reconfirm").asBoolean()).isTrue();
     assertThat(obligation.has("selectedChoice")).isFalse();
-    harness.obligation.setAll(obligation);
-    for (String ref : List.of("e1", "e2")) {
-      GuidedSessionException refusal = harness.refusal(ActionHarness.selection(ref, click()));
-      assertThat(refusal).as(ref).isNotNull();
-      assertThat(refusal.getMessage()).isEqualTo("INVALID_CONTRACT");
-      assertThat(refusal.status()).isEqualTo(422);
-      assertThat(harness.lastGate()).as(ref).isEqualTo(Gate.NEXT_SELECTED_CHOICE);
-    }
   }
 
   @Test
-  void zeroMatchesAskAgainAndRefuseAction() {
-    ActionHarness harness =
+  void zeroMatchesAskAgain() {
+    World harness =
         harness(
             ObservationFixtures.observation()
                 .element("e1", "button", "Cancel")
                 .element("e2", "button", "Save order"),
-            "click",
             "Save");
     ObjectNode obligation = effective(harness, save());
     assertThat(obligation.path("reconfirm").asBoolean()).isTrue();
     assertThat(obligation.has("selectedChoice")).isFalse();
-    harness.obligation.setAll(obligation);
-    // "Save order" would satisfy the intent gate on its own; with a re-confirmation pending it
-    // is still not admissible, and neither is any other ref.
-    for (String ref : List.of("e1", "e2")) {
-      assertThat(harness.refusal(ActionHarness.selection(ref, click()))).as(ref).isNotNull();
-      assertThat(harness.lastGate()).as(ref).isEqualTo(Gate.NEXT_SELECTED_CHOICE);
-    }
-    // Without the stored choice the same ref is admitted by the intent gate: the refusal above
-    // is the re-confirmation, not the page.
-    ActionHarness fresh =
-        harness(
-            ObservationFixtures.observation().element("e2", "button", "Save order"),
-            "click",
-            "Save");
-    assertThat(fresh.refusal(ActionHarness.selection("e2", click()))).isNull();
-    assertThat(fresh.intentPaths).containsExactly(GuidedGates.IntentPath.EVIDENCE_SUBSET);
-  }
-
-  @Test
-  void aChosenElementIsAdmittedWithoutTheIntentWordsButNotAgainstItsRole() {
-    // The author chose "Place order" for the intent "Submit": the selection stands for the intent.
-    ActionHarness harness =
-        harness(
-            ObservationFixtures.observation().element("e1", "button", "Place order"),
-            "click",
-            "Submit");
-    assertThat(harness.refusal(ActionHarness.selection("e1", click()))).isNotNull();
-    assertThat(harness.lastGate()).isEqualTo(Gate.NEXT_TARGET_INTENT);
-    harness.obligation.setAll(
-        effective(harness, new Selection("button", "Place order", "Place order")));
-    assertThat(harness.refusal(ActionHarness.selection("e1", click()))).isNull();
-    // The operation still has to fit the element: a button cannot be filled.
-    harness.obligation.put("operationKind", "fill");
-    ObjectNode fill = C.object().put("kind", "fill");
-    fill.putObject("value").put("kind", "authoredLiteral").put("sourceInputId", "input-1");
-    assertThat(harness.refusal(ActionHarness.selection("e1", fill))).isNotNull();
-    assertThat(harness.lastGate()).isEqualTo(Gate.NEXT_OPERATION_TARGET);
   }
 
   @Test
   void aChoiceThatWasNeverResolvedIsNotAnAuthority() {
-    ActionHarness harness =
-        harness(ObservationFixtures.observation().element("e1", "button", "Save"), "click", "Save");
+    World harness =
+        harness(ObservationFixtures.observation().element("e1", "button", "Save"), "Save");
     GuidedClarificationContextStore questions = mock(GuidedClarificationContextStore.class);
     ObjectNode row = C.object().put("acceptedChoiceId", "choice-1");
     row.putObject("context").put("clarificationId", CLARIFICATION);
@@ -248,7 +199,7 @@ class GuidedClarificationSelectionTest {
             C,
             null,
             null,
-            harness.validator,
+            new GuidedProposalValidator(C),
             null,
             new GuidedTranslationProperties(true, 98304, 4096, 20, "worker"),
             Clock.systemUTC());

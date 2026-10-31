@@ -56,9 +56,7 @@ public final class GuidedEffectiveGraph {
       require(fact != null, "REFERENCE_MISMATCH", 422);
       JsonNode operation = GuidedPlanBuilder.proposal(basis, fact).path("operation");
       require(
-          operation.path("kind").asText().equals("read")
-              && operation.path("bindingId").equals(producer.path("bindingId"))
-              && operation.path("recipe").equals(producer.path("recipe"))
+          captures(operation, producer.path("bindingId").asText())
               && producer.path("coordinate").equals(fact.path("ledger").path("coordinate"))
               && producer
                   .path("origin")
@@ -68,8 +66,8 @@ public final class GuidedEffectiveGraph {
     }
     for (JsonNode fact : actions.values()) {
       JsonNode operation = GuidedPlanBuilder.proposal(basis, fact).path("operation");
-      if (operation.path("kind").asText().equals("read")) {
-        JsonNode producer = producers.get(operation.path("bindingId").asText());
+      for (JsonNode captured : operation.path("captures")) {
+        JsonNode producer = producers.get(captured.asText());
         require(
             producer != null
                 && producer
@@ -92,7 +90,7 @@ public final class GuidedEffectiveGraph {
       }
       validateEdge(basis, edge, fact, GuidedPlanBuilder.proposal(basis, fact), producers);
       require(
-          uses.add(consumer + "\u0000" + edge.path("argumentSlot").asText()),
+          uses.add(consumer + "\u0000" + edge.path("bindingId").asText()),
           "REFERENCE_MISMATCH",
           422);
       effectiveEdges.add(edge.deepCopy());
@@ -102,13 +100,13 @@ public final class GuidedEffectiveGraph {
     }
     for (var entry : actions.entrySet()) {
       JsonNode operation = GuidedPlanBuilder.proposal(basis, entry.getValue()).path("operation");
-      String field = operation.path("kind").asText().equals("assert") ? "expected" : "value";
-      if (operation.path(field).path("kind").asText().equals("binding")) {
-        require(
-            uses.contains(
-                entry.getKey() + "\u0000" + operation.path("kind").asText() + "." + field),
-            "REFERENCE_MISMATCH",
-            422);
+      for (JsonNode use : operation.path("uses")) {
+        if (use.path("kind").asText().equals("binding")) {
+          require(
+              uses.contains(entry.getKey() + "\u0000" + use.path("id").asText()),
+              "REFERENCE_MISMATCH",
+              422);
+        }
       }
     }
     // Admission atomically records binding intent and its consumer edge, even when a positively
@@ -117,41 +115,39 @@ public final class GuidedEffectiveGraph {
       JsonNode fact = excluded.path("action"),
           proposal = excluded.path("preparation").path("proposal"),
           operation = proposal.path("operation");
-      String kind = operation.path("kind").asText(),
-          field = kind.equals("assert") ? "expected" : "value";
-      if (!operation.path(field).path("kind").asText().equals("binding")) {
-        continue;
-      }
-      String binding = operation.path(field).path("bindingId").asText(),
-          slot = kind + "." + field,
-          admission = fact.path("ledger").path("admission").path("admissionId").asText();
-      JsonNode allocation = allocations.get(binding), producer = producers.get(binding);
-      require(
-          allocation != null
-              && producer != null
-              && allocation
-                  .path("producerStepId")
-                  .equals(producer.path("coordinate").path("stepId")),
-          "REFERENCE_MISMATCH",
-          422);
-      int intentCount = 0;
-      for (JsonNode intent : allocation.path("consumers")) {
-        if (intent.path("stepId").equals(proposal.path("coordinate").path("stepId"))
-            && intent.path("argumentSlot").asText().equals(slot)) {
-          intentCount++;
-        }
-      }
-      require(intentCount == 1, "REFERENCE_MISMATCH", 422);
-      int edgeCount = 0;
-      for (JsonNode edge : basis.path("consumerEdges")) {
-        if (!edge.path("consumerAdmissionId").asText().equals(admission)
-            || !edge.path("argumentSlot").asText().equals(slot)) {
+      for (JsonNode use : operation.path("uses")) {
+        if (!use.path("kind").asText().equals("binding")) {
           continue;
         }
-        require(drift && excludedEdge(basis, edge, producers), "EVIDENCE_MISMATCH", 422);
-        edgeCount++;
+        String binding = use.path("id").asText(),
+            admission = fact.path("ledger").path("admission").path("admissionId").asText();
+        JsonNode allocation = allocations.get(binding), producer = producers.get(binding);
+        require(
+            allocation != null
+                && producer != null
+                && allocation
+                    .path("producerStepId")
+                    .equals(producer.path("coordinate").path("stepId")),
+            "REFERENCE_MISMATCH",
+            422);
+        int intentCount = 0;
+        for (JsonNode intent : allocation.path("consumers")) {
+          if (intent.path("stepId").equals(proposal.path("coordinate").path("stepId"))) {
+            intentCount++;
+          }
+        }
+        require(intentCount == 1, "REFERENCE_MISMATCH", 422);
+        int edgeCount = 0;
+        for (JsonNode edge : basis.path("consumerEdges")) {
+          if (!edge.path("consumerAdmissionId").asText().equals(admission)
+              || !edge.path("bindingId").asText().equals(binding)) {
+            continue;
+          }
+          require(drift && excludedEdge(basis, edge, producers), "EVIDENCE_MISMATCH", 422);
+          edgeCount++;
+        }
+        require(edgeCount == 1, "REFERENCE_MISMATCH", 422);
       }
-      require(edgeCount == 1, "REFERENCE_MISMATCH", 422);
     }
     ArrayNode effectiveAllocations = contracts.object().putArray("items");
     for (JsonNode raw : basis.path("allocations")) {
@@ -263,13 +259,8 @@ public final class GuidedEffectiveGraph {
             && edge.path("destinationOrigin").equals(producer.path("origin")),
         "REFERENCE_MISMATCH",
         422);
-    JsonNode operation = proposal.path("operation");
-    String kind = operation.path("kind").asText(),
-        field = kind.equals("assert") ? "expected" : "value";
     require(
-        edge.path("argumentSlot").asText().equals(kind + "." + field)
-            && operation.path(field).path("kind").asText().equals("binding")
-            && operation.path(field).path("bindingId").equals(edge.path("bindingId")),
+        consumes(proposal.path("operation"), edge.path("bindingId").asText()),
         "REFERENCE_MISMATCH",
         422);
     require(
@@ -318,9 +309,7 @@ public final class GuidedEffectiveGraph {
     }
     for (JsonNode action : basis.path("incrementalEvidence").path("program").path("actions")) {
       if (action.path("coordinate").equals(original.path("producer"))
-          && action.path("operation").path("kind").asText().equals("read")
-          && action.path("operation").path("bindingId").asText().equals(binding)
-          && action.path("operation").path("recipe").equals(original.path("recipe"))) {
+          && captures(action.path("operation"), binding)) {
         return !afterDrift || atOrAfterDrift(basis, action.path("coordinate"));
       }
     }
@@ -340,13 +329,8 @@ public final class GuidedEffectiveGraph {
       return false;
     }
     for (JsonNode action : basis.path("incrementalEvidence").path("program").path("actions")) {
-      JsonNode operation = action.path("operation");
-      String kind = operation.path("kind").asText(),
-          field = kind.equals("assert") ? "expected" : "value";
       if (action.path("coordinate").path("stepId").equals(intent.path("stepId"))
-          && (kind + "." + field).equals(intent.path("argumentSlot").asText())
-          && operation.path(field).path("kind").asText().equals("binding")
-          && operation.path(field).path("bindingId").asText().equals(binding)
+          && consumes(action.path("operation"), binding)
           && atOrAfterDrift(basis, action.path("coordinate"))) {
         return true;
       }
@@ -367,7 +351,6 @@ public final class GuidedEffectiveGraph {
     JsonNode original = originalBinding(basis, producer.path("bindingId").asText());
     if (original == null
         || !original.path("producer").equals(producer.path("coordinate"))
-        || !original.path("recipe").equals(producer.path("recipe"))
         || !original.path("sourceOrigin").equals(producer.path("origin"))) {
       return false;
     }
@@ -435,6 +418,26 @@ public final class GuidedEffectiveGraph {
 
   private static String pair(JsonNode item) {
     JsonNode coordinate = item.has("coordinate") ? item.path("coordinate") : item;
-    return coordinate.path("stepId").asText() + "\u0000" + item.path("argumentSlot").asText();
+    return coordinate.path("stepId").asText();
+  }
+
+  /** The step record names the binding among its captures. */
+  static boolean captures(JsonNode operation, String binding) {
+    for (JsonNode captured : operation.path("captures")) {
+      if (captured.asText().equals(binding)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /** The step record names the binding among its uses. */
+  static boolean consumes(JsonNode operation, String binding) {
+    for (JsonNode use : operation.path("uses")) {
+      if (use.path("kind").asText().equals("binding") && use.path("id").asText().equals(binding)) {
+        return true;
+      }
+    }
+    return false;
   }
 }

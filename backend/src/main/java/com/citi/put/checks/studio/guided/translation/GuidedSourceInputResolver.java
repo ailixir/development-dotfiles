@@ -48,7 +48,6 @@ public final class GuidedSourceInputResolver {
                       value.has("value") ? value.path("value").asText() : null,
                       value.path("stepId").asText(),
                       value.path("kind").asText(),
-                      value.path("intendedSlot").asText(),
                       session.path("scopeHash").asText(),
                       !value.path("kind").asText().equals("secretRef"),
                       value.path("referenceName").asText()));
@@ -93,9 +92,6 @@ public final class GuidedSourceInputResolver {
     }
   }
 
-  private static final java.util.Set<String> LITERAL_SLOTS =
-      java.util.Set.of("fill.value", "selectOption.value", "assert.expected");
-
   /**
    * In a step that quotes a literal, a typed, selected or asserted literal is that quoted text: the
    * model's UTF-16 offsets must start right after an opening quote and end right before its closing
@@ -103,7 +99,7 @@ public final class GuidedSourceInputResolver {
    */
   private static void requireQuotedLiteral(JsonNode manifest, JsonNode reference) {
     if (!reference.path("referenceKind").asText().equals("sourceSpan")
-        || !LITERAL_SLOTS.contains(reference.path("intendedSlot").asText())) {
+        || !reference.path("kind").asText().equals("nonsecretText")) {
       return;
     }
     String text = null;
@@ -127,10 +123,10 @@ public final class GuidedSourceInputResolver {
               && text.substring(start, end).indexOf(text.charAt(end)) < 0;
     }
     if (!exact) {
-      // Offsets only, never step text: enough to tell a miscounted span from a wrong slot.
+      // Offsets only, never step text: enough to tell a miscounted span from a wrong kind.
       LOG.warn(
-          "Refused literal span slot={} start={} end={} textLength={} quotedLiterals={}",
-          reference.path("intendedSlot").asText(),
+          "Refused literal span kind={} start={} end={} textLength={} quotedLiterals={}",
+          reference.path("kind").asText(),
           start,
           end,
           text.length(),

@@ -64,6 +64,7 @@ public class ExecutionReadinessService implements ExecutionReadiness {
   public static final String READINESS_QUERY =
       "SELECT t.deleted_at, t.quarantined_at, t.csi_id, t.steps::text AS draft_source,\n"
           + "       t.source_revision, t.configuration_revision, t.confirmed_revision_id,\n"
+          + "       t.candidate_revision_id,\n"
           + "       r.id AS revision_id, r.test_id AS revision_test_id, r.csi_id AS"
           + " revision_csi_id,\n"
           + "       r.confirmed_by, r.confirmed_at,\n"
@@ -78,7 +79,7 @@ public class ExecutionReadinessService implements ExecutionReadiness {
           + "         'timeoutSeconds',t.timeout_seconds,'waitStrategy',t.wait_strategy,\n"
           + "         'environment',t.environment)::text AS draft_configuration\n"
           + "  FROM ui_tests t\n"
-          + "  LEFT JOIN ui_test_revisions r ON r.id = t.confirmed_revision_id\n"
+          + "  LEFT JOIN ui_test_revisions r ON r.id = ?::uuid\n"
           + " WHERE t.id = ?\n";
 
   /**
@@ -119,12 +120,18 @@ public class ExecutionReadinessService implements ExecutionReadiness {
    */
   @Transactional(readOnly = true)
   public StudioReadiness readiness(UUID testId) {
-    if (evaluate(testId).ready()) {
+    Pointers pointers = pointers(testId);
+    UUID runnable = runnableRevisionId(testId);
+    boolean recorded = runnable != null && !runnable.equals(pointers.confirmed());
+    if (!recorded && runnable != null && evaluateRevision(testId, runnable, false).ready()) {
       return StudioReadiness.READY;
     }
     Boolean learning = jdbc.queryForObject(LEARNING_QUERY, Boolean.class, testId.toString());
     if (Boolean.TRUE.equals(learning)) {
       return StudioReadiness.LEARNING;
+    }
+    if (recorded) {
+      return StudioReadiness.RECORDED;
     }
     try {
       var change = change(testId);
@@ -136,6 +143,44 @@ public class ExecutionReadinessService implements ExecutionReadiness {
     }
   }
 
+  /** The two revision pointers of a test, read from the draft row. */
+  public record Pointers(UUID confirmed, UUID candidate) {
+    public UUID head() {
+      return candidate != null ? candidate : confirmed;
+    }
+  }
+
+  public Pointers pointers(UUID testId) {
+    List<Map<String, Object>> rows =
+        jdbc.queryForList(
+            "SELECT confirmed_revision_id, candidate_revision_id FROM ui_tests WHERE id = ?",
+            testId);
+    if (rows.isEmpty()) {
+      throw new IllegalArgumentException("UI Test not found: " + testId);
+    }
+    return new Pointers(
+        (UUID) rows.get(0).get("confirmed_revision_id"),
+        (UUID) rows.get(0).get("candidate_revision_id"));
+  }
+
+  /**
+   * The one revision a manual Run, a proof and the readiness label agree on: the recorded candidate
+   * when it passes the full check against the draft, else the confirmed revision (or {@code null}).
+   *
+   * @param testId the test
+   * @return the runnable revision id, or {@code null} when the test has none
+   */
+  @Transactional(readOnly = true)
+  public UUID runnableRevisionId(UUID testId) {
+    Pointers pointers = pointers(testId);
+    if (pointers.candidate() != null
+        && !pointers.candidate().equals(pointers.confirmed())
+        && evaluateRevision(testId, pointers.candidate(), false).ready()) {
+      return pointers.candidate();
+    }
+    return pointers.confirmed();
+  }
+
   /**
    * Evaluates readiness. Reads only; changes nothing.
    *
@@ -144,7 +189,22 @@ public class ExecutionReadinessService implements ExecutionReadiness {
    */
   @Transactional(readOnly = true)
   public ReadinessVerdict evaluate(UUID testId) {
-    List<Map<String, Object>> rows = jdbc.queryForList(READINESS_QUERY, testId);
+    return evaluateRevision(testId, pointers(testId).confirmed(), false);
+  }
+
+  /**
+   * Evaluates one revision of the test against the draft.
+   *
+   * @param testId the test
+   * @param revisionId the revision to judge, or {@code null} (no revision: LEARN_REQUIRED)
+   * @param intrinsicOnly skip the terms that compare the revision with the draft, keeping the
+   *     lifecycle, the publication evidence and the observed verifier. Used only for the scheduled
+   *     run of the confirmed revision while a recorded candidate exists.
+   * @return the verdict
+   */
+  @Transactional(readOnly = true)
+  public ReadinessVerdict evaluateRevision(UUID testId, UUID revisionId, boolean intrinsicOnly) {
+    List<Map<String, Object>> rows = jdbc.queryForList(READINESS_QUERY, revisionId, testId);
     if (rows.isEmpty()) {
       throw new IllegalArgumentException("UI Test not found: " + testId);
     }
@@ -165,7 +225,9 @@ public class ExecutionReadinessService implements ExecutionReadiness {
     }
 
     // Term 2 — a confirmed revision of this test and this CSI.
-    UUID confirmedRevisionId = (UUID) row.get("confirmed_revision_id");
+    UUID confirmedRevisionId = revisionId;
+    UUID candidateId = (UUID) row.get("candidate_revision_id");
+    UUID head = candidateId != null ? candidateId : (UUID) row.get("confirmed_revision_id");
     if (confirmedRevisionId == null || row.get("revision_id") == null) {
       return learnRequired(
           "This test has not been learned yet. Run it to learn the steps before it can replay.");
@@ -189,10 +251,11 @@ public class ExecutionReadinessService implements ExecutionReadiness {
           "This test has no learned revision. Run it to learn the steps before it can replay.");
     }
 
-    // Semantic identity, rather than unused declaration counter changes, controls re-learning.
+    // Semantic identity, rather than unused declaration counter changes, controls re-learning. The
+    // comparison is against the head revision, so it applies only when that is the one judged.
     try {
-      var change = change(testId);
-      if (change.changed()) {
+      var change = (intrinsicOnly || !confirmedRevisionId.equals(head)) ? null : change(testId);
+      if (change != null && change.changed()) {
         return learnRequired("The current authoring requires learning from its first changed step");
       }
     } catch (com.citi.put.checks.studio.guided.session.GuidedSessionException missing) {
@@ -205,7 +268,8 @@ public class ExecutionReadinessService implements ExecutionReadiness {
           CanonicalStudioCodec.parseSteps(String.valueOf(row.get("draft_source")));
       ArrayNode draftLines = MAPPER.createArrayNode();
       draftSourceLines.forEach(line -> draftLines.add(line == null ? "" : line));
-      if (!GuidedContracts.hash(draftLines).equals(String.valueOf(row.get("source_hash")))) {
+      if (!intrinsicOnly
+          && !GuidedContracts.hash(draftLines).equals(String.valueOf(row.get("source_hash")))) {
         return learnRequired(
             "The steps of this test no longer match the text that was learned, even though the"
                 + " revision counter did not move. Run it to learn the current steps.");
@@ -229,6 +293,9 @@ public class ExecutionReadinessService implements ExecutionReadiness {
             ReadinessVerdict.RUNTIME_INCOMPATIBLE, "Observed replay is unavailable");
       }
       JsonNode verified = observed.verify(confirmedRevisionId);
+      if (intrinsicOnly) {
+        return ReadinessVerdict.ready(confirmedRevisionId);
+      }
       JsonNode currentAuthoring = MAPPER.readTree(String.valueOf(row.get("draft_authoring")));
       ArrayNode orderedAuthoring = MAPPER.createArrayNode();
       for (JsonNode step : currentAuthoring.path("steps")) {
@@ -268,7 +335,22 @@ public class ExecutionReadinessService implements ExecutionReadiness {
   @Override
   @Transactional(readOnly = true)
   public Verdict evaluate(UITest test) {
-    ReadinessVerdict verdict = evaluate(test.getId());
+    return verdictOf(evaluateRevision(test.getId(), runnableRevisionId(test.getId()), false));
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Verdict evaluateConfirmedIntrinsic(UITest test) {
+    return verdictOf(evaluateRevision(test.getId(), pointers(test.getId()).confirmed(), true));
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public UUID runnableRevisionId(UITest test) {
+    return runnableRevisionId(test.getId());
+  }
+
+  private static Verdict verdictOf(ReadinessVerdict verdict) {
     return verdict.ready()
         ? Verdict.accepted()
         : new Verdict(false, verdict.code(), verdict.message());

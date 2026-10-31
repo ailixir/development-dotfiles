@@ -183,8 +183,16 @@ public class VaultStudioReferenceResolver implements StudioReferenceResolver {
   public static final class SecretTooLongException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
+    private final String secretId;
+
     public SecretTooLongException(String id) {
       super("Secret exceeds the value bound: " + id);
+      this.secretId = id;
+    }
+
+    /** The one secret whose value was too long. */
+    public String secretId() {
+      return secretId;
     }
   }
 

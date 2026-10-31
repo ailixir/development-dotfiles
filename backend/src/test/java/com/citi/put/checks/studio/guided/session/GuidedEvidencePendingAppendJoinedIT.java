@@ -40,7 +40,6 @@ import com.citi.put.checks.studio.guided.translation.GuidedResponseParser;
 import com.citi.put.checks.studio.guided.translation.GuidedSourceClassifier;
 import com.citi.put.checks.studio.guided.translation.GuidedSourceInputResolver;
 import com.citi.put.checks.studio.guided.translation.GuidedSourceSnapshotRepository;
-import com.citi.put.checks.studio.guided.translation.GuidedStepVerifier;
 import com.citi.put.checks.studio.guided.translation.GuidedTranslationProperties;
 import com.citi.put.checks.studio.guided.translation.GuidedTranslationService;
 import com.citi.put.checks.studio.guided.translation.GuidedTranslationStore;
@@ -176,13 +175,8 @@ class GuidedEvidencePendingAppendJoinedIT {
   static final HttpServer PROVIDER;
   static final List<String> PROVIDER_KINDS = new CopyOnWriteArrayList<>();
 
-  /** The per-session SOURCE_PLAN template the provider answers with. */
-  static volatile ObjectNode sourcePlan;
-
-  /** The per-reservation NEXT_ACTION selection: an occurrence and a {target, operation}. */
-  static volatile Selection nextSelection;
-
-  record Selection(int occurrence, ObjectNode action) {}
+  /** The authored steps of the current test (set before the session is created). */
+  static volatile List<UUID> stepIds = List.of();
 
   static {
     try {
@@ -380,23 +374,16 @@ class GuidedEvidencePendingAppendJoinedIT {
     }
 
     @Bean
-    GuidedStepVerifier verifier(GuidedTranslationStore store) {
-      return new GuidedStepVerifier(store);
-    }
-
-    @Bean
     GuidedProductionSessionAccess access(
         GuidedSourceSnapshotRepository snapshots,
         GuidedSourceClassifier classifier,
         GuidedSourceInputResolver inputs,
-        GuidedTranslationStore store,
-        GuidedStepVerifier verifier) {
+        GuidedTranslationStore store) {
       return new GuidedProductionSessionAccess(
           snapshots,
           classifier,
           inputs,
           store,
-          verifier,
           new CsiOwnershipEvaluator(),
           com.citi.put.checks.studio.support.TestDomains.FIXTURES,
           new com.citi.put.checks.studio.secrets.VaultStudioReferenceResolver(
@@ -553,9 +540,9 @@ class GuidedEvidencePendingAppendJoinedIT {
   }
 
   /**
-   * SOURCE_PLAN answers with the session's template. NEXT_ACTION selects the remaining obligation
-   * of the requested occurrence and a {target, operation}. Every bridge-authority field is built
-   * server-side.
+   * ADR-SC-008: SOURCE_PLAN is S-min (one open obligation per authored step); STEP_CODE answers
+   * with the Playwright code of the requested step: open the page, then fill Destination from the
+   * step's saved value.
    */
   static ObjectNode providerResponse(JsonNode request) {
     String kind = request.path("kind").asText();
@@ -567,57 +554,75 @@ class GuidedEvidencePendingAppendJoinedIT {
             .put("kind", kind)
             .put("requestId", request.path("requestId").asText());
     if (kind.equals("SOURCE_PLAN")) {
-      return (ObjectNode) response.setAll(sourcePlan.deepCopy());
+      var references = response.putArray("sourceReferences");
+      var obligations = response.putArray("obligations");
+      String[] intents = {"page", "Destination", "Done"};
+      for (int i = 0; i < stepIds.size(); i++) {
+        var obligation =
+            obligations
+                .addObject()
+                .put("stepId", stepIds.get(i).toString())
+                .put("occurrence", 0)
+                .put("targetIntent", intents[i])
+                .putNull("scopeIntent");
+        // The classifier's configuration reference for the step's <var>, as the planner returns it.
+        JsonNode chosen = null;
+        for (JsonNode reference : request.path("context").path("configurationReferences")) {
+          if (reference.path("stepId").asText().equals(stepIds.get(i).toString())) {
+            chosen = reference;
+          }
+        }
+        if (chosen == null) {
+          obligation.putNull("referenceIndex");
+        } else {
+          obligation.put("referenceIndex", references.size());
+          ObjectNode reference = chosen.deepCopy();
+          reference
+              .put("referenceKind", "configuration")
+              .put(
+                  "configurationRevision",
+                  request.path("context").path("configurationRevision").asText());
+          if (!reference.path("kind").asText().equals("secretRef")) {
+            reference.remove("referenceName");
+          }
+          references.add(reference);
+        }
+        obligation.putNull("needId");
+        obligation.putArray("uses");
+      }
+      response.putArray("stepSections");
+      return response;
     }
-    if (!kind.equals("NEXT_ACTION")) {
+    if (!kind.equals("STEP_CODE")) {
       throw new IllegalStateException("UNEXPECTED_" + kind);
     }
-    Selection next = nextSelection;
-    if (next == null) {
-      throw new IllegalStateException("NO_SELECTION");
-    }
-    JsonNode chosen = null;
-    for (JsonNode obligation : request.path("context").path("obligations")) {
-      if (obligation.path("occurrence").asInt() == next.occurrence()) {
-        chosen = obligation;
+    JsonNode chosen = request.path("context").path("obligations").path(0);
+    String step = chosen.path("stepId").asText();
+    String code;
+    if (stepIds.get(0).toString().equals(step)) {
+      code = "await page.goto('" + ORIGIN + "/start');";
+    } else {
+      String inputId = null;
+      for (JsonNode input : request.path("context").path("inputs")) {
+        if (input.path("sourceStepId").asText().equals(step)) {
+          inputId = input.path("inputId").asText();
+        }
       }
+      if (inputId == null) {
+        throw new IllegalStateException("INPUT_MISSING:" + step);
+      }
+      code = "await page.getByLabel('Destination').fill(inputs['" + inputId + "']);";
     }
-    if (chosen == null) {
-      throw new IllegalStateException("UNPLANNED_OCCURRENCE");
-    }
-    response
-        .put("status", "ACTION")
-        .put("obligationId", chosen.path("obligationId").asText())
-        .putNull("question")
-        .set("action", next.action().deepCopy());
+    response.put("status", "CODE").put("code", code).putArray("captures");
     return response;
   }
 
-  static ObjectNode obligation(
-      String step, int occurrence, String kind, String target, Integer reference) {
-    ObjectNode item =
-        CONTRACTS
-            .object()
-            .put("stepId", step)
-            .put("occurrence", occurrence)
-            .put("operationKind", kind)
-            .put("targetIntent", target)
-            .putNull("scopeIntent")
-            .putNull("predicate");
-    if (reference == null) {
-      item.putNull("referenceIndex");
-    } else {
-      item.put("referenceIndex", reference);
-    }
-    item.putNull("needId");
-    return item;
-  }
-
-  /** The single authored step: a navigation, then a fill of one authored literal. */
-  static String sourceText() {
-    return "Visit "
-        + ORIGIN
-        + "/start then copy the displayed order into Destination and type fixture-input.";
+  /** Open the page, fill Destination from the saved value, and a third step that never runs. */
+  static List<String> stepTexts() {
+    return List.of(
+        "Open " + ORIGIN + "/start",
+        "Fill Destination with <var DESTINATION>",
+        "Check the page is shown");
   }
 
   @LocalServerPort int backendPort;
@@ -647,7 +652,6 @@ class GuidedEvidencePendingAppendJoinedIT {
               List.of(new CsiOwnershipEntry("CSI-123", "owner"))));
   RunnerProcessHarness workerHarness;
   UUID testId;
-  UUID step;
 
   @BeforeEach
   void startWorker() throws Exception {
@@ -665,8 +669,6 @@ class GuidedEvidencePendingAppendJoinedIT {
         .load()
         .migrate();
     PROVIDER_KINDS.clear();
-    sourcePlan = null;
-    nextSelection = null;
     RECEIPT.set(null);
     jdbc.update(
         "INSERT INTO users(id,sso_id,name,email,created_at) VALUES (?,'guided-fixture','Guided"
@@ -677,9 +679,12 @@ class GuidedEvidencePendingAppendJoinedIT {
             + " ('CSI-123','Guided fixture','Ops','HIGH','user-1','Production') ON CONFLICT DO"
             + " NOTHING");
     testId = UUID.randomUUID();
-    step = UUID.randomUUID();
-    var authoring =
-        new AuthoringV2Request(2, null, List.of(new AuthoringStep(step, sourceText(), null)));
+    stepIds = List.of(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID());
+    var steps = new java.util.ArrayList<AuthoringStep>();
+    for (int i = 0; i < stepIds.size(); i++) {
+      steps.add(new AuthoringStep(stepIds.get(i), stepTexts().get(i), null));
+    }
+    var authoring = new AuthoringV2Request(2, null, steps);
     ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
     jdbc.update(
         "INSERT INTO ui_tests(id, name, csi_id, environment, browser, steps, variables, authoring,"
@@ -687,10 +692,11 @@ class GuidedEvidencePendingAppendJoinedIT {
             + " evidence','CSI-123','fixture','chromium',?::jsonb,?::jsonb,?::jsonb,?::jsonb,'user"
             + "-1',now(),now())",
         testId,
-        mapper.writeValueAsString(List.of(sourceText())),
-        "[]",
+        mapper.writeValueAsString(stepTexts()),
+        "[{\"name\":\"DESTINATION\",\"kind\":\"plain\",\"value\":\"fixture-input\"}]",
         mapper.writeValueAsString(authoring),
-        mapper.writeValueAsString(AuthoringRevisionIdentity.create(authoring, Map.of())));
+        mapper.writeValueAsString(
+            AuthoringRevisionIdentity.create(authoring, Map.of("DESTINATION", "fixture-input"))));
     Files.writeString(
         TEMP.resolve("worker.jwt"), token("owning-worker", "worker-1", "studio-guided-controller"));
     Path journal = Files.createTempDirectory(TEMP, "journal-");
@@ -727,7 +733,7 @@ class GuidedEvidencePendingAppendJoinedIT {
       report.assertCleanExit();
     }
     // The controlled model only ever plans and selects.
-    assertThat(PROVIDER_KINDS).isSubsetOf("SOURCE_PLAN", "NEXT_ACTION");
+    assertThat(PROVIDER_KINDS).isSubsetOf("SOURCE_PLAN", "STEP_CODE");
   }
 
   @AfterAll
@@ -866,20 +872,22 @@ class GuidedEvidencePendingAppendJoinedIT {
    * pushed to the runner.
    */
   String pendingAppendSession() throws Exception {
-    String id = plannedSession(planNavLit());
-    JsonNode navigated = admit(id, reserve(id, navigation(id)));
-    advance(id, navigated, "navigate");
-    awaitSucceeded(navigated);
-    ObjectNode fill = proposal(id, 1, "fill", "destination");
-    fill.withObject("/operation")
-        .set(
-            "value",
-            CONTRACTS.object().put("kind", "authoredLiteral").put("sourceInputId", inputId(id, 1)));
-    JsonNode filled = admit(id, reserve(id, fill));
-    advance(id, filled, "fill");
-    awaitSucceeded(filled);
+    String id = createSession();
+    translation.plan(controller, id, 0, "plan-" + id, command(id));
+    assertThat(progress(id).path("translationBootstrap").path("phase").asText()).isEqualTo("READY");
+    for (int turn = 0; turn < 40 && progress(id).path("stepIndex").asInt() < 2; turn++) {
+      translation.advance(controller, id, 1, "advance-" + UUID.randomUUID(), command(id));
+    }
+    assertThat(progress(id).path("stepIndex").asInt()).as("two learned steps").isEqualTo(2);
+    assertThat(
+            jdbc.queryForList(
+                "SELECT document->>'state' FROM studio_guided_actions WHERE session_id=? ORDER BY"
+                    + " ordinal",
+                String.class,
+                id))
+        .containsExactly("SUCCEEDED", "SUCCEEDED");
     assertThat(RECEIPT.get())
-        .as("the real browser wrote the authored literal")
+        .as("the real browser wrote the authored value")
         .isEqualTo("fixture-input");
 
     ObjectNode issued = appendPendingDelivery(id);
@@ -1083,19 +1091,6 @@ class GuidedEvidencePendingAppendJoinedIT {
         id);
   }
 
-  void awaitSucceeded(JsonNode ledger) throws Exception {
-    String admission = ledger.path("admission").path("admissionId").asText();
-    await(
-        () ->
-            "SUCCEEDED"
-                .equals(
-                    jdbc.queryForObject(
-                        "SELECT document->>'state' FROM studio_guided_actions WHERE admission_id=?",
-                        String.class,
-                        admission)),
-        20_000);
-  }
-
   /**
    * Appends v2 through the V21 append path (continuation MATERIALIZE, then one appended input) and
    * issues its frozen context, leaving one PENDING delivery that no runner acknowledged. The
@@ -1151,240 +1146,6 @@ class GuidedEvidencePendingAppendJoinedIT {
               .put("expectedConfigurationRevision", "1")
               .put("expectedPlanRevision", store.state(id).path("planRevision").asInt());
         });
-  }
-
-  /** Start through production access, then the real planner plans, materializes and delivers. */
-  String plannedSession(ObjectNode template) throws Exception {
-    sourcePlan = template;
-    String id = createSession();
-    translation.plan(controller, id, 0, "plan-" + id, command(id));
-    assertThat(progress(id).path("translationBootstrap").path("phase").asText()).isEqualTo("READY");
-    assertThat(session(id).path("state").asText()).isEqualTo("PROPOSING");
-    return id;
-  }
-
-  ObjectNode span(String kind, String slot, int start, int end) {
-    return CONTRACTS
-        .object()
-        .put("referenceKind", "sourceSpan")
-        .put("sourceRevision", "1")
-        .put("stepId", step.toString())
-        .put("startUtf16", start)
-        .put("endUtf16", end)
-        .put("kind", kind)
-        .put("intendedSlot", slot);
-  }
-
-  /** PLAN_NAV_LIT: refs [R0, R1]; navigate(0, page, ref 0), fill(1, destination, ref 1). */
-  ObjectNode planNavLit() {
-    ObjectNode plan = CONTRACTS.object();
-    plan.putArray("sourceReferences")
-        .add(span("destination", "navigate.destination", 6, 6 + (ORIGIN + "/start").length()))
-        .add(
-            span(
-                "nonsecretText",
-                "fill.value",
-                sourceText().lastIndexOf("fixture-input"),
-                sourceText().lastIndexOf("fixture-input") + "fixture-input".length()));
-    plan.putArray("obligations")
-        .add(obligation(step.toString(), 0, "navigate", "page", 0))
-        .add(obligation(step.toString(), 1, "fill", "destination", 1));
-    return plan;
-  }
-
-  String stepId(String id) {
-    return session(id).path("sourceSteps").get(0).path("stepId").asText();
-  }
-
-  /** The authored input whose provenance equals the accepted plan's source reference. */
-  String inputId(String id, int referenceIndex) {
-    JsonNode reference =
-        repository.transaction(
-            () ->
-                store
-                    .state(id)
-                    .path("plan")
-                    .path("sourceReferences")
-                    .path(referenceIndex)
-                    .deepCopy());
-    JsonNode found = null;
-    for (JsonNode candidate :
-        sessions.runnerContext(controller, id, 1).path("authoredInputs").path("inputs")) {
-      if (candidate.path("provenance").equals(reference)) {
-        assertThat(found).as("one input per planned reference").isNull();
-        found = candidate;
-      }
-    }
-    assertThat(found).as("materialized input for planned reference %s", referenceIndex).isNotNull();
-    return found.path("inputId").asText();
-  }
-
-  ObjectNode navigation(String id) {
-    ObjectNode proposal = proposal(id, 0, "navigate", null);
-    proposal.withObject("/operation").put("destinationInputId", inputId(id, 0));
-    return proposal;
-  }
-
-  /**
-   * The planner issues the association. The hand-built proposal only supplies the controlled
-   * model's selection; the real advance builds, validates, guards and reserves the obligation, and
-   * the spy stops the controller at prepareAndAdmit after that reservation committed.
-   */
-  JsonNode reserve(String id, JsonNode hand) throws Exception {
-    for (ObjectNode prior : repository.transaction(() -> repository.actions(id))) {
-      assertThat(prior.path("state").asText())
-          .as("reserve only after prior actions settle")
-          .isEqualTo("SUCCEEDED");
-    }
-    ObjectNode action = CONTRACTS.object();
-    ObjectNode target = hand.path("target").deepCopy();
-    target.remove(List.of("documentId", "generation"));
-    action.set("target", target);
-    action.set("operation", hand.path("operation").deepCopy());
-    int occurrence = hand.path("coordinate").path("ordinal").asInt();
-    nextSelection = new Selection(occurrence, action);
-    var stopped = org.mockito.Mockito.spy(dispatch);
-    org.mockito.Mockito.doThrow(new AssertionError("process-stop"))
-        .when(stopped)
-        .prepareAndAdmit(
-            org.mockito.ArgumentMatchers.any(),
-            org.mockito.ArgumentMatchers.eq(id),
-            org.mockito.ArgumentMatchers.anyLong(),
-            org.mockito.ArgumentMatchers.anyString(),
-            org.mockito.ArgumentMatchers.any());
-    var reserving =
-        new GuidedTranslationService(
-            sessions,
-            repository,
-            store,
-            questions,
-            stopped,
-            gateway,
-            CONTRACTS,
-            new GuidedPromptAssembler(
-                CONTRACTS, com.citi.put.checks.studio.support.TestDomains.FIXTURES),
-            inputs,
-            new GuidedProposalValidator(CONTRACTS),
-            new GuidedDependencyPlanner(sessions),
-            properties,
-            Clock.systemUTC());
-    reserving.installDatabase(jdbc);
-    boolean reached = false;
-    // Acquisition may answer WAIT before the NEXT_ACTION call; each retry is a new continuation.
-    for (int n = 0; n < 3 && !reached; n++) {
-      try {
-        reserving.advance(controller, id, 1, "reserve-" + UUID.randomUUID(), command(id));
-      } catch (AssertionError stop) {
-        assertThat(stop).hasMessage("process-stop");
-        reached = true;
-      }
-    }
-    assertThat(reached).as("planner reached prepareAndAdmit").isTrue();
-    JsonNode association =
-        sessions.translationTransaction(
-            controller,
-            id,
-            1,
-            current -> {
-              for (JsonNode obligation : store.state(id).path("plan").path("obligations")) {
-                if (obligation.path("occurrence").asInt() == occurrence) {
-                  return store.obligation(id, obligation.path("obligationId").asText());
-                }
-              }
-              return null;
-            });
-    assertThat(association).as("planner-issued association").isNotNull();
-    assertThat(association.path("admissionId").isNull()).isTrue();
-    assertThat(association.path("admissionKey").asText()).startsWith("obligation-");
-    return association;
-  }
-
-  /** The production internal admissions route with the planner-issued key and proposal bytes. */
-  JsonNode admit(String id, JsonNode association) throws Exception {
-    return post(
-        id,
-        "admissions",
-        association.path("proposal"),
-        association.path("admissionKey").asText(),
-        token("backend-controller", "controller-1", "studio-guided-controller"),
-        202);
-  }
-
-  ObjectNode proposal(String id, int ordinal, String kind, String testId) {
-    JsonNode evidence = progress(id).path("executionEvidence");
-    ObjectNode context = sessions.runnerContext(controller, id, 1);
-    ObjectNode p =
-        CONTRACTS
-            .object()
-            .put("schemaVersion", 3)
-            .put("sessionId", id)
-            .put("scopeHash", context.path("scopeHash").asText())
-            .put("generation", evidence.path("generation").asInt())
-            .put("evidenceHash", GuidedContracts.hash(evidence))
-            .put("authoredInputsHash", context.path("authoredInputsHash").asText())
-            .put("contextRevision", 1);
-    p.set("executionEvidence", evidence);
-    p.putObject("coordinate").put("stepId", stepId(id)).put("ordinal", ordinal);
-    p.putObject("operation").put("kind", kind);
-    ObjectNode target =
-        p.putObject("target")
-            .put("documentId", evidence.path("documentId").asText())
-            .put("generation", evidence.path("generation").asInt());
-    if (testId == null) {
-      target.put("kind", "page");
-    } else {
-      // ADR-SC-007: the model names a ref of the outline; the runner derives the locator.
-      target
-          .put("kind", "node")
-          .put(
-              "ref",
-              com.citi.put.checks.studio.support.JoinedRefs.refOfTestId(
-                  progress(id).path("observation"), testId));
-    }
-    return p;
-  }
-
-  JsonNode advance(String id, JsonNode ledger, String key) throws Exception {
-    return post(
-        id,
-        "advance",
-        CONTRACTS
-            .object()
-            .put("schemaVersion", 3)
-            .put("sessionId", id)
-            .put("ownerFence", 1)
-            .put("admissionId", ledger.path("admission").path("admissionId").asText())
-            .put("operationHash", ledger.path("operationHash").asText()),
-        key,
-        token("backend-controller", "controller-1", "studio-guided-controller"),
-        202);
-  }
-
-  JsonNode post(String id, String route, JsonNode body, String key, String token, int expected)
-      throws Exception {
-    var response =
-        java.net.http.HttpClient.newBuilder()
-            .sslContext(RUNNER_SIDE)
-            .build()
-            .send(
-                java.net.http.HttpRequest.newBuilder(
-                        URI.create(
-                            "https://localhost:"
-                                + backendPort
-                                + "/internal/v2/studio/guided-sessions/"
-                                + id
-                                + "/"
-                                + route))
-                    .header("Authorization", "Bearer " + token)
-                    .header("Content-Type", "application/json")
-                    .header("Idempotency-Key", key)
-                    .header("X-Owner-Fence", "1")
-                    .POST(java.net.http.HttpRequest.BodyPublishers.ofString(body.toString()))
-                    .timeout(Duration.ofSeconds(25))
-                    .build(),
-                java.net.http.HttpResponse.BodyHandlers.ofString());
-    assertThat(response.statusCode()).as("%s: %s", route, response.body()).isEqualTo(expected);
-    return CONTRACTS.parse(response.body());
   }
 
   JsonNode session(String id) {

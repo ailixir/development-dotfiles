@@ -40,7 +40,7 @@ class GuidedSecretByteBodyTest {
                     Path.of("../docs/specs/studio-observed-authoring/contracts/v3/fixtures.json")))
             .path("documents");
     ObjectNode dispatch = (ObjectNode) fixture.path("secretDispatch").deepCopy();
-    ObjectNode metadata = (ObjectNode) dispatch.remove("secret");
+    ObjectNode metadata = (ObjectNode) dispatch.remove("secrets").get(0).deepCopy();
     metadata.remove("value");
     String canary = "GUIDED-BYTE-CANARY-" + java.util.UUID.randomUUID();
     SSLContext tls = certificate();
@@ -75,9 +75,9 @@ class GuidedSecretByteBodyTest {
         char[] chars = canary.toCharArray();
         var secret = new SecretValue(chars);
         if (reply == 200) {
-          client.sendSecret(dispatch, metadata, secret);
+          client.sendSecrets(dispatch, one(metadata, secret), null);
         } else {
-          assertThatThrownBy(() -> client.sendSecret(dispatch, metadata, secret))
+          assertThatThrownBy(() -> client.sendSecrets(dispatch, one(metadata, secret), null))
               .hasMessage("UNKNOWN_OUTCOME");
         }
         assertThat(new String(received.get(), StandardCharsets.UTF_8)).contains(canary);
@@ -121,7 +121,7 @@ class GuidedSecretByteBodyTest {
                     Path.of("../docs/specs/studio-observed-authoring/contracts/v3/fixtures.json")))
             .path("documents");
     ObjectNode dispatch = (ObjectNode) documents.path("secretDispatch").deepCopy();
-    ObjectNode metadata = (ObjectNode) dispatch.remove("secret");
+    ObjectNode metadata = (ObjectNode) dispatch.remove("secrets").get(0).deepCopy();
     metadata.remove("value");
     String canary = "STALLED-BYTE-" + java.util.UUID.randomUUID();
     char[] chars = canary.toCharArray();
@@ -190,10 +190,9 @@ class GuidedSecretByteBodyTest {
             .start(
                 () -> {
                   try {
-                    client.sendSecret(
+                    client.sendSecrets(
                         dispatch,
-                        metadata,
-                        secret,
+                        one(metadata, secret),
                         defaultBound || interrupt
                             ? null
                             : java.time.Instant.now().plusMillis(1000));
@@ -289,5 +288,70 @@ class GuidedSecretByteBodyTest {
       in.transferTo(java.io.OutputStream.nullOutputStream());
     }
     assertThat(process.waitFor()).isZero();
+  }
+
+  @Test
+  void twoSecretsTravelInOneSecretsArrayAndBothBuffersAreErased() throws Exception {
+    var contracts = new GuidedContracts();
+    var fixture =
+        contracts
+            .parse(
+                Files.readString(
+                    Path.of("../docs/specs/studio-observed-authoring/contracts/v3/fixtures.json")))
+            .path("documents");
+    ObjectNode dispatch = (ObjectNode) fixture.path("secretDispatch").deepCopy();
+    ObjectNode first = (ObjectNode) dispatch.remove("secrets").get(0).deepCopy();
+    first.remove("value");
+    ObjectNode second = first.deepCopy();
+    second.put("secretId", "TOKEN");
+    String canaryOne = "GUIDED-BYTE-ONE-" + java.util.UUID.randomUUID();
+    String canaryTwo = "GUIDED-BYTE-TWO-" + java.util.UUID.randomUUID();
+    SSLContext tls = certificate();
+    var server = HttpsServer.create(new InetSocketAddress("localhost", 0), 0);
+    server.setHttpsConfigurator(new HttpsConfigurator(tls));
+    var received = new AtomicReference<byte[]>();
+    byte[] outcome = fixture.path("outcome").toString().getBytes(StandardCharsets.UTF_8);
+    server.createContext(
+        "/",
+        exchange -> {
+          received.set(exchange.getRequestBody().readAllBytes());
+          exchange.sendResponseHeaders(200, outcome.length);
+          exchange.getResponseBody().write(outcome);
+          exchange.close();
+        });
+    server.start();
+    try {
+      var client =
+          new HttpRunnerDispatchClient(
+              URI.create("https://localhost:" + server.getAddress().getPort()),
+              tls,
+              () -> "synthetic-controller-token",
+              contracts);
+      char[] one = canaryOne.toCharArray(), two = canaryTwo.toCharArray();
+      client.sendSecrets(
+          dispatch,
+          java.util.List.of(
+              new HttpRunnerDispatchClient.SecretEnvelope(first, new SecretValue(one)),
+              new HttpRunnerDispatchClient.SecretEnvelope(second, new SecretValue(two))),
+          null);
+      var sent = contracts.parse(new String(received.get(), StandardCharsets.UTF_8));
+      assertThat(sent.has("secret")).isFalse();
+      assertThat(sent.path("secrets")).hasSize(2);
+      assertThat(sent.path("secrets").get(0).path("secretId").asText()).isEqualTo("PASS");
+      assertThat(sent.path("secrets").get(0).path("value").asText()).isEqualTo(canaryOne);
+      assertThat(sent.path("secrets").get(1).path("secretId").asText()).isEqualTo("TOKEN");
+      assertThat(sent.path("secrets").get(1).path("value").asText()).isEqualTo(canaryTwo);
+      assertThat(one).containsOnly('\0');
+      assertThat(two).containsOnly('\0');
+      java.util.Arrays.fill(received.get(), (byte) 0);
+    } finally {
+      server.stop(0);
+      java.util.Arrays.fill(outcome, (byte) 0);
+    }
+  }
+
+  private static java.util.List<HttpRunnerDispatchClient.SecretEnvelope> one(
+      ObjectNode metadata, SecretValue secret) {
+    return java.util.List.of(new HttpRunnerDispatchClient.SecretEnvelope(metadata, secret));
   }
 }

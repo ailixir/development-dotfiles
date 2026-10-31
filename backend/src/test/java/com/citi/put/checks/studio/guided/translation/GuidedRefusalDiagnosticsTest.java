@@ -61,39 +61,19 @@ class GuidedRefusalDiagnosticsTest {
             "APPLICATION",
             "SETTLEMENT_AUTHORITY",
             "OTHER_CLIENT_FAILURE",
-            "NEXT_QUESTION_CALL",
-            "NEXT_PLAN_ACCESS_CALL",
-            "NEXT_SOURCE_SELECTION_CALL",
-            "NEXT_OBLIGATION_LOOKUP_CALL",
-            "NEXT_ASSOCIATION_LOOKUP_CALL",
-            "NEXT_RUNNER_CONTEXT_CALL",
-            "NEXT_MATERIALIZE_CALL",
-            "NEXT_ORIGINAL_AUTHORITY",
-            "NEXT_CURRENT_AUTHORED_STEP",
-            "NEXT_SELECTION_SHAPE",
-            "NEXT_MATERIALIZE_CONTRACT_CALL",
-            "NEXT_EFFECTIVE_CHOICE_CALL",
-            "NEXT_VALIDATE_ACTION_CALL",
-            "NEXT_ACTION_CONTRACT_CALL",
-            "NEXT_ACTION_MEANING",
-            "NEXT_ACTION_EVIDENCE",
-            // ADR-SC-007: the grounding gates are appended in the order the validator runs them.
-            "NEXT_TARGET_REF",
-            "NEXT_TARGET_INTENT",
-            "NEXT_SELECTED_CHOICE",
-            "NEXT_OPERATION_TARGET",
-            "NEXT_AUTHORED_SOURCE",
-            "NEXT_SECRET_POLICY",
-            "NEXT_BINDING_MEANING",
-            "NEXT_ASSERTION_PREDICATE",
-            "NEXT_ASSERT_TEXT_ABSENT",
-            "NEXT_READ_RULE",
-            "NEXT_POLICY_CALL",
-            "NEXT_RESERVATION_CALL",
-            // Runner-time refusals: persisted in progress.refusalGate, never receipted.
-            "RUNNER_OPTION_NOT_PRESENT",
-            "RUNNER_NO_DURABLE_LOCATOR",
-            "RUNNER_READ_NOT_ALLOWED"),
+            "STEP_ORIGINAL_AUTHORITY",
+            "STEP_CURRENT_AUTHORED_STEP",
+            "STEP_CODE_SHAPE",
+            "STEP_CAPTURES",
+            "STEP_USES",
+            "STEP_CONTRACT",
+            "STEP_CHOICES",
+            "STEP_TARGET_REF",
+            "STEP_SELECTED_CHOICE",
+            "STEP_RESERVATION",
+            // Prepare refusals: persisted in progress.refusalGate, never receipted.
+            "STEP_SYNTAX",
+            "STEP_PRE_FENCE"),
         java.util.Arrays.stream(Gate.values()).map(Enum::name).toList());
     for (Gate gate : Gate.values()) {
       assertTrue(receipt(gate).bytes().length <= 256);
@@ -200,7 +180,7 @@ class GuidedRefusalDiagnosticsTest {
         var events = new ArrayList<GuidedRefusalDiagnostics.Receipt>();
         var attempt = attempt(events::add);
         attempt.record(gate);
-        attempt.record(Gate.NEXT_RESERVATION_CALL);
+        attempt.record(Gate.STEP_RESERVATION);
         if (phase > 0) {
           attempt.enterApplication();
         }
@@ -208,11 +188,11 @@ class GuidedRefusalDiagnosticsTest {
           attempt.applicationReturned();
         }
         tx.executeWithoutResult(status -> attempt.rejectedAfterCommit(true));
-        Gate first = gate == Gate.UNKNOWN ? Gate.NEXT_RESERVATION_CALL : gate;
+        Gate first = gate == Gate.UNKNOWN ? Gate.STEP_RESERVATION : gate;
         assertEquals(
             phase != 1
                 ? Gate.SETTLEMENT_AUTHORITY
-                : first.name().startsWith("NEXT_") ? first : Gate.APPLICATION,
+                : first.name().startsWith("STEP_") ? first : Gate.APPLICATION,
             events.getFirst().gate());
       }
     }
@@ -225,7 +205,7 @@ class GuidedRefusalDiagnosticsTest {
         .skip(11)
         // The RUNNER_* values are runner-time refusals persisted on the session, never recorded
         // on a model-reply capture, so they have no receipt phase to filter.
-        .filter(gate -> gate.name().startsWith("NEXT_"))
+        .filter(gate -> gate.name().startsWith("STEP_"))
         .flatMap(
             gate ->
                 java.util.stream.IntStream.range(0, 3)

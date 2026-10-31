@@ -153,7 +153,7 @@ class ObservedGrantClockIT {
               return prepared;
             })
         .when(authorizer)
-        .authorize(any(), any(), any());
+        .authorize(any(), any(), any(), any());
   }
 
   @AfterEach

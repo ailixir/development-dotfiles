@@ -58,50 +58,10 @@ public final class ObservedArtifactLowerer {
     int ordinal = 0;
     for (JsonNode fact : basis.path("actions")) {
       JsonNode proposal = GuidedPlanBuilder.proposal(basis, fact),
-          execution = proposal.path("executionEvidence"),
-          target = proposal.path("target");
+          execution = proposal.path("executionEvidence");
       String guardId = "g" + ordinal++;
-      ObjectNode guard = guards.addObject().put("guardId", guardId);
-      guard.set("origin", execution.path("origin"));
-      ObjectNode targetGuard = guard.putObject("target");
-      if (execution.path("kind").asText().equals("initialBlank")) {
-        targetGuard.put("kind", "initialBlank");
-      } else {
-        if (target.path("kind").asText().equals("passwordControl")) {
-          targetGuard.put("kind", "passwordControl");
-        } else {
-          if (target.path("kind").asText().equals("page")) {
-            targetGuard.put("kind", "page");
-          } else {
-            JsonNode preparation =
-                GuidedPlanBuilder.unique(
-                    basis.path("preparations"), "preparationId", text(fact, "preparationId"));
-            JsonNode observation =
-                GuidedPlanBuilder.unique(
-                        basis.path("observations"),
-                        "observationHash",
-                        text(preparation, "observationHash"))
-                    .path("observation");
-            // ADR-SC-007 D3: the Guard is the target the runner reported for this very preparation,
-            // copied as reported; the lowerer derives no locator and no role. Only the read grant
-            // is added, from the observation the read was admitted on.
-            JsonNode reported = preparation.path("proof").path("target");
-            require(reported.isObject(), "OPERATION_MISMATCH", 422);
-            targetGuard.put("kind", "element");
-            targetGuard.set("locator", reported.path("locator").deepCopy());
-            targetGuard.set("tier", reported.path("tier").deepCopy());
-            targetGuard.set("identity", reported.path("identity").deepCopy());
-            if (reported.has("assertTextMode")) {
-              targetGuard.set("assertTextMode", reported.path("assertTextMode"));
-            }
-            if (proposal.path("operation").path("kind").asText().equals("read")) {
-              targetGuard.set("readRuleId", observation.path("readRuleId"));
-            } else {
-              targetGuard.putNull("readRuleId");
-            }
-          }
-        }
-      }
+      // ADR-SC-008: the Guard is only the origin the step ran on (null for the initial blank).
+      guards.addObject().put("guardId", guardId).set("origin", execution.path("origin"));
       ObjectNode action = contracts.object().put("guardId", guardId);
       action.set("coordinate", proposal.path("coordinate").deepCopy());
       action.set("operation", proposal.path("operation").deepCopy());
@@ -162,24 +122,19 @@ public final class ObservedArtifactLowerer {
     for (JsonNode step : basis.path("sourceSteps")) {
       order.put(text(step, "stepId"), step.path("ordinal").asInt());
     }
-    // Input history remains complete in the basis. Only successful effective operations create
-    // future replay recipes; preparing/materializing a value is not execution authority.
+    // Input history remains complete in the basis. A step's uses entry of kind input makes the
+    // input a replay recipe; preparing/materializing a value is not execution authority.
     var usedInputs = new HashSet<String>();
     for (JsonNode fact : basis.path("actions")) {
       if (!fact.path("ledger").path("state").asText().equals("SUCCEEDED")) {
         continue;
       }
-      JsonNode operation = GuidedPlanBuilder.proposal(basis, fact).path("operation");
-      if (operation.has("destinationInputId")) {
-        usedInputs.add(text(operation, "destinationInputId"));
-      }
-      for (String field : List.of("value", "expected")) {
-        if (operation.path(field).has("sourceInputId")) {
-          usedInputs.add(text(operation.path(field), "sourceInputId"));
-        }
-      }
+      JsonNode proposal = GuidedPlanBuilder.proposal(basis, fact);
+      GuidedPlanBuilder.addUses(
+          usedInputs, text(proposal.path("coordinate"), "stepId"), proposal.path("operation"));
     }
     List<ObjectNode> values = new ArrayList<>();
+    var matched = new HashSet<String>();
     var ids = new HashSet<String>();
     var meanings = new HashSet<String>();
     for (JsonNode input : basis.path("inputs")) {
@@ -189,12 +144,11 @@ public final class ObservedArtifactLowerer {
           order.containsKey(stepId)
               && ids.add(text(input, "inputId"))
               && provenance.path("stepId").asText().equals(stepId)
-              && provenance.path("kind").equals(input.path("kind"))
-              && provenance.path("intendedSlot").equals(input.path("intendedSlot")),
+              && provenance.path("kind").equals(input.path("kind")),
           "REFERENCE_MISMATCH",
           422);
       ObjectNode recipe = contracts.object();
-      for (String field : List.of("inputId", "stepId", "kind", "intendedSlot")) {
+      for (String field : List.of("inputId", "stepId", "kind")) {
         recipe.set(field, input.path(field));
       }
       ObjectNode projected = recipe.putObject("provenance");
@@ -251,11 +205,13 @@ public final class ObservedArtifactLowerer {
       ObjectNode meaning = recipe.deepCopy();
       meaning.remove("inputId");
       require(meanings.add(GuidedContracts.hash(meaning)), "REFERENCE_MISMATCH", 422);
-      if (usedInputs.contains(text(input, "inputId"))) {
+      String useKey = GuidedPlanBuilder.useKey(stepId, input);
+      if (usedInputs.contains(useKey)) {
         values.add(recipe);
+        matched.add(useKey);
       }
     }
-    require(ids.containsAll(usedInputs), "REFERENCE_MISMATCH", 422);
+    require(matched.containsAll(usedInputs), "REFERENCE_MISMATCH", 422);
     values.sort(
         Comparator.comparingInt((ObjectNode r) -> order.get(text(r, "stepId")))
             .thenComparingInt(
@@ -265,7 +221,6 @@ public final class ObservedArtifactLowerer {
             .thenComparing(
                 r -> r.path("provenance").path("referenceId").asText(),
                 ObservedArtifactLowerer::compareScalars)
-            .thenComparing(r -> text(r, "intendedSlot"), ObservedArtifactLowerer::compareScalars)
             .thenComparing(r -> text(r, "kind"), ObservedArtifactLowerer::compareScalars)
             .thenComparing(r -> text(r, "inputId"), ObservedArtifactLowerer::compareScalars));
     ArrayNode result = contracts.object().putArray("inputs");

@@ -9,6 +9,9 @@ public final class GuidedSessionException extends RuntimeException {
   private final String messageCode;
   private final boolean retryable;
   private final Integer retryAfterSeconds;
+  private final Integer line;
+  private final Integer column;
+  private final Integer matchCount;
 
   public GuidedSessionException(String code, int status) {
     this(code, status, code, false, null);
@@ -21,6 +24,38 @@ public final class GuidedSessionException extends RuntimeException {
    */
   public GuidedSessionException(
       String code, int status, String messageCode, boolean retryable, Integer retryAfterSeconds) {
+    this(code, status, messageCode, retryable, retryAfterSeconds, null, null, null);
+  }
+
+  /**
+   * A learning-time step refusal that names the position in the model's own code (STEP_SYNTAX,
+   * STEP_PRE_FENCE). Line and column are integers, never page or caller data; either may be null.
+   */
+  public GuidedSessionException(
+      String code, int status, String messageCode, Integer line, Integer column) {
+    this(code, status, messageCode, false, null, line, column, null);
+  }
+
+  /** As above, plus the number of elements a pre-fence locator matched (STEP_PRE_FENCE). */
+  public GuidedSessionException(
+      String code,
+      int status,
+      String messageCode,
+      Integer line,
+      Integer column,
+      Integer matchCount) {
+    this(code, status, messageCode, false, null, line, column, matchCount);
+  }
+
+  private GuidedSessionException(
+      String code,
+      int status,
+      String messageCode,
+      boolean retryable,
+      Integer retryAfterSeconds,
+      Integer line,
+      Integer column,
+      Integer matchCount) {
     super(code);
     if (retryAfterSeconds != null && (!retryable || retryAfterSeconds < 1)) {
       throw new IllegalArgumentException("Retry-After needs a retryable refusal and >= 1 second");
@@ -29,6 +64,9 @@ public final class GuidedSessionException extends RuntimeException {
     this.messageCode = messageCode;
     this.retryable = retryable;
     this.retryAfterSeconds = retryAfterSeconds;
+    this.line = line;
+    this.column = column;
+    this.matchCount = matchCount;
   }
 
   public int status() {
@@ -46,6 +84,21 @@ public final class GuidedSessionException extends RuntimeException {
   /** Whole seconds for a {@code Retry-After} header, or null when the refusal carries none. */
   public Integer retryAfterSeconds() {
     return retryAfterSeconds;
+  }
+
+  /** The line in the model's code a step refusal names, or null. */
+  public Integer line() {
+    return line;
+  }
+
+  /** The column in the model's code a step refusal names, or null. */
+  public Integer column() {
+    return column;
+  }
+
+  /** The number of matches a STEP_PRE_FENCE refusal names, or null. */
+  public Integer matchCount() {
+    return matchCount;
   }
 
   public Map<String, Object> response() {

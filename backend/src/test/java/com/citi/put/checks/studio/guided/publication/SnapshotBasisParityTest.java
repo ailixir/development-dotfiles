@@ -734,21 +734,6 @@ class SnapshotBasisParityTest {
     }
     plan = learned(doc);
     expected = computation(doc);
-    for (int index = 0; index < 2; index++) {
-      String slot = index == 0 ? "\uD800\uDC00" : "\uE000";
-      put(plan, "bindings/0/consumers/" + index + "/coordinate/ordinal", M.valueToTree(0));
-      put(plan, "bindings/0/consumers/" + index + "/argumentSlot", slot);
-      put(
-          expected,
-          "rows/2/learnedContent/consumedBindings/" + index + "/coordinate/ordinal",
-          M.valueToTree(0));
-      put(expected, "rows/2/learnedContent/consumedBindings/" + index + "/argumentSlot", slot);
-    }
-    reverse((ArrayNode) at(expected, "rows/2/learnedContent/consumedBindings"));
-    construction(
-        "57/learned/utf8-ties/argumentSlot", current(doc), configuration(doc), plan, expected);
-    plan = learned(doc);
-    expected = computation(doc);
     ObjectNode moved = at(expected, "rows/0/learnedContent/actions/0").deepCopy();
     String stepId = at(expected, "rows/1/stepInput/stepId").asText();
     put(plan, "actions/0/coordinate/stepId", stepId);

@@ -14,8 +14,7 @@ public record GuidedModelRequest(
     int maxOutputTokens) {
   public enum Kind {
     SOURCE_PLAN,
-    NEXT_ACTION,
-    VERIFY_STEP
+    STEP_CODE
   }
 
   public GuidedModelRequest {

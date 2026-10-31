@@ -85,6 +85,12 @@ public class GuidedSecretLoginMigrationTest {
         config.target(target);
       }
       config.load().migrate();
+      // Hand-written preparation proofs below are minimal; the closed-key shape of a proof is
+      // covered by GuidedStepKindMigrationIT, so only that one check is dropped here.
+      jdbc.execute(
+          "DO $$ BEGIN IF to_regclass('studio_guided_preparations') IS NOT NULL THEN ALTER TABLE"
+              + " studio_guided_preparations DROP CONSTRAINT IF EXISTS ck_wi6_preparation_metadata;"
+              + " END IF; END $$");
     }
 
     void session(String state) {
@@ -132,14 +138,12 @@ public class GuidedSecretLoginMigrationTest {
           .put("referenceId", "ref-PASS")
           .put("referenceName", "PASS")
           .put("kind", "secretRef")
-          .put("stepId", "password-step")
-          .put("intendedSlot", "fill.value");
+          .put("stepId", "password-step");
       refs.addObject()
           .put("referenceId", "ref-UNREACHED")
           .put("referenceName", "UNREACHED")
           .put("kind", "secretRef")
-          .put("stepId", "unused-step")
-          .put("intendedSlot", "fill.value");
+          .put("stepId", "unused-step");
       jdbc.update(
           ("INSERT INTO studio_guided_source_manifests(session_id,scope_hash,manifes"
               + "t,manifest_hash) VALUES ('session',?,?::jsonb,studio_publication_hash(?:"
@@ -177,12 +181,18 @@ public class GuidedSecretLoginMigrationTest {
               String.class);
       var proposal = C.object().put("contextRevision", 1).put("authoredInputsHash", inputsHash);
       proposal.putObject("coordinate").put("stepId", stepId).put("ordinal", 0);
-      proposal
-          .putObject("operation")
-          .put("kind", "fill")
-          .putObject("value")
-          .put("kind", "secretRef")
-          .put("sourceInputId", sourceInputId);
+      var operation =
+          proposal
+              .putObject("operation")
+              .put("kind", "step")
+              .put("code", "await page.getByLabel('Password').fill(secrets['PASS']);");
+      operation.putArray("captures");
+      operation
+          .putArray("uses")
+          .addObject()
+          .put("kind", "secret")
+          .put("id", sourceInputId.replaceFirst("^input-", ""));
+      operation.put("sourceHash", GuidedContracts.hash(operation.path("code")));
       String digest = GuidedContracts.hash(proposal);
       var proof =
           C.object()
@@ -230,9 +240,9 @@ public class GuidedSecretLoginMigrationTest {
           "{\"sessionId\":\"session\",\"scopeHash\":\""
               + HASH
               + ("\",\"inputs\":[{\"inputId\":\"input-PASS\",\"sourceStepId\":\"password-step\",\"kind"
-                  + "\":\"secretRef\",\"secretId\":\"PASS\",\"intendedSlot\":\"fill.value\"},{\"inputId\":"
+                  + "\":\"secretRef\",\"secretId\":\"PASS\"},{\"inputId\":"
                   + "\"input-UNREACHED\",\"sourceStepId\":\"unused-step\",\"kind\":\"secretRef\",\"secre"
-                  + "tId\":\"UNREACHED\",\"intendedSlot\":\"fill.value\"}]}");
+                  + "tId\":\"UNREACHED\"}]}");
       var safeInputs =
           (com.fasterxml.jackson.databind.node.ObjectNode)
               new com.citi.put.checks.studio.guided.session.GuidedContracts().parse(inputs);
@@ -245,8 +255,7 @@ public class GuidedSecretLoginMigrationTest {
             .put("referenceId", "ref-" + input.path("secretId").asText())
             .put("referenceName", input.path("secretId").asText())
             .put("kind", "secretRef")
-            .put("stepId", input.path("sourceStepId").asText())
-            .put("intendedSlot", "fill.value");
+            .put("stepId", input.path("sourceStepId").asText());
       }
       safeInputs
           .put("schemaVersion", 3)
@@ -294,12 +303,12 @@ public class GuidedSecretLoginMigrationTest {
     try (var db = new Database(null)) {
       assertThat(
               db.jdbc.queryForObject(
-                  "SELECT max(version::int) FROM flyway_schema_history", Integer.class))
-          .isEqualTo(29);
+                  "SELECT count(*) FROM flyway_schema_history WHERE version='33' AND success",
+                  Integer.class))
+          .isEqualTo(1);
       assertThat(
               db.jdbc.queryForObject(
-                  "SELECT count(*) FROM flyway_schema_history WHERE version::int > 29",
-                  Integer.class))
+                  "SELECT count(*) FROM flyway_schema_history WHERE NOT success", Integer.class))
           .isZero();
       assertThat(Files.exists(Path.of("db/cutover"))).isFalse();
       assertThat(
@@ -381,7 +390,7 @@ public class GuidedSecretLoginMigrationTest {
               .put("principalId", OWNER)
               .put("csiId", "CSI")
               .put("environment", "Development");
-      scope.putArray("capabilities").add("fill");
+      scope.putArray("capabilities").add("step");
       scope.putObject("initialContext").put("kind", "initialBlank");
       assertThat(predicate(db, "studio_publication_scope", scope)).isTrue();
       assertThat(
@@ -1746,7 +1755,7 @@ public class GuidedSecretLoginMigrationTest {
           .isTrue();
       assertThat(
               db.jdbc.queryForObject(
-                  "SELECT studio_secret_guided_input_reference('session',?,'admission')",
+                  "SELECT studio_secret_guided_input_reference('session',?,'admission','PASS')",
                   String.class,
                   HASH))
           .isNull();
@@ -1763,8 +1772,8 @@ public class GuidedSecretLoginMigrationTest {
                       + "(a.document->>'attemptOrdinal')::integer=0",
                   Integer.class))
           .isEqualTo(1);
-      assertThatThrownBy(() -> insert(db, noDecision(db, "NOT_USED", null)))
-          .hasMessageContaining("unreached");
+      // ADR-SC-008: the step names the secrets it uses, so a step that does not use PASS (its uses
+      // name a secret nothing materialized) neither conceals nor consumes the PASS declaration.
       assertThatThrownBy(() -> insert(db, noDecision(db, "UNKNOWN_OUTCOME", "admission")))
           .hasMessageContaining("admission source reference declaration lineage invalid");
       assertThat(lineage(db)).isEqualTo(before);
@@ -1793,7 +1802,7 @@ public class GuidedSecretLoginMigrationTest {
       assertThat(lineage(db)).isEqualTo(before);
       assertThat(
               db.jdbc.queryForObject(
-                  "SELECT studio_secret_guided_input_reference('session',?,'admission')",
+                  "SELECT studio_secret_guided_input_reference('session',?,'admission','PASS')",
                   String.class,
                   HASH))
           .isEqualTo("ref-PASS");

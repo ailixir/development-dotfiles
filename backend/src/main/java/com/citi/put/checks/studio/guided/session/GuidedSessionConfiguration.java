@@ -145,12 +145,11 @@ public class GuidedSessionConfiguration {
       com.citi.put.checks.studio.guided.translation.GuidedSourceClassifier classifier,
       com.citi.put.checks.studio.guided.translation.GuidedSourceInputResolver resolver,
       com.citi.put.checks.studio.guided.translation.GuidedTranslationStore store,
-      com.citi.put.checks.studio.guided.translation.GuidedStepVerifier verifier,
       CsiOwnershipEvaluator ownership,
       AllowedDomains domains,
       com.citi.put.checks.studio.dispatch.StudioReferenceResolver references) {
     return new com.citi.put.checks.studio.guided.translation.GuidedProductionSessionAccess(
-        snapshots, classifier, resolver, store, verifier, ownership, domains, references);
+        snapshots, classifier, resolver, store, ownership, domains, references);
   }
 
   /**

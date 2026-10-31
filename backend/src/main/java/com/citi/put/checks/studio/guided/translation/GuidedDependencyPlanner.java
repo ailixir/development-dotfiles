@@ -28,22 +28,20 @@ public final class GuidedDependencyPlanner {
     for (JsonNode need : plan.path("needs")) {
       String id = need.path("needId").asText(), producer = need.path("producerStepId").asText();
       require(needs.add(id) && order.containsKey(producer), "BINDING_ORDER", 422);
-      boolean hasRead = false;
+      boolean produced = false;
       for (JsonNode obligation : plan.path("obligations")) {
-        hasRead |=
+        produced |=
             obligation.path("stepId").asText().equals(producer)
-                && obligation.path("operationKind").asText().equals("read")
                 && obligation.path("needId").asText().equals(id);
       }
-      require(hasRead, "MISSING_SOURCE", 409);
+      require(produced, "MISSING_SOURCE", 409);
       for (JsonNode consumer : need.path("consumers")) {
         Integer at = order.get(consumer.path("stepId").asText());
-        require(at != null && at >= order.get(producer), "BINDING_ORDER", 422);
+        require(at != null && at > order.get(producer), "BINDING_ORDER", 422);
       }
     }
-    // Needs are derived from the obligations' needIds (ADR-SC-007), so the reverse also holds:
-    // every needId an obligation carries names one of the plan's needs, and a read sits at the
-    // need's producer step.
+    // Needs are derived from the obligations' needIds and uses, so the reverse also holds: every
+    // needId an obligation produces names one of the plan's needs and sits at its producer step.
     var byId = new HashMap<String, JsonNode>();
     plan.path("needs").forEach(need -> byId.put(need.path("needId").asText(), need));
     for (JsonNode obligation : plan.path("obligations")) {
@@ -52,11 +50,7 @@ public final class GuidedDependencyPlanner {
       }
       JsonNode need = byId.get(obligation.path("needId").asText());
       require(need != null, "MISSING_SOURCE", 409);
-      require(
-          !obligation.path("operationKind").asText().equals("read")
-              || need.path("producerStepId").equals(obligation.path("stepId")),
-          "BINDING_ORDER",
-          422);
+      require(need.path("producerStepId").equals(obligation.path("stepId")), "BINDING_ORDER", 422);
     }
   }
 

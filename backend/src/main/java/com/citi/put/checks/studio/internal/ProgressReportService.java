@@ -72,6 +72,15 @@ public class ProgressReportService {
   private final Clock clock;
   private com.citi.put.checks.studio.secrets.SecretAuditLifecycle secretAudit;
 
+  private com.citi.put.checks.studio.dispatch.StudioProofPromotionService promotion;
+
+  // Required: without it nothing would ever confirm a revision, and no error would say so.
+  @Autowired
+  public void installProofPromotion(
+      com.citi.put.checks.studio.dispatch.StudioProofPromotionService promotion) {
+    this.promotion = promotion;
+  }
+
   @Autowired(required = false)
   public void installSecretAudit(com.citi.put.checks.studio.secrets.SecretAuditLifecycle audit) {
     this.secretAudit = audit;
@@ -511,7 +520,17 @@ public class ProgressReportService {
    * projection forward — and only forward (AC-27).
    */
   private void afterFinal(RunnerReport report, RunnerReportProjection.Projected projected) {
-    studioService.applyLastRunProjection(report.executionId());
+    // Promotion first: it moves the confirmed pointer by SQL, and the last-run projection below
+    // loads and dirties the draft row. A diagnostic run, and a proof that did not promote, are not
+    // runs of the confirmed revision and must not set the draft's last run.
+    boolean excluded = false;
+    if (promotion != null) {
+      boolean promoted = promotion.onFinal(report.executionId());
+      excluded = promotion.excludesLastRun(report.executionId(), promoted);
+    }
+    if (!excluded) {
+      studioService.applyLastRunProjection(report.executionId());
+    }
     if (projected.videoStatus() != null
         && !VideoEvidence.PROCESSING.equals(projected.videoStatus())) {
       statements.closeFinalized(report.executionId());

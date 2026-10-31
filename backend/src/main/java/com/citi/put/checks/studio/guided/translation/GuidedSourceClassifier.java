@@ -18,8 +18,7 @@ import java.util.regex.Pattern;
 /** Provenance/policy classification, not an English parser or universal secret detector. */
 public final class GuidedSourceClassifier {
   private static final Pattern TOKEN = Pattern.compile("<(var|secret)\\s+([A-Za-z0-9_.-]{1,64})>");
-  private static final List<String> SLOTS =
-      List.of("navigate.destination", "fill.value", "selectOption.value", "assert.expected");
+  private static final List<String> KINDS = List.of("destination", "nonsecretText");
   private final GuidedContracts contracts;
   private final CredentialPatternScreen screen;
   private final GuidedPromptAssembler prompts;
@@ -136,16 +135,14 @@ public final class GuidedSourceClassifier {
               .toList()) {
         String reference =
             "cfg-"
-                + UUID.nameUUIDFromBytes(
-                    (id + ":secret:" + name + ":fill.value").getBytes(StandardCharsets.UTF_8));
+                + UUID.nameUUIDFromBytes((id + ":secret:" + name).getBytes(StandardCharsets.UTF_8));
         ObjectNode config =
             configs
                 .addObject()
                 .put("referenceId", reference)
                 .put("stepId", id)
                 .put("referenceName", name)
-                .put("kind", "secretRef")
-                .put("intendedSlot", "fill.value");
+                .put("kind", "secretRef");
         privateConfigs.set(reference, config.deepCopy());
       }
       for (String name :
@@ -156,20 +153,18 @@ public final class GuidedSourceClassifier {
         require(saved != null && saved.isTextual(), "MISSING_SOURCE", 409);
         // Empty text is an intentional clear-input value; null/missing is never coerced to text.
         String value = saved.textValue();
-        for (String slot : SLOTS) {
+        for (String kind : KINDS) {
           String reference =
               "cfg-"
                   + UUID.nameUUIDFromBytes(
-                      (id + ":" + name + ":" + slot).getBytes(StandardCharsets.UTF_8));
+                      (id + ":" + name + ":" + kind).getBytes(StandardCharsets.UTF_8));
           ObjectNode config =
               configs
                   .addObject()
                   .put("referenceId", reference)
                   .put("stepId", id)
                   .put("referenceName", name)
-                  .put(
-                      "kind", slot.equals("navigate.destination") ? "destination" : "nonsecretText")
-                  .put("intendedSlot", slot);
+                  .put("kind", kind);
           privateConfigs.set(reference, config.deepCopy().put("value", value));
         }
       }

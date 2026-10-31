@@ -34,22 +34,6 @@ final class GuidedRejectionDiagnostics {
         needIds(proposal));
   }
 
-  /**
-   * Structural facts of a read obligation that no obligation uses: the closed subcase, a presence
-   * flag for its needId and the count of users. Logged, and returned for tests.
-   */
-  static String readShape(JsonNode item, int consumers) {
-    String shape =
-        "subcase="
-            + GuidedRefusalDiagnostics.PlanSubcase.READ_WITHOUT_CONSUMER.name()
-            + " needId="
-            + presence(item, "needId")
-            + " consumers="
-            + consumers;
-    LOG.warn("Guided read obligation refused {}", shape);
-    return shape;
-  }
-
   /** Distinct needIds the obligations carry (a count, never the ids); -1 without obligations. */
   private static int needIds(JsonNode proposal) {
     JsonNode obligations = proposal == null ? null : proposal.path("obligations");
@@ -63,26 +47,6 @@ final class GuidedRejectionDiagnostics {
       }
     }
     return ids.size();
-  }
-
-  /**
-   * Structural facts of an assert obligation whose predicate/source combination is refused: the
-   * predicate is a closed enum value; the rest are presence flags. Logged, and returned for tests.
-   */
-  static String assertShape(JsonNode item) {
-    String shape =
-        "predicate="
-            + item.path("predicate").asText("none")
-            + " referenceIndex="
-            + presence(item, "referenceIndex")
-            + " needId="
-            + presence(item, "needId");
-    LOG.warn("Guided assert obligation refused {}", shape);
-    return shape;
-  }
-
-  private static String presence(JsonNode item, String field) {
-    return !item.has(field) ? "missing" : item.get(field).isNull() ? "null" : "set";
   }
 
   /** The throwing check and its caller, skipping the shared {@code require} helpers. */

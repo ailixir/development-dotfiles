@@ -141,7 +141,7 @@ class GuidedTranslationCoordinatorTest {
     coordinator.continueRuns();
     await().atMost(5, TimeUnit.SECONDS).until(() -> postsTo("a") == 1);
     // The POST is awaited well past 65 s, so the coordinator does not give up on it first.
-    assertThat(posts.getFirst().timeout()).hasValue(Duration.ofSeconds(222));
+    assertThat(posts.getFirst().timeout()).hasValue(Duration.ofSeconds(267));
     for (int poll = 0; poll < 5; poll++) {
       coordinator.continueRuns();
     }
@@ -222,21 +222,17 @@ class GuidedTranslationCoordinatorTest {
 
   @Test
   void theTimeoutCoversTheLongestRequestForDefaultsAndARaisedSendCap() {
-    // Three attempts of (call + 2 s settle) with the 2 s then 4 s backoff between them.
+    // One pool of three requests, each (call + 2 s settle + 15 s prepare), the 2 s then 4 s backoff
+    // between attempts and a fixed 30 s margin.
     Duration defaults =
         new GuidedTranslationProperties(true, 65536, 4096, 60, "w").continuationTimeout();
-    assertThat(defaults).isGreaterThanOrEqualTo(Duration.ofSeconds(3 * (60 + 2) + 2 + 4));
-    assertThat(defaults).isEqualTo(Duration.ofSeconds(222));
+    assertThat(defaults).isGreaterThanOrEqualTo(Duration.ofSeconds(3 * (60 + 2 + 15) + 2 + 4));
+    assertThat(defaults).isEqualTo(Duration.ofSeconds(3 * (60 + 2 + 15) + 6 + 30));
 
-    var raised = new GuidedTranslationProperties(true, 65536, 4096, 120, "w", false, 2000, 110);
+    var raised = new GuidedTranslationProperties(true, 65536, 4096, 120, "w", 2000, 110);
     assertThat(raised.isCallBudgetCoveringSendCap()).isTrue();
     assertThat(raised.continuationTimeout())
-        .isGreaterThanOrEqualTo(Duration.ofSeconds(3 * (120 + 2) + 2 + 4));
-
-    // A next-action proposal followed by its verification is two model requests in one POST.
-    var verifying = new GuidedTranslationProperties(true, 65536, 4096, 60, "w", true);
-    assertThat(verifying.continuationTimeout())
-        .isGreaterThanOrEqualTo(Duration.ofSeconds(2 * (3 * (60 + 2) + 2 + 4)));
+        .isGreaterThanOrEqualTo(Duration.ofSeconds(3 * (120 + 2 + 15) + 2 + 4));
   }
 
   @Test

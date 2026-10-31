@@ -11,7 +11,11 @@ import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-/** One consistent semantic comparison shared by detail, execute and incremental start. */
+/**
+ * One consistent semantic comparison shared by detail, execute and incremental start. The base is
+ * the head revision: the recorded candidate when there is one, else the confirmed revision
+ * (ADR-SC-008 D5, D-3).
+ */
 @Service
 public final class IncrementalChangeService {
   private static final ObjectMapper MAPPER =
@@ -47,12 +51,14 @@ public final class IncrementalChangeService {
           jsonb_build_object('environment',t.environment,'browser',t.browser,
             'viewport',jsonb_build_object('width',t.viewport_width,'height',t.viewport_height),
             'timeoutSeconds',t.timeout_seconds,'waitStrategy',t.wait_strategy)::text AS current_config,
-          t.confirmed_revision_id,r.authoring::text AS base_authoring,
+          COALESCE(t.candidate_revision_id,t.confirmed_revision_id) AS confirmed_revision_id,
+          r.authoring::text AS base_authoring,
           r.authoring_revision_inputs::text AS base_inputs,r.configuration::text AS base_config,
           r."references"::text AS base_references,r.artifact::text AS base_artifact,
           r.step_snapshot_hashes::text AS snapshot_hashes,r.step_reuse_provenance::text AS reuse_map,
           r.revision_digest
-        FROM ui_tests t LEFT JOIN ui_test_revisions r ON r.id=t.confirmed_revision_id
+        FROM ui_tests t LEFT JOIN ui_test_revisions r
+          ON r.id=COALESCE(t.candidate_revision_id,t.confirmed_revision_id)
           AND r.test_id=t.id AND r.csi_id=t.csi_id WHERE t.id=?
         """,
             testId);

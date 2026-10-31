@@ -8,6 +8,8 @@ package com.citi.put.checks.studio.dto;
  * exception is the step a cancel interrupted: the runner reports it {@code SKIPPED} with the start
  * it had and a fixed stop text, and it is projected verbatim like any other (ADR-002 §29.5).
  *
+ * @param receipt the per-step receipt (ADR-SC-008: closedCode, stepHash, fenceCrossed, effects,
+ *     offscreen), or null for legacy history and unstarted steps
  * @param offsetMs start offset on the recording timeline, or null if the step was never attempted
  */
 public record StepResult(
@@ -16,7 +18,19 @@ public record StepResult(
     String status,
     Long offsetMs,
     Long durationMs,
-    String message) {
+    String message,
+    com.fasterxml.jackson.databind.JsonNode receipt) {
+
+  /** A step without a receipt (legacy history, or not yet reported). */
+  public StepResult(
+      Integer stepIndex,
+      String originalText,
+      String status,
+      Long offsetMs,
+      Long durationMs,
+      String message) {
+    this(stepIndex, originalText, status, offsetMs, durationMs, message, null);
+  }
 
   public static final String PENDING = "PENDING";
   public static final String RUNNING = "RUNNING";

@@ -11,9 +11,8 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 /**
- * ADR-SC-007 D2 / I-4: the operation hash has one definition, {@code
- * sha256(canonical-v1({coordinate, origin, target, operation}))}, where target is null or the
- * runner-reported ResolvedTarget of the preparation proof. The same vectors are pinned in the
+ * ADR-SC-008 D2: a step's operation hash has one definition, {@code
+ * sha256(canonical-v1({coordinate, origin, operation}))}. The same vectors are pinned in the
  * contract fixtures that the runner and the contract tools reproduce.
  */
 class GuidedOperationIdentityTest {
@@ -21,38 +20,39 @@ class GuidedOperationIdentityTest {
   private static final Path CONTRACTS =
       Path.of("../docs/specs/studio-observed-authoring/contracts/v3");
 
-  @Test
-  void theHashedDocumentIsTheClosedFourKeyDocument() {
-    ObjectNode coordinate = C.object().put("stepId", "step-1").put("ordinal", 0);
-    ObjectNode operation =
-        C.object().put("kind", "navigate").put("destinationInputId", "input-destination");
-    String canonical =
-        GuidedContracts.canonical(
-            GuidedOperationIdentity.preimage(
-                coordinate, NullNode.instance, NullNode.instance, operation));
-    assertThat(canonical)
-        .isEqualTo(
-            "{\"coordinate\":{\"ordinal\":0,\"stepId\":\"step-1\"},"
-                + "\"operation\":{\"destinationInputId\":\"input-destination\",\"kind\":\"navigate\"},"
-                + "\"origin\":null,\"target\":null}");
+  private static ObjectNode step(String code) {
+    ObjectNode operation = C.object().put("kind", "step").put("code", code);
+    operation.putArray("captures");
+    operation.putArray("uses");
+    operation.put("sourceHash", GuidedContracts.hash(C.object().textNode(code)));
+    return operation;
   }
 
   @Test
-  void aMissingOriginOrTargetIsAJsonNullNotAnAbsentKey() {
+  void theHashedDocumentIsTheClosedThreeKeyDocument() {
     ObjectNode coordinate = C.object().put("stepId", "step-1").put("ordinal", 0);
-    ObjectNode operation = C.object().put("kind", "click");
+    ObjectNode operation = C.object().put("kind", "step").put("code", "x");
+    String canonical =
+        GuidedContracts.canonical(
+            GuidedOperationIdentity.preimage(coordinate, NullNode.instance, operation));
+    assertThat(canonical)
+        .isEqualTo(
+            "{\"coordinate\":{\"ordinal\":0,\"stepId\":\"step-1\"},"
+                + "\"operation\":{\"code\":\"x\",\"kind\":\"step\"},"
+                + "\"origin\":null}");
+  }
+
+  @Test
+  void aMissingOriginIsAJsonNullNotAnAbsentKey() {
+    ObjectNode coordinate = C.object().put("stepId", "step-1").put("ordinal", 0);
+    ObjectNode operation = step("await page.goto('x');");
     ObjectNode proposal = C.object();
     proposal.set("coordinate", coordinate);
     proposal.set("operation", operation);
     proposal.putObject("executionEvidence").put("kind", "initialBlank");
-    assertThat(GuidedOperationIdentity.of(proposal, C.object().path("target")))
-        .isEqualTo(
-            GuidedOperationIdentity.hash(
-                coordinate, NullNode.instance, NullNode.instance, operation));
-    assertThat(
-            GuidedOperationIdentity.preimage(coordinate, null, null, operation)
-                .get("origin")
-                .isNull())
+    assertThat(GuidedOperationIdentity.of(proposal))
+        .isEqualTo(GuidedOperationIdentity.hash(coordinate, NullNode.instance, operation));
+    assertThat(GuidedOperationIdentity.preimage(coordinate, null, operation).get("origin").isNull())
         .isTrue();
   }
 
@@ -66,7 +66,9 @@ class GuidedOperationIdentityTest {
       if (!List.of(
               "initial navigation operation with actual null origin",
               "operation on a runner-reported resolved target",
-              "secret fill with a null target")
+              "secret fill with a null target",
+              "step operation identity with an input and a capture",
+              "step operation identity with a secret handle")
           .contains(name)) {
         continue;
       }
@@ -74,28 +76,21 @@ class GuidedOperationIdentityTest {
       assertThat(
               GuidedContracts.canonical(
                   GuidedOperationIdentity.preimage(
-                      value.path("coordinate"),
-                      value.path("origin"),
-                      value.path("target"),
-                      value.path("operation"))))
+                      value.path("coordinate"), value.path("origin"), value.path("operation"))))
           .as(name + " canonical preimage")
           .isEqualTo(vector.path("canonical").asText());
       assertThat(
               GuidedOperationIdentity.hash(
-                  value.path("coordinate"),
-                  value.path("origin"),
-                  value.path("target"),
-                  value.path("operation")))
+                  value.path("coordinate"), value.path("origin"), value.path("operation")))
           .as(name + " digest")
           .isEqualTo(vector.path("sha256").asText());
       checked++;
     }
-    assertThat(checked).isEqualTo(3);
+    assertThat(checked).isEqualTo(5);
   }
 
   @Test
-  void everyLedgerOperationHashOfTheFixtureBasisIsTheIdentityOfItsProposalAndReportedTarget()
-      throws Exception {
+  void everyLedgerOperationHashOfTheFixtureBasisIsTheIdentityOfItsProposal() throws Exception {
     JsonNode basis =
         C.parse(Files.readString(CONTRACTS.resolve("publication-fixtures.json"))).path("basis");
     int checked = 0;
@@ -107,9 +102,7 @@ class GuidedOperationIdentityTest {
         }
       }
       assertThat(preparation).isNotNull();
-      assertThat(
-              GuidedOperationIdentity.of(
-                  preparation.path("proposal"), preparation.path("proof").path("target")))
+      assertThat(GuidedOperationIdentity.of(preparation.path("proposal")))
           .as(action.path("preparationId").asText())
           .isEqualTo(action.path("ledger").path("operationHash").asText());
       checked++;
@@ -118,38 +111,24 @@ class GuidedOperationIdentityTest {
   }
 
   @Test
-  void theRefDocumentAndGenerationOfTheProposalAreNotPartOfTheIdentity() {
-    ObjectNode operation = C.object().put("kind", "click");
-    ObjectNode target = C.object();
-    target.putArray("locator").addObject().put("by", "testId").put("value", "save");
-    target.put("tier", "testId");
-    target.putObject("identity").put("role", "button").put("name", "Save");
-    ObjectNode first = proposal("e3", "doc-1", 2, operation);
-    ObjectNode later = proposal("e17", "doc-9", 6, operation);
-    assertThat(GuidedOperationIdentity.of(first, target))
-        .isEqualTo(GuidedOperationIdentity.of(later, target));
-    ObjectNode other = target.deepCopy();
-    ((ObjectNode) other.path("locator").get(0)).put("value", "cancel");
-    assertThat(GuidedOperationIdentity.of(first, other))
-        .isNotEqualTo(GuidedOperationIdentity.of(first, target));
-    assertThat(GuidedOperationIdentity.of(first, NullNode.instance))
-        .isNotEqualTo(GuidedOperationIdentity.of(first, target));
+  void theDocumentAndGenerationOfTheProposalAreNotPartOfTheIdentity() {
+    ObjectNode operation = step("await page.getByRole('button').click();");
+    assertThat(GuidedOperationIdentity.of(proposal("doc-1", 2, operation)))
+        .isEqualTo(GuidedOperationIdentity.of(proposal("doc-9", 6, operation)));
+    // The code is part of it: one byte of code is another identity.
+    assertThat(GuidedOperationIdentity.of(proposal("doc-1", 2, step("await a();"))))
+        .isNotEqualTo(GuidedOperationIdentity.of(proposal("doc-1", 2, step("await b();"))));
   }
 
-  private static ObjectNode proposal(
-      String ref, String documentId, int generation, ObjectNode operation) {
+  private static ObjectNode proposal(String documentId, int generation, ObjectNode operation) {
     ObjectNode proposal = C.object();
-    proposal.putObject("coordinate").put("stepId", "step-1").put("ordinal", 1);
+    proposal.putObject("coordinate").put("stepId", "step-1").put("ordinal", 0);
     proposal
         .putObject("executionEvidence")
         .put("kind", "observedDocument")
-        .put("origin", "https://orders.example.test");
-    proposal
-        .putObject("target")
-        .put("kind", "node")
-        .put("ref", ref)
         .put("documentId", documentId)
-        .put("generation", generation);
+        .put("generation", generation)
+        .put("origin", "https://orders.example.test");
     proposal.set("operation", operation);
     return proposal;
   }

@@ -100,11 +100,22 @@ public class UITestExecution {
   @Column(name = "trigger_source", updatable = false)
   private String triggerSource;
 
+  @Column(name = "diagnostic", nullable = false, updatable = false)
+  private boolean diagnostic;
+
   @Column(name = "schedule_id", updatable = false)
   private UUID scheduleId;
 
   @Column(name = "scheduled_at", updatable = false)
   private Instant scheduledAt;
+
+  public boolean isDiagnostic() {
+    return diagnostic;
+  }
+
+  public void setDiagnostic(boolean value) {
+    diagnostic = value;
+  }
 
   public String getTriggerSource() {
     return triggerSource;

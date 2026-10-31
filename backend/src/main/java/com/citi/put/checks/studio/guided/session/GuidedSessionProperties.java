@@ -24,8 +24,7 @@ public record GuidedSessionProperties(
     @DefaultValue("32") int maxRuntimeValues,
     @DefaultValue("4096") int maxRuntimeValueBytes,
     @DefaultValue("65536") int maxRuntimeValuesBytesTotal,
-    @DefaultValue("100") int maxSourceSteps,
-    @DefaultValue("8") int maxStatementsPerStep) {
+    @DefaultValue("100") int maxSourceSteps) {
   @ConstructorBinding
   public GuidedSessionProperties {}
 
@@ -45,8 +44,7 @@ public record GuidedSessionProperties(
         limits.getOrDefault("maxRuntimeValues", 32),
         limits.getOrDefault("maxRuntimeValueBytes", 4096),
         limits.getOrDefault("maxRuntimeValuesBytesTotal", 65536),
-        limits.getOrDefault("maxSourceSteps", 100),
-        limits.getOrDefault("maxStatementsPerStep", 8));
+        limits.getOrDefault("maxSourceSteps", 100));
   }
 
   public ObjectNode snapshot(GuidedContracts contracts) {
@@ -64,7 +62,6 @@ public record GuidedSessionProperties(
     out.put("maxRuntimeValueBytes", maxRuntimeValueBytes);
     out.put("maxRuntimeValuesBytesTotal", maxRuntimeValuesBytesTotal);
     out.put("maxSourceSteps", maxSourceSteps);
-    out.put("maxStatementsPerStep", maxStatementsPerStep);
     contracts.validate("limits", out);
     return out;
   }

@@ -4,11 +4,7 @@ import static com.citi.put.checks.studio.guided.session.GuidedSessionException.r
 
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.guided.session.GuidedOperationIdentity;
-import com.citi.put.checks.studio.guided.session.GuidedPreparationCrossCheck;
-import com.citi.put.checks.studio.guided.translation.GuidedGates;
 import com.citi.put.checks.studio.guided.translation.GuidedProposalValidator;
-import com.citi.put.checks.studio.guided.translation.GuidedRefusalDiagnostics;
-import com.citi.put.checks.studio.guided.translation.GuidedSourceInputResolver;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -43,18 +39,25 @@ public final class GuidedPlanBuilder {
             && !pins.path("providerSchemaHashes").isEmpty(),
         "EVIDENCE_MISMATCH",
         422);
-    for (String kind : List.of("SOURCE_PLAN", "NEXT_ACTION", "VERIFY_STEP")) {
-      require(
-          text(pins.path("providerSchemaHashes"), kind).matches("[a-f0-9]{64}"),
-          "EVIDENCE_MISMATCH",
-          422);
+    JsonNode providers = pins.path("providerSchemaHashes");
+    require(providers.size() == 2, "EVIDENCE_MISMATCH", 422);
+    for (String kind : List.of("SOURCE_PLAN", "STEP_CODE")) {
+      require(text(providers, kind).matches("[a-f0-9]{64}"), "EVIDENCE_MISMATCH", 422);
     }
+    String reference = text(pins, "playwrightReferenceHash"),
+        contract = text(pins, "stepCodeContractHash");
+    require(
+        reference.matches("[a-f0-9]{64}") && contract.matches("[a-f0-9]{64}"),
+        "EVIDENCE_MISMATCH",
+        422);
     return contracts
         .object()
         .put("guidedModelContractHash", strict)
-        .put("guidedProviderSchemaHash", GuidedContracts.hash(pins.path("providerSchemaHashes")))
+        .put("guidedProviderSchemaHash", GuidedContracts.hash(providers))
         .putNull("guidedPromptHash")
         .put("outputContractHash", output)
+        .put("playwrightReferenceHash", reference)
+        .put("stepCodeContractHash", contract)
         .put("publicationResultVersion", 3)
         .putNull("configuredModel")
         .putNull("providerReturnedModelVersion");
@@ -112,16 +115,6 @@ public final class GuidedPlanBuilder {
     require(
         GuidedContracts.hash(plan).equals(text(raw, "translationHash")), "EVIDENCE_MISMATCH", 422);
     ObjectNode result = contracts.object().put("schemaVersion", 1);
-    boolean inherited = false;
-    for (JsonNode prepared : raw.path("preparations")) {
-      inherited |= prepared.path("proof").path("pressInheritance").isObject();
-    }
-    require(!inherited || evidence.sourceAuthority() != null, "EVIDENCE_MISMATCH", 422);
-    result.set(
-        "guardAuthorizations",
-        evidence.sourceAuthority() == null
-            ? contracts.object().putArray("empty")
-            : evidence.sourceAuthority().requireFor(raw));
     for (String key :
         List.of(
             "sessionId",
@@ -194,24 +187,19 @@ public final class GuidedPlanBuilder {
       JsonNode proposal =
           unique(raw.path("preparations"), "preparationId", text(joined, "preparationId"))
               .path("proposal");
-      JsonNode operation = proposal.path("operation");
-      if (operation.has("destinationInputId")) {
-        usedInputs.add(text(operation, "destinationInputId"));
-      }
-      for (String slot : List.of("value", "expected")) {
-        if (operation.path(slot).has("sourceInputId")) {
-          usedInputs.add(text(operation.path(slot), "sourceInputId"));
-        }
-      }
+      addUses(usedInputs, text(proposal.path("coordinate"), "stepId"), proposal.path("operation"));
     }
+    var matchedUses = new HashSet<String>();
     for (JsonNode input : materialization.path("inputs")) {
-      if (!usedInputs.contains(text(input, "inputId"))) {
+      String useKey = useKey(text(input, "sourceStepId"), input);
+      if (!usedInputs.contains(useKey)) {
         continue;
       }
+      matchedUses.add(useKey);
       require(
           !input.has("value") && inputIds.add(text(input, "inputId")), "REFERENCE_MISMATCH", 422);
       ObjectNode safe = inputs.addObject();
-      for (String key : List.of("inputId", "kind", "intendedSlot", "provenance")) {
+      for (String key : List.of("inputId", "kind", "provenance")) {
         safe.set(key, input.path(key).deepCopy());
       }
       safe.set("stepId", input.path("sourceStepId"));
@@ -223,9 +211,7 @@ public final class GuidedPlanBuilder {
                 manifest.path("configurationReferences"),
                 "referenceId",
                 input.path("provenance").path("referenceId").asText());
-        for (String key : List.of("kind", "intendedSlot")) {
-          require(mapped.path(key).equals(input.path(key)), "REFERENCE_MISMATCH", 422);
-        }
+        require(mapped.path("kind").equals(input.path("kind")), "REFERENCE_MISMATCH", 422);
         require(
             mapped.path("stepId").equals(input.path("sourceStepId")), "REFERENCE_MISMATCH", 422);
         ObjectNode item = (ObjectNode) mapped.deepCopy();
@@ -233,6 +219,7 @@ public final class GuidedPlanBuilder {
         configs.add(item);
       }
     }
+    require(matchedUses.containsAll(usedInputs), "REFERENCE_MISMATCH", 422);
     require(inputs.size() <= 200, "BUDGET_EXCEEDED", 413);
     ObjectNode context = contracts.object();
     context.putObject("authoredInputs").set("inputs", materialization.path("inputs"));
@@ -299,7 +286,6 @@ public final class GuidedPlanBuilder {
     ArrayNode preparedFacts = result.putArray("preparations"),
         observedFacts = result.putArray("observations");
     var seenObservations = new HashSet<String>();
-    var questionObservations = new java.util.LinkedHashSet<String>();
     var seenAdmissions = new HashSet<String>();
     var seenObligations = new HashSet<String>();
     Map<String, Integer> ordinal = new HashMap<>();
@@ -349,8 +335,6 @@ public final class GuidedPlanBuilder {
                   <= materialization.path("materializationRevision").asInt(),
           "EVIDENCE_MISMATCH",
           422);
-      ObjectNode actionContext = contracts.object();
-      actionContext.putObject("authoredInputs").set("inputs", actionMaterialization.path("inputs"));
       String digest = GuidedContracts.hash(proposal);
       require(
           proposal.equals(association.path("proposal"))
@@ -399,80 +383,23 @@ public final class GuidedPlanBuilder {
                   .path("authoredInputsHash")
                   .equals(actionMaterialization.path("authoredInputsHash"))
               && ledger.path("coordinate").equals(proposal.path("coordinate"))
-              && ledger.path("documentId").equals(proposal.path("target").path("documentId"))
+              && ledger.path("documentId").equals(execution.path("documentId"))
               && ledger.path("generation").equals(proposal.path("generation")),
           "EVIDENCE_MISMATCH",
           422);
 
-      ObjectNode progress = contracts.object();
-      for (String key : List.of("generation", "evidenceHash", "executionEvidence")) {
-        progress.set(key, proposal.path(key));
-      }
-      ObjectNode effective =
-          effectiveObservedObligation(
-              session, plan, actionMaterialization, prepared, observations, obligation);
-      if (!proposal.path("target").path("kind").asText().equals("page")) {
-        // The same gates that admitted the action re-run on the facts the model was judged on.
-        JsonNode observed = observations.get(text(prepared, "observationHash"));
-        require(observed != null, "EVIDENCE_MISMATCH", 422);
-        progress.set("observation", observed.path("observation"));
-      }
-      var sourceHistory = contracts.object().putArray("history");
-      for (JsonNode historical : raw.path("actions")) {
-        JsonNode associationRow =
-            unique(
-                raw.path("admissionAssociations"),
-                "admissionId",
-                historical.path("admission").path("admissionId").asText());
-        JsonNode preparedRow =
-            unique(
-                raw.path("preparations"),
-                "preparationId",
-                associationRow.path("preparationId").asText());
-        var row = sourceHistory.addObject();
-        row.set("ledger", historical);
-        row.set("proposal", preparedRow.path("proposal"));
-        row.set("proof", preparedRow.path("proof"));
-      }
-      GuidedPreparationCrossCheck.verifySourceHistory(
-          contracts, plan, proposal, proof, sourceHistory, raw.path("producers"));
-      if (proof.has("assertSourceBinding")) {
-        progress.set("assertSourceBinding", proof.path("assertSourceBinding"));
-      }
-      proposals.action(
-          session,
-          progress,
-          plan,
-          effective,
-          proposal,
-          actionContext,
-          authoredLiteral(manifest, plan, obligation),
-          GuidedRefusalDiagnostics.Capture.NONE);
-      if (prepared.has("observedChoice")) {
-        String questionObservation =
-            prepared
-                .path("observedChoice")
-                .path("context")
-                .path("questionCapture")
-                .path("observationHash")
-                .asText();
-        questionObservations.add(questionObservation);
-      }
+      // ADR-SC-008: the step record is opaque data. Its identity, size and storable characters
+      // are checked here; its syntax is the runner's, before any effect.
+      GuidedStepRecord.check(proposal.path("operation"), 422);
       require(
-          GuidedOperationIdentity.of(proposal, proof.path("target"))
-              .equals(text(ledger, "operationHash")),
+          GuidedOperationIdentity.of(proposal).equals(text(ledger, "operationHash")),
           "OPERATION_MISMATCH",
           422);
-      if (proposal.path("operation").path("kind").asText().equals("assert")) {
-        require(ledger.path("assertionPassed").asBoolean(), "EVIDENCE_MISMATCH", 422);
-      }
       if (execution.path("kind").asText().equals("initialBlank")) {
         require(
             actionFacts.isEmpty()
                 && prepared.path("observationHash").isNull()
-                && proposal.path("operation").path("kind").asText().equals("navigate")
-                && proposal.path("target").path("kind").asText().equals("page")
-                && proposal.path("target").path("documentId").equals(execution.path("documentId"))
+                && proposal.path("generation").asInt(-1) == 0
                 && execution.path("generation").asInt(-1) == 0
                 && execution.path("origin").isNull(),
             "EVIDENCE_MISMATCH",
@@ -487,31 +414,17 @@ public final class GuidedPlanBuilder {
             "EVIDENCE_MISMATCH",
             422);
         contracts.validate("v3/observation", observed.path("observation"));
-        JsonNode target = proposal.path("target"), obs = observed.path("observation");
-        for (String key : List.of("documentId", "generation")) {
-          require(target.path(key).equals(obs.path(key)), "EVIDENCE_MISMATCH", 422);
-        }
+        JsonNode obs = observed.path("observation");
+        require(
+            execution.path("documentId").equals(obs.path("documentId"))
+                && proposal.path("generation").equals(obs.path("generation")),
+            "EVIDENCE_MISMATCH",
+            422);
         require(
             obs.path("scopeHash").equals(session.path("scopeHash"))
                 && obs.path("origin").equals(execution.path("origin")),
             "EVIDENCE_MISMATCH",
             422);
-        if (!java.util.Set.of("page", "passwordControl").contains(target.path("kind").asText())) {
-          // The runner-reported target must agree with the fact the gates judged (D-15, replayed).
-          GuidedPreparationCrossCheck.verify(proposal, proof, obs);
-          if (proposal.path("operation").path("kind").asText().equals("read")) {
-            // The recipe is the backend's completion from the page-level read grant: any other
-            // recipe, or an invented rule id, is not a recipe this backend ever admitted.
-            JsonNode recipe = proposal.path("operation").path("recipe");
-            require(
-                recipe.path("kind").asText().equals("visibleText")
-                    && recipe.path("classification").asText().equals("permittedBusinessData")
-                    && obs.path("readRuleId").isTextual()
-                    && recipe.path("policyRuleId").equals(obs.path("readRuleId")),
-                "REFERENCE_MISMATCH",
-                422);
-          }
-        }
         if (seenObservations.add(hash)) {
           observedFacts.add(observed.deepCopy());
         }
@@ -529,13 +442,6 @@ public final class GuidedPlanBuilder {
               .put("admissionId", admissionId)
               .put("proposalHash", digest);
       joinedObligation.set("coordinate", ledger.path("coordinate").deepCopy());
-    }
-    // Preserve the established exercised-preparation order; append only additional question
-    // snapshots in source action order so zero/source-only canonical projections stay identical.
-    for (String hash : questionObservations) {
-      if (seenObservations.add(hash)) {
-        observedFacts.add(observations.get(hash).deepCopy());
-      }
     }
     for (JsonNode request : result.path("incrementalEvidence").path("prefixRequests")) {
       boolean found = false;
@@ -670,236 +576,6 @@ public final class GuidedPlanBuilder {
             && ledger.path("admission").path("admissionId").equals(association.path("admissionId")),
         "EVIDENCE_MISMATCH",
         422);
-  }
-
-  /**
-   * Independent original-fact validation; only explicit human target resolution changes locally.
-   */
-  ObjectNode effectiveObservedObligation(
-      JsonNode session,
-      JsonNode plan,
-      JsonNode materialization,
-      JsonNode prepared,
-      Map<String, JsonNode> observations,
-      JsonNode obligation) {
-    ObjectNode effective = PublicationContracts.copy(obligation);
-    if (!prepared.has("observedChoice")) {
-      return effective;
-    }
-    JsonNode witness = prepared.path("observedChoice");
-    PublicationContracts.bounded(witness, 262144);
-    contracts.validate("v3/replay-validation#/definitions/ObservedChoiceWitness1", witness);
-    JsonNode receipt = witness.path("receipt"),
-        identity = witness.path("context"),
-        capture = identity.path("questionCapture"),
-        question = identity.path("question"),
-        answer = receipt.path("answer"),
-        attempt = witness.path("attempt"),
-        questionPlan = witness.path("questionPlan"),
-        modelQuestion = attempt.path("modelQuestion"),
-        proposal = prepared.path("proposal"),
-        proof = prepared.path("proof");
-    PublicationContracts.bounded(receipt, 16384);
-    PublicationContracts.bounded(identity, 65536);
-    require(
-        GuidedContracts.canonical(witness.path("meanings"))
-                .getBytes(java.nio.charset.StandardCharsets.UTF_8)
-                .length
-            <= 65536,
-        "BUDGET_EXCEEDED",
-        413);
-    require(
-        receipt.path("sessionId").equals(session.path("sessionId"))
-            && identity.path("sessionId").equals(session.path("sessionId"))
-            && identity.path("scopeHash").equals(session.path("scopeHash"))
-            && receipt.path("preparationId").equals(prepared.path("preparationId"))
-            && receipt.path("preparationId").equals(proof.path("preparationId"))
-            && receipt.path("clarificationId").equals(identity.path("clarificationId"))
-            && receipt.path("clarificationId").equals(question.path("clarificationId"))
-            && receipt.path("acceptedChoiceId").equals(witness.path("acceptedChoiceId"))
-            && receipt.path("obligationId").equals(obligation.path("obligationId"))
-            && capture.path("obligationId").equals(obligation.path("obligationId"))
-            && GuidedContracts.hash(identity).equals(receipt.path("contextIdentityHash").asText())
-            && GuidedContracts.hash(witness.path("meanings"))
-                .equals(receipt.path("meaningsHash").asText())
-            && GuidedContracts.hash(capture).equals(receipt.path("questionCaptureHash").asText()),
-        "EVIDENCE_MISMATCH",
-        422);
-    for (String key : List.of("sourceRevision", "configurationRevision")) {
-      require(
-          identity.path(key).equals(session.path("scope").path(key))
-              && answer.path(key).equals(identity.path(key)),
-          "EVIDENCE_MISMATCH",
-          422);
-    }
-    for (String key :
-        List.of(
-            "sessionId",
-            "scopeHash",
-            "clarificationId",
-            "coordinate",
-            "documentId",
-            "generation")) {
-      require(answer.path(key).equals(question.path(key)), "EVIDENCE_MISMATCH", 422);
-    }
-    require(
-        question.path("sessionId").equals(session.path("sessionId"))
-            && question.path("scopeHash").equals(session.path("scopeHash"))
-            && question.path("phase").asText().equals("observed")
-            && question.path("coordinate").equals(proposal.path("coordinate"))
-            && question.path("coordinate").path("stepId").equals(obligation.path("stepId"))
-            && question.path("coordinate").path("ordinal").equals(obligation.path("occurrence"))
-            && answer.path("choiceId").equals(witness.path("acceptedChoiceId"))
-            && !java.time.Instant.parse(answer.path("resolvedAt").asText())
-                .isAfter(java.time.Instant.parse(question.path("expiresAt").asText()))
-            && !java.time.Instant.parse(answer.path("resolvedAt").asText())
-                .isAfter(java.time.Instant.parse(session.path("expiresAt").asText())),
-        "EVIDENCE_MISMATCH",
-        422);
-    for (String key :
-        List.of("attemptId", "requestId", "attempt", "planRevision", "executionEvidence")) {
-      require(attempt.path(key).equals(capture.path(key)), "EVIDENCE_MISMATCH", 422);
-    }
-    require(
-        attempt.path("kind").asText().equals("NEXT_ACTION")
-            && attempt.path("status").asText().equals("APPLIED")
-            && attempt.path("responseKind").equals(attempt.path("kind"))
-            && attempt.path("responseRequestId").equals(attempt.path("requestId"))
-            && attempt.path("responseStatus").asText().equals("CLARIFICATION")
-            && attempt.path("responseSchemaVersion").asInt() == 3
-            && attempt.path("scope").equals(session.path("scope"))
-            && attempt.path("scopeHash").equals(session.path("scopeHash"))
-            && attempt.path("owner").path("workerId").equals(capture.path("workerId"))
-            && attempt.path("owner").path("fence").equals(capture.path("ownerFence"))
-            && capture.path("workerId").equals(materialization.path("workerId"))
-            && capture.path("ownerFence").equals(materialization.path("ownerFence"))
-            && capture.path("workerId").equals(session.path("owner").path("workerId"))
-            && capture.path("ownerFence").equals(session.path("owner").path("fence"))
-            && GuidedContracts.hash(modelQuestion)
-                .equals(capture.path("modelQuestionHash").asText())
-            && modelQuestion.path("reason").equals(question.path("reason")),
-        "EVIDENCE_MISMATCH",
-        422);
-    for (String key : List.of("contextId", "contextRevision", "authoredInputsHash")) {
-      require(
-          capture.path(key).equals(materialization.path(key))
-              && capture.path(key).equals(proof.path(key)),
-          "EVIDENCE_MISMATCH",
-          422);
-    }
-    JsonNode evidence = capture.path("executionEvidence");
-    require(
-        evidence.path("kind").asText().equals("observedDocument")
-            && evidence.path("contextId").equals(capture.path("contextId"))
-            && evidence.path("documentId").equals(question.path("documentId"))
-            && evidence.path("generation").equals(question.path("generation"))
-            && evidence.path("documentId").equals(attempt.path("documentId"))
-            && evidence.path("generation").equals(attempt.path("generation"))
-            && evidence.path("observationHash").equals(capture.path("observationHash"))
-            && GuidedContracts.hash(evidence).equals(capture.path("evidenceHash").asText())
-            && proposal.path("generation").asLong() > question.path("generation").asLong(),
-        "EVIDENCE_MISMATCH",
-        422);
-    require(
-        questionPlan.path("revision").equals(capture.path("planRevision"))
-            && questionPlan.path("planHash").equals(capture.path("planHash"))
-            && GuidedContracts.hash(questionPlan.path("plan"))
-                .equals(capture.path("planHash").asText())
-            && unique(
-                    questionPlan.path("plan").path("obligations"),
-                    "obligationId",
-                    obligation.path("obligationId").asText())
-                .equals(obligation)
-            && unique(
-                    plan.path("obligations"),
-                    "obligationId",
-                    obligation.path("obligationId").asText())
-                .equals(obligation),
-        "EVIDENCE_MISMATCH",
-        422);
-    JsonNode oldEntry = observations.get(capture.path("observationHash").asText());
-    require(oldEntry != null, "EVIDENCE_MISMATCH", 422);
-    JsonNode oldObservation = oldEntry.path("observation");
-    contracts.validate("v3/observation", oldObservation);
-    require(
-        GuidedContracts.hash(oldObservation).equals(capture.path("observationHash").asText())
-            && oldObservation.path("scopeHash").equals(session.path("scopeHash"))
-            && oldObservation.path("documentId").equals(question.path("documentId"))
-            && oldObservation.path("generation").equals(question.path("generation"))
-            && oldObservation.path("origin").equals(evidence.path("origin")),
-        "EVIDENCE_MISMATCH",
-        422);
-    int count = modelQuestion.path("choices").size();
-    require(
-        count >= 2
-            && count <= 10
-            && question.path("choices").size() == count
-            && witness.path("meanings").size() == count,
-        "EVIDENCE_MISMATCH",
-        422);
-    var serverIds = new HashSet<String>();
-    var providerIds = new HashSet<String>();
-    var meaningHashes = new HashSet<String>();
-    JsonNode selected = null;
-    for (int i = 0; i < count; i++) {
-      JsonNode provider = modelQuestion.path("choices").get(i),
-          mapping = witness.path("meanings").get(i),
-          choice = question.path("choices").get(i),
-          meaning = mapping.path("meaning");
-      require(
-          provider.path("meaning").equals(meaning)
-              && meaning.path("obligationId").equals(obligation.path("obligationId"))
-              && mapping.path("choiceId").equals(choice.path("choiceId"))
-              && meaning.path("bindingId").equals(choice.path("bindingId"))
-              && serverIds.add(choice.path("choiceId").asText())
-              && providerIds.add(provider.path("choiceId").asText())
-              && meaningHashes.add(GuidedContracts.hash(meaning)),
-          "EVIDENCE_MISMATCH",
-          422);
-      // The stored semantic selection is the fact of the question-time observation it names.
-      require(
-          mapping.path("selection").isObject()
-              && oldObservation.path("facts").path(meaning.path("ref").asText()).isObject()
-              && GuidedGates.selectionOf(
-                      oldObservation.path("facts"),
-                      oldObservation.path("facts").path(meaning.path("ref").asText()))
-                  .equals(GuidedGates.selectionOf(mapping.path("selection"))),
-          "EVIDENCE_MISMATCH",
-          422);
-      if (choice.path("choiceId").equals(witness.path("acceptedChoiceId"))) {
-        require(
-            answer.path("bindingId").equals(choice.path("bindingId")), "EVIDENCE_MISMATCH", 422);
-        selected = mapping;
-      }
-    }
-    require(selected != null, "EVIDENCE_MISMATCH", 422);
-    // Re-established by a count, never by position: exactly one equal fact in the question-time
-    // observation, and exactly one in the fresh observation, which is the element acted on.
-    GuidedGates.Selection selection = GuidedGates.selectionOf(selected.path("selection"));
-    JsonNode freshEntry = observations.get(prepared.path("observationHash").asText());
-    require(
-        freshEntry != null
-            && GuidedGates.matchingRefs(oldObservation.path("facts"), selection).size() == 1
-            && GuidedGates.matchingRefs(freshEntry.path("observation").path("facts"), selection)
-                .equals(List.of(proposal.path("target").path("ref").asText())),
-        "EVIDENCE_MISMATCH",
-        422);
-    effective.set("selection", selected.path("selection").deepCopy());
-    return effective;
-  }
-
-  /**
-   * The authored literal an assert containsText expects, for the G2 text gate: the quoted source
-   * span of the obligation's reference. Null when the obligation has no source reference or the
-   * reference is a configuration or secret value.
-   */
-  private static String authoredLiteral(JsonNode manifest, JsonNode plan, JsonNode obligation) {
-    if (!obligation.path("referenceIndex").isIntegralNumber()) {
-      return null;
-    }
-    JsonNode reference =
-        plan.path("sourceReferences").get(obligation.path("referenceIndex").asInt());
-    return reference == null ? null : GuidedSourceInputResolver.literalOf(manifest, reference);
   }
 
   private ObjectNode bootstrap(JsonNode original, JsonNode session) {
@@ -1041,12 +717,7 @@ public final class GuidedPlanBuilder {
           "REFERENCE_MISMATCH",
           422);
       JsonNode operation = proposal(basis, producerAction).path("operation");
-      require(
-          operation.path("kind").asText().equals("read")
-              && operation.path("bindingId").asText().equals(id)
-              && operation.path("recipe").equals(producer.path("recipe")),
-          "REFERENCE_MISMATCH",
-          422);
+      require(GuidedEffectiveGraph.captures(operation, id), "REFERENCE_MISMATCH", 422);
       ObjectNode binding =
           bindings
               .addObject()
@@ -1056,7 +727,6 @@ public final class GuidedPlanBuilder {
               .put("transferPolicy", "sameOrigin")
               .put("preserveBytes", true);
       binding.set("producer", producer.path("coordinate"));
-      binding.set("recipe", producer.path("recipe"));
       binding.set("sourceOrigin", producer.path("origin"));
       binding
           .putObject("provenance")
@@ -1071,7 +741,7 @@ public final class GuidedPlanBuilder {
               .sorted(
                   Comparator.comparingInt((JsonNode e) -> position(order, e.path("coordinate")))
                       .thenComparingInt(e -> e.path("coordinate").path("ordinal").asInt())
-                      .thenComparing(e -> text(e, "argumentSlot")))
+                      .thenComparing(e -> text(e, "consumerAdmissionId")))
               .toList();
       for (JsonNode edge : edges) {
         contracts.validate("v3/consumer-edge", edge);
@@ -1088,35 +758,27 @@ public final class GuidedPlanBuilder {
                     .equals(action.path("ledger").path("executionEvidence").path("origin")),
             "REFERENCE_MISMATCH",
             422);
-        String slot = text(edge, "argumentSlot"),
-            field = slot.endsWith("expected") ? "expected" : "value";
         require(
-            consumerOperation.path("kind").asText().equals(slot.substring(0, slot.indexOf('.')))
-                && consumerOperation.path(field).path("kind").asText().equals("binding")
-                && consumerOperation.path(field).path("bindingId").asText().equals(id)
+            GuidedEffectiveGraph.consumes(consumerOperation, id)
                 && compare(order, producer.path("coordinate"), edge.path("coordinate")) < 0,
             "REFERENCE_MISMATCH",
             422);
         boolean declared = false;
         for (JsonNode consumer : allocation.path("consumers")) {
-          if (consumer.path("stepId").equals(edge.path("coordinate").path("stepId"))
-              && consumer.path("argumentSlot").asText().equals(slot)) {
+          if (consumer.path("stepId").equals(edge.path("coordinate").path("stepId"))) {
             declared = true;
           }
         }
         require(declared, "REFERENCE_MISMATCH", 422);
-        satisfied.add(text(edge.path("coordinate"), "stepId") + ":" + slot);
+        satisfied.add(text(edge.path("coordinate"), "stepId"));
         consumers.add(edge.deepCopy());
-        ObjectNode transfer = transfers.addObject().put("bindingId", id).put("slot", slot);
+        ObjectNode transfer = transfers.addObject().put("bindingId", id);
         transfer.set("producer", producer.path("coordinate"));
         transfer.set("consumer", edge.path("coordinate"));
         transfer.set("origin", producer.path("origin"));
       }
       for (JsonNode consumer : allocation.path("consumers")) {
-        require(
-            satisfied.contains(text(consumer, "stepId") + ":" + text(consumer, "argumentSlot")),
-            "REFERENCE_MISMATCH",
-            422);
+        require(satisfied.contains(text(consumer, "stepId")), "REFERENCE_MISMATCH", 422);
       }
       contracts.validate("v3/binding", binding);
     }
@@ -1173,8 +835,6 @@ public final class GuidedPlanBuilder {
       ObjectNode action = actions.addObject();
       action.set("coordinate", ledger.path("coordinate"));
       action.set("origin", proposal.path("executionEvidence").path("origin"));
-      // ADR-SC-007: the learned plan carries what the runner reported, never a derived locator.
-      action.set("target", proofTarget(basis, fact));
       action.set("operation", proposal.path("operation"));
       action.set("admissionId", ledger.path("admission").path("admissionId"));
       action.set("operationHash", ledger.path("operationHash"));
@@ -1185,13 +845,24 @@ public final class GuidedPlanBuilder {
     return plan;
   }
 
-  /** The ResolvedTarget the runner reported when it prepared this action, or JSON null. */
-  public static JsonNode proofTarget(JsonNode basis, JsonNode action) {
-    JsonNode target =
-        unique(basis.path("preparations"), "preparationId", text(action, "preparationId"))
-            .path("proof")
-            .path("target");
-    return target.isObject() ? target : com.fasterxml.jackson.databind.node.NullNode.instance;
+  /**
+   * Adds the keys of the inputs and secrets a step's {@code uses} names. A key is the step, the
+   * kind and the input id (or the secret id), so the same secret used by two steps stays two uses.
+   */
+  static void addUses(java.util.Set<String> used, String stepId, JsonNode operation) {
+    for (JsonNode use : operation.path("uses")) {
+      String kind = use.path("kind").asText();
+      if (kind.equals("input") || kind.equals("secret")) {
+        used.add(kind + "\u0000" + stepId + "\u0000" + text(use, "id"));
+      }
+    }
+  }
+
+  /** The {@link #addUses} key of an authored input: a secretRef is named by its secret id. */
+  static String useKey(String stepId, JsonNode input) {
+    return input.path("kind").asText().equals("secretRef")
+        ? "secret\u0000" + stepId + "\u0000" + text(input.path("provenance"), "referenceName")
+        : "input\u0000" + stepId + "\u0000" + text(input, "inputId");
   }
 
   public static JsonNode proposal(JsonNode basis, JsonNode action) {

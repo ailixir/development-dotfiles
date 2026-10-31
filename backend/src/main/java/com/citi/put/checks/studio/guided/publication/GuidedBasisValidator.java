@@ -138,7 +138,6 @@ final class GuidedBasisValidator {
       }
     }
     require(usedObservations.equals(observations.keySet()), "EVIDENCE_MISMATCH", 422);
-    GuidedGuardSourceAuthority.validatePublic(contracts, basis);
   }
 
   private void validateAction(
@@ -215,12 +214,9 @@ final class GuidedBasisValidator {
         "EVIDENCE_MISMATCH",
         422);
     observedEvidence(basis, proposal.path("executionEvidence"), observations, used);
-    if (preparation.has("observedChoice")) {
-      choiceObservation(basis, fact, preparation, context, observations, used);
-    }
+    GuidedStepRecord.check(proposal.path("operation"), 422);
     require(
-        com.citi.put.checks.studio.guided.session.GuidedOperationIdentity.of(
-                proposal, proof.path("target"))
+        com.citi.put.checks.studio.guided.session.GuidedOperationIdentity.of(proposal)
             .equals(ledger.path("operationHash").asText()),
         "EVIDENCE_MISMATCH",
         422);
@@ -235,36 +231,24 @@ final class GuidedBasisValidator {
             .equals(ledger.path("admission").path("policyDecisionHash").asText()),
         "EVIDENCE_MISMATCH",
         422);
-    var sourceHistory = contracts.object().putArray("history");
-    for (JsonNode historical : basis.path("actions")) {
-      JsonNode preparedRow =
-          GuidedPlanBuilder.unique(
-              basis.path("preparations"),
-              "preparationId",
-              historical.path("preparationId").asText());
-      var row = sourceHistory.addObject();
-      row.set("ledger", historical.path("ledger"));
-      row.set("proposal", preparedRow.path("proposal"));
-      row.set("proof", preparedRow.path("proof"));
-    }
-    com.citi.put.checks.studio.guided.session.GuidedPreparationCrossCheck.verifySourceHistory(
-        contracts,
-        basis.path("translationPlan"),
-        proposal,
-        proof,
-        sourceHistory,
-        basis.path("producers"));
     JsonNode op = proposal.path("operation");
-    var ids = new HashSet<String>();
-    context.path("inputs").forEach(input -> ids.add(input.path("inputId").asText()));
-    if (op.has("destinationInputId")) {
-      require(ids.contains(op.path("destinationInputId").asText()), "REFERENCE_MISMATCH", 422);
-    }
-    for (String slot : List.of("value", "expected")) {
-      if (op.path(slot).has("sourceInputId")) {
-        require(
-            ids.contains(op.path(slot).path("sourceInputId").asText()), "REFERENCE_MISMATCH", 422);
+    String stepId = proposal.path("coordinate").path("stepId").asText();
+    for (JsonNode use : op.path("uses")) {
+      String kind = use.path("kind").asText(), id = use.path("id").asText();
+      if (kind.equals("binding")) {
+        continue;
       }
+      boolean found = false;
+      for (JsonNode input : context.path("inputs")) {
+        found |=
+            input.path("sourceStepId").asText().equals(stepId)
+                && (kind.equals("input")
+                    ? !input.path("kind").asText().equals("secretRef")
+                        && input.path("inputId").asText().equals(id)
+                    : input.path("kind").asText().equals("secretRef")
+                        && input.path("provenance").path("referenceName").asText().equals(id));
+      }
+      require(found, "REFERENCE_MISMATCH", 422);
     }
   }
 
@@ -288,45 +272,6 @@ final class GuidedBasisValidator {
       require(execution.path(field).equals(snapshot.path(field)), "EVIDENCE_MISMATCH", 422);
     }
     used.add(execution.path("observationHash").asText());
-  }
-
-  /** A historical question capture is an anchor only through its actual exercised preparation. */
-  private void choiceObservation(
-      JsonNode basis,
-      JsonNode fact,
-      JsonNode preparation,
-      JsonNode context,
-      Map<String, JsonNode> observations,
-      Set<String> used) {
-    JsonNode witness = preparation.path("observedChoice"),
-        identity = witness.path("context"),
-        capture = identity.path("questionCapture"),
-        question = identity.path("question"),
-        receipt = witness.path("receipt"),
-        evidence = capture.path("executionEvidence");
-    require(
-        identity.path("sessionId").equals(basis.path("sessionId"))
-            && identity.path("scopeHash").asText().equals(GuidedContracts.hash(basis.path("scope")))
-            && receipt.path("preparationId").equals(preparation.path("preparationId"))
-            && receipt.path("obligationId").equals(fact.path("obligationId"))
-            && capture.path("obligationId").equals(fact.path("obligationId"))
-            && receipt.path("contextIdentityHash").asText().equals(GuidedContracts.hash(identity))
-            && receipt.path("questionCaptureHash").asText().equals(GuidedContracts.hash(capture))
-            && capture.path("evidenceHash").asText().equals(GuidedContracts.hash(evidence))
-            && capture.path("observationHash").equals(evidence.path("observationHash"))
-            && evidence.path("kind").asText().equals("observedDocument")
-            && question.path("documentId").equals(evidence.path("documentId"))
-            && question.path("generation").equals(evidence.path("generation"))
-            && question.path("coordinate").equals(preparation.path("proposal").path("coordinate"))
-            && preparation.path("executionEvidence").path("generation").asLong()
-                > evidence.path("generation").asLong(),
-        "EVIDENCE_MISMATCH",
-        422);
-    for (String field :
-        List.of("contextId", "contextRevision", "authoredInputsHash", "workerId", "ownerFence")) {
-      require(capture.path(field).equals(context.path(field)), "EVIDENCE_MISMATCH", 422);
-    }
-    observedEvidence(basis, evidence, observations, used);
   }
 
   private void validatePrefix(
@@ -447,12 +392,7 @@ final class GuidedBasisValidator {
             "EVIDENCE_MISMATCH",
             422);
       }
-      require(
-          receipt.path("phase").asText().equals("PRE_ADMISSION")
-              ? incremental.path("excludedAttempts").isEmpty()
-              : incremental.path("excludedAttempts").size() == 1,
-          "EVIDENCE_MISMATCH",
-          422);
+      require(incremental.path("excludedAttempts").size() == 1, "EVIDENCE_MISMATCH", 422);
     }
   }
 }

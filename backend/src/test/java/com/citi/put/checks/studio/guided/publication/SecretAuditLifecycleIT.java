@@ -284,6 +284,12 @@ class SecretAuditLifecycleIT {
       boolean rollback) throws Exception {
     try (var fixture = GuidedSecretLoginMigrationTest.publishedRetry()) {
       var jdbc = fixture.jdbc();
+      // GuidedLedgerSeed now writes the V33 closed-key proof, so this drop is not needed for the
+      // seed;
+      // it keeps the audit fixture independent of that check (its shape is covered by
+      // GuidedStepKindMigrationIT).
+      jdbc.execute(
+          "ALTER TABLE studio_guided_preparations DROP CONSTRAINT ck_wi6_preparation_metadata");
       var tx = fixture.transaction();
       var contracts = new com.citi.put.checks.studio.guided.session.GuidedContracts();
       String sessionId = "multi-admission-session",
@@ -334,8 +340,7 @@ class SecretAuditLifecycleIT {
           .put("referenceId", reference)
           .put("referenceName", "PASS")
           .put("kind", "secretRef")
-          .put("stepId", step)
-          .put("intendedSlot", "fill.value");
+          .put("stepId", step);
       jdbc.update(
           ("INSERT INTO studio_guided_source_manifests(session_id,scope_hash,manifest,manifest_ha"
               + "sh) VALUES (?,?,?::jsonb,?)"),
@@ -365,8 +370,7 @@ class SecretAuditLifecycleIT {
               .put("inputId", "input-PASS")
               .put("sourceStepId", step)
               .put("kind", "secretRef")
-              .put("secretId", "PASS")
-              .put("intendedSlot", "fill.value");
+              .put("secretId", "PASS");
       input
           .putObject("provenance")
           .put("referenceKind", "configuration")
@@ -374,8 +378,7 @@ class SecretAuditLifecycleIT {
           .put("referenceId", reference)
           .put("referenceName", "PASS")
           .put("kind", "secretRef")
-          .put("stepId", step)
-          .put("intendedSlot", "fill.value");
+          .put("stepId", step);
       // V21: closed identity and canonical hash; live because the ledger rows below are admitted
       // only against the live head.
       var closedInputs =
@@ -408,12 +411,16 @@ class SecretAuditLifecycleIT {
         action.putObject("coordinate").put("stepId", step).put("ordinal", ordinal);
         action.putObject("admission").put("admissionId", admission);
         var proposal = contracts.object();
-        proposal
-            .putObject("operation")
-            .put("kind", "fill")
-            .putObject("value")
-            .put("kind", "secretRef")
-            .put("sourceInputId", "input-PASS");
+        var operation =
+            proposal
+                .putObject("operation")
+                .put("kind", "step")
+                .put("code", "await page.getByLabel('Password').fill(secrets['PASS']);");
+        operation.putArray("captures");
+        operation.putArray("uses").addObject().put("kind", "secret").put("id", "PASS");
+        operation.put(
+            "sourceHash",
+            com.citi.put.checks.studio.guided.session.GuidedContracts.hash(operation.path("code")));
         seed.action(admission, step, ordinal, action, proposal);
         actions.add(action);
       }
@@ -445,7 +452,10 @@ class SecretAuditLifecycleIT {
                   "PASS",
                   resolved.secretVersions().get("PASS"),
                   SecretUseAuditRecorder.ResolutionOutcome.RESOLVED);
-              lifecycle.guidedOutcome(session, actions.getFirst());
+              lifecycle.guidedOutcome(
+                  session,
+                  actions.getFirst(),
+                  new com.citi.put.checks.studio.guided.session.GuidedContracts().object());
             });
       }
       var terminal = session.deepCopy().put("state", "FAILED");

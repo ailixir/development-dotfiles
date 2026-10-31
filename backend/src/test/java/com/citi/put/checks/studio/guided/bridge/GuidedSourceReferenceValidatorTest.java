@@ -33,8 +33,7 @@ class GuidedSourceReferenceValidatorTest {
         .put("stepId", "step")
         .put("startUtf16", start)
         .put("endUtf16", end)
-        .put("kind", "nonsecretText")
-        .put("intendedSlot", "fill.value");
+        .put("kind", "nonsecretText");
   }
 
   GuidedSourceReferenceValidator.Sources sources(String text, int end) {
@@ -74,8 +73,7 @@ class GuidedSourceReferenceValidatorTest {
         .hasMessage("REVISION_CONFLICT");
     assertThatThrownBy(
             () ->
-                validator.resolve(
-                    session(), source, candidate(0, 1).put("intendedSlot", "navigate.destination")))
+                validator.resolve(session(), source, candidate(0, 1).put("stepId", "another-step")))
         .hasMessage("INVALID_CONTRACT");
   }
 
@@ -90,10 +88,7 @@ class GuidedSourceReferenceValidatorTest {
             "https://example.test:0/",
             "http://127.0.0.1:4102/",
             "data:text/plain,hi")) {
-      var candidate =
-          candidate(0, destination.length())
-              .put("kind", "destination")
-              .put("intendedSlot", "navigate.destination");
+      var candidate = candidate(0, destination.length()).put("kind", "destination");
       assertThatThrownBy(
               () ->
                   validator.resolve(
@@ -112,9 +107,7 @@ class GuidedSourceReferenceValidatorTest {
                   .resolve(
                       session(),
                       sources(destination, destination.length()),
-                      candidate(0, destination.length())
-                          .put("kind", "destination")
-                          .put("intendedSlot", "navigate.destination"))
+                      candidate(0, destination.length()).put("kind", "destination"))
                   .path("value")
                   .asText())
           .isEqualTo(destination);
@@ -130,9 +123,7 @@ class GuidedSourceReferenceValidatorTest {
                 closed.resolve(
                     session(),
                     sources(destination, destination.length()),
-                    candidate(0, destination.length())
-                        .put("kind", "destination")
-                        .put("intendedSlot", "navigate.destination")))
+                    candidate(0, destination.length()).put("kind", "destination")))
         .hasMessage("ORIGIN_NOT_ALLOWED");
   }
 
@@ -145,11 +136,10 @@ class GuidedSourceReferenceValidatorTest {
             .put("configurationRevision", "c1")
             .put("referenceId", "ref")
             .put("stepId", "step")
-            .put("kind", "nonsecretText")
-            .put("intendedSlot", "fill.value");
+            .put("kind", "nonsecretText");
     var value =
         new GuidedSourceReferenceValidator.ConfigurationValue(
-            "", "step", "nonsecretText", "fill.value", "a".repeat(64), true);
+            "", "step", "nonsecretText", "a".repeat(64), true);
     var source =
         new GuidedSourceReferenceValidator.Sources("r1", "c1", Map.of(), Map.of("ref", value));
     assertThat(validator.resolve(session(), source, reference).path("value").asText()).isEmpty();

@@ -41,6 +41,23 @@ public interface ExecutionReadiness {
     }
   }
 
-  /** Decides whether this draft may be executed now. Never throws for an unready draft. */
+  /**
+   * Decides whether this draft may be executed now: the full check of the {@linkplain
+   * #runnableRevisionId runnable revision}. Never throws for an unready draft.
+   */
   Verdict evaluate(UITest test);
+
+  /**
+   * The scheduled-run check of the confirmed revision while a recorded candidate exists: lifecycle,
+   * publication evidence and the observed verifier, without comparing the revision with a draft
+   * that has already moved on to the candidate (ADR-SC-008 D5: the previous confirmed revision
+   * keeps its schedules until promotion).
+   */
+  Verdict evaluateConfirmedIntrinsic(UITest test);
+
+  /**
+   * The one revision a manual Run, a proof and the readiness label agree on: the recorded candidate
+   * when it matches the draft, else the confirmed revision, else {@code null}.
+   */
+  java.util.UUID runnableRevisionId(UITest test);
 }

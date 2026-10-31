@@ -6,9 +6,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.citi.put.checks.studio.dto.AuthoringStep;
 import com.citi.put.checks.studio.dto.AuthoringV2Request;
 import com.citi.put.checks.studio.dto.LiteralInput;
-import com.citi.put.checks.studio.dto.ResolvedInput;
-import com.citi.put.checks.studio.dto.ResolvedLiteralInput;
-import com.citi.put.checks.studio.dto.ResolvedReferenceInput;
 import com.citi.put.checks.studio.dto.SecretReference;
 import com.citi.put.checks.studio.dto.StudioAuthoringValidation;
 import com.citi.put.checks.studio.dto.StudioAuthoringValidation.Category;
@@ -164,30 +161,6 @@ class StudioContextContractTest {
                   assertThat(((InvalidAuthoringException) exception).categories())
                       .containsExactlyInAnyOrderElementsOf(expected));
     }
-  }
-
-  @Test
-  void resolvedReviewInputsDistinguishExactLiteralsSafeReferencesAndNoInput() throws IOException {
-    ResolvedInput literal =
-        MAPPER.readValue("{\"kind\":\"literal\",\"value\":\"  東京\\n  \"}", ResolvedInput.class);
-    ResolvedInput variable =
-        MAPPER.readValue(
-            "{\"kind\":\"variableRef\",\"referenceId\":\"CUSTOMER_QUERY\"}", ResolvedInput.class);
-    ResolvedInput secret =
-        MAPPER.readValue(
-            "{\"kind\":\"secretRef\",\"referenceId\":\"vault://studio/password\"}",
-            ResolvedInput.class);
-
-    assertThat(literal)
-        .isEqualTo(new ResolvedLiteralInput(ResolvedLiteralInput.Kind.LITERAL, "  東京\n  "));
-    assertThat(variable)
-        .isEqualTo(
-            new ResolvedReferenceInput(ResolvedReferenceInput.Kind.VARIABLE_REF, "CUSTOMER_QUERY"));
-    assertThat(secret)
-        .isEqualTo(
-            new ResolvedReferenceInput(
-                ResolvedReferenceInput.Kind.SECRET_REF, "vault://studio/password"));
-    assertThat(MAPPER.readTree("{\"input\":null}").path("input").isNull()).isTrue();
   }
 
   @Test

@@ -101,8 +101,7 @@ final class GuidedAuthoredUriCandidates {
                 .put("stepId", entry.getKey())
                 .put("startUtf16", span.start())
                 .put("endUtf16", span.end())
-                .put("kind", "destination")
-                .put("intendedSlot", "navigate.destination");
+                .put("kind", "destination");
         if (!seen.add(GuidedContracts.hash(candidate))) {
           continue;
         }
@@ -123,8 +122,7 @@ final class GuidedAuthoredUriCandidates {
       }
     }
     // Exact offsets of each quoted literal, so the model copies them instead of counting UTF-16
-    // code units (a miscount is refused by GuidedSourceInputResolver). The slot is the model's
-    // call.
+    // code units (a miscount is refused by GuidedSourceInputResolver).
     for (var entry : sources.entrySet()) {
       if (stepIds != null && !stepIds.contains(entry.getKey())) {
         continue;
@@ -137,40 +135,34 @@ final class GuidedAuthoredUriCandidates {
         if (!source.approves(span[0], span[1])) {
           continue;
         }
-        for (String slot : LITERAL_SLOTS) {
-          var candidate =
-              contracts
-                  .object()
-                  .put("referenceKind", "sourceSpan")
-                  .put("sourceRevision", sourceOnly.sourceRevision())
-                  .put("stepId", entry.getKey())
-                  .put("startUtf16", span[0])
-                  .put("endUtf16", span[1])
-                  .put("kind", "nonsecretText")
-                  .put("intendedSlot", slot);
-          if (checked == REFERENCE_CAP) {
-            return result;
+        var candidate =
+            contracts
+                .object()
+                .put("referenceKind", "sourceSpan")
+                .put("sourceRevision", sourceOnly.sourceRevision())
+                .put("stepId", entry.getKey())
+                .put("startUtf16", span[0])
+                .put("endUtf16", span[1])
+                .put("kind", "nonsecretText");
+        if (checked == REFERENCE_CAP) {
+          return result;
+        }
+        checked++;
+        try {
+          resolver.resolveSourceOnly(session, sourceOnly, candidate);
+          if (seen.add(GuidedContracts.hash(candidate))) {
+            result.add(candidate);
           }
-          checked++;
-          try {
-            resolver.resolveSourceOnly(session, sourceOnly, candidate);
-            if (seen.add(GuidedContracts.hash(candidate))) {
-              result.add(candidate);
-            }
-          } catch (GuidedSessionException refused) {
-            if (!Set.of("INVALID_CONTRACT", "FORBIDDEN_SCOPE", "REVISION_CONFLICT")
-                .contains(refused.getMessage())) {
-              throw refused;
-            }
+        } catch (GuidedSessionException refused) {
+          if (!Set.of("INVALID_CONTRACT", "FORBIDDEN_SCOPE", "REVISION_CONFLICT")
+              .contains(refused.getMessage())) {
+            throw refused;
           }
         }
       }
     }
     return result;
   }
-
-  private static final List<String> LITERAL_SLOTS =
-      List.of("fill.value", "selectOption.value", "assert.expected");
 
   record Span(int start, int end) {}
 

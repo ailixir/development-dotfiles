@@ -70,8 +70,7 @@ public final class GuidedMaterializationService {
                 entry ->
                     entry.getValue().stepId().equals(stepId)
                         && name.equals(entry.getValue().referenceName())
-                        && entry.getValue().kind().equals("nonsecretText")
-                        && entry.getValue().intendedSlot().equals("fill.value"))
+                        && entry.getValue().kind().equals("nonsecretText"))
             .map(java.util.Map.Entry::getKey)
             .sorted()
             .findFirst()
@@ -84,8 +83,7 @@ public final class GuidedMaterializationService {
                             .put("configurationRevision", sources.configurationRevision())
                             .put("stepId", stepId)
                             .put("referenceId", referenceId)
-                            .put("kind", "nonsecretText")
-                            .put("intendedSlot", "fill.value")));
+                            .put("kind", "nonsecretText")));
       }
     }
     return found;

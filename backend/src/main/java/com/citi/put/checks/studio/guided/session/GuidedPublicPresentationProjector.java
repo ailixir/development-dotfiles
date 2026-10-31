@@ -26,26 +26,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
  * active step is {@code null} while finalizing, in every terminal state, and whenever the
  * coordinate or its authored sentence is unavailable.
  *
- * <p><b>Explanation</b> claims only what retained facts prove. Labels come from a closed vocabulary
- * selected by the recorded operation kind; {@code referenceIds} are opaque identifiers. No locator,
- * URL, page text, model output, document, context body or resolved value is read into the output,
- * so none can leak into it.
+ * <p><b>Explanation</b> claims only what retained facts prove: per action its coordinates and
+ * outcome, and {@code referenceIds}, the opaque identifiers a step captures or uses. No code,
+ * locator, URL, page text, model output, document, context body or resolved value is read into the
+ * output, so none can leak into it.
  */
 public final class GuidedPublicPresentationProjector {
-
-  /** The controlled vocabulary: recorded operation kind to the one label that may describe it. */
-  private static final Map<String, String> LABELS =
-      Map.of(
-          "navigate", "Open page",
-          "click", "Click control",
-          "fill", "Fill field",
-          "press", "Press key",
-          "check", "Check control",
-          "uncheck", "Uncheck control",
-          "hover", "Move over control",
-          "selectOption", "Select option",
-          "read", "Read reference",
-          "assert", "Check expected result");
 
   private static final Set<String> TERMINAL =
       Set.of(
@@ -221,8 +207,6 @@ public final class GuidedPublicPresentationProjector {
             .put("admissionId", fact.admissionId)
             .put("ordinal", fact.ordinal)
             .put("attemptOrdinal", fact.attemptOrdinal)
-            .put("operationKind", fact.kind)
-            .put("safeLabel", LABELS.get(fact.kind))
             .put("outcome", fact.state);
         ArrayNode references = action.putArray("referenceIds");
         fact.referenceIds.forEach(references::add);
@@ -255,7 +239,6 @@ public final class GuidedPublicPresentationProjector {
     int attemptOrdinal;
     String admissionId;
     String state;
-    String kind;
     ObjectNode document;
     Set<String> referenceIds = new TreeSet<>();
   }
@@ -272,23 +255,18 @@ public final class GuidedPublicPresentationProjector {
           }
           ObjectNode document = (ObjectNode) contracts.parse(rs.getString(4));
           JsonNode operation = contracts.parse(rs.getString(5)).path("operation");
-          String kind = operation.path("kind").asText();
-          GuidedSessionException.require(LABELS.containsKey(kind), "INVALID_CONTRACT", 422);
           Fact fact = new Fact();
           fact.stepIndex = at;
           fact.ordinal = rs.getInt(2);
           fact.attemptOrdinal = rs.getInt(3);
           fact.admissionId = document.path("admission").path("admissionId").asText();
           fact.state = document.path("state").asText();
-          fact.kind = kind;
           fact.document = document;
-          for (String field : List.of("destinationInputId", "bindingId")) {
-            addId(fact.referenceIds, operation.path(field));
+          for (JsonNode captured : operation.path("captures")) {
+            addId(fact.referenceIds, captured);
           }
-          for (String slot : List.of("value", "expected")) {
-            JsonNode value = operation.path(slot);
-            addId(fact.referenceIds, value.path("sourceInputId"));
-            addId(fact.referenceIds, value.path("bindingId"));
+          for (JsonNode use : operation.path("uses")) {
+            addId(fact.referenceIds, use.path("id"));
           }
           facts.add(fact);
         },
@@ -340,33 +318,21 @@ public final class GuidedPublicPresentationProjector {
 
   /** Actual produced bindings joined to the executed consumers that used them; no invented edge. */
   private void flows(String id, Map<String, Integer> position, ArrayNode into) {
-    record Flow(
-        int producer,
-        int consumer,
-        String binding,
-        String slot,
-        String producerId,
-        String consumerId) {}
+    record Flow(int producer, int consumer, String binding, String producerId, String consumerId) {}
     Set<Flow> seen = new LinkedHashSet<>();
     jdbc.query(
-        "SELECT e.binding_id,e.argument_slot,p.step_id,c.step_id FROM"
+        "SELECT e.binding_id,p.step_id,c.step_id FROM"
             + " studio_guided_consumer_edges e JOIN studio_guided_actions p ON"
             + " p.session_id=e.session_id AND p.admission_id=e.producer_admission_id JOIN"
             + " studio_guided_actions c ON c.session_id=e.session_id AND"
             + " c.admission_id=e.consumer_admission_id WHERE e.session_id=? AND"
             + " p.document->>'state'='SUCCEEDED' AND c.document->>'state'='SUCCEEDED'",
         rs -> {
-          Integer producer = position.get(rs.getString(3)),
-              consumer = position.get(rs.getString(4));
+          Integer producer = position.get(rs.getString(2)),
+              consumer = position.get(rs.getString(3));
           if (producer != null && consumer != null) {
             seen.add(
-                new Flow(
-                    producer,
-                    consumer,
-                    rs.getString(1),
-                    rs.getString(2),
-                    rs.getString(3),
-                    rs.getString(4)));
+                new Flow(producer, consumer, rs.getString(1), rs.getString(2), rs.getString(3)));
           }
         },
         id);
@@ -374,14 +340,12 @@ public final class GuidedPublicPresentationProjector {
         .sorted(
             java.util.Comparator.comparingInt(Flow::producer)
                 .thenComparingInt(Flow::consumer)
-                .thenComparing(Flow::binding)
-                .thenComparing(Flow::slot))
+                .thenComparing(Flow::binding))
         .forEach(
             flow ->
                 into.addObject()
                     .put("bindingId", flow.binding())
                     .put("producerStepId", flow.producerId())
-                    .put("consumerStepId", flow.consumerId())
-                    .put("argumentSlot", flow.slot()));
+                    .put("consumerStepId", flow.consumerId()));
   }
 }

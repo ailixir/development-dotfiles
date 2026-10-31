@@ -36,7 +36,7 @@ class GuidedClarificationSupersessionIT {
   }
 
   private static ObservationFixtures.Builder page() {
-    return ObservationFixtures.observation().readRuleId("observed-read-v1-" + "a".repeat(64));
+    return ObservationFixtures.observation();
   }
 
   private static JsonNode firstObligation(GuidedModelRequest request) {
@@ -45,16 +45,17 @@ class GuidedClarificationSupersessionIT {
 
   @Test
   void latestAcceptedAnswerSupersedesEarlierOnes() throws Exception {
-    // The action guard grounds the name of the element finally clicked in the authored step.
     var h = new GroundingItHarness(POSTGRES, "Click Save order.");
-    String id = h.session(List.of(Spec.click(0, "Save")));
+    String id = h.session(List.of(Spec.of(0, "Save")));
 
     // Question 1: two elements both fit the intent "Save"; the author is asked.
     h.observe(
         id,
         1,
         page().element("e1", "button", "Save draft").element("e2", "button", "Save order").build());
-    h.reply(GuidedModelRequest.Kind.NEXT_ACTION, request -> h.clarification(request, "e1", "e2"));
+    h.reply(
+        GuidedModelRequest.Kind.STEP_CODE,
+        request -> h.clarification(request, "AMBIGUOUS_TARGET", "e1", "e2"));
     h.advance(id);
     assertThat(h.state(id)).isEqualTo("AWAITING_CLARIFICATION");
     String first = h.progress(id).path("clarification").path("clarificationId").asText();
@@ -70,12 +71,12 @@ class GuidedClarificationSupersessionIT {
                 .element("e2", "button", "Save order")
                 .build());
     h.reply(
-        GuidedModelRequest.Kind.NEXT_ACTION,
+        GuidedModelRequest.Kind.STEP_CODE,
         request -> {
           JsonNode obligation = firstObligation(request);
           assertThat(obligation.path("reconfirm").asBoolean()).isTrue();
           assertThat(obligation.has("selectedChoice")).isFalse();
-          return h.clarification(request, "e1", "e2");
+          return h.clarification(request, "AMBIGUOUS_TARGET", "e1", "e2");
         });
     h.advance(id);
     assertThat(h.state(id)).isEqualTo("AWAITING_CLARIFICATION");
@@ -108,7 +109,7 @@ class GuidedClarificationSupersessionIT {
     // The next page holds exactly one element equal to the latest choice: the model is told its
     // role, name and fresh ref and nothing else, and the audit records that the choice admitted it.
     h.reply(
-        GuidedModelRequest.Kind.NEXT_ACTION,
+        GuidedModelRequest.Kind.STEP_CODE,
         request -> {
           JsonNode obligation = firstObligation(request);
           assertThat(obligation.has("reconfirm")).isFalse();
@@ -120,11 +121,11 @@ class GuidedClarificationSupersessionIT {
                       .put("name", "Save order")
                       .put("ref", "e2"));
           assertThat(request.projection().document().toString()).doesNotContain("evidence");
-          return h.click(request, "e2");
+          return h.code(request, "await page.getByRole('button', { name: 'Save order' }).click();");
         });
     assertThatThrownBy(() -> h.advance(id)).isInstanceOf(GroundingItHarness.ReachedRunner.class);
-    assertThat(h.intentRows(id)).hasSize(1);
-    assertThat(h.intentRows(id).getFirst().getFirst()).isEqualTo("SELECTED_CHOICE");
+    // The answer came back as the selectedChoice of the step's occurrence-0 obligation only.
+    assertThat(h.reservations(id)).isEqualTo(1);
     assertThat(h.rejectionGates(id)).isEqualTo(Map.of());
   }
 }

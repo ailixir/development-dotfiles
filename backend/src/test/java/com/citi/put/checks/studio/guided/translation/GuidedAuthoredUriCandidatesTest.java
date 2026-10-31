@@ -93,7 +93,7 @@ class GuidedAuthoredUriCandidatesTest {
     for (var candidate : all) {
       if (candidate.path("kind").asText().equals("nonsecretText")) {
         String value = resolve(fixture, candidate);
-        literals.add(candidate.path("intendedSlot").asText() + "=" + value);
+        literals.add(value);
         if (value.equals("Your username is invalid!")) {
           // The E2E-016 miscount was 33-59 and 35-60; the suggestion is the exact [36,61).
           assertThat(candidate.path("startUtf16").asInt()).isEqualTo(36);
@@ -102,15 +102,10 @@ class GuidedAuthoredUriCandidatesTest {
       }
     }
     assertThat(literals)
-        .contains(
-            "fill.value=incorrectUser",
-            "assert.expected=incorrectUser",
-            "selectOption.value=Username",
-            "fill.value=Submit",
-            "assert.expected=Your username is invalid!")
+        .contains("incorrectUser", "Username", "Submit", "Your username is invalid!")
         .noneMatch(literal -> literal.contains("https://"));
-    // 1 destination + 3 slots x 4 quoted non-URL literals.
-    assertThat(all).hasSize(13);
+    // 1 destination + 4 quoted non-URL literals.
+    assertThat(all).hasSize(5);
     assertThat(all.toString().length()).isLessThan(4000);
   }
 
@@ -124,7 +119,7 @@ class GuidedAuthoredUriCandidatesTest {
     ObjectNode shorter = ((ObjectNode) candidate).deepCopy().put("endUtf16", 34);
     assertThat(resolve(fixture, shorter)).isEqualTo("http://localhost:18182/fixtur");
     assertThat(shorter.path("endUtf16").asInt()).isEqualTo(34);
-    assertThat(candidate.size()).isEqualTo(7);
+    assertThat(candidate.size()).isEqualTo(6);
     assertThat(candidate.toString()).doesNotContain("inputId", "value", "obligationId");
   }
 
@@ -153,7 +148,8 @@ class GuidedAuthoredUriCandidatesTest {
   void multipleWhitespaceSeparatedUrisKeepEveryDistinctOccurrenceInStableOrder() {
     Fixture fixture =
         fixture(
-            "https://example.test/first\u00a0https://example.test/second https://example.test/first");
+            "https://example.test/first\u00a0https://example.test/second"
+                + " https://example.test/first");
     var candidates = candidates(fixture);
     assertThat(candidates).hasSize(3);
     assertThat(resolve(fixture, candidates.get(0))).isEqualTo("https://example.test/first");
@@ -391,12 +387,7 @@ class GuidedAuthoredUriCandidatesTest {
     assertThat(context.path("sourceReferences")).isEmpty();
     ArrayNode selected = C.object().arrayNode();
     ObjectNode choice = selected.addObject();
-    choice
-        .putObject("need")
-        .put("stepId", stepId)
-        .put("occurrence", 0)
-        .put("operationKind", "navigate")
-        .put("argumentSlot", "navigate.destination");
+    choice.putObject("need").put("stepId", stepId).put("occurrence", 0);
     choice.set("reference", candidates(fixture).get(0));
     context =
         request(fixture, GuidedModelRequest.Kind.SOURCE_PLAN, C.object(), C.object(), selected)
@@ -449,22 +440,5 @@ class GuidedAuthoredUriCandidatesTest {
       assertThat(value).hasSize(end - start);
     }
     assertThat(references.toString()).contains("\"startUtf16\":36,\"endUtf16\":46");
-  }
-
-  @ParameterizedTest
-  @ValueSource(strings = {"NEXT_ACTION", "VERIFY_STEP"})
-  void otherKindsDoNotAcquireSourceSuggestions(String kind) {
-    Fixture fixture = fixture("https://example.test/path");
-    assertThat(
-            request(
-                    fixture,
-                    GuidedModelRequest.Kind.valueOf(kind),
-                    C.object(),
-                    C.object(),
-                    C.object().arrayNode())
-                .projection()
-                .document()
-                .has("sourceReferences"))
-        .isFalse();
   }
 }

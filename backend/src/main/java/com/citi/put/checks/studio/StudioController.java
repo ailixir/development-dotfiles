@@ -124,6 +124,23 @@ public class StudioController {
         .body(Map.of("executionId", execution.executionId(), "status", execution.status()));
   }
 
+  /** Re-runs the model-free proof of the recorded revision ("Verify again"). */
+  @PostMapping("/tests/{id}/verify")
+  public ResponseEntity<Map<String, Object>> verifyRecordedRevision(
+      @PathVariable UUID id,
+      @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+      Authentication auth,
+      jakarta.servlet.http.HttpServletRequest request) {
+    if (idempotencyKey == null || idempotencyKey.isBlank()) {
+      throw new StudioValidationException(
+          "IDEMPOTENCY_KEY_REQUIRED", "Idempotency-Key header is required");
+    }
+    ExecutionSnapshotDto execution =
+        studioService.verifyRecorded(id, auth, idempotencyKey, request);
+    return ResponseEntity.accepted()
+        .body(Map.of("executionId", execution.executionId(), "status", execution.status()));
+  }
+
   /**
    * One execution snapshot, authorized against the execution's own immutable CSI — never the parent
    * test's current value, and equally for a soft-deleted test (AC-4a).

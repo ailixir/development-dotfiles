@@ -43,7 +43,10 @@ class GuidedAllowedDomainsMigrationIT {
   @Test
   void v28AppliesAsTheHeadOnTopOfV1ToV27() throws SQLException {
     try (Connection c = connect()) {
-      assertThat(scalar(c, "SELECT max(version::int) FROM flyway_schema_history")).isEqualTo("29");
+      assertThat(
+              scalar(
+                  c, "SELECT count(*) FROM flyway_schema_history WHERE version='33' AND success"))
+          .isEqualTo("1");
       assertThat(scalar(c, "SELECT description FROM flyway_schema_history WHERE version='28'"))
           .isEqualTo("allowed domains");
       assertThat(
@@ -58,7 +61,7 @@ class GuidedAllowedDomainsMigrationIT {
   void aReplayScopeIsClosedWithoutAnOriginList() throws SQLException {
     try (Connection c = connect()) {
       String base =
-          "'principalId':'u','csiId':'CSI-1','environment':'Production','capabilities':['navigate','click']";
+          "'principalId':'u','csiId':'CSI-1','environment':'Production','capabilities':['step']";
       assertThat(scope(c, "{" + base + ",'initialContext':{'kind':'initialBlank'}}")).isTrue();
       assertThat(
               scope(

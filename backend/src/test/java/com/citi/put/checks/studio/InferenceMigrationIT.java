@@ -51,7 +51,8 @@ class InferenceMigrationIT {
               + OWNER
               + "',true)");
       s.executeUpdate(
-          "INSERT INTO csi_systems(id,name,business_unit,criticality,owner_email,environment,status)"
+          "INSERT INTO"
+              + " csi_systems(id,name,business_unit,criticality,owner_email,environment,status)"
               + " VALUES('"
               + CSI
               + "','Inference','Ops','HIGH','"
@@ -66,7 +67,8 @@ class InferenceMigrationIT {
               + TEST_ID
               + "','PASSED',NOW(),NOW(),0)");
     }
-    migrate(POSTGRES.getJdbcUrl(), "18");
+    // Publishing needs V34's candidate_revision_id, so the populated database goes to the head.
+    migrate(POSTGRES.getJdbcUrl(), null);
   }
 
   @AfterAll
@@ -184,10 +186,10 @@ class InferenceMigrationIT {
     var owner = publish("inference-reuse-owner");
     var ds = dataSource();
     var first =
-        GuidedPublicationMigrationTest.prepareHistoricalV18Observed(
+        GuidedPublicationMigrationTest.prepareObserved(
             ds, "inference-reuse-1", owner.testId(), CSI, "Production", OWNER);
     var second =
-        GuidedPublicationMigrationTest.prepareHistoricalV18Observed(
+        GuidedPublicationMigrationTest.prepareObserved(
             ds, "inference-reuse-2", owner.testId(), CSI, "Production", OWNER);
     String step = first.stepId().toString();
     String snapshot = "{\"" + step + "\":\"" + "d".repeat(64) + "\"}";
@@ -274,7 +276,8 @@ class InferenceMigrationIT {
       assertThat(
               scalar(
                   c,
-                  "SELECT count(*) FROM ui_test_executions WHERE status='PASSED' AND execution_scope='FULL'"))
+                  "SELECT count(*) FROM ui_test_executions WHERE status='PASSED' AND"
+                      + " execution_scope='FULL'"))
           .isEqualTo("0");
       assertThat(
               scalar(
@@ -302,7 +305,7 @@ class InferenceMigrationIT {
   }
 
   private static GuidedPublicationMigrationTest.Published publish(String session) {
-    return GuidedPublicationMigrationTest.publishHistoricalV18Observed(
+    return GuidedPublicationMigrationTest.publishObserved(
         dataSource(), session, CSI, "Production", OWNER);
   }
 
@@ -354,12 +357,14 @@ class InferenceMigrationIT {
   }
 
   private static void migrate(String jdbcUrl, String target) {
-    Flyway.configure()
-        .dataSource(jdbcUrl, POSTGRES.getUsername(), POSTGRES.getPassword())
-        .locations("classpath:db/migration")
-        .target(target)
-        .load()
-        .migrate();
+    var config =
+        Flyway.configure()
+            .dataSource(jdbcUrl, POSTGRES.getUsername(), POSTGRES.getPassword())
+            .locations("classpath:db/migration");
+    if (target != null) {
+      config.target(target);
+    }
+    config.load().migrate();
   }
 
   private static Connection connect() throws SQLException {

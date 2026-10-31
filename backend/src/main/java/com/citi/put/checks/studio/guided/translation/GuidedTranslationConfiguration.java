@@ -48,11 +48,6 @@ public class GuidedTranslationConfiguration {
   }
 
   @Bean
-  GuidedStepVerifier guidedStepVerifier(GuidedTranslationStore store) {
-    return new GuidedStepVerifier(store);
-  }
-
-  @Bean
   GuidedResponseParser guidedResponseParser(GuidedContracts contracts) {
     return new GuidedResponseParser(contracts);
   }

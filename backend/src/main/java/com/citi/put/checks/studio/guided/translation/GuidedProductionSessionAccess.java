@@ -23,7 +23,6 @@ public final class GuidedProductionSessionAccess
   private final GuidedSourceClassifier classifier;
   private final GuidedSourceInputResolver resolver;
   private final GuidedTranslationStore store;
-  private final GuidedStepVerifier verifier;
   private final CsiOwnershipEvaluator ownership;
   private final AllowedDomains domains;
   private final com.citi.put.checks.studio.dispatch.StudioReferenceResolver references;
@@ -33,7 +32,6 @@ public final class GuidedProductionSessionAccess
       GuidedSourceClassifier classifier,
       GuidedSourceInputResolver resolver,
       GuidedTranslationStore store,
-      GuidedStepVerifier verifier,
       CsiOwnershipEvaluator ownership,
       AllowedDomains domains,
       com.citi.put.checks.studio.dispatch.StudioReferenceResolver references) {
@@ -41,7 +39,6 @@ public final class GuidedProductionSessionAccess
     this.classifier = classifier;
     this.resolver = resolver;
     this.store = store;
-    this.verifier = verifier;
     this.ownership = ownership;
     this.domains = domains;
     this.references = references;
@@ -63,19 +60,7 @@ public final class GuidedProductionSessionAccess
     scope.set("csiId", current.path("csiId"));
     scope.put("modelDataPolicyId", "INPUT-POLICY-01-A").putNull("valueTransferPolicyId");
     scope.put("principalId", ((BffAuthenticationToken) user).getPrincipal().userId());
-    scope
-        .putArray("capabilities")
-        .add("observe")
-        .add("navigate")
-        .add("click")
-        .add("fill")
-        .add("press")
-        .add("check")
-        .add("uncheck")
-        .add("hover")
-        .add("selectOption")
-        .add("read")
-        .add("assert");
+    scope.putArray("capabilities").add("observe").add("step");
     JsonNode manifest = classifier.classify(current, scope);
     // A test that names no URL cannot be learned, and its first URL (step order) must be on the
     // deployment's allowed domains. Any later URL is checked when a step uses it as a destination.
@@ -139,7 +124,7 @@ public final class GuidedProductionSessionAccess
 
   public void initialize(JsonNode session) {
     var current = snapshots.lockCurrent(UUID.fromString(session.path("testId").asText()));
-    store.initialize(session, classifier.classify(current, session.path("scope")), true);
+    store.initialize(session, classifier.classify(current, session.path("scope")));
   }
 
   @Override
@@ -151,6 +136,7 @@ public final class GuidedProductionSessionAccess
 
   @Override
   public boolean complete(JsonNode session, JsonNode completion, List<ObjectNode> actions) {
-    return verifier.complete(session, completion, actions);
+    return store.stepFulfilled(
+        session.path("sessionId").asText(), completion.path("stepId").asText(), actions);
   }
 }

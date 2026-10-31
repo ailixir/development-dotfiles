@@ -176,15 +176,25 @@ class GuidedTranslationMigrationTest {
       String hash = GuidedContracts.hash(inputs);
       proposal.put("contextRevision", 1).put("authoredInputsHash", hash);
       String digest = GuidedContracts.hash(proposal);
+      // The 15 keys V33's ck_wi6_preparation_metadata requires, exactly.
+      String sealed = "a".repeat(64);
       ObjectNode proof =
           C.object()
+              .put("schemaVersion", 3)
               .put("sessionId", id)
-              .put("preparationId", "translation-preparation")
-              .put("contextId", "translation-context")
+              .put("workerId", "worker")
               .put("ownerFence", 1)
+              .put("scopeHash", scope)
+              .put("contextId", "translation-context")
               .put("contextRevision", 1)
+              .put("sourceRevision", "1")
+              .put("configurationRevision", "1")
+              .put("preparationId", "translation-preparation")
+              .put("requestDigest", digest)
+              .put("evidenceHash", sealed)
               .put("authoredInputsHash", hash)
-              .put("requestDigest", digest);
+              .put("expiresAt", "2099-01-01T00:00:00Z");
+      proof.putObject("versions").put("contract", 3);
       ObjectNode intent =
           C.object()
               .put("sessionId", id)
@@ -197,8 +207,8 @@ class GuidedTranslationMigrationTest {
             sessions.lock(id);
             jdbc.update(
                 "INSERT INTO"
-                    + " studio_guided_assignments(session_id,assignment_id,scope_hash,worker_id,expected_fence,"
-                    + "intent) VALUES (?,?,?,'worker',0,?::jsonb)",
+                    + " studio_guided_assignments(session_id,assignment_id,scope_hash,worker_id,expected_fence,intent)"
+                    + " VALUES (?,?,?,'worker',0,?::jsonb)",
                 id,
                 "translation-assignment",
                 scope,
@@ -206,19 +216,18 @@ class GuidedTranslationMigrationTest {
             jdbc.update(
                 "INSERT INTO"
                     + " studio_guided_materializations(session_id,scope_hash,context_id,context_revision,"
-                    + "materialization_revision,worker_id,owner_fence,source_revision,configuration_revision,"
-                    + "authored_inputs_hash,authored_inputs) VALUES"
+                    + "materialization_revision,worker_id,owner_fence,source_revision,"
+                    + "configuration_revision,authored_inputs_hash,authored_inputs) VALUES"
                     + " (?,?,'translation-context',1,1,'worker',1,'1','1',?,?::jsonb)",
                 id,
                 scope,
                 hash,
                 inputs.toString());
             jdbc.update(
-                "INSERT INTO"
-                    + " studio_guided_preparations(session_id,preparation_id,context_id,owner_fence,request_digest,"
-                    + "proof,expires_at) VALUES"
-                    + " (?,'translation-preparation','translation-context',1,?,?::jsonb,clock_timestamp("
-                    + ")+interval '1 hour')",
+                "INSERT INTO studio_guided_preparations(session_id,preparation_id,context_id,"
+                    + "owner_fence,request_digest,proof,expires_at) VALUES"
+                    + " (?,'translation-preparation','translation-context',1,?,?::jsonb,clock_timestamp()+interval"
+                    + " '1 hour')",
                 id,
                 digest,
                 proof.toString());
@@ -239,13 +248,13 @@ class GuidedTranslationMigrationTest {
         .put("obligationId", obligation)
         .put("stepId", "step")
         .put("occurrence", 0)
-        .put("operationKind", "click")
         .put("targetIntent", "Submit")
         .putNull("scopeIntent")
         .putNull("referenceIndex")
         .putNull("needId")
-        .putNull("predicate");
+        .putArray("uses");
     plan.putArray("needs");
+    plan.putArray("stepSections");
     return plan;
   }
 
@@ -588,8 +597,9 @@ class GuidedTranslationMigrationTest {
       assertThat(
               db.jdbc.queryForObject(
                   "SELECT data_type||'/'||character_maximum_length||'/'||is_nullable FROM"
-                      + " information_schema.columns WHERE table_name='studio_guided_model_attempts'"
-                      + " AND column_name='rejection_reason'",
+                      + " information_schema.columns WHERE"
+                      + " table_name='studio_guided_model_attempts' AND"
+                      + " column_name='rejection_reason'",
                   String.class))
           .isEqualTo("character varying/40/YES");
     }

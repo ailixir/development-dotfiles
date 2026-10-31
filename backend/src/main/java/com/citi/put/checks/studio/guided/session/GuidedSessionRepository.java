@@ -207,22 +207,50 @@ public final class GuidedSessionRepository {
 
   public void saveAction(ObjectNode action) {
     contracts.validate("ledger", action);
-    saveActionBody(action);
+    saveActionBody(action, null);
+  }
+
+  /**
+   * Saves the outcome of a learning step together with the runner's step receipt ({@code
+   * step-receipt.schema.json}: closed code, step hash, fence, effect method names; never a value).
+   * The receipt is written once with the outcome and read by the gate.
+   */
+  public void saveAction(ObjectNode action, JsonNode receipt) {
+    contracts.validate("ledger", action);
+    saveActionBody(action, receipt);
   }
 
   void saveAction(ObjectNode action, GuidedActionLedger.PreparedReport prepared) {
+    saveAction(action, prepared, null);
+  }
+
+  void saveAction(ObjectNode action, GuidedActionLedger.PreparedReport prepared, JsonNode receipt) {
     if (!GuidedActionLedger.successfulSchemaMatches(prepared, action, contracts)) {
-      saveAction(action);
+      if (receipt == null) {
+        saveAction(action);
+      } else {
+        saveAction(action, receipt);
+      }
       return;
     }
     GuidedContracts.canonical(action);
-    saveActionBody(action);
+    saveActionBody(action, receipt);
   }
 
-  private void saveActionBody(ObjectNode action) {
+  private void saveActionBody(ObjectNode action, JsonNode receipt) {
+    if (receipt == null || receipt.isMissingNode() || receipt.isNull()) {
+      jdbc.update(
+          "UPDATE studio_guided_actions SET document=?::jsonb WHERE admission_id=?",
+          action.toString(),
+          action.path("admission").path("admissionId").asText());
+      return;
+    }
+    contracts.validate("v3/step-receipt", receipt);
     jdbc.update(
-        "UPDATE studio_guided_actions SET document=?::jsonb WHERE admission_id=?",
+        "UPDATE studio_guided_actions SET document=?::jsonb, receipt=COALESCE(receipt,"
+            + " ?::jsonb) WHERE admission_id=?",
         action.toString(),
+        receipt.toString(),
         action.path("admission").path("admissionId").asText());
   }
 

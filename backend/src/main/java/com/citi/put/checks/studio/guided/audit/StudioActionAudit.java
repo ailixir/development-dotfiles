@@ -4,13 +4,8 @@ import static net.logstash.logback.argument.StructuredArguments.kv;
 
 import com.citi.put.checks.studio.navigation.AllowedDomains;
 import com.fasterxml.jackson.databind.JsonNode;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.HexFormat;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,13 +19,12 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * appender, {@code stream=studio-audit}, no MDC). The log message is the constant event type and
  * every field is a structured argument, so no field is ever interpolated into text.
  *
- * <p>Events carry IDs and closed codes only. Never a value, an authored or page text, a label, a
- * URL path or query, a secret id or value, or an exception message. The one page-derived input, the
- * target's safe label, leaves only as {@code targetLabelHash} (first 32 hex of {@code
- * sha256(scopeHash + ':' + label)}); low-entropy labels are dictionary-reversible within one scope,
- * which the AC-2 document discloses (no keyed HMAC this wave). The origin is emitted only when it
- * is a bare http(s) origin (an action ran on it only after the allowed-domains check); otherwise
- * {@code UNAPPROVED}.
+ * <p>Events carry IDs and closed codes only. Never a value, an authored or page text, a label,
+ * code, a URL path or query, a secret id or value, or an exception message. A step is generated
+ * code, so an event names no target: {@code obligationKind} is the constant {@code step}, {@code
+ * targetRole} is {@code none} and {@code targetLabelHash} is null (the fields keep their names and
+ * positions so the SIEM schema is stable). The origin is emitted only when it is a bare http(s)
+ * origin (an action ran on it only after the allowed-domains check); otherwise {@code UNAPPROVED}.
  *
  * <p>An admission is emitted after the surrounding transaction commits, so a rolled-back admission
  * is never audited as admitted. A refusal is emitted at the decision: the rejected proposal's
@@ -86,105 +80,8 @@ public final class StudioActionAudit {
   /** The obligation kind of a replay dispatch, which is a whole run, not one action. */
   public static final String REPLAY_RUN = "replayRun";
 
-  private static final Set<String> OPERATION_KINDS =
-      Set.of(
-          "observe",
-          "navigate",
-          "click",
-          "fill",
-          "press",
-          "check",
-          "uncheck",
-          "hover",
-          "selectOption",
-          "read",
-          "assert");
-
-  /** WAI-ARIA 1.2 roles; anything else is reported as {@code none}. */
-  private static final Set<String> ARIA_ROLES =
-      Set.of(
-          "alert",
-          "alertdialog",
-          "application",
-          "article",
-          "banner",
-          "blockquote",
-          "button",
-          "caption",
-          "cell",
-          "checkbox",
-          "code",
-          "columnheader",
-          "combobox",
-          "complementary",
-          "contentinfo",
-          "definition",
-          "deletion",
-          "dialog",
-          "directory",
-          "document",
-          "emphasis",
-          "feed",
-          "figure",
-          "form",
-          "generic",
-          "grid",
-          "gridcell",
-          "group",
-          "heading",
-          "img",
-          "insertion",
-          "link",
-          "list",
-          "listbox",
-          "listitem",
-          "log",
-          "main",
-          "marquee",
-          "math",
-          "menu",
-          "menubar",
-          "menuitem",
-          "menuitemcheckbox",
-          "menuitemradio",
-          "meter",
-          "navigation",
-          "none",
-          "note",
-          "option",
-          "paragraph",
-          "presentation",
-          "progressbar",
-          "radio",
-          "radiogroup",
-          "region",
-          "row",
-          "rowgroup",
-          "rowheader",
-          "scrollbar",
-          "search",
-          "searchbox",
-          "separator",
-          "slider",
-          "spinbutton",
-          "status",
-          "strong",
-          "subscript",
-          "superscript",
-          "switch",
-          "tab",
-          "table",
-          "tablist",
-          "tabpanel",
-          "term",
-          "textbox",
-          "time",
-          "timer",
-          "toolbar",
-          "tooltip",
-          "tree",
-          "treegrid",
-          "treeitem");
+  /** Every guided action is a step; the audit names no operation kind of its own. */
+  private static final String STEP = "step";
 
   private static final Logger AUDIT = LoggerFactory.getLogger(CATEGORY);
 
@@ -196,11 +93,8 @@ public final class StudioActionAudit {
    * @param session the session document (scope, scopeHash, testId)
    * @param admissionId the committed admission id
    * @param proposal the admitted proposal
-   * @param identity the {@code {role, name}} identity of the target the runner reported for it, or
-   *     a missing/null node for a target that has none (page, password control)
    */
-  public static void guidedActionAdmitted(
-      JsonNode session, String admissionId, JsonNode proposal, JsonNode identity) {
+  public static void guidedActionAdmitted(JsonNode session, String admissionId, JsonNode proposal) {
     guided(
         EventType.GUIDED_ACTION_ADMITTED,
         Outcome.ADMITTED,
@@ -208,7 +102,6 @@ public final class StudioActionAudit {
         admissionId,
         null,
         proposal,
-        identity,
         null,
         true);
   }
@@ -217,12 +110,10 @@ public final class StudioActionAudit {
    * A guided proposal the validator refused.
    *
    * @param attemptId the model attempt that proposed it
-   * @param identity the {@code {role, name}} of the observed fact the proposal named, or a
-   *     missing/null node for a target with none
-   * @param reasonCode a closed reason ({@code GuidedPolicyReason}) or an existing closed code
+   * @param reasonCode a closed reason or an existing closed code
    */
   public static void guidedActionRefused(
-      JsonNode session, String attemptId, JsonNode proposal, JsonNode identity, String reasonCode) {
+      JsonNode session, String attemptId, JsonNode proposal, String reasonCode) {
     guided(
         EventType.GUIDED_ACTION_REFUSED,
         Outcome.REFUSED,
@@ -230,7 +121,6 @@ public final class StudioActionAudit {
         null,
         attemptId,
         proposal,
-        identity,
         reasonCode,
         false);
   }
@@ -268,14 +158,9 @@ public final class StudioActionAudit {
       String admissionId,
       String attemptId,
       JsonNode proposal,
-      JsonNode identity,
       String reasonCode,
       boolean afterCommit) {
     JsonNode scope = session.path("scope");
-    JsonNode target = proposal.path("target");
-    // ADR-SC-007: role and label come from the identity of the element, not from a locator.
-    String label = identity.path("name").isTextual() ? identity.path("name").asText() : null;
-    String kind = proposal.path("operation").path("kind").asText();
     List<Object> fields = new ArrayList<>();
     fields.add(SCHEMA_VERSION);
     fields.add(type.name());
@@ -288,9 +173,9 @@ public final class StudioActionAudit {
     fields.add(admissionId);
     fields.add(attemptId);
     fields.add(approvedOrigin(proposal.path("executionEvidence").path("origin").asText()));
-    fields.add(OPERATION_KINDS.contains(kind) ? kind : "unknown");
-    fields.add(targetRole(target, identity));
-    fields.add(label == null ? null : labelHash(session.path("scopeHash").asText(), label));
+    fields.add(STEP);
+    fields.add("none");
+    fields.add(null);
     fields.add(outcome.name());
     fields.add(reasonCode);
     emit(type, fields, afterCommit);
@@ -308,25 +193,6 @@ public final class StudioActionAudit {
             && origin.indexOf('#') < 0
         ? origin
         : "UNAPPROVED";
-  }
-
-  static String targetRole(JsonNode target, JsonNode identity) {
-    if (target.path("kind").asText().equals("page")) {
-      return "page";
-    }
-    String role = identity.path("role").asText();
-    return ARIA_ROLES.contains(role) ? role : "none";
-  }
-
-  static String labelHash(String scopeHash, String label) {
-    try {
-      byte[] digest =
-          MessageDigest.getInstance("SHA-256")
-              .digest((scopeHash + ":" + label).getBytes(StandardCharsets.UTF_8));
-      return HexFormat.of().formatHex(digest).substring(0, 32);
-    } catch (NoSuchAlgorithmException e) {
-      throw new IllegalStateException(e);
-    }
   }
 
   private static String id(JsonNode value) {

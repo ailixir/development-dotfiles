@@ -27,34 +27,6 @@ public final class GuidedPublicationEvidenceRepository {
     this.contracts = contracts;
   }
 
-  public void captureQuestion(
-      GuidedSessionRepository.Session current, JsonNode capture, Instant now) {
-    GuidedPublicationBaseRepository.transaction();
-    if (new GuidedPublicationBaseRepository(jdbc, contracts)
-        .find(current.document().path("sessionId").asText())
-        .isEmpty()) {
-      return;
-    }
-    contracts.validate("v3/replay-validation#/definitions/QuestionCapture1", capture);
-    JsonNode material = materializationIdentity(current.document().path("sessionId").asText());
-    for (String key :
-        List.of("contextId", "contextRevision", "workerId", "ownerFence", "authoredInputsHash")) {
-      require(capture.path(key).equals(material.path(key)), "EVIDENCE_MISMATCH", 422);
-    }
-    require(
-        capture.path("executionEvidence").path("kind").asText().equals("observedDocument"),
-        "EVIDENCE_MISMATCH",
-        422);
-    String hash =
-        captureObservation(
-            current,
-            capture.path("contextId").asText(),
-            capture.path("ownerFence").asInt(),
-            capture.path("executionEvidence"),
-            now);
-    require(hash.equals(capture.path("observationHash").asText()), "EVIDENCE_MISMATCH", 422);
-  }
-
   private String captureObservation(
       GuidedSessionRepository.Session current,
       String contextId,
@@ -117,193 +89,6 @@ public final class GuidedPublicationEvidenceRepository {
                 .put("workerId", rs.getString(3))
                 .put("ownerFence", rs.getInt(4))
                 .put("authoredInputsHash", rs.getString(5)),
-        id);
-  }
-
-  /**
-   * The accepted observed clarifications that count: the latest accepted question per obligation.
-   * An earlier answer that a later question superseded stays in the database and never enters the
-   * basis.
-   */
-  List<ObjectNode> observedChoices(String id) {
-    return new com.citi.put.checks.studio.guided.translation.GuidedClarificationContextStore(
-            jdbc, contracts)
-        .effectiveObserved(id);
-  }
-
-  private JsonNode selectedMeaning(JsonNode row) {
-    JsonNode selected = null;
-    for (JsonNode mapping : row.path("meanings")) {
-      if (mapping.path("choiceId").equals(row.path("acceptedChoiceId"))) {
-        require(selected == null, "EVIDENCE_MISMATCH", 422);
-        selected = mapping.path("meaning");
-      }
-    }
-    require(selected != null, "EVIDENCE_MISMATCH", 422);
-    return selected;
-  }
-
-  private JsonNode preparationChoice(
-      GuidedSessionRepository.Session current, JsonNode proposal, JsonNode proof) {
-    String id = current.document().path("sessionId").asText();
-    List<ObjectNode> decisions = observedChoices(id);
-    if (decisions.isEmpty()) {
-      return null;
-    }
-    JsonNode plan =
-        contracts.parse(
-            jdbc.queryForObject(
-                "SELECT p.plan::text FROM studio_guided_translation_state s JOIN"
-                    + " studio_guided_translation_plans p USING(session_id,plan_revision) WHERE"
-                    + " s.session_id=?",
-                String.class,
-                id));
-    JsonNode obligation = null;
-    for (JsonNode item : plan.path("obligations")) {
-      if (item.path("stepId").equals(proposal.path("coordinate").path("stepId"))
-          && item.path("occurrence").equals(proposal.path("coordinate").path("ordinal"))) {
-        require(obligation == null, "EVIDENCE_MISMATCH", 422);
-        obligation = item;
-      }
-    }
-    require(obligation != null, "EVIDENCE_MISMATCH", 422);
-    JsonNode decision = null;
-    for (JsonNode row : decisions) {
-      if (selectedMeaning(row).path("obligationId").equals(obligation.path("obligationId"))) {
-        require(decision == null, "EVIDENCE_MISMATCH", 422);
-        decision = row;
-      }
-    }
-    if (decision == null) {
-      return null;
-    }
-    JsonNode identity = decision.path("context"), capture = identity.path("questionCapture");
-    String questionId = identity.path("clarificationId").asText();
-    ObjectNode receipt =
-        contracts
-            .object()
-            .put("version", 1)
-            .put("sessionId", id)
-            .put("preparationId", proof.path("preparationId").asText())
-            .put("clarificationId", questionId)
-            .put("obligationId", obligation.path("obligationId").asText())
-            .put("contextIdentityHash", GuidedContracts.hash(identity))
-            .put("meaningsHash", GuidedContracts.hash(decision.path("meanings")))
-            .put("questionCaptureHash", GuidedContracts.hash(capture))
-            .put("acceptedChoiceId", decision.path("acceptedChoiceId").asText());
-    receipt.set("answer", current.progress().path("resolvedClarifications").path(questionId));
-    contracts.validate("v3/replay-validation#/definitions/ObservedChoiceReceipt1", receipt);
-    PublicationContracts.bounded(receipt, 16384);
-    ObjectNode prepared =
-        contracts.object().put("preparationId", proof.path("preparationId").asText());
-    prepared.set("proposal", proposal);
-    prepared.set("proof", proof);
-    prepared.set("executionEvidence", proposal.path("executionEvidence"));
-    prepared.set("observationHash", proposal.path("executionEvidence").path("observationHash"));
-    prepared.set("observedChoice", choiceWitness(id, receipt));
-    var observations = new java.util.HashMap<String, JsonNode>();
-    for (JsonNode row : observationRows(id)) {
-      observations.put(row.path("observationHash").asText(), row);
-    }
-    new GuidedPlanBuilder(contracts)
-        .effectiveObservedObligation(
-            current.document(),
-            plan,
-            materializationIdentity(id),
-            prepared,
-            observations,
-            obligation);
-    return receipt;
-  }
-
-  private ObjectNode choiceWitness(String id, JsonNode receipt) {
-    contracts.validate("v3/replay-validation#/definitions/ObservedChoiceReceipt1", receipt);
-    var decisions =
-        observedChoices(id).stream()
-            .filter(
-                row ->
-                    row.path("context")
-                        .path("clarificationId")
-                        .equals(receipt.path("clarificationId")))
-            .toList();
-    require(decisions.size() == 1, "EVIDENCE_MISMATCH", 422);
-    JsonNode decision = decisions.getFirst(),
-        capture = decision.path("context").path("questionCapture");
-    contracts.validate("v3/replay-validation#/definitions/QuestionCapture1", capture);
-    var attempts =
-        jdbc.query(
-            "SELECT identity::text,status,safe_result::text FROM studio_guided_model_attempts"
-                + " WHERE session_id=? AND attempt_id=?",
-            (rs, n) -> {
-              JsonNode identity = contracts.parse(rs.getString(1));
-              require(
-                  rs.getString(2).equals("APPLIED") && rs.getString(3) != null,
-                  "EVIDENCE_MISMATCH",
-                  422);
-              JsonNode result = contracts.parse(rs.getString(3));
-              ObjectNode attempt = contracts.object().put("status", rs.getString(2));
-              for (String key :
-                  List.of(
-                      "attemptId",
-                      "requestId",
-                      "attempt",
-                      "kind",
-                      "projectionHash",
-                      "scopeHash",
-                      "scope",
-                      "owner",
-                      "documentId",
-                      "generation",
-                      "executionEvidence")) {
-                attempt.set(key, identity.path(key));
-              }
-              attempt.put("planRevision", identity.path("planRevision").asText());
-              attempt.set("responseSchemaVersion", result.path("schemaVersion"));
-              attempt.set("responseRequestId", result.path("requestId"));
-              attempt.set("responseKind", result.path("kind"));
-              attempt.set("responseStatus", result.path("status"));
-              attempt.set("modelQuestion", result.path("question"));
-              return attempt;
-            },
-            id,
-            capture.path("attemptId").asText());
-    require(attempts.size() == 1, "EVIDENCE_MISMATCH", 422);
-    var plans =
-        jdbc.query(
-            "SELECT plan_revision,plan_hash,plan::text FROM studio_guided_translation_plans"
-                + " WHERE session_id=? AND plan_revision=?",
-            (rs, n) -> {
-              ObjectNode plan =
-                  contracts
-                      .object()
-                      .put("revision", Long.toString(rs.getLong(1)))
-                      .put("planHash", rs.getString(2));
-              plan.set("plan", contracts.parse(rs.getString(3)));
-              return plan;
-            },
-            id,
-            Long.parseLong(capture.path("planRevision").asText()));
-    require(plans.size() == 1, "EVIDENCE_MISMATCH", 422);
-    ObjectNode witness = contracts.object().put("version", 1);
-    witness.set("receipt", receipt);
-    witness.set("context", decision.path("context"));
-    witness.set("meanings", decision.path("meanings"));
-    witness.set("acceptedChoiceId", decision.path("acceptedChoiceId"));
-    witness.set("attempt", attempts.getFirst());
-    witness.set("questionPlan", plans.getFirst());
-    contracts.validate("v3/replay-validation#/definitions/ObservedChoiceWitness1", witness);
-    return PublicationContracts.bounded(witness, 262144);
-  }
-
-  private List<ObjectNode> observationRows(String id) {
-    return jdbc.query(
-        "SELECT observation_hash,observation::text FROM studio_guided_publication_observations"
-            + " WHERE session_id=? ORDER BY generation,observation_hash",
-        (rs, n) -> {
-          ObjectNode row = contracts.object().put("observationHash", rs.getString(1));
-          row.set("observation", contracts.parse(rs.getString(2)));
-          return row;
-        },
         id);
   }
 
@@ -376,10 +161,8 @@ public final class GuidedPublicationEvidenceRepository {
     } else {
       require(
           evidence.path("kind").asText().equals("initialBlank")
-              && proposal.path("target").path("kind").asText().equals("page")
-              && proposal.path("target").path("documentId").equals(evidence.path("documentId"))
-              && proposal.path("target").path("generation").asInt(-1) == 0
-              && proposal.path("operation").path("kind").asText().equals("navigate")
+              && proposal.path("generation").asInt(-1) == 0
+              && evidence.path("generation").asInt(-1) == 0
               && proposal.path("coordinate").path("ordinal").asInt(-1) == 0
               && current
                   .document()
@@ -395,23 +178,13 @@ public final class GuidedPublicationEvidenceRepository {
           "EVIDENCE_MISMATCH",
           422);
     }
-    JsonNode choiceReceipt = preparationChoice(current, proposal, proof);
-    if (choiceReceipt != null) {
-      require(
-          !Instant.parse(choiceReceipt.path("answer").path("resolvedAt").asText()).isAfter(now),
-          "EVIDENCE_MISMATCH",
-          422);
-    }
     var old =
         jdbc.query(
-            "SELECT proposal::text,proof::text,observed_choice_receipt::text FROM"
-                + " studio_guided_publication_preparations WHERE session_id=? AND preparation_id=?",
+            "SELECT proposal::text,proof::text FROM studio_guided_publication_preparations WHERE"
+                + " session_id=? AND preparation_id=?",
             (rs, n) ->
                 contracts.parse(rs.getString(1)).equals(proposal)
-                    && contracts.parse(rs.getString(2)).equals(proof)
-                    && (rs.getString(3) == null
-                        ? choiceReceipt == null
-                        : contracts.parse(rs.getString(3)).equals(choiceReceipt)),
+                    && contracts.parse(rs.getString(2)).equals(proof),
             id,
             proof.path("preparationId").asText());
     if (!old.isEmpty()) {
@@ -429,8 +202,8 @@ public final class GuidedPublicationEvidenceRepository {
             + " studio_guided_publication_preparations(session_id,preparation_id"
             + ",context_id,owner_fence,request_digest,evidence_hash,inputs_hash,"
             + "materialization_revision,source_manifest_hash,observation_hash,ex"
-            + "ecution_evidence,proposal,proof,captured_at,observed_choice_receipt)"
-            + " VALUES (?,?,?,?,?,?,?,?,?,?,?::jsonb,?::jsonb,?::jsonb,?,?::jsonb)",
+            + "ecution_evidence,proposal,proof,captured_at)"
+            + " VALUES (?,?,?,?,?,?,?,?,?,?,?::jsonb,?::jsonb,?::jsonb,?)",
         id,
         proof.path("preparationId").asText(),
         proof.path("contextId").asText(),
@@ -444,8 +217,7 @@ public final class GuidedPublicationEvidenceRepository {
         evidence.toString(),
         proposal.toString(),
         proof.toString(),
-        Timestamp.from(PublicationContracts.millisecond(now)),
-        choiceReceipt == null ? null : choiceReceipt.toString());
+        Timestamp.from(PublicationContracts.millisecond(now)));
   }
 
   public void attachAdmission(JsonNode session, JsonNode ledger, JsonNode proposal, Instant now) {
@@ -463,18 +235,8 @@ public final class GuidedPublicationEvidenceRepository {
             id,
             admission,
             GuidedContracts.hash(proposal));
-    // The runner-reported target the preparation stored with this proposal is part of the identity.
-    JsonNode proof =
-        contracts.parse(
-            jdbc.queryForObject(
-                "SELECT proof::text FROM studio_guided_publication_preparations WHERE session_id=?"
-                    + " AND preparation_id=?",
-                String.class,
-                id,
-                ledger.path("preparationId").asText()));
     require(
-        com.citi.put.checks.studio.guided.session.GuidedOperationIdentity.of(
-                proposal, proof.path("target"))
+        com.citi.put.checks.studio.guided.session.GuidedOperationIdentity.of(proposal)
             .equals(ledger.path("operationHash").asText()),
         "EVIDENCE_MISMATCH",
         422);
@@ -552,7 +314,6 @@ public final class GuidedPublicationEvidenceRepository {
         "EVIDENCE_MISMATCH",
         422);
     out.set("snapshotEvidence", snapshotEvidence(id, source));
-    ObjectNode privateManifest = source.deepCopy();
     source.remove("configurationValues");
     out.set("sourceManifest", source);
     var plan =
@@ -608,7 +369,7 @@ public final class GuidedPublicationEvidenceRepository {
     jdbc.query(
             "SELECT"
                 + " preparation_id,proposal::text,proof::text,execution_evidence::text,"
-                + "observation_hash,observed_choice_receipt::text,materialization_revision"
+                + "observation_hash,materialization_revision"
                 + " FROM studio_guided_publication_preparations WHERE session_id=? ORDER BY"
                 + " preparation_id",
             (rs, n) -> {
@@ -617,10 +378,7 @@ public final class GuidedPublicationEvidenceRepository {
               p.set("proof", contracts.parse(rs.getString(3)));
               p.set("executionEvidence", contracts.parse(rs.getString(4)));
               p.put("observationHash", rs.getString(5));
-              p.put("materializationRevision", rs.getInt(7));
-              if (rs.getString(6) != null) {
-                p.set("observedChoice", choiceWitness(id, contracts.parse(rs.getString(6))));
-              }
+              p.put("materializationRevision", rs.getInt(6));
               return p;
             },
             id)
@@ -678,44 +436,7 @@ public final class GuidedPublicationEvidenceRepository {
     } else {
       out.set("incrementalEvidence", incremental);
     }
-    var witnessedQuestions = new java.util.HashSet<String>();
-    var witnessedObligations = new java.util.HashSet<String>();
-    for (JsonNode prepared : preparations) {
-      if (!prepared.has("observedChoice")) {
-        continue;
-      }
-      JsonNode receipt = prepared.path("observedChoice").path("receipt");
-      require(
-          witnessedQuestions.add(receipt.path("clarificationId").asText())
-              && witnessedObligations.add(receipt.path("obligationId").asText()),
-          "EVIDENCE_MISMATCH",
-          422);
-      boolean successful = false;
-      for (JsonNode association : associations) {
-        if (!association.path("preparationId").equals(prepared.path("preparationId"))
-            || !association.path("obligationId").equals(receipt.path("obligationId"))) {
-          continue;
-        }
-        for (JsonNode action : actions) {
-          successful |=
-              action.path("admission").path("admissionId").equals(association.path("admissionId"))
-                  && action.path("state").asText().equals("SUCCEEDED");
-        }
-      }
-      require(successful, "EVIDENCE_MISMATCH", 422);
-    }
-    var acceptedQuestions = new java.util.HashSet<String>();
-    var acceptedObligations = new java.util.HashSet<String>();
-    for (JsonNode row : observedChoices(id)) {
-      require(
-          acceptedQuestions.add(row.path("context").path("clarificationId").asText())
-              && acceptedObligations.add(selectedMeaning(row).path("obligationId").asText()),
-          "EVIDENCE_MISMATCH",
-          422);
-    }
-    require(acceptedQuestions.equals(witnessedQuestions), "EVIDENCE_MISMATCH", 422);
-    require(witnessedQuestions.size() <= 200, "BUDGET_EXCEEDED", 413);
-    // Only original observations actually used by successful actions or their question proof,
+    // Only original observations actually used by successful actions,
     // or committed to by this session's own prefix requests (prefixRequestObservations), belong
     // to the independent basis. Captured but unexercised facts remain in immutable SQL.
     var neededObservations = new java.util.HashSet<String>();
@@ -734,15 +455,6 @@ public final class GuidedPublicationEvidenceRepository {
               preparations, "preparationId", association.path("preparationId").asText());
       if (!prepared.path("observationHash").isNull()) {
         neededObservations.add(prepared.path("observationHash").asText());
-      }
-      if (prepared.has("observedChoice")) {
-        neededObservations.add(
-            prepared
-                .path("observedChoice")
-                .path("context")
-                .path("questionCapture")
-                .path("observationHash")
-                .asText());
       }
     }
     // A prefix request names the original observation it was issued against. A drifted request
@@ -812,8 +524,7 @@ public final class GuidedPublicationEvidenceRepository {
     }
     require(initial != null, "MISSING_SOURCE", 409);
     bootstrap.set("initialEvidence", initial.deepCopy());
-    return new PublicationContracts.Evidence(
-        out, GuidedGuardSourceAuthority.verify(contracts, privateManifest, out));
+    return new PublicationContracts.Evidence(out);
   }
 
   private ObjectNode snapshotEvidence(String id, JsonNode manifest) {

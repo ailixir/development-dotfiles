@@ -132,7 +132,10 @@ class ExecutionVideoContractTest {
               // STUDIO-UNIFY-001.6: a session-authenticated public route (30 -> 31).
               "readLatestGuidedAttempts",
               // STUDIO-OBS-008 C-int W1 (P1): a session-authenticated public route (31 -> 32).
-              "getStudioTestCapabilities"));
+              "getStudioTestCapabilities",
+              // SC008-E5: "Verify again" re-runs the proof; session-authenticated like
+              // executeTest (24 -> 25).
+              "verifyRecordedRevision"));
 
   /**
    * The two internal callbacks, whose {@code 401} comes from {@code
@@ -515,8 +518,8 @@ class ExecutionVideoContractTest {
     // readLatestGuidedAttempts (30 -> 31). STUDIO-OBS-008 C-int W1: + getStudioTestCapabilities
     // (31 -> 32). STUDIO-GOV-001.3 deleted five operations that had declared the public 401
     // (guided policies), and STUDIO-GOV-001.2 deleted the eight Studio schedule operations that
-    // had declared it (32 -> 24).
-    assertThat(publicRefs).as("the number of public operations declaring a 401 moved").hasSize(24);
+    // had declared it (32 -> 24). SC008-E5: + verifyRecordedRevision (24 -> 25).
+    assertThat(publicRefs).as("the number of public operations declaring a 401 moved").hasSize(25);
     assertThat(callbackRefs)
         .as("the number of internal callbacks declaring a 401 moved")
         .hasSize(3);

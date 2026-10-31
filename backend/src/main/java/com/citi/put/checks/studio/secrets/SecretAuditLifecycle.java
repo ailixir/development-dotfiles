@@ -54,7 +54,12 @@ public final class SecretAuditLifecycle {
     return audit.recordRelease(identity, version, outcome);
   }
 
-  public void guidedOutcome(JsonNode session, JsonNode action) {
+  /**
+   * Records how each resolved secret was used, from the runner's own account of the step: {@code
+   * secretUse} maps a secretId to USED, NOT_USED or REFUSED. A secret the report does not name is
+   * recorded from the ledger outcome as before.
+   */
+  public void guidedOutcome(JsonNode session, JsonNode action, JsonNode secretUse) {
     for (var row :
         jdbc.queryForList(
             ("SELECT * FROM studio_secret_use_audit WHERE session_id=? AND admission_id=? AND decis"
@@ -62,11 +67,14 @@ public final class SecretAuditLifecycle {
             session.path("sessionId").asText(),
             action.path("admission").path("admissionId").asText())) {
       String code = action.path("outcomeCode").asText();
-      audit.recordUsage(
-          release(row),
-          code.equals("OK")
-              ? SecretUseAuditRecorder.UsageOutcome.USED
-              : SecretUseAuditRecorder.UsageOutcome.UNKNOWN_OUTCOME);
+      JsonNode reported = secretUse.path((String) row.get("secret_id"));
+      SecretUseAuditRecorder.UsageOutcome usage =
+          reported.isTextual()
+              ? SecretUseAuditRecorder.UsageOutcome.valueOf(reported.asText())
+              : code.equals("OK")
+                  ? SecretUseAuditRecorder.UsageOutcome.USED
+                  : SecretUseAuditRecorder.UsageOutcome.UNKNOWN_OUTCOME;
+      audit.recordUsage(release(row), usage);
     }
   }
 
@@ -104,8 +112,9 @@ public final class SecretAuditLifecycle {
                 + "ession_id=g.session_id AND m.context_revision=(g.document->>'contextRevision')::integer"
                 + " AND m.authored_inputs_hash=g.document->>'authoredInputsHash' WHERE g.session_id=? AND"
                 + " (g.document->>'dispatchCount')::integ"
-                + "er=1 AND g.proposal->'operation'->>'kind'='fill' AND g.proposal->'operation'->'value'"
-                + "->>'kind'='secretRef'"),
+                + "er=1 AND g.proposal->'operation'->>'kind'='step' AND EXISTS(SELECT 1 FROM"
+                + " jsonb_array_elements(g.proposal->'operation'->'uses') u WHERE"
+                + " u->>'kind'='secret')"),
             id);
     for (JsonNode reference : manifest.path("configurationReferences")) {
       if (!reference.path("kind").asText().equals("secretRef")) {
@@ -123,13 +132,10 @@ public final class SecretAuditLifecycle {
         JsonNode action = new GuidedContracts().parse((String) admission.get("action"));
         for (JsonNode input :
             new GuidedContracts().parse((String) admission.get("inputs")).path("inputs")) {
-          if (input
-                  .path("inputId")
-                  .equals(proposal.path("operation").path("value").path("sourceInputId"))
+          if (usesSecret(proposal, secret)
               && input.path("kind").asText().equals("secretRef")
               && input.path("secretId").asText().equals(secret)
               && input.path("sourceStepId").asText().equals(step)
-              && input.path("intendedSlot").asText().equals("fill.value")
               && input.path("provenance").path("referenceId").asText().equals(referenceId)
               && action.path("coordinate").path("stepId").asText().equals(step)) {
             matching.add(action);
@@ -198,6 +204,15 @@ public final class SecretAuditLifecycle {
     }
   }
 
+  private static boolean usesSecret(JsonNode proposal, String secretId) {
+    for (JsonNode use : proposal.path("operation").path("uses")) {
+      if (use.path("kind").asText().equals("secret") && use.path("id").asText().equals(secretId)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   private String guidedReferenceId(
       String sessionId, String admissionId, String secretId, String stepId) {
     var rows =
@@ -214,13 +229,10 @@ public final class SecretAuditLifecycle {
       JsonNode proposal = new GuidedContracts().parse((String) row.get("proposal"));
       for (JsonNode input :
           new GuidedContracts().parse((String) row.get("inputs")).path("inputs")) {
-        if (input
-                .path("inputId")
-                .equals(proposal.path("operation").path("value").path("sourceInputId"))
+        if (usesSecret(proposal, secretId)
             && input.path("kind").asText().equals("secretRef")
             && input.path("secretId").asText().equals(secretId)
-            && input.path("sourceStepId").asText().equals(stepId)
-            && input.path("intendedSlot").asText().equals("fill.value")) {
+            && input.path("sourceStepId").asText().equals(stepId)) {
           ids.add(input.path("provenance").path("referenceId").asText());
         }
       }

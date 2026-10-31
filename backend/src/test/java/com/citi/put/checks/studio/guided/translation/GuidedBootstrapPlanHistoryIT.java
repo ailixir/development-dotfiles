@@ -24,6 +24,7 @@ class GuidedBootstrapPlanHistoryIT {
   private static final GuidedContracts C = new GuidedContracts();
   private static final String ID = "bootstrap-phase";
   private static final String STEP = "00000000-0000-4000-8000-000000000001";
+  private static final String CONSUMER_STEP = "00000000-0000-4000-8000-000000000002";
 
   private static ObjectNode initialize(GuidedTranslationMigrationTest.Database db)
       throws Exception {
@@ -46,7 +47,9 @@ class GuidedBootstrapPlanHistoryIT {
         .put("workerId", "worker")
         .put("fence", 1)
         .put("leaseExpiresAt", Instant.now().plusSeconds(120).toString());
-    session.putArray("sourceSteps").addObject().put("stepId", STEP).put("requiresAssertion", false);
+    var sessionSteps = session.putArray("sourceSteps");
+    sessionSteps.addObject().put("stepId", STEP).put("requiresAssertion", false);
+    sessionSteps.addObject().put("stepId", CONSUMER_STEP).put("requiresAssertion", false);
     ObjectNode manifest =
         C.object()
             .put("testId", session.path("testId").asText())
@@ -55,11 +58,12 @@ class GuidedBootstrapPlanHistoryIT {
                 "configurationRevision",
                 session.path("scope").path("configurationRevision").asText())
             .put("policy", "INPUT-POLICY-01-A");
-    manifest
-        .putArray("sourceSteps")
+    var manifestSteps = manifest.putArray("sourceSteps");
+    manifestSteps.addObject().put("stepId", STEP).put("text", "Read the Order reference.");
+    manifestSteps
         .addObject()
-        .put("stepId", STEP)
-        .put("text", "Read Order reference then enter that order reference in Destination.");
+        .put("stepId", CONSUMER_STEP)
+        .put("text", "Enter that order reference in Destination.");
     db.tx.executeWithoutResult(
         t -> {
           db.sessions.insert(session);
@@ -74,26 +78,21 @@ class GuidedBootstrapPlanHistoryIT {
     response.putArray("sourceReferences");
     var meanings = response.putArray("obligations");
     for (int at = 0; at < 2; at++) {
-      meanings
-          .addObject()
-          .put("stepId", STEP)
-          .put("occurrence", at)
-          .put("operationKind", at == 0 ? "read" : "fill")
-          .put("targetIntent", at == 0 ? "Order reference" : "Destination")
-          .putNull("scopeIntent")
-          .putNull("referenceIndex")
-          .put("needId", "order")
-          .putNull("predicate");
+      var obligation =
+          meanings
+              .addObject()
+              .put("stepId", at == 0 ? STEP : CONSUMER_STEP)
+              .put("occurrence", 0)
+              .put("targetIntent", at == 0 ? "Order reference" : "Destination")
+              .putNull("scopeIntent")
+              .putNull("referenceIndex");
+      // The first obligation produces the order need; the second one uses it (needs are derived).
+      if (at == 0) {
+        obligation.put("needId", "order").putArray("uses");
+      } else {
+        obligation.putNull("needId").putArray("uses").add("order");
+      }
     }
-    response
-        .putArray("needs")
-        .addObject()
-        .put("needId", "order")
-        .put("producerStepId", STEP)
-        .putArray("consumers")
-        .addObject()
-        .put("stepId", STEP)
-        .put("argumentSlot", "fill.value");
     return new GuidedProposalValidator(C).admitPlan(session, response);
   }
 
@@ -112,7 +111,8 @@ class GuidedBootstrapPlanHistoryIT {
           table,
           C.parse(
               db.jdbc.queryForObject(
-                  "SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY to_jsonb(t)::text),'[]'::jsonb)::text FROM "
+                  "SELECT COALESCE(jsonb_agg(to_jsonb(t) ORDER BY"
+                      + " to_jsonb(t)::text),'[]'::jsonb)::text FROM "
                       + table
                       + " t WHERE session_id=?",
                   String.class,
@@ -135,7 +135,8 @@ class GuidedBootstrapPlanHistoryIT {
       assertThat(initial).isEqualTo(original);
       String raw =
           db.jdbc.queryForObject(
-              "SELECT plan::text FROM studio_guided_translation_plans WHERE session_id=? AND plan_revision=1",
+              "SELECT plan::text FROM studio_guided_translation_plans WHERE session_id=? AND"
+                  + " plan_revision=1",
               String.class,
               ID);
       assertThat(C.parse(raw).path("needs").get(0).has("bindingId")).isFalse();
@@ -202,13 +203,15 @@ class GuidedBootstrapPlanHistoryIT {
           });
       assertThat(
               db.jdbc.queryForObject(
-                  "SELECT plan::text FROM studio_guided_translation_plans WHERE session_id=? AND plan_revision=1",
+                  "SELECT plan::text FROM studio_guided_translation_plans WHERE session_id=? AND"
+                      + " plan_revision=1",
                   String.class,
                   ID))
           .isEqualTo(raw);
       assertThat(
               db.jdbc.queryForObject(
-                  "SELECT plan_hash FROM studio_guided_translation_plans WHERE session_id=? AND plan_revision=1",
+                  "SELECT plan_hash FROM studio_guided_translation_plans WHERE session_id=? AND"
+                      + " plan_revision=1",
                   String.class,
                   ID))
           .isEqualTo(GuidedContracts.hash(original));
@@ -256,8 +259,7 @@ class GuidedBootstrapPlanHistoryIT {
               .put("stepId", "foreign-step")
               .put("startUtf16", 0)
               .put("endUtf16", 4)
-              .put("kind", "nonsecretText")
-              .put("intendedSlot", "fill.value");
+              .put("kind", "nonsecretText");
           ((ObjectNode) plan.path("obligations").get(1)).put("referenceIndex", 0).putNull("needId");
         }
         case "foreign-producer" ->

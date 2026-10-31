@@ -159,12 +159,6 @@ public class GuidedPublicationConfiguration {
               }
 
               @Override
-              public void questioned(
-                  GuidedSessionRepository.Session current, JsonNode capture, Instant now) {
-                evidence.captureQuestion(current, capture, now);
-              }
-
-              @Override
               public void admitted(
                   JsonNode session, JsonNode action, JsonNode proposal, Instant now) {
                 evidence.attachAdmission(session, action, proposal, now);

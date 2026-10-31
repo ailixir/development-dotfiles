@@ -798,8 +798,7 @@ class ProgressCallbackIT {
             .put("stepId", stepId)
             .put("referenceId", "report-password")
             .put("kind", "secretRef")
-            .put("referenceName", "PASS")
-            .put("intendedSlot", "fill.value");
+            .put("referenceName", "PASS");
     ((com.fasterxml.jackson.databind.node.ObjectNode) selected)
         .put("kind", "secretRef")
         .set("provenance", reference);
@@ -909,19 +908,20 @@ class ProgressCallbackIT {
       var preparation = (com.fasterxml.jackson.databind.node.ObjectNode) row;
       var proposal = (com.fasterxml.jackson.databind.node.ObjectNode) preparation.path("proposal");
       proposal.put("authoredInputsHash", inputsHash);
-      if (proposal.path("operation").path("value").path("sourceInputId").asText().equals(inputId)) {
+      boolean usesInput = false;
+      for (var use : proposal.path("operation").path("uses")) {
+        usesInput |=
+            use.path("kind").asText().equals("input") && use.path("id").asText().equals(inputId);
+      }
+      if (usesInput) {
         changed++;
-        ((com.fasterxml.jackson.databind.node.ObjectNode) proposal.path("operation").path("value"))
-            .put("kind", "secretRef");
-        proposal
-            .putObject("target")
-            .put("kind", "passwordControl")
-            .set("documentId", proposal.path("executionEvidence").path("documentId"));
-        ((com.fasterxml.jackson.databind.node.ObjectNode) proposal.path("target"))
-            .set("generation", proposal.path("executionEvidence").path("generation"));
-        // ADR-SC-007: a password control reports no element target.
-        ((com.fasterxml.jackson.databind.node.ObjectNode) preparation.path("proof"))
-            .putNull("target");
+        var operation = (com.fasterxml.jackson.databind.node.ObjectNode) proposal.path("operation");
+        String code = "await page.getByRole('textbox').fill(secrets['PASS']);";
+        operation.put("code", code);
+        operation.put(
+            "sourceHash",
+            com.citi.put.checks.studio.guided.session.GuidedContracts.hash(operation.path("code")));
+        operation.putArray("uses").addObject().put("kind", "secret").put("id", "PASS");
       }
       var proof = (com.fasterxml.jackson.databind.node.ObjectNode) preparation.path("proof");
       if (observationHashes.containsKey(preparation.path("observationHash").asText())) {
@@ -972,7 +972,9 @@ class ProgressCallbackIT {
         }
       }
     }
-    assertThat(changed).as("one actual executed fill becomes a declared secret input").isEqualTo(1);
+    assertThat(changed)
+        .as("one executed step using the secret becomes a declared secret input")
+        .isEqualTo(1);
     return basis;
   }
 

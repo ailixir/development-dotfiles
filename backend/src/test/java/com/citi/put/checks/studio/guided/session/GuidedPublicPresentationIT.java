@@ -63,19 +63,6 @@ class GuidedPublicPresentationIT {
   private static final String SECRET_INPUT = "login-password-input";
   private static final String OWNER = "presentation-owner@citi.com";
   private static final GuidedContracts C = new GuidedContracts();
-  private static final Set<String> LABELS =
-      Set.of(
-          "Open page",
-          "Click control",
-          "Fill field",
-          "Press key",
-          "Check control",
-          "Uncheck control",
-          "Move over control",
-          "Select option",
-          "Read reference",
-          "Check expected result");
-
   @Autowired private JdbcTemplate jdbc;
   @Autowired private TransactionTemplate transactions;
   @Autowired private GuidedSessionService sessions;
@@ -217,20 +204,15 @@ class GuidedPublicPresentationIT {
       assertThat(step.path("relearnedAfterDrift").asBoolean()).isFalse();
       assertThat(step.path("actions")).isNotEmpty();
       for (JsonNode action : step.path("actions")) {
-        assertThat(LABELS).contains(action.path("safeLabel").asText());
+        // ADR-SC-008: a step has no operation kind and no label; the public action is its
+        // coordinates, its outcome and the opaque ids it captures or uses.
+        assertThat(action.has("operationKind")).isFalse();
+        assertThat(action.has("safeLabel")).isFalse();
         assertThat(action.path("outcome").asText()).isEqualTo("SUCCEEDED");
         assertThat(action.path("attemptOrdinal").asInt()).isZero();
       }
     }
-    assertThat(steps.get(0).path("actions").get(0).path("operationKind").asText())
-        .isEqualTo("navigate");
-    assertThat(steps.get(0).path("actions").get(0).path("safeLabel").asText())
-        .isEqualTo("Open page");
     assertThat(steps.get(0).path("actions").get(0).path("referenceIds")).isNotEmpty();
-    assertThat(steps.get(1).path("actions").get(0).path("operationKind").asText())
-        .isEqualTo("press");
-    assertThat(steps.get(1).path("actions").get(0).path("safeLabel").asText())
-        .isEqualTo("Press key");
     assertThat(result.path("publication").path("status").asText()).isEqualTo("PUBLISHED");
   }
 
@@ -301,13 +283,7 @@ class GuidedPublicPresentationIT {
       for (JsonNode action : step.path("actions")) {
         assertThat(keys(action))
             .containsExactlyInAnyOrder(
-                "admissionId",
-                "ordinal",
-                "attemptOrdinal",
-                "operationKind",
-                "safeLabel",
-                "outcome",
-                "referenceIds");
+                "admissionId", "ordinal", "attemptOrdinal", "outcome", "referenceIds");
       }
     }
     assertThat(keys(result.path("progress"))).containsExactlyInAnyOrder("stepCount", "activeStep");
@@ -333,15 +309,13 @@ class GuidedPublicPresentationIT {
     // field.
     replicaUpdate(
         "UPDATE studio_guided_actions SET proposal = jsonb_set(proposal,'{operation}',"
-            + "jsonb_build_object('kind','fill','value',jsonb_build_object('kind','secretRef',"
-            + "'sourceInputId',?::text,'secretValue',?::text))) || jsonb_build_object("
-            + "'target',jsonb_build_object('kind','page','documentId',?::text,'generation',0,"
-            + "'locator',jsonb_build_object('kind','label','value',?::text,'exact',true))),"
+            + "jsonb_build_object('kind','step','code',?::text,'captures','[]'::jsonb,'uses',"
+            + "jsonb_build_array(jsonb_build_object('kind','secret','id',?::text)),'sourceHash',"
+            + "repeat('a',64),'secretValue',?::text)),"
             + " document = document || jsonb_build_object('plantedEvidence',?::text)"
             + " WHERE session_id=? AND step_id=?",
+        "await page.getByLabel('" + SECRET_VALUE + "').fill('" + SECRET_VALUE + "');",
         SECRET_INPUT,
-        SECRET_VALUE,
-        SECRET_VALUE,
         SECRET_VALUE,
         SECRET_VALUE,
         id,
@@ -373,8 +347,8 @@ class GuidedPublicPresentationIT {
           .doesNotContain("plantedEvidence");
     }
     JsonNode action = result.path("explanation").path("steps").get(1).path("actions").get(0);
-    assertThat(action.path("operationKind").asText()).isEqualTo("fill");
-    assertThat(action.path("safeLabel").asText()).isEqualTo("Fill field");
+    assertThat(action.has("operationKind")).isFalse();
+    assertThat(action.toString()).doesNotContain("await page");
     assertThat(action.path("referenceIds").toString())
         .as("the declared reference id is named, the value is not")
         .contains(SECRET_INPUT);
@@ -434,11 +408,7 @@ class GuidedPublicPresentationIT {
     JsonNode result = sessions.read(owner, id, "result");
     JsonNode actions = result.path("explanation").path("steps").get(0).path("actions");
 
-    assertThat(actions)
-        .as("ordinal 0 twice (two attempts), then the untouched ordinal 1")
-        .hasSize(3);
-    assertThat(actions.get(2).path("ordinal").asInt()).isEqualTo(1);
-    assertThat(actions.get(2).path("attemptOrdinal").asInt()).isZero();
+    assertThat(actions).as("ordinal 0 twice: the two attempts, one step").hasSize(2);
     assertThat(actions.get(0).path("admissionId").asText()).isEqualTo(attemptZero);
     assertThat(actions.get(0).path("attemptOrdinal").asInt()).isZero();
     assertThat(actions.get(0).path("outcome").asText()).isEqualTo("FAILED");

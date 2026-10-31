@@ -287,26 +287,12 @@ public final class GuidedSessionService {
       String key,
       JsonNode question,
       JsonNode meanings) {
-    return translationQuestion(controller, id, fence, key, question, meanings, null);
-  }
-
-  public JsonNode translationQuestion(
-      Authentication controller,
-      String id,
-      long fence,
-      String key,
-      JsonNode question,
-      JsonNode meanings,
-      JsonNode capture) {
     return translationTransaction(
         controller,
         id,
         fence,
         session -> {
-          questions.create(session.document(), question, meanings, capture);
-          if (capture != null && publication != null) {
-            publication.questioned(session, capture, clock.instant());
-          }
+          questions.create(session.document(), question, meanings);
           JsonNode created = clarification(controller, id, fence, key, question);
           translation.continuation(id, "AWAITING_CLARIFICATION");
           return created;
@@ -320,9 +306,8 @@ public final class GuidedSessionService {
     failTranslation(controller, id, fence, code, null);
   }
 
-  /** The runner-time gates (ADR-SC-007 D5/D8): the refusal that ended a run at prepare. */
-  private static final Set<String> RUNNER_REFUSAL_GATES =
-      Set.of("RUNNER_OPTION_NOT_PRESENT", "RUNNER_NO_DURABLE_LOCATOR", "RUNNER_READ_NOT_ALLOWED");
+  /** The step gates (ADR-SC-008 D3.3): the prepare refusal that ended a run. */
+  private static final Set<String> RUNNER_REFUSAL_GATES = Set.of("STEP_SYNTAX", "STEP_PRE_FENCE");
 
   /**
    * @param refusalGate the runner-time gate that refused at prepare, stored as {@code
@@ -336,8 +321,6 @@ public final class GuidedSessionService {
     require(
         Set.of(
                 "BUDGET_EXCEEDED",
-                // ADR-SC-007 D8: the authored option is not among the live options (G1).
-                "TARGET_MISMATCH",
                 "MISSING_SOURCE",
                 "INVALID_CONTRACT",
                 "RUNTIME_INCOMPATIBLE",
@@ -345,10 +328,6 @@ public final class GuidedSessionService {
                 "BINDING_ORDER",
                 "STALE_GENERATION",
                 "UNSUPPORTED_SURFACE",
-                // The model refused the step itself (UNSUPPORTED_CAPABILITY or
-                // INSUFFICIENT_EVIDENCE):
-                // Studio cannot do this step yet.
-                "UNSUPPORTED_STEP",
                 // STUDIO-FLEX-001: the learning page stayed off the allowed domains past the
                 // runner's return window.
                 "ORIGIN_NOT_ALLOWED",
@@ -1162,23 +1141,7 @@ public final class GuidedSessionService {
       String key,
       JsonNode proposal,
       String preparationId) {
-    try {
-      return admitChecked(controller, id, fence, key, proposal, preparationId);
-    } catch (GuidedSessionException refusal) {
-      if (refusal.getMessage().equals("POLICY_DENIED")
-          && com.citi.put.checks.studio.guided.translation.GuidedPolicyReason.of(
-                  refusal.messageCode())
-              != null) {
-        // Persist the guard refusal in its own authenticated transaction after admission rolls
-        // back. Never reserve a native admission or leave a refused prefix runnable.
-        try {
-          failTranslation(controller, id, fence, "POLICY_DENIED");
-        } catch (GuidedSessionException noCurrentAuthority) {
-          // Cancellation, expiry or a replaced fence already prevents any further effect.
-        }
-      }
-      throw refusal;
-    }
+    return admitChecked(controller, id, fence, key, proposal, preparationId);
   }
 
   private JsonNode admitChecked(
@@ -1213,22 +1176,11 @@ public final class GuidedSessionService {
           }
           require(
               proposal
-                      .path("target")
-                      .path("documentId")
-                      .equals(session.progress().path("documentId"))
-                  && GuidedContracts.same(
-                      proposal.path("target").path("generation"), proposal.path("generation")),
+                  .path("executionEvidence")
+                  .path("documentId")
+                  .equals(session.progress().path("documentId")),
               "STALE_GENERATION",
               409);
-          if (incremental.pending(id)) {
-            var decision =
-                com.citi.put.checks.studio.guided.translation.GuidedActionGuard.evaluateProposal(
-                    session.progress(), translation.currentManifest(id), proposal);
-            if (decision.refused() && expectedPressInheritance(session, proposal).isNull()) {
-              throw new GuidedSessionException(
-                  "POLICY_DENIED", 422, decision.refusal().name(), false, null);
-            }
-          }
           JsonNode coordinate = proposal.path("coordinate");
           List<ObjectNode> actions = repository.actions(id);
           int attemptOrdinal = incremental.attemptOrdinal(id, coordinate);
@@ -1261,11 +1213,9 @@ public final class GuidedSessionService {
                           a.path("coordinate").path("stepId").equals(coordinate.path("stepId"))
                               && a.path("state").asText().equals("SUCCEEDED"))
                   .count();
-          require(coordinate.path("ordinal").asLong() == ordinal, "BINDING_ORDER", 422);
+          // One step is one action at ordinal 0 (ADR-SC-008 D2); the contract allows more records.
           require(
-              ordinal < session.document().path("limits").path("maxStatementsPerStep").asInt(),
-              "BUDGET_EXCEEDED",
-              429);
+              coordinate.path("ordinal").asLong() == ordinal && ordinal == 0, "BINDING_ORDER", 422);
           boolean capability = false;
           for (JsonNode c : session.document().path("scope").path("capabilities")) {
             if (c.equals(proposal.path("operation").path("kind"))) {
@@ -1285,56 +1235,15 @@ public final class GuidedSessionService {
                   && proposal.path("contextRevision").equals(context.path("contextRevision")),
               "REVISION_CONFLICT",
               409);
-          if (proposal.path("executionEvidence").path("kind").asText().equals("initialBlank")) {
-            require(
-                repository.effectiveActions(id).isEmpty()
-                    && stepIndex == 0
-                    && ordinal == 0
-                    && proposal.path("operation").path("kind").asText().equals("navigate")
-                    && proposal.path("target").path("kind").asText().equals("page"),
-                "INVALID_CONTRACT",
-                422);
-          }
           bindings.validateAction(session.document(), proposal, context);
-          if (proposal.path("target").path("kind").asText().equals("passwordControl")) {
-            require(
-                session
-                        .progress()
-                        .path("observation")
-                        .path("coverage")
-                        .path("passwordControls")
-                        .asInt(-1)
-                    == 1,
-                "POLICY_DENIED",
-                422);
-          }
-          requireActionScope(session, proposal);
           JsonNode proof =
               preparations.authorize(
                   session.document(), proposal, context, preparationId, clock.instant());
-          require(
-              GuidedContracts.same(
-                  proof.path("pressInheritance"), expectedPressInheritance(session, proposal)),
-              "EVIDENCE_MISMATCH",
-              422);
-          JsonNode expectedSource = expectedAssertSourceBinding(session, proposal);
-          require(
-              expectedSource.isNull()
-                  ? !proof.has("assertSourceBinding")
-                  : GuidedContracts.same(proof.path("assertSourceBinding"), expectedSource),
-              "EVIDENCE_MISMATCH",
-              422);
           String policyDecisionHash = access.authorizeAction(session.document(), proposal, proof);
 
           reserve(session, "actions", 1, "maxActions");
           ObjectNode action =
-              ledger.admit(
-                  session.document(),
-                  proposal,
-                  key,
-                  policyDecisionHash,
-                  proof.path("target"),
-                  clock.instant());
+              ledger.admit(session.document(), proposal, key, policyDecisionHash, clock.instant());
           for (String field :
               List.of(
                   "executionEvidence", "evidenceHash", "authoredInputsHash", "contextRevision")) {
@@ -1355,10 +1264,7 @@ public final class GuidedSessionService {
           repository.save(session);
           // STUDIO-OBS-014 AC-10: emitted after this transaction commits, never on rollback.
           com.citi.put.checks.studio.guided.audit.StudioActionAudit.guidedActionAdmitted(
-              session.document(),
-              action.path("admission").path("admissionId").asText(),
-              proposal,
-              proof.path("target").path("identity"));
+              session.document(), action.path("admission").path("admissionId").asText(), proposal);
           return action.deepCopy();
         });
   }
@@ -1400,11 +1306,6 @@ public final class GuidedSessionService {
                               a.path("state").asText().equals("SUCCEEDED")
                                   && a.path("dispatchCount").asInt() == 1),
               "UNKNOWN_OUTCOME",
-              409);
-          require(
-              !step.path("requiresAssertion").asBoolean()
-                  || actions.stream().anyMatch(a -> a.path("assertionPassed").asBoolean()),
-              "ASSERTION_FAILED",
               409);
           // Authoritative semantic completeness is OBS-005/006; fail closed until it is installed.
           require(
@@ -1735,14 +1636,7 @@ public final class GuidedSessionService {
             return session.document().deepCopy();
           }
           if (!terminal(session)) {
-            boolean uncertain =
-                repository.actions(id).stream()
-                    .anyMatch(a -> a.path("state").asText().equals("DISPATCHING"));
-            stop(
-                session,
-                uncertain
-                    ? "UNKNOWN_OUTCOME"
-                    : request.path("reason").asText().equals("EXPIRED") ? "EXPIRED" : "FAILED");
+            stopForLifecycleReason(session, id, request.path("reason").asText());
           }
           repository.command(id, "assignment-lifecycle", key, digest, session.document());
           return session.document().deepCopy();
@@ -1851,122 +1745,6 @@ public final class GuidedSessionService {
         });
   }
 
-  public JsonNode prefixAssertSourceBinding(
-      Authentication controller, String id, long fence, JsonNode action) {
-    if (!action
-        .path("guard")
-        .path("target")
-        .path("assertTextMode")
-        .asText()
-        .equals("READ_BINDING_SOURCE")) {
-      return com.fasterxml.jackson.databind.node.NullNode.instance;
-    }
-    GuidedInternalSecurity.requireRole(controller, "backend-controller");
-    return repository.transaction(
-        () -> {
-          var session = repository.lock(id);
-          owner(controller, "backend-controller", session, fence);
-          active(session);
-          access.checkSourceCurrent(session.document());
-          return preparations.prefixSourceBinding(
-              id,
-              translation.state(id).path("plan"),
-              action,
-              materialization.context(session.document()),
-              session.progress().path("observation"));
-        });
-  }
-
-  public JsonNode assertSourceBinding(
-      Authentication controller, String id, long fence, JsonNode proposal) {
-    GuidedInternalSecurity.requireRole(controller, "backend-controller");
-    return repository.transaction(
-        () -> {
-          var session = repository.lock(id);
-          owner(controller, "backend-controller", session, fence);
-          active(session);
-          access.checkSourceCurrent(session.document());
-          return expectedAssertSourceBinding(session, proposal);
-        });
-  }
-
-  private JsonNode expectedAssertSourceBinding(
-      GuidedSessionRepository.Session session, JsonNode proposal) {
-    String id = session.document().path("sessionId").asText();
-    if (translation == null || !translation.exists(id)) {
-      return com.fasterxml.jackson.databind.node.NullNode.instance;
-    }
-    return preparations.sourceBinding(
-        id,
-        translation.state(id).path("plan"),
-        proposal,
-        materialization.context(session.document()));
-  }
-
-  public JsonNode pressInheritance(
-      Authentication controller, String id, long fence, JsonNode proposal) {
-    GuidedInternalSecurity.requireRole(controller, "backend-controller");
-    return repository.transaction(
-        () -> {
-          var session = repository.lock(id);
-          owner(controller, "backend-controller", session, fence);
-          active(session);
-          access.checkSourceCurrent(session.document());
-          JsonNode inheritance = expectedPressInheritance(session, proposal);
-          if (translation != null && translation.exists(id)) {
-            var guard =
-                com.citi.put.checks.studio.guided.translation.GuidedActionGuard.evaluateProposal(
-                    session.progress(), translation.currentManifest(id), proposal);
-            if (guard.refused() && inheritance.isNull()) {
-              throw new GuidedSessionException(
-                  "POLICY_DENIED", 422, guard.refusal().name(), false, null);
-            }
-          }
-          return inheritance;
-        });
-  }
-
-  private void requireActionScope(GuidedSessionRepository.Session session, JsonNode proposal) {
-    String id = session.document().path("sessionId").asText();
-    if (!proposal.path("target").path("kind").asText().equals("node")
-        || translation == null
-        || !translation.exists(id)) {
-      return;
-    }
-    JsonNode found = null;
-    for (JsonNode obligation : translation.state(id).path("plan").path("obligations")) {
-      if (obligation.path("stepId").equals(proposal.path("coordinate").path("stepId"))
-          && GuidedContracts.same(
-              obligation.path("occurrence"), proposal.path("coordinate").path("ordinal"))) {
-        require(found == null, "EVIDENCE_MISMATCH", 422);
-        found = obligation;
-      }
-    }
-    require(found != null, "EVIDENCE_MISMATCH", 422);
-    JsonNode facts = session.progress().path("observation").path("facts");
-    require(
-        com.citi.put.checks.studio.guided.translation.GuidedGates.scopeSatisfied(
-            found, facts, facts.path(proposal.path("target").path("ref").asText())),
-        "INVALID_CONTRACT",
-        422);
-  }
-
-  private JsonNode expectedPressInheritance(
-      GuidedSessionRepository.Session session, JsonNode proposal) {
-    String id = session.document().path("sessionId").asText();
-    if (translation == null || !translation.exists(id)) {
-      return com.fasterxml.jackson.databind.node.NullNode.instance;
-    }
-    JsonNode state = translation.state(id);
-    return preparations.inheritance(
-        id,
-        state.path("manifest"),
-        state.path("plan"),
-        proposal,
-        session.progress().path("observation"),
-        materialization.context(session.document()));
-  }
-
   /**
    * Called by authenticated runner-client transport only; never exposed as a body-trusting route.
    */
@@ -1989,23 +1767,6 @@ public final class GuidedSessionService {
                   <= 0,
               "EXPIRED",
               409);
-          // ADR-SC-007 D2/D15: the target the runner reports must agree with the fact the gates
-          // admitted, before anything is stored or admitted.
-          GuidedPreparationCrossCheck.verify(
-              proposal, proof, session.progress().path("observation"));
-          requireActionScope(session, proposal);
-          require(
-              GuidedContracts.same(
-                  proof.path("pressInheritance"), expectedPressInheritance(session, proposal)),
-              "EVIDENCE_MISMATCH",
-              422);
-          JsonNode expectedSource = expectedAssertSourceBinding(session, proposal);
-          require(
-              expectedSource.isNull()
-                  ? !proof.has("assertSourceBinding")
-                  : GuidedContracts.same(proof.path("assertSourceBinding"), expectedSource),
-              "EVIDENCE_MISMATCH",
-              422);
           if (publication != null) {
             publication.capturePreparationObservation(session, proposal, proof, clock.instant());
           }
@@ -2395,23 +2156,21 @@ public final class GuidedSessionService {
           ObjectNode report = (ObjectNode) request.path("ledger");
           path(id, report);
           ObjectNode stored = action(id, report.path("admission").path("admissionId").asText());
-          ledger.verifyReport(stored, report, preparedReport);
+          // The receipt's closed code is the truth; the coarse ledger enum is derived from it.
+          ledger.verifyReport(
+              stored,
+              report,
+              preparedReport,
+              GuidedActionLedger.derive(request.path("receipt").path("closedCode")));
           require(stored.path("ownerFence").asLong() == fence, "STALE_FENCE", 409);
           JsonNode proposal =
               repository.proposal(report.path("admission").path("admissionId").asText());
-          String kind = proposal.path("operation").path("kind").asText();
-          require(
-              kind.equals("assert")
-                  ? !report.path("state").asText().equals("SUCCEEDED")
-                      || report.path("assertionPassed").asBoolean()
-                  : report.path("assertionPassed").isNull(),
-              "INVALID_CONTRACT",
-              422);
           require(
               stored.equals(report) || stored.path("state").asText().equals("DISPATCHING"),
               "UNKNOWN_OUTCOME",
               409);
-          if (kind.equals("read") && report.path("state").asText().equals("SUCCEEDED")) {
+          if (report.path("state").asText().equals("SUCCEEDED")
+              && !proposal.path("operation").path("captures").isEmpty()) {
             bindings.successfulRead(
                 session.document(),
                 proposal,
@@ -2419,18 +2178,18 @@ public final class GuidedSessionService {
                 request.path("availability"),
                 materialization.context(session.document()));
           } else {
-            require(request.path("availability").isNull(), "INVALID_CONTRACT", 422);
+            require(request.path("availability").isEmpty(), "INVALID_CONTRACT", 422);
           }
           if (stored.equals(report)) {
             return session.document().deepCopy();
           }
           if (preparedReport == null) {
-            repository.saveAction(report);
+            repository.saveAction(report, request.path("receipt"));
           } else {
-            repository.saveAction(report, preparedReport);
+            repository.saveAction(report, preparedReport, request.path("receipt"));
           }
           if (secretAudit != null) {
-            secretAudit.guidedOutcome(session.document(), report);
+            secretAudit.guidedOutcome(session.document(), report, request.path("secretUse"));
           }
           if (report.path("state").asText().equals("SUCCEEDED")) {
             session
@@ -2502,7 +2261,7 @@ public final class GuidedSessionService {
           if (admitted) {
             repository.saveAction(reported);
             if (secretAudit != null) {
-              secretAudit.guidedOutcome(session.document(), reported);
+              secretAudit.guidedOutcome(session.document(), reported, contracts.object());
             }
           } else {
             incremental.settle(id, receipt.path("requestDigest").asText(), "DRIFT");
@@ -2555,20 +2314,31 @@ public final class GuidedSessionService {
         session -> {
           // OBS-015 B2B-01 L1: owner/browser loss must land while an append ACK is pending.
           materialization.verifyLifecycle(session.document(), request);
-          boolean uncertain =
-              repository.actions(id).stream()
-                  .anyMatch(a -> a.path("state").asText().equals("DISPATCHING"));
           // STUDIO-OBS-009 LIFECYCLE-REASON-01: the runner's stop reason maps as it does on the
           // no-browser path (assignmentLifecycle). An uncertain action still wins; every reason
           // but EXPIRED stays FAILED. No tolerance: the backend does not second-guess the worker's
           // clock (T0 ruling, R9/R10 precedent).
-          stop(
-              session,
-              uncertain
-                  ? "UNKNOWN_OUTCOME"
-                  : request.path("reason").asText().equals("EXPIRED") ? "EXPIRED" : "FAILED");
+          stopForLifecycleReason(session, id, request.path("reason").asText());
           return session.document().deepCopy();
         });
+  }
+
+  /**
+   * Stops the session for a runner lifecycle report: an uncertain action wins with UNKNOWN_OUTCOME,
+   * EXPIRED stays EXPIRED, every other reason is FAILED. A FAILED stop with no earlier code records
+   * {@code progress.errorCode = LEARNING_<reason>} (the closed lifecycle reason, the only cause the
+   * wire carries) before {@code stop} saves, so the author sees a code instead of a bare FAILED.
+   */
+  private void stopForLifecycleReason(
+      GuidedSessionRepository.Session session, String id, String reason) {
+    boolean uncertain =
+        repository.actions(id).stream()
+            .anyMatch(a -> a.path("state").asText().equals("DISPATCHING"));
+    String state = uncertain ? "UNKNOWN_OUTCOME" : reason.equals("EXPIRED") ? "EXPIRED" : "FAILED";
+    if (state.equals("FAILED") && !session.progress().has("errorCode")) {
+      session.progress().put("errorCode", "LEARNING_" + reason);
+    }
+    stop(session, state);
   }
 
   private JsonNode internal(

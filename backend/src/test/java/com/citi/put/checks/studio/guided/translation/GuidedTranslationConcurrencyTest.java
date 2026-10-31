@@ -190,62 +190,6 @@ class GuidedTranslationConcurrencyTest {
   }
 
   @Test
-  void repeatedProposalsAgainstAnUnadmittedReservationAreCountedPerStep() {
-    try (var db = new GuidedTranslationMigrationTest.Database()) {
-      var doc = db.seed("s");
-      db.init(doc);
-      var proposal = C.object().put("sessionId", "s");
-      proposal.putObject("coordinate").put("stepId", "step").put("ordinal", 0);
-      db.tx.executeWithoutResult(
-          s -> {
-            db.sessions.lock("s");
-            db.store.acceptPlan("s", 0, plan(OBLIGATION));
-          });
-      java.util.function.Consumer<Integer> askedOnce =
-          number ->
-              db.tx.executeWithoutResult(
-                  s -> {
-                    db.sessions.lock("s");
-                    var attempt =
-                        db.store.reserveAttempt(
-                            doc,
-                            "r" + number,
-                            1,
-                            "NEXT_ACTION",
-                            "b".repeat(64),
-                            1,
-                            50,
-                            10,
-                            "t",
-                            Instant.now().plusSeconds(90));
-                    db.store.reserveObligation(doc, OBLIGATION, proposal);
-                    db.store.finishAttempt("s", attempt.attemptId(), "APPLIED", null, 1, 1);
-                  });
-      java.util.function.Supplier<Integer> repeats =
-          () ->
-              db.tx.execute(
-                  s -> {
-                    db.sessions.lock("s");
-                    return db.store.repeatedUnadmittedProposals("s", "step");
-                  });
-      assertThat(repeats.get()).isZero();
-      askedOnce.accept(1);
-      assertThat(repeats.get()).isZero();
-      askedOnce.accept(2);
-      assertThat(repeats.get()).isEqualTo(1);
-      askedOnce.accept(3);
-      assertThat(repeats.get()).isEqualTo(2);
-      int other =
-          db.tx.execute(
-              s -> {
-                db.sessions.lock("s");
-                return db.store.repeatedUnadmittedProposals("s", "other-step");
-              });
-      assertThat(other).isZero();
-    }
-  }
-
-  @Test
   void sessionThenSourceLockProducesCoherentSnapshotsWhileAnotherSessionAndEditorRun()
       throws Exception {
     try (var db = new GuidedTranslationMigrationTest.Database();

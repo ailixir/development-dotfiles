@@ -34,28 +34,36 @@ public final class GuidedDispatchService {
     this.references = references;
   }
 
-  private JsonNode secretInput(JsonNode context, JsonNode proposal) {
-    JsonNode value = proposal.path("operation").path("value");
-    if (!value.path("kind").asText().equals("secretRef")) {
-      return null;
+  /**
+   * The secret inputs a step may use: the secret entries of its server-set {@code uses}, each
+   * resolved to the authored input that declares it for this step. At most eight.
+   */
+  private java.util.List<JsonNode> secretInputs(JsonNode context, JsonNode proposal) {
+    var inputs = new java.util.ArrayList<JsonNode>();
+    for (JsonNode use : proposal.path("operation").path("uses")) {
+      if (!use.path("kind").asText().equals("secret")) {
+        continue;
+      }
+      JsonNode input = null;
+      for (JsonNode candidate : context.path("authoredInputs").path("inputs")) {
+        if (candidate.path("secretId").asText().equals(use.path("id").asText())) {
+          input = candidate;
+        }
+      }
+      require(
+          input != null
+              && input.path("kind").asText().equals("secretRef")
+              && input.path("sourceStepId").equals(proposal.path("coordinate").path("stepId")),
+          "REFERENCE_MISMATCH",
+          422);
+      inputs.add(input);
     }
-    JsonNode input =
-        com.citi.put.checks.studio.guided.publication.GuidedPlanBuilder.unique(
-            context.path("authoredInputs").path("inputs"),
-            "inputId",
-            value.path("sourceInputId").asText());
-    require(
-        input.path("kind").asText().equals("secretRef")
-            && input.path("sourceStepId").equals(proposal.path("coordinate").path("stepId"))
-            && input.path("intendedSlot").asText().equals("fill.value")
-            && proposal.path("target").path("kind").asText().equals("passwordControl"),
-        "REFERENCE_MISMATCH",
-        422);
-    return input;
+    require(inputs.size() <= 8, "BUDGET_EXCEEDED", 429);
+    return inputs;
   }
 
-  private void preflight(String id, JsonNode input) {
-    if (input == null) {
+  private void preflight(String id, java.util.List<JsonNode> inputs) {
+    if (inputs.isEmpty()) {
       return;
     }
     require(references != null, "SECRET_UNAVAILABLE", 404);
@@ -67,7 +75,7 @@ public final class GuidedDispatchService {
           java.util.UUID.fromString(session.path("testId").asText()),
           scope.path("principalId").asText(),
           new com.citi.put.checks.studio.dispatch.ReferenceDeclarations(
-              java.util.List.of(), java.util.List.of(input.path("secretId").asText())));
+              java.util.List.of(), secretIds(inputs)));
     } catch (UnknownReferenceException failure) {
       throw new com.citi.put.checks.studio.guided.session.GuidedSessionException(
           "SECRET_UNAVAILABLE", 404);
@@ -75,6 +83,10 @@ public final class GuidedDispatchService {
       throw new com.citi.put.checks.studio.guided.session.GuidedSessionException(
           "VAULT_UNAVAILABLE", 503);
     }
+  }
+
+  private static java.util.List<String> secretIds(java.util.List<JsonNode> inputs) {
+    return inputs.stream().map(input -> input.path("secretId").asText()).toList();
   }
 
   /** Assignment intent commits before the worker uses its own credential to claim. */
@@ -140,6 +152,7 @@ public final class GuidedDispatchService {
     return sessions.committedObservationRefresh(controller, id, fence, key, request, response);
   }
 
+  /** Prepare an already reserved proposal and admit it: the resume path of a crashed advance. */
   public JsonNode prepareAndAdmit(
       Authentication controller, String id, long fence, String key, JsonNode proposal) {
     noTransaction();
@@ -147,8 +160,20 @@ public final class GuidedDispatchService {
     if (existing != null) {
       return existing;
     }
+    JsonNode proof = prepareStep(controller, id, fence, proposal);
+    return admitPrepared(controller, id, fence, key, proposal, proof);
+  }
+
+  /**
+   * The runner prepare of one step proposal: the syntax admission (the code constructs, its hash
+   * matches) and, for learning, a run up to the first effectful call. A repairable refusal is a
+   * {@link com.citi.put.checks.studio.guided.session.GuidedSessionException} with messageCode
+   * STEP_SYNTAX or STEP_PRE_FENCE. Nothing is stored or reserved here.
+   */
+  public JsonNode prepareStep(Authentication controller, String id, long fence, JsonNode proposal) {
+    noTransaction();
     ObjectNode context = sessions.runnerContext(controller, id, fence);
-    preflight(id, secretInput(context, proposal));
+    preflight(id, secretInputs(context, proposal));
     try {
       runner.send("context", context);
     } catch (RuntimeException failure) {
@@ -162,14 +187,20 @@ public final class GuidedDispatchService {
     }
     ObjectNode request = materialization.identity(context);
     request.set("proposal", proposal);
-    request.set("pressInheritance", sessions.pressInheritance(controller, id, fence, proposal));
-    JsonNode sourceBinding = sessions.assertSourceBinding(controller, id, fence, proposal);
-    if (!sourceBinding.isNull()) {
-      request.set("assertSourceBinding", sourceBinding);
-    }
     request.put("requestDigest", GuidedContracts.hash(proposal));
     request.set("expiresAt", context.path("leaseExpiresAt"));
-    JsonNode proof = runner.send("prepare", request);
+    return runner.send("prepare", request);
+  }
+
+  /** Stores the preparation proof and admits the reserved proposal under {@code key}. */
+  public JsonNode admitPrepared(
+      Authentication controller,
+      String id,
+      long fence,
+      String key,
+      JsonNode proposal,
+      JsonNode proof) {
+    noTransaction();
     sessions.storePreparation(controller, id, fence, proposal, proof);
     return sessions.admit(
         controller, id, fence, key, proposal, proof.path("preparationId").asText());
@@ -200,8 +231,9 @@ public final class GuidedDispatchService {
       }
     }
     try {
-      JsonNode input = secretInput(won.context(), won.proposal());
-      if (input == null) {
+      java.util.List<JsonNode> inputs = secretInputs(won.context(), won.proposal());
+      if (inputs.isEmpty()) {
+        payload.putArray("secrets");
         runner.send(
             "dispatch",
             payload,
@@ -210,7 +242,7 @@ public final class GuidedDispatchService {
       } else {
         require(references != null, "SECRET_UNAVAILABLE", 404);
         JsonNode session = sessions.secretSession(id), scope = session.path("scope");
-        String secretId = input.path("secretId").asText();
+        java.util.List<String> secretIds = secretIds(inputs);
         try (var resolved =
             references.resolve(
                 scope.path("csiId").asText(),
@@ -218,67 +250,75 @@ public final class GuidedDispatchService {
                 java.util.UUID.fromString(session.path("testId").asText()),
                 scope.path("principalId").asText(),
                 new com.citi.put.checks.studio.dispatch.ReferenceDeclarations(
-                    java.util.List.of(), java.util.List.of(secretId)))) {
-          ObjectNode metadata =
-              new GuidedContracts()
-                  .object()
-                  .put("secretId", secretId)
-                  .put("versionId", resolved.secretVersions().get(secretId));
-          var origins = metadata.putArray("allowedOrigins");
-          resolved
-              .secretOrigins()
-              .getOrDefault(secretId, java.util.List.of())
-              .forEach(origins::add);
-          sessions.recordSecretDecision(
-              id,
-              won.ledger(),
-              secretId,
-              resolved.secretVersions().get(secretId),
-              com.citi.put.checks.studio.secrets.SecretUseAuditRecorder.ResolutionOutcome.RESOLVED);
+                    java.util.List.of(), secretIds))) {
           String origin = won.proposal().path("executionEvidence").path("origin").asText();
-          if (origins.isEmpty()
-              || origins.size() > 16
-              || !sessions.allowedDomains().allows(origin)
-              || metadata.path("versionId").asText().length() > 256
-              || !resolved
-                  .secretOrigins()
-                  .getOrDefault(secretId, java.util.List.of())
-                  .contains(origin)) {
-            sessions.refuseResolvedSecret(id, won.ledger());
-            throw new com.citi.put.checks.studio.guided.session.GuidedSessionException(
-                "ORIGIN_NOT_ALLOWED", 403);
+          var envelopes =
+              new java.util.ArrayList<
+                  com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient.SecretEnvelope>();
+          for (String secretId : secretIds) {
+            ObjectNode metadata =
+                new GuidedContracts()
+                    .object()
+                    .put("secretId", secretId)
+                    .put("versionId", resolved.secretVersions().get(secretId));
+            var origins = metadata.putArray("allowedOrigins");
+            resolved
+                .secretOrigins()
+                .getOrDefault(secretId, java.util.List.of())
+                .forEach(origins::add);
+            sessions.recordSecretDecision(
+                id,
+                won.ledger(),
+                secretId,
+                resolved.secretVersions().get(secretId),
+                com.citi.put.checks.studio.secrets.SecretUseAuditRecorder.ResolutionOutcome
+                    .RESOLVED);
+            // The page the step starts on must be on the deployment's list. Which origin the
+            // secret is typed on is judged at the fill, by the runtime form-action and origin
+            // checks; a step that navigates and then fills is not refused here.
+            if (origins.isEmpty()
+                || origins.size() > 16
+                || !sessions.allowedDomains().allows(origin)
+                || metadata.path("versionId").asText().length() > 256) {
+              sessions.refuseResolvedSecret(id, won.ledger());
+              throw new com.citi.put.checks.studio.guided.session.GuidedSessionException(
+                  "ORIGIN_NOT_ALLOWED", 403);
+            }
+            envelopes.add(
+                new com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient.SecretEnvelope(
+                    metadata, resolved.secretValues().get(secretId)));
           }
-          runner.sendSecret(
-              payload,
-              metadata,
-              resolved.secretValues().get(secretId),
-              java.time.Instant.parse(session.path("expiresAt").asText()));
+          runner.sendSecrets(
+              payload, envelopes, java.time.Instant.parse(session.path("expiresAt").asText()));
         } catch (StudioReferenceResolver.ReferenceUnavailableException failure) {
-          sessions.recordSecretDecision(
+          recordSecretFailure(
               id,
               won.ledger(),
-              secretId,
-              null,
+              secretIds,
+              failure.getReferenceName(),
               com.citi.put.checks.studio.secrets.SecretUseAuditRecorder.ResolutionOutcome
-                  .UNAVAILABLE);
+                  .UNAVAILABLE,
+              null);
           throw new com.citi.put.checks.studio.guided.session.GuidedSessionException(
               "SECRET_UNAVAILABLE", 404);
         } catch (VaultProviderUnavailableException failure) {
-          sessions.recordSecretDecision(
+          // An outage does not say which read failed: every secret still unresolved is affected.
+          recordSecretFailure(
               id,
               won.ledger(),
-              secretId,
+              secretIds,
               null,
               com.citi.put.checks.studio.secrets.SecretUseAuditRecorder.ResolutionOutcome
-                  .VAULT_UNAVAILABLE);
+                  .VAULT_UNAVAILABLE,
+              null);
           throw new com.citi.put.checks.studio.guided.session.GuidedSessionException(
               "VAULT_UNAVAILABLE", 503);
         } catch (SecretTooLongException failure) {
-          sessions.recordSecretDecision(
+          recordSecretFailure(
               id,
               won.ledger(),
-              secretId,
-              null,
+              secretIds,
+              failure.secretId(),
               com.citi.put.checks.studio.secrets.SecretUseAuditRecorder.ResolutionOutcome
                   .UNAVAILABLE,
               "SECRET_TOO_LONG");
@@ -306,6 +346,30 @@ public final class GuidedDispatchService {
     reconcileLostAcknowledgment(id, won.ledger().path("admission").path("admissionId").asText());
     // The owner-authenticated callback is commit authority; response is only transport ack.
     return won.ledger();
+  }
+
+  /**
+   * Records the failed resolution. When the resolver names the secret that failed only that secret
+   * is marked; otherwise (an outage) every secret of the step is.
+   */
+  void recordSecretFailure(
+      String id,
+      JsonNode ledger,
+      java.util.List<String> secretIds,
+      String failedSecretId,
+      com.citi.put.checks.studio.secrets.SecretUseAuditRecorder.ResolutionOutcome outcome,
+      String code) {
+    java.util.List<String> affected =
+        failedSecretId != null && secretIds.contains(failedSecretId)
+            ? java.util.List.of(failedSecretId)
+            : secretIds;
+    for (String secretId : affected) {
+      if (code == null) {
+        sessions.recordSecretDecision(id, ledger, secretId, null, outcome);
+      } else {
+        sessions.recordSecretDecision(id, ledger, secretId, null, outcome, code);
+      }
+    }
   }
 
   /** Only terminal reconciliation masks a prior interrupt, after dispatch buffers are erased. */

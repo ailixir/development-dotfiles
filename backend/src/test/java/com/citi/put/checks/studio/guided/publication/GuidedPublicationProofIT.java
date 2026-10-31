@@ -9,8 +9,10 @@ import static org.mockito.Mockito.doThrow;
 
 import com.citi.put.checks.studio.StudioExecutionFixtures;
 import com.citi.put.checks.studio.StudioExecutionProperties;
+import com.citi.put.checks.studio.StudioService;
 import com.citi.put.checks.studio.dispatch.ExecutionReadiness;
 import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
+import com.citi.put.checks.studio.dispatch.StudioProofPromotionService;
 import com.citi.put.checks.studio.dispatch.StudioReferenceResolver;
 import com.citi.put.checks.studio.dispatch.StudioScheduledUiTestLauncher;
 import com.citi.put.checks.studio.entity.UITest;
@@ -22,6 +24,7 @@ import com.citi.put.checks.studio.secrets.VaultProviderUnavailableException;
 import com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture;
 import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.Instant;
 import java.util.List;
@@ -86,6 +89,8 @@ class GuidedPublicationProofIT {
   @Autowired private GuidedSessionRepository sessions;
   @Autowired private GuidedPublicationBaseRepository bases;
   @Autowired private TransactionTemplate tx;
+  @Autowired private StudioProofPromotionService promotion;
+  @Autowired private StudioService studioService;
   @Autowired private JdbcTemplate jdbc;
   @Autowired private StudioScheduledUiTestLauncher scheduler;
   @SpyBean private LearnProofRepository learnProofs;
@@ -191,6 +196,20 @@ class GuidedPublicationProofIT {
     return id;
   }
 
+  /**
+   * The same owner, but with a Core user id that is not the e-mail (the normal production shape).
+   */
+  private Authentication coreUser() {
+    return new com.citi.put.checks.security.BffAuthenticationToken(
+        new com.citi.put.checks.security.UserIdentity(
+            "core-user-42",
+            OWNER,
+            "Owner",
+            "Ops",
+            List.of(),
+            List.of(new com.citi.put.checks.security.CsiOwnershipEntry(CSI, "owner"))));
+  }
+
   private Authentication user() {
     return StudioExecutionFixtures.identity(OWNER, CSI, "owner");
   }
@@ -232,12 +251,9 @@ class GuidedPublicationProofIT {
     var receipt = finalize(learned.sessionId(), "proof-key-1");
 
     UUID revisionId = UUID.fromString(receipt.document().path("revisionId").asText());
-    assertThat(
-            jdbc.queryForObject(
-                "SELECT confirmed_revision_id FROM ui_tests WHERE id=?",
-                UUID.class,
-                learned.testId()))
-        .isEqualTo(revisionId);
+    // Finalize records the revision; only the proof confirms it (ADR-SC-008 D5).
+    assertThat(pointer("candidate_revision_id", learned.testId())).isEqualTo(revisionId);
+    assertThat(pointer("confirmed_revision_id", learned.testId())).isNull();
     var executions =
         jdbc.queryForList(
             "SELECT id,status,trigger_source,schedule_id,scheduled_at,principal,revision_id,"
@@ -366,13 +382,10 @@ class GuidedPublicationProofIT {
     var receipt = finalize(learned.sessionId(), "proof-refused-" + code);
 
     UUID revisionId = UUID.fromString(receipt.document().path("revisionId").asText());
-    assertThat(
-            jdbc.queryForObject(
-                "SELECT confirmed_revision_id FROM ui_tests WHERE id=?",
-                UUID.class,
-                learned.testId()))
-        .as("the publication is kept: %s", code)
+    assertThat(pointer("candidate_revision_id", learned.testId()))
+        .as("the publication is kept, recorded and not confirmed: %s", code)
         .isEqualTo(revisionId);
+    assertThat(pointer("confirmed_revision_id", learned.testId())).isNull();
     assertThat(
             count("SELECT count(*) FROM ui_test_executions WHERE ui_test_id=?", learned.testId()))
         .as("no execution: %s", code)
@@ -480,6 +493,9 @@ class GuidedPublicationProofIT {
                 learned.testId()))
         .as("the revision pointer did not move")
         .isNull();
+    assertThat(pointer("candidate_revision_id", learned.testId()))
+        .as("no candidate either")
+        .isNull();
     assertThat(count("SELECT count(*) FROM ui_test_revisions WHERE test_id=?", learned.testId()))
         .as("no revision")
         .isZero();
@@ -554,13 +570,505 @@ class GuidedPublicationProofIT {
                 secondProof.get("execution_id")))
         .as("the new proof replays the new revision")
         .isEqualTo(secondRevision);
+    assertThat(pointer("candidate_revision_id", first.testId()))
+        .as("the newest recording is the candidate")
+        .isEqualTo(secondRevision);
+    assertThat(pointer("confirmed_revision_id", first.testId())).isNull();
+    assertThat(link(first.sessionId()).get("revision_id")).isEqualTo(firstRevision);
+  }
+
+  // ---- recorded, then confirmed by the proof (ADR-SC-008 D5) ----
+
+  private UUID pointer(String column, UUID testId) {
+    return jdbc.queryForObject(
+        "SELECT " + column + " FROM ui_tests WHERE id=?", UUID.class, testId);
+  }
+
+  private UUID proofExecution(UUID testId) {
+    return jdbc.queryForObject(
+        "SELECT id FROM ui_test_executions WHERE ui_test_id=? AND trigger_source='AFTER_LEARN'"
+            + " ORDER BY started_at DESC LIMIT 1",
+        UUID.class,
+        testId);
+  }
+
+  /** What the runner's FINAL report leaves in step_results: one receipt per planned step. */
+  private ArrayNode stepResults(UUID revisionId, String status, boolean goodHash) {
+    JsonNode steps =
+        C.parse(
+                jdbc.queryForObject(
+                    "SELECT artifact::text FROM ui_test_revisions WHERE id=?",
+                    String.class,
+                    revisionId))
+            .path("steps");
+    ArrayNode out = C.object().putArray("items");
+    for (int index = 0; index < steps.size(); index++) {
+      ObjectNode step =
+          out.addObject().put("stepIndex", index).put("originalText", "").put("status", status);
+      ObjectNode receipt = step.putObject("receipt");
+      if ("PASS".equals(status)) {
+        receipt.putNull("closedCode");
+      } else {
+        receipt.put("closedCode", "TARGET_DRIFT");
+      }
+      receipt
+          .put(
+              "stepHash",
+              goodHash
+                  ? GuidedContracts.hash(
+                      steps.get(index).path("operations").path(0).path("operation"))
+                  : "f".repeat(64))
+          .put("fenceCrossed", true)
+          .put("offscreen", false)
+          .putArray("effects");
+    }
+    return out;
+  }
+
+  /** Leaves the proof execution as a FINAL report would, then runs the promotion hook. */
+  private boolean finishProof(
+      UUID testId, UUID revisionId, String executionStatus, ArrayNode steps) {
+    UUID execution = proofExecution(testId);
+    jdbc.update(
+        "UPDATE ui_test_executions SET status=?, step_results=?::jsonb WHERE id=?",
+        executionStatus,
+        steps.toString(),
+        execution);
+    return callback(execution);
+  }
+
+  /** The promotion hook as the report transaction runs it. */
+  private boolean callback(UUID execution) {
+    return Boolean.TRUE.equals(tx.execute(status -> promotion.onFinal(execution)));
+  }
+
+  private record Recorded(UUID testId, UUID revisionId) {}
+
+  private Recorded recorded() {
+    Learned learned = finalizing();
+    var receipt = finalize(learned.sessionId(), "recorded-" + learned.sessionId());
+    return new Recorded(
+        learned.testId(), UUID.fromString(receipt.document().path("revisionId").asText()));
+  }
+
+  @Test
+  void aFullPassOfTheCandidatePromotesItOnceAndWritesReceiptsBoundToIds() {
+    Recorded recorded = recorded();
+
+    assertThat(
+            finishProof(
+                recorded.testId(),
+                recorded.revisionId(),
+                "PASSED",
+                stepResults(recorded.revisionId(), "PASS", true)))
+        .isTrue();
+
+    assertThat(pointer("confirmed_revision_id", recorded.testId()))
+        .isEqualTo(recorded.revisionId());
+    assertThat(pointer("candidate_revision_id", recorded.testId())).isNull();
+    var receipts =
+        jdbc.queryForList(
+            "SELECT status, proof_execution_id, step_hash FROM studio_step_receipts WHERE revision_id=?",
+            recorded.revisionId());
+    assertThat(receipts).isNotEmpty();
+    assertThat(receipts)
+        .allSatisfy(
+            row -> {
+              assertThat(row.get("status")).isEqualTo("PASSED");
+              assertThat(row.get("proof_execution_id"))
+                  .isEqualTo(proofExecution(recorded.testId()));
+              assertThat(row.get("step_hash")).isNotNull();
+            });
+
+    // The examples recorder ran after the report transaction committed (ADR-SC-008 D6).
     assertThat(
             jdbc.queryForObject(
-                "SELECT confirmed_revision_id FROM ui_tests WHERE id=?",
-                UUID.class,
-                first.testId()))
-        .isEqualTo(secondRevision);
-    assertThat(link(first.sessionId()).get("revision_id")).isEqualTo(firstRevision);
+                "SELECT count(*) FROM studio_step_examples WHERE revision_id=?",
+                Integer.class,
+                recorded.revisionId()))
+        .isPositive();
+
+    // A duplicate callback finds the candidate already cleared: it counts once.
+    assertThat(callback(proofExecution(recorded.testId()))).isFalse();
+    assertThat(pointer("confirmed_revision_id", recorded.testId()))
+        .isEqualTo(recorded.revisionId());
+  }
+
+  @Test
+  void aProofThatIsNotAFullPassNeverPromotes() {
+    // FAILED step, SKIPPED (NOT_RUN) step with a passed execution, tampered hash, and an ERROR run.
+    record Case(String name, String executionStatus, String stepStatus, boolean goodHash) {}
+    for (Case c :
+        List.of(
+            new Case("failed", "FAILED", "FAIL", true),
+            new Case("notRun", "PASSED", "SKIPPED", true),
+            new Case("tampered", "PASSED", "PASS", false),
+            new Case("error", "ERROR", "SKIPPED", true))) {
+      Recorded recorded = recorded();
+      assertThat(
+              finishProof(
+                  recorded.testId(),
+                  recorded.revisionId(),
+                  c.executionStatus(),
+                  stepResults(recorded.revisionId(), c.stepStatus(), c.goodHash())))
+          .as(c.name())
+          .isFalse();
+      assertThat(pointer("confirmed_revision_id", recorded.testId())).as(c.name()).isNull();
+      assertThat(pointer("candidate_revision_id", recorded.testId()))
+          .as(c.name())
+          .isEqualTo(recorded.revisionId());
+    }
+  }
+
+  @Test
+  void aLatePassOfASupersededRevisionDoesNotConfirmTheNewerOne() {
+    Recorded first = recorded();
+    UUID firstProof = proofExecution(first.testId());
+    jdbc.update("UPDATE studio_dispatch_ledger SET state='DONE' WHERE test_id=?", first.testId());
+    var second = finalize(relearn(first.testId()), "late-second");
+    UUID secondRevision = UUID.fromString(second.document().path("revisionId").asText());
+    assertThat(pointer("candidate_revision_id", first.testId())).isEqualTo(secondRevision);
+
+    jdbc.update(
+        "UPDATE ui_test_executions SET status='PASSED', step_results=?::jsonb WHERE id=?",
+        stepResults(first.revisionId(), "PASS", true).toString(),
+        firstProof);
+
+    assertThat(callback(firstProof)).isFalse();
+    assertThat(pointer("confirmed_revision_id", first.testId())).isNull();
+    assertThat(pointer("candidate_revision_id", first.testId())).isEqualTo(secondRevision);
+  }
+
+  @Test
+  void twoConcurrentPromotionAttemptsForTheSameCandidatePromoteExactlyOnce() throws Exception {
+    Recorded recorded = recorded();
+    UUID execution = proofExecution(recorded.testId());
+    jdbc.update(
+        "UPDATE ui_test_executions SET status='PASSED', step_results=?::jsonb WHERE id=?",
+        stepResults(recorded.revisionId(), "PASS", true).toString(),
+        execution);
+    CountDownLatch start = new CountDownLatch(1);
+    ExecutorService pool = Executors.newFixedThreadPool(2);
+    try {
+      Callable<Boolean> attempt =
+          () -> {
+            start.await();
+            return callback(execution);
+          };
+      Future<Boolean> first = pool.submit(attempt), second = pool.submit(attempt);
+      start.countDown();
+      boolean a = first.get(30, java.util.concurrent.TimeUnit.SECONDS);
+      boolean b = second.get(30, java.util.concurrent.TimeUnit.SECONDS);
+      assertThat(a ^ b).as("exactly one attempt promoted, the other was a no-op").isTrue();
+    } finally {
+      pool.shutdownNow();
+    }
+    assertThat(pointer("confirmed_revision_id", recorded.testId()))
+        .isEqualTo(recorded.revisionId());
+    assertThat(pointer("candidate_revision_id", recorded.testId())).isNull();
+    assertThat(
+            count(
+                "SELECT count(*) FROM studio_step_receipts WHERE revision_id=?",
+                recorded.revisionId()))
+        .as("one set of receipts")
+        .isEqualTo(
+            count(
+                "SELECT count(DISTINCT step_ordinal) FROM studio_step_receipts WHERE revision_id=?",
+                recorded.revisionId()));
+  }
+
+  @Test
+  void theVerificationFollowsTheProof() {
+    Recorded recorded = recorded();
+    assertThat(readiness.readiness(recorded.testId()).name()).isEqualTo("RECORDED");
+    assertThat(promotion.verification(recorded.testId(), recorded.revisionId()).state())
+        .isEqualTo("PENDING");
+
+    finishProof(
+        recorded.testId(),
+        recorded.revisionId(),
+        "FAILED",
+        stepResults(recorded.revisionId(), "FAIL", true));
+    assertThat(promotion.verification(recorded.testId(), recorded.revisionId()).state())
+        .isEqualTo("FAILED");
+
+    // A passed execution whose receipts do not match is not promoted: INCOMPLETE, so Verify again
+    // is offered.
+    finishProof(
+        recorded.testId(),
+        recorded.revisionId(),
+        "PASSED",
+        stepResults(recorded.revisionId(), "PASS", false));
+    var incomplete = promotion.verification(recorded.testId(), recorded.revisionId());
+    assertThat(incomplete.state()).isEqualTo("INCOMPLETE");
+    assertThat(incomplete.firstUnverifiedStepId()).isNotNull();
+
+    finishProof(
+        recorded.testId(),
+        recorded.revisionId(),
+        "ERROR",
+        stepResults(recorded.revisionId(), "SKIPPED", true));
+    assertThat(promotion.verification(recorded.testId(), recorded.revisionId()).state())
+        .isEqualTo("INCOMPLETE");
+  }
+
+  @Test
+  void promotionAndTheLastRunProjectionInOneReportTransactionKeepTheConfirmedPointer() {
+    Recorded recorded = recorded();
+    UUID execution = proofExecution(recorded.testId());
+    jdbc.update(
+        "UPDATE ui_test_executions SET status='PASSED', step_results=?::jsonb, started_at=started_at WHERE id=?",
+        stepResults(recorded.revisionId(), "PASS", true).toString(),
+        execution);
+
+    tx.executeWithoutResult(
+        status -> {
+          promotion.onFinal(execution);
+          studioService.applyLastRunProjection(execution);
+        });
+
+    assertThat(pointer("confirmed_revision_id", recorded.testId()))
+        .as("the stale entity flush did not undo the promotion")
+        .isEqualTo(recorded.revisionId());
+    assertThat(pointer("candidate_revision_id", recorded.testId())).isNull();
+  }
+
+  /** Sets the one step's text in both places the draft keeps it. */
+  private void setDraftText(UUID testId, String text) {
+    jdbc.update(
+        "UPDATE ui_tests SET steps=jsonb_build_array(?::text),"
+            + " authoring=jsonb_set(authoring,'{steps,0,text}',to_jsonb(?::text)) WHERE id=?",
+        text,
+        text,
+        testId);
+  }
+
+  /** A test whose first revision A is confirmed and whose second B is recorded (B's proof idle). */
+  private record Confirmed(
+      UUID testId, UUID confirmedRevision, UUID recordedRevision, String originalText) {}
+
+  private static void noHook() {}
+
+  private Confirmed confirmedAThenRecordedB(Runnable beforeSecondLearn) {
+    Recorded a = recorded();
+    assertThat(
+            finishProof(
+                a.testId(), a.revisionId(), "PASSED", stepResults(a.revisionId(), "PASS", true)))
+        .isTrue();
+    jdbc.update("UPDATE studio_dispatch_ledger SET state='DONE' WHERE test_id=?", a.testId());
+    String original = "Open " + ObservedPublicationFixture.ORIGIN;
+    beforeSecondLearn.run();
+    setDraftText(a.testId(), original + " again");
+    var second = finalize(relearn(a.testId()), "recorded-b-" + a.testId());
+    jdbc.update("UPDATE studio_dispatch_ledger SET state='DONE' WHERE test_id=?", a.testId());
+    return new Confirmed(
+        a.testId(),
+        a.revisionId(),
+        UUID.fromString(second.document().path("revisionId").asText()),
+        original);
+  }
+
+  @Test
+  void aDraftRevertedToTheConfirmedRevisionRunsThatRevisionNotTheRecordedOne() {
+    Confirmed c = confirmedAThenRecordedB(GuidedPublicationProofIT::noHook);
+    assertThat(pointer("confirmed_revision_id", c.testId())).isEqualTo(c.confirmedRevision());
+    assertThat(pointer("candidate_revision_id", c.testId())).isEqualTo(c.recordedRevision());
+
+    // The draft follows B: the one resolver names B, and the label agrees.
+    assertThat(readiness.runnableRevisionId(c.testId())).isEqualTo(c.recordedRevision());
+    assertThat(readiness.readiness(c.testId()))
+        .isEqualTo(com.citi.put.checks.studio.readiness.StudioReadiness.RECORDED);
+
+    // Reverted to A's text it follows A: the same resolver names A, so Run is READY and not a
+    // diagnostic.
+    setDraftText(c.testId(), c.originalText());
+    assertThat(readiness.runnableRevisionId(c.testId())).isEqualTo(c.confirmedRevision());
+    assertThat(readiness.readiness(c.testId()))
+        .isEqualTo(com.citi.put.checks.studio.readiness.StudioReadiness.READY);
+  }
+
+  @Test
+  void
+      aScheduledSlotRunsTheOldConfirmedRevisionUnderItsStoredConfigurationWhileACandidateIsRecorded() {
+    Confirmed c = confirmedAThenRecordedB(GuidedPublicationProofIT::noHook);
+    int storedTimeout = storedTimeoutOf(c.confirmedRevision());
+    jdbc.update("UPDATE ui_tests SET timeout_seconds=timeout_seconds+7 WHERE id=?", c.testId());
+    UUID schedule = UUID.randomUUID();
+    jdbc.update(
+        "INSERT INTO schedules(id, ui_test_id, check_type, frequency, cron_expression, timezone,"
+            + " enabled, next_execution_at) VALUES (?, ?, 'UI_TEST', 'custom', '0 0 0 1 1 *',"
+            + " 'UTC', true, now() + interval '30 days')",
+        schedule,
+        c.testId());
+
+    // The cron dispatcher calls the launcher inside the schedule's transaction.
+    var result = tx.execute(status -> scheduler.launch(c.testId(), schedule, Instant.now()));
+
+    assertThat(result.outcome())
+        .isEqualTo(com.citi.put.checks.scheduling.ScheduledUiTestLauncher.Outcome.ACCEPTED);
+    var run =
+        jdbc.queryForMap(
+            "SELECT revision_id, diagnostic, configuration_snapshot::text AS snapshot"
+                + " FROM ui_test_executions WHERE ui_test_id=? AND trigger_source='SCHEDULED'",
+            c.testId());
+    assertThat(run.get("revision_id"))
+        .as("the confirmed revision, not the candidate")
+        .isEqualTo(c.confirmedRevision());
+    assertThat(run.get("diagnostic")).isEqualTo(false);
+    assertThat(C.parse((String) run.get("snapshot")).path("timeoutSeconds").asInt())
+        .as("the revision's own stored configuration, not the draft's")
+        .isEqualTo(storedTimeout)
+        .isNotEqualTo(
+            jdbc.queryForObject(
+                "SELECT timeout_seconds FROM ui_tests WHERE id=?", Integer.class, c.testId()));
+    assertThat(pointer("confirmed_revision_id", c.testId())).isEqualTo(c.confirmedRevision());
+
+    // A draft whose environment moved on is not replayed under the old revision's environment.
+    jdbc.update("UPDATE studio_dispatch_ledger SET state='DONE' WHERE test_id=?", c.testId());
+    jdbc.update("UPDATE ui_tests SET environment='Staging' WHERE id=?", c.testId());
+    var refused =
+        tx.execute(status -> scheduler.launch(c.testId(), schedule, Instant.now().plusSeconds(60)));
+    assertThat(refused.outcome())
+        .isEqualTo(com.citi.put.checks.scheduling.ScheduledUiTestLauncher.Outcome.SKIPPED);
+    assertThat(
+            count(
+                "SELECT count(*) FROM ui_test_executions WHERE ui_test_id=? AND"
+                    + " trigger_source='SCHEDULED'",
+                c.testId()))
+        .isEqualTo(1);
+  }
+
+  // ---- POST /tests/{id}/verify ("Verify again", D-4) ----
+
+  private String verifyCode(UUID testId, String key) {
+    var thrown =
+        org.assertj.core.api.Assertions.catchThrowableOfType(
+            () ->
+                studioService.verifyRecorded(
+                    testId, coreUser(), key, ObservedPublicationFixture.request(coreUser())),
+            com.citi.put.checks.studio.StudioConflictException.class);
+    assertThat(thrown).as("a 409 was expected").isNotNull();
+    return thrown.getCode();
+  }
+
+  @Test
+  void verifyAgainIsAcceptedOnlyAfterAProofThatDidNotFinishAndAPassPromotes() {
+    Recorded recorded = recorded();
+
+    // The proof is still running: nothing to verify again.
+    assertThat(verifyCode(recorded.testId(), "verify-pending")).isEqualTo("VERIFY_NOT_AVAILABLE");
+
+    // A proof that ended in error (cancelled, timed out, refused) is INCOMPLETE: accepted and
+    // queued.
+    finishProof(
+        recorded.testId(),
+        recorded.revisionId(),
+        "ERROR",
+        stepResults(recorded.revisionId(), "SKIPPED", true));
+    jdbc.update(
+        "UPDATE studio_dispatch_ledger SET state='DONE' WHERE test_id=?", recorded.testId());
+    var accepted =
+        studioService.verifyRecorded(
+            recorded.testId(),
+            coreUser(),
+            "verify-incomplete",
+            ObservedPublicationFixture.request(coreUser()));
+    assertThat(accepted.status()).isEqualTo("PENDING");
+    assertThat(accepted.revisionId())
+        .as("the same recorded revision")
+        .isEqualTo(recorded.revisionId());
+    assertThat(accepted.triggerSource()).isEqualTo("AFTER_LEARN");
+    assertThat(accepted.diagnostic()).isFalse();
+    assertThat(
+            count(
+                "SELECT count(*) FROM ui_test_executions WHERE ui_test_id=? AND trigger_source='AFTER_LEARN'",
+                recorded.testId()))
+        .isEqualTo(2);
+    assertThat(pointer("candidate_revision_id", recorded.testId()))
+        .isEqualTo(recorded.revisionId());
+    // The same key returns the same execution.
+    assertThat(
+            studioService
+                .verifyRecorded(
+                    recorded.testId(),
+                    coreUser(),
+                    "verify-incomplete",
+                    ObservedPublicationFixture.request(coreUser()))
+                .executionId())
+        .isEqualTo(accepted.executionId());
+
+    // Its proof passing promotes the revision under the ordinary rule.
+    assertThat(
+            finishProof(
+                recorded.testId(),
+                recorded.revisionId(),
+                "PASSED",
+                stepResults(recorded.revisionId(), "PASS", true)))
+        .isTrue();
+    assertThat(pointer("confirmed_revision_id", recorded.testId()))
+        .isEqualTo(recorded.revisionId());
+
+    // Nothing is recorded any more.
+    assertThat(verifyCode(recorded.testId(), "verify-confirmed")).isEqualTo("NOT_RECORDED");
+  }
+
+  @Test
+  void verifyAgainIsRefusedAfterAFailedProof() {
+    Recorded recorded = recorded();
+    finishProof(
+        recorded.testId(),
+        recorded.revisionId(),
+        "FAILED",
+        stepResults(recorded.revisionId(), "FAIL", true));
+    jdbc.update(
+        "UPDATE studio_dispatch_ledger SET state='DONE' WHERE test_id=?", recorded.testId());
+
+    assertThat(verifyCode(recorded.testId(), "verify-failed")).isEqualTo("VERIFY_NOT_AVAILABLE");
+    assertThat(
+            count(
+                "SELECT count(*) FROM ui_test_executions WHERE ui_test_id=? AND trigger_source='AFTER_LEARN'",
+                recorded.testId()))
+        .as("a failure is evidence: nothing was queued")
+        .isEqualTo(1);
+  }
+
+  @Test
+  void reLearnFromAStepUsesTheRecordedCandidateAsItsBase() {
+    Confirmed c = confirmedAThenRecordedB(GuidedPublicationProofIT::noHook);
+    String stepId =
+        jdbc.queryForObject(
+            "SELECT authoring->'steps'->0->>'id' FROM ui_tests WHERE id=?",
+            String.class,
+            c.testId());
+    var store = new com.citi.put.checks.studio.guided.session.GuidedIncrementalStore(jdbc, C);
+    ObjectNode request =
+        C.object().put("testId", c.testId().toString()).put("firstLearnStepId", stepId);
+
+    var selection = store.select(request, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
+
+    assertThat(selection.change().baseRevisionId())
+        .as("the base is the recorded candidate B, not the confirmed A")
+        .isEqualTo(c.recordedRevision())
+        .isNotEqualTo(c.confirmedRevision());
+    assertThat(selection.program().path("baseRevisionId").asText())
+        .isEqualTo(c.recordedRevision().toString());
+
+    // A client that still names the confirmed revision as the base is refused, not silently
+    // re-based.
+    ObjectNode stale = request.deepCopy().put("baseRevisionId", c.confirmedRevision().toString());
+    assertThatThrownBy(
+            () -> store.select(stale, com.citi.put.checks.studio.support.TestDomains.FIXTURES))
+        .isInstanceOf(GuidedSessionException.class);
+  }
+
+  private int storedTimeoutOf(UUID revisionId) {
+    return C.parse(
+            jdbc.queryForObject(
+                "SELECT configuration::text FROM ui_test_revisions WHERE id=?",
+                String.class,
+                revisionId))
+        .path("timeoutSeconds")
+        .asInt();
   }
 
   /** A second finished learn of a published test. */

@@ -33,6 +33,27 @@ public final class SecretValue implements AutoCloseable {
     return difference == 0;
   }
 
+  /**
+   * Whether the secret occurs verbatim in {@code text}: a plain scan that stops at the first match
+   * and never builds a String of the secret.
+   */
+  public boolean occursIn(CharSequence text) {
+    if (erased || text == null || value.length == 0) {
+      return false;
+    }
+    int last = text.length() - value.length;
+    outer:
+    for (int at = 0; at <= last; at++) {
+      for (int offset = 0; offset < value.length; offset++) {
+        if (text.charAt(at + offset) != value[offset]) {
+          continue outer;
+        }
+      }
+      return true;
+    }
+    return false;
+  }
+
   @Override
   public String toString() {
     return "<secret>";

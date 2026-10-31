@@ -149,6 +149,7 @@ class GuidedLifecycleReasonIT {
     assertThat(teardownReason(id))
         .as("the stop sent to the runner names the same reason (assignmentLifecycle does too)")
         .isEqualTo("EXPIRED");
+    assertThat(persistedErrorCode(id)).as("EXPIRED is not a failure code").isNull();
   }
 
   // ---- LR c, case 2: every other reason stays FAILED ----
@@ -164,6 +165,8 @@ class GuidedLifecycleReasonIT {
       assertThat(stopped.path("state").asText()).as(reason).isEqualTo("FAILED");
       assertThat(persistedState(id)).as(reason).isEqualTo("FAILED");
       assertThat(teardownReason(id)).as(reason).isEqualTo("UNKNOWN_OUTCOME");
+      // SC008-FIX-20: the reason is kept as a closed code the author can read, not a bare FAILED.
+      assertThat(persistedErrorCode(id)).as(reason).isEqualTo("LEARNING_" + reason);
     }
     ArgumentCaptor<JsonNode> terminal = ArgumentCaptor.forClass(JsonNode.class);
     verify(audit, org.mockito.Mockito.atLeastOnce()).guidedTerminal(terminal.capture());
@@ -188,6 +191,49 @@ class GuidedLifecycleReasonIT {
       assertThat(repository.actions(id).getFirst().path("state").asText())
           .as("the uncertain action is recorded, as before")
           .isEqualTo("UNKNOWN_OUTCOME");
+      assertThat(persistedErrorCode(id)).as(reason).isNull();
+    }
+  }
+
+  // ---- SC008-FIX-20: a code that is already there is kept ----
+
+  @Test
+  void anErrorCodeAlreadyOnTheSessionIsKept() {
+    String id = observing();
+    jdbc.update(
+        "UPDATE studio_guided_sessions SET progress = jsonb_set(progress, '{errorCode}',"
+            + " '\"BUDGET_EXCEEDED\"') WHERE session_id=?",
+        id);
+
+    lifecycle(id, "CONTEXT_LOST", "lifecycle-kept");
+
+    assertThat(persistedState(id)).isEqualTo("FAILED");
+    assertThat(persistedErrorCode(id)).isEqualTo("BUDGET_EXCEEDED");
+  }
+
+  // ---- SC008-FIX-20: the no-browser path gives the same codes ----
+
+  @Test
+  void theNoBrowserAssignmentLifecycleGivesTheSameCodes() {
+    for (String reason : List.of("CONTEXT_LOST", "LEASE_LOST", "EXPIRED")) {
+      String id = observing();
+      ObjectNode request =
+          contracts
+              .object()
+              .put("schemaVersion", 3)
+              .put("kind", "assignment")
+              .put("reason", reason);
+      request.set("assignment", new GuidedAssignmentStore(jdbc, contracts).find(id));
+
+      service.assignmentLifecycle(worker, id, "assignment-" + reason, request);
+
+      if (reason.equals("EXPIRED")) {
+        assertThat(persistedState(id)).as(reason).isEqualTo("EXPIRED");
+        assertThat(persistedErrorCode(id)).as(reason).isNull();
+      } else {
+        assertThat(persistedState(id)).as(reason).isEqualTo("FAILED");
+        assertThat(persistedErrorCode(id)).as(reason).isEqualTo("LEARNING_" + reason);
+      }
     }
   }
 
@@ -283,6 +329,13 @@ class GuidedLifecycleReasonIT {
   private String persistedState(String id) {
     return jdbc.queryForObject(
         "SELECT document->>'state' FROM studio_guided_sessions WHERE session_id=?",
+        String.class,
+        id);
+  }
+
+  private String persistedErrorCode(String id) {
+    return jdbc.queryForObject(
+        "SELECT progress->>'errorCode' FROM studio_guided_sessions WHERE session_id=?",
         String.class,
         id);
   }
@@ -406,7 +459,11 @@ class GuidedLifecycleReasonIT {
   }
 
   private ObjectNode observation(String id, int generation) {
-    ObjectNode o = fixture("observation");
+    ObjectNode o =
+        com.citi.put.checks.studio.support.ObservationFixtures.observation()
+            .document("document-1", generation)
+            .element("e1", "button", "Save")
+            .build();
     o.put("sessionId", id).put("scopeHash", scope(id)).put("generation", generation);
     return o;
   }
@@ -415,7 +472,15 @@ class GuidedLifecycleReasonIT {
     ObjectNode p = fixture("action");
     p.put("sessionId", id).put("scopeHash", scope(id));
     // A click has no runtime-value producer side effects; only the action state matters here.
-    p.putObject("operation").put("kind", "click");
+    p.remove("target");
+    String code = "await page.getByRole('button', { name: 'Save' }).click();";
+    ObjectNode operation = p.putObject("operation");
+    operation.put("kind", "step").put("code", code);
+    operation.putArray("captures");
+    operation.putArray("uses");
+    operation.put(
+        "sourceHash",
+        GuidedContracts.hash(com.fasterxml.jackson.databind.node.TextNode.valueOf(code)));
     ObjectNode observation = observation(id, 1);
     ObjectNode context = context(id);
     ObjectNode evidence =
@@ -434,7 +499,6 @@ class GuidedLifecycleReasonIT {
         .put("authoredInputsHash", context.path("authoredInputsHash").asText())
         .put("contextRevision", 1);
     p.set("executionEvidence", evidence);
-    p.withObject("/target").put("generation", 1);
     return p;
   }
 
@@ -447,7 +511,6 @@ class GuidedLifecycleReasonIT {
     String issuedKey = association.path("admissionKey").asText();
     ObjectNode proof = materialization.identity(context(id));
     proof
-        .putNull("pressInheritance")
         .put("preparationId", UUID.randomUUID().toString())
         .put("requestDigest", GuidedContracts.hash(proposal))
         .put("evidenceHash", proposal.path("evidenceHash").asText())
@@ -455,7 +518,6 @@ class GuidedLifecycleReasonIT {
         .put("expiresAt", clock.now.plusSeconds(20).toString());
     JsonNode existing = service.existingAdmission(controller, id, 1, issuedKey, proposal);
     assertThat(existing).as("a new admission").isNull();
-    proof.set("target", proofTarget(proposal));
     service.storePreparation(controller, id, 1, proposal, proof);
     JsonNode admission =
         service.admit(controller, id, 1, issuedKey, proposal, proof.path("preparationId").asText());
@@ -723,7 +785,6 @@ class GuidedLifecycleReasonIT {
                 new com.citi.put.checks.studio.guided.translation.GuidedSourceInputResolver(
                     contracts, com.citi.put.checks.studio.support.TestDomains.FIXTURES),
                 store,
-                new com.citi.put.checks.studio.guided.translation.GuidedStepVerifier(store),
                 new CsiOwnershipEvaluator(),
                 com.citi.put.checks.studio.support.TestDomains.FIXTURES,
                 org.mockito.Mockito.mock(
@@ -865,6 +926,23 @@ class GuidedLifecycleReasonIT {
               org.mockito.ArgumentMatchers.anyLong(),
               org.mockito.ArgumentMatchers.anyString(),
               org.mockito.ArgumentMatchers.any());
+      // The runner's prepare accepts the code; the run stops at admission, after the reservation.
+      org.mockito.Mockito.doReturn(contracts.object().put("preparationId", "gs-t-stand-in"))
+          .when(stopped)
+          .prepareStep(
+              org.mockito.ArgumentMatchers.any(),
+              org.mockito.ArgumentMatchers.anyString(),
+              org.mockito.ArgumentMatchers.anyLong(),
+              org.mockito.ArgumentMatchers.any());
+      org.mockito.Mockito.doThrow(new AssertionError("gs-t-planner-reservation-stop"))
+          .when(stopped)
+          .admitPrepared(
+              org.mockito.ArgumentMatchers.any(),
+              org.mockito.ArgumentMatchers.anyString(),
+              org.mockito.ArgumentMatchers.anyLong(),
+              org.mockito.ArgumentMatchers.anyString(),
+              org.mockito.ArgumentMatchers.any(),
+              org.mockito.ArgumentMatchers.any());
       com.citi.put.checks.studio.guided.translation.GuidedLlmGatewayClient gateway =
           (request, budget) -> {
             var context = request.projection().document();
@@ -888,16 +966,15 @@ class GuidedLifecycleReasonIT {
                     secret = reference;
                   }
                 }
-                String kind = secret != null ? "fill" : stepId.endsWith("a2") ? "assert" : "click";
                 var obligation =
                     obligations
                         .addObject()
                         .put("stepId", stepId)
                         .put("occurrence", 0)
-                        .put("operationKind", kind)
                         .put("targetIntent", secret == null ? "Order number" : "Password")
                         .putNull("scopeIntent")
                         .putNull("needId");
+                obligation.putArray("uses");
                 if (secret == null) {
                   obligation.putNull("referenceIndex");
                 } else {
@@ -908,15 +985,11 @@ class GuidedLifecycleReasonIT {
                       .put("configurationRevision", context.path("configurationRevision").asText());
                   references.add(reference);
                 }
-                if (kind.equals("assert")) {
-                  obligation.put("predicate", "visible");
-                } else {
-                  obligation.putNull("predicate");
-                }
               }
+              response.putArray("stepSections");
             } else if (request.kind()
                 == com.citi.put.checks.studio.guided.translation.GuidedModelRequest.Kind
-                    .NEXT_ACTION) {
+                    .STEP_CODE) {
               JsonNode probe = selected.get(context.path("sessionId").asText());
               assertThat(probe).as("selected controlled-provider action").isNotNull();
               JsonNode chosen = null;
@@ -929,16 +1002,10 @@ class GuidedLifecycleReasonIT {
                 }
               }
               assertThat(chosen).as("remaining planner obligation").isNotNull();
-              var action = contracts.object();
-              ObjectNode target = probe.path("target").deepCopy();
-              target.remove(List.of("documentId", "generation"));
-              action.set("target", target);
-              action.set("operation", probe.path("operation").deepCopy());
               response
-                  .put("status", "ACTION")
-                  .put("obligationId", chosen.path("obligationId").asText())
-                  .putNull("question");
-              response.set("action", action);
+                  .put("status", "CODE")
+                  .put("code", probe.path("operation").path("code").asText());
+              response.putArray("captures");
             } else {
               throw new AssertionError("Unexpected GS-T model request: " + request.kind());
             }
@@ -1051,17 +1118,5 @@ class GuidedLifecycleReasonIT {
       }
       return association;
     }
-  }
-
-  /**
-   * The ResolvedTarget the runner reports on a preparation proof (ADR-SC-007): for a node action it
-   * is the locator it derived for the picked ref and the {role, name} identity of that element,
-   * which the backend cross-checks against the fact the ref names; null for any other target.
-   */
-  private static JsonNode proofTarget(JsonNode proposal) {
-    return proposal.path("target").path("kind").asText().equals("node")
-        ? com.citi.put.checks.studio.support.ObservationFixtures.resolvedTarget(
-            "order-reference", "text", "Order number")
-        : com.fasterxml.jackson.databind.node.NullNode.instance;
   }
 }

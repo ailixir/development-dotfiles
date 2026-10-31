@@ -202,22 +202,37 @@ class GuidedGatewayPrivacyTest {
         .addObject()
         .put("inputId", "opaque-input")
         .put("sourceStepId", STEP)
-        .put("kind", "nonsecretText")
-        .put("intendedSlot", "fill.value");
-    return new GuidedPromptAssembler(
-            contracts, com.citi.put.checks.studio.support.TestDomains.FIXTURES)
-        .assemble(
-            "synthetic-request",
-            attempt,
-            kind,
-            session,
-            progress,
-            state,
-            safeInputs,
-            JSON.createArrayNode(),
-            JSON.createArrayNode(),
-            attempt == 1 ? List.of() : List.of("INVALID_RESPONSE"),
-            1024);
+        .put("kind", "nonsecretText");
+    var assembler =
+        new GuidedPromptAssembler(
+            contracts, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
+    if (kind == GuidedModelRequest.Kind.STEP_CODE) {
+      return assembler.assembleStepCode(
+          "synthetic-request",
+          attempt,
+          session,
+          progress,
+          state,
+          safeInputs,
+          JSON.createArrayNode(),
+          JSON.createArrayNode(),
+          List.of(),
+          null,
+          98304,
+          1024);
+    }
+    return assembler.assemble(
+        "synthetic-request",
+        attempt,
+        kind,
+        session,
+        progress,
+        state,
+        safeInputs,
+        JSON.createArrayNode(),
+        JSON.createArrayNode(),
+        attempt == 1 ? List.of() : List.of("INVALID_RESPONSE"),
+        1024);
   }
 
   static ObjectNode answer(GuidedModelRequest request) {
@@ -234,20 +249,17 @@ class GuidedGatewayPrivacyTest {
             .addObject()
             .put("stepId", STEP)
             .put("occurrence", 0)
-            .put("operationKind", "click")
             .put("targetIntent", "Continue")
             .putNull("scopeIntent")
             .putNull("referenceIndex")
             .putNull("needId")
-            .putNull("predicate");
+            .putArray("uses");
+        answer.putArray("stepSections");
       }
-      case NEXT_ACTION ->
-          answer
-              .put("status", "COMPLETE")
-              .putNull("obligationId")
-              .putNull("action")
-              .putNull("question");
-      case VERIFY_STEP -> answer.put("stepId", STEP).put("complete", true);
+      case STEP_CODE -> {
+        answer.put("status", "CODE").put("code", "await page.goto('https://example.test');");
+        answer.putArray("captures");
+      }
     }
     return answer;
   }
@@ -434,7 +446,7 @@ class GuidedGatewayPrivacyTest {
             base.maxOutputTokens(),
             base.thinkingLevel(),
             new StudioGatewayProperties.ProviderFeatures(false, false));
-    var request = classifiedRequest(GuidedModelRequest.Kind.VERIFY_STEP, 1);
+    var request = classifiedRequest(GuidedModelRequest.Kind.STEP_CODE, 1);
     server.stubFor(
         post(urlPathMatching(".*generateContent"))
             .willReturn(okJson(provider(answer(request).toString()))));
@@ -628,7 +640,7 @@ class GuidedGatewayPrivacyTest {
 
   @Test
   void rejectsFinishFailureEvenWhenTextIsValid() throws Exception {
-    var request = request(GuidedModelRequest.Kind.VERIFY_STEP, projection(), 1);
+    var request = request(GuidedModelRequest.Kind.STEP_CODE, projection(), 1);
     server.stubFor(
         post(urlPathMatching(".*generateContent"))
             .willReturn(
@@ -641,7 +653,7 @@ class GuidedGatewayPrivacyTest {
 
   @Test
   void requestLimitIncludesActualSdkSchemaEnvelopeBeforeNetwork() throws Exception {
-    var base = request(GuidedModelRequest.Kind.VERIFY_STEP, projection(), 1);
+    var base = request(GuidedModelRequest.Kind.STEP_CODE, projection(), 1);
     ObjectNode largeSchema = (ObjectNode) base.responseSchema();
     largeSchema.put("description", "schema-padding-".repeat(500));
     var request =
@@ -679,7 +691,7 @@ class GuidedGatewayPrivacyTest {
 
   @Test
   void cancellationStopsSocketThenReleasesSharedCapacity() throws Exception {
-    var request = request(GuidedModelRequest.Kind.VERIFY_STEP, projection(), 1);
+    var request = request(GuidedModelRequest.Kind.STEP_CODE, projection(), 1);
     server.stubFor(
         post(urlPathMatching(".*generateContent"))
             .willReturn(okJson(provider(answer(request).toString())).withFixedDelay(10000)));
@@ -724,7 +736,7 @@ class GuidedGatewayPrivacyTest {
 
   @Test
   void aCallWaitsForAFreedPermitInsteadOfFailingBusy() throws Exception {
-    var request = request(GuidedModelRequest.Kind.VERIFY_STEP, projection(), 1);
+    var request = request(GuidedModelRequest.Kind.STEP_CODE, projection(), 1);
     server.stubFor(
         post(urlPathMatching(".*generateContent"))
             .willReturn(okJson(provider(answer(request).toString()))));
@@ -745,7 +757,7 @@ class GuidedGatewayPrivacyTest {
 
   @Test
   void aCallIsBusyOnlyAfterWaitingOutItsOwnBudgetAndNeverSends() throws Exception {
-    var request = request(GuidedModelRequest.Kind.VERIFY_STEP, projection(), 1);
+    var request = request(GuidedModelRequest.Kind.STEP_CODE, projection(), 1);
     try (var transport = new GenAiGatewayTransport(properties(server.baseUrl(), 65536, 65536));
         var held = transport.tryAcquire(open())) {
       assertThat(held).isNotNull();
@@ -761,7 +773,7 @@ class GuidedGatewayPrivacyTest {
 
   @Test
   void anExpiredSendIsAbortedAndReleasesItsPermit() throws Exception {
-    var request = request(GuidedModelRequest.Kind.VERIFY_STEP, projection(), 1);
+    var request = request(GuidedModelRequest.Kind.STEP_CODE, projection(), 1);
     server.stubFor(
         post(urlPathMatching(".*generateContent"))
             .willReturn(okJson(provider(answer(request).toString())).withFixedDelay(10000)));
@@ -779,7 +791,7 @@ class GuidedGatewayPrivacyTest {
 
   @Test
   void remainingDeadlineStopsOneAttemptAndExpiredBudgetDoesNotSend() throws Exception {
-    var request = request(GuidedModelRequest.Kind.VERIFY_STEP, projection(), 1);
+    var request = request(GuidedModelRequest.Kind.STEP_CODE, projection(), 1);
     server.stubFor(
         post(urlPathMatching(".*generateContent"))
             .willReturn(okJson(provider(answer(request).toString())).withFixedDelay(5000)));
@@ -813,7 +825,7 @@ class GuidedGatewayPrivacyTest {
 
   @Test
   void boundedRealCredentialRefreshCancelsBeforeModelAndRecovers() throws Exception {
-    var request = request(GuidedModelRequest.Kind.VERIFY_STEP, projection(), 1);
+    var request = request(GuidedModelRequest.Kind.STEP_CODE, projection(), 1);
     var keys = java.security.KeyPairGenerator.getInstance("RSA");
     keys.initialize(2048);
     String pem =

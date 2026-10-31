@@ -50,7 +50,10 @@ class GuidedRecordingMigrationIT {
   @Test
   void headIsV21AndTheTableHasExactlyTheRuledShape() throws SQLException {
     try (Connection c = connect()) {
-      assertThat(scalar(c, "SELECT max(version::int) FROM flyway_schema_history")).isEqualTo("29");
+      assertThat(
+              scalar(
+                  c, "SELECT count(*) FROM flyway_schema_history WHERE version='33' AND success"))
+          .isEqualTo("1");
       assertThat(scalar(c, "SELECT description FROM flyway_schema_history WHERE version='20'"))
           .isEqualTo("guided session recording");
       assertThat(

@@ -86,6 +86,13 @@ class GuidedRuntimeRolePrivilegeIT {
       -- New relation, V27 (the proof link of a publication): inserted by the publication commit,
       -- read by the result projector.
       GRANT SELECT, INSERT ON studio_learn_proofs TO :"runtime_role";
+      -- New relation, V34 (per-step receipts of the proof): the report transaction replaces a
+      -- revision's rows (DELETE, INSERT) and the draft projection reads them.
+      GRANT SELECT, INSERT, DELETE ON studio_step_receipts TO :"runtime_role";
+      -- New relations, V35 (retrieved step-code examples): the recorder inserts, retrieval reads;
+      -- the gate snapshot is inserted once and read.
+      GRANT SELECT, INSERT ON studio_step_examples TO :"runtime_role";
+      GRANT SELECT, INSERT ON studio_step_example_snapshots TO :"runtime_role";
       -- Pre-V19 relations: what V19..V22 function and trigger bodies newly need on them. A no-op
       -- where the V18 baseline already grants it.
       -- V21 version-history trigger locks the materialization row (FOR UPDATE).
@@ -114,6 +121,11 @@ class GuidedRuntimeRolePrivilegeIT {
        replay_failure_login_steps_present), UPDATE (replay_failure_code, replay_failure_step_id,
        replay_failure_step_index, replay_failure_login_steps_present)
        ON ui_test_executions TO :"runtime_role";
+      -- V34: the recorded-revision pointer (written by finalize and promotion, inserted with the
+      -- draft row) and the diagnostic flag (inserted with the execution row).
+      GRANT SELECT (candidate_revision_id), INSERT (candidate_revision_id),
+       UPDATE (candidate_revision_id) ON ui_tests TO :"runtime_role";
+      GRANT SELECT (diagnostic), INSERT (diagnostic) ON ui_test_executions TO :"runtime_role";
       GRANT SELECT (rejection_reason), UPDATE (rejection_reason)
        ON studio_guided_model_attempts TO :"runtime_role";
       GRANT SELECT (rejection_gate, intent_path, intent_fields),
@@ -121,6 +133,8 @@ class GuidedRuntimeRolePrivilegeIT {
        ON studio_guided_model_attempts TO :"runtime_role";
       GRANT SELECT (ui_test_id), INSERT (ui_test_id), UPDATE (ui_test_id)
        ON schedules TO :"runtime_role";
+      -- V33: the step receipt, written once with the outcome (UPDATE ... COALESCE(receipt, ?)).
+      GRANT SELECT (receipt), UPDATE (receipt) ON studio_guided_actions TO :"runtime_role";
       """;
 
   /** Relations V19 through the head create: name to "version kind". */
@@ -138,7 +152,10 @@ class GuidedRuntimeRolePrivilegeIT {
           Map.entry("studio_guided_prefix_requests", "21 r"),
           Map.entry("studio_guided_no_invocation_receipts", "21 r"),
           Map.entry("studio_guided_suffix_acceptances", "21 r"),
-          Map.entry("studio_learn_proofs", "27 r"));
+          Map.entry("studio_learn_proofs", "27 r"),
+          Map.entry("studio_step_receipts", "34 r"),
+          Map.entry("studio_step_examples", "35 r"),
+          Map.entry("studio_step_example_snapshots", "35 r"));
 
   /**
    * What application SQL (backend/src/main/java, grep in the DE receipt) does to each new relation.
@@ -159,13 +176,22 @@ class GuidedRuntimeRolePrivilegeIT {
           Map.entry("studio_guided_no_invocation_receipts", Set.of("SELECT", "INSERT")),
           Map.entry("studio_guided_suffix_acceptances", Set.of("SELECT", "INSERT")),
           // V27: the publication commit inserts the link, the result projector reads it.
-          Map.entry("studio_learn_proofs", Set.of("SELECT", "INSERT")));
+          Map.entry("studio_learn_proofs", Set.of("SELECT", "INSERT")),
+          // V34: the proof's report transaction replaces a revision's receipts; the draft reads
+          // them.
+          Map.entry("studio_step_receipts", Set.of("SELECT", "INSERT", "DELETE")),
+          // V35 (ADR-SC-008 D6): the recorder inserts examples, retrieval reads them; the gate
+          // snapshot row is inserted once and read.
+          Map.entry("studio_step_examples", Set.of("SELECT", "INSERT")),
+          Map.entry("studio_step_example_snapshots", Set.of("SELECT", "INSERT")));
 
   /** Columns V19 through the head add to pre-V19 relations, with what the runtime does to them. */
   private static final Map<String, Set<String>> ADDED_COLUMNS =
       Map.ofEntries(
           Map.entry("studio_guided_sessions.pruned_at", Set.of("SELECT", "UPDATE")),
           Map.entry("studio_guided_actions.attempt_ordinal", Set.of("SELECT", "INSERT")),
+          // V33 (ADR-SC-008): the attempt's step receipt, written once with the outcome.
+          Map.entry("studio_guided_actions.receipt", Set.of("SELECT", "UPDATE")),
           Map.entry(
               "studio_guided_obligation_admissions.attempt_ordinal", Set.of("SELECT", "INSERT")),
           Map.entry("ui_test_executions.replay_failure_code", Set.of("SELECT", "UPDATE")),
@@ -181,7 +207,10 @@ class GuidedRuntimeRolePrivilegeIT {
           Map.entry("studio_guided_model_attempts.intent_path", Set.of("SELECT", "UPDATE")),
           Map.entry("studio_guided_model_attempts.intent_fields", Set.of("SELECT", "UPDATE")),
           // V24 (STUDIO-GOV-001.2): a shared schedule's UI test target; the schedule API writes it.
-          Map.entry("schedules.ui_test_id", Set.of("SELECT", "INSERT", "UPDATE")));
+          Map.entry("schedules.ui_test_id", Set.of("SELECT", "INSERT", "UPDATE")),
+          // V34 (ADR-SC-008 D5): the recorded revision pointer and the diagnostic run flag.
+          Map.entry("ui_tests.candidate_revision_id", Set.of("SELECT", "INSERT", "UPDATE")),
+          Map.entry("ui_test_executions.diagnostic", Set.of("SELECT", "INSERT")));
 
   private final List<String> databases = new ArrayList<>();
   private final List<String> roles = new ArrayList<>();
@@ -853,8 +882,7 @@ class GuidedRuntimeRolePrivilegeIT {
                 "{\"sessionId\":\"session\",\"scopeHash\":\""
                     + HASH
                     + "\",\"inputs\":[{\"inputId\":\"input-PASS\",\"sourceStepId\":"
-                    + "\"password-step\",\"kind\":\"secretRef\",\"secretId\":\"PASS\","
-                    + "\"intendedSlot\":\"fill.value\"}]}");
+                    + "\"password-step\",\"kind\":\"secretRef\",\"secretId\":\"PASS\"}]}");
     for (var raw : inputs.path("inputs")) {
       ((ObjectNode) raw)
           .putObject("provenance")
@@ -863,8 +891,7 @@ class GuidedRuntimeRolePrivilegeIT {
           .put("referenceId", "ref-PASS")
           .put("referenceName", "PASS")
           .put("kind", "secretRef")
-          .put("stepId", "password-step")
-          .put("intendedSlot", "fill.value");
+          .put("stepId", "password-step");
     }
     ObjectNode closed = GuidedLedgerSeed.closedInputs(inputs, "1", "1");
     String inputsHash = GuidedContracts.hash(closed);
@@ -890,7 +917,7 @@ class GuidedRuntimeRolePrivilegeIT {
             + "\"policy\":\"INPUT-POLICY-01-A\",\"sourceSteps\":[{\"stepId\":\"password-step\","
             + "\"text\":\"Enter <secret PASS> as password\"}],\"configurationReferences\":"
             + "[{\"referenceId\":\"ref-PASS\",\"referenceName\":\"PASS\",\"kind\":\"secretRef\","
-            + "\"stepId\":\"password-step\",\"intendedSlot\":\"fill.value\"}]}";
+            + "\"stepId\":\"password-step\"}]}";
     jdbc.update(
         "INSERT INTO studio_guided_source_manifests(session_id,scope_hash,manifest,manifest_hash)"
             + " VALUES ('session',?,?::jsonb,studio_publication_hash(?::jsonb))",
@@ -903,12 +930,12 @@ class GuidedRuntimeRolePrivilegeIT {
   private static void consumedSecret(GuidedLedgerSeed ledger) {
     ledger.retire("admission");
     ObjectNode proposal = CONTRACTS.object();
-    proposal
-        .putObject("operation")
-        .put("kind", "fill")
-        .putObject("value")
-        .put("kind", "secretRef")
-        .put("sourceInputId", "input-PASS");
+    // A step proposal (ADR-SC-008): opaque frozen code plus the secret it uses.
+    String code = "await page.getByLabel('Password').fill(secrets['PASS']);";
+    ObjectNode operation = proposal.putObject("operation").put("kind", "step").put("code", code);
+    operation.putArray("captures");
+    operation.putArray("uses").addObject().put("kind", "secret").put("id", "PASS");
+    operation.put("sourceHash", GuidedContracts.hash(operation.path("code")));
     ledger.action(
         "admission",
         "password-step",

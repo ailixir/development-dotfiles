@@ -28,8 +28,7 @@ class GuidedSourceInputResolverTest {
             .put("stepId", GuidedSourceClassifierTest.STEP)
             .put("startUtf16", 6)
             .put("endUtf16", 9)
-            .put("kind", "nonsecretText")
-            .put("intendedSlot", "fill.value");
+            .put("kind", "nonsecretText");
     var validator =
         new GuidedSourceReferenceValidator(
             c, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
@@ -73,7 +72,7 @@ class GuidedSourceInputResolverTest {
     session.putArray("sourceSteps").addObject().put("stepId", GuidedSourceClassifierTest.STEP);
     for (com.fasterxml.jackson.databind.JsonNode reference :
         manifest.path("configurationReferences")) {
-      if (reference.path("intendedSlot").asText().equals("fill.value")) {
+      if (reference.path("kind").asText().equals("nonsecretText")) {
         ObjectNode candidate = ((ObjectNode) reference).deepCopy();
         candidate.remove("referenceName");
         candidate.put("referenceKind", "configuration").put("configurationRevision", "1");
@@ -98,36 +97,33 @@ class GuidedSourceInputResolverTest {
     session.putArray("sourceSteps").addObject().put("stepId", GuidedSourceClassifierTest.STEP);
     int start = text.indexOf("Test login");
     int end = start + "Test login".length();
-    for (String slot : new String[] {"assert.expected", "fill.value", "selectOption.value"}) {
-      ObjectNode reference =
-          c.object()
-              .put("referenceKind", "sourceSpan")
-              .put("sourceRevision", "1")
-              .put("stepId", GuidedSourceClassifierTest.STEP)
-              .put("startUtf16", start)
-              .put("endUtf16", end)
-              .put("kind", "nonsecretText")
-              .put("intendedSlot", slot);
-      resolver.validate(session, manifest, c.object().putArray("items").add(reference).deepCopy());
-      // The E2E miscount: three code units early, so the span is `t "Test lo`.
-      for (int shift : new int[] {-3, -1, 1}) {
-        var shifted =
-            reference.deepCopy().put("startUtf16", start + shift).put("endUtf16", end + shift);
-        assertThatThrownBy(
-                () ->
-                    resolver.validate(
-                        session, manifest, c.object().putArray("items").add(shifted).deepCopy()))
-            .hasMessage("INVALID_CONTRACT");
-      }
-      // Excluding a final character or including a delimiter is not the whole literal either.
-      for (int[] bounds : new int[][] {{start, end - 1}, {start - 1, end}, {start, end + 1}}) {
-        var inexact = reference.deepCopy().put("startUtf16", bounds[0]).put("endUtf16", bounds[1]);
-        assertThatThrownBy(
-                () ->
-                    resolver.validate(
-                        session, manifest, c.object().putArray("items").add(inexact).deepCopy()))
-            .hasMessage("INVALID_CONTRACT");
-      }
+    ObjectNode reference =
+        c.object()
+            .put("referenceKind", "sourceSpan")
+            .put("sourceRevision", "1")
+            .put("stepId", GuidedSourceClassifierTest.STEP)
+            .put("startUtf16", start)
+            .put("endUtf16", end)
+            .put("kind", "nonsecretText");
+    resolver.validate(session, manifest, c.object().putArray("items").add(reference).deepCopy());
+    // The E2E miscount: three code units early, so the span is `t "Test lo`.
+    for (int shift : new int[] {-3, -1, 1}) {
+      var shifted =
+          reference.deepCopy().put("startUtf16", start + shift).put("endUtf16", end + shift);
+      assertThatThrownBy(
+              () ->
+                  resolver.validate(
+                      session, manifest, c.object().putArray("items").add(shifted).deepCopy()))
+          .hasMessage("INVALID_CONTRACT");
+    }
+    // Excluding a final character or including a delimiter is not the whole literal either.
+    for (int[] bounds : new int[][] {{start, end - 1}, {start - 1, end}, {start, end + 1}}) {
+      var inexact = reference.deepCopy().put("startUtf16", bounds[0]).put("endUtf16", bounds[1]);
+      assertThatThrownBy(
+              () ->
+                  resolver.validate(
+                      session, manifest, c.object().putArray("items").add(inexact).deepCopy()))
+          .hasMessage("INVALID_CONTRACT");
     }
   }
 
@@ -138,13 +134,12 @@ class GuidedSourceInputResolverTest {
     session.set("scope", scope);
     session.putArray("sourceSteps").addObject().put("stepId", GuidedSourceClassifierTest.STEP);
     String[][] cases = {
-      {"Type \"incorrectUser\" in the \"Username\" field", "incorrectUser", "fill.value"},
+      {"Type \"incorrectUser\" in the \"Username\" field", "incorrectUser"},
       {
         "Check that the page shows the text \"Your username is invalid!\"",
-        "Your username is invalid!",
-        "assert.expected"
+        "Your username is invalid!"
       },
-      {"Check that the page shows the text \"Test login\"", "Test login", "assert.expected"},
+      {"Check that the page shows the text \"Test login\"", "Test login"},
     };
     for (String[] row : cases) {
       var manifest =
@@ -158,8 +153,7 @@ class GuidedSourceInputResolverTest {
               .put("stepId", GuidedSourceClassifierTest.STEP)
               .put("startUtf16", start)
               .put("endUtf16", start + row[1].length())
-              .put("kind", "nonsecretText")
-              .put("intendedSlot", row[2]);
+              .put("kind", "nonsecretText");
       resolver.validate(session, manifest, c.object().putArray("items").add(reference).deepCopy());
     }
   }

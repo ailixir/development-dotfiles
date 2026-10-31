@@ -204,16 +204,7 @@ class GuidedBridgeIntegrationTest {
               .put("configurationRevision", "config-1")
               .put("modelDataPolicyId", "labels-only-1")
               .putNull("valueTransferPolicyId");
-      scope
-          .putArray("capabilities")
-          .add("observe")
-          .add("navigate")
-          .add("read")
-          .add("fill")
-          .add("click")
-          .add("check")
-          .add("uncheck")
-          .add("assert");
+      scope.putArray("capabilities").add("observe").add("step");
       var steps = ENV.contracts.object().putArray("steps");
       steps.add(ENV.contracts.object().put("stepId", "step-1").put("requiresAssertion", false));
       if (ENV.wideSession) {
@@ -246,7 +237,8 @@ class GuidedBridgeIntegrationTest {
                       ENV.contracts
                           .parse(
                               jdbc.queryForObject(
-                                  "SELECT proposal::text FROM studio_guided_actions WHERE admission_id=?",
+                                  "SELECT proposal::text FROM studio_guided_actions WHERE"
+                                      + " admission_id=?",
                                   String.class,
                                   action.path("admission").path("admissionId").asText()))
                           .path("operation")
@@ -311,7 +303,6 @@ class GuidedBridgeIntegrationTest {
                       String.class),
                   "step-1",
                   "nonsecretText",
-                  "fill.value",
                   session.path("scopeHash").asText(),
                   true)));
     }
@@ -1167,8 +1158,8 @@ class GuidedBridgeIntegrationTest {
                     + "\"scopeHash\":\"2fec131b52b0144e082e963564fc3d114f068e5ef4d795a82c8f3b5653186861\","
                     + "\"coordinate\":{\"stepId\":\"step-2\",\"ordinal\":0},\"documentId\":\"document-1\","
                     + "\"generation\":1,\"reason\":\"AMBIGUOUS_TARGET\",\"promptCode\":\"CHOOSE_FIELD\","
-                    + "\"choices\":[{\"choiceId\":\"choice-1\",\"safeLabel\":\"Order reference\","
-                    + "\"bindingId\":null}],\"expiresAt\":\"2026-10-08T03:10:00Z\"}");
+                    + "\"choices\":[{\"choiceId\":\"choice-1\",\"safeLabel\":\"Order"
+                    + " reference\",\"bindingId\":null}],\"expiresAt\":\"2026-10-08T03:10:00Z\"}");
     legacyQuestion.put("sessionId", id);
     assertThatThrownBy(
             () -> sessions.clarification(controller, id, 1, "legacy-question", legacyQuestion))
@@ -1267,8 +1258,8 @@ class GuidedBridgeIntegrationTest {
         .isEqualTo(401);
     assertThat(
             jdbc.queryForObject(
-                ("SELECT count(*) FROM studio_guided_commands WHERE namespace=? AND idempotency_key LIK"
-                    + "E 'malformed-%'"),
+                ("SELECT count(*) FROM studio_guided_commands WHERE namespace=? AND idempotency_key"
+                    + " LIKE 'malformed-%'"),
                 Integer.class,
                 id))
         .isZero();
@@ -1434,8 +1425,7 @@ class GuidedBridgeIntegrationTest {
             .put("stepId", "step-1")
             .put("startUtf16", 6)
             .put("endUtf16", 6 + (ENV.origin + "/start").length())
-            .put("kind", "destination")
-            .put("intendedSlot", "navigate.destination"));
+            .put("kind", "destination"));
     String source =
         jdbc.queryForObject("SELECT source FROM bridge_fixture_sources WHERE id=1", String.class);
     refs.add(
@@ -1446,8 +1436,7 @@ class GuidedBridgeIntegrationTest {
             .put("stepId", "step-1")
             .put("startUtf16", source.lastIndexOf("fixture-input"))
             .put("endUtf16", source.lastIndexOf("fixture-input") + "fixture-input".length())
-            .put("kind", "nonsecretText")
-            .put("intendedSlot", "fill.value"));
+            .put("kind", "nonsecretText"));
     refs.add(
         ENV.contracts
             .object()
@@ -1455,8 +1444,7 @@ class GuidedBridgeIntegrationTest {
             .put("configurationRevision", "config-1")
             .put("stepId", "step-1")
             .put("referenceId", "config-value")
-            .put("kind", "nonsecretText")
-            .put("intendedSlot", "fill.value"));
+            .put("kind", "nonsecretText"));
     if (ENV.privacyEcho) {
       int start = source.indexOf(ENV.origin + "/echo");
       refs.add(
@@ -1467,8 +1455,7 @@ class GuidedBridgeIntegrationTest {
               .put("stepId", "step-1")
               .put("startUtf16", start)
               .put("endUtf16", start + (ENV.origin + "/echo").length())
-              .put("kind", "destination")
-              .put("intendedSlot", "navigate.destination"));
+              .put("kind", "destination"));
     }
     sessions.materialize(controller, id, 1, "materialize", refs);
   }

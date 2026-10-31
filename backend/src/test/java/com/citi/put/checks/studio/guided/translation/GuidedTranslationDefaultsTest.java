@@ -78,19 +78,20 @@ class GuidedTranslationDefaultsTest {
     assertThat(application.getBean(ObservedRevisionVerifier.class)).isNotNull();
   }
 
-  /** Round 067 (Candidate B): the per-send cap defaults to 50 s and the yml entry is bound. */
+  /** SC008-FIX-20: the per-send cap defaults to 20 s (was 50 s) and the yml entry is bound. */
   @Test
-  void sendTimeoutDefaultsToFiftySecondsUnderTheSixtySecondCallBudget() throws Exception {
+  void sendTimeoutDefaultsToTwentySecondsUnderTheSixtySecondCallBudget() throws Exception {
     var properties = application.getBean(GuidedTranslationProperties.class);
-    assertThat(properties.sendTimeoutSeconds()).isEqualTo(50);
+    assertThat(properties.sendTimeoutSeconds()).isEqualTo(20);
     assertThat(properties.callSeconds()).isEqualTo(60);
     assertThat(properties.isCallBudgetCoveringSendCap()).isTrue();
-    // 3 attempts x (60 s call + 2 s settle) + 2 s + 4 s backoff = 192 s, plus a 30 s margin.
-    assertThat(properties.continuationTimeout()).isEqualTo(java.time.Duration.ofSeconds(222));
-    assertThat(bindSendTimeout(null).sendTimeoutSeconds()).isEqualTo(50);
+    // 3 attempts x (60 s call + 2 s settle + 15 s runner prepare) + 3 x 2 s backoff = 237 s,
+    // plus a 30 s margin.
+    assertThat(properties.continuationTimeout()).isEqualTo(java.time.Duration.ofSeconds(267));
+    assertThat(bindSendTimeout(null).sendTimeoutSeconds()).isEqualTo(20);
     assertThat(
             Files.readString(Path.of("src/main/resources/application.yml"))
-                .contains("send-timeout-seconds: ${STUDIO_GUIDED_SEND_TIMEOUT_SECONDS:50}"))
+                .contains("send-timeout-seconds: ${STUDIO_GUIDED_SEND_TIMEOUT_SECONDS:20}"))
         .isTrue();
     assertThat(bindSendTimeout("1").sendTimeoutSeconds()).isEqualTo(1);
     assertThat(bindSendTimeout("600").sendTimeoutSeconds()).isEqualTo(600);

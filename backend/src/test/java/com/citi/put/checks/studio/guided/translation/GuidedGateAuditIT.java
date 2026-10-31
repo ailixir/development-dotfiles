@@ -10,10 +10,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import com.citi.put.checks.studio.guided.session.GuidedSessionException;
+import com.citi.put.checks.studio.guided.translation.GroundingItHarness.ReachedRunner;
 import com.citi.put.checks.studio.guided.translation.GroundingItHarness.Spec;
 import com.citi.put.checks.studio.support.ObservationFixtures;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.AfterAll;
@@ -22,20 +22,18 @@ import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
- * ADR-SC-007 AC1/AC5/AC7/AC10: the grounding gates, end to end on a real PostgreSQL. The real
+ * ADR-SC-008 D3.3/D6: the learning loop of one step, end to end on a real PostgreSQL. The real
  * session service, translation service, stores and migrations run; the model is scripted and the
- * runner is a stand-in at the dispatch edge, which refuses prepare the way {@code
+ * runner is a stand-in at the dispatch edge, which accepts or refuses prepare the way {@code
  * HttpRunnerDispatchClient} maps the runner's closed refusals.
  *
  * <p>What is proved is what the service persisted, read back with SQL after the run: the gate that
- * refused each rejected attempt ({@code rejection_gate}), how the intent gate admitted each applied
- * action ({@code intent_path}, {@code intent_fields}), and the runner-time gate that ended a run
- * ({@code progress.refusalGate}).
+ * refused each rejected attempt ({@code rejection_gate}), the prepare gate that ended a run ({@code
+ * progress.refusalGate}), the reservations and the model requests that were spent.
  */
 class GuidedGateAuditIT {
   private static final PostgreSQLContainer<?> POSTGRES =
       new PostgreSQLContainer<>("postgres:15-alpine");
-  private static final String READ_GRANT = "observed-read-v1-" + "a".repeat(64);
 
   @BeforeAll
   static void start() {
@@ -48,7 +46,7 @@ class GuidedGateAuditIT {
   }
 
   private static ObservationFixtures.Builder page() {
-    return ObservationFixtures.observation().readRuleId(READ_GRANT);
+    return ObservationFixtures.observation();
   }
 
   private static GuidedSessionException refusal(Throwable thrown) {
@@ -56,26 +54,32 @@ class GuidedGateAuditIT {
     return (GuidedSessionException) thrown;
   }
 
-  private static void noDispatch(GroundingItHarness h) {
-    verify(h.dispatch, never()).prepareAndAdmit(any(), anyString(), anyLong(), anyString(), any());
+  private static void noPrepare(GroundingItHarness h) {
+    verify(h.dispatch, never()).prepareStep(any(), anyString(), anyLong(), any());
   }
 
-  // ---- AC1: the gate that refused is persisted ----
+  private static JsonNode repairOf(GroundingItHarness h, int request) {
+    return h.requests.stream()
+        .filter(r -> r.kind() == GuidedModelRequest.Kind.STEP_CODE)
+        .toList()
+        .get(request)
+        .projection()
+        .document()
+        .path("repair");
+  }
 
-  /**
-   * The model offers two elements that look alike to the backend (the same role, name and evidence)
-   * as the choice between them. They can never be told apart by what the backend keeps, so the
-   * question is refused every time; three refusals end the run as a surface Studio cannot work
-   * with, and nothing was clicked.
-   */
+  // ---- the gate that refused is persisted ----
+
+  /** A clarification must offer at least two refs; fewer is a repairable reply, three end it. */
   @Test
-  void duplicateNameClarificationEndsUnsupportedSurface() throws Exception {
+  void aClarificationWithTooFewChoicesIsRepairedThenEndsInvalidContract() throws Exception {
     var h = new GroundingItHarness(POSTGRES, "Click Save.");
-    String id = h.session(List.of(Spec.click(0, "Save")));
-    h.observe(
-        id, 1, page().element("e1", "button", "Save").element("e2", "button", "Save").build());
+    String id = h.session(List.of(Spec.of(0, "Save")));
+    h.observe(id, 1, page().element("e1", "button", "Save").build());
     for (int attempt = 0; attempt < 3; attempt++) {
-      h.reply(GuidedModelRequest.Kind.NEXT_ACTION, request -> h.clarification(request, "e1", "e2"));
+      h.reply(
+          GuidedModelRequest.Kind.STEP_CODE,
+          request -> h.clarification(request, "AMBIGUOUS_TARGET", "e1"));
     }
     assertThatThrownBy(() -> h.advance(id))
         .satisfies(
@@ -83,244 +87,258 @@ class GuidedGateAuditIT {
               assertThat(refusal(failure).getMessage()).isEqualTo("INVALID_CONTRACT");
               assertThat(refusal(failure).status()).isEqualTo(422);
             });
-    assertThat(h.requests(GuidedModelRequest.Kind.NEXT_ACTION)).isEqualTo(3);
+    assertThat(h.requests(GuidedModelRequest.Kind.STEP_CODE)).isEqualTo(3);
     assertThat(h.state(id)).isEqualTo("FAILED");
-    assertThat(h.errorCode(id)).isEqualTo("UNSUPPORTED_SURFACE");
-    assertThat(h.rejectionGates(id)).isEqualTo(Map.of("NEXT_SELECTED_CHOICE", 3));
+    assertThat(h.errorCode(id)).isEqualTo("INVALID_CONTRACT");
+    assertThat(h.rejectionGates(id)).isEqualTo(Map.of("STEP_CHOICES", 3));
+    assertThat(h.reservations(id)).isZero();
     assertThat(h.actions(id)).isZero();
     assertThat(h.progress(id).has("clarification")).isFalse();
-    noDispatch(h);
+    assertThat(repairOf(h, 1).path("closedCode").asText()).isEqualTo("INVALID_CONTRACT");
+    noPrepare(h);
   }
 
   /**
-   * Three rejected replies for one obligation, each failing a different gate in the order the
-   * validator runs them: the ref is not on the page, the element does not match the intent, the
-   * operation does not fit the element's role. Each attempt row carries its own gate; the run ends
-   * UNSUPPORTED_SURFACE because the last refusal was a grounding gate.
+   * Three rejected replies for one step, each failing a different check in the order the validator
+   * runs them: blank code, a capture nobody planned, a choice whose ref is not on the page. Each
+   * attempt row carries its own gate.
    */
   @Test
   void rejectionGateIsPersistedForEachApplyGateAndReadBack() throws Exception {
-    var h = new GroundingItHarness(POSTGRES, "Tick the terms.");
-    String id = h.session(List.of(Spec.check(0, "Terms")));
+    var h = new GroundingItHarness(POSTGRES, "Click Save.");
+    String id = h.session(List.of(Spec.of(0, "Save")));
     h.observe(
-        id, 1, page().element("e1", "button", "Terms").element("e2", "button", "Cancel").build());
-    ObjectNode check = h.contracts.object().put("kind", "check");
-    for (String ref : List.of("e99", "e2", "e1")) {
-      h.reply(
-          GuidedModelRequest.Kind.NEXT_ACTION,
-          request -> h.action(request, ObservationFixtures.nodeRef(ref), check.deepCopy()));
-    }
+        id, 1, page().element("e1", "button", "Save").element("e2", "button", "Cancel").build());
+    h.reply(GuidedModelRequest.Kind.STEP_CODE, request -> h.code(request, "   "));
+    h.reply(
+        GuidedModelRequest.Kind.STEP_CODE, request -> h.code(request, "await x();", "unplanned"));
+    h.reply(
+        GuidedModelRequest.Kind.STEP_CODE,
+        request -> h.clarification(request, "AMBIGUOUS_TARGET", "e99", "e2"));
     assertThatThrownBy(() -> h.advance(id))
         .satisfies(
             failure -> assertThat(refusal(failure).getMessage()).isEqualTo("INVALID_CONTRACT"));
     assertThat(h.rejectionGates(id))
-        .isEqualTo(
-            Map.of(
-                "NEXT_TARGET_REF", 1,
-                "NEXT_TARGET_INTENT", 1,
-                "NEXT_OPERATION_TARGET", 1));
+        .isEqualTo(Map.of("STEP_CODE_SHAPE", 1, "STEP_CAPTURES", 1, "STEP_TARGET_REF", 1));
     assertThat(h.state(id)).isEqualTo("FAILED");
-    assertThat(h.errorCode(id)).isEqualTo("UNSUPPORTED_SURFACE");
+    assertThat(h.errorCode(id)).isEqualTo("INVALID_CONTRACT");
     assertThat(h.actions(id)).isZero();
-    noDispatch(h);
-
-    // A gate that is not a grounding gate keeps its own terminal code: an operation that is not
-    // the obligation's is a malformed reply, not a surface Studio cannot work with.
-    String other = h.session(List.of(Spec.click(0, "Save")));
-    h.observe(other, 1, page().element("e1", "button", "Save").build());
-    ObjectNode hover = h.contracts.object().put("kind", "hover");
-    for (int attempt = 0; attempt < 3; attempt++) {
-      h.reply(
-          GuidedModelRequest.Kind.NEXT_ACTION,
-          request -> h.action(request, ObservationFixtures.nodeRef("e1"), hover.deepCopy()));
-    }
-    assertThatThrownBy(() -> h.advance(other))
-        .satisfies(
-            failure -> assertThat(refusal(failure).getMessage()).isEqualTo("INVALID_CONTRACT"));
-    assertThat(h.rejectionGates(other)).isEqualTo(Map.of("NEXT_ACTION_MEANING", 3));
-    assertThat(h.errorCode(other)).isEqualTo("INVALID_CONTRACT");
+    noPrepare(h);
   }
 
-  // ---- AC5: how an admitted action passed the intent gate ----
+  // ---- the runner's prepare is the syntax admission, and it shares the pool ----
 
   /**
-   * An action admitted by an exact name and one admitted by a word subset of the element's evidence
-   * (the words came from its name and from the text near it): the audit says which path and which
-   * evidence fields supplied the intent words. Read back after the run, per applied attempt.
+   * The runner cannot parse the first code. The next request carries the repair: the closed code,
+   * the position and the code that failed. The second code is accepted and its obligation reserved.
    */
   @Test
-  void intentPathAndFieldsArePersistedForAdmittedActionsAndReadBack() throws Exception {
-    var h = new GroundingItHarness(POSTGRES, "Click Save.");
-    // The action guard grounds the clicked element's name in the authored step text.
-    var searching = new GroundingItHarness(POSTGRES, "Click Search docs.");
-
-    String exact = h.session(List.of(Spec.click(0, "Save")));
-    h.observe(exact, 1, page().element("e1", "button", "Save").build());
-    h.reply(GuidedModelRequest.Kind.NEXT_ACTION, request -> h.click(request, "e1"));
-    assertThatThrownBy(() -> h.advance(exact)).isInstanceOf(GroundingItHarness.ReachedRunner.class);
-    assertThat(h.intentRows(exact)).isEqualTo(List.of(List.of("EXACT_NAME", "name")));
-    assertThat(h.rejectionGates(exact)).isEmpty();
-
-    String subset = searching.session(List.of(Spec.click(0, "Search docs")));
-    ObjectNode search = ObservationFixtures.fact("button", "Search", false, null);
-    search.put("evidence", "Search docs");
-    search
-        .putArray("evidenceSegments")
-        .addObject()
-        .put("field", "name")
-        .put("start", 0)
-        .put("end", 6);
-    search
-        .withArray("evidenceSegments")
-        .addObject()
-        .put("field", "near")
-        .put("start", 7)
-        .put("end", 11);
-    searching.observe(subset, 1, page().withFact("e1", search).build());
-    searching.reply(GuidedModelRequest.Kind.NEXT_ACTION, request -> searching.click(request, "e1"));
-    assertThatThrownBy(() -> searching.advance(subset))
-        .isInstanceOf(GroundingItHarness.ReachedRunner.class);
-    assertThat(searching.intentRows(subset))
-        .isEqualTo(List.of(List.of("EVIDENCE_SUBSET", "name,near")));
-    assertThat(searching.rejectionGates(subset)).isEmpty();
-  }
-
-  // ---- AC7: a read needs a grant and text ----
-
-  /**
-   * A page the runner reported with no read grant admits no read, so the run ends before a model is
-   * asked: three refused replies would only have spent the budget.
-   */
-  @Test
-  void readOnPageWithoutReadGrantFailsBeforeTheModelCall() throws Exception {
-    var h = new GroundingItHarness(POSTGRES, "Read the reference.", "Check the reference.");
-    String id = h.session(readPlan());
-    h.observe(
-        id,
-        1,
-        ObservationFixtures.observation().readable("e1", "text", "Order number", "ORD-1").build());
-    assertThatThrownBy(() -> h.advance(id))
-        .satisfies(
-            failure -> {
-              assertThat(refusal(failure).getMessage()).isEqualTo("UNSUPPORTED_SURFACE");
-              assertThat(refusal(failure).status()).isEqualTo(422);
-            });
-    assertThat(h.requests(GuidedModelRequest.Kind.NEXT_ACTION)).isZero();
-    assertThat(h.state(id)).isEqualTo("FAILED");
-    assertThat(h.errorCode(id)).isEqualTo("UNSUPPORTED_SURFACE");
-    assertThat(h.actions(id)).isZero();
-    noDispatch(h);
-  }
-
-  // ---- AC10: the runner's report must agree, and its closed refusals end the run ----
-
-  /**
-   * The runner reports a target that disagrees with the element the gates admitted, so the
-   * preparation is refused before it can be stored. The same proposal is asked and refused again;
-   * after two unadmitted proposals the run ends as a surface Studio cannot work with.
-   */
-  @Test
-  void evidenceMismatchedPreparationEndsUnsupportedSurfaceAfterTwoUnadmittedProposals()
+  void aSyntaxRefusalIsRepairedWithItsPositionAndNothingIsReservedForTheRefusedCode()
       throws Exception {
     var h = new GroundingItHarness(POSTGRES, "Click Save.");
-    String id = h.session(List.of(Spec.click(0, "Save")));
+    String id = h.session(List.of(Spec.of(0, "Save")));
     h.observe(id, 1, page().element("e1", "button", "Save").build());
-    h.prepareFails("EVIDENCE_MISMATCH", 422);
-    for (int proposal = 0; proposal < 2; proposal++) {
-      h.reply(GuidedModelRequest.Kind.NEXT_ACTION, request -> h.click(request, "e1"));
-    }
-    for (int proposal = 0; proposal < 2; proposal++) {
-      assertThatThrownBy(() -> h.advance(id))
-          .satisfies(
-              failure -> assertThat(refusal(failure).getMessage()).isEqualTo("EVIDENCE_MISMATCH"));
-      assertThat(h.state(id)).isEqualTo("PROPOSING");
-    }
-    h.advance(id);
+    h.stopAtRunner();
+    h.prepareSequence(GroundingItHarness.syntax(1, 18), null);
+    h.reply(GuidedModelRequest.Kind.STEP_CODE, request -> h.code(request, "await page.click(("));
+    h.reply(
+        GuidedModelRequest.Kind.STEP_CODE,
+        request -> h.code(request, "await page.getByRole('button').click();"));
+    assertThatThrownBy(() -> h.advance(id)).isInstanceOf(ReachedRunner.class);
+    assertThat(h.requests(GuidedModelRequest.Kind.STEP_CODE)).isEqualTo(2);
+    assertThat(repairOf(h, 0).isNull()).isTrue();
+    JsonNode repair = repairOf(h, 1);
+    assertThat(repair.path("closedCode").asText()).isEqualTo("STEP_SYNTAX");
+    assertThat(repair.path("stage").asText()).isEqualTo("SYNTAX");
+    assertThat(repair.path("line").asInt()).isEqualTo(1);
+    assertThat(repair.path("column").asInt()).isEqualTo(18);
+    assertThat(repair.path("previousCode").asText()).isEqualTo("await page.click((");
+    assertThat(repair.path("facts").asText().length()).isLessThanOrEqualTo(256);
+    assertThat(h.reservations(id)).isEqualTo(1);
+    // A syntax refusal ran no code: the page is not observed again.
+    verify(h.dispatch, never()).observe(any(), anyString(), anyLong(), anyString(), any());
+    assertThat(h.stepCodeAttempts(id)).isEqualTo(Map.of("APPLIED", 2));
+  }
+
+  /** A miss before the first action ran the code, so the page is observed again first. */
+  @Test
+  void aPreFenceRefusalRefreshesTheObservationBeforeTheNextRequest() throws Exception {
+    var h = new GroundingItHarness(POSTGRES, "Click Save.");
+    String id = h.session(List.of(Spec.of(0, "Save")));
+    h.observe(id, 1, page().element("e1", "button", "Save").build());
+    h.refreshWith(
+        generation ->
+            page().document("document-1", generation).element("e1", "button", "Save").build());
+    h.stopAtRunner();
+    h.prepareSequence(GroundingItHarness.preFence(0), null);
+    h.reply(GuidedModelRequest.Kind.STEP_CODE, request -> h.code(request, "await a();"));
+    h.reply(GuidedModelRequest.Kind.STEP_CODE, request -> h.code(request, "await b();"));
+    assertThatThrownBy(() -> h.advance(id)).isInstanceOf(ReachedRunner.class);
+    JsonNode repair = repairOf(h, 1);
+    assertThat(repair.path("closedCode").asText()).isEqualTo("TARGET_DRIFT");
+    assertThat(repair.path("stage").asText()).isEqualTo("PRE_FENCE");
+    assertThat(repair.path("line").isNull()).isTrue();
+    assertThat(repair.path("facts").asText()).contains("0 elements");
+    verify(h.dispatch, times(1)).observe(any(), anyString(), anyLong(), anyString(), any());
+  }
+
+  /** Two rejected replies and one prepare refusal spend the one pool of three and end the step. */
+  @Test
+  void rejectionsAndPrepareRefusalsShareOnePoolOfThree() throws Exception {
+    var h = new GroundingItHarness(POSTGRES, "Click Save.");
+    String id = h.session(List.of(Spec.of(0, "Save")));
+    h.observe(id, 1, page().element("e1", "button", "Save").build());
+    h.stopAtRunner();
+    h.prepareSequence(GroundingItHarness.syntax(2, 3));
+    h.reply(GuidedModelRequest.Kind.STEP_CODE, request -> h.code(request, "   "));
+    h.reply(GuidedModelRequest.Kind.STEP_CODE, request -> h.code(request, "x", "unplanned"));
+    h.reply(GuidedModelRequest.Kind.STEP_CODE, request -> h.code(request, "await broken("));
+    assertThatThrownBy(() -> h.advance(id))
+        .satisfies(
+            failure -> assertThat(refusal(failure).getMessage()).isEqualTo("INVALID_CONTRACT"));
+    assertThat(h.requests(GuidedModelRequest.Kind.STEP_CODE)).isEqualTo(3);
     assertThat(h.state(id)).isEqualTo("FAILED");
-    assertThat(h.errorCode(id)).isEqualTo("UNSUPPORTED_SURFACE");
-    assertThat(h.requests(GuidedModelRequest.Kind.NEXT_ACTION)).isEqualTo(2);
-    verify(h.dispatch, times(2)).prepareAndAdmit(any(), anyString(), anyLong(), anyString(), any());
+    assertThat(h.errorCode(id)).isEqualTo("INVALID_CONTRACT");
+    assertThat(h.refusalGate(id)).isEqualTo("STEP_SYNTAX");
+    assertThat(h.reservations(id)).isZero();
     assertThat(h.actions(id)).isZero();
   }
 
+  /** The pool also holds across a redrive: a fourth request is never made for the step. */
+  @Test
+  void aSpentPoolStaysSpentWhenTheStepIsDrivenAgain() throws Exception {
+    var h = new GroundingItHarness(POSTGRES, "Click Save.");
+    String id = h.session(List.of(Spec.of(0, "Save")));
+    h.observe(id, 1, page().element("e1", "button", "Save").build());
+    h.prepareSequence(GroundingItHarness.syntax(1, 1));
+    for (int attempt = 0; attempt < 3; attempt++) {
+      h.reply(GuidedModelRequest.Kind.STEP_CODE, request -> h.code(request, "await broken("));
+    }
+    assertThatThrownBy(() -> h.advance(id)).isInstanceOf(GuidedSessionException.class);
+    int spent = h.requests(GuidedModelRequest.Kind.STEP_CODE);
+    assertThatThrownBy(() -> h.advance(id)).isInstanceOf(GuidedSessionException.class);
+    assertThat(h.requests(GuidedModelRequest.Kind.STEP_CODE)).isEqualTo(spent);
+  }
+
+  // ---- a reservation that outlived its admission ----
+
   /**
-   * The runner cannot find the authored option among the live ones. The run ends TARGET_MISMATCH
-   * with the runner-time gate recorded, and the model is not asked again.
+   * The run died between the reservation and the admission. The next advance resumes that
+   * reservation from its stored proposal: no new model request and no IDEMPOTENCY_CONFLICT.
    */
   @Test
-  void runnerOptionNotPresentEndsTargetMismatchWithoutReask() throws Exception {
+  void aReservationThatWasNeverAdmittedIsResumedFromItsStoredProposal() throws Exception {
     var h = new GroundingItHarness(POSTGRES, "Click Save.");
-    String id = h.session(List.of(Spec.click(0, "Save")));
+    String id = h.session(List.of(Spec.of(0, "Save")));
     h.observe(id, 1, page().element("e1", "button", "Save").build());
-    h.reply(GuidedModelRequest.Kind.NEXT_ACTION, request -> h.click(request, "e1"));
-    h.runnerRefusesPrepare("TARGET_MISMATCH", 422, "OPTION_NOT_PRESENT");
-    assertThatThrownBy(() -> h.advance(id))
-        .satisfies(
-            failure -> {
-              assertThat(refusal(failure).getMessage()).isEqualTo("TARGET_MISMATCH");
-              assertThat(refusal(failure).messageCode()).isEqualTo("OPTION_NOT_PRESENT");
-            });
-    assertThat(h.state(id)).isEqualTo("FAILED");
-    assertThat(h.errorCode(id)).isEqualTo("TARGET_MISMATCH");
-    assertThat(h.refusalGate(id)).isEqualTo("RUNNER_OPTION_NOT_PRESENT");
-    assertThatThrownBy(() -> h.advance(id)).isInstanceOf(GuidedSessionException.class);
-    assertThat(h.requests(GuidedModelRequest.Kind.NEXT_ACTION)).isEqualTo(1);
+    h.stopAtRunner();
+    h.reply(GuidedModelRequest.Kind.STEP_CODE, request -> h.code(request, "await ok();"));
+    assertThatThrownBy(() -> h.advance(id)).isInstanceOf(ReachedRunner.class);
+    assertThat(h.reservations(id)).isEqualTo(1);
+    assertThatThrownBy(() -> h.advance(id)).isInstanceOf(ReachedRunner.class);
+    assertThat(h.requests(GuidedModelRequest.Kind.STEP_CODE)).isEqualTo(1);
     verify(h.dispatch, times(1)).prepareAndAdmit(any(), anyString(), anyLong(), anyString(), any());
+    assertThat(h.reservations(id)).isEqualTo(1);
   }
 
-  /** The runner cannot give the element a locator that survives a reload: not a state to learn. */
+  /** The resumed proposal is refused at prepare: the run ends, and the gate is recorded. */
   @Test
-  void runnerNoDurableLocatorEndsUnsupportedSurface() throws Exception {
+  void aResumedProposalThatPrepareRefusesEndsTheRunWithItsGate() throws Exception {
     var h = new GroundingItHarness(POSTGRES, "Click Save.");
-    String id = h.session(List.of(Spec.click(0, "Save")));
+    String id = h.session(List.of(Spec.of(0, "Save")));
     h.observe(id, 1, page().element("e1", "button", "Save").build());
-    h.reply(GuidedModelRequest.Kind.NEXT_ACTION, request -> h.click(request, "e1"));
-    h.runnerRefusesPrepare("UNSUPPORTED_SURFACE", 422, "NO_DURABLE_LOCATOR");
+    h.stopAtRunner();
+    h.reply(GuidedModelRequest.Kind.STEP_CODE, request -> h.code(request, "await ok();"));
+    assertThatThrownBy(() -> h.advance(id)).isInstanceOf(ReachedRunner.class);
+    org.mockito.Mockito.doThrow(GroundingItHarness.syntax(4, 2))
+        .when(h.dispatch)
+        .prepareAndAdmit(any(), anyString(), anyLong(), anyString(), any());
     assertThatThrownBy(() -> h.advance(id))
-        .satisfies(
-            failure -> {
-              assertThat(refusal(failure).getMessage()).isEqualTo("UNSUPPORTED_SURFACE");
-              assertThat(refusal(failure).messageCode()).isEqualTo("NO_DURABLE_LOCATOR");
-            });
+        .satisfies(failure -> assertThat(refusal(failure).messageCode()).isEqualTo("STEP_SYNTAX"));
     assertThat(h.state(id)).isEqualTo("FAILED");
-    assertThat(h.errorCode(id)).isEqualTo("UNSUPPORTED_SURFACE");
-    assertThat(h.refusalGate(id)).isEqualTo("RUNNER_NO_DURABLE_LOCATOR");
-    assertThat(h.requests(GuidedModelRequest.Kind.NEXT_ACTION)).isEqualTo(1);
+    assertThat(h.errorCode(id)).isEqualTo("INVALID_CONTRACT");
+    assertThat(h.refusalGate(id)).isEqualTo("STEP_SYNTAX");
+    assertThat(h.requests(GuidedModelRequest.Kind.STEP_CODE)).isEqualTo(1);
   }
 
-  /** The runner's kept read profile does not allow the read the backend's gates admitted. */
+  // ---- an absent target ----
+
+  /**
+   * The model finds nothing to choose from on a page that has settled: the step ends MISSING_SOURCE
+   * (never BUDGET_EXCEEDED), with nothing prepared, reserved or dispatched.
+   */
   @Test
-  void runnerReadNotAllowedEndsUnsupportedSurface() throws Exception {
-    var h = new GroundingItHarness(POSTGRES, "Read the reference.", "Check the reference.");
-    String id = h.session(readPlan());
-    h.observe(id, 1, page().readable("e1", "text", "Order number", "ORD-1").build());
+  void anAbsentTargetOnAStablePageReachesTheModelAndEndsMissingSource() throws Exception {
+    var h = new GroundingItHarness(POSTGRES, "Click Delete.");
+    String id = h.session(List.of(Spec.of(0, "Delete")));
+    h.observe(id, 1, page().element("e1", "button", "Save").build());
     h.reply(
-        GuidedModelRequest.Kind.NEXT_ACTION,
-        request -> {
-          JsonNode needs = request.projection().document().path("needs");
-          ObjectNode read =
-              h.contracts
-                  .object()
-                  .put("kind", "read")
-                  .put("bindingId", needs.get(0).path("bindingId").asText());
-          return h.action(request, ObservationFixtures.nodeRef("e1"), read);
-        });
-    h.runnerRefusesPrepare("UNSUPPORTED_SURFACE", 422, "READ_NOT_ALLOWED");
-    assertThatThrownBy(() -> h.advance(id))
-        .satisfies(
-            failure -> {
-              assertThat(refusal(failure).getMessage()).isEqualTo("UNSUPPORTED_SURFACE");
-              assertThat(refusal(failure).messageCode()).isEqualTo("READ_NOT_ALLOWED");
-            });
+        GuidedModelRequest.Kind.STEP_CODE,
+        request -> h.clarification(request, "INSUFFICIENT_EVIDENCE"));
+    h.advance(id);
+    assertThat(h.requests(GuidedModelRequest.Kind.STEP_CODE)).isEqualTo(1);
     assertThat(h.state(id)).isEqualTo("FAILED");
-    assertThat(h.errorCode(id)).isEqualTo("UNSUPPORTED_SURFACE");
-    assertThat(h.refusalGate(id)).isEqualTo("RUNNER_READ_NOT_ALLOWED");
-    assertThat(h.requests(GuidedModelRequest.Kind.NEXT_ACTION)).isEqualTo(1);
+    assertThat(h.errorCode(id)).isEqualTo("MISSING_SOURCE");
+    assertThat(h.reservations(id)).isZero();
+    assertThat(h.actions(id)).isZero();
+    noPrepare(h);
   }
 
-  /** A read of the order reference, then a check that the page shows the value that was read. */
-  private static List<Spec> readPlan() {
-    return List.of(
-        Spec.read(0, "Order number", "need-a"), Spec.assertContains(1, "Order number", "need-a"));
+  /** Zero choices with an ambiguity reason is a malformed reply, not an absent target. */
+  @Test
+  void zeroChoicesWithAnAmbiguityReasonIsRepairable() throws Exception {
+    var h = new GroundingItHarness(POSTGRES, "Click Save.");
+    String id = h.session(List.of(Spec.of(0, "Save")));
+    h.observe(id, 1, page().element("e1", "button", "Save").build());
+    h.stopAtRunner();
+    h.reply(
+        GuidedModelRequest.Kind.STEP_CODE, request -> h.clarification(request, "AMBIGUOUS_TARGET"));
+    h.reply(GuidedModelRequest.Kind.STEP_CODE, request -> h.code(request, "await ok();"));
+    assertThatThrownBy(() -> h.advance(id)).isInstanceOf(ReachedRunner.class);
+    assertThat(h.rejectionGates(id)).isEqualTo(Map.of("STEP_CHOICES", 1));
+    assertThat(h.requests(GuidedModelRequest.Kind.STEP_CODE)).isEqualTo(2);
+  }
+
+  /**
+   * SC008-FIX-9: a stand-alone "Copy ..." step (a needId nothing uses) is planned, not refused. The
+   * plan keeps the step, drops the unused need, and the step is an ordinary one: its STEP_CODE
+   * request carries needId null and no needs, and it is dispatched with no capture.
+   */
+  @Test
+  void aStandAloneCopyStepIsPlannedAsAnOrdinaryStepWithNoNeed() throws Exception {
+    var h = new GroundingItHarness(POSTGRES, "Copy the price.");
+    String id = h.session(List.of(Spec.produces(0, "Price", "need-price")));
+    h.observe(id, 1, page().element("e1", "text", "9.99").build());
+    h.runnerSucceeds();
+    h.refreshWith(
+        generation ->
+            page().document("document-1", generation).element("e1", "text", "9.99").build());
+    h.reply(
+        GuidedModelRequest.Kind.STEP_CODE,
+        request -> h.code(request, "await expect(page.getByText('9.99')).toBeVisible();"));
+
+    h.advance(id);
+
+    JsonNode context =
+        h.requests.stream()
+            .filter(r -> r.kind() == GuidedModelRequest.Kind.STEP_CODE)
+            .findFirst()
+            .orElseThrow()
+            .projection()
+            .document();
+    assertThat(context.path("needs")).isEmpty();
+    assertThat(context.path("obligations").get(0).path("needId").isNull()).isTrue();
+    var actions = h.actionRows(id);
+    assertThat(actions).hasSize(1);
+    assertThat(actions.getFirst().path("state").asText()).isEqualTo("SUCCEEDED");
+    assertThat(h.reservations(id)).isEqualTo(1);
+    assertThat(
+            h.repository
+                .transaction(() -> h.store.obligations(id))
+                .getFirst()
+                .path("proposal")
+                .path("operation")
+                .path("captures"))
+        .isEmpty();
   }
 }

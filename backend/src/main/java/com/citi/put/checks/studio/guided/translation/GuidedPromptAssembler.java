@@ -13,6 +13,8 @@ public final class GuidedPromptAssembler {
   private final GuidedContracts contracts;
   private final AllowedDomains domains;
   private final String output;
+  private final String stepCodeContract;
+  private final PlaywrightReference reference;
   private final JsonNode schema;
   private final java.util.Map<String, JsonNode> schemaInputs;
   private final java.util.Map<GuidedModelRequest.Kind, JsonNode> providerSchemas;
@@ -27,7 +29,13 @@ public final class GuidedPromptAssembler {
       GuidedContracts contracts, AllowedDomains domains, boolean productionFactory) {
     this.contracts = contracts;
     this.domains = domains;
-    output = resource("/studio/guided-output-contract.md");
+    reference = PlaywrightReference.load();
+    // The plan names the reference sections each step needs, from this index (ADR-SC-008 D6).
+    output =
+        resource("/studio/guided-output-contract.md").stripTrailing()
+            + "\n\nReference section index (section id (tier) title: members):\n"
+            + reference.index().stripTrailing();
+    stepCodeContract = resource("/studio/guided-step-code-contract.md");
     schema =
         contracts.parse(
             resource("/studio/observed-contracts/v3/guided-model-response.schema.json"));
@@ -42,7 +50,11 @@ public final class GuidedPromptAssembler {
     var providers =
         new java.util.EnumMap<GuidedModelRequest.Kind, JsonNode>(GuidedModelRequest.Kind.class);
     for (GuidedModelRequest.Kind kind : GuidedModelRequest.Kind.values()) {
-      providers.put(kind, buildProviderSchema(kind, inputs));
+      // Only a kind with a branch in the response schema can be requested (SOURCE_PLAN, STEP_CODE).
+      JsonNode providerSchema = buildProviderSchema(kind, inputs);
+      if (providerSchema != null) {
+        providers.put(kind, providerSchema);
+      }
     }
     schemaInputs = java.util.Map.copyOf(inputs);
     providerSchemas = java.util.Map.copyOf(providers);
@@ -94,6 +106,10 @@ public final class GuidedPromptAssembler {
       JsonNode selectedSources,
       List<String> repairCodes,
       int maxOutputTokens) {
+    if (kind != GuidedModelRequest.Kind.SOURCE_PLAN) {
+      throw new IllegalArgumentException(
+          "assemble builds SOURCE_PLAN requests; see assembleStepCode");
+    }
     ObjectNode context =
         buildPositiveContext(
             kind, session, progress, state, safeInputs, remaining, selectedSources, repairCodes);
@@ -105,6 +121,68 @@ public final class GuidedPromptAssembler {
         output,
         providerSchema(kind),
         maxOutputTokens);
+  }
+
+  /**
+   * The STEP_CODE request for one step (ADR-SC-008 D6): the step-code contract and the reference
+   * sections the plan picked as system text, the usual envelope as user content, and on a repair
+   * attempt the structured repair input. Sections are hints: if the request would exceed {@code
+   * maxWireBytes} they are dropped from the end, and a request that does not fit even with the
+   * contract and the core reference only is refused. The outline is never touched.
+   */
+  public GuidedModelRequest assembleStepCode(
+      String requestId,
+      int attempt,
+      JsonNode session,
+      JsonNode progress,
+      JsonNode state,
+      JsonNode safeInputs,
+      JsonNode remaining,
+      JsonNode selectedSources,
+      List<String> sections,
+      JsonNode repair,
+      int maxWireBytes,
+      int maxOutputTokens) {
+    GuidedModelRequest.Kind kind = GuidedModelRequest.Kind.STEP_CODE;
+    ObjectNode context =
+        buildPositiveContext(
+            kind, session, progress, state, safeInputs, remaining, selectedSources, List.of());
+    context.set("repair", maskedRepair(repair));
+    // The projection refuses over-long repair text; nothing here truncates.
+    var projection = new GuidedModelProjection(context);
+    JsonNode schema = providerSchema(kind);
+    List<String> picked = reference.validExtended(sections);
+    for (int count = picked.size(); count >= 0; count--) {
+      var request =
+          new GuidedModelRequest(
+              requestId,
+              attempt,
+              kind,
+              projection,
+              stepCodeContract.stripTrailing()
+                  + "\n\n"
+                  + reference.select(picked.subList(0, count)),
+              schema,
+              maxOutputTokens);
+      if (wireBytes(request) <= maxWireBytes) {
+        return request;
+      }
+    }
+    throw new com.citi.put.checks.studio.guided.session.GuidedSessionException(
+        "BUDGET_EXCEEDED", 422);
+  }
+
+  private static JsonNode maskedRepair(JsonNode repair) {
+    if (repair == null || repair.isNull() || repair.isMissingNode()) {
+      return com.fasterxml.jackson.databind.node.NullNode.instance;
+    }
+    ObjectNode masked = repair.deepCopy();
+    for (String key : List.of("facts", "previousCode")) {
+      if (masked.path(key).isTextual()) {
+        masked.put(key, maskSecretTokens(masked.path(key).asText()));
+      }
+    }
+    return masked;
   }
 
   ObjectNode buildPositiveContext(
@@ -183,12 +261,11 @@ public final class GuidedPromptAssembler {
               "obligationId",
               "stepId",
               "occurrence",
-              "operationKind",
               "targetIntent",
               "scopeIntent",
               "referenceIndex",
               "needId",
-              "predicate")) {
+              "uses")) {
         safe.set(key, item.path(key));
       }
       // ADR-SC-007 D6: the model sees an earlier choice only as {role, name, ref}, the ref being
@@ -307,6 +384,28 @@ public final class GuidedPromptAssembler {
     }
   }
 
+  /**
+   * The one wire-size formula: the escaped JSON of the request contents (the stringified context is
+   * escaped again inside it), the system instruction and the response schema, plus an allowance for
+   * the SDK field wrappers. The translation size check and every prompt-size test use it.
+   */
+  public int wireBytes(GuidedModelRequest request) {
+    ObjectNode payload =
+        contracts
+            .object()
+            .put("kind", request.kind().name())
+            .put("requestId", request.requestId())
+            .put("attempt", request.attempt());
+    payload.set("context", request.projection().document());
+    ObjectNode wire =
+        contracts
+            .object()
+            .put("contents", payload.toString())
+            .put("systemInstruction", request.outputContract());
+    wire.set("responseJsonSchema", request.responseSchema());
+    return wire.toString().getBytes(StandardCharsets.UTF_8).length + 2048;
+  }
+
   PreparedProjection preparePure(
       PreparationCapability capability,
       ObjectNode context,
@@ -314,8 +413,11 @@ public final class GuidedPromptAssembler {
       int attempt,
       GuidedModelRequest.Kind kind,
       int outputCap) {
-    if (capability == null || capability != preparationCapability || !capability.ownedBy(this)) {
-      return null;
+    if (capability == null
+        || capability != preparationCapability
+        || !capability.ownedBy(this)
+        || kind != GuidedModelRequest.Kind.SOURCE_PLAN) {
+      return null; // STEP_CODE carries sections and repair, so it is never prepared.
     }
     try {
       ObjectNode owned = context.deepCopy();
@@ -330,22 +432,8 @@ public final class GuidedPromptAssembler {
                 output,
                 providerSchemas.get(kind),
                 outputCap);
-        ObjectNode payload =
-            contracts
-                .object()
-                .put("kind", request.kind().name())
-                .put("requestId", request.requestId())
-                .put("attempt", request.attempt());
-        payload.set("context", request.projection().document());
-        ObjectNode wire =
-            contracts
-                .object()
-                .put("contents", payload.toString())
-                .put("systemInstruction", request.outputContract());
-        wire.set("responseJsonSchema", request.responseSchema());
-        int bytes = wire.toString().getBytes(StandardCharsets.UTF_8).length + 2048;
         return new PreparedProjection(
-            capability, owned, key, attempt, kind, outputCap, request, bytes, null, 0);
+            capability, owned, key, attempt, kind, outputCap, request, wireBytes(request), null, 0);
       } catch (com.citi.put.checks.studio.guided.session.GuidedSessionException failure) {
         String fixed = failure.getMessage();
         if (!(fixed.equals("INVALID_CONTRACT") && failure.status() == 422
@@ -446,7 +534,11 @@ public final class GuidedPromptAssembler {
 
   /** Inline pinned local references, then project only provider-supported JSON-schema keywords. */
   public JsonNode providerSchema(GuidedModelRequest.Kind kind) {
-    return providerSchemas.get(kind).deepCopy();
+    JsonNode schema = providerSchemas.get(kind);
+    if (schema == null) {
+      throw new IllegalArgumentException("No provider schema for the request kind");
+    }
+    return schema.deepCopy();
   }
 
   private JsonNode buildProviderSchema(
@@ -461,6 +553,9 @@ public final class GuidedPromptAssembler {
       if (matches) {
         alternatives.add(providerNode(candidate, inputs));
       }
+    }
+    if (alternatives.isEmpty()) {
+      return null;
     }
     JsonNode expanded =
         alternatives.size() == 1
@@ -541,11 +636,14 @@ public final class GuidedPromptAssembler {
                 GuidedContracts.hash(schemaInputs.get("planning-context.schema.json")))
             .put(
                 "outputContractHash",
-                GuidedContracts.hash(contracts.object().put("contract", output)));
+                GuidedContracts.hash(contracts.object().put("contract", output)))
+            .put(
+                "stepCodeContractHash",
+                GuidedContracts.hash(contracts.object().put("contract", stepCodeContract)))
+            .put("playwrightReferenceHash", reference.referenceHash());
     ObjectNode provider = pins.putObject("providerSchemaHashes");
-    for (GuidedModelRequest.Kind kind : GuidedModelRequest.Kind.values()) {
-      provider.put(kind.name(), GuidedContracts.hash(providerSchemas.get(kind)));
-    }
+    providerSchemas.forEach(
+        (kind, schema) -> provider.put(kind.name(), GuidedContracts.hash(schema)));
     return pins;
   }
 

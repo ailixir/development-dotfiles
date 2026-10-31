@@ -19,8 +19,8 @@ import java.util.UUID;
  *
  * <h2>Readiness</h2>
  *
- * <p>{@code readiness} is {@code UNLEARNED | LEARNING | READY | NEEDS_RELEARN}, derived on every
- * read by the same predicate the execute path consults; no column stores it. {@code
+ * <p>{@code readiness} is {@code UNLEARNED | LEARNING | RECORDED | READY | NEEDS_RELEARN}, derived
+ * on every read by the same predicate the execute path consults; no column stores it. {@code
  * firstChangedStepId} accompanies {@code NEEDS_RELEARN}, which STUDIO-OBS-015 introduces; until
  * then the server never emits {@code NEEDS_RELEARN} and the field is always {@code null}.
  *
@@ -53,7 +53,14 @@ public record UITestDto(
     UUID firstChangedStepId,
     UUID confirmedRevisionId,
     String confirmedRevisionArtifactHash,
-    JsonNode confirmedRevisionArtifact) {
+    JsonNode confirmedRevisionArtifact,
+    Verification verification) {
+
+  /**
+   * The state of the model-free proof of a recorded revision; non-null exactly when readiness is
+   * {@code RECORDED}. {@code state} is PENDING, FAILED or INCOMPLETE.
+   */
+  public record Verification(String state, UUID firstUnverifiedStepId) {}
 
   private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -67,11 +74,15 @@ public record UITestDto(
    * @return the full representation
    */
   public static UITestDto from(UITest entity, UITestRevision confirmed, StudioReadiness readiness) {
-    return from(entity, confirmed, readiness, null);
+    return from(entity, confirmed, readiness, null, null);
   }
 
   public static UITestDto from(
-      UITest entity, UITestRevision confirmed, StudioReadiness readiness, UUID firstChangedStepId) {
+      UITest entity,
+      UITestRevision confirmed,
+      StudioReadiness readiness,
+      UUID firstChangedStepId,
+      Verification verification) {
     return new UITestDto(
         entity.getId(),
         entity.getName(),
@@ -98,7 +109,8 @@ public record UITestDto(
         firstChangedStepId,
         entity.getConfirmedRevisionId(),
         confirmed == null ? null : confirmed.getArtifactHash(),
-        confirmed == null ? null : parse(confirmed.getArtifact()));
+        confirmed == null ? null : parse(confirmed.getArtifact()),
+        verification);
   }
 
   /**
@@ -112,7 +124,12 @@ public record UITestDto(
    * @return the list representation returned by {@code GET /tests}
    */
   public static UITestDto forList(UITest entity, StudioReadiness readiness) {
-    return from(entity, null, readiness);
+    return forList(entity, readiness, null);
+  }
+
+  public static UITestDto forList(
+      UITest entity, StudioReadiness readiness, Verification verification) {
+    return from(entity, null, readiness, null, verification);
   }
 
   /**

@@ -67,15 +67,26 @@ public final class GuidedLedgerSeed {
         proposal.deepCopy().put("contextRevision", 1).put("authoredInputsHash", inputsHash);
     String digest = GuidedContracts.hash(request);
     String preparationId = "prep-" + admissionId;
+    // The 15 keys V33's ck_wi6_preparation_metadata requires, exactly (a step carries no target
+    // or press inheritance).
+    String hash = "a".repeat(64);
     ObjectNode proof =
         C.object()
+            .put("schemaVersion", 3)
             .put("sessionId", sessionId)
-            .put("preparationId", preparationId)
-            .put("contextId", contextId)
+            .put("workerId", "worker")
             .put("ownerFence", ownerFence)
-            .put("requestDigest", digest)
+            .put("scopeHash", hash)
+            .put("contextId", contextId)
             .put("contextRevision", 1)
-            .put("authoredInputsHash", inputsHash);
+            .put("sourceRevision", "1")
+            .put("configurationRevision", "1")
+            .put("preparationId", preparationId)
+            .put("requestDigest", digest)
+            .put("evidenceHash", hash)
+            .put("authoredInputsHash", inputsHash)
+            .put("expiresAt", "2099-01-01T00:00:00Z");
+    proof.putObject("versions").put("contract", 3);
     ObjectNode ledger =
         document
             .deepCopy()

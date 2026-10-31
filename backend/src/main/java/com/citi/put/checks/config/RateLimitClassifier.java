@@ -31,7 +31,7 @@ public class RateLimitClassifier {
     // Studio's execute route is POST /api/v1/studio/tests/{id}/execute (StudioController). An
     // earlier pattern matched a `/run` suffix that no controller maps, so every Studio execution
     // was metered as an ordinary WRITE.
-    if (path.matches(".*/studio/tests/[^/]+/execute$")) {
+    if (path.matches(".*/studio/tests/[^/]+/(execute|verify)$")) {
       return BucketClass.EXECUTE;
     }
 

@@ -156,7 +156,7 @@ class GuidedServiceTransportFaultIT {
           new DriverManagerDataSource(
               DATABASE.getJdbcUrl(), DATABASE.getUsername(), DATABASE.getPassword());
       // STUDIO-OBS-014 S3: governance (V19) and recordings (V20) are part of every start; head.
-      Flyway.configure().dataSource(source).target("29").load().migrate();
+      Flyway.configure().dataSource(source).load().migrate();
       actualJdbc = new JdbcTemplate(source);
       actualJdbc.update(
           "INSERT INTO users(sso_id,name,email) VALUES ('service-user','fixture',?)", EMAIL);
@@ -528,12 +528,6 @@ class GuidedServiceTransportFaultIT {
         .put("evidenceHash", GuidedContracts.hash(evidence))
         .put("authoredInputsHash", context.path("authoredInputsHash").asText());
     proposal.set("executionEvidence", evidence);
-    proposal.withObject("/target").put("documentId", "document-1").put("generation", 1);
-    proposal
-        .withObject("/operation/value")
-        .put(
-            "sourceInputId",
-            context.path("authoredInputs").path("inputs").get(0).path("inputId").asText());
     firstObservationCommitted(repository, id);
     JsonNode association =
         planner(sessions, repository, materialization, dispatch, actualJdbc)
@@ -812,12 +806,6 @@ class GuidedServiceTransportFaultIT {
             .put("evidenceHash", GuidedContracts.hash(evidence))
             .put("authoredInputsHash", context.path("authoredInputsHash").asText());
         proposal.set("executionEvidence", evidence);
-        proposal.withObject("/target").put("documentId", "document-1").put("generation", 1);
-        proposal
-            .withObject("/operation/value")
-            .put(
-                "sourceInputId",
-                context.path("authoredInputs").path("inputs").get(0).path("inputId").asText());
         firstObservationCommitted(routedRepository, id);
         JsonNode association =
             planner(sessions, routedRepository, routedMaterialization, dispatch, routedJdbc)
@@ -2353,12 +2341,6 @@ class GuidedServiceTransportFaultIT {
         .put("evidenceHash", GuidedContracts.hash(evidence))
         .put("authoredInputsHash", context.path("authoredInputsHash").asText());
     proposal.set("executionEvidence", evidence);
-    proposal.withObject("/target").put("documentId", "document-1").put("generation", 1);
-    proposal
-        .withObject("/operation/value")
-        .put(
-            "sourceInputId",
-            context.path("authoredInputs").path("inputs").get(0).path("inputId").asText());
     firstObservationCommitted(routedRepository, id);
     JsonNode association =
         planner(sessions, routedRepository, routedMaterialization, dispatch, routedJdbc)
@@ -2930,7 +2912,7 @@ class GuidedServiceTransportFaultIT {
       String expectedReference =
           "cfg-"
               + UUID.nameUUIDFromBytes(
-                  (STEP_ID + ":secret:" + "PASS" + ":fill.value").getBytes(StandardCharsets.UTF_8));
+                  (STEP_ID + ":secret:" + "PASS").getBytes(StandardCharsets.UTF_8));
       var rows =
           actualJdbc.queryForList("SELECT * FROM studio_secret_use_audit WHERE session_id=?", id);
       assertThat(rows.size()).isEqualTo(1);
@@ -3216,12 +3198,6 @@ class GuidedServiceTransportFaultIT {
         .put("evidenceHash", GuidedContracts.hash(evidence))
         .put("authoredInputsHash", context.path("authoredInputsHash").asText());
     proposal.set("executionEvidence", evidence);
-    proposal.withObject("/target").put("documentId", "document-1").put("generation", 1);
-    proposal
-        .withObject("/operation/value")
-        .put(
-            "sourceInputId",
-            context.path("authoredInputs").path("inputs").get(0).path("inputId").asText());
     firstObservationCommitted(repository, id);
     JsonNode association =
         planner(sessions, repository, materialization, dispatch, actualJdbc)
@@ -5392,13 +5368,7 @@ class GuidedServiceTransportFaultIT {
           Map.of(
               "ref-PASS",
               new GuidedSourceReferenceValidator.ConfigurationValue(
-                  null,
-                  STEP_ID,
-                  "secretRef",
-                  "fill.value",
-                  session.path("scopeHash").asText(),
-                  false,
-                  "PASS")));
+                  null, STEP_ID, "secretRef", session.path("scopeHash").asText(), false, "PASS")));
     }
   }
 
@@ -5787,20 +5757,14 @@ class GuidedServiceTransportFaultIT {
                 .put(
                     "authoredInputsHash", body.path("proposal").path("authoredInputsHash").asText())
                 .put("expiresAt", body.path("expiresAt").asText());
-        // ADR-SC-007: the runner reports the locator and identity it derived for the picked ref.
-        response.set(
-            "target",
-            body.path("proposal").path("target").path("kind").asText().equals("node")
-                ? com.citi.put.checks.studio.support.ObservationFixtures.resolvedTarget(
-                    "order-reference", "text", "Order number")
-                : com.fasterxml.jackson.databind.node.NullNode.instance);
         respond(exchange, 200, response);
       } else if (path.endsWith("/dispatch")) {
         scenario.posts.incrementAndGet();
         scenario.certified.set(true);
         assertThat(action(id).path("dispatchCount").asInt()).isEqualTo(1);
         assertThat(scenario.reads.get()).isEqualTo(1);
-        assertThat(body.path("secret").path("value").asText().equals(scenario.canary)).isTrue();
+        assertThat(body.path("secrets").get(0).path("value").asText().equals(scenario.canary))
+            .isTrue();
         ObjectNode response = identity(body);
         ObjectNode ledger = body.path("ledger").deepCopy();
         ledger
@@ -5809,7 +5773,22 @@ class GuidedServiceTransportFaultIT {
                 "outcomeCode",
                 scenario.mode == Mode.COMPLETE_200_OWNER_FAILED ? "TARGET_CHANGED" : "OK");
         response.set("ledger", ledger);
-        response.putNull("availability");
+        response.putArray("availability");
+        // The receipt is the truth: the ledger outcome above is what its closed code derives.
+        ObjectNode receipt =
+            C.object()
+                .put("stepHash", "a".repeat(64))
+                .put("fenceCrossed", true)
+                .put("effectsTruncated", false)
+                .put("offscreen", false);
+        if (scenario.mode == Mode.COMPLETE_200_OWNER_FAILED) {
+          receipt.put("closedCode", "TARGET_DRIFT");
+        } else {
+          receipt.putNull("closedCode");
+        }
+        receipt.putArray("effects");
+        response.set("receipt", receipt);
+        response.putObject("secretUse");
         if (scenario.mode.callback()) {
           callback(id, "outcomes", response);
           scenario.callbacks.incrementAndGet();
@@ -6199,8 +6178,7 @@ class GuidedServiceTransportFaultIT {
                 String.class,
                 id));
     for (JsonNode saved : manifest.path("configurationReferences")) {
-      if (saved.path("kind").asText().equals("secretRef")
-          && saved.path("intendedSlot").asText().equals("fill.value")) {
+      if (saved.path("kind").asText().equals("secretRef")) {
         ObjectNode reference = saved.deepCopy();
         reference.put("referenceKind", "configuration").put("configurationRevision", "1");
         return reference;
@@ -6302,7 +6280,6 @@ class GuidedServiceTransportFaultIT {
                 new com.citi.put.checks.studio.guided.translation.GuidedSourceInputResolver(
                     contracts, com.citi.put.checks.studio.support.TestDomains.FIXTURES),
                 store,
-                new com.citi.put.checks.studio.guided.translation.GuidedStepVerifier(store),
                 new CsiOwnershipEvaluator(),
                 com.citi.put.checks.studio.support.TestDomains.FIXTURES,
                 org.mockito.Mockito.mock(
@@ -6444,6 +6421,23 @@ class GuidedServiceTransportFaultIT {
               org.mockito.ArgumentMatchers.anyLong(),
               org.mockito.ArgumentMatchers.anyString(),
               org.mockito.ArgumentMatchers.any());
+      // The runner's prepare accepts the code; the run stops at admission, after the reservation.
+      org.mockito.Mockito.doReturn(contracts.object().put("preparationId", "gs-t-stand-in"))
+          .when(stopped)
+          .prepareStep(
+              org.mockito.ArgumentMatchers.any(),
+              org.mockito.ArgumentMatchers.anyString(),
+              org.mockito.ArgumentMatchers.anyLong(),
+              org.mockito.ArgumentMatchers.any());
+      org.mockito.Mockito.doThrow(new AssertionError("gs-t-planner-reservation-stop"))
+          .when(stopped)
+          .admitPrepared(
+              org.mockito.ArgumentMatchers.any(),
+              org.mockito.ArgumentMatchers.anyString(),
+              org.mockito.ArgumentMatchers.anyLong(),
+              org.mockito.ArgumentMatchers.anyString(),
+              org.mockito.ArgumentMatchers.any(),
+              org.mockito.ArgumentMatchers.any());
       com.citi.put.checks.studio.guided.translation.GuidedLlmGatewayClient gateway =
           (request, budget) -> {
             var context = request.projection().document();
@@ -6467,16 +6461,15 @@ class GuidedServiceTransportFaultIT {
                     secret = reference;
                   }
                 }
-                String kind = secret != null ? "fill" : stepId.endsWith("a2") ? "assert" : "click";
                 var obligation =
                     obligations
                         .addObject()
                         .put("stepId", stepId)
                         .put("occurrence", 0)
-                        .put("operationKind", kind)
                         .put("targetIntent", secret == null ? "Order number" : "Password")
                         .putNull("scopeIntent")
                         .putNull("needId");
+                obligation.putArray("uses");
                 if (secret == null) {
                   obligation.putNull("referenceIndex");
                 } else {
@@ -6487,15 +6480,11 @@ class GuidedServiceTransportFaultIT {
                       .put("configurationRevision", context.path("configurationRevision").asText());
                   references.add(reference);
                 }
-                if (kind.equals("assert")) {
-                  obligation.put("predicate", "visible");
-                } else {
-                  obligation.putNull("predicate");
-                }
               }
+              response.putArray("stepSections");
             } else if (request.kind()
                 == com.citi.put.checks.studio.guided.translation.GuidedModelRequest.Kind
-                    .NEXT_ACTION) {
+                    .STEP_CODE) {
               JsonNode probe = selected.get(context.path("sessionId").asText());
               assertThat(probe).as("selected controlled-provider action").isNotNull();
               JsonNode chosen = null;
@@ -6508,16 +6497,10 @@ class GuidedServiceTransportFaultIT {
                 }
               }
               assertThat(chosen).as("remaining planner obligation").isNotNull();
-              var action = contracts.object();
-              ObjectNode target = probe.path("target").deepCopy();
-              target.remove(List.of("documentId", "generation"));
-              action.set("target", target);
-              action.set("operation", probe.path("operation").deepCopy());
               response
-                  .put("status", "ACTION")
-                  .put("obligationId", chosen.path("obligationId").asText())
-                  .putNull("question");
-              response.set("action", action);
+                  .put("status", "CODE")
+                  .put("code", probe.path("operation").path("code").asText());
+              response.putArray("captures");
             } else {
               throw new AssertionError("Unexpected GS-T model request: " + request.kind());
             }

@@ -117,9 +117,9 @@ class GuidedRefusalCompatibilityTest {
     var gates = new ArrayList<Gate>();
     var parser = new GuidedResponseParser(C);
     String valid =
-        "{\"schemaVersion\":3,\"kind\":\"NEXT_ACTION\",\"requestId\":\""
+        "{\"schemaVersion\":3,\"kind\":\"STEP_CODE\",\"requestId\":\""
             + CANARY
-            + "\",\"status\":\"COMPLETE\",\"obligationId\":null,\"action\":null,\"question\":null}";
+            + "\",\"status\":\"CODE\",\"code\":\"await x();\",\"captures\":[]}";
     for (String[] fixture :
         List.of(
             new String[] {"{\"x\":1,\"x\":2}", "WIRE_CANONICAL"},
@@ -299,17 +299,7 @@ class GuidedRefusalCompatibilityTest {
               throw original;
             })
         .when(after.store)
-        .finishAttempt(
-            anyString(),
-            anyString(),
-            eq("APPLIED"),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any());
+        .finishAttempt(anyString(), anyString(), eq("APPLIED"), any(), any(), any());
     assertSame(
         original, assertThrows(GuidedSessionException.class, () -> after.call(() -> C.object())));
     assertEquals(3, after.events.size());
@@ -338,16 +328,7 @@ class GuidedRefusalCompatibilityTest {
           .finishAttempt(anyString(), anyString(), eq("REJECTED"), any(), any(), any(), any());
       verify(late.store, never())
           .finishAttempt(
-              anyString(),
-              anyString(),
-              eq("REJECTED"),
-              any(),
-              any(),
-              any(),
-              any(),
-              any(),
-              any(),
-              any());
+              anyString(), anyString(), eq("REJECTED"), any(), any(), any(), any(), any());
     }
     Fixture unsettled = new Fixture(true, GuidedModelResponse.Code.TRANSPORT);
     doThrow(new GuidedSessionException("REVISION_CONFLICT", 409))
@@ -357,7 +338,8 @@ class GuidedRefusalCompatibilityTest {
     assertTrue(unsettled.events.isEmpty());
     Fixture nonsent = new Fixture(true, GuidedModelResponse.Code.OK);
     nonsent.send = false;
-    assertNotNull(nonsent.call(() -> C.object()));
+    // A replay of an applied attempt cannot rebuild its proposal: it is refused, never re-applied.
+    assertThrows(GuidedSessionException.class, () -> nonsent.call(() -> C.object()));
     assertTrue(nonsent.events.isEmpty());
     verifyNoInteractions(nonsent.gateway);
   }
@@ -438,16 +420,16 @@ class GuidedRefusalCompatibilityTest {
                       seen.add(capture);
                       return GuidedRefusalDiagnostics.call(
                           capture,
-                          Gate.NEXT_RESERVATION_CALL,
+                          Gate.STEP_RESERVATION,
                           () -> {
                             throw new GuidedSessionException("INVALID_CONTRACT", 422);
                           });
                     }));
         assertEquals(3, seen.size());
-        boolean fine = enabled && kind == GuidedModelRequest.Kind.NEXT_ACTION;
+        boolean fine = enabled && kind == GuidedModelRequest.Kind.STEP_CODE;
         // ADR-SC-007: the gate that refused is persisted on the attempt whether or not the private
         // receipt channel is enabled, so every NEXT_ACTION apply runs under a recording capture.
-        boolean recorded = kind == GuidedModelRequest.Kind.NEXT_ACTION;
+        boolean recorded = kind == GuidedModelRequest.Kind.STEP_CODE;
         assertTrue(
             seen.stream()
                 .allMatch(
@@ -460,8 +442,7 @@ class GuidedRefusalCompatibilityTest {
               fixture.events.stream()
                   .allMatch(
                       receipt ->
-                          receipt.gate()
-                              == (fine ? Gate.NEXT_RESERVATION_CALL : Gate.APPLICATION)));
+                          receipt.gate() == (fine ? Gate.STEP_RESERVATION : Gate.APPLICATION)));
         } else {
           assertTrue(fixture.events.isEmpty());
         }
@@ -474,11 +455,11 @@ class GuidedRefusalCompatibilityTest {
               GuidedSessionException.class,
               () ->
                   joined.call(
-                      GuidedModelRequest.Kind.NEXT_ACTION,
+                      GuidedModelRequest.Kind.STEP_CODE,
                       capture ->
                           GuidedRefusalDiagnostics.call(
                               capture,
-                              Gate.NEXT_RESERVATION_CALL,
+                              Gate.STEP_RESERVATION,
                               () -> {
                                 throw new GuidedSessionException("INVALID_CONTRACT", 422);
                               })));
@@ -560,7 +541,7 @@ class GuidedRefusalCompatibilityTest {
     return new GuidedModelRequest(
         CANARY,
         1,
-        GuidedModelRequest.Kind.NEXT_ACTION,
+        GuidedModelRequest.Kind.STEP_CODE,
         new GuidedModelProjection(context),
         "fixed synthetic contract",
         C.object().put("type", "object"),
@@ -678,24 +659,14 @@ class GuidedRefusalCompatibilityTest {
               })
           .when(store)
           .finishAttempt(anyString(), anyString(), anyString(), any(), any(), any(), any());
-      // ADR-SC-007: an applied or apply-rejected attempt also carries the gate and intent audit.
+      // An apply-rejected attempt also carries the gate it was refused at.
       doAnswer(
               invocation -> {
                 state.putNull("activeAttempt");
                 return null;
               })
           .when(store)
-          .finishAttempt(
-              anyString(),
-              anyString(),
-              anyString(),
-              any(),
-              any(),
-              any(),
-              any(),
-              any(),
-              any(),
-              any());
+          .finishAttempt(anyString(), anyString(), anyString(), any(), any(), any(), any(), any());
       var response =
           new GuidedModelResponse(
               code,

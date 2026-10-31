@@ -22,6 +22,8 @@ import java.util.UUID;
  * @param videoPath protected API path, never an object storage key
  * @param revision monotonic API snapshot revision; also the SSE event id
  * @param streamComplete true once outcome and evidence disposition are both settled
+ * @param diagnostic true when the run executed a revision that was not the confirmed one (a
+ *     labelled diagnostic run of a recorded revision); null for legacy history (SC008-E12)
  * @param replayFailure the one named cause of a replay that stopped at a learned step
  *     (STUDIO-OBS-008 T0 ruling A1), written once with the terminal status; null means the API
  *     names no such cause
@@ -49,7 +51,8 @@ public record ExecutionSnapshotDto(
     String triggerSource,
     UUID scheduleId,
     Instant scheduledAt,
-    ReplayFailure replayFailure) {
+    ReplayFailure replayFailure,
+    Boolean diagnostic) {
 
   /** Existing call sites retain unknown provenance unless the persisted history supplies it. */
   @SuppressWarnings("checkstyle:ParameterNumber")
@@ -96,6 +99,7 @@ public record ExecutionSnapshotDto(
         null,
         null,
         null,
+        null,
         null);
   }
 
@@ -124,6 +128,7 @@ public record ExecutionSnapshotDto(
         triggerSource,
         scheduleId,
         scheduledAt,
-        replayFailure);
+        replayFailure,
+        diagnostic);
   }
 }

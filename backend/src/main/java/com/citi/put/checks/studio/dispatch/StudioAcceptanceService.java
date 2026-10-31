@@ -260,6 +260,30 @@ public class StudioAcceptanceService {
     return acceptCore(testId, principal, idempotencyKey, null, null, null);
   }
 
+  /**
+   * Accepts the proof replay of the recorded candidate on an author's request ("Verify again"). It
+   * is the same accepted execution a publication's proof is: trigger source {@code AFTER_LEARN},
+   * the candidate as the revision, and no model.
+   */
+  @Transactional
+  public UUID acceptVerify(
+      UUID testId,
+      String principal,
+      String key,
+      com.citi.put.checks.studio.guided.publication.ObservedReplayAuthorization.Prepared
+          authorization,
+      UUID candidateRevisionId) {
+    return acceptCore(testId, principal, key, null, authorization, candidateRevisionId);
+  }
+
+  /** The execution an earlier request with this principal and key already accepted, if any. */
+  @Transactional(readOnly = true)
+  public Optional<UUID> acceptedUnderKey(String principal, String idempotencyKey) {
+    return ledger
+        .findByPrincipalAndIdempotencyKey(principal, idempotencyKey)
+        .map(StudioDispatchLedger::getExecutionId);
+  }
+
   @Transactional
   public UUID acceptObserved(
       UUID testId,
@@ -311,14 +335,37 @@ public class StudioAcceptanceService {
       }
     }
 
-    ExecutionReadiness.Verdict verdict = readiness.evaluate(test);
+    // Which revision runs (ADR-SC-008 D5). A scheduled run fires the confirmed revision only; while
+    // a recorded candidate exists the draft already follows the candidate, so the confirmed
+    // revision is judged on its own evidence (verifier included) and runs under its own stored
+    // configuration. A manual Run and a proof run the one runnable revision readiness names.
+    boolean intrinsic = scheduled != null && test.getCandidateRevisionId() != null;
+    UUID targetRevisionId =
+        scheduled != null ? test.getConfirmedRevisionId() : readiness.runnableRevisionId(test);
+    if (targetRevisionId == null) {
+      throw new StudioConflictException(
+          ExecutionReadiness.Verdict.LEARN_REQUIRED,
+          "This test has not been learned yet. Run it to learn the steps before it can replay.");
+    }
+    ExecutionReadiness.Verdict verdict =
+        intrinsic ? readiness.evaluateConfirmedIntrinsic(test) : readiness.evaluate(test);
     if (!verdict.ready()) {
       throw new StudioConflictException(verdict.errorCode(), verdict.message());
     }
+    if (publishedRevisionId != null && !publishedRevisionId.equals(targetRevisionId)) {
+      // The proof is of the recorded candidate only; a draft that moved on is not ready for it.
+      throw new StudioConflictException(
+          ExecutionReadiness.Verdict.LEARN_REQUIRED,
+          "The recorded revision no longer matches the draft. Run the test to learn it again.");
+    }
+    boolean diagnostic =
+        scheduled == null
+            && publishedRevisionId == null
+            && !targetRevisionId.equals(test.getConfirmedRevisionId());
 
     UITestRevision revision =
         revisions
-            .findById(test.getConfirmedRevisionId())
+            .findById(targetRevisionId)
             .orElseThrow(
                 () ->
                     new StudioConflictException(
@@ -331,11 +378,6 @@ public class StudioAcceptanceService {
       throw new StudioConflictException(
           ExecutionReadiness.Verdict.LEARN_REQUIRED,
           "This test has no learned revision. Run it to learn the steps before it can replay.");
-    }
-    if (publishedRevisionId != null && !publishedRevisionId.equals(revision.getId())) {
-      // Unreachable under the locks the publication holds; if it ever happens it is a defect, and
-      // the publication must not commit with a proof of some other revision.
-      throw new IllegalStateException("The proof must replay the revision that was just published");
     }
     if (observedGrant == null && observed != null) {
       if (scheduled != null) {
@@ -404,7 +446,11 @@ public class StudioAcceptanceService {
       execution.setScheduleId(scheduled.scheduleId());
       execution.setScheduledAt(scheduled.scheduledAt());
     }
-    execution.setConfigurationSnapshot(configurationSnapshot(test, revision, plainVariables));
+    execution.setDiagnostic(diagnostic);
+    execution.setConfigurationSnapshot(
+        intrinsic
+            ? storedConfigurationSnapshot(revision, plainVariables)
+            : configurationSnapshot(test, revision, plainVariables));
     execution.setStepResults(pendingStepResults(steps));
     execution = executions.save(execution);
 
@@ -531,6 +577,36 @@ public class StudioAcceptanceService {
     snapshot.put("timeoutSeconds", test.getTimeoutSeconds());
     snapshot.put("waitStrategy", test.getWaitStrategy());
     snapshot.put("environment", test.getEnvironment());
+    snapshot.put("sourceRevision", revision.getSourceRevision());
+    snapshot.put("configurationRevision", revision.getConfigurationRevision());
+    snapshot.put("artifactHash", revision.getArtifactHash());
+    snapshot.put("variables", plainVariables);
+    return writeJson(snapshot);
+  }
+
+  /**
+   * The snapshot of a run of a revision the draft has moved past: the revision's own stored
+   * configuration, never the draft's. Plain variable values are not versioned on a revision, so
+   * they still come from the draft by the revision's declared names (a missing one is refused
+   * before this point).
+   */
+  private String storedConfigurationSnapshot(
+      UITestRevision revision, Map<String, String> plainVariables) {
+    JsonNode stored;
+    try {
+      stored = objectMapper.readTree(revision.getConfiguration());
+    } catch (JsonProcessingException e) {
+      throw new StudioConflictException(
+          ExecutionReadiness.Verdict.LEARN_REQUIRED,
+          "The stored configuration of the learned revision cannot be read");
+    }
+    Map<String, Object> snapshot = new LinkedHashMap<>();
+    snapshot.put("browser", stored.path("browser").asText(null));
+    snapshot.put("viewportWidth", stored.path("viewport").path("width").asInt());
+    snapshot.put("viewportHeight", stored.path("viewport").path("height").asInt());
+    snapshot.put("timeoutSeconds", stored.path("timeoutSeconds").asInt());
+    snapshot.put("waitStrategy", stored.path("waitStrategy").asText(null));
+    snapshot.put("environment", stored.path("environment").asText(null));
     snapshot.put("sourceRevision", revision.getSourceRevision());
     snapshot.put("configurationRevision", revision.getConfigurationRevision());
     snapshot.put("artifactHash", revision.getArtifactHash());

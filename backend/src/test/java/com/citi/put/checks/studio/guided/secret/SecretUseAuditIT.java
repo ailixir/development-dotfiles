@@ -76,6 +76,10 @@ class SecretUseAuditIT {
             PG.getPassword());
     Flyway.configure().dataSource(source).load().migrate();
     jdbc = new JdbcTemplate(source);
+    // The seed writes a minimal preparation proof; the closed-key shape of a proof is not this
+    // test's subject (GuidedStepKindMigrationIT covers it), so only that one check is dropped here.
+    jdbc.execute(
+        "ALTER TABLE studio_guided_preparations DROP CONSTRAINT ck_wi6_preparation_metadata");
     transaction = new TransactionTemplate(new DataSourceTransactionManager(source));
     audit = new SecretUseAuditRecorder(jdbc, Clock.systemUTC());
     testId = UUID.randomUUID();
@@ -96,7 +100,7 @@ class SecretUseAuditIT {
             + "minutes',jsonb_build_object('owner',jsonb_build_object('fence',1),'scope"
             + "',jsonb_build_object('principalId',?,'csiId','CSI','environmentId','Deve"
             + "lopment'),'sourceSteps',jsonb_build_array(jsonb_build_object('stepId','p"
-            + "assword-step'))))"),
+            + "assword-step'),jsonb_build_object('stepId','login-step'))))"),
         testId.toString(),
         PRINCIPAL,
         HASH,
@@ -117,9 +121,14 @@ class SecretUseAuditIT {
                 + "\"policy\":\"INPUT-POLICY-01-A\",\"sourceSteps\":[{\"stepId"
                 + "\":\"password-step\",\"text\":\"Enter"
                 + " <secret PASS> as"
-                + " password\"}],\"configurationReferences\":[{\"referenceId\":\"ref-PASS"
-                + "\",\"referenceName\":\"PASS\",\"kind\":\"secretRef\",\"stepId\":\"password-step\",\"in"
-                + "tendedSlot\":\"fill.value\"}]}");
+                + " password\"},{\"stepId\":\"login-step\",\"text\":\"Sign in with"
+                + " <secret PASS>, <secret TOKEN> and <secret EXTRA>\"}],"
+                + "\"configurationReferences\":[{\"referenceId\":\"ref-PASS"
+                + "\",\"referenceName\":\"PASS\",\"kind\":\"secretRef\",\"stepId\":\"password-step\"}"
+                + ",{\"referenceId\":\"ref-PASS-login\",\"referenceName\":\"PASS\",\"kind\":\"secretRef\""
+                + ",\"stepId\":\"login-step\"},{\"referenceId\":\"ref-TOKEN-login\",\"referenceName\":\"TOKEN\""
+                + ",\"kind\":\"secretRef\",\"stepId\":\"login-step\"},{\"referenceId\":\"ref-EXTRA-login\""
+                + ",\"referenceName\":\"EXTRA\",\"kind\":\"secretRef\",\"stepId\":\"login-step\"}]}");
     jdbc.update(
         ("INSERT INTO studio_guided_source_manifests(session_id,scope_hash,manifes"
             + "t,manifest_hash) VALUES ('session',?,?::jsonb,studio_publication_hash(?:"
@@ -464,7 +473,11 @@ class SecretUseAuditIT {
         "{\"sessionId\":\"session\",\"scopeHash\":\""
             + HASH
             + ("\",\"inputs\":[{\"inputId\":\"input-PASS\",\"sourceStepId\":\"password-step\",\"kind"
-                + "\":\"secretRef\",\"secretId\":\"PASS\",\"intendedSlot\":\"fill.value\"}]}");
+                + "\":\"secretRef\",\"secretId\":\"PASS\"},{\"inputId\":\"input-PASS-login\","
+                + "\"sourceStepId\":\"login-step\",\"kind\":\"secretRef\",\"secretId\":\"PASS\"},"
+                + "{\"inputId\":\"input-TOKEN-login\",\"sourceStepId\":\"login-step\",\"kind\":\"secretRef\","
+                + "\"secretId\":\"TOKEN\"},{\"inputId\":\"input-EXTRA-login\",\"sourceStepId\":\"login-step\","
+                + "\"kind\":\"secretRef\",\"secretId\":\"EXTRA\"}]}");
     var safeInputs = (ObjectNode) CONTRACTS.parse(inputs);
     for (var rawInput : safeInputs.path("inputs")) {
       var input = (ObjectNode) rawInput;
@@ -472,11 +485,10 @@ class SecretUseAuditIT {
           .putObject("provenance")
           .put("referenceKind", "configuration")
           .put("configurationRevision", "1")
-          .put("referenceId", "ref-" + input.path("secretId").asText())
+          .put("referenceId", referenceId(input))
           .put("referenceName", input.path("secretId").asText())
           .put("kind", "secretRef")
-          .put("stepId", input.path("sourceStepId").asText())
-          .put("intendedSlot", "fill.value");
+          .put("stepId", input.path("sourceStepId").asText());
     }
     ObjectNode closed = GuidedLedgerSeed.closedInputs(safeInputs, "1", "1");
     String inputsHash = GuidedContracts.hash(closed);
@@ -492,28 +504,46 @@ class SecretUseAuditIT {
     ledger = new GuidedLedgerSeed(jdbc, "session", "context", 1, inputsHash);
   }
 
+  private static String referenceId(com.fasterxml.jackson.databind.JsonNode input) {
+    return "ref-"
+        + input.path("secretId").asText()
+        + (input.path("sourceStepId").asText().equals("login-step") ? "-login" : "");
+  }
+
   private static ObjectNode ledgerDocument(
       String admission, int ordinal, String state, int dispatchCount) {
+    return ledgerDocument("password-step", admission, ordinal, state, dispatchCount);
+  }
+
+  private static ObjectNode ledgerDocument(
+      String step, String admission, int ordinal, String state, int dispatchCount) {
     ObjectNode document =
         CONTRACTS
             .object()
             .put("sessionId", "session")
             .put("state", state)
             .put("dispatchCount", dispatchCount);
-    document.putObject("coordinate").put("stepId", "password-step").put("ordinal", ordinal);
+    document.putObject("coordinate").put("stepId", step).put("ordinal", ordinal);
     document.putObject("admission").put("admissionId", admission);
     return document;
   }
 
-  private static ObjectNode secretFill() {
+  /** A step proposal (ADR-SC-008): opaque frozen code plus what it uses. */
+  private static ObjectNode stepProposal(String... secretIds) {
     ObjectNode proposal = CONTRACTS.object();
-    proposal
-        .putObject("operation")
-        .put("kind", "fill")
-        .putObject("value")
-        .put("kind", "secretRef")
-        .put("sourceInputId", "input-PASS");
+    String code = "await page.getByLabel('Password').fill(secrets['PASS']);";
+    ObjectNode operation = proposal.putObject("operation").put("kind", "step").put("code", code);
+    operation.putArray("captures");
+    var uses = operation.putArray("uses");
+    for (String secret : secretIds) {
+      uses.addObject().put("kind", "secret").put("id", secret);
+    }
+    operation.put("sourceHash", GuidedContracts.hash(operation.path("code")));
     return proposal;
+  }
+
+  private static ObjectNode secretFill() {
+    return stepProposal("PASS");
   }
 
   private void consumedSecret(String outcome, boolean terminal) {
@@ -2522,5 +2552,108 @@ class SecretUseAuditIT {
       assertThatThrownBy(() -> f.jdbc().execute("TRUNCATE " + leaf))
           .hasMessageContaining("append-only");
     }
+  }
+
+  /**
+   * ADR-SC-008: one step dispatch can carry up to 8 secrets. The login step is consumed with the
+   * secrets its {@code uses} names, and each one has its own release and usage rows.
+   */
+  private void consumedLogin(String... secretIds) {
+    ledger.action(
+        "login",
+        "login-step",
+        0,
+        ledgerDocument("login-step", "login", 0, "DISPATCHING", 1)
+            .put("ownerFence", 1)
+            .put("outcomeCode", "PENDING"),
+        stepProposal(secretIds));
+  }
+
+  private Scope loginScope(String secret, long releaseSequence) {
+    return new Scope(
+        Path.GUIDED,
+        null,
+        "session",
+        "login",
+        PRINCIPAL,
+        "CSI",
+        "Development",
+        testId,
+        secret,
+        "session:1",
+        releaseSequence,
+        "login-step",
+        0);
+  }
+
+  @Test
+  void twoSecretsInOneAdmissionGiveTwoAuditRows() {
+    consumedLogin("PASS", "TOKEN");
+    var pass =
+        transaction.execute(
+            status ->
+                audit.recordRelease(loginScope("PASS", 1), "version1", ResolutionOutcome.RESOLVED));
+    var token =
+        transaction.execute(
+            status ->
+                audit.recordRelease(
+                    loginScope("TOKEN", 2), "version1", ResolutionOutcome.RESOLVED));
+    transaction.executeWithoutResult(
+        status -> {
+          audit.recordUsage(pass, UsageOutcome.USED);
+          audit.recordUsage(token, UsageOutcome.USED);
+        });
+    assertThat(
+            jdbc.queryForList(
+                ("SELECT secret_id FROM studio_secret_use_audit WHERE admission_id='login' AND"
+                    + " row_kind='RELEASE' ORDER BY secret_id"),
+                String.class))
+        .containsExactly("PASS", "TOKEN");
+    assertThat(count()).isEqualTo(4);
+  }
+
+  @Test
+  void aSecretAbsentFromTheStepsUsesIsRejected() {
+    consumedLogin("PASS");
+    assertThatThrownBy(
+            () ->
+                transaction.execute(
+                    status ->
+                        audit.recordRelease(
+                            loginScope("TOKEN", 1), "version1", ResolutionOutcome.RESOLVED)))
+        .hasMessageContaining("lineage");
+    assertThat(count()).isZero();
+    transaction.executeWithoutResult(
+        status ->
+            audit.recordRelease(loginScope("PASS", 1), "version1", ResolutionOutcome.RESOLVED));
+    assertThat(count()).isEqualTo(1);
+  }
+
+  @Test
+  void secretUseValuesMapOneToOneOntoUsageOutcomes() {
+    consumedLogin("PASS", "TOKEN", "EXTRA");
+    var outcomes =
+        java.util.Map.of(
+            "PASS",
+            UsageOutcome.USED,
+            "TOKEN",
+            UsageOutcome.NOT_USED,
+            "EXTRA",
+            UsageOutcome.REFUSED);
+    long sequence = 1;
+    for (var entry : new java.util.TreeMap<>(outcomes).entrySet()) {
+      Scope scope = loginScope(entry.getKey(), sequence++);
+      var release =
+          transaction.execute(
+              status -> audit.recordRelease(scope, "version1", ResolutionOutcome.RESOLVED));
+      transaction.executeWithoutResult(status -> audit.recordUsage(release, entry.getValue()));
+    }
+    var rows =
+        jdbc.queryForList(
+            ("SELECT secret_id,usage_outcome FROM studio_secret_use_audit WHERE"
+                + " row_kind='USAGE' ORDER BY secret_id"));
+    assertThat(rows)
+        .extracting(row -> row.get("secret_id") + ":" + row.get("usage_outcome"))
+        .containsExactly("EXTRA:REFUSED", "PASS:USED", "TOKEN:NOT_USED");
   }
 }

@@ -24,12 +24,14 @@ class ObservedProgressSecretEvidenceTest {
   private ObjectNode artifact() throws Exception {
     return (ObjectNode)
         mapper.readTree(
-            ("{\"steps\":[{\"stepIndex\":0,\"stepId\":\"password-step\",\"operations\":[{\"coordina"
-                + "te\":{\"stepId\":\"password-step\",\"ordinal\":0},\"operation\":{\"kind\":\"fill\",\""
-                + "value\":{\"kind\":\"secretRef\",\"sourceInputId\":\"input-pass\"}}}]}],\"inputRecipes"
-                + "\":[{\"inputId\":\"input-pass\",\"stepId\":\"password-step\",\"kind\":\"secretRef\","
-                + "\"intendedSlot\":\"fill.value\",\"provenance\":{\"kind\":\"configuration\",\"referenc"
-                + "eName\":\"PASS\"}}]}"));
+            ("{\"steps\":[{\"stepIndex\":0,\"stepId\":\"password-step\",\"operations\":["
+                + "{\"coordinate\":{\"stepId\":\"password-step\",\"ordinal\":0},\"operation\":"
+                + "{\"kind\":\"step\",\"code\":\"await page.getByLabel('Password')"
+                + ".fill(secrets['PASS']);\",\"captures\":[],\"uses\":["
+                + "{\"kind\":\"secret\",\"id\":\"PASS\"}]}}]}],\"inputRecipes\":["
+                + "{\"inputId\":\"input-pass\",\"stepId\":\"password-step\","
+                + "\"kind\":\"secretRef\",\"provenance\":{\"kind\":\"configuration\","
+                + "\"referenceName\":\"PASS\"}}]}"));
   }
 
   private RunnerReport report(
@@ -166,9 +168,8 @@ class ObservedProgressSecretEvidenceTest {
       strings = {
         "nonsecret",
         "wrong-step",
-        "wrong-slot",
-        "wrong-input",
         "wrong-reference",
+        "no-recipe-for-use",
         "duplicate-recipe",
         "wrong-coordinate"
       })
@@ -179,8 +180,8 @@ class ObservedProgressSecretEvidenceTest {
     switch (mutation) {
       case "nonsecret" -> recipe.put("kind", "nonsecretText");
       case "wrong-step" -> recipe.put("stepId", "other-step");
-      case "wrong-slot" -> recipe.put("intendedSlot", "assert.expected");
-      case "wrong-input" -> recipe.put("inputId", "another-input");
+      case "no-recipe-for-use" ->
+          ((com.fasterxml.jackson.databind.node.ArrayNode) frozen.path("inputRecipes")).removeAll();
       case "wrong-reference" ->
           ((ObjectNode) recipe.path("provenance")).put("referenceName", "OTHER");
       case "duplicate-recipe" ->

@@ -16,7 +16,6 @@ class ObservationFixturesTest {
     ObjectNode empty = ObservationFixtures.observation().build();
     ObjectNode small =
         ObservationFixtures.observation()
-            .readRuleId("business-reference")
             .element("e1", "button", "Save")
             .editable("e2", "textbox", "Destination")
             .readable("e3", "text", "Reference", "R-1234")
@@ -39,19 +38,5 @@ class ObservationFixturesTest {
     assertThat(projected.path("projection").path("notShown").asInt()).isEqualTo(40);
     assertThat(GuidedOutline.shownRefs(projected.path("outline").asText()))
         .containsExactly("e1", "e2");
-  }
-
-  @Test
-  void aResolvedTargetValidatesAgainstTheLocatorAndIdentityContracts() {
-    ObjectNode target = ObservationFixtures.resolvedTarget("save", "button", "Save");
-    C.validate("v3/locator", target.path("locator"));
-    assertThat(target.path("identity").path("name").asText()).isEqualTo("Save");
-    assertThat(
-            ObservationFixtures.resolvedTarget("x", "textbox", null)
-                .path("identity")
-                .path("name")
-                .isNull())
-        .isTrue();
-    assertThat(ObservationFixtures.nodeRef("e4").path("ref").asText()).isEqualTo("e4");
   }
 }

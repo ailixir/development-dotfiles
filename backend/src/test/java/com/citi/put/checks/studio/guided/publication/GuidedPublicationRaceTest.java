@@ -45,7 +45,7 @@ class GuidedPublicationRaceTest {
   static PublicationContracts.Base capture(
       GuidedPublicationMigrationTest.Database db, JsonNode session) {
     var requirements = C.object().put("csiId", "CSI").put("environment", "Development");
-    requirements.putArray("capabilities").add("navigate");
+    requirements.putArray("capabilities").add("step");
     requirements.putObject("initialContext").put("kind", "initialBlank");
     return db.tx.execute(
         t -> {
@@ -579,7 +579,7 @@ class GuidedPublicationRaceTest {
           target = "ui_tests";
           trigger =
               "CREATE TRIGGER publication_test_fault AFTER UPDATE ON ui_tests FOR EACH ROW WHEN"
-                  + " (NEW.confirmed_revision_id IS DISTINCT FROM OLD.confirmed_revision_id)"
+                  + " (NEW.candidate_revision_id IS DISTINCT FROM OLD.candidate_revision_id)"
                   + " EXECUTE FUNCTION publication_test_fault()";
         }
         case "session" -> {

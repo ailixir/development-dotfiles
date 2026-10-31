@@ -380,16 +380,14 @@ class GuidedLatestAttemptIT {
     String stepTwo = stepIds(id).get(1);
     replicaUpdate(
         "UPDATE studio_guided_actions SET proposal = jsonb_set(proposal,'{operation}',"
-            + "jsonb_build_object('kind','fill','value',jsonb_build_object('kind','secretRef',"
-            + "'sourceInputId',?::text,'secretValue',?::text))) || jsonb_build_object("
-            + "'target',jsonb_build_object('kind','page','documentId',?::text,'generation',0,"
-            + "'locator',jsonb_build_object('kind','label','value',?::text,'exact',true))),"
+            + "jsonb_build_object('kind','step','code',?::text,'captures','[]'::jsonb,"
+            + "'uses',jsonb_build_array(jsonb_build_object('kind','secret','id',?::text)),"
+            + "'sourceHash',?::text)),"
             + " document = document || jsonb_build_object('plantedEvidence',?::text)"
             + " WHERE session_id=? AND step_id=?",
+        SECRET_VALUE,
         SECRET_INPUT,
-        SECRET_VALUE,
-        SECRET_VALUE,
-        SECRET_VALUE,
+        "a".repeat(64),
         SECRET_VALUE,
         id,
         stepTwo);

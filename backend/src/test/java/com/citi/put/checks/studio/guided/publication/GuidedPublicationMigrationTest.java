@@ -494,12 +494,7 @@ public class GuidedPublicationMigrationTest {
             proposal.path("executionEvidence").path("origin").isMissingNode()
                 ? com.fasterxml.jackson.databind.node.NullNode.instance
                 : proposal.path("executionEvidence").path("origin"));
-        // ADR-SC-007: the operation identity covers the target the runner reported on the proof.
-        operation.set(
-            "target",
-            preparation.path("proof").has("target")
-                ? preparation.path("proof").path("target")
-                : com.fasterxml.jackson.databind.node.NullNode.instance);
+        // ADR-SC-008: the identity is {coordinate, origin, operation}; the step has no target.
         operation.set("operation", proposal.path("operation"));
         ledger.put("operationHash", GuidedContracts.hash(operation));
         ObjectNode decision =
@@ -685,12 +680,7 @@ public class GuidedPublicationMigrationTest {
           s -> {
             sessions.lock("session");
             var r = C.object().put("csiId", "CSI").put("environment", "Development");
-            r.putArray("capabilities")
-                .add("navigate")
-                .add("read")
-                .add("fill")
-                .add("click")
-                .add("assert");
+            r.putArray("capabilities").add("step");
             r.putObject("initialContext").put("kind", "initialBlank");
             return bases.capture(session, r, Instant.now());
           });
@@ -827,8 +817,9 @@ public class GuidedPublicationMigrationTest {
           throw new IllegalArgumentException("Shared action lacks its exact preparation");
         }
         JsonNode operation = fact.path("proposal").path("operation");
-        if (operation.path("kind").asText().equals("fill")
-            && operation.path("value").path("kind").asText().equals("binding")) {
+        if (operation.path("kind").asText().equals("step")
+            && operation.path("uses").path(0).path("kind").asText().equals("binding")
+            && operation.path("code").asText().contains(".fill(")) {
           if (selected != null) {
             throw new IllegalArgumentException("Pending binding consumer is ambiguous");
           }
@@ -837,14 +828,14 @@ public class GuidedPublicationMigrationTest {
         }
       }
       if (selected == null) {
-        throw new IllegalArgumentException("Shared fixture has no actual binding-fill consumer");
+        throw new IllegalArgumentException(
+            "Shared fixture has no actual binding-using consumer step");
       }
       String admission = selected.path("ledger").path("admission").path("admissionId").asText();
-      String binding = selectedProposal.path("operation").path("value").path("bindingId").asText();
+      String binding = selectedProposal.path("operation").path("uses").path(0).path("id").asText();
       JsonNode edge = null, producer = null, producerAction = null, allocation = null;
       for (JsonNode value : sharedBasis.path("consumerEdges")) {
-        if (value.path("consumerAdmissionId").asText().equals(admission)
-            && value.path("argumentSlot").asText().equals("fill.value")) {
+        if (value.path("consumerAdmissionId").asText().equals(admission)) {
           if (edge != null) {
             throw new IllegalArgumentException("Pending consumer edge is ambiguous");
           }
@@ -994,11 +985,7 @@ public class GuidedPublicationMigrationTest {
         String admission = ledger.path("admission").path("admissionId").asText();
         boolean admittedPending = admission.equals(pendingAdmission);
         if (admittedPending) {
-          ledger
-              .put("state", "ADMITTED")
-              .put("dispatchCount", 0)
-              .put("outcomeCode", "PENDING")
-              .putNull("assertionPassed");
+          ledger.put("state", "ADMITTED").put("dispatchCount", 0).put("outcomeCode", "PENDING");
           pendingCoordinate = ledger.path("coordinate");
         }
         if (prefixWriteRevision != null && proof.has("assertSourceBinding")) {
@@ -1151,11 +1138,10 @@ public class GuidedPublicationMigrationTest {
           if (edge.path("consumerAdmissionId").asText().equals(admission)) {
             jdbc.update(
                 "INSERT INTO studio_guided_consumer_edges(session_id,consumer_admission"
-                    + ("_id,argument_slot,binding_id,producer_admission_id,document) VALUES (?")
-                    + (",?,?,?,?,?::jsonb)"),
+                    + ("_id,binding_id,producer_admission_id,document) VALUES (?")
+                    + (",?,?,?,?::jsonb)"),
                 fixtureSession,
                 admission,
-                edge.path("argumentSlot").asText(),
                 edge.path("bindingId").asText(),
                 edge.path("producerAdmissionId").asText(),
                 edge.toString());
@@ -1240,7 +1226,7 @@ public class GuidedPublicationMigrationTest {
                         + " producer ON producer.session_id=r.session_id AND"
                         + " producer.admission_id=r.admission_id WHERE a.session_id=? AND"
                         + " a.admission_id=? AND a.document->>'state'='ADMITTED' AND"
-                        + " a.document->>'dispatchCount'='0' AND e.argument_slot='fill.value' AND"
+                        + " a.document->>'dispatchCount'='0' AND"
                         + " p.request_digest=studio_publication_hash(a.proposal) AND"
                         + " o.proposal_digest=p.request_digest AND"
                         + " producer.document->>'state'='SUCCEEDED' AND"
@@ -1395,9 +1381,10 @@ public class GuidedPublicationMigrationTest {
                   "SELECT version FROM flyway_schema_history WHERE version IS NOT NULL"
                       + " ORDER BY installed_rank",
                   String.class))
-          .containsExactly(
+          .startsWith(
               "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16",
-              "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29");
+              "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30",
+              "31", "32", "33");
       assertThat(Files.exists(Path.of("db/cutover"))).isFalse();
       assertThat(
               jdbc.queryForObject(
@@ -1720,11 +1707,11 @@ public class GuidedPublicationMigrationTest {
       assertThat(receipt.document().path("publicReceipt").path("relearnedFrom").isNull()).isTrue();
       assertThat(receipt.document().path("revisionId").asText())
           .isEqualTo(command.revisionId().toString());
-      // Readiness is derived (STUDIO-OBS-012A AC-2): the commit moved the confirmed pointer and
-      // with it the publication epoch; there is no stored compile state to agree with.
+      // Readiness is derived (STUDIO-OBS-012A AC-2): the commit moved the candidate pointer (the
+      // head) and with it the publication epoch; only the proof confirms (ADR-SC-008 D5).
       assertThat(
               db.jdbc.queryForObject(
-                  "SELECT confirmed_revision_id::text FROM ui_tests WHERE id=?",
+                  "SELECT candidate_revision_id::text FROM ui_tests WHERE id=?",
                   String.class,
                   db.testId))
           .isEqualTo(command.revisionId().toString());
@@ -2088,13 +2075,7 @@ public class GuidedPublicationMigrationTest {
           }
         });
     var requirements = C.object().put("csiId", csiId).put("environment", environment);
-    requirements
-        .putArray("capabilities")
-        .add("navigate")
-        .add("read")
-        .add("fill")
-        .add("click")
-        .add("assert");
+    requirements.putArray("capabilities").add("step");
     requirements.putObject("initialContext").put("kind", "initialBlank");
     var base =
         tx.execute(
@@ -2998,14 +2979,7 @@ public class GuidedPublicationMigrationTest {
         .put("environmentId", environment)
         .put("modelDataPolicyId", "fixture-model-policy")
         .putNull("valueTransferPolicyId");
-    scope
-        .putArray("capabilities")
-        .add("observe")
-        .add("navigate")
-        .add("read")
-        .add("fill")
-        .add("click")
-        .add("assert");
+    scope.putArray("capabilities").add("observe").add("step");
   }
 
   private static JsonNode approvedFixturePrivateValues() {
@@ -3555,268 +3529,6 @@ public class GuidedPublicationMigrationTest {
         receipt == null ? null : receipt.toString());
   }
 
-  @Test
-  void observedChoiceReceiptIsOptionalImmutableAndRollsBackWithPreparation() throws Exception {
-    try (var db = new Database()) {
-      db.capture();
-      var flow = GuidedPublicationEvidenceTest.setup(db);
-      GuidedPublicationEvidenceTest.capture(db, flow, 0);
-      assertThat(
-              db.jdbc.queryForObject(
-                  "SELECT observed_choice_receipt IS NULL FROM"
-                      + " studio_guided_publication_preparations",
-                  Boolean.class))
-          .isTrue();
-      ObjectNode valid = choiceReceipt("accepted-prep");
-      db.tx.executeWithoutResult(tx -> insertReceipt(db, "accepted-prep", valid));
-      assertThat(
-              C.parse(
-                  db.jdbc.queryForObject(
-                      "SELECT observed_choice_receipt::text FROM"
-                          + " studio_guided_publication_preparations WHERE"
-                          + " preparation_id='accepted-prep'",
-                      String.class)))
-          .isEqualTo(valid);
-      assertThatThrownBy(
-              () ->
-                  db.jdbc.update(
-                      "UPDATE studio_guided_publication_preparations SET"
-                          + " observed_choice_receipt=NULL WHERE preparation_id='accepted-prep'"))
-          .hasMessageContaining("immutable");
-      assertThatThrownBy(
-              () ->
-                  db.jdbc.update(
-                      "DELETE FROM studio_guided_publication_preparations WHERE"
-                          + " preparation_id='accepted-prep'"))
-          .hasMessageContaining("immutable");
-      assertThatThrownBy(
-              () ->
-                  db.jdbc.update(
-                      "UPDATE studio_guided_publication_preparations SET"
-                          + " observed_choice_receipt=?::jsonb WHERE observed_choice_receipt IS"
-                          + " NULL",
-                      valid.toString()))
-          .hasMessageContaining("immutable");
-      assertThatThrownBy(
-              () ->
-                  db.tx.executeWithoutResult(
-                      tx -> {
-                        insertReceipt(db, "rollback-prep", choiceReceipt("rollback-prep"));
-                        throw new IllegalStateException("injected rollback");
-                      }))
-          .hasMessage("injected rollback");
-      assertThat(
-              db.jdbc.queryForObject(
-                  "SELECT count(*) FROM studio_guided_preparations WHERE"
-                      + " preparation_id='rollback-prep'",
-                  Integer.class))
-          .isZero();
-      assertThat(
-              db.jdbc.queryForObject(
-                  "SELECT count(*) FROM studio_guided_publication_preparations WHERE"
-                      + " preparation_id='rollback-prep'",
-                  Integer.class))
-          .isZero();
-      db.tx.executeWithoutResult(tx -> insertReceipt(db, "legacy-null", null));
-    }
-  }
-
-  @Test
-  void observedChoiceReceiptRejectsMissingExtraNullWrongTypesAndRowIdentity() throws Exception {
-    try (var db = new Database()) {
-      db.capture();
-      var flow = GuidedPublicationEvidenceTest.setup(db);
-      GuidedPublicationEvidenceTest.capture(db, flow, 0);
-      ObjectNode valid = choiceReceipt("probe");
-      db.tx.executeWithoutResult(
-          tx -> {
-            insertReceipt(db, "probe", valid);
-            tx.setRollbackOnly();
-          });
-      java.util.List<com.fasterxml.jackson.databind.JsonNode> mutations =
-          new java.util.ArrayList<>();
-      mutations.add(C.parse("null"));
-      mutations.add(C.parse("true"));
-      mutations.add(C.parse("[]"));
-      mutations.add(C.object());
-      mutations.add(valid.deepCopy().put("extra", true));
-      for (var names = valid.fieldNames(); names.hasNext(); ) {
-        String key = names.next();
-        ObjectNode missing = valid.deepCopy();
-        missing.remove(key);
-        mutations.add(missing);
-        mutations.add(valid.deepCopy().putNull(key));
-        mutations.add(valid.deepCopy().put(key, false));
-      }
-      for (var names = valid.path("answer").fieldNames(); names.hasNext(); ) {
-        String key = names.next();
-        ObjectNode missing = valid.deepCopy();
-        missing.withObject("/answer").remove(key);
-        mutations.add(missing);
-        if (!key.equals("bindingId")) {
-          ObjectNode nil = valid.deepCopy();
-          nil.withObject("/answer").putNull(key);
-          mutations.add(nil);
-        }
-        ObjectNode wrong = valid.deepCopy();
-        wrong.withObject("/answer").put(key, false);
-        mutations.add(wrong);
-      }
-      for (String key :
-          List.of("sessionId", "preparationId", "clarificationId", "acceptedChoiceId")) {
-        mutations.add(valid.deepCopy().put(key, "other"));
-      }
-      for (String key : List.of("stepId", "ordinal")) {
-        ObjectNode missing = valid.deepCopy();
-        missing.withObject("/answer/coordinate").remove(key);
-        mutations.add(missing);
-      }
-      ObjectNode extra = valid.deepCopy();
-      extra.withObject("/answer/coordinate").put("extra", 0);
-      mutations.add(extra);
-      for (long generation : new long[] {-1, 2147483648L}) {
-        ObjectNode bad = valid.deepCopy();
-        bad.withObject("/answer").put("generation", generation);
-        mutations.add(bad);
-      }
-      for (String key : List.of("sourceRevision", "configurationRevision")) {
-        for (String revision : List.of("01", "-1", "9223372036854775808")) {
-          ObjectNode bad = valid.deepCopy();
-          bad.withObject("/answer").put(key, revision);
-          mutations.add(bad);
-        }
-      }
-      for (String time :
-          List.of(
-              "not-time",
-              "2026-02-30T00:00:00Z",
-              "infinity",
-              "2026-10-09T13:00:00+00:00",
-              "2026-10-09T13:00:00.1234567890Z",
-              "2026-10-09T29:00:00Z",
-              "2026-10-09T24:00:00Z",
-              "2026-00-09T13:00:00Z")) {
-        ObjectNode bad = valid.deepCopy();
-        bad.withObject("/answer").put("resolvedAt", time);
-        mutations.add(bad);
-      }
-      ObjectNode answerExtra = valid.deepCopy();
-      answerExtra.withObject("/answer").put("extra", true);
-      mutations.add(answerExtra);
-      for (int ordinal : new int[] {-1, 8}) {
-        ObjectNode badOrdinal = valid.deepCopy();
-        badOrdinal.withObject("/answer/coordinate").put("ordinal", ordinal);
-        mutations.add(badOrdinal);
-      }
-      for (String key : List.of("stepId", "ordinal")) {
-        ObjectNode nil = valid.deepCopy();
-        nil.withObject("/answer/coordinate").putNull(key);
-        mutations.add(nil);
-        ObjectNode wrong = valid.deepCopy();
-        wrong.withObject("/answer/coordinate").put(key, false);
-        mutations.add(wrong);
-      }
-      ObjectNode badStep = valid.deepCopy();
-      badStep.withObject("/answer/coordinate").put("stepId", "");
-      mutations.add(badStep);
-      for (String key : List.of("sessionId", "clarificationId", "choiceId")) {
-        ObjectNode mismatch = valid.deepCopy();
-        mismatch.withObject("/answer").put(key, "other");
-        mutations.add(mismatch);
-      }
-      ObjectNode emptyBinding = valid.deepCopy();
-      emptyBinding.withObject("/answer").put("bindingId", "");
-      mutations.add(emptyBinding);
-      ObjectNode stringGeneration = valid.deepCopy();
-      stringGeneration.withObject("/answer").put("generation", "1");
-      mutations.add(stringGeneration);
-      mutations.add(valid.deepCopy().put("obligationId", "not-a-uuid"));
-      mutations.add(valid.deepCopy().put("contextIdentityHash", "A".repeat(64)));
-      mutations.add(valid.deepCopy().put("version", "1"));
-      mutations.add(valid.deepCopy().put("version", 1.5));
-      for (var mutation : mutations) {
-        assertThatThrownBy(
-                () -> db.tx.executeWithoutResult(tx -> insertReceipt(db, "probe", mutation)))
-            .as("malformed synthetic receipt: %s", mutation)
-            .isInstanceOf(org.springframework.dao.DataAccessException.class);
-        assertThat(
-                db.jdbc.queryForObject(
-                    "SELECT count(*) FROM studio_guided_preparations WHERE preparation_id='probe'",
-                    Integer.class))
-            .isZero();
-      }
-      db.tx.executeWithoutResult(tx -> insertReceipt(db, "probe", valid));
-    }
-  }
-
-  @Test
-  void observedChoiceCanonicalBytesAndUnicodeIdsUseIndependentBounds() {
-    try (var db = new Database()) {
-      ObjectNode valid = choiceReceipt("preparation");
-      assertReceiptShape(db, valid, true);
-      // Escaped control scalars remain within each ID bound but expand to six
-      // canonical bytes. Coordinate.stepId preserves the original generic ID type.
-      ObjectNode large = valid.deepCopy();
-      for (String key :
-          List.of("sessionId", "clarificationId", "acceptedChoiceId", "preparationId")) {
-        large.put(key, String.valueOf((char) 1).repeat(256));
-      }
-      ObjectNode answer = large.withObject("/answer");
-      for (String key :
-          List.of("sessionId", "clarificationId", "choiceId", "documentId", "bindingId")) {
-        answer.put(key, String.valueOf((char) 1).repeat(256));
-      }
-      answer
-          .withObject("/coordinate")
-          .put("stepId", String.valueOf((char) 1).repeat(256))
-          .put("ordinal", 7);
-      answer
-          .put("generation", Integer.MAX_VALUE)
-          .put("sourceRevision", "9223372036854775807")
-          .put("configurationRevision", "9223372036854775807");
-      // ADR-SC-007: the answer lost its element id, so even with every id at its bound of 256
-      // scalars that each escape to six canonical bytes the receipt is 16,129 bytes: the ids can no
-      // longer reach the 16,384-byte cap the SQL function still enforces on the canonical form.
-      int bytes = canonicalBytes(large);
-      assertThat(bytes).isEqualTo(16129).isLessThan(16384);
-      assertThat(
-              db.jdbc.queryForObject(
-                  "SELECT studio_publication_canonical(?::jsonb)", String.class, large.toString()))
-          .isEqualTo(GuidedContracts.canonical(large));
-      assertReceiptShape(db, large, true);
-      assertThat(
-              db.jdbc.queryForObject(
-                  "SELECT"
-                      + " pg_get_functiondef('studio_publication_observed_choice_receipt(jsonb)'::regprocedure)",
-                  String.class))
-          .contains("<=16384");
-      // The bound is on the canonical bytes, not on a count of keys: a closed shape with one more
-      // key is refused, and so is one id a scalar over its bound.
-      ObjectNode extra = large.deepCopy().put("padding", "x");
-      assertReceiptShape(db, extra, false);
-      ObjectNode longId = large.deepCopy();
-      longId.put("preparationId", String.valueOf((char) 1).repeat(257));
-      assertReceiptShape(db, longId, false);
-      ObjectNode unicode = valid.deepCopy();
-      for (String value : List.of("😀".repeat(256), "e\u0301".repeat(128), "x".repeat(256))) {
-        unicode.withObject("/answer").put("documentId", value);
-        assertReceiptShape(db, unicode, true);
-      }
-      for (String value : List.of("😀".repeat(257), "e\u0301".repeat(129), "x".repeat(257), "")) {
-        unicode.withObject("/answer").put("documentId", value);
-        assertReceiptShape(db, unicode, false);
-      }
-      ObjectNode zero = valid.deepCopy();
-      zero.withObject("/answer")
-          .put("generation", 0)
-          .put("sourceRevision", "0")
-          .put("configurationRevision", "0")
-          .put("resolvedAt", "2026-10-09T13:00:00Z")
-          .put("bindingId", "binding");
-      assertReceiptShape(db, zero, true);
-    }
-  }
-
   // ---- ADR-SC-007 V29: the observation is an outline plus a facts table ----
 
   /** A valid new-shape observation for the fixture session, with {@code facts} shown elements. */
@@ -3832,6 +3544,8 @@ public class GuidedPublicationMigrationTest {
         .put("generation", generation)
         .put("scopeHash", db.session.path("scopeHash").asText())
         .put("origin", "https://orders.example.test");
+    // The read-rule id left the observation contract (E5 row 33d).
+    observation.remove("readRuleId");
     return observation;
   }
 
@@ -3985,7 +3699,10 @@ public class GuidedPublicationMigrationTest {
       int count = 1;
       int size;
       do {
-        facts.set("e" + ++count, template.deepCopy());
+        // A fact equal to a peer in role, name and evidence needs an ordinal (V32); stay unique.
+        ObjectNode fact = template.deepCopy();
+        fact.put("name", "Button " + (count + 1)).put("evidence", "Button " + (count + 1));
+        facts.set("e" + ++count, fact);
         size =
             db.jdbc.queryForObject(
                 "SELECT octet_length(convert_to(?::jsonb::text,'UTF8'))",

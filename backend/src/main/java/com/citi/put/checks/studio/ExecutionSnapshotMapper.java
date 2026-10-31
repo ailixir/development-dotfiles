@@ -97,7 +97,8 @@ public class ExecutionSnapshotMapper {
         execution.getTriggerSource(),
         execution.getScheduleId(),
         execution.getScheduledAt(),
-        replayFailure(execution));
+        replayFailure(execution),
+        execution.isDiagnostic());
   }
 
   /**

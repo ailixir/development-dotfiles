@@ -39,15 +39,14 @@ class GuidedTemplateSpanTest {
     return session;
   }
 
-  private ObjectNode span(int start, int end, String kind, String slot) {
+  private ObjectNode span(int start, int end, String kind) {
     return c.object()
         .put("referenceKind", "sourceSpan")
         .put("sourceRevision", "1")
         .put("stepId", GuidedSourceClassifierTest.STEP)
         .put("startUtf16", start)
         .put("endUtf16", end)
-        .put("kind", kind)
-        .put("intendedSlot", slot);
+        .put("kind", kind);
   }
 
   private JsonNode manifest(String text, String value) {
@@ -62,30 +61,14 @@ class GuidedTemplateSpanTest {
     assertThat(manifest.path("sourceSteps").get(0).path("regions").size()).isEqualTo(2);
     ObjectNode input =
         validator.resolve(
-            session(),
-            resolver.sources(session(), manifest),
-            span(START, END, "nonsecretText", "fill.value"));
+            session(), resolver.sources(session(), manifest), span(START, END, "nonsecretText"));
     assertThat(input.path("value").asText()).isEqualTo("Top 3 banks. is Citi?");
     assertThat(input.path("provenance").path("referenceKind").asText()).isEqualTo("sourceSpan");
-    for (String slot : new String[] {"selectOption.value", "assert.expected"}) {
-      assertThat(
-              validator
-                  .resolve(
-                      session(),
-                      resolver.sources(session(), manifest),
-                      span(START, END, "nonsecretText", slot))
-                  .path("value")
-                  .asText())
-          .isEqualTo("Top 3 banks. is Citi?");
-    }
     // The model-facing quoted-literal rule still holds: the whole quoted text and nothing else.
     resolver.validate(
         session(),
         manifest,
-        c.object()
-            .putArray("items")
-            .add(span(START, END, "nonsecretText", "fill.value"))
-            .deepCopy());
+        c.object().putArray("items").add(span(START, END, "nonsecretText")).deepCopy());
     assertThatThrownBy(
             () ->
                 resolver.validate(
@@ -93,7 +76,7 @@ class GuidedTemplateSpanTest {
                     manifest,
                     c.object()
                         .putArray("items")
-                        .add(span(START, END - 1, "nonsecretText", "fill.value"))
+                        .add(span(START, END - 1, "nonsecretText"))
                         .deepCopy()))
         .hasMessage("INVALID_CONTRACT");
   }
@@ -106,7 +89,7 @@ class GuidedTemplateSpanTest {
                 .resolve(
                     session(),
                     resolver.sources(session(), manifest),
-                    span(START, END, "nonsecretText", "fill.value"))
+                    span(START, END, "nonsecretText"))
                 .path("value")
                 .asText())
         .isEqualTo("Top 3 banks. is ?");
@@ -121,7 +104,7 @@ class GuidedTemplateSpanTest {
                 validator.resolve(
                     session(),
                     resolver.sources(session(), manifest),
-                    span(START, END, "nonsecretText", "fill.value")))
+                    span(START, END, "nonsecretText")))
         .hasMessage("MISSING_SOURCE");
   }
 
@@ -135,7 +118,7 @@ class GuidedTemplateSpanTest {
                 validator.resolve(
                     session(),
                     resolver.sources(session(), manifest),
-                    span(token, token + "<var city>".length(), "nonsecretText", "fill.value")))
+                    span(token, token + "<var city>".length(), "nonsecretText")))
         .hasMessage("FORBIDDEN_SCOPE");
     // An edge inside a token would type half of it.
     for (int[] bounds : new int[][] {{START, token + 4}, {token + 3, END}}) {
@@ -144,7 +127,7 @@ class GuidedTemplateSpanTest {
                   validator.resolve(
                       session(),
                       resolver.sources(session(), manifest),
-                      span(bounds[0], bounds[1], "nonsecretText", "fill.value")))
+                      span(bounds[0], bounds[1], "nonsecretText")))
           .hasMessage("FORBIDDEN_SCOPE");
     }
     // Variables inside a navigation URL are not interpolated.
@@ -156,7 +139,7 @@ class GuidedTemplateSpanTest {
                 validator.resolve(
                     session(),
                     resolver.sources(session(), urlManifest),
-                    span(from, url.lastIndexOf('"'), "destination", "navigate.destination")))
+                    span(from, url.lastIndexOf('"'), "destination")))
         .hasMessage("FORBIDDEN_SCOPE");
   }
 
@@ -233,7 +216,7 @@ class GuidedTemplateSpanTest {
                 validator.resolve(
                     session(),
                     resolver.sources(session(), manifest),
-                    span(from, to, "nonsecretText", "fill.value")))
+                    span(from, to, "nonsecretText")))
         .hasMessage("FORBIDDEN_SCOPE");
   }
 
@@ -242,7 +225,7 @@ class GuidedTemplateSpanTest {
     JsonNode manifest = manifest(TEXT, "Citi");
     var hints =
         new GuidedAuthoredUriCandidates(c, TestDomains.FIXTURES).candidates(session(), manifest);
-    assertThat(hints).hasSize(3);
+    assertThat(hints).hasSize(1);
     for (JsonNode hint : hints) {
       assertThat(hint.path("startUtf16").asInt()).isEqualTo(START);
       assertThat(hint.path("endUtf16").asInt()).isEqualTo(END);
@@ -253,8 +236,8 @@ class GuidedTemplateSpanTest {
     var wholeHints =
         new GuidedAuthoredUriCandidates(c, TestDomains.FIXTURES)
             .candidates(session(), manifest(whole, "Citi"));
-    // Only the literal \"Search\" (3 slots); the quoted variable stays on the configuration path.
-    assertThat(wholeHints).hasSize(3);
+    // Only the literal \"Search\"; the quoted variable stays on the configuration path.
+    assertThat(wholeHints).hasSize(1);
     assertThat(wholeHints.get(0).path("startUtf16").asInt()).isEqualTo(whole.indexOf("Search"));
   }
 

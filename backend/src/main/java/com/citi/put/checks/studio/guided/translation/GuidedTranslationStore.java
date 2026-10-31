@@ -2,8 +2,6 @@ package com.citi.put.checks.studio.guided.translation;
 
 import static com.citi.put.checks.studio.guided.session.GuidedSessionException.require;
 
-import com.citi.put.checks.studio.guided.diagnostics.GuidedGuardProvenance;
-import com.citi.put.checks.studio.guided.diagnostics.GuidedGuardProvenance.Guard;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -78,631 +76,6 @@ public final class GuidedTranslationStore {
         approvedManifest.toString(),
         GuidedContracts.hash(approvedManifest));
     jdbc.update("INSERT INTO studio_guided_translation_state(session_id) VALUES (?)", id);
-  }
-
-  /** Production-only initialization under the same locked current source transaction. */
-  public void initialize(JsonNode session, JsonNode manifest, boolean acquisition) {
-    transaction();
-    boolean existed = exists(session.path("sessionId").asText());
-    initialize(session, manifest);
-    if (acquisition && !existed) {
-      ObjectNode marker = newAcquisition(session);
-      jdbc.update(
-          "UPDATE studio_guided_sessions SET"
-              + " progress=jsonb_set(progress,'{translationAcquisition}',?::jsonb) WHERE"
-              + " session_id=?",
-          marker.toString(),
-          session.path("sessionId").asText());
-    }
-  }
-
-  /** This is current locked configuration, never a manufactured source-manifest field. */
-  public long stepTimeoutMillis(JsonNode session) {
-    transaction();
-    var rows =
-        jdbc.queryForList(
-            "SELECT timeout_seconds,source_revision,configuration_revisio"
-                + "n FROM ui_tests WHERE id=?"
-                + " AND deleted_at IS NULL AND quarantined_at IS NULL FOR UPDATE",
-            UUID.fromString(session.path("testId").asText()));
-    require(rows.size() == 1, "MISSING_SOURCE", 409);
-    var row = rows.getFirst();
-    require(
-        row.get("source_revision")
-                .toString()
-                .equals(session.path("scope").path("sourceRevision").asText())
-            && row.get("configuration_revision")
-                .toString()
-                .equals(session.path("scope").path("configurationRevision").asText()),
-        "REVISION_CONFLICT",
-        409);
-    long seconds = ((Number) row.get("timeout_seconds")).longValue();
-    require(seconds >= 1 && seconds <= 120, "INVALID_CONTRACT", 422);
-    return seconds * 1000;
-  }
-
-  public Instant acquisitionNow() {
-    transaction();
-    return jdbc.queryForObject("SELECT clock_timestamp()", Timestamp.class).toInstant();
-  }
-
-  public enum AcquisitionDisposition {
-    READY,
-    WAIT,
-    POLL,
-    REFUSED
-  }
-
-  public record AcquisitionClaim(
-      AcquisitionDisposition disposition,
-      JsonNode request,
-      String key,
-      String windowId,
-      long pollNumber,
-      Instant deadline,
-      long remainingMs,
-      String errorCode) {
-    public AcquisitionClaim {
-      request = request == null ? null : request.deepCopy();
-    }
-
-    @Override
-    public JsonNode request() {
-      return request == null ? null : request.deepCopy();
-    }
-  }
-
-  private AcquisitionClaim acquisitionResult(AcquisitionDisposition disposition, String error) {
-    return new AcquisitionClaim(disposition, null, null, null, 0, null, 0, error);
-  }
-
-  private ObjectNode newAcquisition(JsonNode session) {
-    ObjectNode marker =
-        contracts
-            .object()
-            .put("version", 1)
-            .put("policy", "passive-target-1")
-            .put("allowanceMs", stepTimeoutMillis(session))
-            .put("totalExtraPolls", 0)
-            .putNull("active");
-    marker.set("sourceRevision", session.path("scope").path("sourceRevision"));
-    marker.set("configurationRevision", session.path("scope").path("configurationRevision"));
-    return marker;
-  }
-
-  public boolean acquisitionPending(
-      com.citi.put.checks.studio.guided.session.GuidedSessionRepository.Session current) {
-    JsonNode active = current.progress().path("translationAcquisition").path("active");
-    return active.isObject() && active.path("pending").isObject();
-  }
-
-  public boolean acquisitionOpen(
-      com.citi.put.checks.studio.guided.session.GuidedSessionRepository.Session current) {
-    JsonNode active = current.progress().path("translationAcquisition").path("active");
-    return active.isObject()
-        && (active.path("window").isObject() || active.path("pending").isObject());
-  }
-
-  private static void closedAcquisition(JsonNode node, String... keys) {
-    require(node.isObject(), "INVALID_CONTRACT", 422);
-    var fields = new HashSet<String>();
-    node.fieldNames().forEachRemaining(fields::add);
-    require(fields.equals(Set.of(keys)), "INVALID_CONTRACT", 422);
-  }
-
-  private static long acquisitionNumber(JsonNode node, String key, long maximum) {
-    JsonNode value = node.path(key);
-    require(
-        value.isIntegralNumber()
-            && value.canConvertToLong()
-            && value.asLong() >= 0
-            && value.asLong() <= maximum,
-        "INVALID_CONTRACT",
-        422);
-    return value.asLong();
-  }
-
-  private static String acquisitionTime(Instant value) {
-    return new java.time.format.DateTimeFormatterBuilder()
-        .appendInstant(3)
-        .toFormatter()
-        .format(value.truncatedTo(java.time.temporal.ChronoUnit.MILLIS));
-  }
-
-  private static Instant acquisitionInstant(JsonNode node, String field) {
-    require(node.path(field).isTextual(), "INVALID_CONTRACT", 422);
-    try {
-      return Instant.parse(node.path(field).asText());
-    } catch (java.time.format.DateTimeParseException invalid) {
-      throw new com.citi.put.checks.studio.guided.session.GuidedSessionException(
-          "INVALID_CONTRACT", 422);
-    }
-  }
-
-  private void saveAcquisition(
-      com.citi.put.checks.studio.guided.session.GuidedSessionRepository.Session current,
-      ObjectNode marker) {
-    bounded(marker, 16384);
-    current.progress().set("translationAcquisition", marker);
-    require(
-        jdbc.update(
-                "UPDATE studio_guided_sessions SET progress=?::jsonb WHERE session_id=?",
-                current.progress().toString(),
-                current.document().path("sessionId").asText())
-            == 1,
-        "MISSING_SOURCE",
-        409);
-  }
-
-  private ObjectNode acquisitionBook(
-      com.citi.put.checks.studio.guided.session.GuidedSessionRepository.Session current,
-      JsonNode state,
-      JsonNode obligation,
-      boolean available) {
-    JsonNode stored = current.progress().path("translationAcquisition");
-    if (!stored.isObject()) {
-      if (available) {
-        return null;
-      }
-      Integer effects =
-          jdbc.queryForObject(
-              "SELECT count(*) FROM studio_guided_actions WHERE session_id=?",
-              Integer.class,
-              current.document().path("sessionId").asText());
-      require(effects != null && effects == 0, "RUNTIME_INCOMPATIBLE", 409);
-      stored = newAcquisition(current.document());
-    }
-    ObjectNode marker = (ObjectNode) stored.deepCopy();
-    closedAcquisition(
-        marker,
-        "version",
-        "policy",
-        "sourceRevision",
-        "configurationRevision",
-        "allowanceMs",
-        "totalExtraPolls",
-        "active");
-    require(
-        marker.path("version").isIntegralNumber()
-            && marker.path("version").asInt() == 1
-            && marker.path("policy").asText().equals("passive-target-1"),
-        "RUNTIME_INCOMPATIBLE",
-        409);
-    require(
-        marker
-                .path("sourceRevision")
-                .equals(current.document().path("scope").path("sourceRevision"))
-            && marker
-                .path("configurationRevision")
-                .equals(current.document().path("scope").path("configurationRevision")),
-        "REVISION_CONFLICT",
-        409);
-    long allowance = acquisitionNumber(marker, "allowanceMs", 120000);
-    require(
-        allowance >= 1000 && allowance == stepTimeoutMillis(current.document()),
-        "REVISION_CONFLICT",
-        409);
-    acquisitionNumber(marker, "totalExtraPolls", 200);
-    int stepIndex = current.progress().path("stepIndex").asInt(0);
-    JsonNode step = current.document().path("sourceSteps").path(stepIndex);
-    require(step.path("stepId").equals(obligation.path("stepId")), "BINDING_ORDER", 422);
-    JsonNode old = marker.path("active");
-    if (old.isNull() || old.path("stepIndex").asInt(-1) < stepIndex) {
-      require(
-          old.isNull() || old.path("window").isNull() && old.path("pending").isNull(),
-          "BINDING_ORDER",
-          422);
-      ObjectNode fresh =
-          marker
-              .putObject("active")
-              .put("stepId", step.path("stepId").asText())
-              .put("stepIndex", stepIndex)
-              .put("usedMs", 0)
-              .put("extraPolls", 0)
-              .putNull("lastObservationHash")
-              .put(
-                  "lastSemanticHash",
-                  GuidedAcquisitionFingerprint.hash(current.progress().path("observation")))
-              .put("unchangedRefreshes", 0)
-              .putNull("stableSemanticHash")
-              .put("lastGeneration", current.progress().path("generation").asInt(0))
-              .put("nextPollAt", acquisitionTime(Instant.EPOCH))
-              .putNull("window")
-              .putNull("pending");
-      acquisitionIdentity(fresh, current.document(), state, obligation);
-    }
-    ObjectNode active = (ObjectNode) marker.path("active");
-    closedAcquisition(
-        active,
-        "stepId",
-        "stepIndex",
-        "usedMs",
-        "extraPolls",
-        "planRevision",
-        "planHash",
-        "obligationId",
-        "targetIntentHash",
-        "workerId",
-        "ownerFence",
-        "lastObservationHash",
-        "lastSemanticHash",
-        "unchangedRefreshes",
-        "stableSemanticHash",
-        "lastGeneration",
-        "nextPollAt",
-        "window",
-        "pending");
-    require(
-        active.path("stepId").equals(step.path("stepId"))
-            && acquisitionNumber(active, "stepIndex", 99) == stepIndex,
-        "BINDING_ORDER",
-        422);
-    acquisitionNumber(active, "usedMs", allowance);
-    acquisitionNumber(active, "extraPolls", 32);
-    acquisitionNumber(active, "lastGeneration", Integer.MAX_VALUE);
-    if (active.path("window").isObject() || active.path("pending").isObject()) {
-      ObjectNode identity = contracts.object();
-      acquisitionIdentity(identity, current.document(), state, obligation);
-      for (var fields = identity.fields(); fields.hasNext(); ) {
-        var field = fields.next();
-        require(active.path(field.getKey()).equals(field.getValue()), "STALE_GENERATION", 409);
-      }
-    } else {
-      require(
-          active.path("window").isNull() && active.path("pending").isNull(),
-          "INVALID_CONTRACT",
-          422);
-      ObjectNode identity = contracts.object();
-      acquisitionIdentity(identity, current.document(), state, obligation);
-      if (!active.path("targetIntentHash").equals(identity.path("targetIntentHash"))
-          || !GuidedContracts.same(active.path("workerId"), identity.path("workerId"))
-          || !GuidedContracts.same(active.path("ownerFence"), identity.path("ownerFence"))) {
-        active
-            .put(
-                "lastSemanticHash",
-                GuidedAcquisitionFingerprint.hash(current.progress().path("observation")))
-            .put("unchangedRefreshes", 0)
-            .putNull("stableSemanticHash");
-      }
-      acquisitionIdentity(active, current.document(), state, obligation);
-    }
-    JsonNode window = active.path("window"), pending = active.path("pending");
-    if (window.isObject()) {
-      closedAcquisition(
-          window, "windowId", "openedAt", "deadline", "reservedMs", "lastCheckedAt", "uncertain");
-      long reserved = acquisitionNumber(window, "reservedMs", allowance);
-      require(
-          reserved > 0
-              && reserved <= active.path("usedMs").asLong()
-              && window.path("uncertain").isBoolean(),
-          "INVALID_CONTRACT",
-          422);
-      require(
-          acquisitionInstant(window, "deadline")
-                  .equals(acquisitionInstant(window, "openedAt").plusMillis(reserved))
-              && !acquisitionInstant(window, "lastCheckedAt")
-                  .isBefore(acquisitionInstant(window, "openedAt")),
-          "INVALID_CONTRACT",
-          422);
-    } else {
-      require(window.isNull(), "INVALID_CONTRACT", 422);
-    }
-    if (pending.isObject()) {
-      closedAcquisition(
-          pending, "pollNumber", "expectedGeneration", "refreshKey", "request", "requestHash");
-      require(
-          window.isObject()
-              && acquisitionNumber(pending, "pollNumber", marker.path("totalExtraPolls").asLong())
-                  > 0,
-          "INVALID_CONTRACT",
-          422);
-      acquisitionNumber(pending, "expectedGeneration", Integer.MAX_VALUE - 1);
-      acquisitionRequestIdentity(current.document(), pending.path("request"));
-      require(
-          pending.path("refreshKey").isTextual()
-              && !pending.path("refreshKey").asText().isBlank()
-              && pending.path("refreshKey").asText().length() <= 256
-              && GuidedContracts.hash(pending.path("request"))
-                  .equals(pending.path("requestHash").asText())
-              && pending
-                  .path("request")
-                  .path("expectedGeneration")
-                  .equals(pending.path("expectedGeneration")),
-          "INVALID_CONTRACT",
-          422);
-    } else {
-      require(pending.isNull(), "INVALID_CONTRACT", 422);
-    }
-    acquisitionInstant(active, "nextPollAt");
-    return marker;
-  }
-
-  private void acquisitionRequestIdentity(JsonNode session, JsonNode request) {
-    contracts.validate("v3/observation-refresh", request);
-    for (String field : List.of("schemaVersion", "sessionId", "scopeHash", "versions")) {
-      require(request.path(field).equals(session.path(field)), "STALE_GENERATION", 409);
-    }
-    require(
-        request.path("workerId").equals(session.path("owner").path("workerId"))
-            && request.path("ownerFence").equals(session.path("owner").path("fence"))
-            && request.path("sourceRevision").equals(session.path("scope").path("sourceRevision"))
-            && request
-                .path("configurationRevision")
-                .equals(session.path("scope").path("configurationRevision")),
-        "STALE_GENERATION",
-        409);
-  }
-
-  /**
-   * What an acquisition waits for: the bare label, plus the qualifying region and the accepted
-   * selection (role, name, evidence) when the obligation has them. An unqualified obligation keeps
-   * its original value.
-   */
-  static JsonNode acquisitionTarget(JsonNode obligation) {
-    boolean qualified = obligation.path("scopeIntent").isTextual();
-    if (!qualified && !obligation.has("selection")) {
-      return obligation.path("targetIntent");
-    }
-    var identity =
-        com.fasterxml.jackson.databind.node.JsonNodeFactory.instance
-            .arrayNode()
-            .add(obligation.path("targetIntent"));
-    if (qualified) {
-      identity.add(obligation.path("scopeIntent"));
-    }
-    if (obligation.has("selection")) {
-      identity.add(obligation.path("selection"));
-    }
-    return identity;
-  }
-
-  private static void acquisitionIdentity(
-      ObjectNode active, JsonNode session, JsonNode state, JsonNode obligation) {
-    active
-        .put("planRevision", state.path("planRevision").asText())
-        .put("planHash", GuidedContracts.hash(state.path("plan")))
-        .put("obligationId", obligation.path("obligationId").asText())
-        .put("targetIntentHash", GuidedContracts.hash(acquisitionTarget(obligation)));
-    active.set("workerId", session.path("owner").path("workerId"));
-    active.set("ownerFence", session.path("owner").path("fence"));
-  }
-
-  /** Caller holds session/source locks; a REFUSED result commits prior reservations. */
-  public AcquisitionClaim acquire(
-      com.citi.put.checks.studio.guided.session.GuidedSessionRepository.Session current,
-      JsonNode state,
-      JsonNode obligation,
-      boolean available,
-      JsonNode freshRequest) {
-    transaction();
-    Instant now = acquisitionNow();
-    ObjectNode marker = acquisitionBook(current, state, obligation, available);
-    if (marker == null) {
-      return acquisitionResult(AcquisitionDisposition.READY, null);
-    }
-    ObjectNode active = (ObjectNode) marker.path("active");
-    JsonNode window = active.path("window"), pending = active.path("pending");
-    String semantic = GuidedAcquisitionFingerprint.hash(current.progress().path("observation"));
-    if (!semantic.equals(active.path("lastSemanticHash").asText())) {
-      active
-          .put("lastSemanticHash", semantic)
-          .put("unchangedRefreshes", 0)
-          .putNull("stableSemanticHash");
-    }
-    if (pending.isNull() && semantic.equals(active.path("stableSemanticHash").asText())) {
-      closeAcquisitionWindow(active, now);
-      saveAcquisition(current, marker);
-      return acquisitionResult(AcquisitionDisposition.READY, null);
-    }
-    if (window.isObject()) {
-      closedAcquisition(
-          window, "windowId", "openedAt", "deadline", "reservedMs", "lastCheckedAt", "uncertain");
-      require(window.path("uncertain").isBoolean(), "INVALID_CONTRACT", 422);
-      long reserved = acquisitionNumber(window, "reservedMs", marker.path("allowanceMs").asLong());
-      require(reserved > 0 && reserved <= active.path("usedMs").asLong(), "INVALID_CONTRACT", 422);
-      if (now.isBefore(acquisitionInstant(window, "lastCheckedAt"))
-          || !acquisitionInstant(window, "deadline").isAfter(now)) {
-        GuidedGuardProvenance.observe(
-            Guard.ACQUISITION_WINDOW, () -> current.document().path("sessionId").asText());
-        saveAcquisition(current, marker);
-        return acquisitionResult(AcquisitionDisposition.REFUSED, "BUDGET_EXCEEDED");
-      }
-      // Every live check is a wall-clock checkpoint, including cadence wait and pending recovery.
-      ((ObjectNode) window).put("lastCheckedAt", acquisitionTime(now));
-    }
-    if (pending.isObject()) {
-      require(window.isObject(), "INVALID_CONTRACT", 422);
-      closedAcquisition(
-          pending, "pollNumber", "expectedGeneration", "refreshKey", "request", "requestHash");
-      acquisitionRequestIdentity(current.document(), pending.path("request"));
-      require(
-          GuidedContracts.hash(pending.path("request")).equals(pending.path("requestHash").asText())
-              && pending
-                  .path("request")
-                  .path("expectedGeneration")
-                  .equals(pending.path("expectedGeneration")),
-          "INVALID_CONTRACT",
-          422);
-      ((ObjectNode) window).put("uncertain", true);
-      saveAcquisition(current, marker);
-      return acquisitionPoll(active, now);
-    }
-    require(pending.isNull(), "INVALID_CONTRACT", 422);
-    if (available) {
-      closeAcquisitionWindow(active, now);
-      saveAcquisition(current, marker);
-      return acquisitionResult(AcquisitionDisposition.READY, null);
-    }
-    if (window.isNull()) {
-      long remaining = marker.path("allowanceMs").asLong() - active.path("usedMs").asLong();
-      remaining =
-          Math.min(
-              remaining,
-              java.time.Duration.between(
-                      now, Instant.parse(current.document().path("expiresAt").asText()))
-                  .toMillis());
-      remaining =
-          Math.min(
-              remaining,
-              java.time.Duration.between(
-                      now,
-                      Instant.parse(
-                          current.document().path("owner").path("leaseExpiresAt").asText()))
-                  .toMillis());
-      if (remaining <= 0) {
-        GuidedGuardProvenance.observe(
-            Guard.ACQUISITION_REMAINING, () -> current.document().path("sessionId").asText());
-        saveAcquisition(current, marker);
-        return acquisitionResult(AcquisitionDisposition.REFUSED, "BUDGET_EXCEEDED");
-      }
-      active.put("usedMs", active.path("usedMs").asLong() + remaining);
-      active
-          .putObject("window")
-          .put("windowId", UUID.randomUUID().toString())
-          .put("openedAt", acquisitionTime(now))
-          .put("deadline", acquisitionTime(now.plusMillis(remaining)))
-          .put("reservedMs", remaining)
-          .put("lastCheckedAt", acquisitionTime(now))
-          .put("uncertain", false);
-      active.put(
-          "nextPollAt",
-          acquisitionTime(now.plusMillis(active.path("extraPolls").asLong() == 0 ? 100 : 250)));
-      window = active.path("window");
-    }
-    if (acquisitionInstant(active, "nextPollAt").isAfter(now)) {
-      saveAcquisition(current, marker);
-      return acquisitionResult(AcquisitionDisposition.WAIT, null);
-    }
-    JsonNode counts = current.document().path("counters"),
-        limits = current.document().path("limits");
-    if (active.path("extraPolls").asLong() >= 32
-        || marker.path("totalExtraPolls").asLong() >= 200
-        || counts.path("observations").asLong() >= limits.path("maxObservations").asLong()
-        || limits.path("maxSanitizedEvidenceBytesTotal").asLong()
-                - counts.path("sanitizedEvidenceBytes").asLong()
-            < limits.path("maxObservationBytes").asLong()) {
-      GuidedGuardProvenance.observe(
-          Guard.ACQUISITION_POLL_LIMITS, () -> current.document().path("sessionId").asText());
-      saveAcquisition(current, marker);
-      return acquisitionResult(AcquisitionDisposition.REFUSED, "BUDGET_EXCEEDED");
-    }
-    acquisitionRequestIdentity(current.document(), freshRequest);
-    require(
-        freshRequest.path("expectedGeneration").equals(current.progress().path("generation")),
-        "STALE_GENERATION",
-        409);
-    long poll = marker.path("totalExtraPolls").asLong() + 1;
-    marker.put("totalExtraPolls", poll);
-    active.put("extraPolls", active.path("extraPolls").asLong() + 1);
-    String key = "acquire-" + window.path("windowId").asText() + "-" + poll;
-    ObjectNode next =
-        active
-            .putObject("pending")
-            .put("pollNumber", poll)
-            .put("refreshKey", key)
-            .put("requestHash", GuidedContracts.hash(freshRequest));
-    next.set("expectedGeneration", freshRequest.path("expectedGeneration"));
-    next.set("request", freshRequest.deepCopy());
-    ((ObjectNode) window).put("lastCheckedAt", acquisitionTime(now));
-    saveAcquisition(current, marker);
-    continuation(current.document().path("sessionId").asText(), "REFRESH");
-    return acquisitionPoll(active, now);
-  }
-
-  private AcquisitionClaim acquisitionPoll(ObjectNode active, Instant now) {
-    JsonNode pending = active.path("pending"), window = active.path("window");
-    return new AcquisitionClaim(
-        AcquisitionDisposition.POLL,
-        pending.path("request"),
-        pending.path("refreshKey").asText(),
-        window.path("windowId").asText(),
-        pending.path("pollNumber").asLong(),
-        acquisitionInstant(window, "deadline"),
-        Math.max(
-            0, java.time.Duration.between(now, acquisitionInstant(window, "deadline")).toMillis()),
-        null);
-  }
-
-  private static void closeAcquisitionWindow(ObjectNode active, Instant now) {
-    JsonNode window = active.path("window");
-    if (window.isNull()) {
-      return;
-    }
-    if (!window.path("uncertain").asBoolean()) {
-      long elapsed =
-          Math.max(
-              0,
-              java.time.Duration.between(acquisitionInstant(window, "openedAt"), now).toMillis()
-                  + 1);
-      long refund =
-          window.path("reservedMs").asLong()
-              - Math.min(window.path("reservedMs").asLong(), elapsed);
-      active.put("usedMs", active.path("usedMs").asLong() - refund);
-    }
-    active.putNull("window");
-  }
-
-  public AcquisitionClaim settleAcquisition(
-      com.citi.put.checks.studio.guided.session.GuidedSessionRepository.Session current,
-      JsonNode state,
-      JsonNode obligation,
-      AcquisitionClaim claim,
-      JsonNode response,
-      boolean available) {
-    transaction();
-    Instant now = acquisitionNow();
-    ObjectNode marker = acquisitionBook(current, state, obligation, false);
-    ObjectNode active = (ObjectNode) marker.path("active");
-    JsonNode window = active.path("window"), pending = active.path("pending");
-    require(
-        window.isObject()
-            && pending.isObject()
-            && window.path("windowId").asText().equals(claim.windowId())
-            && pending.path("pollNumber").asLong() == claim.pollNumber()
-            && pending.path("request").equals(claim.request())
-            && pending.path("refreshKey").asText().equals(claim.key()),
-        "STALE_GENERATION",
-        409);
-    if (!acquisitionInstant(window, "deadline").isAfter(now)
-        || now.isBefore(acquisitionInstant(window, "lastCheckedAt"))) {
-      GuidedGuardProvenance.observe(
-          Guard.ACQUISITION_SETTLEMENT_WINDOW, () -> current.document().path("sessionId").asText());
-      saveAcquisition(current, marker);
-      return acquisitionResult(AcquisitionDisposition.REFUSED, "BUDGET_EXCEEDED");
-    }
-    JsonNode observation = response.path("observation");
-    require(
-        observation.path("generation").asLong() > pending.path("expectedGeneration").asLong()
-            && GuidedContracts.same(
-                observation.path("generation"), current.progress().path("generation"))
-            && GuidedContracts.hash(observation)
-                .equals(current.progress().path("observationHash").asText()),
-        "STALE_GENERATION",
-        409);
-    active.putNull("pending");
-    String semantic = GuidedAcquisitionFingerprint.hash(observation);
-    int unchanged =
-        !available && semantic.equals(active.path("lastSemanticHash").asText())
-            ? active.path("unchangedRefreshes").asInt() + 1
-            : 0;
-    active.put("lastSemanticHash", semantic).put("unchangedRefreshes", unchanged);
-    boolean stable = !available && unchanged >= 2;
-    if (stable) {
-      active.put("stableSemanticHash", semantic);
-    } else {
-      active.putNull("stableSemanticHash");
-    }
-    active.set("lastObservationHash", current.progress().path("observationHash"));
-    active.set("lastGeneration", current.progress().path("generation"));
-    active.put("nextPollAt", acquisitionTime(now.plusMillis(250)));
-    ((ObjectNode) window).put("lastCheckedAt", acquisitionTime(now));
-    if (available || stable) {
-      closeAcquisitionWindow(active, now);
-    }
-    saveAcquisition(current, marker);
-    continuation(current.document().path("sessionId").asText(), "NEXT");
-    return acquisitionResult(
-        available || stable ? AcquisitionDisposition.READY : AcquisitionDisposition.WAIT, null);
   }
 
   /** Current authorization needs only immutable provenance, not plan or active attempt state. */
@@ -867,42 +240,39 @@ public final class GuidedTranslationStore {
           422);
       previousStep = at;
       previousOrdinal = ordinal;
-      String kind = obligation.path("operationKind").asText();
       if (!obligation.path("referenceIndex").isNull()) {
         JsonNode reference =
             plan.path("sourceReferences").get(obligation.path("referenceIndex").asInt());
-        String slot =
-            kind.equals("navigate")
-                ? "navigate.destination"
-                : kind + (kind.equals("assert") ? ".expected" : ".value");
         require(
-            reference.path("stepId").equals(obligation.path("stepId"))
-                && reference.path("intendedSlot").asText().equals(slot),
-            "REFERENCE_MISMATCH",
-            422);
+            reference.path("stepId").equals(obligation.path("stepId")), "REFERENCE_MISMATCH", 422);
       }
       if (!obligation.path("needId").isNull()) {
         JsonNode need = needs.get(obligation.path("needId").asText());
         require(need != null, "MISSING_SOURCE", 409);
-        if (kind.equals("read")) {
-          require(
-              need.path("producerStepId").equals(obligation.path("stepId")), "BINDING_ORDER", 422);
-        }
+        require(
+            need.path("producerStepId").equals(obligation.path("stepId")), "BINDING_ORDER", 422);
+      }
+      for (JsonNode use : obligation.path("uses")) {
+        JsonNode need = needs.get(use.asText());
+        require(need != null, "MISSING_SOURCE", 409);
+        require(
+            order.getOrDefault(need.path("producerStepId").asText(), -1) < at,
+            "BINDING_ORDER",
+            422);
       }
     }
     for (JsonNode need : plan.path("needs")) {
       int producer = order.getOrDefault(need.path("producerStepId").asText(), -1);
-      boolean read = false;
+      boolean produced = false;
       for (JsonNode obligation : plan.path("obligations")) {
-        read |=
-            obligation.path("operationKind").asText().equals("read")
-                && obligation.path("stepId").equals(need.path("producerStepId"))
+        produced |=
+            obligation.path("stepId").equals(need.path("producerStepId"))
                 && obligation.path("needId").equals(need.path("needId"));
       }
-      require(producer >= 0 && read, "BINDING_ORDER", 422);
+      require(producer >= 0 && produced, "BINDING_ORDER", 422);
       for (JsonNode consumer : need.path("consumers")) {
         require(
-            order.getOrDefault(consumer.path("stepId").asText(), -1) >= producer,
+            order.getOrDefault(consumer.path("stepId").asText(), -1) > producer,
             "BINDING_ORDER",
             422);
       }
@@ -915,8 +285,6 @@ public final class GuidedTranslationStore {
         Set.of(
                 "SOURCE_PLAN",
                 "REPLAYING_PREFIX",
-                "NEXT_ACTION",
-                "VERIFY_STEP",
                 "MATERIALIZE",
                 "NEXT",
                 "REFRESH",
@@ -992,7 +360,7 @@ public final class GuidedTranslationStore {
             && attempt <= 3
             && inputCeiling > 0
             && outputCeiling > 0
-            && Set.of("SOURCE_PLAN", "NEXT_ACTION", "VERIFY_STEP").contains(kind)
+            && Set.of("SOURCE_PLAN", "STEP_CODE").contains(kind)
             && projectionHash.matches("[a-f0-9]{64}")
             && !translatorId.isBlank(),
         "INVALID_CONTRACT",
@@ -1198,21 +566,12 @@ public final class GuidedTranslationStore {
   static {
     var gates = new java.util.HashSet<String>();
     for (GuidedRefusalDiagnostics.Gate gate : GuidedRefusalDiagnostics.Gate.values()) {
-      if (gate.name().startsWith("NEXT_")) {
+      if (gate.name().startsWith("STEP_")) {
         gates.add(gate.name());
       }
     }
     REJECTION_GATES = Set.copyOf(gates);
   }
-
-  /** How the intent gate admitted an applied NEXT_ACTION, persisted with the APPLIED attempt. */
-  private static final Set<String> INTENT_PATHS =
-      Set.of("EXACT_NAME", "EVIDENCE_SUBSET", "SELECTED_CHOICE", "SCOPE_EVIDENCE");
-
-  private static final java.util.regex.Pattern INTENT_FIELDS =
-      java.util.regex.Pattern.compile(
-          "(name|placeholder|near|ownText|text|group|header|sibling)"
-              + "(,(name|placeholder|near|ownText|text|group|header|sibling)){0,7}");
 
   /** Maps an apply-side refusal code to its closed reason; anything unlisted is APPLY_OTHER. */
   static String applyRejectionReason(String refusalCode) {
@@ -1241,25 +600,12 @@ public final class GuidedTranslationStore {
       Integer outputTokens,
       String rejectionReason) {
     finishAttempt(
-        sessionId,
-        attemptId,
-        status,
-        safeResult,
-        inputTokens,
-        outputTokens,
-        rejectionReason,
-        null,
-        null,
-        null);
+        sessionId, attemptId, status, safeResult, inputTokens, outputTokens, rejectionReason, null);
   }
 
   /**
-   * @param rejectionGate the first grounding gate that refused (a closed NEXT_* token), allowed
-   *     only with status REJECTED
-   * @param intentPath how the intent gate admitted the pick (EXACT_NAME, EVIDENCE_SUBSET or
-   *     SELECTED_CHOICE), allowed only with status APPLIED
-   * @param intentFields the comma-joined evidence fields that supplied the intent words (D7(d)),
-   *     allowed only with an intent path
+   * @param rejectionGate the first gate that refused (a closed STEP_* token), allowed only with
+   *     status REJECTED
    */
   public void finishAttempt(
       String sessionId,
@@ -1269,25 +615,12 @@ public final class GuidedTranslationStore {
       Integer inputTokens,
       Integer outputTokens,
       String rejectionReason,
-      String rejectionGate,
-      String intentPath,
-      String intentFields) {
+      String rejectionGate) {
     transaction();
     requireNotPruned(sessionId);
     require(
         rejectionGate == null
             || status.equals("REJECTED") && REJECTION_GATES.contains(rejectionGate),
-        "INVALID_CONTRACT",
-        422);
-    require(
-        intentPath == null || status.equals("APPLIED") && INTENT_PATHS.contains(intentPath),
-        "INVALID_CONTRACT",
-        422);
-    require(
-        intentFields == null
-            || intentPath != null
-                && intentFields.length() <= 80
-                && INTENT_FIELDS.matcher(intentFields).matches(),
         "INVALID_CONTRACT",
         422);
     require(
@@ -1306,14 +639,12 @@ public final class GuidedTranslationStore {
     var rows =
         jdbc.query(
             "SELECT status,safe_result::text,input_tokens,output_tokens,rejection_reason,"
-                + "rejection_gate,intent_path,intent_fields FROM"
+                + "rejection_gate FROM"
                 + " studio_guided_model_attempts WHERE session_id=? AND attempt_id=?",
             (rs, n) -> {
               ObjectNode row = contracts.object().put("status", rs.getString(1));
               row.put("reason", rs.getString(5));
               row.put("gate", rs.getString(6));
-              row.put("intentPath", rs.getString(7));
-              row.put("intentFields", rs.getString(8));
               row.set(
                   "result",
                   rs.getString(2) == null
@@ -1350,13 +681,7 @@ public final class GuidedTranslationStore {
               && java.util.Objects.equals(
                   old.path("reason").isNull() ? null : old.path("reason").asText(), rejectionReason)
               && java.util.Objects.equals(
-                  old.path("gate").isNull() ? null : old.path("gate").asText(), rejectionGate)
-              && java.util.Objects.equals(
-                  old.path("intentPath").isNull() ? null : old.path("intentPath").asText(),
-                  intentPath)
-              && java.util.Objects.equals(
-                  old.path("intentFields").isNull() ? null : old.path("intentFields").asText(),
-                  intentFields),
+                  old.path("gate").isNull() ? null : old.path("gate").asText(), rejectionGate),
           "IDEMPOTENCY_CONFLICT",
           409);
       return;
@@ -1365,7 +690,7 @@ public final class GuidedTranslationStore {
         "UPDATE studio_guided_model_attempts SET"
             + " status=?,safe_result=?::jsonb,input_tokens=?,output_tokens="
             + "?,rejection_reason=?,"
-            + "rejection_gate=?,intent_path=?,intent_fields=?,updated_at=clock_timestamp()"
+            + "rejection_gate=?,updated_at=clock_timestamp()"
             + " WHERE session_id=? AND attempt_id=?",
         status,
         safeResult == null || safeResult.isNull() ? null : safeResult.toString(),
@@ -1373,8 +698,6 @@ public final class GuidedTranslationStore {
         outputTokens,
         rejectionReason,
         rejectionGate,
-        intentPath,
-        intentFields,
         sessionId,
         attemptId);
   }
@@ -1531,24 +854,50 @@ public final class GuidedTranslationStore {
   }
 
   /**
-   * Re-asks that followed a still-unadmitted reservation for a step. An obligation's reservation
-   * holds one proposal, and a refused runner prepare leaves it unadmitted, so each NEXT_ACTION
-   * applied after the reservation was the same proposal asked and refused again. Zero means the
-   * first proposal has not yet been repeated.
+   * STEP_CODE requests already spent on a step: attempts of kind STEP_CODE for {@code stepIndex}
+   * that are not a clarification. Validator rejections, transient retries and prepare refusals all
+   * count, so one pool of three bounds the step across redrives.
    */
-  public int repeatedUnadmittedProposals(String sessionId, String stepId) {
+  public int stepCodeRequests(String sessionId, int stepIndex) {
     transaction();
     Integer count =
         jdbc.queryForObject(
-            "SELECT COALESCE(MAX(n),0) FROM (SELECT count(a.attempt_id) AS n FROM"
-                + " studio_guided_obligation_admissions o LEFT JOIN studio_guided_model_attempts a"
-                + " ON a.session_id=o.session_id AND a.kind='NEXT_ACTION' AND a.status='APPLIED'"
-                + " AND a.created_at>o.created_at WHERE o.session_id=? AND o.admission_id IS NULL"
-                + " AND o.proposal->'coordinate'->>'stepId'=? GROUP BY o.obligation_id) t",
+            "SELECT count(*) FROM studio_guided_model_attempts WHERE session_id=? AND"
+                + " kind='STEP_CODE' AND status IN ('APPLIED','REJECTED') AND"
+                + " identity->>'stepIndex'=? AND COALESCE(safe_result->>'status','')<>"
+                + "'CLARIFICATION'",
             Integer.class,
             sessionId,
-            stepId);
+            Integer.toString(stepIndex));
     return count == null ? 0 : count;
+  }
+
+  /**
+   * The step is fulfilled when every obligation's step has one action that SUCCEEDED, was
+   * dispatched once and carries the digest of the reserved proposal. Several obligations may
+   * describe one step; the action is keyed on the occurrence-0 obligation.
+   */
+  public boolean stepFulfilled(String sessionId, String stepId, List<ObjectNode> actions) {
+    JsonNode anchor = GuidedProposalValidator.anchor(state(sessionId).path("plan"), stepId);
+    if (anchor == null || actions.size() != 1) {
+      return false;
+    }
+    ObjectNode association = obligation(sessionId, anchor.path("obligationId").asText());
+    if (association == null || association.path("admissionId").isNull()) {
+      return false;
+    }
+    ObjectNode action = actions.getFirst();
+    return action
+            .path("admission")
+            .path("admissionId")
+            .asText()
+            .equals(association.path("admissionId").asText())
+        && action.path("state").asText().equals("SUCCEEDED")
+        && action.path("dispatchCount").asInt() == 1
+        && action
+            .path("requestDigest")
+            .asText()
+            .equals(GuidedContracts.hash(association.path("proposal")));
   }
 
   public void attachAdmission(String sessionId, String admissionKey, JsonNode action) {

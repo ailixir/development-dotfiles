@@ -749,7 +749,10 @@ class GuidedGovernanceMigrationIT {
     flyway(url, null).migrate();
     flyway(url, null).validate();
     try (Connection c = connect(url)) {
-      assertThat(scalar(c, "SELECT max(version::int) FROM flyway_schema_history")).isEqualTo("29");
+      assertThat(
+              scalar(
+                  c, "SELECT count(*) FROM flyway_schema_history WHERE version='33' AND success"))
+          .isEqualTo("1");
       assertThat(
               scalar(
                   c,
@@ -903,6 +906,12 @@ class GuidedGovernanceMigrationIT {
     UUID revision = UUID.randomUUID();
     String h = HASH;
     exec(c, "SET LOCAL session_replication_role='replica'");
+    // The seeded preparation is minimal; its closed-key shape is covered by
+    // GuidedStepKindMigrationIT, and this test's subject is pruning and immutability.
+    exec(
+        c,
+        "ALTER TABLE studio_guided_publication_preparations DROP CONSTRAINT IF EXISTS"
+            + " ck_publication_preparation_shape");
     StringBuilder base =
         new StringBuilder(
             "jsonb_build_object('sessionId','"
@@ -953,7 +962,7 @@ class GuidedGovernanceMigrationIT {
             + "','observedAt','t','coverage',jsonb_build_object('withheldRegions',0,"
             + "'unsupportedRegions',0,'passwordControls',0),'projection',"
             + "jsonb_build_object('projected',false,'tier',NULL::text,'totalNodes',1,"
-            + "'shownNodes',1,'notShown',0,'outlineBytes',10),'readRuleId',NULL::text,"
+            + "'shownNodes',1,'notShown',0,'outlineBytes',10),"
             + "'outline','- document','facts','{}'::jsonb),clock_timestamp())");
     String evidence = "jsonb_build_object('kind','page','documentId','doc','generation',0)";
     String proposal =

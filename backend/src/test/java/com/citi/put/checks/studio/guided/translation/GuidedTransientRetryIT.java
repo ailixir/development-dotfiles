@@ -148,8 +148,7 @@ class GuidedTransientRetryIT {
     repository = new GuidedSessionRepository(jdbc, tx, C);
     store = new GuidedTranslationStore(jdbc, C);
     translationProperties =
-        new GuidedTranslationProperties(
-            true, 65536, 4096, 60, "worker-1", false, (int) BASE_MILLIS);
+        new GuidedTranslationProperties(true, 65536, 4096, 60, "worker-1", (int) BASE_MILLIS);
     var prompts =
         new GuidedPromptAssembler(C, com.citi.put.checks.studio.support.TestDomains.FIXTURES);
     seedSource();

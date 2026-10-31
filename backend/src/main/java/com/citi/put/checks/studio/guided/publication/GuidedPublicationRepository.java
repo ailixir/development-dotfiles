@@ -407,10 +407,13 @@ public final class GuidedPublicationRepository {
         Timestamp.from(PublicationContracts.millisecond(wall)));
     int changed =
         jdbc.update(
-            "UPDATE ui_tests SET confirmed_revision_id=?"
+            // Finalize records the revision as the candidate; only its model-free proof confirms it
+            // (ADR-SC-008 D5). The base is the head: the candidate, else the confirmed revision.
+            "UPDATE ui_tests SET candidate_revision_id=?"
                 + " WHERE id=? AND source_revision=? AND configuration_revision=? AND"
                 + " publication_epoch=? AND"
-                + " confirmed_revision_id IS NOT DISTINCT FROM ?::uuid AND deleted_at IS NULL AND"
+                + " COALESCE(candidate_revision_id,confirmed_revision_id) IS NOT DISTINCT FROM"
+                + " ?::uuid AND deleted_at IS NULL AND"
                 + " quarantined_at IS NULL AND clock_timestamp()<? AND EXISTS(SELECT 1 FROM"
                 + " studio_guided_sessions WHERE session_id=? AND state='FINALIZING' AND"
                 + " expires_at>clock_timestamp() AND"

@@ -24,7 +24,6 @@ import com.citi.put.checks.studio.guided.session.GuidedSessionProperties;
 import com.citi.put.checks.studio.guided.session.GuidedSessionRepository;
 import com.citi.put.checks.studio.guided.session.GuidedSessionService;
 import com.citi.put.checks.studio.guided.session.GuidedTestIdentities;
-import com.citi.put.checks.studio.support.ObservationFixtures;
 import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import com.citi.put.checks.studio.support.TestDomains;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -55,8 +54,8 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * A real PostgreSQL, real session service, real translation service and real stores, with a
  * scripted model and a stand-in for the runner (no browser, no network). The integration tests of
- * the ADR-SC-007 grounding gates drive {@code GuidedTranslationService.advance} through it and read
- * the persisted gate audit back with SQL.
+ * the ADR-SC-008 step loop drives {@code GuidedTranslationService.advance} through it and read the
+ * persisted gate audit back with SQL.
  *
  * <p>What is scripted: the model (a queue of reply builders per kind), the runner's context
  * bootstrap, and the dispatch edge ({@link #dispatch} is a spy whose {@code prepareAndAdmit} stops
@@ -65,31 +64,20 @@ import org.testcontainers.containers.PostgreSQLContainer;
  * wiring follows {@code GuidedLifecycleReasonIT}, which adapts {@code GuidedSessionIT}.
  */
 final class GroundingItHarness {
-  /** One planned obligation: which step it belongs to and what it asks of the page. */
-  record Spec(int step, String kind, String intent, String predicate, String needId) {
-    static Spec click(int step, String intent) {
-      return new Spec(step, "click", intent, null, null);
+  /** One planned obligation: the step it describes, what it asks of the page, what it passes on. */
+  record Spec(int step, String intent, String needId, List<String> uses) {
+    static Spec of(int step, String intent) {
+      return new Spec(step, intent, null, List.of());
     }
 
-    static Spec check(int step, String intent) {
-      return new Spec(step, "check", intent, null, null);
+    /** The step produces the value {@code needId} (a capture). */
+    static Spec produces(int step, String intent, String needId) {
+      return new Spec(step, intent, needId, List.of());
     }
 
-    static Spec fill(int step, String intent) {
-      return new Spec(step, "fill", intent, null, null);
-    }
-
-    static Spec read(int step, String intent, String needId) {
-      return new Spec(step, "read", intent, null, needId);
-    }
-
-    static Spec assertVisible(int step, String intent) {
-      return new Spec(step, "assert", intent, "visible", null);
-    }
-
-    /** An assert whose expected text is the value an earlier read bound to {@code needId}. */
-    static Spec assertContains(int step, String intent, String needId) {
-      return new Spec(step, "assert", intent, "containsText", needId);
+    /** The step reads the values {@code needIds} an earlier step produced. */
+    static Spec uses(int step, String intent, String... needIds) {
+      return new Spec(step, intent, null, List.of(needIds));
     }
   }
 
@@ -121,9 +109,21 @@ final class GroundingItHarness {
   GuidedClarificationContextStore questions;
   GuidedTranslationService translation;
   GuidedDispatchService dispatch;
+  HttpRunnerDispatchClient runner;
+
+  /** The input tokens the scripted gateway reports for every reply (tests raise it to overrun). */
+  volatile int reportedInputTokens = 1;
+
+  private final Map<String, Integer> limits;
   private List<Spec> plan = List.of();
 
   GroundingItHarness(PostgreSQLContainer<?> postgres, String... steps) throws Exception {
+    this(postgres, Map.of(), steps);
+  }
+
+  GroundingItHarness(PostgreSQLContainer<?> postgres, Map<String, Integer> limits, String... steps)
+      throws Exception {
+    this.limits = limits;
     this.steps = List.of(steps);
     for (GuidedModelRequest.Kind kind : GuidedModelRequest.Kind.values()) {
       script.put(kind, new ArrayDeque<>());
@@ -156,7 +156,7 @@ final class GroundingItHarness {
     service = newService();
     store = new GuidedTranslationStore(jdbc, contracts);
     questions = new GuidedClarificationContextStore(jdbc, contracts);
-    var runner = Mockito.mock(HttpRunnerDispatchClient.class);
+    runner = Mockito.mock(HttpRunnerDispatchClient.class);
     org.mockito.stubbing.Answer<JsonNode> contextReply =
         call -> {
           JsonNode context = call.getArgument(1);
@@ -198,6 +198,28 @@ final class GroundingItHarness {
     translation.installDatabase(jdbc);
   }
 
+  /** A translation service over the same stores and scripted model but other collaborators. */
+  GuidedTranslationService translationWith(
+      GuidedSessionService sessions, GuidedDispatchService bridge, GuidedPromptAssembler prompts) {
+    var other =
+        new GuidedTranslationService(
+            sessions,
+            repository,
+            store,
+            questions,
+            bridge,
+            this::answer,
+            contracts,
+            prompts,
+            new GuidedSourceInputResolver(contracts, TestDomains.FIXTURES),
+            new GuidedProposalValidator(contracts),
+            new GuidedDependencyPlanner(sessions),
+            new GuidedTranslationProperties(true, 131072, 2048, 60, "worker-1"),
+            clock);
+    other.installDatabase(jdbc);
+    return other;
+  }
+
   // ---- scripting ----
 
   /** The next model reply of this kind; replies are consumed in order, one per request. */
@@ -206,9 +228,20 @@ final class GroundingItHarness {
   }
 
   /**
-   * The dispatch edge ends the run with a sentinel: the action was reserved and reached prepare.
+   * The runner accepts the code at prepare and the run ends with a sentinel at admission: the step
+   * was prepared, its obligation was reserved, and nothing was dispatched.
    */
   void stopAtRunner() {
+    prepareAccepts();
+    Mockito.doThrow(new ReachedRunner())
+        .when(dispatch)
+        .admitPrepared(
+            org.mockito.ArgumentMatchers.any(),
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.anyLong(),
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.any(),
+            org.mockito.ArgumentMatchers.any());
     Mockito.doThrow(new ReachedRunner())
         .when(dispatch)
         .prepareAndAdmit(
@@ -219,28 +252,53 @@ final class GroundingItHarness {
             org.mockito.ArgumentMatchers.any());
   }
 
-  /** The runner refuses prepare with a closed refusal, as HttpRunnerDispatchClient maps it. */
-  void runnerRefusesPrepare(String publicCode, int status, String reason) {
-    Mockito.doThrow(new GuidedSessionException(publicCode, status, reason, false, null))
+  /** The runner's prepare accepts every proposal (a stand-in proof; nothing is stored). */
+  void prepareAccepts() {
+    Mockito.doReturn(contracts.object().put("preparationId", "stand-in"))
         .when(dispatch)
-        .prepareAndAdmit(
+        .prepareStep(
             org.mockito.ArgumentMatchers.any(),
             org.mockito.ArgumentMatchers.anyString(),
             org.mockito.ArgumentMatchers.anyLong(),
-            org.mockito.ArgumentMatchers.anyString(),
             org.mockito.ArgumentMatchers.any());
   }
 
-  /** The runner refuses prepare with a plain public code and no closed reason. */
-  void prepareFails(String publicCode, int status) {
-    Mockito.doThrow(new GuidedSessionException(publicCode, status))
+  /**
+   * The runner's answers to the next prepare calls, one per call, the last repeating: a {@link
+   * GuidedSessionException} is a refusal, anything else is accepted.
+   */
+  void prepareSequence(GuidedSessionException... outcomes) {
+    org.mockito.stubbing.Stubber stubber = null;
+    for (GuidedSessionException outcome : outcomes) {
+      stubber =
+          stubber == null
+              ? outcome == null
+                  ? Mockito.doReturn(contracts.object().put("preparationId", "stand-in"))
+                  : Mockito.doThrow(outcome)
+              : outcome == null
+                  ? stubber.doReturn(contracts.object().put("preparationId", "stand-in"))
+                  : stubber.doThrow(outcome);
+    }
+    stubber
         .when(dispatch)
-        .prepareAndAdmit(
+        .prepareStep(
             org.mockito.ArgumentMatchers.any(),
             org.mockito.ArgumentMatchers.anyString(),
             org.mockito.ArgumentMatchers.anyLong(),
-            org.mockito.ArgumentMatchers.anyString(),
             org.mockito.ArgumentMatchers.any());
+  }
+
+  /**
+   * The runner could not parse the code: STEP_SYNTAX with a position, as the HTTP client maps it.
+   */
+  static GuidedSessionException syntax(int line, int column) {
+    return new GuidedSessionException("INVALID_CONTRACT", 422, "STEP_SYNTAX", line, column);
+  }
+
+  /** The code failed before its first action: STEP_PRE_FENCE with the match count. */
+  static GuidedSessionException preFence(int matches) {
+    return new GuidedSessionException(
+        "INVALID_CONTRACT", 422, "STEP_PRE_FENCE", null, null, matches);
   }
 
   /**
@@ -284,6 +342,123 @@ final class GroundingItHarness {
             org.mockito.ArgumentMatchers.any());
   }
 
+  /**
+   * The runner runs every step and succeeds: prepare returns a proof of the proposal it was given,
+   * and dispatch commits the owner callback (receipt with no closed code, no effects named) the way
+   * the owning worker does before the dispatch call returns. The real prepare/admit/consume and
+   * outcome paths of the backend run; only the browser is absent.
+   */
+  void runnerSucceeds() {
+    // Back to the real bridge: the constructor stopped it at the runner. Call before refreshWith.
+    Mockito.reset(dispatch);
+    Mockito.doAnswer(
+            call -> {
+              JsonNode request = call.getArgument(1);
+              JsonNode proposal = request.path("proposal");
+              ObjectNode proof = contracts.object();
+              for (String field :
+                  List.of(
+                      "schemaVersion",
+                      "sessionId",
+                      "workerId",
+                      "ownerFence",
+                      "scopeHash",
+                      "contextId",
+                      "contextRevision",
+                      "sourceRevision",
+                      "configurationRevision",
+                      "versions")) {
+                proof.set(field, request.path(field));
+              }
+              proof
+                  .put("preparationId", UUID.randomUUID().toString())
+                  .put("requestDigest", GuidedContracts.hash(proposal))
+                  .put("evidenceHash", proposal.path("evidenceHash").asText())
+                  .put("authoredInputsHash", proposal.path("authoredInputsHash").asText());
+              proof.set("expiresAt", request.path("expiresAt"));
+              return proof;
+            })
+        .when(runner)
+        .send(org.mockito.ArgumentMatchers.eq("prepare"), org.mockito.ArgumentMatchers.any());
+    Mockito.doAnswer(
+            call -> {
+              JsonNode payload = call.getArgument(1);
+              String id = payload.path("sessionId").asText();
+              ObjectNode body = contracts.object();
+              for (String field :
+                  List.of(
+                      "schemaVersion",
+                      "sessionId",
+                      "workerId",
+                      "ownerFence",
+                      "scopeHash",
+                      "contextId",
+                      "contextRevision",
+                      "sourceRevision",
+                      "configurationRevision",
+                      "versions")) {
+                body.set(field, payload.path(field));
+              }
+              ObjectNode ledger = payload.path("ledger").deepCopy();
+              ledger.put("state", "SUCCEEDED").put("outcomeCode", "OK");
+              body.set("ledger", ledger);
+              var availability = body.putArray("availability");
+              for (JsonNode capture : payload.path("proposal").path("operation").path("captures")) {
+                availability
+                    .addObject()
+                    .put("bindingId", capture.asText())
+                    .put(
+                        "producerAdmissionId",
+                        ledger.path("admission").path("admissionId").asText())
+                    .put("contextId", payload.path("contextId").asText())
+                    .put("workerId", payload.path("workerId").asText())
+                    .put("ownerFence", payload.path("ownerFence").asInt());
+              }
+              ObjectNode receipt =
+                  contracts
+                      .object()
+                      .put(
+                          "stepHash",
+                          payload.path("proposal").path("operation").path("sourceHash").asText())
+                      .put("fenceCrossed", true)
+                      .put("effectsTruncated", false)
+                      .put("offscreen", false);
+              receipt.putNull("closedCode");
+              receipt.putArray("effects").addObject().put("method", "click").put("completed", true);
+              body.set("receipt", receipt);
+              body.putObject("secretUse");
+              receipts.add(receipt);
+              service.outcomeV2(worker, id, 1, "outcome-" + UUID.randomUUID(), body);
+              return contracts.object().put("accepted", true);
+            })
+        .when(runner)
+        .send(
+            org.mockito.ArgumentMatchers.eq("dispatch"),
+            org.mockito.ArgumentMatchers.any(),
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.any(Instant.class));
+  }
+
+  /** The receipts {@link #runnerSucceeds()} committed, in order. */
+  final List<ObjectNode> receipts = new ArrayList<>();
+
+  /** The actions of the session in order of admission, read back. */
+  List<ObjectNode> actionRows(String id) {
+    return repository.actions(id);
+  }
+
+  /** The stored receipt column of each action of the session, by step id. */
+  Map<String, String> storedReceipts(String id) {
+    Map<String, String> rows = new LinkedHashMap<>();
+    jdbc.query(
+        "SELECT step_id, receipt::text FROM studio_guided_actions WHERE session_id=? ORDER BY step_id",
+        rs -> {
+          rows.put(rs.getString(1), rs.getString(2));
+        },
+        id);
+    return rows;
+  }
+
   int requests(GuidedModelRequest.Kind kind) {
     return (int) requests.stream().filter(request -> request.kind() == kind).count();
   }
@@ -301,7 +476,8 @@ final class GroundingItHarness {
       reply = next.apply(request);
     }
     contracts.validate("v3/guided-model-response", reply);
-    return new GuidedModelResponse(GuidedModelResponse.Code.OK, reply, 1, 1, "scripted");
+    return new GuidedModelResponse(
+        GuidedModelResponse.Code.OK, reply, reportedInputTokens, 1, "scripted");
   }
 
   /** The SOURCE_PLAN reply: the planned obligations of {@link #session(List)}. */
@@ -323,7 +499,6 @@ final class GroundingItHarness {
               .addObject()
               .put("stepId", context.path("sourceSteps").get(spec.step()).path("stepId").asText())
               .put("occurrence", occurrence)
-              .put("operationKind", spec.kind())
               .put("targetIntent", spec.intent())
               .putNull("scopeIntent")
               .putNull("referenceIndex");
@@ -332,18 +507,16 @@ final class GroundingItHarness {
       } else {
         obligation.put("needId", spec.needId());
       }
-      if (spec.predicate() == null) {
-        obligation.putNull("predicate");
-      } else {
-        obligation.put("predicate", spec.predicate());
-      }
+      var used = obligation.putArray("uses");
+      spec.uses().forEach(used::add);
     }
+    response.putArray("stepSections");
     return response;
   }
 
   // ---- reply builders ----
 
-  /** The obligation id of the {@code index}th remaining obligation the request lists. */
+  /** The obligation id of the {@code index}th obligation the request lists. */
   static String obligationId(GuidedModelRequest request, int index) {
     return request
         .projection()
@@ -354,59 +527,35 @@ final class GroundingItHarness {
         .asText();
   }
 
-  /**
-   * An ACTION reply on the first remaining obligation naming {@code target} and {@code operation}.
-   */
-  ObjectNode action(GuidedModelRequest request, ObjectNode target, ObjectNode operation) {
-    ObjectNode reply = envelope(request, "ACTION", obligationId(request, 0));
-    ObjectNode action = reply.putObject("action");
-    action.set("target", target);
-    action.set("operation", operation);
-    reply.putNull("question");
+  /** A STEP_CODE CODE reply: the step's code and the bindings it captures. */
+  ObjectNode code(GuidedModelRequest request, String code, String... captures) {
+    ObjectNode reply = envelope(request, "CODE").put("code", code);
+    var list = reply.putArray("captures");
+    for (String capture : captures) {
+      list.add(capture);
+    }
     return reply;
   }
 
-  ObjectNode click(GuidedModelRequest request, String ref) {
-    return action(
-        request, ObservationFixtures.nodeRef(ref), contracts.object().put("kind", "click"));
-  }
-
-  /** A CLARIFICATION reply on the first remaining obligation offering the given refs. */
-  ObjectNode clarification(GuidedModelRequest request, String... refs) {
-    ObjectNode reply = envelope(request, "CLARIFICATION", null);
-    reply.putNull("action");
-    ObjectNode question = reply.putObject("question").put("reason", "AMBIGUOUS_TARGET");
+  /** A STEP_CODE CLARIFICATION reply offering the given refs. */
+  ObjectNode clarification(GuidedModelRequest request, String reason, String... refs) {
+    ObjectNode reply = envelope(request, "CLARIFICATION");
+    ObjectNode question = reply.putObject("question").put("reason", reason);
     var choices = question.putArray("choices");
     int index = 0;
     for (String ref : refs) {
-      var choice =
-          choices
-              .addObject()
-              .put("choiceId", "choice-" + ++index)
-              .put("safeLabel", "Option " + index);
-      choice
-          .putObject("meaning")
-          .put("ref", ref)
-          .put("obligationId", obligationId(request, 0))
-          .putNull("bindingId");
+      choices.addObject().put("ref", ref).put("safeLabel", "Option " + ++index);
     }
     return reply;
   }
 
-  private ObjectNode envelope(GuidedModelRequest request, String status, String obligationId) {
-    ObjectNode reply =
-        contracts
-            .object()
-            .put("schemaVersion", 3)
-            .put("kind", "NEXT_ACTION")
-            .put("requestId", request.requestId())
-            .put("status", status);
-    if (obligationId == null) {
-      reply.putNull("obligationId");
-    } else {
-      reply.put("obligationId", obligationId);
-    }
-    return reply;
+  private ObjectNode envelope(GuidedModelRequest request, String status) {
+    return contracts
+        .object()
+        .put("schemaVersion", 3)
+        .put("kind", "STEP_CODE")
+        .put("requestId", request.requestId())
+        .put("status", status);
   }
 
   // ---- session lifecycle ----
@@ -415,6 +564,11 @@ final class GroundingItHarness {
    * A claimed, acknowledged, planned session at fence 1, left waiting for its first observation.
    */
   String session(List<Spec> specs) {
+    return session(specs, true);
+  }
+
+  /** A claimed, acknowledged session at fence 1 whose plan and bootstrap have not run yet. */
+  String unplannedSession(List<Spec> specs) {
     this.plan = specs;
     String id =
         service.start(user, UUID.randomUUID().toString(), start()).path("sessionId").asText();
@@ -429,13 +583,20 @@ final class GroundingItHarness {
             .put("leaseExpiresAt", claimed.path("owner").path("leaseExpiresAt").asText());
     receipt.set("assignment", intent);
     service.acknowledgeAssignment(controller, id, receipt);
+    return id;
+  }
+
+  private String session(List<Spec> specs, boolean observing) {
+    String id = unplannedSession(specs);
     translation.plan(controller, id, 1, "plan-" + id, command(id));
     repository.transaction(
         () -> {
           var current = repository.lock(id);
           assertThat(current.document().path("state").asText()).isEqualTo("PROPOSING");
-          current.document().put("state", "OBSERVING");
-          repository.save(current);
+          if (observing) {
+            current.document().put("state", "OBSERVING");
+            repository.save(current);
+          }
           return null;
         });
     return id;
@@ -528,14 +689,22 @@ final class GroundingItHarness {
     return counts;
   }
 
-  /** {@code [intent_path, intent_fields]} of the APPLIED NEXT_ACTION attempts, oldest first. */
-  List<List<String>> intentRows(String id) {
-    return jdbc.query(
-        "SELECT intent_path, intent_fields FROM studio_guided_model_attempts WHERE session_id = ?"
-            + " AND kind = 'NEXT_ACTION' AND status = 'APPLIED' AND intent_path IS NOT NULL"
-            + " ORDER BY created_at",
-        (rs, n) -> List.of(rs.getString(1), rs.getString(2) == null ? "" : rs.getString(2)),
+  /** The STEP_CODE attempts of the session by status, e.g. {@code {APPLIED=1, REJECTED=2}}. */
+  Map<String, Integer> stepCodeAttempts(String id) {
+    Map<String, Integer> counts = new LinkedHashMap<>();
+    jdbc.query(
+        "SELECT status, count(*) FROM studio_guided_model_attempts WHERE session_id = ? AND"
+            + " kind = 'STEP_CODE' GROUP BY status ORDER BY status",
+        rs -> {
+          counts.put(rs.getString(1), rs.getInt(2));
+        },
         id);
+    return counts;
+  }
+
+  /** The reserved obligations of the session (a reservation survives a prepare that passed). */
+  int reservations(String id) {
+    return repository.transaction(() -> store.obligations(id).size());
   }
 
   int actions(String id) {
@@ -633,7 +802,7 @@ final class GroundingItHarness {
             repository,
             contracts,
             productionAccess(access),
-            new GuidedSessionProperties(true, Map.of()),
+            new GuidedSessionProperties(true, limits),
             TestDomains.FIXTURES,
             clock);
     var translationStore = new GuidedTranslationStore(jdbc, contracts);
@@ -667,7 +836,6 @@ final class GroundingItHarness {
                     contracts, new CredentialPatternScreen(), TestDomains.FIXTURES),
                 new GuidedSourceInputResolver(contracts, TestDomains.FIXTURES),
                 translationStore,
-                new GuidedStepVerifier(translationStore),
                 new CsiOwnershipEvaluator(),
                 TestDomains.FIXTURES,
                 Mockito.mock(StudioReferenceResolver.class)));

@@ -122,7 +122,7 @@ public final class GuidedContracts {
   // gained maxOutlineBytes (40,000), maxObservationBytes moved to 524,288, the evidence total to
   // 4,194,304, and maxModelInputTokensTotal default 786,432 -> 1,572,864 (its existing maximum).
   private static final String SESSION_SCHEMA_EPOCH =
-      "26df4ab8ef285ba41721251365859b2a3f10bef2d4b2ba9f2820ffb1179bae83";
+      "338b262de9e4da1de8ac46fe9f35177f9b65a292ca7371982e23c188f4b12c4c";
   // STUDIO-OBS-014 C2a re-epochs replay-validation: ObservedQuestionContext.question $refs
   // clarification.schema.json, which gained labelSource/role/region and two enum values.
   // STUDIO-OBS-009 round 057 re-epochs it again: every accepted-plan obligation gained the required
@@ -140,17 +140,24 @@ public final class GuidedContracts {
   // meanings gain the
   // semantic selection, and the read operation names no recipe.
   // WI6: exact current expanded root gains fact/purpose/ordinal/scope and sealed source metadata.
+  // SC008-E5 (ADR-SC-008) re-epochs it again: the operation is one step record, targets, slots,
+  // recipes, the choice witness and
+  // the guard source authority are gone, obligations gain uses and the plan gains stepSections, the
+  // learning provenance gains the two
+  // pins; session lost its per-step statement ceiling and its capabilities are observe and step;
+  // the ledger lost assertionPassed; the outcome
+  // carries the step receipt and secretUse.
   private static final String REPLAY_VALIDATION_SCHEMA_EPOCH =
-      "b9dd7b4281cb767f715cbe9ef9623bdc99680ddbefb8d53915d89d02868b03aa";
+      "2d23554b2aae35c5bb280cd38a31e1128d05277d33f0d01b5d85dc541a751d2f";
 
   private static final String LEDGER_SCHEMA_EPOCH =
-      "b1a71bd543c51f4eaebd849f99139d077e475caf3ca90efa84a4c9d9d062b80d";
+      "80764187cc60a8ce20840fcfea5588ad400bf4d4ce7ec5f5817398d6b28eea64";
 
   // The only constraint of this frozen root is exactly one COMPLETE native alternative.
   // WI6: prefix-drift receipts include required nullable press metadata and optional sealed source
   // metadata. Pin the complete current root to retain independent native-branch validation.
   private static final String OUTCOME_SCHEMA_EPOCH =
-      "a9a4c23b11f47a2eac7651fb127ba4f67ddcca7035aa4cf9cd50c8995759cc3f";
+      "c05da0f10a7b5c57b1886ffde9a718b9211f56e866c9fdc8e09667d38fcbe35b";
 
   private record ArraySchema(JsonSchema shape, JsonSchema item, CompiledSchema itemObject) {
     ArraySchema(JsonSchema shape, JsonSchema item) {

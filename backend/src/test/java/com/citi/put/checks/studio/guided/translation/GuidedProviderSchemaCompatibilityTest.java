@@ -55,23 +55,10 @@ class GuidedProviderSchemaCompatibilityTest {
     }
   }
 
-  @Test
-  void nextActionContractNamesTheOutlineRefAsTheOnlyNodeTargetAndNoLocator() {
-    // ADR-SC-007: the model copies a ref from the outline; the runner derives the locator.
-    var request =
-        GuidedGatewayPrivacyTest.classifiedRequest(GuidedModelRequest.Kind.NEXT_ACTION, 1);
-    assertThat(request.outputContract())
-        .contains(
-            "{kind:\"node\",ref}",
-            "copy ref exactly from a line of the current outline",
-            "You never write a selector, locator, role expression or code",
-            "A ref that is not shown in the outline is refused")
-        .doesNotContain("locatorHints", "nodeId from the current observation");
-  }
-
   private ObjectNode response(ObjectNode plan) {
     ObjectNode response = plan.deepCopy();
     response.remove("needs");
+    response.putArray("stepSections");
     return response.put("schemaVersion", 3).put("kind", "SOURCE_PLAN").put("requestId", "bounded");
   }
 
@@ -82,15 +69,15 @@ class GuidedProviderSchemaCompatibilityTest {
             {
               "sourceReferences":[{
                 "referenceKind":"sourceSpan","sourceRevision":"1","stepId":"s",
-                "startUtf16":0,"endUtf16":1,"kind":"nonsecretText","intendedSlot":"fill.value"
+                "startUtf16":0,"endUtf16":1,"kind":"nonsecretText"
               }],
               "obligations":[{
-                "stepId":"s","occurrence":0,"operationKind":"fill","targetIntent":"Search","scopeIntent":null,
-                "referenceIndex":0,"needId":null,"predicate":null
+                "stepId":"s","occurrence":0,"targetIntent":"Search","scopeIntent":null,
+                "referenceIndex":0,"needId":null,"uses":[]
               }],
               "needs":[{
                 "needId":"n","producerStepId":"s",
-                "consumers":[{"stepId":"s","argumentSlot":"fill.value"}]
+                "consumers":[{"stepId":"s"}]
               }]
             }
             """);

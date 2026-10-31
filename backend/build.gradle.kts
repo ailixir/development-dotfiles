@@ -123,179 +123,9 @@ tasks.withType<Test>().configureEach {
 }
 
 
-// STUDIO-OBS-015: immutable fixture profiles; both lanes remain normal check obligations.
-val joinedFixtureClass = "com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT"
-val joinedIncrementalMethods = listOf(
-    "incrementalEditFourOfTenUsesRealPrefixFreshBindingThenPublishesAndReplays",
-    "incrementalStructuralEditsAndExplicitRelearningUseTheActualJoinedBrowser"
-)
-val joinedPrefixSyncMethods = setOf(
-    "prefixProducerContextAcknowledgementPrecedesPreparationAndPreservesIssuedRequest",
-    "prefixProducerContextDefiniteRefusalsStopBeforePreparation",
-    "prefixProducerContextUncertainRepliesNeverAdmitOrRedispatch",
-    "prefixProducerContextPostAckRevalidationRejectsChangedAuthorityOrEvidence",
-    "prefixProducerContextConcurrentAdvancePreparesCoordinateOnce"
-)
-// Disclosed low-lane singleton additions (B1A-CB-01 first). The indexed joinedIncrementalMethods
-// list stays closed at its original entries; later low singletons append here only.
-val joinedAddedLowMethods = setOf(
-    "actualIncrementalPrefixWaitRefreshesExactFocusAndPersistentAbsenceStopsAtBoundedDrift",
-    "incrementalPrefixCallbacksKeepStateAndFenceBothReservations",
-    "incrementalPrefixRecoveryUsesNextUnconsumedCoordinate",
-    "incrementalConcurrentAuthenticatedDriftCommitsOneSwitch",
-    "incrementalDriftAuthorityRejectsEveryExactJoin",
-    "incrementalExcludedAttemptCannotHideOtherUnsettledActions",
-    "incrementalPrefixContinuationMatrixDoneRows",
-    "incrementalStepTwoAssertionFailureIsFactualAndNeverRelearned",
-    "incrementalPrefixPolicyRefusalsNeverBecomeDrift",
-    "incrementalPrefixKeepsAnAuthoredEnterUnderTheGuards",
-    "incrementalEmptyPrefixProgramPairSurvivesEveryContextDelivery",
-    "incrementalBoundaryAndEmptyPrefixPlanningFailureKeepEnteredBoundary",
-    "incrementalAppendRetryAndExpiredPreparationKeepExactHistoricalAuthority",
-    "incrementalPlainAndContextCanariesRemainPrivateAcrossMergedPublication",
-    "incrementalOriginalBaseAndSourceAuthorityRejectEveryStoredSubstitution",
-    "incrementalNonemptyOriginalPrefixRetainsBaseProofAfterDriftAtOne",
-    "incrementalFirstSuffixAcceptanceIsOnceAndLaterPairsCannotDisappear",
-    "incrementalPartialDriftStepReadPublishesAndReplaysTwice",
-    "incrementalAdmittedReplacementKeepsItsIdentityAndThePublishedLearnRecordingIsDiscarded"
-)
-val joinedDefaultMethods = setOf(
-    "actualHttpExplicitFullLearnRefreshesStaleDraftIdentityCache",
-    "historicalIncompleteBaseRequiresExplicitFirstStepAndPublishesFullLearnWithoutOldProof",
-    "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues",
-    "queuedAndPreReadyRefusals",
-    "editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness",
-    "asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays",
-    "modelAndSourceQuestionTimeDoNotConsumePassiveBrowserAllowance",
-    "absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork",
-    "observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays",
-    "originalQuestionDriftAndSqlCaptureRefusalRollbackAndCommitUsageWithoutAnotherCall",
-    "actualIncrementalSecretPrefixRecapturesRotatedValueWithScopedAuditAndOrdinaryReplay",
-    "actualSecretLoginPublishesValueFreeAndTwoOrdinaryRunsResolveFreshWithoutModel",
-    "guidedRecorderFaultSettlesUnavailableAndTheSessionStillFinishes",
-    "actualCoreGuidedSameSecretIdStaysWithinPersistedScope",
-    "actualCoreOrdinarySameSecretIdStaysWithinAcceptedScope",
-    "actualGuidedReportsWithoutLoginStepsAnnotatesExistingFailure",
-    "actualGuidedWrongPasswordAnnotatesEarlierSecretDispatch",
-    "actualGuidedRegistrationPassingAssertRemainsPassed",
-    "actualPublishedReportsWithoutLoginStepsAnnotatesExpiredProtection",
-    "actualPublishedWrongPasswordAnnotatesEarlierSecretFill",
-    "actualPublishedRegistrationPassingAssertRemainsPassed",
-    "syntheticSinkScannerDetectsIndependentNonAsciiEncodedControls",
-    "actualGuidedZeroPasswordControlsRejectsScopedSecretProposalBeforeRead",
-    "actualGuidedTwoPasswordControlsRejectsScopedSecretProposalBeforeRead",
-    "actualPublishedZeroPasswordControlsRefusesNativeFillAfterFreshResolution",
-    "actualPublishedTwoPasswordControlsRefusesNativeFillAfterFreshResolution",
-    "actualCommittedSecretProgressSurvivesOwnedChildAndParentCrashThenRunningReaper",
-    "actualPublishedNativePasswordStepDeadlinePreservesUnknownEffect",
-    "actualPublishedPublicCancelWhileNativePasswordWorldPending",
-    "actualGuidedOwnedPrimaryBrowserLossWhileNativePasswordWorldPending",
-    "actualGuidedReleasedValueInjectedFailureRedactsProducedSinks",
-    "actualOrdinaryOwnedCompiledChildLossWhileSolePasswordPrimitivePending",
-    "actualPoolDefiniteRefusalThenFreshSecretAttemptResolvesRotatedValue",
-    "actualScopedVaultOutageThenFreshSecretAttemptResolvesRotatedValue",
-    "actualSecretControlWindowLossBeforeReadyReachesTerminalError",
-    "actualCoreGuidedHasValuePasswordRequestRefusesBeforeRead",
-    "actualCorePublishedHasValuePasswordRequestAndReusedTextCanaryAssertion",
-    "incrementalSecretPrefixPreservesEveryVaultFaultOracle",
-    "incrementalSecretVersionOneUsageSurvivesSuffixVersionTwoAck",
-    "auditStreamCarriesIdsAndCodesOnlyAcrossTheWholeClass"
-)
-val joinedIncrementalLabels = listOf(
-    "insert4",
-    "delete4",
-    "reorder4",
-    "config",
-    "tail1",
-    "tail7",
-    "append11",
-    "ready6",
-    "empty",
-    "drift2",
-    "admitted-drift2",
-    "unknown2",
-    "assert-fail",
-    "append-input",
-    "deleted-consumers",
-    "admitted-literal2",
-    "pre-literal2",
-    "same-pair-literal",
-    "unused-declaration",
-    "drift-plan-fail",
-    "drift-first",
-    "drift-auth",
-    "drift-auth-pre",
-    "before4at2",
-    "equal4"
-)
-val guidedLaneStarts = ConcurrentHashMap<String, Long>()
-val guidedLaneRuns = ConcurrentHashMap<String, String>()
-val guidedLaneCases = ConcurrentHashMap<String, AtomicInteger>()
-
-fun configureJoinedFixtureLane(task: Test, profile: String) {
-    task.systemProperty("studio.join.fixture.profile", profile)
-    task.outputs.upToDateWhen { false } // Fresh execution data, never historical partition coverage.
-    task.extensions.configure<org.gradle.testing.jacoco.plugins.JacocoTaskExtension> {
-        destinationFile = layout.buildDirectory.file("jacoco/${task.name}.exec").get().asFile
-    }
-    task.doFirst {
-        val run = UUID.randomUUID().toString()
-        guidedLaneRuns[task.name] = run
-        guidedLaneStarts[task.name] = System.currentTimeMillis()
-        guidedLaneCases[task.name] = AtomicInteger()
-        task.systemProperty("studio.join.fixture.run-id", run)
-        val data = layout.buildDirectory.file("jacoco/${task.name}.exec").get().asFile
-        if (data.exists() && !data.delete()) throw GradleException("Cannot replace stale ${task.name} coverage")
-        check(!data.exists()) { "Stale ${task.name} coverage remains" }
-    }
-    task.addTestListener(object : org.gradle.api.tasks.testing.TestListener {
-        override fun beforeSuite(suite: org.gradle.api.tasks.testing.TestDescriptor) {}
-        override fun afterSuite(suite: org.gradle.api.tasks.testing.TestDescriptor, result: org.gradle.api.tasks.testing.TestResult) {}
-        override fun beforeTest(test: org.gradle.api.tasks.testing.TestDescriptor) {}
-        override fun afterTest(test: org.gradle.api.tasks.testing.TestDescriptor, result: org.gradle.api.tasks.testing.TestResult) {
-            if (test.className == joinedFixtureClass) guidedLaneCases[task.name]?.incrementAndGet()
-        }
-    })
-}
-
-val guidedIncrementalTest = tasks.register<Test>("guidedIncrementalTest") {
-    description = "Observed incremental joined browser cases in the immutable supported 2048 fixture JVM."
-    group = "verification"
-    testClassesDirs = sourceSets["test"].output.classesDirs
-    classpath = sourceSets["test"].runtimeClasspath
-    setIncludes(listOf("**/GuidedPublicationReplayIT.class"))
-    setExcludes(emptyList<String>())
-    filter { setIncludePatterns(*(joinedIncrementalMethods + joinedPrefixSyncMethods + joinedAddedLowMethods).map { "$joinedFixtureClass.$it" }.toTypedArray()) }
-    forkEvery = 1
-    mustRunAfter(tasks.test, "crossReplicaTest", "retainOriginalGuidedCohort")
-    configureJoinedFixtureLane(this, "incremental2048")
-}
-tasks.test {
-    (joinedIncrementalMethods + joinedPrefixSyncMethods + joinedAddedLowMethods).forEach { method -> filter.excludeTestsMatching("$joinedFixtureClass.$method") }
-    configureJoinedFixtureLane(this, "original4000")
-}
-
-// WI6 joined additions own static TLS/Core/browser fixtures; each class gets its own JVM.
-// They remain full check obligations and never join the immutable original40/incremental50 lanes.
-val testWi6Joined = tasks.register<Test>("testWi6Joined") {
-    description = "WI6 native/child and guard/source continuity joined proofs in isolated fixture JVMs."
-    group = "verification"
-    testClassesDirs = sourceSets["test"].output.classesDirs
-    classpath = sourceSets["test"].runtimeClasspath
-    setIncludes(listOf("**/GuidedNativeChildContextJoinedIT.class", "**/GuidedGuardContinuityJoinedIT.class"))
-    setExcludes(emptyList<String>())
-    forkEvery = 1
-    maxParallelForks = 1
-    outputs.upToDateWhen { false }
-    mustRunAfter(tasks.test, guidedIncrementalTest, "crossReplicaTest")
-}
-tasks.test {
-    exclude("**/GuidedNativeChildContextJoinedIT.class", "**/GuidedGuardContinuityJoinedIT.class")
-}
-
 // STUDIO-OBS-009 AC-12 i / T0 ruling A14: the guided ITs spawn whatever studio-runner/dist exists, so the
 // dependency is explicit. This task never builds the runner. It fails when dist/main.js is missing or older
-// than any file under studio-runner/src, and `test` and `guidedIncrementalTest` depend on it. A focused
+// than any file under studio-runner/src, and `test` depends on it. A focused
 // `--tests` run that selects no guided IT (no wildcard, no class named below) skips it, so unit runs of other
 // classes are not held up by the runner build. Which dist a run spawned is recorded by the collectors
 // (dist.digest before and after) and by RunnerProcessHarness.distDigest(); QA credits a guided IT run only
@@ -304,8 +134,6 @@ val runnerSpawningTestClasses = listOf(
     "GuidedBridgeIntegrationTest",
     "GuidedBridgePlannedIT",
     "GuidedPlanningIntegrationTest",
-    "GuidedPublicationReplayIT",
-    "GuidedFocusMutationJoinedIT",
     "GuidedLoginJourneyJoinedIT",
     "GuidedAuthoredEchoJoinedIT",
     "ObservedCoRunIT",
@@ -339,72 +167,6 @@ val verifyRunnerDist = tasks.register("verifyRunnerDist") {
     }
 }
 tasks.test { dependsOn(verifyRunnerDist) }
-guidedIncrementalTest { dependsOn(verifyRunnerDist) }
-testWi6Joined { dependsOn(verifyRunnerDist) }
-
-fun registerGuidedCohortRetention(taskName: String, finalizerName: String) = tasks.register(finalizerName) {
-    group = "verification"
-    mustRunAfter(taskName)
-    doLast {
-        val run = guidedLaneRuns[taskName] ?: throw GradleException("Missing actual $taskName run identity")
-        val started = guidedLaneStarts[taskName] ?: throw GradleException("Missing actual $taskName start")
-        val count = guidedLaneCases[taskName]?.get() ?: 0
-        val folder = layout.buildDirectory.dir("guided-cohorts/$taskName/$run").get().asFile
-        val manifests = fileTree(folder) { include("*/cohort.json") }.files
-        if (count == 0) {
-            check(manifests.isEmpty()) { "Ambiguous unexecuted JOIN cohort for $taskName" }
-        } else {
-            check(manifests.size == 1) { "Missing/ambiguous real $taskName JOIN lifecycle export; original failure retained" }
-            val manifest = manifests.single()
-            check(manifest.lastModified() >= started) { "Stale $taskName JOIN export" }
-            val guard = manifest.parentFile.resolve("guard-tally.json")
-            check(guard.isFile && guard.lastModified() >= started) { "Missing/stale real $taskName guard snapshot" }
-            val value = groovy.json.JsonSlurper().parse(manifest) as Map<*, *>
-            check(value["runId"] == run && value["lane"] == taskName) { "Crossed $taskName cohort" }
-            val canonical = layout.buildDirectory.file("guard-tally/GuidedPublicationReplayIT.json").get().asFile
-            check(canonical.isFile && canonical.readBytes().contentEquals(guard.readBytes())) {
-                "Canonical guard tally changed before ordered $taskName retention"
-            }
-        }
-    }
-}
-val retainOriginalGuidedCohort = registerGuidedCohortRetention("test", "retainOriginalGuidedCohort")
-val retainIncrementalGuidedCohort = registerGuidedCohortRetention("guidedIncrementalTest", "retainIncrementalGuidedCohort")
-tasks.test { finalizedBy(retainOriginalGuidedCohort) }
-guidedIncrementalTest { finalizedBy(retainIncrementalGuidedCohort) }
-
-val requireFreshGuidedPartitions = tasks.register("requireFreshGuidedPartitions") {
-    group = "verification"
-    dependsOn(tasks.test, guidedIncrementalTest, retainOriginalGuidedCohort, retainIncrementalGuidedCohort)
-    doLast {
-        for (lane in listOf("test", "guidedIncrementalTest")) {
-            val started = guidedLaneStarts[lane] ?: throw GradleException("Missing fresh $lane execution")
-            val exec = layout.buildDirectory.file("jacoco/$lane.exec").get().asFile
-            check(exec.isFile && exec.length() > 0 && exec.lastModified() >= started) { "Missing/stale $lane exec" }
-            val run = guidedLaneRuns[lane] ?: throw GradleException("Missing $lane run")
-            val manifests = fileTree(layout.buildDirectory.dir("guided-cohorts/$lane/$run").get().asFile) { include("*/cohort.json") }.files
-            check(manifests.size == 1) { "Missing/ambiguous complete $lane cohort" }
-            val data = groovy.json.JsonSlurper().parse(manifests.single()) as Map<*, *>
-            check(data["auditComplete"] == true && data["privacyComplete"] == true && data["producersDrained"] == true &&
-                data["modelEvidenceComplete"] == true && data["budgetEvidenceComplete"] == true && data["responseEvidenceComplete"] == true) {
-                "Incomplete final $lane audit/privacy/producer proof"
-            }
-            val invocations = data["invocations"] as List<*>
-            val identities = invocations.map { item ->
-                val row = item as Map<*, *>
-                check(row["passed"] == true && row["afterEachComplete"] == true) { "Failed/partial $lane invocation" }
-                val method = row["method"] as String
-                val label = row["variant"] as String
-                if (label == "singleton") method else "$method:$label"
-            }
-            val expected = if (lane == "test") joinedDefaultMethods else
-                setOf(joinedIncrementalMethods[0]) + joinedPrefixSyncMethods + joinedAddedLowMethods +
-                    joinedIncrementalLabels.map { "${joinedIncrementalMethods[1]}:$it" }
-            check(identities.size == expected.size && identities.toSet() == expected) { "JOIN partition omission/duplicate in $lane" }
-            check(guidedLaneCases[lane]?.get() == expected.size) { "JOIN XML/test event multiplicity mismatch in $lane" }
-        }
-    }
-}
 
 spotless {
     java {
@@ -428,8 +190,6 @@ tasks.withType<Checkstyle>().configureEach {
         html.required.set(true)
         xml.required.set(false)
     }
-    // The default worker heap (512m) is exhausted on the 34k-line GuidedPublicationReplayIT
-    // (OutOfMemoryError surfaced as "Error was thrown while processing <file>").
     maxHeapSize.set("2g")
 }
 
@@ -455,8 +215,8 @@ val jacocoExcludes = listOf(
 )
 
 tasks.jacocoTestReport {
-    dependsOn(requireFreshGuidedPartitions, testWi6Joined)
-    executionData.setFrom(layout.buildDirectory.file("jacoco/test.exec"), layout.buildDirectory.file("jacoco/guidedIncrementalTest.exec"), layout.buildDirectory.file("jacoco/testWi6Joined.exec"))
+    dependsOn(tasks.test)
+    executionData.setFrom(layout.buildDirectory.file("jacoco/test.exec"))
     reports {
         html.required.set(true)
         xml.required.set(true)
@@ -469,8 +229,8 @@ tasks.jacocoTestReport {
 }
 
 tasks.jacocoTestCoverageVerification {
-    dependsOn(tasks.jacocoTestReport, requireFreshGuidedPartitions)
-    executionData.setFrom(layout.buildDirectory.file("jacoco/test.exec"), layout.buildDirectory.file("jacoco/guidedIncrementalTest.exec"), layout.buildDirectory.file("jacoco/testWi6Joined.exec"))
+    dependsOn(tasks.jacocoTestReport)
+    executionData.setFrom(layout.buildDirectory.file("jacoco/test.exec"))
     classDirectories.setFrom(tasks.jacocoTestReport.get().classDirectories)
     violationRules {
         rule {
@@ -582,7 +342,7 @@ tasks.register("antiRegressionCheck") {
 }
 
 tasks.check {
-    dependsOn(tasks.test, guidedIncrementalTest, testWi6Joined)
+    dependsOn(tasks.test)
     dependsOn("crossReplicaTest")
     dependsOn(tasks.jacocoTestCoverageVerification)
     dependsOn("rdsParityLint")

@@ -162,7 +162,12 @@ public final class GuidedPublicationResultProjector {
                       ? "CONFIG_CHANGED"
                       : !replay.enabled()
                           ? "REPLAY_DISABLED"
-                          : readiness.evaluate(testId).ready() ? "READY" : "RUNTIME_INCOMPATIBLE";
+                          // Recorded, not yet confirmed by its proof (ADR-SC-008 D5): not ready.
+                          : revisionId.equals(readiness.pointers(testId).candidate())
+                              ? "NOT_PUBLISHED"
+                              : readiness.evaluate(testId).ready()
+                                  ? "READY"
+                                  : "RUNTIME_INCOMPATIBLE";
       ready
           .put("revisionId", revisionId.toString())
           .put("ready", code.equals("READY"))

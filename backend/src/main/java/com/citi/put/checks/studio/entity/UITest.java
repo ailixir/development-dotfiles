@@ -102,8 +102,13 @@ public class UITest {
   @Column(name = "configuration_revision", nullable = false)
   private long configurationRevision = 1L;
 
-  @Column(name = "confirmed_revision_id")
+  // The two pointers move only through SQL (finalize, promotion): an entity flush must never
+  // rewrite them from a stale snapshot (SC008-E12).
+  @Column(name = "confirmed_revision_id", updatable = false)
   private UUID confirmedRevisionId;
+
+  @Column(name = "candidate_revision_id", updatable = false)
+  private UUID candidateRevisionId;
 
   protected UITest() {}
 
@@ -323,5 +328,10 @@ public class UITest {
 
   public void setConfirmedRevisionId(UUID confirmedRevisionId) {
     this.confirmedRevisionId = confirmedRevisionId;
+  }
+
+  /** The recorded revision awaiting its proof, or {@code null}. */
+  public UUID getCandidateRevisionId() {
+    return candidateRevisionId;
   }
 }

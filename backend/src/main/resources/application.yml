@@ -246,7 +246,7 @@ studio:
       # (call-seconds, default 60). A send that receives no response headers within the cap is
       # abandoned as a TRANSPORT_STALL and retried as a new charged attempt.
       # Start-up refuses call-seconds below send-timeout-seconds + 10, so raise both together.
-      send-timeout-seconds: ${STUDIO_GUIDED_SEND_TIMEOUT_SECONDS:50}
+      send-timeout-seconds: ${STUDIO_GUIDED_SEND_TIMEOUT_SECONDS:20}
     # STUDIO-OBS-014 AC-3 (ruling AR-2 b): sanitized observations, model output and the publication
     # copies of never-published sessions are pruned this long after a terminal session's expiry.
     # Same default as studio.execution.evidence-retention, so video and observations age out

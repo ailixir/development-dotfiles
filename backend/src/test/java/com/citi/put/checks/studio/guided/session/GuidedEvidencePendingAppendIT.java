@@ -674,13 +674,7 @@ class GuidedEvidencePendingAppendIT {
           Map.of(
               "ref-PASS",
               new GuidedSourceReferenceValidator.ConfigurationValue(
-                  null,
-                  stepId,
-                  "secretRef",
-                  "fill.value",
-                  session.path("scopeHash").asText(),
-                  false,
-                  "PASS")));
+                  null, stepId, "secretRef", session.path("scopeHash").asText(), false, "PASS")));
     }
   }
 }

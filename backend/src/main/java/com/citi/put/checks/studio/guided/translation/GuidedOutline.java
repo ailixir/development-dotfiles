@@ -92,7 +92,7 @@ public final class GuidedOutline {
     Set<String> keys = new LinkedHashSet<>();
     facts.fieldNames().forEachRemaining(keys::add);
     require(shown.equals(keys), "INVALID_CONTRACT", 422);
-    GuidedGates.requireCoherentOrdinals(facts);
+    GuidedObservationFacts.requireCoherentOrdinals(facts);
     var seen = new java.util.HashSet<String>();
     var positions = new java.util.HashMap<List<String>, Integer>();
     for (Line line : parse(outline.asText())) {

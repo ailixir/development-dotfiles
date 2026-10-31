@@ -24,7 +24,7 @@ class StudioActionAuditTest {
 
   private static final ObjectMapper JSON = new ObjectMapper();
   private static final String SCOPE_HASH = "a".repeat(64);
-  private static final String LABEL_CANARY = "Delete account canary-label-7731";
+  private static final String CODE_CANARY = "await page.getByText('canary-label-7731').click();";
   private static final String ORIGIN = "https://app.example.test";
 
   private final ListAppender<ILoggingEvent> captured = new ListAppender<>();
@@ -46,9 +46,8 @@ class StudioActionAuditTest {
   }
 
   @Test
-  void anAdmittedActionCarriesTheClosedKeySetAndNoLabelText() {
-    StudioActionAudit.guidedActionAdmitted(
-        session(), "admission-1", proposal(ORIGIN), identity("button"));
+  void anAdmittedStepCarriesTheClosedKeySetAndNeitherCodeNorTarget() {
+    StudioActionAudit.guidedActionAdmitted(session(), "admission-1", proposal(ORIGIN));
 
     Map<String, Object> event = only();
     assertThat(event.keySet()).containsExactlyElementsOf(StudioActionAudit.KEYS);
@@ -63,35 +62,33 @@ class StudioActionAuditTest {
         .containsEntry("admissionId", "admission-1")
         .containsEntry("attemptId", null)
         .containsEntry("origin", ORIGIN)
-        .containsEntry("obligationKind", "click")
-        .containsEntry("targetRole", "button")
-        .containsEntry("targetLabelHash", StudioActionAudit.labelHash(SCOPE_HASH, LABEL_CANARY))
+        .containsEntry("obligationKind", "step")
+        .containsEntry("targetRole", "none")
+        .containsEntry("targetLabelHash", null)
         .containsEntry("outcome", "ADMITTED")
         .containsEntry("reasonCode", null);
-    assertThat(String.valueOf(event.get("targetLabelHash"))).matches("[a-f0-9]{32}");
-    assertThat(rendered()).doesNotContain("canary-label-7731").doesNotContain("Delete account");
+    assertThat(rendered()).doesNotContain("canary-label-7731").doesNotContain("getByText");
     assertThat(captured.list.getFirst().getFormattedMessage()).isEqualTo("GUIDED_ACTION_ADMITTED");
   }
 
   @Test
-  void aNonOriginValueAndAnUnknownRoleAreNeverEchoed() {
+  void aNonOriginValueIsNeverEchoed() {
     StudioActionAudit.guidedActionRefused(
         session(),
         "attempt-1",
         proposal("https://evil.example.test/path?q=secret"),
-        identity("x-custom-role"),
         "DESTRUCTIVE_VERB");
 
     Map<String, Object> event = only();
     assertThat(event)
         .containsEntry("eventType", "GUIDED_ACTION_REFUSED")
         .containsEntry("origin", "UNAPPROVED")
-        .containsEntry("targetRole", "none")
+        .containsEntry("obligationKind", "step")
         .containsEntry("attemptId", "attempt-1")
         .containsEntry("admissionId", null)
         .containsEntry("outcome", "REFUSED")
         .containsEntry("reasonCode", "DESTRUCTIVE_VERB");
-    assertThat(rendered()).doesNotContain("evil.example").doesNotContain("x-custom-role");
+    assertThat(rendered()).doesNotContain("evil.example");
   }
 
   @Test
@@ -120,8 +117,7 @@ class StudioActionAuditTest {
   @Test
   void insideATransactionTheEventWaitsForTheCommitAndARollbackEmitsNothing() {
     TransactionSynchronizationManager.initSynchronization();
-    StudioActionAudit.guidedActionAdmitted(
-        session(), "admission-1", proposal(ORIGIN), identity("button"));
+    StudioActionAudit.guidedActionAdmitted(session(), "admission-1", proposal(ORIGIN));
     assertThat(captured.list).as("nothing before commit").isEmpty();
     List<TransactionSynchronization> pending =
         TransactionSynchronizationManager.getSynchronizations();
@@ -138,7 +134,7 @@ class StudioActionAuditTest {
   void aRefusalIsAuditedAtTheDecisionEvenInsideATransactionThatWillRollBack() {
     TransactionSynchronizationManager.initSynchronization();
     StudioActionAudit.guidedActionRefused(
-        session(), "attempt-1", proposal(ORIGIN), identity("button"), "UNGROUNDED_TARGET");
+        session(), "attempt-1", proposal(ORIGIN), "UNGROUNDED_TARGET");
     assertThat(captured.list).hasSize(1);
     assertThat(TransactionSynchronizationManager.getSynchronizations()).isEmpty();
   }
@@ -186,19 +182,11 @@ class StudioActionAuditTest {
 
   private static JsonNode proposal(String origin) {
     ObjectNode proposal = JSON.createObjectNode();
-    proposal.putObject("operation").put("kind", "click");
-    proposal
-        .putObject("target")
-        .put("kind", "node")
-        .put("ref", "e1")
-        .put("documentId", "document-1")
-        .put("generation", 1);
+    ObjectNode operation = proposal.putObject("operation").put("kind", "step");
+    operation.put("code", CODE_CANARY);
+    operation.putArray("captures");
+    operation.putArray("uses");
     proposal.putObject("executionEvidence").put("origin", origin);
     return proposal;
-  }
-
-  /** ADR-SC-007: the audit takes role and label from the identity of the element, not a locator. */
-  private static JsonNode identity(String role) {
-    return JSON.createObjectNode().put("role", role).put("name", LABEL_CANARY);
   }
 }

@@ -47,6 +47,21 @@ class GuidedReplayingPrefixMigrationIT {
   static void migrate() {
     PG.start();
     flyway(PG.getJdbcUrl(), null).migrate();
+    // The hand-written preparation proofs below are minimal; the closed-key shape of a proof is
+    // covered by GuidedStepKindMigrationIT, so only that one check is dropped here.
+    try (var c =
+            java.sql.DriverManager.getConnection(
+                PG.getJdbcUrl(), PG.getUsername(), PG.getPassword());
+        var statement = c.createStatement()) {
+      statement.execute(
+          "ALTER TABLE studio_guided_preparations DROP CONSTRAINT IF EXISTS"
+              + " ck_wi6_preparation_metadata");
+      statement.execute(
+          "ALTER TABLE studio_guided_publication_preparations DROP CONSTRAINT IF EXISTS"
+              + " ck_publication_preparation_shape");
+    } catch (java.sql.SQLException failure) {
+      throw new IllegalStateException(failure);
+    }
   }
 
   @AfterAll
@@ -346,8 +361,7 @@ class GuidedReplayingPrefixMigrationIT {
           .put("inputId", "input0")
           .put("sourceStepId", STEP1)
           .put("kind", "nonsecretText")
-          .put("value", "private-015")
-          .put("intendedSlot", "fill.value");
+          .put("value", "private-015");
       input
           .putObject("provenance")
           .put("referenceKind", "sourceSpan")
@@ -956,14 +970,17 @@ class GuidedReplayingPrefixMigrationIT {
   void freshV1ToV21HasExpectedHeadDescriptionAndNoPendingMigrations() throws Exception {
     assertThat(flyway(PG.getJdbcUrl(), null).info().pending()).isEmpty();
     try (Connection c = connect()) {
-      assertThat(scalar(c, "SELECT max(version::int) FROM flyway_schema_history")).isEqualTo("29");
+      assertThat(
+              scalar(
+                  c, "SELECT count(*) FROM flyway_schema_history WHERE version='33' AND success"))
+          .isEqualTo("1");
       assertThat(scalar(c, "SELECT description FROM flyway_schema_history WHERE version='21'"))
           .isEqualTo("guided session replaying prefix");
       assertThat(
               scalar(
                   c,
-                  "SELECT count(*) FROM flyway_schema_history WHERE success AND version IS NOT NULL"))
-          .isEqualTo("29");
+                  "SELECT count(*) FROM flyway_schema_history WHERE success AND version::int <= 33"))
+          .isEqualTo("33");
     }
   }
 
@@ -1031,12 +1048,14 @@ class GuidedReplayingPrefixMigrationIT {
             assertThat(
                     scalar(
                         c,
-                        "SELECT to_jsonb(existing_row)::text FROM "
+                        "SELECT (to_jsonb(existing_row) @> "
+                            + q(before.get(entry.getKey()))
+                            + "::jsonb)::text FROM "
                             + entry.getKey()
                             + " existing_row WHERE "
                             + entry.getValue()))
                 .as("V20->V21 preserves all existing columns in %s", entry.getKey())
-                .isEqualTo(before.get(entry.getKey()));
+                .isEqualTo("true");
           }
           assertThat(
                   scalar(
@@ -1054,10 +1073,13 @@ class GuidedReplayingPrefixMigrationIT {
           assertThat(
                   scalar(
                       c,
-                      "SELECT jsonb_agg(to_jsonb(a)-'attempt_ordinal' ORDER BY admission_id)::text FROM "
+                      "SELECT (jsonb_agg(to_jsonb(a)-'attempt_ordinal'-'receipt' ORDER BY admission_id)"
+                          + " = "
+                          + q(oldActions)
+                          + "::jsonb)::text FROM "
                           + "studio_guided_actions a"
                           + f.where()))
-              .isEqualTo(oldActions);
+              .isEqualTo("true");
           assertThat(
                   scalar(
                       c,
@@ -1913,7 +1935,7 @@ class GuidedReplayingPrefixMigrationIT {
               "{\"referenceKind\":\"configuration\",\"referenceId\":\"cfg-secret\","
                   + "\"referenceName\":\"LOGIN_PASSWORD\",\"stepId\":\""
                   + STEP1
-                  + "\",\"kind\":\"secretRef\",\"intendedSlot\":\"fill.value\",\"configurationRevision\":\"1\"}"));
+                  + "\",\"kind\":\"secretRef\",\"configurationRevision\":\"1\"}"));
       // Seed historical pre-action prerequisites; current installed functions are asserted
       // against complete joined facts under origin, never a current-head version alias.
       exec(f.c, "SET LOCAL session_replication_role='replica'");
@@ -1941,8 +1963,7 @@ class GuidedReplayingPrefixMigrationIT {
           .put("referenceId", "cfg-secret")
           .put("referenceName", "LOGIN_PASSWORD")
           .put("kind", "secretRef")
-          .put("stepId", STEP1)
-          .put("intendedSlot", "fill.value");
+          .put("stepId", STEP1);
       exec(
           f.c,
           "UPDATE studio_guided_source_manifests SET manifest="
@@ -1955,7 +1976,11 @@ class GuidedReplayingPrefixMigrationIT {
       p.set(
           "operation",
           obj(
-              "{\"kind\":\"fill\",\"value\":{\"kind\":\"secretRef\",\"sourceInputId\":\"input0\"}}"));
+              "{\"kind\":\"step\",\"code\":\"await page.getByLabel('Password').fill(secrets['LOGIN_PASSWORD']);\","
+                  + "\"captures\":[],\"uses\":[{\"kind\":\"secret\",\"id\":\"LOGIN_PASSWORD\"}],"
+                  + "\"sourceHash\":\""
+                  + "a".repeat(64)
+                  + "\"}"));
       String admission = f.id + "-secret";
       exec(f.c, f.preparation(admission + "-prep", p, false));
       exec(f.c, f.actionSql(f.action(admission, STEP1, 0, 0, "SUCCEEDED", p), p));
@@ -1997,7 +2022,7 @@ class GuidedReplayingPrefixMigrationIT {
                       + q(H)
                       + ","
                       + q(admission)
-                      + ")"))
+                      + ",'LOGIN_PASSWORD')"))
           .isEqualTo("cfg-secret");
       assertThat(
               scalar(

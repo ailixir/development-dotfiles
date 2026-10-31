@@ -41,36 +41,29 @@ public final class ObservedRevisionVerifier {
         artifact, resolved, new com.fasterxml.jackson.databind.ObjectMapper().createArrayNode());
   }
 
+  /** Secrets shorter than this are not looked for in code: they would match almost any step. */
+  static final int MIN_SCANNED_SECRET_LENGTH = 8;
+
   public void assertResolvedSecretLiterals(
       JsonNode artifact,
       com.citi.put.checks.studio.dispatch.StudioReferenceResolver.Resolved resolved,
       JsonNode inputs) {
-    var secrets = resolved.secretValues();
+    var secrets = resolved.secretValues().values();
     for (JsonNode step : artifact.path("steps")) {
       for (JsonNode action : step.path("operations")) {
-        JsonNode operation = action.path("operation");
-        if (operation.path("kind").asText().equals("fill")) {
-          JsonNode value = operation.path("value");
-          if (value.path("kind").asText().equals("authoredLiteral")) {
-            for (JsonNode input : inputs) {
-              if (input.path("inputId").equals(value.path("sourceInputId"))) {
-                require(
-                    secrets.values().stream()
-                        .noneMatch(secret -> secret.matches(input.path("value").asText())),
-                    "REFERENCE_MISMATCH",
-                    422);
-              }
-            }
-          }
-          if (value.isTextual() || value.path("kind").asText().equals("literal")) {
-            String literal = value.isTextual() ? value.textValue() : value.path("value").asText();
-            require(
-                secrets.values().stream().noneMatch(secret -> secret.matches(literal)),
-                "REFERENCE_MISMATCH",
-                422);
-          }
+        String code = action.path("operation").path("code").asText();
+        for (var secret : secrets) {
+          require(
+              secret.length() < MIN_SCANNED_SECRET_LENGTH || !secret.occursIn(code),
+              "REFERENCE_MISMATCH",
+              422);
         }
       }
+    }
+    for (JsonNode input : inputs) {
+      String value = input.path("value").asText();
+      require(
+          secrets.stream().noneMatch(secret -> secret.matches(value)), "REFERENCE_MISMATCH", 422);
     }
   }
 
@@ -115,10 +108,13 @@ public final class ObservedRevisionVerifier {
         policy = contracts.parse((String) row.get("policy")),
         configuration = contracts.parse((String) row.get("configuration")),
         provenance = contracts.parse((String) row.get("provenance"));
+    // The pin first: a revision learned under an older contract is a closed RUNTIME_INCOMPATIBLE,
+    // not a schema error.
+    pins.supported(artifact.path("profile"), null);
     contracts.validate("v3/replay-artifact", artifact);
     contracts.validate("v3/replay-policy", policy);
     contracts.validate("v3/replay-profile#/definitions/Configuration", configuration);
-    pins.supported(artifact.path("profile"), null);
+    requireFrozenSteps(artifact, policy);
     require(
         GuidedContracts.hash(artifact).equals(row.get("artifact_hash"))
             && GuidedContracts.hash(configuration)
@@ -252,8 +248,7 @@ public final class ObservedRevisionVerifier {
         require(
             operation.path("coordinate").equals(original.path("coordinate"))
                 && operation.path("operation").equals(original.path("operation"))
-                && guard.path("origin").equals(original.path("origin"))
-                && guardTargetsAction(guard.path("target"), original.path("target")),
+                && guard.path("origin").equals(original.path("origin")),
             "OPERATION_MISMATCH",
             409);
         operations.add(operation);
@@ -321,16 +316,42 @@ public final class ObservedRevisionVerifier {
   }
 
   /**
-   * ADR-SC-007 D3: the Guard's element target is the very ResolvedTarget the learned action carries
-   * (locator, tier, identity); an action without a target has no element Guard.
+   * ADR-SC-008 D2: every stored step is a well-formed record whose sourceHash is the hash of its
+   * code, and what it captures and uses is declared by the revision. Nothing downstream (job,
+   * secret resolution, runner) is reached when a stored byte of code differs.
    */
-  private static boolean guardTargetsAction(JsonNode guardTarget, JsonNode actionTarget) {
-    if (!actionTarget.isObject()) {
-      return !guardTarget.path("kind").asText().equals("element");
+  static void requireFrozenSteps(JsonNode artifact, JsonNode policy) {
+    var bindings = new java.util.HashSet<String>();
+    policy.path("bindings").forEach(binding -> bindings.add(binding.path("bindingId").asText()));
+    var declared = new java.util.HashSet<String>();
+    for (JsonNode recipe : artifact.path("inputRecipes")) {
+      declared.add(GuidedPlanBuilder.useKey(text(recipe, "stepId"), recipe));
     }
-    return guardTarget.path("kind").asText().equals("element")
-        && guardTarget.path("locator").equals(actionTarget.path("locator"))
-        && guardTarget.path("tier").equals(actionTarget.path("tier"))
-        && guardTarget.path("identity").equals(actionTarget.path("identity"));
+    for (JsonNode step : artifact.path("steps")) {
+      String stepId = text(step, "stepId");
+      // E5 review condition: contracts/v3 admits up to 8 operation records per step, a step is one.
+      require(
+          step.path("operations").size() == 1
+              && step.path("operations").get(0).path("coordinate").path("ordinal").asInt(-1) == 0,
+          "EVIDENCE_MISMATCH",
+          409);
+      for (JsonNode action : step.path("operations")) {
+        JsonNode operation = action.path("operation");
+        GuidedStepRecord.check(operation, 409);
+        for (JsonNode captured : operation.path("captures")) {
+          require(bindings.contains(captured.asText()), "EVIDENCE_MISMATCH", 409);
+        }
+        for (JsonNode use : operation.path("uses")) {
+          String id = text(use, "id");
+          require(
+              use.path("kind").asText().equals("binding")
+                  ? bindings.contains(id)
+                  : declared.contains(
+                      use.path("kind").asText() + "\u0000" + stepId + "\u0000" + id),
+              "EVIDENCE_MISMATCH",
+              409);
+        }
+      }
+    }
   }
 }

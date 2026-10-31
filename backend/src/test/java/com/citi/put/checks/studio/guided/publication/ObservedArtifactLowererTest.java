@@ -4,7 +4,6 @@ import static com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTes
 import static com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.array;
 import static com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.at;
 import static com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.canonical;
-import static com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.choiceFixture;
 import static com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.copy;
 import static com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.fixture;
 import static com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.hash;
@@ -16,7 +15,6 @@ import com.citi.put.checks.studio.dispatch.DispatchAuthorization;
 import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.guided.session.GuidedSessionException;
-import com.citi.put.checks.studio.guided.translation.GuidedRefusalDiagnostics;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.charset.StandardCharsets;
@@ -30,7 +28,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.StreamSupport;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /** Independent RUNNER fixture artifact/hash vectors are the expected results, never Java output. */
@@ -520,31 +517,23 @@ class ObservedArtifactLowererTest {
     }
     assertThat(hash(candidate.artifact()))
         .isEqualTo(original.path("hashes").path("artifactHash").asText());
-    assertThat(candidate.artifact().path("guards").get(0).path("target"))
-        .isEqualTo(C.parse("{\"kind\":\"initialBlank\"}"));
-    assertThat(
-            candidate
-                .artifact()
-                .path("steps")
-                .get(1)
-                .path("operations")
-                .get(0)
-                .path("operation")
-                .path("kind")
-                .asText())
-        .isEqualTo("read");
-    assertThat(
-            candidate
-                .artifact()
-                .path("steps")
-                .get(2)
-                .path("operations")
-                .get(0)
-                .path("operation")
-                .path("value")
-                .path("kind")
-                .asText())
-        .isEqualTo("binding");
+    assertThat(candidate.artifact().path("guards").get(0))
+        .isEqualTo(C.parse("{\"guardId\":\"g0\",\"origin\":null}"));
+    // ADR-SC-008: every operation is the opaque step record, byte-identical to the learned one.
+    for (int step = 0; step < candidate.artifact().path("steps").size(); step++) {
+      for (JsonNode action : candidate.artifact().path("steps").get(step).path("operations")) {
+        JsonNode operation = action.path("operation");
+        assertThat(operation.path("kind").asText()).isEqualTo("step");
+        assertThat(hash(operation.path("code")))
+            .as("sourceHash is the hash of the code")
+            .isEqualTo(operation.path("sourceHash").asText());
+        assertThat(candidate.learnedPlan().path("actions"))
+            .anySatisfy(learned -> assertThat(learned.path("operation")).isEqualTo(operation));
+      }
+    }
+    for (JsonNode guard : candidate.artifact().path("guards")) {
+      assertThat(guard.fieldNames()).toIterable().containsExactlyInAnyOrder("guardId", "origin");
+    }
   }
 
   @Test
@@ -591,9 +580,6 @@ class ObservedArtifactLowererTest {
     object(at(wrongStep, "inputs", 0), "provenance")
         .put("stepId", wrongStep.path("sourceSteps").get(1).path("stepId").asText());
     assertThatThrownBy(() -> lowerer.recipes(wrongStep)).isInstanceOf(GuidedSessionException.class);
-    var wrongSlot = copy(original);
-    object(at(wrongSlot, "inputs", 1), "provenance").put("intendedSlot", "assert.expected");
-    assertThatThrownBy(() -> lowerer.recipes(wrongSlot)).isInstanceOf(GuidedSessionException.class);
     JsonNode configured =
         C.parse(
                 Files.readString(
@@ -819,244 +805,6 @@ class ObservedArtifactLowererTest {
   }
 
   @Test
-  void lawfulJoinedSemanticBasisAcceptsExactlySixMiBBeforeOneLegalByteIsRefused() throws Exception {
-    var parent = IncrementalBoundaryFixture.exact();
-    ObjectNode basis = parent.basis(), basisBefore = basis.deepCopy();
-    JsonNode expected = parent.artifact(), expectedBefore = expected.deepCopy();
-    assertThat(PublicationContracts.MAX_BASIS_BYTES).isEqualTo(6_291_456);
-    assertThat(PublicationContracts.MAX_VALIDATION_BYTES).isEqualTo(8_388_608);
-    assertThat(IncrementalBoundaryFixture.bytes(basis)).isEqualTo(6_291_456);
-    assertThat(GuidedContracts.canonical(basis).getBytes(StandardCharsets.UTF_8).length)
-        .isEqualTo(6_291_456);
-    assertThat(parent.baselineBytes() + 100 * parent.intentBytes() + parent.residue())
-        .isEqualTo(6_291_456);
-    assertThat(parent.residue()).isBetween(0, 99);
-    assertBoundaryComponentsAndCompleteJoins(parent);
-    assertThat(IncrementalBoundaryFixture.bytes(expected)).isLessThanOrEqualTo(1_048_576);
-    assertThat(IncrementalBoundaryFixture.bytes(expected.path("replayPolicy")))
-        .isLessThanOrEqualTo(524_288);
-    ObjectNode oversized = IncrementalBoundaryFixture.plusOne(parent),
-        oversizedBefore = oversized.deepCopy();
-    assertThat(IncrementalBoundaryFixture.bytes(oversized)).isEqualTo(6_291_457);
-    // The +1 is legal safeLabel text, with all model/capture/context/receipt hashes resealed.
-    C.validate("v3/replay-validation#/definitions/ValidationBasis", oversized);
-    var checked = org.mockito.Mockito.spy(new GuidedContracts());
-    var lowerer = new ObservedArtifactLowerer(checked);
-    var hashCalls = new java.util.concurrent.atomic.AtomicInteger();
-    try (var hashes =
-        org.mockito.Mockito.mockStatic(
-            GuidedContracts.class,
-            invocation -> {
-              if (invocation.getMethod().getName().equals("hash")) {
-                hashCalls.incrementAndGet();
-              }
-              return invocation.callRealMethod();
-            })) {
-      var accepted = lowerer.lower(basis, expected.path("profile"));
-      assertThat(accepted.artifact()).isEqualTo(expected);
-      assertThat(accepted.hashes()).isEqualTo(parent.hashes());
-      assertThat(hashCalls.get())
-          .as("positive parent observes actual semantic hashing through this hook")
-          .isPositive();
-      org.mockito.Mockito.verify(checked)
-          .validate(
-              org.mockito.ArgumentMatchers.eq("v3/replay-validation#/definitions/ValidationBasis"),
-              org.mockito.ArgumentMatchers.same(basis));
-      hashCalls.set(0);
-      org.mockito.Mockito.clearInvocations(checked);
-      assertThatThrownBy(() -> lowerer.lower(oversized, expected.path("profile")))
-          .isInstanceOfSatisfying(
-              GuidedSessionException.class,
-              refusal -> {
-                assertThat(refusal.getMessage()).isEqualTo("BUDGET_EXCEEDED");
-                assertThat(refusal.status()).isEqualTo(413);
-              });
-      assertThat(hashCalls.get()).as("+1 refused before semantic hashing").isZero();
-      org.mockito.Mockito.verify(checked, org.mockito.Mockito.never())
-          .validate(
-              org.mockito.ArgumentMatchers.anyString(),
-              org.mockito.ArgumentMatchers.any(JsonNode.class));
-    }
-    assertThat(basis).isEqualTo(basisBefore);
-    assertThat(expected).isEqualTo(expectedBefore);
-    assertThat(oversized).isEqualTo(oversizedBefore);
-    // This pure lowerer has no dispatch, JDBC, HTTP, callback, native or model dependency.
-    // Actual raw 8 MiB HTTP exact/+1 is a separate runner route obligation.
-  }
-
-  private static void assertBoundaryComponentsAndCompleteJoins(
-      IncrementalBoundaryFixture.Parent parent) {
-    JsonNode basis = parent.basis();
-    for (String field :
-        List.of("sourceSteps", "actions", "preparations", "obligationAssociations")) {
-      assertThat(basis.path(field)).as(field).hasSize(100);
-    }
-    assertThat(basis.at("/translationPlan/obligations")).hasSize(100);
-    assertThat(basis.path("observations")).hasSize(198);
-    for (String field :
-        List.of("allocations", "producers", "consumerEdges", "bindings", "transfers")) {
-      assertThat(basis.path(field)).as(field).isEmpty();
-    }
-    assertThat(basis.at("/materializationEvidence/versions")).hasSize(1);
-    assertThat(basis.at("/materializationEvidence/entries")).hasSize(1);
-    assertThat(basis.at("/snapshotEvidence/baseProof").isNull()).isTrue();
-    assertThat(basis.at("/snapshotEvidence/pinnedBase").isObject()).isTrue();
-    assertThat(basis.at("/incrementalEvidence/switch/reason").asText()).isEqualTo("EMPTY_PREFIX");
-    assertThat(basis.at("/incrementalEvidence/program/actions")).isEmpty();
-    assertThat(basis.at("/incrementalEvidence/program/sourceStepIds")).isEmpty();
-    assertThat(basis.at("/incrementalEvidence/prefixRequests")).isEmpty();
-    assertThat(basis.at("/incrementalEvidence/excludedAttempts")).isEmpty();
-    C.validate("v3/authored-inputs", parent.privateInputs());
-    assertThat(hash(parent.privateInputs())).isEqualTo(basis.path("authoredInputsHash").asText());
-    JsonNode privateInput = parent.privateInputs().path("inputs").get(0);
-    assertThat(hash(privateInput))
-        .isEqualTo(basis.at("/materializationEvidence/entries/0/inputHash").asText());
-    ObjectNode safeInput = privateInput.deepCopy();
-    safeInput.remove("value");
-    assertThat(safeInput).isEqualTo(basis.at("/materializationEvidence/entries/0/metadata"));
-    var observations = new java.util.LinkedHashMap<String, JsonNode>();
-    int observationBytes = 0, sourceBytes = 0;
-    for (JsonNode row : basis.path("observations")) {
-      int bytes = IncrementalBoundaryFixture.bytes(row.path("observation"));
-      // ADR-SC-007: one observation is at most 524,288 bytes (limits.maxObservationBytes).
-      assertThat(bytes).isLessThanOrEqualTo(524_288);
-      observationBytes += bytes;
-      C.validate("v3/observation", row.path("observation"));
-      assertThat(row.path("observation").path("facts")).hasSize(2);
-      assertThat(row.path("observation").path("observedAt").asText())
-          .isEqualTo("2026-10-08T03:00:05.123456789Z");
-      assertThat(hash(row.path("observation"))).isEqualTo(row.path("observationHash").asText());
-      assertThat(observations.put(row.path("observationHash").asText(), row)).isNull();
-    }
-    // The session's sanitized evidence total is 4,194,304 bytes
-    // (limits.maxSanitizedEvidenceBytesTotal).
-    assertThat(observationBytes).isLessThanOrEqualTo(4_194_304);
-    for (JsonNode source : basis.path("sourceSteps")) {
-      sourceBytes += source.path("source").asText().getBytes(StandardCharsets.UTF_8).length;
-    }
-    assertThat(sourceBytes).isLessThanOrEqualTo(1_048_576);
-    var preparationIds = new java.util.HashSet<String>();
-    var admissionIds = new java.util.HashSet<String>();
-    var obligationIds = new java.util.HashSet<String>();
-    var stepIds = new java.util.HashSet<String>();
-    var questionIds = new java.util.HashSet<String>();
-    var attemptIds = new java.util.HashSet<String>();
-    var requestIds = new java.util.HashSet<String>();
-    var contextHashes = new java.util.HashSet<String>();
-    var choiceIds = new java.util.HashSet<String>();
-    var providerIds = new java.util.HashSet<String>();
-    var builder = new GuidedPlanBuilder(C);
-    var proposals = new com.citi.put.checks.studio.guided.translation.GuidedProposalValidator(C);
-    JsonNode header = basis.at("/materializationEvidence/versions/0");
-    var materialization =
-        GuidedMaterializationEvidence.versionContext(C, basis.path("materializationEvidence"), 1);
-    for (int index = 0; index < 100; index++) {
-      JsonNode source = basis.path("sourceSteps").get(index),
-          fact = basis.path("actions").get(index),
-          prep = basis.path("preparations").get(index),
-          ledger = fact.path("ledger"),
-          proposal = prep.path("proposal"),
-          obligation = basis.at("/translationPlan/obligations").get(index),
-          association = basis.path("obligationAssociations").get(index);
-      assertThat(stepIds.add(source.path("stepId").asText())).isTrue();
-      assertThat(preparationIds.add(prep.path("preparationId").asText())).isTrue();
-      assertThat(admissionIds.add(ledger.at("/admission/admissionId").asText())).isTrue();
-      assertThat(obligationIds.add(obligation.path("obligationId").asText())).isTrue();
-      assertThat(
-              obligation
-                  .path("targetIntent")
-                  .asText()
-                  .codePointCount(0, obligation.path("targetIntent").asText().length()))
-          .isLessThanOrEqualTo(500);
-      assertThat(ledger.path("state").asText()).isEqualTo("SUCCEEDED");
-      assertThat(ledger.path("dispatchCount").asInt()).isEqualTo(1);
-      assertThat(ledger.path("outcomeCode").asText()).isEqualTo("OK");
-      assertThat(ledger.at("/coordinate/ordinal").asInt()).isZero();
-      assertThat(ledger.at("/coordinate/stepId")).isEqualTo(source.path("stepId"));
-      assertThat(obligation.path("stepId")).isEqualTo(source.path("stepId"));
-      assertThat(fact.path("obligationId")).isEqualTo(obligation.path("obligationId"));
-      assertThat(association.path("obligationId")).isEqualTo(obligation.path("obligationId"));
-      assertThat(association.path("coordinate")).isEqualTo(ledger.path("coordinate"));
-      assertThat(association.path("admissionId")).isEqualTo(ledger.at("/admission/admissionId"));
-      assertThat(association.path("proposalHash").asText()).isEqualTo(hash(proposal));
-      assertThat(fact.path("preparationId")).isEqualTo(prep.path("preparationId"));
-      assertThat(ledger.path("preparationId")).isEqualTo(prep.path("preparationId"));
-      assertThat(proposal.path("coordinate")).isEqualTo(ledger.path("coordinate"));
-      assertThat(proposal.path("executionEvidence")).isEqualTo(ledger.path("executionEvidence"));
-      assertThat(proposal.path("authoredInputsHash")).isEqualTo(header.path("authoredInputsHash"));
-      ObjectNode progress = C.object(), actionContext = C.object();
-      for (String field : List.of("generation", "evidenceHash", "executionEvidence")) {
-        progress.set(field, proposal.path(field));
-      }
-      actionContext.putObject("authoredInputs").set("inputs", materialization.path("inputs"));
-      if (index == 0) {
-        assertThat(prep.has("observedChoice")).isFalse();
-        proposals.action(
-            parent.session(),
-            progress,
-            basis.path("translationPlan"),
-            obligation,
-            proposal,
-            actionContext,
-            null,
-            GuidedRefusalDiagnostics.Capture.NONE);
-        continue;
-      }
-      JsonNode witness = prep.path("observedChoice");
-      C.validate("v3/replay-validation#/definitions/ObservedChoiceWitness1", witness);
-      assertThat(IncrementalBoundaryFixture.bytes(witness)).isLessThanOrEqualTo(262_144);
-      assertThat(IncrementalBoundaryFixture.bytes(witness.path("context")))
-          .isLessThanOrEqualTo(65_536);
-      assertThat(IncrementalBoundaryFixture.bytes(witness.path("meanings")))
-          .isLessThanOrEqualTo(65_536);
-      assertThat(IncrementalBoundaryFixture.bytes(witness.path("receipt")))
-          .isLessThanOrEqualTo(16_384);
-      assertThat(witness.at("/questionPlan/plan")).isEqualTo(basis.path("translationPlan"));
-      assertThat(witness.at("/questionPlan/plan/obligations")).hasSize(100);
-      assertThat(questionIds.add(witness.at("/context/clarificationId").asText())).isTrue();
-      assertThat(attemptIds.add(witness.at("/attempt/attemptId").asText())).isTrue();
-      assertThat(requestIds.add(witness.at("/attempt/requestId").asText())).isTrue();
-      assertThat(contextHashes.add(hash(witness.path("context")))).isTrue();
-      for (JsonNode choice : witness.at("/context/question/choices")) {
-        assertThat(choiceIds.add(choice.path("choiceId").asText())).isTrue();
-      }
-      for (JsonNode provider : witness.at("/attempt/modelQuestion/choices")) {
-        assertThat(providerIds.add(provider.path("choiceId").asText())).isTrue();
-      }
-      // The gates replay on the facts of the observation the model was judged on.
-      progress.set(
-          "observation",
-          observations.get(prep.path("observationHash").asText()).path("observation"));
-      JsonNode effective =
-          builder.effectiveObservedObligation(
-              parent.session(),
-              basis.path("translationPlan"),
-              materialization,
-              prep,
-              observations,
-              obligation);
-      assertThat(effective.path("selection")).isEqualTo(selectedSelection(witness));
-      proposals.action(
-          parent.session(),
-          progress,
-          basis.path("translationPlan"),
-          effective,
-          proposal,
-          actionContext,
-          null,
-          GuidedRefusalDiagnostics.Capture.NONE);
-      assertThat(prep.at("/executionEvidence/generation").asInt())
-          .isGreaterThan(witness.at("/context/question/generation").asInt());
-    }
-    assertThat(questionIds).hasSize(99);
-    assertThat(attemptIds).hasSize(99);
-    assertThat(requestIds).hasSize(99);
-    assertThat(contextHashes).hasSize(99);
-    assertThat(choiceIds).hasSize(198);
-    assertThat(providerIds).hasSize(198);
-  }
-
-  @Test
   void defensiveCandidateCannotBeChangedThroughCallerJson() throws Exception {
     var fixture = fixture("fresh-order-reference");
     var candidate =
@@ -1068,111 +816,6 @@ class ObservedArtifactLowererTest {
     var binding = candidate.artifact().path("replayPolicy").path("bindings").get(0);
     assertThat(binding.has("value")).isFalse();
     assertThat(binding.path("producer").path("ordinal").asInt()).isZero();
-  }
-
-  @Test
-  void reproducesIndependentPythonObservedChoiceArtifactAndAllHashes() throws Exception {
-    var independent = choiceFixture();
-    var original = new GuidedPlanBuilderTest.Original(independent.path("basis"));
-    var reconstructed = original.build();
-    assertThat(reconstructed).isEqualTo(original.expected);
-    assertThat(reconstructed.path("sourceManifestHash"))
-        .isNotEqualTo(independent.path("basis").path("sourceManifestHash"));
-    // Golden fixture carries an explicitly opaque standalone manifest projection, not
-    // the full source body constructed by Original. Its unchanged pure oracle stays separate.
-    var candidate =
-        new ObservedArtifactLowerer(C)
-            .lower(independent.path("basis"), independent.path("artifact").path("profile"));
-    assertThat(candidate.artifact()).isEqualTo(independent.path("artifact"));
-    assertThat(candidate.policy()).isEqualTo(independent.path("artifact").path("replayPolicy"));
-    assertThat(candidate.learnedPlan()).isEqualTo(independent.path("artifact").path("learnedPlan"));
-    for (var fields = independent.path("hashes").fields(); fields.hasNext(); ) {
-      var entry = fields.next();
-      assertThat(candidate.hashes().path(entry.getKey()))
-          .as(entry.getKey())
-          .isEqualTo(entry.getValue());
-    }
-    // Current choice vector (resealed by STUDIO-GOV-001.4 when the scope lost its policy fields;
-    // the
-    // lowerer recomputes the same hash from the basis), not the reconstructed manifest.
-    assertThat(independent.path("hashes").path("artifactHash").asText())
-        .isEqualTo("1ba1668823c8f9feb34d78be96b53d856f77a9744e894d9b7b538da4c8de94eb");
-    assertThat(hash(candidate.artifact()))
-        .isEqualTo(independent.path("hashes").path("artifactHash").asText());
-    assertThat(
-            candidate
-                .artifact()
-                .path("guards")
-                .get(3)
-                .path("target")
-                .path("locator")
-                .get(0)
-                .path("value")
-                .asText())
-        .isEqualTo("backup-label-é");
-    assertThat(
-            reconstructed
-                .path("translationPlan")
-                .path("obligations")
-                .get(3)
-                .path("targetIntent")
-                .asText())
-        .isEqualTo("label");
-  }
-
-  @Test
-  void compiledNodeIndependentlyValidatesChoiceAgainstCurrentPackagedBuild() throws Exception {
-    var independent = choiceFixture();
-    var original = new GuidedPlanBuilderTest.Original(independent.path("basis"));
-    assertThat(original.build()).isEqualTo(original.expected);
-    var candidate =
-        new ObservedArtifactLowerer(C)
-            .lower(independent.path("basis"), independent.path("artifact").path("profile"));
-    var node = compiledNode(independent.path("basis"), candidate.artifact(), false);
-    assertThat(node.path("artifact")).isEqualTo(independent.path("artifact"));
-    assertThat(node.path("hashes")).isEqualTo(independent.path("hashes"));
-    assertThat(node.path("verdict").path("ok").asBoolean()).isTrue();
-    assertThat(node.path("build").path("schemaBundleHash"))
-        .isEqualTo(node.path("recordedSchemaBundleHash"));
-    assertThat(node.path("build").path("referenceBundleHash"))
-        .isEqualTo(node.path("recordedReferenceBundleHash"));
-    assertThat(node.path("build").path("profileHash").asText())
-        .isEqualTo(hash(candidate.artifact().path("profile")));
-    assertThat(
-            compiledNode(independent.path("basis"), candidate.artifact(), true)
-                .path("refusal")
-                .asText())
-        .isEqualTo("PROFILE_MISMATCH");
-    var reconstructed =
-        new ObservedArtifactLowerer(C)
-            .lower(original.build(), independent.path("artifact").path("profile"));
-    assertExecutableSemanticsEqual(reconstructed, candidate);
-    var changed = new java.util.ArrayList<String>();
-    reconstructed
-        .hashes()
-        .fields()
-        .forEachRemaining(
-            entry -> {
-              if (!entry.getValue().equals(candidate.hashes().path(entry.getKey()))) {
-                changed.add(entry.getKey());
-              }
-            });
-    assertThat(changed)
-        .containsExactlyInAnyOrder(
-            "publicationEvidenceHash", "referencePolicyHash", "artifactHash", "revisionDigest");
-    var reconstructedNode = compiledNode(original.build(), reconstructed.artifact(), false);
-    assertThat(reconstructedNode.path("verdict").path("ok").asBoolean()).isTrue();
-    assertThat(reconstructedNode.path("artifact")).isEqualTo(reconstructed.artifact());
-    reconstructedNode
-        .path("hashes")
-        .fields()
-        .forEachRemaining(
-            entry ->
-                assertThat(reconstructed.hashes().path(entry.getKey()))
-                    .as(entry.getKey())
-                    .isEqualTo(entry.getValue()));
-    // Current packaged tuple is built from actual compiled records, never an old fixture build.
-    // Image digest is explicitly synthetic; this pure test does not grant deployment authority.
   }
 
   static ObjectNode compiledNode(JsonNode basis, JsonNode artifact, boolean unsupportedBuild)
@@ -1242,78 +885,6 @@ class ObservedArtifactLowererTest {
   }
 
   @Test
-  void choiceCanonicalHashesPreserveUnicodeAndOriginalInstantWithoutNormalization()
-      throws Exception {
-    var f = new GuidedPlanBuilderTest.Original(choiceFixture().path("basis"));
-    assertThat(f.build()).isEqualTo(f.expected);
-    var witness = f.witness();
-    var receipt = witness.path("receipt");
-    assertThat(receipt.path("contextIdentityHash").asText())
-        .isEqualTo(hash(witness.path("context")));
-    assertThat(receipt.path("meaningsHash").asText()).isEqualTo(hash(witness.path("meanings")));
-    assertThat(receipt.path("questionCaptureHash").asText())
-        .isEqualTo(hash(witness.path("context").path("questionCapture")));
-    assertThat(receipt.path("answer").path("resolvedAt").asText())
-        .isEqualTo("2026-10-08T03:00:05.123456789Z");
-    ObjectNode reordered = C.object();
-    var names = new java.util.ArrayList<String>();
-    witness.fieldNames().forEachRemaining(names::add);
-    java.util.Collections.reverse(names);
-    names.forEach(name -> reordered.set(name, witness.path(name).deepCopy()));
-    assertThat(hash(reordered)).isEqualTo(hash(witness));
-    assertThat(GuidedContracts.hash(reordered)).isEqualTo(hash(witness));
-    ObjectNode explicitNull = copy(f.raw.path("preparations").get(0)).putNull("observedChoice");
-    assertThat(hash(explicitNull)).isNotEqualTo(hash(f.raw.path("preparations").get(0)));
-  }
-
-  @Test
-  void originalZeroAndSourceOnlyProofsOmitChoiceAndKeepReferenceBytes() throws Exception {
-    var zero = fixture("fresh-order-reference");
-    var original = new GuidedPlanBuilderTest.Original(zero.path("basis"));
-    assertThat(original.build()).isEqualTo(original.expected);
-    for (JsonNode preparation : original.build().path("preparations")) {
-      assertThat(preparation.has("observedChoice")).isFalse();
-    }
-    var candidate =
-        new ObservedArtifactLowerer(C)
-            .lower(zero.path("basis"), zero.path("artifact").path("profile"));
-    assertThat(candidate.artifact()).isEqualTo(zero.path("artifact"));
-    assertThat(hash(candidate.artifact()))
-        .isEqualTo(zero.path("hashes").path("artifactHash").asText());
-    var reconstructed =
-        new ObservedArtifactLowerer(C)
-            .lower(original.build(), zero.path("artifact").path("profile"));
-    assertExecutableSemanticsEqual(reconstructed, candidate);
-    // Existing source-selection semantics use this original evidence and require no observed
-    // witness.
-    var selections = original.raw.putArray("sourceSelections");
-    var selection = selections.addObject();
-    selection
-        .putObject("need")
-        .put(
-            "stepId",
-            original.raw.path("translationPlan").path("obligations").get(3).path("stepId").asText())
-        .put("occurrence", 1)
-        .put("operationKind", "fill")
-        .put("argumentSlot", "fill.value");
-    selection.set(
-        "reference",
-        original.raw.path("translationPlan").path("sourceReferences").get(1).deepCopy());
-    ObjectNode sourceOnly = original.build();
-    for (JsonNode preparation : sourceOnly.path("preparations")) {
-      assertThat(preparation.has("observedChoice")).isFalse();
-    }
-    // Source evidence has its own basis hash; executable operations/profile stay byte-identical.
-    var sourceCandidate =
-        new ObservedArtifactLowerer(C).lower(sourceOnly, zero.path("artifact").path("profile"));
-    assertThat(sourceCandidate.learnedPlan()).isEqualTo(candidate.learnedPlan());
-    assertThat(sourceCandidate.artifact().path("steps"))
-        .isEqualTo(candidate.artifact().path("steps"));
-    assertThat(sourceCandidate.artifact().path("profile"))
-        .isEqualTo(candidate.artifact().path("profile"));
-  }
-
-  @Test
   void independentUtf8LimitsDoNotBorrowTheLargerTransportAllowance() {
     // Isolated size utility probes only: padding documents are not publication evidence.
     for (int limit :
@@ -1339,77 +910,6 @@ class ObservedArtifactLowererTest {
     }
   }
 
-  static java.util.stream.Stream<GuidedPlanBuilderTest.Mutation> pairedChoiceMutations() {
-    return GuidedPlanBuilderTest.brokenChoiceJoins()
-        .filter(
-            m ->
-                List.of(
-                        "missing prospective choice witness",
-                        "coherently resealed singleton original question",
-                        "provider meanings order changed",
-                        "exact locator kind differs with same text",
-                        "answer after expiry by one nanosecond",
-                        "original question plan changed meaning despite resealing",
-                        "old duplicate locator on hidden unrelated node",
-                        "fresh duplicate locator on hidden unrelated node",
-                        "old generation equals fresh preparation with coherent snapshot",
-                        "missing original question observation",
-                        "coherent changed operation",
-                        "coherent alternative authored input",
-                        "meaning cannot replace authored argument with binding")
-                    .contains(m.name()));
-  }
-
-  @ParameterizedTest(name = "independent Java/Node original proof: {0}")
-  @MethodSource("pairedChoiceMutations")
-  void bothIndependentValidatorsRejectTheSameCoherentProofMutation(
-      GuidedPlanBuilderTest.Mutation mutation) throws Exception {
-    var independent = choiceFixture();
-    var f = new GuidedPlanBuilderTest.Original(independent.path("basis"));
-    assertThat(f.build()).isEqualTo(f.expected);
-    var baseline =
-        new ObservedArtifactLowerer(C)
-            .lower(f.build(), independent.path("artifact").path("profile"));
-    assertThat(
-            compiledNode(f.suppliedBasis(), baseline.artifact(), false)
-                .path("verdict")
-                .path("ok")
-                .asBoolean())
-        .isTrue();
-    mutation.change().accept(f);
-    assertThatThrownBy(f::build).isInstanceOf(GuidedSessionException.class);
-    var node = compiledNode(f.suppliedBasis(), baseline.artifact(), false);
-    assertThat(node.has("refusal"))
-        .as("coherent proof must fail before artifact comparison: %s", mutation.name())
-        .isTrue();
-  }
-
-  @Test
-  void providerAuditLabelsAndIdsNeverBecomeExecutableSelectors() throws Exception {
-    var independent = choiceFixture();
-    var f = new GuidedPlanBuilderTest.Original(independent.path("basis"));
-    assertThat(f.build()).isEqualTo(f.expected);
-    var before =
-        new ObservedArtifactLowerer(C)
-            .lower(f.build(), independent.path("artifact").path("profile"));
-    at(object(object(f.witness(), "attempt"), "modelQuestion"), "choices", 1)
-        .put("choiceId", "audit-provider-é🧪")
-        .put("safeLabel", "Café e\u0301 🧪 untrusted audit");
-    f.resealChoice();
-    var result =
-        new ObservedArtifactLowerer(C)
-            .lower(f.build(), independent.path("artifact").path("profile"));
-    assertThat(result.learnedPlan()).isEqualTo(before.learnedPlan());
-    assertThat(result.artifact().path("steps")).isEqualTo(before.artifact().path("steps"));
-    assertThat(result.artifact().path("guards")).isEqualTo(before.artifact().path("guards"));
-    assertThat(result.artifact().path("inputRecipes"))
-        .isEqualTo(before.artifact().path("inputRecipes"));
-    assertThat(result.artifact().toString())
-        .doesNotContain("audit-provider-é🧪", "untrusted audit");
-    assertThat(result.hashes().path("publicationEvidenceHash"))
-        .isNotEqualTo(before.hashes().path("publicationEvidenceHash"));
-  }
-
   static void assertExecutableSemanticsEqual(
       PublicationContracts.Candidate reconstructed, PublicationContracts.Candidate standalone) {
     assertThat(reconstructed.learnedPlan()).isEqualTo(standalone.learnedPlan());
@@ -1432,15 +932,5 @@ class ObservedArtifactLowererTest {
     actualPolicy.remove("publicationEvidenceHash");
     expectedPolicy.remove("publicationEvidenceHash");
     assertThat(actualPolicy).isEqualTo(expectedPolicy);
-  }
-
-  /** The stored semantic selection the author accepted: the entry of the accepted choice. */
-  private static JsonNode selectedSelection(JsonNode witness) {
-    for (JsonNode mapping : witness.path("meanings")) {
-      if (mapping.path("choiceId").equals(witness.path("acceptedChoiceId"))) {
-        return mapping.path("selection");
-      }
-    }
-    throw new AssertionError("the accepted choice has no mapping");
   }
 }

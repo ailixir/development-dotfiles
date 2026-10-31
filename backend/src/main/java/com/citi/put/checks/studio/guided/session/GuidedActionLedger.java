@@ -17,12 +17,7 @@ public final class GuidedActionLedger {
   }
 
   public ObjectNode admit(
-      JsonNode session,
-      JsonNode proposal,
-      String key,
-      String policyDecisionHash,
-      JsonNode preparationTarget,
-      Instant now) {
+      JsonNode session, JsonNode proposal, String key, String policyDecisionHash, Instant now) {
     ObjectNode ledger = contracts.object();
     ledger.put("schemaVersion", 3);
     ledger.put("attemptOrdinal", 0);
@@ -31,10 +26,9 @@ public final class GuidedActionLedger {
     ledger.put("idempotencyKey", key);
     ledger.put("requestDigest", GuidedContracts.hash(proposal));
     ledger.set("scopeHash", session.path("scopeHash"));
-    // ADR-SC-007 D2: the hash covers the target the runner reported for this proposal.
-    ledger.put("operationHash", GuidedOperationIdentity.of(proposal, preparationTarget));
+    ledger.put("operationHash", GuidedOperationIdentity.of(proposal));
     ledger.set("generation", proposal.path("generation"));
-    ledger.set("documentId", proposal.path("target").path("documentId"));
+    ledger.set("documentId", proposal.path("executionEvidence").path("documentId"));
     ledger.set("ownerFence", session.path("owner").path("fence"));
     ObjectNode admission = ledger.putObject("admission");
     admission.put("admissionId", UUID.randomUUID().toString());
@@ -44,8 +38,41 @@ public final class GuidedActionLedger {
     ledger.put("state", "ADMITTED");
     ledger.put("dispatchCount", 0);
     ledger.put("outcomeCode", "PENDING");
-    ledger.putNull("assertionPassed");
     return ledger;
+  }
+
+  /** A ledger state and its coarse outcome code. */
+  public record Outcome(String state, String outcomeCode) {}
+
+  /**
+   * The ledger outcome a step receipt implies (E5 field-needs row 36). The closed code of the
+   * receipt is the truth; the coarse ledger enum is derived from it by this one table.
+   *
+   * @param closedCode the receipt's closedCode, or null for a step that ran without error
+   */
+  public static Outcome derive(JsonNode closedCode) {
+    if (closedCode == null || closedCode.isNull() || closedCode.isMissingNode()) {
+      return new Outcome("SUCCEEDED", "OK");
+    }
+    return switch (closedCode.asText()) {
+      case "ASSERTION_FAILED" -> new Outcome("FAILED", "ASSERTION_FAILED");
+      case "TARGET_DRIFT" -> new Outcome("FAILED", "TARGET_CHANGED");
+      case "TIMEOUT" -> new Outcome("FAILED", "TIMEOUT");
+      case "CANCELLED" -> new Outcome("FAILED", "CANCELLED");
+      case "OUTCOME_UNKNOWN" -> new Outcome("UNKNOWN_OUTCOME", "ACK_LOST");
+      case "POLICY_REFUSED",
+              "READ_REFUSED",
+              "PASSWORD_CONTROL_READ_REFUSED",
+              "REFERENCE_REFUSED",
+              "REFERENCE_MISMATCH",
+              "LOGIN_REQUIRED",
+              "INVALID_CONTRACT",
+              "INTERNAL_ERROR",
+              "PROFILE_MISMATCH",
+              "AUTHORIZATION_EXPIRED" ->
+          new Outcome("FAILED", "POLICY_DENIED");
+      default -> throw new GuidedSessionException("INVALID_CONTRACT", 422);
+    };
   }
 
   private static final Set<Class<?>> STANDARD_OUTCOME_SCALARS =
@@ -174,10 +201,21 @@ public final class GuidedActionLedger {
 
   public void verifyReport(ObjectNode stored, ObjectNode report) {
     contracts.validate("ledger", report);
-    verifyReportBody(stored, report);
+    verifyReportBody(stored, report, null);
+  }
+
+  /** As {@link #verifyReport(ObjectNode, ObjectNode)}, and the outcome must be the receipt's. */
+  public void verifyReport(ObjectNode stored, ObjectNode report, Outcome expected) {
+    contracts.validate("ledger", report);
+    verifyReportBody(stored, report, expected);
   }
 
   void verifyReport(ObjectNode stored, ObjectNode report, PreparedReport prepared) {
+    verifyReport(stored, report, prepared, null);
+  }
+
+  void verifyReport(
+      ObjectNode stored, ObjectNode report, PreparedReport prepared, Outcome expected) {
     boolean matching = false;
     try {
       matching =
@@ -192,41 +230,37 @@ public final class GuidedActionLedger {
       // An unavailable input comparison cannot establish schema validity.
     }
     if (!matching) {
-      verifyReport(stored, report);
+      verifyReport(stored, report, expected);
       return;
     }
     if (prepared.failure != null) {
       throw new GuidedSessionException(prepared.failure.code, prepared.failure.status);
     }
-    verifyReportBody(stored, report);
+    verifyReportBody(stored, report, expected);
   }
 
-  private void verifyReportBody(ObjectNode stored, ObjectNode report) {
+  private void verifyReportBody(ObjectNode stored, ObjectNode report, Outcome expected) {
     ObjectNode immutable = report.deepCopy(), original = stored.deepCopy();
-    for (String field : new String[] {"state", "dispatchCount", "outcomeCode", "assertionPassed"}) {
+    for (String field : new String[] {"state", "dispatchCount", "outcomeCode"}) {
       immutable.remove(field);
       original.remove(field);
     }
     require(original.equals(immutable), "IDEMPOTENCY_CONFLICT", 409);
     require(report.path("dispatchCount").asInt() == 1, "INVALID_CONTRACT", 422);
     String state = report.path("state").asText(), code = report.path("outcomeCode").asText();
-    require(
-        (state.equals("SUCCEEDED")
-                    && code.equals("OK")
-                    && !report.path("assertionPassed").isBoolean()
-                || state.equals("SUCCEEDED")
-                    && code.equals("OK")
-                    && report.path("assertionPassed").asBoolean())
-            || state.equals("FAILED")
-                && java.util.Set.of(
-                        "ASSERTION_FAILED", "TARGET_CHANGED", "POLICY_DENIED", "TIMEOUT")
-                    .contains(code)
-            || state.equals("UNKNOWN_OUTCOME")
-                && java.util.Set.of(
-                        "TARGET_CHANGED", "POLICY_DENIED", "TIMEOUT", "CANCELLED", "ACK_LOST")
-                    .contains(code)
-                && report.path("assertionPassed").isNull(),
-        "INVALID_CONTRACT",
-        422);
+    boolean legal;
+    if (expected != null) {
+      legal = expected.state().equals(state) && expected.outcomeCode().equals(code);
+    } else {
+      legal =
+          state.equals("SUCCEEDED") && code.equals("OK")
+              || state.equals("FAILED")
+                  && Set.of("ASSERTION_FAILED", "TARGET_CHANGED", "POLICY_DENIED", "TIMEOUT")
+                      .contains(code)
+              || state.equals("UNKNOWN_OUTCOME")
+                  && Set.of("TARGET_CHANGED", "POLICY_DENIED", "TIMEOUT", "CANCELLED", "ACK_LOST")
+                      .contains(code);
+    }
+    require(legal, "INVALID_CONTRACT", 422);
   }
 }

@@ -612,23 +612,32 @@ class HttpRunnerDispatchClientTest {
    */
   @Test
   void closedPrepareRefusalsAreDefinite() throws Exception {
-    var cases =
-        java.util.Map.of(
-            "OPTION_NOT_PRESENT", "TARGET_MISMATCH",
-            "NO_DURABLE_LOCATOR", "UNSUPPORTED_SURFACE",
-            "READ_NOT_ALLOWED", "UNSUPPORTED_SURFACE");
+    String syntax =
+        "{\"code\":\"PREPARATION_DENIED\",\"reason\":\"STEP_SYNTAX\",\"line\":3,\"column\":7}";
+    String preFence =
+        "{\"code\":\"PREPARATION_DENIED\",\"reason\":\"STEP_PRE_FENCE\",\"line\":null,\"column\":null,"
+            + "\"matchCount\":0}";
+    var cases = new java.util.LinkedHashMap<String, String>();
+    cases.put("STEP_SYNTAX", syntax);
+    cases.put("STEP_PRE_FENCE", preFence);
     for (var entry : cases.entrySet()) {
       try (var runner = new RunnerDouble()) {
-        runner.answers(409, refusal("PREPARATION_DENIED", entry.getKey()));
+        runner.answers(409, entry.getValue());
         org.assertj.core.api.Assertions.assertThatThrownBy(
                 () -> runner.client().send("prepare", ordinaryPrepare()))
             .as(entry.getKey())
             .isInstanceOfSatisfying(
                 com.citi.put.checks.studio.guided.session.GuidedSessionException.class,
                 failure -> {
-                  assertThat(failure.getMessage()).isEqualTo(entry.getValue());
+                  assertThat(failure.getMessage()).isEqualTo("INVALID_CONTRACT");
                   assertThat(failure.status()).isEqualTo(422);
                   assertThat(failure.messageCode()).isEqualTo(entry.getKey());
+                  assertThat(failure.line())
+                      .isEqualTo(entry.getKey().equals("STEP_SYNTAX") ? 3 : null);
+                  assertThat(failure.column())
+                      .isEqualTo(entry.getKey().equals("STEP_SYNTAX") ? 7 : null);
+                  assertThat(failure.matchCount())
+                      .isEqualTo(entry.getKey().equals("STEP_SYNTAX") ? null : 0);
                 });
         assertThat(runner.requests()).isEqualTo(1);
       }
@@ -643,13 +652,16 @@ class HttpRunnerDispatchClientTest {
   @Test
   void otherPrepare409StaysUnknownOutcome() throws Exception {
     String oversize =
-        "{\"code\":\"PREPARATION_DENIED\",\"reason\":\"OPTION_NOT_PRESENT\",\"x\":\""
+        "{\"code\":\"PREPARATION_DENIED\",\"reason\":\"STEP_SYNTAX\",\"line\":1,\"column\":1,\"x\":\""
             + "a".repeat(5000)
             + "\"}";
     var bodies = new java.util.LinkedHashMap<String, String>();
     bodies.put("unknown reason", refusal("PREPARATION_DENIED", "SOMETHING_NEW"));
     bodies.put("another code", refusal("BUSY", null));
-    bodies.put("reason under the wrong code", refusal("BUSY", "OPTION_NOT_PRESENT"));
+    bodies.put("reason under the wrong code", refusal("BUSY", "STEP_SYNTAX"));
+    bodies.put("terminal hash refusal", refusal("PREPARATION_DENIED", "SOURCE_HASH_MISMATCH"));
+    bodies.put("a removed reason", refusal("PREPARATION_DENIED", "OPTION_NOT_PRESENT"));
+    bodies.put("syntax without a position", refusal("PREPARATION_DENIED", "STEP_SYNTAX"));
     bodies.put("no reason", refusal("PREPARATION_DENIED", null));
     bodies.put("not json", "plain text");
     bodies.put("empty", "");
@@ -663,7 +675,9 @@ class HttpRunnerDispatchClientTest {
         assertThat(runner.requests()).as(entry.getKey()).isEqualTo(before + 1);
       }
       for (int status : List.of(400, 403, 422, 500, 503)) {
-        runner.answers(status, refusal("PREPARATION_DENIED", "OPTION_NOT_PRESENT"));
+        runner.answers(
+            status,
+            "{\"code\":\"PREPARATION_DENIED\",\"reason\":\"STEP_SYNTAX\",\"line\":1,\"column\":1}");
         assertUnknownOutcome(runner, "prepare", ordinaryPrepare(), "status " + status);
       }
     }
@@ -673,10 +687,13 @@ class HttpRunnerDispatchClientTest {
   @Test
   void closedRefusalOnAPrefixPrepareStaysUnknownOutcome() throws Exception {
     try (var runner = new RunnerDouble()) {
-      for (String reason :
-          List.of("OPTION_NOT_PRESENT", "NO_DURABLE_LOCATOR", "READ_NOT_ALLOWED")) {
+      for (String reason : List.of("STEP_SYNTAX", "STEP_PRE_FENCE", "SOURCE_HASH_MISMATCH")) {
         int before = runner.requests();
-        runner.answers(409, refusal("PREPARATION_DENIED", reason));
+        runner.answers(
+            409,
+            "{\"code\":\"PREPARATION_DENIED\",\"reason\":\""
+                + reason
+                + "\",\"line\":1,\"column\":1}");
         assertUnknownOutcome(runner, "prepare", prefixPrepare(), reason);
         assertThat(runner.requests()).as(reason).isEqualTo(before + 1);
       }

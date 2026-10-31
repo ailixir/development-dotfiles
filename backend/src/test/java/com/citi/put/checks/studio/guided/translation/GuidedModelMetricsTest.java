@@ -63,7 +63,7 @@ class GuidedModelMetricsTest {
 
   @Test
   void oneCallRecordsTheTimerByKindAndOutcomeAndTheCachedTokens() throws Exception {
-    var request = request(GuidedModelRequest.Kind.VERIFY_STEP, projection(), 1);
+    var request = request(GuidedModelRequest.Kind.STEP_CODE, projection(), 1);
     server.stubFor(
         post(urlPathMatching(".*generateContent"))
             .willReturn(okJson(withCached(provider(answer(request).toString()), 9))));
@@ -71,7 +71,7 @@ class GuidedModelMetricsTest {
       assertThat(client(transport).propose(request, budget(Duration.ofSeconds(5))).code())
           .isEqualTo(GuidedModelResponse.Code.OK);
     }
-    var timer = timer("VERIFY_STEP", "ok");
+    var timer = timer("STEP_CODE", "ok");
     assertThat(timer).isNotNull();
     assertThat(timer.count()).isEqualTo(1);
     assertThat(timer.totalTime(TimeUnit.NANOSECONDS)).isPositive();
@@ -98,7 +98,7 @@ class GuidedModelMetricsTest {
 
   @Test
   void aRefusedCallIsTaggedRefusedAndRecordsNoCachedTokens() throws Exception {
-    var request = request(GuidedModelRequest.Kind.NEXT_ACTION, projection(), 1);
+    var request = request(GuidedModelRequest.Kind.STEP_CODE, projection(), 1);
     server.stubFor(
         post(urlPathMatching(".*generateContent"))
             .willReturn(aResponse().withStatus(403).withBody("{}")));
@@ -106,19 +106,19 @@ class GuidedModelMetricsTest {
       assertThat(client(transport).propose(request, budget(Duration.ofSeconds(5))).reason())
           .isEqualTo(GuidedModelResponse.Reason.TRANSPORT_HTTP_401_403);
     }
-    assertThat(timer("NEXT_ACTION", "refused").count()).isEqualTo(1);
+    assertThat(timer("STEP_CODE", "refused").count()).isEqualTo(1);
     assertThat(registry.find(GenAiGuidedLlmGatewayClient.CACHED_TOKENS).summary().count()).isZero();
   }
 
   @Test
   void aBusyCallIsTimedFromEntryAndTaggedBusy() throws Exception {
-    var request = request(GuidedModelRequest.Kind.VERIFY_STEP, projection(), 1);
+    var request = request(GuidedModelRequest.Kind.STEP_CODE, projection(), 1);
     try (var transport = new GenAiGatewayTransport(properties(server.baseUrl(), 65536, 65536));
         var held = transport.tryAcquire(open())) {
       assertThat(held).isNotNull();
       client(transport).propose(request, budget(Duration.ofMillis(300)));
     }
-    var timer = timer("VERIFY_STEP", "busy");
+    var timer = timer("STEP_CODE", "busy");
     assertThat(timer.count()).isEqualTo(1);
     assertThat(timer.totalTime(TimeUnit.MILLISECONDS)).isGreaterThanOrEqualTo(200);
   }

@@ -1,0 +1,1 @@
+{"schemaVersion":3,"kind":"STEP_CODE","requestId":"synthetic-request","status":"CODE","code":"await page.getByRole('button', { name: 'Save' }).click();\nawait expect(page.getByText('Saved')).toBeVisible();","captures":[]}

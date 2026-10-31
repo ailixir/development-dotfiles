@@ -40,61 +40,20 @@ public final class GuidedRefusalDiagnostics {
     APPLICATION,
     SETTLEMENT_AUTHORITY,
     OTHER_CLIENT_FAILURE,
-    NEXT_QUESTION_CALL,
-    NEXT_PLAN_ACCESS_CALL,
-    NEXT_SOURCE_SELECTION_CALL,
-    NEXT_OBLIGATION_LOOKUP_CALL,
-    NEXT_ASSOCIATION_LOOKUP_CALL,
-    NEXT_RUNNER_CONTEXT_CALL,
-    NEXT_MATERIALIZE_CALL,
-    NEXT_ORIGINAL_AUTHORITY,
-    NEXT_CURRENT_AUTHORED_STEP,
-    NEXT_SELECTION_SHAPE,
-    NEXT_MATERIALIZE_CONTRACT_CALL,
-    NEXT_EFFECTIVE_CHOICE_CALL,
-    NEXT_VALIDATE_ACTION_CALL,
-    NEXT_ACTION_CONTRACT_CALL,
-    NEXT_ACTION_MEANING,
-    NEXT_ACTION_EVIDENCE,
-    NEXT_TARGET_REF,
-    NEXT_TARGET_INTENT,
-    NEXT_SELECTED_CHOICE,
-    NEXT_OPERATION_TARGET,
-    NEXT_AUTHORED_SOURCE,
-    NEXT_SECRET_POLICY,
-    NEXT_BINDING_MEANING,
-    NEXT_ASSERTION_PREDICATE,
-    NEXT_ASSERT_TEXT_ABSENT,
-    NEXT_READ_RULE,
-    NEXT_POLICY_CALL,
-    NEXT_RESERVATION_CALL,
-    /** The runner refused at prepare: the authored literal is not among the live options (G1). */
-    RUNNER_OPTION_NOT_PRESENT,
-    /** The runner refused at prepare: it cannot give the picked element a durable locator. */
-    RUNNER_NO_DURABLE_LOCATOR,
-    /** The runner refused at prepare: the kept read profile does not allow the read. */
-    RUNNER_READ_NOT_ALLOWED
-  }
-
-  /**
-   * Closed subcases of a SOURCE_PLAN refusal whose public code stays the same (ADR-SC-007 D6). They
-   * are not receipt gates: the receipt vocabulary above is the NEXT_ACTION refusal point list.
-   */
-  public enum PlanSubcase {
-    /** A {@code read} nothing uses: public code MISSING_SOURCE. */
-    READ_WITHOUT_CONSUMER
-  }
-
-  /** Never throws; a missing sink records nothing. */
-  static void recordPlan(java.util.function.Consumer<PlanSubcase> sink, PlanSubcase subcase) {
-    if (sink == null) {
-      return;
-    }
-    try {
-      sink.accept(subcase);
-    } catch (Throwable unavailable) {
-      // An optional diagnostic cannot replace an original return, exception or transaction.
-    }
+    STEP_ORIGINAL_AUTHORITY,
+    STEP_CURRENT_AUTHORED_STEP,
+    STEP_CODE_SHAPE,
+    STEP_CAPTURES,
+    STEP_USES,
+    STEP_CONTRACT,
+    STEP_CHOICES,
+    STEP_TARGET_REF,
+    STEP_SELECTED_CHOICE,
+    STEP_RESERVATION,
+    /** The runner refused the code at prepare: it does not parse (line and column). */
+    STEP_SYNTAX,
+    /** The runner refused at prepare: the code failed before its first effectful call. */
+    STEP_PRE_FENCE
   }
 
   private static void ignore(Gate gate) {}
@@ -104,12 +63,6 @@ public final class GuidedRefusalDiagnostics {
     Capture NONE = GuidedRefusalDiagnostics::ignore;
 
     void record(Gate gate);
-
-    /**
-     * The intent gate admitted the pick by {@code path}; {@code fields} are the evidence parts that
-     * supplied the intent words (D7(d)). Only the production recorder keeps it.
-     */
-    default void intent(GuidedGates.IntentPath path, java.util.List<String> fields) {}
   }
 
   record Receipt(UUID sessionId, UUID attemptId, Gate gate) {
@@ -216,36 +169,20 @@ public final class GuidedRefusalDiagnostics {
         condition, code, status);
   }
 
-  private static boolean nextActionFailure(Gate gate) {
+  private static boolean stepFailure(Gate gate) {
     return switch (gate) {
-      case NEXT_QUESTION_CALL,
-              NEXT_PLAN_ACCESS_CALL,
-              NEXT_SOURCE_SELECTION_CALL,
-              NEXT_OBLIGATION_LOOKUP_CALL,
-              NEXT_ASSOCIATION_LOOKUP_CALL,
-              NEXT_RUNNER_CONTEXT_CALL,
-              NEXT_MATERIALIZE_CALL,
-              NEXT_ORIGINAL_AUTHORITY,
-              NEXT_CURRENT_AUTHORED_STEP,
-              NEXT_SELECTION_SHAPE,
-              NEXT_MATERIALIZE_CONTRACT_CALL,
-              NEXT_EFFECTIVE_CHOICE_CALL,
-              NEXT_VALIDATE_ACTION_CALL,
-              NEXT_ACTION_CONTRACT_CALL,
-              NEXT_ACTION_MEANING,
-              NEXT_ACTION_EVIDENCE,
-              NEXT_TARGET_REF,
-              NEXT_TARGET_INTENT,
-              NEXT_SELECTED_CHOICE,
-              NEXT_OPERATION_TARGET,
-              NEXT_AUTHORED_SOURCE,
-              NEXT_SECRET_POLICY,
-              NEXT_BINDING_MEANING,
-              NEXT_ASSERTION_PREDICATE,
-              NEXT_ASSERT_TEXT_ABSENT,
-              NEXT_READ_RULE,
-              NEXT_POLICY_CALL,
-              NEXT_RESERVATION_CALL ->
+      case STEP_ORIGINAL_AUTHORITY,
+              STEP_CURRENT_AUTHORED_STEP,
+              STEP_CODE_SHAPE,
+              STEP_CAPTURES,
+              STEP_USES,
+              STEP_CONTRACT,
+              STEP_CHOICES,
+              STEP_TARGET_REF,
+              STEP_SELECTED_CHOICE,
+              STEP_RESERVATION,
+              STEP_SYNTAX,
+              STEP_PRE_FENCE ->
           true;
       default -> false;
     };
@@ -331,9 +268,9 @@ public final class GuidedRefusalDiagnostics {
         Gate gate =
             exceptionPath
                 ? entered && !returned
-                    ? nextActionFailure(captured) ? captured : Gate.APPLICATION
+                    ? stepFailure(captured) ? captured : Gate.APPLICATION
                     : Gate.SETTLEMENT_AUTHORITY
-                : captured == Gate.UNKNOWN || nextActionFailure(captured)
+                : captured == Gate.UNKNOWN || stepFailure(captured)
                     ? Gate.OTHER_CLIENT_FAILURE
                     : captured;
         Receipt receipt = new Receipt(session, attempt, gate);

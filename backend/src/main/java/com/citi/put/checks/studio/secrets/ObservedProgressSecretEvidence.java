@@ -65,25 +65,26 @@ public final class ObservedProgressSecretEvidence {
         throw invalid();
       }
       for (JsonNode action : frozen.path("operations")) {
-        JsonNode operation = action.path("operation"), value = operation.path("value");
-        if (!operation.path("kind").asText().equals("fill")
-            || !value.path("kind").asText().equals("secretRef")) {
-          continue;
+        for (JsonNode use : action.path("operation").path("uses")) {
+          if (!use.path("kind").asText().equals("secret")) {
+            continue;
+          }
+          String name = use.path("id").asText();
+          boolean declared = false;
+          for (JsonNode recipe : byInput.values()) {
+            declared |=
+                recipe.path("kind").asText().equals("secretRef")
+                    && recipe.path("stepId").equals(frozen.path("stepId"))
+                    && recipe.path("provenance").path("kind").asText().equals("configuration")
+                    && recipe.path("provenance").path("referenceName").asText().equals(name);
+          }
+          if (!declared
+              || !action.path("coordinate").path("stepId").equals(frozen.path("stepId"))
+              || !StudioVaultProvider.isValidSecretName(name)) {
+            throw invalid();
+          }
+          proven.add(name);
         }
-        JsonNode recipe = byInput.get(value.path("sourceInputId").asText());
-        if (recipe == null
-            || !recipe.path("kind").asText().equals("secretRef")
-            || !recipe.path("stepId").equals(frozen.path("stepId"))
-            || !action.path("coordinate").path("stepId").equals(frozen.path("stepId"))
-            || !recipe.path("intendedSlot").asText().equals("fill.value")
-            || !recipe.path("provenance").path("kind").asText().equals("configuration")) {
-          throw invalid();
-        }
-        String name = recipe.path("provenance").path("referenceName").asText();
-        if (!StudioVaultProvider.isValidSecretName(name)) {
-          throw invalid();
-        }
-        proven.add(name);
       }
     }
     if (!proven.containsAll(report.secretUse().keySet())) {

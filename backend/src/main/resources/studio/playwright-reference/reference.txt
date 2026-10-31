@@ -1,0 +1,355 @@
+# playwright-reference format=1 playwright=1.63.0
+# types.d.ts sha256=2806f6d7810fba0306066d500cd716a6d1128d90af2c3cf71723e3ea0a8904c4
+# test.d.ts sha256=0c45393d79498d440f99e8eb10d93609742f073dfc631feab5ab0f1a6b21c056
+@@preamble
+Playwright 1.63.0 API reference, generated from the pinned type definitions. It is guidance, not an allow-list: any Playwright API may be used.
+Each line is receiver.member(params) -> result  # summary. Option bags are shown as names with ? when optional (core) or name: type (extended).
+@@index
+core.locators (core) Locators: page.frameLocator, page.getByAltText, page.getByLabel, page.getByPlaceholder, page.getByRole, page.getByTestId, page.getByText, page.getByTitle, page.locator, locator.and, locator.contentFrame, locator.count, locator.describe, locator.filter, locator.first, locator.frameLocator, locator.getByAltText, locator.getByLabel, locator.getByPlaceholder, locator.getByRole, locator.getByTestId, locator.getByText, locator.getByTitle, locator.last, locator.locator, locator.nth, locator.or
+core.actions (core) Actions: page.goBack, page.goForward, page.goto, page.reload, locator.blur, locator.check, locator.clear, locator.click, locator.dblclick, locator.dragTo, locator.fill, locator.focus, locator.hover, locator.press, locator.pressSequentially, locator.scrollIntoViewIfNeeded, locator.selectOption, locator.selectText, locator.setChecked, locator.tap, locator.uncheck
+core.assertions (core) Assertions with expect (web-first, retry until the timeout): expect(locator).toBeAttached, expect(locator).toBeChecked, expect(locator).toBeDisabled, expect(locator).toBeEditable, expect(locator).toBeEmpty, expect(locator).toBeEnabled, expect(locator).toBeFocused, expect(locator).toBeHidden, expect(locator).toBeInViewport, expect(locator).toBeVisible, expect(locator).toContainClass, expect(locator).toContainText, expect(locator).toHaveAccessibleDescription, expect(locator).toHaveAccessibleErrorMessage, expect(locator).toHaveAccessibleName, expect(locator).toHaveAttribute, expect(locator).toHaveClass, expect(locator).toHaveCount, expect(locator).toHaveCSS, expect(locator).toHaveId, expect(locator).toHaveJSProperty, expect(locator).toHaveRole, expect(locator).toHaveText, expect(locator).toHaveValue, expect(locator).toHaveValues, expect(locator).not, expect(page).toHaveTitle, expect(page).toHaveURL, expect(page).not
+reads-element (extended) Reading an element: locator.toString, locator.all, locator.allInnerTexts, locator.allTextContents, locator.ariaSnapshot, locator.ariaSnapshotJSON, locator.boundingBox, locator.description, locator.getAttribute, locator.innerHTML, locator.innerText, locator.inputValue, locator.isChecked, locator.isDisabled, locator.isEditable, locator.isEnabled, locator.isHidden, locator.isVisible, locator.normalize, locator.page, locator.textContent, locator.visible
+reads-page (extended) Reading the page: page.ariaSnapshot, page.ariaSnapshotJSON, page.clearConsoleMessages, page.clearPageErrors, page.consoleMessages, page.content, page.context, page.isClosed, page.pageErrors, page.title, page.url, page.viewportSize, frame.content, frame.isDetached, frame.name, frame.title, frame.url
+waits (extended) Waiting: page.waitForEvent, page.waitForLoadState, page.waitForTimeout, page.waitForURL, frame.waitForLoadState, frame.waitForTimeout, frame.waitForURL, context.waitForEvent, locator.waitFor
+frames (extended) Frames, pages and popups: page.bringToFront, page.frame, page.frames, page.mainFrame, page.opener, frame.childFrames, frame.frameElement, frame.page, frame.parentFrame, context.isClosed, context.pages, frameLocator.frameLocator, frameLocator.getByAltText, frameLocator.getByLabel, frameLocator.getByPlaceholder, frameLocator.getByRole, frameLocator.getByTestId, frameLocator.getByText, frameLocator.getByTitle, frameLocator.locator, frameLocator.owner
+frame-api (extended) Working inside a Frame object: frame.dragAndDrop, frame.frameLocator, frame.getByAltText, frame.getByLabel, frame.getByPlaceholder, frame.getByRole, frame.getByTestId, frame.getByText, frame.getByTitle, frame.goto, frame.locator, frame.setContent
+dialogs-files (extended) Dialogs, downloads and file inputs: locator.drop, locator.setInputFiles, dialog.accept, dialog.defaultValue, dialog.dismiss, dialog.message, dialog.page, dialog.type, download.cancel, download.createReadStream, download.delete, download.failure, download.page, download.path, download.saveAs, download.suggestedFilename, download.url, fileChooser.element, fileChooser.isMultiple, fileChooser.page, fileChooser.setFiles
+input-devices (extended) Keyboard, mouse and touch: page.dragAndDrop, page.keyboard, page.mouse, page.touchscreen, locator.dispatchEvent, page.keyboard.down, page.keyboard.insertText, page.keyboard.press, page.keyboard.type, page.keyboard.up, page.mouse.click, page.mouse.dblclick, page.mouse.down, page.mouse.move, page.mouse.up, page.mouse.wheel, page.touchscreen.tap
+script (extended) Running script in the page: page.evaluate, page.evaluateHandle, page.waitForFunction, frame.evaluate, frame.evaluateHandle, frame.waitForFunction, locator.evaluate, locator.evaluateHandle, locator.evaluateAll, locator.waitForFunction
+page-content (extended) Page content, init scripts and handlers: page.addInitScript, page.exposeBinding, page.addLocatorHandler, page.addScriptTag, page.addStyleTag, page.exposeFunction, page.removeLocatorHandler, page.setContent, frame.addScriptTag, frame.addStyleTag, context.exposeBinding, context.addInitScript, context.exposeFunction, locator.elementHandle, locator.elementHandles
+network (extended) Network: page.requests, page.route, page.routeFromHAR, page.routeWebSocket, page.setExtraHTTPHeaders, page.unroute, page.unrouteAll, page.waitForRequest, page.waitForResponse, context.route, context.routeFromHAR, context.routeWebSocket, context.setExtraHTTPHeaders, context.unroute, context.unrouteAll
+storage (extended) Cookies and storage: page.localStorage, page.sessionStorage, context.addCookies, context.clearCookies, context.cookies, context.setHTTPCredentials, context.setStorageState, context.storageState, context.credentials
+environment (extended) Environment, timeouts and evidence: page.cancelPickLocator, page.emulateMedia, page.hideHighlight, page.pause, page.pdf, page.pickLocator, page.requestGC, page.screenshot, page.setDefaultNavigationTimeout, page.setDefaultTimeout, page.setViewportSize, page.workers, page.clock, page.coverage, page.screencast, context.clearPermissions, context.grantPermissions, context.serviceWorkers, context.setDefaultNavigationTimeout, context.setDefaultTimeout, context.setGeolocation, context.setOffline, context.clock, context.debugger, locator.highlight, locator.hideHighlight, locator.screenshot
+value-assertions (extended) Value assertions on plain values: expect(value).not, expect(value).resolves, expect(value).rejects, expect(value).toBe, expect(value).toBeCloseTo, expect(value).toBeDefined, expect(value).toBeFalsy, expect(value).toBeGreaterThan, expect(value).toBeGreaterThanOrEqual, expect(value).toBeInstanceOf, expect(value).toBeLessThan, expect(value).toBeLessThanOrEqual, expect(value).toBeNaN, expect(value).toBeNull, expect(value).toBeTruthy, expect(value).toBeUndefined, expect(value).toEqual, expect(value).toStrictEqual
+value-assertions-more (extended) More value assertions and snapshots: expect(value).toContain, expect(value).toContainEqual, expect(value).toHaveLength, expect(value).toHaveProperty, expect(value).toMatch, expect(value).toMatchObject, expect(value).toThrow, expect(value).toThrowError, expect(locator).toHaveScreenshot, expect(locator).toMatchAriaSnapshot, expect(page).toHaveScreenshot, expect(page).toMatchAriaSnapshot
+@@section core.locators core Locators
+page.frameLocator(selector?: string) -> FrameLocator  # When working with iframes, you can create a frame locator that will enter the iframe and allow selecting elements in that iframe.
+page.getByAltText(text: string|RegExp, options?: { exact? }) -> Locator  # Allows locating elements by their alt text.
+page.getByLabel(text: string|RegExp, options?: { exact? }) -> Locator  # Allows locating input elements by the text of the associated <label> or aria-labelledby element, or by the aria-label attribute.
+page.getByPlaceholder(text: string|RegExp, options?: { exact? }) -> Locator  # Allows locating input elements by the placeholder text.
+page.getByRole(role: "alert"|"alertdialog"|"application"|"article"|... (82 values), options?: { checked?, description?, disabled?, exact?, expanded?, includeHidden?, level?, name?, pressed?, selected? }) -> Locator  # Allows locating elements by their ARIA role, ARIA attributes and accessible name.
+page.getByTestId(testId: string|RegExp) -> Locator  # Locate element by the test id.
+page.getByText(text: string|RegExp, options?: { exact? }) -> Locator  # Allows locating elements that contain given text.
+page.getByTitle(text: string|RegExp, options?: { exact? }) -> Locator  # Allows locating elements by their title attribute.
+page.locator(selector: string, options?: { has?, hasNot?, hasNotText?, hasText? }) -> Locator  # The method returns an element locator that can be used to perform actions on this page / frame.
+locator.and(locator: Locator) -> Locator  # Creates a locator that matches both this locator and the argument locator.
+locator.contentFrame() -> FrameLocator  # Returns a FrameLocator object pointing to the same iframe as this locator.
+locator.count() -> number  # Returns the number of elements matching the locator.
+locator.describe(description: string) -> Locator  # Describes the locator, description is used in the trace viewer and reports.
+locator.filter(options?: { has?, hasNot?, hasNotText?, hasText?, visible? }) -> Locator  # This method narrows existing locator according to the options, for example filters by text.
+locator.first() -> Locator  # Returns locator to the first matching element.
+locator.frameLocator(selector: string) -> FrameLocator  # When working with iframes, you can create a frame locator that will enter the iframe and allow locating elements in that iframe:
+locator.getByAltText(text: string|RegExp, options?: { exact? }) -> Locator  # Allows locating elements by their alt text.
+locator.getByLabel(text: string|RegExp, options?: { exact? }) -> Locator  # Allows locating input elements by the text of the associated <label> or aria-labelledby element, or by the aria-label attribute.
+locator.getByPlaceholder(text: string|RegExp, options?: { exact? }) -> Locator  # Allows locating input elements by the placeholder text.
+locator.getByRole(role: "alert"|"alertdialog"|"application"|"article"|... (82 values), options?: { checked?, description?, disabled?, exact?, expanded?, includeHidden?, level?, name?, pressed?, selected? }) -> Locator  # Allows locating elements by their ARIA role, ARIA attributes and accessible name.
+locator.getByTestId(testId: string|RegExp) -> Locator  # Locate element by the test id.
+locator.getByText(text: string|RegExp, options?: { exact? }) -> Locator  # Allows locating elements that contain given text.
+locator.getByTitle(text: string|RegExp, options?: { exact? }) -> Locator  # Allows locating elements by their title attribute.
+locator.last() -> Locator  # Returns locator to the last matching element.
+locator.locator(selectorOrLocator: string|Locator, options?: { has?, hasNot?, hasNotText?, hasText? }) -> Locator  # The method finds an element matching the specified selector in the locator's subtree.
+locator.nth(index: number) -> Locator  # Returns locator to the n-th matching element.
+locator.or(locator: Locator) -> Locator  # Creates a locator matching all elements that match one or both of the two locators.
+@@section core.actions core Actions
+page.goBack(options?: { timeout?, waitUntil? }) -> null|Response  # Returns the main resource response.
+page.goForward(options?: { timeout?, waitUntil? }) -> null|Response  # Returns the main resource response.
+page.goto(url: string, options?: { referer?, timeout?, waitUntil? }) -> null|Response  # Returns the main resource response.
+page.reload(options?: { timeout?, waitUntil? }) -> null|Response  # This method reloads the current page, in the same way as if the user had triggered a browser refresh.
+locator.blur(options?: { timeout? }) -> void  # Calls blur on the element.
+locator.check(options?: { force?, position?, scroll?, timeout?, trial? }) -> void  # Ensure that checkbox or radio element is checked.
+locator.clear(options?: { force?, timeout? }) -> void  # Clear the input field.
+locator.click(options?: { button?, clickCount?, delay?, force?, modifiers?, position?, scroll?, steps?, timeout?, trial? }) -> void  # Click an element.
+locator.dblclick(options?: { button?, delay?, force?, modifiers?, position?, scroll?, steps?, timeout?, trial? }) -> void  # Double-click an element.
+locator.dragTo(target: Locator, options?: { force?, scroll?, sourcePosition?, steps?, targetPosition?, timeout?, trial? }) -> void  # Drag the source element towards the target element and drop it.
+locator.fill(value: string, options?: { force?, timeout? }) -> void  # Set a value to the input field.
+locator.focus(options?: { timeout? }) -> void  # Calls focus on the matching element.
+locator.hover(options?: { force?, modifiers?, position?, scroll?, timeout?, trial? }) -> void  # Hover over the matching element.
+locator.press(key: string, options?: { delay?, timeout? }) -> void  # Focuses the matching element and presses a combination of the keys.
+locator.pressSequentially(text: string, options?: { delay?, timeout? }) -> void  # Focuses the element, and then sends a keydown, keypress/input, and keyup event for each character in the text.
+locator.scrollIntoViewIfNeeded(options?: { timeout? }) -> void  # This method waits for actionability checks, then tries to scroll element into view, unless it is completely visible as defined by...
+locator.selectOption(values: null|string|ElementHandle|ReadonlyArray<string>|{ value?: string; label?: string; index?: number; }|ReadonlyArray<ElementHandle>|ReadonlyArray<{ value?: string; label?: string; index?: number; }>, options?: { force?, timeout? }) -> Array<string>  # Selects option or options in <select>.
+locator.selectText(options?: { force?, timeout? }) -> void  # This method waits for actionability checks, then focuses the element and selects all its text content.
+locator.setChecked(checked: boolean, options?: { force?, position?, scroll?, timeout?, trial? }) -> void  # Set the state of a checkbox or a radio element.
+locator.tap(options?: { force?, modifiers?, position?, scroll?, timeout?, trial? }) -> void  # Perform a tap gesture on the element matching the locator.
+locator.uncheck(options?: { force?, position?, scroll?, timeout?, trial? }) -> void  # Ensure that checkbox or radio element is unchecked.
+@@section core.assertions core Assertions with expect (web-first, retry until the timeout)
+expect(locator).toBeAttached(options?: { attached?, timeout? }) -> void  # Ensures that Locator points to an element that is connected to a Document or a ShadowRoot.
+expect(locator).toBeChecked(options?: { checked?, indeterminate?, timeout? }) -> void  # Ensures the Locator points to a checked input.
+expect(locator).toBeDisabled(options?: { timeout? }) -> void  # Ensures the Locator points to a disabled element.
+expect(locator).toBeEditable(options?: { editable?, timeout? }) -> void  # Ensures the Locator points to an editable element.
+expect(locator).toBeEmpty(options?: { timeout? }) -> void  # Ensures the Locator points to an empty editable element or to a DOM node that has no text.
+expect(locator).toBeEnabled(options?: { enabled?, timeout? }) -> void  # Ensures the Locator points to an enabled element.
+expect(locator).toBeFocused(options?: { timeout? }) -> void  # Ensures the Locator points to a focused DOM node.
+expect(locator).toBeHidden(options?: { timeout? }) -> void  # Ensures that Locator either does not resolve to any DOM node, or resolves to a non-visible one.
+expect(locator).toBeInViewport(options?: { ratio?, timeout? }) -> void  # Ensures the Locator points to an element that intersects viewport, according to the intersection observer API.
+expect(locator).toBeVisible(options?: { timeout?, visible? }) -> void  # Ensures that Locator points to an attached and visible DOM node.
+expect(locator).toContainClass(expected: string|ReadonlyArray<string>, options?: { timeout? }) -> void  # Ensures the Locator points to an element with given CSS classes.
+expect(locator).toContainText(expected: string|RegExp|ReadonlyArray<string|RegExp>, options?: { ignoreCase?, timeout?, useInnerText? }) -> void  # Ensures the Locator points to an element that contains the given text.
+expect(locator).toHaveAccessibleDescription(description: string|RegExp, options?: { ignoreCase?, timeout? }) -> void  # Ensures the Locator points to an element with a given accessible description.
+expect(locator).toHaveAccessibleErrorMessage(errorMessage: string|RegExp, options?: { ignoreCase?, timeout? }) -> void  # Ensures the Locator points to an element with a given aria errormessage.
+expect(locator).toHaveAccessibleName(name: string|RegExp, options?: { ignoreCase?, timeout? }) -> void  # Ensures the Locator points to an element with a given accessible name.
+expect(locator).toHaveAttribute(name: string, value: string|RegExp, options?: { ignoreCase?, timeout? }) -> void  # Ensures the Locator points to an element with given attribute.
+expect(locator).toHaveAttribute(name: string, options?: { timeout? }) -> void  # Ensures the Locator points to an element with given attribute.
+expect(locator).toHaveClass(expected: string|RegExp|ReadonlyArray<string|RegExp>, options?: { timeout? }) -> void  # Ensures the Locator points to an element with given CSS classes.
+expect(locator).toHaveCount(count: number, options?: { timeout? }) -> void  # Ensures the Locator resolves to an exact number of DOM nodes.
+expect(locator).toHaveCSS(name: string, value: string|RegExp, options?: { pseudo?, timeout? }) -> void  # Ensures the Locator resolves to an element with the given computed CSS style.
+expect(locator).toHaveId(id: string|RegExp, options?: { timeout? }) -> void  # Ensures the Locator points to an element with the given DOM Node ID.
+expect(locator).toHaveJSProperty(name: string, value: any, options?: { timeout? }) -> void  # Ensures the Locator points to an element with given JavaScript property.
+expect(locator).toHaveRole(role: "alert"|"alertdialog"|"application"|"article"|... (82 values), options?: { timeout? }) -> void  # Ensures the Locator points to an element with a given ARIA role.
+expect(locator).toHaveText(expected: string|RegExp|ReadonlyArray<string|RegExp>, options?: { ignoreCase?, timeout?, useInnerText? }) -> void  # Ensures the Locator points to an element with the given text.
+expect(locator).toHaveValue(value: string|RegExp, options?: { timeout? }) -> void  # Ensures the Locator points to an element with the given input value.
+expect(locator).toHaveValues(values: ReadonlyArray<string|RegExp>, options?: { timeout? }) -> void  # Ensures the Locator points to multi-select/combobox (i.e.
+expect(locator).not: LocatorAssertions  # Makes the assertion check for the opposite condition.
+expect(page).toHaveTitle(titleOrRegExp: string|RegExp, options?: { timeout? }) -> void  # Ensures the page has the given title.
+expect(page).toHaveURL(url: string|RegExp|URLPattern|((url: URL) => boolean), options?: { ignoreCase?, timeout? }) -> void  # Ensures the page is navigated to the given URL.
+expect(page).not: PageAssertions  # Makes the assertion check for the opposite condition.
+@@section reads-element extended Reading an element
+locator.toString() -> string  # Returns a human-readable representation of the locator, using the locator.description() if one exists; otherwise, it generates a string...
+locator.all() -> Array<Locator>  # When the locator points to a list of elements, this returns an array of locators, pointing to their respective elements.
+locator.allInnerTexts() -> Array<string>  # Returns an array of node.innerText values for all matching nodes.
+locator.allTextContents() -> Array<string>  # Returns an array of node.textContent values for all matching nodes.
+locator.ariaSnapshot(options?: { boxes?: boolean, depth?: number, mode?: "ai"|"default", timeout?: number }) -> string  # Captures the aria snapshot of the given element.
+locator.ariaSnapshotJSON(options?: { boxes?: boolean, depth?: number, mode?: "ai"|"default", timeout?: number }) -> Serializable  # Captures the aria snapshot of the given element as a free form JSON object.
+locator.boundingBox(options?: { timeout?: number }) -> null|{ x: number; y: number; width: number; height: number; }  # This method returns the bounding box of the element matching the locator, or null if the element is not visible.
+locator.description() -> null|string  # Returns locator description previously set with locator.describe(description).
+locator.getAttribute(name: string, options?: { timeout?: number }) -> null|string  # Returns the matching element's attribute value.
+locator.innerHTML(options?: { timeout?: number }) -> string  # Returns the element.innerHTML.
+locator.innerText(options?: { timeout?: number }) -> string  # Returns the element.innerText.
+locator.inputValue(options?: { timeout?: number }) -> string  # Returns the value for the matching <input> or <textarea> or <select> element.
+locator.isChecked(options?: { timeout?: number }) -> boolean  # Returns whether the element is checked.
+locator.isDisabled(options?: { timeout?: number }) -> boolean  # Returns whether the element is disabled, the opposite of enabled.
+locator.isEditable(options?: { timeout?: number }) -> boolean  # Returns whether the element is editable.
+locator.isEnabled(options?: { timeout?: number }) -> boolean  # Returns whether the element is enabled.
+locator.isHidden(options?: {  }) -> boolean  # Returns whether the element is hidden, the opposite of visible.
+locator.isVisible(options?: {  }) -> boolean  # Returns whether the element is visible.
+locator.normalize() -> Locator  # Returns a new locator that uses best practices for referencing the matched element, prioritizing test ids, aria roles, and other...
+locator.page() -> Page  # A page this locator belongs to.
+locator.textContent(options?: { timeout?: number }) -> null|string  # Returns the node.textContent.
+locator.visible() -> Locator  # Returns a locator that matches only visible elements, ignoring the invisible ones.
+@@section reads-page extended Reading the page
+page.ariaSnapshot(options?: { boxes?: boolean, depth?: number, mode?: "ai"|"default", timeout?: number }) -> string  # Captures the aria snapshot of the page.
+page.ariaSnapshotJSON(options?: { boxes?: boolean, depth?: number, mode?: "ai"|"default", timeout?: number }) -> Serializable  # Captures the aria snapshot of the page as a free form JSON object.
+page.clearConsoleMessages() -> void  # Clears all stored console messages from this page.
+page.clearPageErrors() -> void  # Clears all stored page errors from this page.
+page.consoleMessages(options?: { filter?: "all"|"since-navigation" }) -> Array<ConsoleMessage>  # Returns up to (currently) 200 last console messages from this page.
+page.content() -> string  # Gets the full HTML contents of the page, including the doctype.
+page.context() -> BrowserContext  # Get the browser context that the page belongs to.
+page.isClosed() -> boolean  # Indicates that the page has been closed.
+page.pageErrors(options?: { filter?: "all"|"since-navigation" }) -> Array<Error>  # Returns up to (currently) 200 last page errors from this page.
+page.title() -> string  # Returns the page's title.
+page.url() -> string
+page.viewportSize() -> null|{ width: number; height: number; }
+frame.content() -> string  # Gets the full HTML contents of the frame, including the doctype.
+frame.isDetached() -> boolean  # Returns true if the frame has been detached, or false otherwise.
+frame.name() -> string  # Returns frame's name attribute as specified in the tag.
+frame.title() -> string  # Returns the page title.
+frame.url() -> string  # Returns frame's url.
+@@section waits extended Waiting
+page.waitForEvent(event: "close"|"console"|"crash"|"dialog"|"dialogclosed"|"domcontentloaded"|"download"|"filechooser"|"frameattached"|"framedetached"|"framenavigated"|"load"|"pageerror"|"popup"|"request"|"requestfailed"|"requestfinished"|"response"|"websocket"|"worker", options?: { predicate?: function, timeout?: number }) -> the event payload  # Waits for the named event and returns its payload.
+page.waitForLoadState(state?: "load"|"domcontentloaded"|"networkidle", options?: { timeout?: number }) -> void  # Returns when the required load state has been reached.
+page.waitForTimeout(timeout: number) -> void  # Waits for the given timeout in milliseconds.
+page.waitForURL(url: string|RegExp|URLPattern|((url: URL) => boolean), options?: { timeout?: number, waitUntil?: "load"|"domcontentloaded"|"networkidle"|"commit" }) -> void  # Waits for the main frame to navigate to the given URL.
+frame.waitForLoadState(state?: "load"|"domcontentloaded"|"networkidle", options?: { timeout?: number }) -> void  # Waits for the required load state to be reached.
+frame.waitForTimeout(timeout: number) -> void  # Waits for the given timeout in milliseconds.
+frame.waitForURL(url: string|RegExp|URLPattern|((url: URL) => boolean), options?: { timeout?: number, waitUntil?: "load"|"domcontentloaded"|"networkidle"|"commit" }) -> void  # Waits for the frame to navigate to the given URL.
+context.waitForEvent(event: "backgroundpage"|"close"|"console"|"dialog"|"dialogclosed"|"download"|"frameattached"|"framedetached"|"framenavigated"|"page"|"pageclose"|"pageload"|"request"|"requestfailed"|"requestfinished"|"response"|"serviceworker"|"weberror", options?: { predicate?: function, timeout?: number }) -> the event payload  # Waits for the named event and returns its payload.
+locator.waitFor(options?: { state?: "attached"|"detached"|"visible"|"hidden", timeout?: number }) -> void  # Returns when element specified by locator satisfies the state option.
+@@section frames extended Frames, pages and popups
+page.bringToFront() -> void  # Brings page to front (activates tab).
+page.frame(frameSelector: string|{ name?: string; url?: string|RegExp|URLPattern|((url: URL) => boolean); }) -> null|Frame  # Returns frame matching the specified criteria.
+page.frames() -> Array<Frame>  # An array of all frames attached to the page.
+page.mainFrame() -> Frame  # The page's main frame.
+page.opener() -> null|Page  # Returns the opener for popup pages and null for others.
+frame.childFrames() -> Array<Frame>
+frame.frameElement() -> ElementHandle  # Returns the frame or iframe element handle which corresponds to this frame.
+frame.page() -> Page  # Returns the page containing this frame.
+frame.parentFrame() -> null|Frame  # Parent frame, if any.
+context.isClosed() -> boolean  # Indicates that the browser context is in the process of closing or has already been closed.
+context.pages() -> Array<Page>  # Returns all open pages in the context.
+frameLocator.frameLocator(selector: string) -> FrameLocator  # When working with iframes, you can create a frame locator that will enter the iframe and allow selecting elements in that iframe.
+frameLocator.getByAltText(text: string|RegExp, options?: { exact?: boolean }) -> Locator  # Allows locating elements by their alt text.
+frameLocator.getByLabel(text: string|RegExp, options?: { exact?: boolean }) -> Locator  # Allows locating input elements by the text of the associated <label> or aria-labelledby element, or by the aria-label attribute.
+frameLocator.getByPlaceholder(text: string|RegExp, options?: { exact?: boolean }) -> Locator  # Allows locating input elements by the placeholder text.
+frameLocator.getByRole(role: "alert"|"alertdialog"|"application"|"article"|... (82 values), options?: { checked?: boolean, description?: string|RegExp, disabled?: boolean, exact?: boolean, expanded?: boolean, includeHidden?: boolean, level?: number, name?: string|RegExp, pressed?: boolean, selected?: boolean }) -> Locator  # Allows locating elements by their ARIA role, ARIA attributes and accessible name.
+frameLocator.getByTestId(testId: string|RegExp) -> Locator  # Locate element by the test id.
+frameLocator.getByText(text: string|RegExp, options?: { exact?: boolean }) -> Locator  # Allows locating elements that contain given text.
+frameLocator.getByTitle(text: string|RegExp, options?: { exact?: boolean }) -> Locator  # Allows locating elements by their title attribute.
+frameLocator.locator(selectorOrLocator: string|Locator, options?: { has?: Locator, hasNot?: Locator, hasNotText?: string|RegExp, hasText?: string|RegExp }) -> Locator  # The method finds an element matching the specified selector in the locator's subtree.
+frameLocator.owner() -> Locator  # Returns a Locator object pointing to the same iframe as this frame locator.
+@@section frame-api extended Working inside a Frame object
+frame.dragAndDrop(source: string, target: string, options?: { force?: boolean, scroll?: "auto"|"none", sourcePosition?: { x: number; y: number; }, steps?: number, strict?: boolean, targetPosition?: { x: number; y: number; }, timeout?: number, trial?: boolean }) -> void
+frame.frameLocator(selector?: string) -> FrameLocator  # When working with iframes, you can create a frame locator that will enter the iframe and allow selecting elements in that iframe.
+frame.getByAltText(text: string|RegExp, options?: { exact?: boolean }) -> Locator  # Allows locating elements by their alt text.
+frame.getByLabel(text: string|RegExp, options?: { exact?: boolean }) -> Locator  # Allows locating input elements by the text of the associated <label> or aria-labelledby element, or by the aria-label attribute.
+frame.getByPlaceholder(text: string|RegExp, options?: { exact?: boolean }) -> Locator  # Allows locating input elements by the placeholder text.
+frame.getByRole(role: "alert"|"alertdialog"|"application"|"article"|... (82 values), options?: { checked?: boolean, description?: string|RegExp, disabled?: boolean, exact?: boolean, expanded?: boolean, includeHidden?: boolean, level?: number, name?: string|RegExp, pressed?: boolean, selected?: boolean }) -> Locator  # Allows locating elements by their ARIA role, ARIA attributes and accessible name.
+frame.getByTestId(testId: string|RegExp) -> Locator  # Locate element by the test id.
+frame.getByText(text: string|RegExp, options?: { exact?: boolean }) -> Locator  # Allows locating elements that contain given text.
+frame.getByTitle(text: string|RegExp, options?: { exact?: boolean }) -> Locator  # Allows locating elements by their title attribute.
+frame.goto(url: string, options?: { referer?: string, timeout?: number, waitUntil?: "load"|"domcontentloaded"|"networkidle"|"commit" }) -> null|Response  # Returns the main resource response.
+frame.locator(selector: string, options?: { has?: Locator, hasNot?: Locator, hasNotText?: string|RegExp, hasText?: string|RegExp }) -> Locator  # The method returns an element locator that can be used to perform actions on this page / frame.
+frame.setContent(html: string, options?: { timeout?: number, waitUntil?: "load"|"domcontentloaded"|"networkidle"|"commit" }) -> void  # This method internally calls document.write(), inheriting all its specific characteristics and behaviors.
+@@section dialogs-files extended Dialogs, downloads and file inputs
+locator.drop(payload: { files?: string|Array<string>|{ name: string; mimeType: string; buffer: Buffer; }|Array<{ name: string; mimeType: string; buffer: Buffer; }>, data?: { [key: string]: string; } }, options?: { position?: { x: number; y: number; }, timeout?: number }) -> void  # Simulate an external drag-and-drop of files or clipboard-like data onto this locator.
+locator.setInputFiles(files: string|ReadonlyArray<string>|{ name: string; mimeType: string; buffer: Buffer; }|ReadonlyArray<{ name: string; mimeType: string; buffer: Buffer; }>, options?: { timeout?: number }) -> void  # Upload file or multiple files into <input type=file>.
+dialog.accept(promptText?: string) -> void  # Returns when the dialog has been accepted.
+dialog.defaultValue() -> string  # If dialog is prompt, returns default prompt value.
+dialog.dismiss() -> void  # Returns when the dialog has been dismissed.
+dialog.message() -> string  # A message displayed in the dialog.
+dialog.page() -> null|Page  # The page that initiated this dialog, if available.
+dialog.type() -> string  # Returns dialog's type, can be one of alert, beforeunload, confirm or prompt.
+download.cancel() -> void  # Cancels a download.
+download.createReadStream() -> Readable  # Returns a readable stream for a successful download, or throws for a failed/canceled download.
+download.delete() -> void  # Deletes the downloaded file.
+download.failure() -> null|string  # Returns download error if any.
+download.page() -> Page  # Get the page that the download belongs to.
+download.path() -> string  # Returns path to the downloaded file for a successful download, or throws for a failed/canceled download.
+download.saveAs(path: string) -> void  # Copy the download to a user-specified path.
+download.suggestedFilename() -> string  # Returns suggested filename for this download.
+download.url() -> string  # Returns downloaded url.
+fileChooser.element() -> ElementHandle  # Returns input element associated with this file chooser.
+fileChooser.isMultiple() -> boolean  # Returns whether this file chooser accepts multiple files.
+fileChooser.page() -> Page  # Returns page this file chooser belongs to.
+fileChooser.setFiles(files: string|ReadonlyArray<string>|{ name: string; mimeType: string; buffer: Buffer; }|ReadonlyArray<{ name: string; mimeType: string; buffer: Buffer; }>, options?: { timeout?: number }) -> void  # Sets the value of the file input this chooser is associated with.
+@@section input-devices extended Keyboard, mouse and touch
+page.dragAndDrop(source: string, target: string, options?: { force?: boolean, scroll?: "auto"|"none", sourcePosition?: { x: number; y: number; }, steps?: number, strict?: boolean, targetPosition?: { x: number; y: number; }, timeout?: number, trial?: boolean }) -> void  # This method drags the source element to the target element.
+page.keyboard: Keyboard
+page.mouse: Mouse
+page.touchscreen: Touchscreen
+locator.dispatchEvent(type: string, eventInit?: EvaluationArgument, options?: { timeout?: number }) -> void  # Programmatically dispatch an event on the matching element.
+page.keyboard.down(key: string) -> void  # Dispatches a keydown event.
+page.keyboard.insertText(text: string) -> void  # Dispatches only input event, does not emit the keydown, keyup or keypress events.
+page.keyboard.press(key: string, options?: { delay?: number }) -> void  # key can specify the intended keyboardEvent.key value or a single character to generate the text for.
+page.keyboard.type(text: string, options?: { delay?: number }) -> void  # Sends a keydown, keypress/input, and keyup event for each character in the text.
+page.keyboard.up(key: string) -> void  # Dispatches a keyup event.
+page.mouse.click(x: number, y: number, options?: { button?: "left"|"right"|"middle", clickCount?: number, delay?: number }) -> void  # Shortcut for [mouse.move(x, y[, options])](https://playwright.dev/docs/api/class-mouse#mouse-move),...
+page.mouse.dblclick(x: number, y: number, options?: { button?: "left"|"right"|"middle", delay?: number }) -> void  # Shortcut for [mouse.move(x, y[, options])](https://playwright.dev/docs/api/class-mouse#mouse-move),...
+page.mouse.down(options?: { button?: "left"|"right"|"middle", clickCount?: number }) -> void  # Dispatches a mousedown event.
+page.mouse.move(x: number, y: number, options?: { steps?: number }) -> void  # Dispatches a mousemove event.
+page.mouse.up(options?: { button?: "left"|"right"|"middle", clickCount?: number }) -> void  # Dispatches a mouseup event.
+page.mouse.wheel(deltaX: number, deltaY: number) -> void  # Dispatches a wheel event.
+page.touchscreen.tap(x: number, y: number) -> void  # Dispatches a touchstart and touchend event with a single touch at the position (x,y).
+@@section script extended Running script in the page
+page.evaluate(pageFunction: PageFunction<Arg, R>, arg: Arg, options?: { exposeFunctions?: boolean }) -> R  # Returns the value of the pageFunction invocation.
+page.evaluate(pageFunction: PageFunction<void, R>, arg?: any, options?: { exposeFunctions?: boolean }) -> R  # Returns the value of the pageFunction invocation.
+page.evaluateHandle(pageFunction: PageFunction<Arg, R>, arg: Arg, options?: { exposeFunctions?: boolean }) -> SmartHandle<R>  # Returns the value of the pageFunction invocation as a JSHandle.
+page.evaluateHandle(pageFunction: PageFunction<void, R>, arg?: any, options?: { exposeFunctions?: boolean }) -> SmartHandle<R>  # Returns the value of the pageFunction invocation as a JSHandle.
+page.waitForFunction(pageFunction: PageFunction<Arg, R>, arg: Arg, options?: PageWaitForFunctionOptions) -> SmartHandle<R>  # Returns when the pageFunction returns a truthy value.
+page.waitForFunction(pageFunction: PageFunction<void, R>, arg?: any, options?: PageWaitForFunctionOptions) -> SmartHandle<R>  # Returns when the pageFunction returns a truthy value.
+frame.evaluate(pageFunction: PageFunction<Arg, R>, arg: Arg, options?: { exposeFunctions?: boolean }) -> R  # Returns the return value of pageFunction.
+frame.evaluate(pageFunction: PageFunction<void, R>, arg?: any, options?: { exposeFunctions?: boolean }) -> R  # Returns the return value of pageFunction.
+frame.evaluateHandle(pageFunction: PageFunction<Arg, R>, arg: Arg, options?: { exposeFunctions?: boolean }) -> SmartHandle<R>  # Returns the return value of pageFunction as a JSHandle.
+frame.evaluateHandle(pageFunction: PageFunction<void, R>, arg?: any, options?: { exposeFunctions?: boolean }) -> SmartHandle<R>  # Returns the return value of pageFunction as a JSHandle.
+frame.waitForFunction(pageFunction: PageFunction<Arg, R>, arg: Arg, options?: PageWaitForFunctionOptions) -> SmartHandle<R>  # Returns when the pageFunction returns a truthy value, returns that value.
+frame.waitForFunction(pageFunction: PageFunction<void, R>, arg?: any, options?: PageWaitForFunctionOptions) -> SmartHandle<R>  # Returns when the pageFunction returns a truthy value, returns that value.
+locator.evaluate(pageFunction: PageFunctionOn<E, Arg, R>, arg?: Arg, options?: { timeout?: number, exposeFunctions?: boolean }) -> R  # Execute JavaScript code in the page, taking the matching element as an argument.
+locator.evaluateHandle(pageFunction: PageFunctionOn<E, Arg, R>, arg?: Arg, options?: { timeout?: number, exposeFunctions?: boolean }) -> SmartHandle<R>  # Execute JavaScript code in the page, taking the matching element as an argument, and return a JSHandle with the result.
+locator.evaluateAll(pageFunction: PageFunctionOn<E[], Arg, R>, arg?: Arg) -> R  # Execute JavaScript code in the page, taking all matching elements as an argument.
+locator.waitForFunction(pageFunction: PageFunctionOn<E, Arg, any>, arg?: Arg, options?: { timeout?: number }) -> void  # Returns when pageFunction returns a truthy value, called with the matching element as a first argument, and arg as a second argument.
+@@section page-content extended Page content, init scripts and handlers
+page.addInitScript(script: PageFunction<Arg, any> | { path?: string, content?: string }, arg?: Arg, options?: { exposeFunctions?: boolean }) -> Disposable  # Adds a script which would be evaluated in one of the following scenarios: - Whenever the page is navigated.
+page.exposeBinding(name: string, playwrightBinding: (source: BindingSource, ...args: any[]) => any) -> Disposable  # The method adds a function called name on the window object of every frame in this page.
+page.addLocatorHandler(locator: Locator, handler: ((locator: Locator) => Promise<any>), options?: { noWaitAfter?: boolean, times?: number }) -> void  # When testing a web page, sometimes unexpected overlays like a "Sign up" dialog appear and block actions you want to automate, e.g.
+page.addScriptTag(options?: { content?: string, path?: string, type?: string, url?: string }) -> ElementHandle  # Adds a <script> tag into the page with the desired url or content.
+page.addStyleTag(options?: { content?: string, path?: string, url?: string }) -> ElementHandle  # Adds a <link rel="stylesheet"> tag into the page with the desired url or a <style type="text/css"> tag with the content.
+page.exposeFunction(name: string, callback: Function) -> Disposable  # The method adds a function called name on the window object of every frame in the page.
+page.removeLocatorHandler(locator: Locator) -> void  # Removes all locator handlers added by [page.addLocatorHandler(locator, handler[,...
+page.setContent(html: string, options?: { timeout?: number, waitUntil?: "load"|"domcontentloaded"|"networkidle"|"commit" }) -> void  # This method internally calls document.write(), inheriting all its specific characteristics and behaviors.
+frame.addScriptTag(options?: { content?: string, path?: string, type?: string, url?: string }) -> ElementHandle  # Returns the added tag when the script's onload fires or when the script content was injected into frame.
+frame.addStyleTag(options?: { content?: string, path?: string, url?: string }) -> ElementHandle  # Returns the added tag when the stylesheet's onload fires or when the CSS content was injected into frame.
+context.exposeBinding(name: string, playwrightBinding: (source: BindingSource, ...args: any[]) => any) -> Disposable  # The method adds a function called name on the window object of every frame in every page in the context.
+context.addInitScript(script: PageFunction<Arg, any> | { path?: string, content?: string }, arg?: Arg, options?: { exposeFunctions?: boolean }) -> Disposable  # Adds a script which would be evaluated in one of the following scenarios: - Whenever a page is created in the browser context or is...
+context.exposeFunction(name: string, callback: Function) -> Disposable  # The method adds a function called name on the window object of every frame in every page in the context.
+locator.elementHandle(options?: { timeout?: number }) -> ElementHandle<SVGElement | HTMLElement>  # Resolves given locator to the first matching DOM element.
+locator.elementHandles() -> Array<ElementHandle>  # Resolves given locator to all matching DOM elements.
+@@section network extended Network
+page.requests() -> Array<Request>  # Returns up to (currently) 100 last network request from this page.
+page.route(url: string|RegExp|URLPattern|((url: URL) => boolean), handler: ((route: Route, request: Request) => Promise<any>|any), options?: { times?: number }) -> Disposable  # Routing provides the capability to modify network requests that are made by a page.
+page.routeFromHAR(har: string, options?: { notFound?: "abort"|"fallback", update?: boolean, updateContent?: "embed"|"attach", updateMode?: "full"|"minimal", url?: string|RegExp }) -> void  # If specified the network requests that are made in the page will be served from the HAR file.
+page.routeWebSocket(url: string|RegExp|URLPattern|((url: URL) => boolean), handler: ((websocketroute: WebSocketRoute) => Promise<any>|any)) -> void  # This method allows to modify websocket connections that are made by the page.
+page.setExtraHTTPHeaders(headers: {  }) -> void  # The extra HTTP headers will be sent with every request the page initiates.
+page.unroute(url: string|RegExp|URLPattern|((url: URL) => boolean), handler?: ((route: Route, request: Request) => Promise<any>|any)) -> void  # Removes a route created with [page.route(url, handler[, options])](https://playwright.dev/docs/api/class-page#page-route).
+page.unrouteAll(options?: { behavior?: "wait"|"ignoreErrors"|"default" }) -> void  # Removes all routes created with [page.route(url, handler[, options])](https://playwright.dev/docs/api/class-page#page-route) and...
+page.waitForRequest(urlOrPredicate: string|RegExp|((request: Request) => boolean|Promise<boolean>), options?: { timeout?: number }) -> Request  # Waits for the matching request and returns it.
+page.waitForResponse(urlOrPredicate: string|RegExp|((response: Response) => boolean|Promise<boolean>), options?: { timeout?: number }) -> Response  # Returns the matched response.
+context.route(url: string|RegExp|URLPattern|((url: URL) => boolean), handler: ((route: Route, request: Request) => Promise<any>|any), options?: { times?: number }) -> Disposable  # Routing provides the capability to modify network requests that are made by any page in the browser context.
+context.routeFromHAR(har: string, options?: { notFound?: "abort"|"fallback", update?: boolean, updateContent?: "embed"|"attach", updateMode?: "full"|"minimal", url?: string|RegExp }) -> void  # If specified the network requests that are made in the context will be served from the HAR file.
+context.routeWebSocket(url: string|RegExp|((url: URL) => boolean), handler: ((websocketroute: WebSocketRoute) => Promise<any>|any)) -> void  # This method allows to modify websocket connections that are made by any page in the browser context.
+context.setExtraHTTPHeaders(headers: {  }) -> void  # The extra HTTP headers will be sent with every request initiated by any page in the context.
+context.unroute(url: string|RegExp|URLPattern|((url: URL) => boolean), handler?: ((route: Route, request: Request) => Promise<any>|any)) -> void  # Removes a route created with [browserContext.route(url, handler[,...
+context.unrouteAll(options?: { behavior?: "wait"|"ignoreErrors"|"default" }) -> void  # Removes all routes created with [browserContext.route(url, handler[,...
+@@section storage extended Cookies and storage
+page.localStorage: WebStorage  # Provides access to the page's localStorage for the current origin.
+page.sessionStorage: WebStorage  # Provides access to the page's sessionStorage for the current origin.
+context.addCookies(cookies: ReadonlyArray<{ name: string; value: string; url?: string; domain?: string; path?: string; expires?: number; httpOnly?: boolean; secure?: boolean; sameSite?: "Strict"|"Lax"|"None"; partitionKey?: string; }>) -> void  # Adds cookies into this browser context.
+context.clearCookies(options?: { domain?: string|RegExp, name?: string|RegExp, path?: string|RegExp }) -> void  # Removes cookies from context.
+context.cookies(urls?: string|ReadonlyArray<string>) -> Array<Cookie>  # If no URLs are specified, this method returns all cookies.
+context.setHTTPCredentials(httpCredentials: null|{ username: string; password: string; origin?: string; }|ReadonlyArray<{ username: string; password: string; origin?: string; }>) -> void  # Sets the credentials for HTTP authentication for this browser context.
+context.setStorageState(storageState: string|{ cookies: Array<{ name: string; value: string; domain: string; path: string; expires: number; httpOnly: boolean; secure: boolean; sameSite: "Strict"|"Lax"|"None"; }>; origins: Array<{ origin: string; localStorage: Array<{ name: string; value: string; }>; }>; }) -> void  # Clears the existing cookies, local storage, IndexedDB entries, origin private file system entries and virtual WebAuthn credentials, and...
+context.storageState(options?: { credentials?: boolean, indexedDB?: boolean, opfs?: boolean, path?: string }) -> { cookies: Array<{ name: string; value: string; domain: string; path: string; expires: number; httpOnly: boolean; secure: boolean; sameSite: "Strict"|"Lax"|"None"; }>; origins: Array<{ origin: string; localStorage: Array<{ name: string; value: string; }>; }>; }  # Returns storage state for this browser context, contains current cookies, local storage snapshot, IndexedDB snapshot, origin private file...
+context.credentials: Credentials  # Virtual WebAuthn authenticator for this context.
+@@section environment extended Environment, timeouts and evidence
+page.cancelPickLocator() -> void  # Cancels an ongoing page.pickLocator() call by deactivating pick locator mode.
+page.emulateMedia(options?: { colorScheme?: null|"light"|"dark"|"no-preference", contrast?: null|"no-preference"|"more", forcedColors?: null|"active"|"none", media?: null|"screen"|"print", reducedMotion?: null|"reduce"|"no-preference" }) -> void  # This method changes the CSS media type through the media argument, and/or the 'prefers-colors-scheme' media feature, using the colorScheme...
+page.hideHighlight() -> void  # Hide all locator highlight overlays previously added by...
+page.pause() -> void  # Pauses script execution.
+page.pdf(options?: { displayHeaderFooter?: boolean, footerTemplate?: string, format?: string, headerTemplate?: string, height?: string|number, landscape?: boolean, margin?: { top?: string|number; right?: string|number; bottom?: string|number; left?: string|number; }, outline?: boolean, pageRanges?: string, path?: string, preferCSSPageSize?: boolean, printBackground?: boolean, scale?: number, tagged?: boolean, width?: string|number }) -> Buffer  # Returns the PDF buffer.
+page.pickLocator() -> Locator  # Enters pick locator mode where hovering over page elements highlights them and shows the corresponding locator.
+page.requestGC() -> void  # Request the page to perform garbage collection.
+page.screenshot(options?: PageScreenshotOptions) -> Buffer  # Returns the buffer with the captured screenshot.
+page.setDefaultNavigationTimeout(timeout: number) -> void  # This setting will change the default maximum navigation time for the following methods and related shortcuts: -...
+page.setDefaultTimeout(timeout: number) -> void  # This setting will change the default maximum time for all the methods accepting timeout option.
+page.setViewportSize(viewportSize: { width: number, height: number }) -> void  # In the case of multiple pages in a single browser, each page can have its own viewport size.
+page.workers() -> Array<Worker>  # This method returns all of the dedicated WebWorkers associated with the page.
+page.clock: Clock  # Playwright has ability to mock clock and passage of time.
+page.coverage: Coverage  # Browser-specific Coverage implementation.
+page.screencast: Screencast  # Screencast object associated with this page.
+context.clearPermissions() -> void  # Clears all permission overrides for the browser context.
+context.grantPermissions(permissions: ReadonlyArray<string>, options?: { origin?: string }) -> void  # Grants specified permissions to the browser context.
+context.serviceWorkers() -> Array<Worker>  # All existing service workers in the context.
+context.setDefaultNavigationTimeout(timeout: number) -> void  # This setting will change the default maximum navigation time for the following methods and related shortcuts: -...
+context.setDefaultTimeout(timeout: number) -> void  # This setting will change the default maximum time for all the methods accepting timeout option.
+context.setGeolocation(geolocation: null|{ latitude: number; longitude: number; accuracy?: number; }) -> void  # Sets the context's geolocation.
+context.setOffline(offline: boolean) -> void
+context.clock: Clock  # Playwright has ability to mock clock and passage of time.
+context.debugger: Debugger  # Debugger allows to pause and resume the execution.
+locator.highlight(options?: { style?: string | { [key: string]: string | number } }) -> Disposable  # Highlight the corresponding element(s) on the screen.
+locator.hideHighlight() -> void  # Hides the element highlight previously added by...
+locator.screenshot(options?: LocatorScreenshotOptions) -> Buffer  # Take a screenshot of the element matching the locator.
+@@section value-assertions extended Value assertions on plain values
+expect(value).not: GenericAssertions<R>  # Makes the assertion check for the opposite condition.
+expect(value).resolves: GenericAssertions<R>  # Use resolves to unwrap the value of a fulfilled promise so any other matcher can be chained.
+expect(value).rejects: GenericAssertions<R>  # Use .rejects to unwrap the reason of a rejected promise so any other matcher can be chained.
+expect(value).toBe(expected: unknown) -> R  # Compares value with expected by calling Object.is.
+expect(value).toBeCloseTo(expected: number, numDigits?: number) -> R  # Compares floating point numbers for approximate equality.
+expect(value).toBeDefined() -> R  # Ensures that value is not undefined.
+expect(value).toBeFalsy() -> R  # Ensures that value is false in a boolean context, one of false, 0, '', null, undefined or NaN.
+expect(value).toBeGreaterThan(expected: number | bigint) -> R  # Ensures that value > expected for number or big integer values.
+expect(value).toBeGreaterThanOrEqual(expected: number | bigint) -> R  # Ensures that value >= expected for number or big integer values.
+expect(value).toBeInstanceOf(expected: Function) -> R  # Ensures that value is an instance of a class.
+expect(value).toBeLessThan(expected: number | bigint) -> R  # Ensures that value < expected for number or big integer values.
+expect(value).toBeLessThanOrEqual(expected: number | bigint) -> R  # Ensures that value <= expected for number or big integer values.
+expect(value).toBeNaN() -> R  # Ensures that value is NaN.
+expect(value).toBeNull() -> R  # Ensures that value is null.
+expect(value).toBeTruthy() -> R  # Ensures that value is true in a boolean context, anything but false, 0, '', null, undefined or NaN.
+expect(value).toBeUndefined() -> R  # Ensures that value is undefined.
+expect(value).toEqual(expected: unknown) -> R  # Compares contents of the value with contents of expected, performing "deep equality" check.
+expect(value).toStrictEqual(expected: unknown) -> R  # Compares contents of the value with contents of expected and their types.
+@@section value-assertions-more extended More value assertions and snapshots
+expect(value).toContain(expected: string) -> R  # Ensures that string value contains an expected substring.
+expect(value).toContain(expected: unknown) -> R  # Ensures that value is an Array or Set and contains an expected item.
+expect(value).toContainEqual(expected: unknown) -> R  # Ensures that value is an Array or Set and contains an item equal to the expected.
+expect(value).toHaveLength(expected: number) -> R  # Ensures that value has a .length property equal to expected.
+expect(value).toHaveProperty(keyPath: string | Array<string>, value?: unknown) -> R  # Ensures that property at provided keyPath exists on the object and optionally checks that property is equal to the expected.
+expect(value).toMatch(expected: RegExp | string) -> R  # Ensures that string value matches a regular expression.
+expect(value).toMatchObject(expected: Record<string, unknown> | Array<unknown>) -> R  # Compares contents of the value with contents of expected, performing "deep equality" check.
+expect(value).toThrow(error?: unknown) -> R  # Calls the function and ensures it throws an error.
+expect(value).toThrowError(error?: unknown) -> R  # An alias for [expect(value).toThrow([expected])](https://playwright.dev/docs/api/class-genericassertions#generic-assertions-to-throw).
+expect(locator).toHaveScreenshot(name: string|ReadonlyArray<string>, options?: { animations?: "disabled"|"allow", caret?: "hide"|"initial", mask?: Array<Locator>, maskColor?: string, maxDiffPixelRatio?: number, maxDiffPixels?: number, omitBackground?: boolean, scale?: "css"|"device", stylePath?: string|Array<string>, threshold?: number, timeout?: number }) -> void  # This function will wait until two consecutive locator screenshots yield the same result, and then compare the last screenshot with the...
+expect(locator).toHaveScreenshot(options?: { animations?: "disabled"|"allow", caret?: "hide"|"initial", mask?: Array<Locator>, maskColor?: string, maxDiffPixelRatio?: number, maxDiffPixels?: number, omitBackground?: boolean, scale?: "css"|"device", stylePath?: string|Array<string>, threshold?: number, timeout?: number }) -> void  # This function will wait until two consecutive locator screenshots yield the same result, and then compare the last screenshot with the...
+expect(locator).toMatchAriaSnapshot(expected: string, options?: { timeout?: number }) -> void  # Asserts that the target element matches the given accessibility snapshot.
+expect(locator).toMatchAriaSnapshot(options?: { name?: string, timeout?: number }) -> void  # Asserts that the target element matches the given accessibility snapshot.
+expect(page).toHaveScreenshot(name: string|ReadonlyArray<string>, options?: PageAssertionsToHaveScreenshotOptions) -> void  # This function will wait until two consecutive page screenshots yield the same result, and then compare the last screenshot with the...
+expect(page).toHaveScreenshot(options?: PageAssertionsToHaveScreenshotOptions) -> void  # This function will wait until two consecutive page screenshots yield the same result, and then compare the last screenshot with the...
+expect(page).toMatchAriaSnapshot(expected: string, options?: { timeout?: number }) -> void  # Asserts that the page body matches the given accessibility snapshot.
+expect(page).toMatchAriaSnapshot(options?: { name?: string, timeout?: number }) -> void  # Asserts that the page body matches the given accessibility snapshot.

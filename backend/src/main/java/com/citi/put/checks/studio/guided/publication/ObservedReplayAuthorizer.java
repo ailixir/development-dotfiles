@@ -39,8 +39,19 @@ public final class ObservedReplayAuthorizer {
     this.clock = clock;
   }
 
+  /** Authorizes a Run of the confirmed revision. */
   public ObservedReplayAuthorization.Prepared authorize(
       UUID testId, Authentication caller, HttpServletRequest request) {
+    return authorize(testId, null, caller, request);
+  }
+
+  /**
+   * Authorizes a Run or a proof of {@code revisionId}, which the caller resolved (the runnable
+   * revision, or the recorded candidate for "Verify again"). It must be this test's confirmed or
+   * candidate revision; {@code null} means the confirmed one.
+   */
+  public ObservedReplayAuthorization.Prepared authorize(
+      UUID testId, UUID requestedRevisionId, Authentication caller, HttpServletRequest request) {
     require(
         !TransactionSynchronizationManager.isActualTransactionActive(),
         "RUNTIME_INCOMPATIBLE",
@@ -49,15 +60,18 @@ public final class ObservedReplayAuthorizer {
     require(request != null && caller instanceof BffAuthenticationToken, "UNAUTHENTICATED", 401);
     var rows =
         jdbc.queryForList(
-            "SELECT confirmed_revision_id,csi_id FROM ui_tests WHERE id=? AND deleted_at IS NULL"
-                + " AND quarantined_at IS NULL",
+            "SELECT confirmed_revision_id,candidate_revision_id,csi_id FROM ui_tests WHERE id=?"
+                + " AND deleted_at IS NULL AND quarantined_at IS NULL",
             testId);
+    require(rows.size() == 1, "FORBIDDEN_SCOPE", 403);
+    var row = rows.getFirst();
+    UUID confirmed = (UUID) row.get("confirmed_revision_id"),
+        candidate = (UUID) row.get("candidate_revision_id");
+    UUID revisionId = requestedRevisionId == null ? confirmed : requestedRevisionId;
     require(
-        rows.size() == 1 && rows.getFirst().get("confirmed_revision_id") != null,
+        revisionId != null && (revisionId.equals(confirmed) || revisionId.equals(candidate)),
         "FORBIDDEN_SCOPE",
         403);
-    var row = rows.getFirst();
-    UUID revisionId = (UUID) row.get("confirmed_revision_id");
     String principal = ((BffAuthenticationToken) caller).getPrincipal().userId(),
         csiId = row.get("csi_id").toString();
     ObjectNode verified = verifier.verify(revisionId);

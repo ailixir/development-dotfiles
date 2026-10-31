@@ -137,8 +137,9 @@ class ExecutionReplayFailureMigrationIT {
   void freshAndUpgradedDatabasesReachV22WithNothingPending() throws SQLException {
     for (String url : List.of(headUrl, upgradeUrl)) {
       assertThat(flyway(url, null).info().pending()).isEmpty();
+      var all = flyway(url, null).info().all();
       assertThat(scalar(url, "SELECT max(version::int) FROM flyway_schema_history"))
-          .isEqualTo("28");
+          .isEqualTo(all[all.length - 1].getVersion().getVersion());
       assertThat(scalar(url, "SELECT description FROM flyway_schema_history WHERE version='22'"))
           .isEqualTo("execution replay failure");
       assertThat(scalar(url, "SELECT count(*) FROM flyway_schema_history WHERE NOT success"))

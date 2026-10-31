@@ -340,7 +340,6 @@ public final class IncrementalAuthoringIdentity {
             .thenComparing(item -> item.path("bindingId").asText(), UTF8));
     consumed.sort(
         Comparator.comparingInt((JsonNode item) -> item.path("coordinate").path("ordinal").asInt())
-            .thenComparing(item -> item.path("argumentSlot").asText(), UTF8)
             .thenComparing(item -> item.path("bindingId").asText(), UTF8));
     ArrayNode producers = content.putArray("producedBindings"),
         consumers = content.putArray("consumedBindings");
