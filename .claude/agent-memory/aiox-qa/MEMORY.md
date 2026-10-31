@@ -48,3 +48,4 @@
 - [WI-5 gate plan review 2026-10-27](project_wi5_gate_plan_review_20261027.md) — r2 APPROVED after 2 rounds; actions counter=admission, L1 canary printed on page, verify.mjs prefix/exit 0, trace leaks secret
 - [WI-4 plan critique 2026-10-27](project_wi4_plan_critique_20261027.md) — CHANGES_REQUIRED; Playwright error text leak, joined tests encoding deleted guards, ReplayIT C6 observer imports deleted collector
 - [Learn/replay parity QA 2026-10-29](project_learn_replay_parity_qa_20261029.md) — no differential test; guided launch lacks viewport; proof replay detects, does not gate
+- [SC008 E22a plan 2026-10-30](project_sc008_e22a_plan_20261030.md) — gate tests red at import, learning receipt unpersisted, dead SC-007 oracles, gate ports 184xx

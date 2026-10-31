@@ -98,3 +98,4 @@
 - [WI-4 builder B state](project_wi4b_builder_state.md) — scratch tree, mailbox, authored files, open findings (AC4 TIMEOUT conflict), T-J6 pending
 - [Link-valued cell read](project_link_valued_cell_read.md) — Wikipedia infobox: backend admitted, runner prepare refused (td-only chain); fix in perceive.ts
 - [Press after fill on a combobox](project_press_after_fill_combobox.md) — Wikipedia search box role flips to combobox; runner certificate + backend selection fix
+- [Gate E22b artifacts](tooling_gate_e22b_artifacts.md) — where generated code lives, what is not persisted (smoke replies), ASSERTION_FAILED = any matcherResult

@@ -100,3 +100,7 @@ logs/
 # QA evidence binaries (coverage archives, run videos) stay on disk, out of git history
 docs/qa/evidence/**/*.tar.gz
 docs/qa/evidence/**/*.webm
+
+# Recorded public-site HARs (contain a public page API key string); never commit
+studio-runner/evaluation/grounding/e18/**/runs/
+studio-runner/evaluation/grounding/runs/e18-har/

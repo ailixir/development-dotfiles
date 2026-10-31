@@ -1,0 +1,2 @@
+- [OBS-015 backend test gotchas](project_obs015_backend_test_gotchas.md) — partial ReplayIT runs always fail at class level; 29 bridge IT cases blocked by the single-path admission gate
+- [ReplayIT TEMP forensics](reference_replayit_temp_forensics.md) — obs007-joined-* TEMP dirs: failed-state, cleanup, finalize-exception dumps show first cause

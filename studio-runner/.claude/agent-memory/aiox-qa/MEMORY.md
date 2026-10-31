@@ -1,0 +1,2 @@
+- [Runner src/run coverage ceiling](project_runner_coverage_ceiling.md) — post-012A unit ceiling 81.16% (AC-25 bars browser.ts); secret-control flake is product-side ps polling
+- [SPK-07 safety verification](project_spk07_safety_verification.md) — 2026-10-26 first NOT READY, re-verified READY after fixes (qa-safety-2 clean); open: QA-D13, KEEP_BODIES
