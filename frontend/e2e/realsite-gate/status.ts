@@ -6,9 +6,8 @@
  */
 import { execFileSync, spawnSync } from 'node:child_process';
 import { closeSync, mkdirSync, openSync, readFileSync, statSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { dirname } from 'node:path';
 import type { APIRequestContext } from '@playwright/test';
-import { GATE_DIR } from './common.ts';
 
 export class StatusShapeError extends Error {
   constructor(message: string) {
@@ -310,39 +309,12 @@ export const TERMINAL_EXECUTION = /^(PASSED|FAILED|ERROR|CANCELLED|STALE)$/;
 
 // ---- action ledger (psql) --------------------------------------------------------------------
 
-/** Top-level operation kinds, derived from the v3 action contract so a spelling drift cannot pass. */
-export function operationKindsFromSchema(schema: unknown): Set<string> {
-  const kinds = new Set<string>();
-  for (const branch of arr(schema, 'properties.operation.oneOf')) {
-    const kind = at(branch, 'properties.kind');
-    if (kind !== null && typeof kind === 'object') {
-      const rec = kind as { const?: unknown; enum?: unknown };
-      if (typeof rec.const === 'string') kinds.add(rec.const);
-      if (Array.isArray(rec.enum)) for (const k of rec.enum) if (typeof k === 'string') kinds.add(k);
-    }
-  }
-  return kinds;
-}
-
-function loadOperationKinds(): ReadonlySet<string> {
-  const schemaPath = resolve(GATE_DIR, '../../../docs/specs/studio-observed-authoring/contracts/v3/action.schema.json');
-  const kinds = operationKindsFromSchema(JSON.parse(readFileSync(schemaPath, 'utf8')));
-  for (const needed of ['click', 'selectOption', 'fill', 'navigate']) {
-    if (!kinds.has(needed)) throw new StatusShapeError(`action.schema.json operation kinds lack ${needed}; the gate cannot judge dispatch`);
-  }
-  return kinds;
-}
-
-export const OPERATION_KINDS: ReadonlySet<string> = loadOperationKinds();
-
 export const LEDGER_STATES = ['ADMITTED', 'REVOKED', 'DISPATCHING', 'SUCCEEDED', 'FAILED', 'UNKNOWN_OUTCOME'] as const;
 
 export interface LedgerRow {
   stepId: string;
   ordinal: number;
   attemptOrdinal: number;
-  kind: string;
-  valueKind: string | null;
   state: (typeof LEDGER_STATES)[number];
   /** document.dispatchCount: 1 exactly for DISPATCHING, SUCCEEDED, FAILED and UNKNOWN_OUTCOME. */
   dispatched: 0 | 1;
@@ -351,8 +323,6 @@ export interface LedgerRow {
 
 export function parseLedgerRows(rows: unknown[]): LedgerRow[] {
   return rows.map((r) => {
-    const kind = str(r, 'kind');
-    if (!OPERATION_KINDS.has(kind)) throw new StatusShapeError(`ledger row has unknown operation kind ${kind}`);
     const state = oneOf(r, 'state', LEDGER_STATES);
     const dispatched = int(r, 'dispatched');
     if (dispatched !== 0 && dispatched !== 1) throw new StatusShapeError('ledger dispatched must be 0 or 1');
@@ -362,13 +332,172 @@ export function parseLedgerRows(rows: unknown[]): LedgerRow[] {
       stepId: str(r, 'step_id'),
       ordinal: int(r, 'ordinal'),
       attemptOrdinal: int(r, 'attempt_ordinal'),
-      kind,
-      valueKind: strOrNull(r, 'value_kind'),
       state,
       dispatched,
       outcome: strOrNull(r, 'outcome'),
     };
   });
+}
+
+// ---- step receipts (psql) ----------------------------------------------------------------------
+
+/** Mirrors contracts/v3/step-receipt.schema.json; status.test.ts compares this list with the schema enum. */
+export const STEP_RECEIPT_CLOSED_CODES = [
+  'INVALID_CONTRACT',
+  'PROFILE_MISMATCH',
+  'AUTHORIZATION_EXPIRED',
+  'POLICY_REFUSED',
+  'TARGET_DRIFT',
+  'READ_REFUSED',
+  'REFERENCE_REFUSED',
+  'ASSERTION_FAILED',
+  'CANCELLED',
+  'TIMEOUT',
+  'OUTCOME_UNKNOWN',
+  'INTERNAL_ERROR',
+  'LOGIN_REQUIRED',
+  'PASSWORD_CONTROL_READ_REFUSED',
+  'REFERENCE_MISMATCH',
+] as const;
+
+/** One effectful Playwright call of a step: the bare method name (for example goto) and whether it returned. */
+export interface StepEffect {
+  method: string;
+  completed: boolean;
+}
+
+export interface StepReceipt {
+  closedCode: (typeof STEP_RECEIPT_CLOSED_CODES)[number] | null;
+  stepHash: string;
+  fenceCrossed: boolean;
+  effects: StepEffect[];
+  effectsTruncated: boolean;
+  offscreen: boolean;
+}
+
+function bool(obj: unknown, path: string): boolean {
+  const v = at(obj, path);
+  if (typeof v !== 'boolean') throw new StatusShapeError(`${path} must be a boolean`);
+  return v;
+}
+
+function closedKeys(obj: unknown, keys: readonly string[], where: string): void {
+  for (const key of keys) at(obj, key);
+  const extra = Object.keys(obj as Record<string, unknown>).filter((key) => !keys.includes(key));
+  if (extra.length > 0) throw new StatusShapeError(`${where} has unexpected field ${extra[0] ?? ''}`);
+}
+
+/** Strict: exactly the step-receipt schema, plus the schema-implied rule that an effect needs a crossed fence. */
+export function parseStepReceipt(raw: unknown): StepReceipt {
+  closedKeys(raw, ['closedCode', 'stepHash', 'fenceCrossed', 'effects', 'effectsTruncated', 'offscreen'], 'step receipt');
+  const closedCode = at(raw, 'closedCode') === null ? null : oneOf(raw, 'closedCode', STEP_RECEIPT_CLOSED_CODES);
+  const stepHash = str(raw, 'stepHash');
+  if (!/^[a-f0-9]{64}$/.test(stepHash)) throw new StatusShapeError('stepHash must be 64 lowercase hex characters');
+  const fenceCrossed = bool(raw, 'fenceCrossed');
+  const list = arr(raw, 'effects');
+  if (list.length > 64) throw new StatusShapeError('effects holds more than 64 entries');
+  const effects = list.map((entry) => {
+    closedKeys(entry, ['method', 'completed'], 'effect');
+    const method = str(entry, 'method');
+    if (method.length > 64) throw new StatusShapeError('effect method is longer than 64 characters');
+    return { method, completed: bool(entry, 'completed') };
+  });
+  if (!fenceCrossed && effects.length > 0) throw new StatusShapeError('effects listed although the fence was not crossed');
+  return { closedCode, stepHash, fenceCrossed, effects, effectsTruncated: bool(raw, 'effectsTruncated'), offscreen: bool(raw, 'offscreen') };
+}
+
+/** The learning receipt of one ledger row (studio_guided_actions.receipt, written with the outcome). */
+export interface AttemptReceipt {
+  /** SC008 writes ordinal 0 and attempt_ordinal 0 for every step; steps differ only by step_id. */
+  stepId: string;
+  ordinal: number;
+  attemptOrdinal: number;
+  dispatchCount: 0 | 1;
+  receipt: StepReceipt | null;
+}
+
+export function parseAttemptReceipts(rows: unknown[]): AttemptReceipt[] {
+  return rows.map((r) => {
+    const dispatchCount = int(r, 'dispatch_count');
+    if (dispatchCount !== 0 && dispatchCount !== 1) throw new StatusShapeError('dispatch_count must be 0 or 1');
+    return { stepId: str(r, 'step_id'), ordinal: int(r, 'ordinal'), attemptOrdinal: int(r, 'attempt_ordinal'), dispatchCount, receipt: at(r, 'receipt') === null ? null : parseStepReceipt(at(r, 'receipt')) };
+  });
+}
+
+/** One entry per ledger row of the session. null (never an empty list) when the source is absent or unreadable. */
+export function learningReceipts(cfg: PsqlConfig, sessionId: string): AttemptReceipt[] | null {
+  const id = safeId(sessionId);
+  try {
+    return parseAttemptReceipts(
+      psqlJson(
+        cfg,
+        `select row_to_json(t) from (select step_id, ordinal, attempt_ordinal, (document->>'dispatchCount')::int as dispatch_count, receipt ` +
+          `from studio_guided_actions where session_id='${id}' order by ordinal, attempt_ordinal) t`,
+      ),
+    );
+  } catch {
+    return null;
+  }
+}
+
+/** The authored step ids of a session in order (document.sourceSteps); a step's index is its position here. */
+export function sessionStepIds(cfg: PsqlConfig, sessionId: string): string[] {
+  const rows = psqlJson(cfg, `select row_to_json(t) from (select array(select step->>'stepId' from jsonb_array_elements(document->'sourceSteps') step) as step_ids from studio_guided_sessions where session_id='${safeId(sessionId)}') t`, 10_000);
+  if (rows.length !== 1) throw new StatusShapeError(`expected exactly one session row, found ${rows.length}`);
+  const ids = arr(rows[0], 'step_ids');
+  if (ids.length === 0 || !ids.every((id) => typeof id === 'string' && id !== '') || new Set(ids).size !== ids.length) throw new StatusShapeError('invalid session step ids');
+  return ids as string[];
+}
+
+// ---- lifecycle: head pointers and proof receipts (psql) -----------------------------------------
+
+/** ui_tests.candidate_revision_id (recorded, awaiting its proof) and confirmed_revision_id (proven). */
+export interface HeadPointers {
+  candidate: string | null;
+  confirmed: string | null;
+}
+
+export function parseHeadPointers(rows: unknown[]): HeadPointers {
+  if (rows.length !== 1) throw new StatusShapeError(`expected exactly one ui_tests row, found ${rows.length}`);
+  return { candidate: strOrNull(rows[0], 'candidate'), confirmed: strOrNull(rows[0], 'confirmed') };
+}
+
+export function readHeadPointers(cfg: PsqlConfig, testId: string): HeadPointers {
+  return parseHeadPointers(psqlJson(cfg, `select row_to_json(t) from (select candidate_revision_id::text as candidate, confirmed_revision_id::text as confirmed from ui_tests where id='${safeId(testId)}'::uuid) t`, 10_000));
+}
+
+export const PROOF_ROW_STATUSES = ['PASSED', 'FAILED', 'NOT_RUN'] as const;
+
+/** One studio_step_receipts row: the proof's verdict on one step of a revision. */
+export interface StepReceiptRow {
+  revisionId: string;
+  stepOrdinal: number;
+  proofExecutionId: string;
+  status: (typeof PROOF_ROW_STATUSES)[number];
+  stepHash: string | null;
+  receipt: StepReceipt | null;
+}
+
+export function parseStepReceiptRows(rows: unknown[]): StepReceiptRow[] {
+  return rows.map((r) => ({
+    revisionId: str(r, 'revision_id'),
+    stepOrdinal: int(r, 'step_ordinal'),
+    proofExecutionId: str(r, 'proof_execution_id'),
+    status: oneOf(r, 'status', PROOF_ROW_STATUSES),
+    stepHash: strOrNull(r, 'step_hash'),
+    receipt: at(r, 'receipt') === null ? null : parseStepReceipt(at(r, 'receipt')),
+  }));
+}
+
+export function stepReceiptRows(cfg: PsqlConfig, revisionId: string): StepReceiptRow[] {
+  return parseStepReceiptRows(
+    psqlJson(
+      cfg,
+      `select row_to_json(t) from (select revision_id::text as revision_id, step_ordinal, proof_execution_id::text as proof_execution_id, status, step_hash, receipt ` +
+        `from studio_step_receipts where revision_id='${safeId(revisionId)}'::uuid order by step_ordinal) t`,
+      10_000,
+    ),
+  );
 }
 
 // ---- model attempts (psql) -------------------------------------------------------------------
@@ -380,9 +509,8 @@ export interface AttemptRow {
   attemptNumber: number;
   status: (typeof ATTEMPT_STATUSES)[number];
   rejectionReason: string | null;
-  /** WI-3 persists the diagnostics Gate of a refusal (column rejection_gate) and the intent-gate path of an admission. */
+  /** The diagnostics Gate of a refusal (column rejection_gate), for example STEP_SYNTAX. */
   rejectionGate: string | null;
-  intentPath: string | null;
   inputTokens: number | null;
   outputTokens: number | null;
   createdAt: string;
@@ -396,7 +524,6 @@ export function parseAttemptRows(rows: unknown[]): AttemptRow[] {
     status: oneOf(r, 'status', ATTEMPT_STATUSES),
     rejectionReason: strOrNull(r, 'rejection_reason'),
     rejectionGate: strOrNull(r, 'rejection_gate'),
-    intentPath: strOrNull(r, 'intent_path'),
     inputTokens: intOrNull(r, 'input_tokens'),
     outputTokens: intOrNull(r, 'output_tokens'),
     createdAt: str(r, 'created_at'),
@@ -460,8 +587,6 @@ export function ledgerRows(cfg: PsqlConfig, sessionId: string): LedgerRow[] {
     psqlJson(
       cfg,
       `select row_to_json(t) from (select step_id, ordinal, attempt_ordinal, ` +
-        `coalesce(document->'operation'->>'kind', proposal->'operation'->>'kind') as kind, ` +
-        `coalesce(document->'operation'->'value'->>'kind', proposal->'operation'->'value'->>'kind') as value_kind, ` +
         `document->>'state' as state, (document->>'dispatchCount')::int as dispatched, document->>'outcomeCode' as outcome ` +
         `from studio_guided_actions where session_id='${id}' order by ordinal, attempt_ordinal) t`,
     ),
@@ -473,7 +598,7 @@ export function attemptRows(cfg: PsqlConfig, sessionId: string): AttemptRow[] {
   return parseAttemptRows(
     psqlJson(
       cfg,
-      `select row_to_json(t) from (select kind, attempt_number, status, rejection_reason, rejection_gate, intent_path, input_tokens, output_tokens, ` +
+      `select row_to_json(t) from (select kind, attempt_number, status, rejection_reason, rejection_gate, input_tokens, output_tokens, ` +
         `created_at, updated_at from studio_guided_model_attempts where session_id='${id}' order by created_at) t`,
     ),
   );

@@ -153,6 +153,10 @@ for (const variant of [
   test.describe(`${variant.name} Variables manual-save preflight`, () => {
     test.use({ viewport: variant.viewport });
     test('blocked Save preserves the draft; correction writes it once and closes', async ({ page, context, request }, testInfo) => {
+      test.skip(
+        process.env.CHECKS_VARIABLES354_EXECUTION !== 'authorized',
+        'One-off Variables 354 execution: needs CHECKS_VARIABLES354_EXECUTION=authorized, ports 19477/19478 and Node 24.20.0.',
+      );
       expect(process.version).toBe('v24.20.0');
       expect(process.env.CHECKS_VARIABLES354_EXECUTION).toBe('authorized');
       expect(process.env.CHECKS_VARIABLES354_EXECUTION_NOTICE_SHA256).toMatch(/^[a-f0-9]{64}$/u);

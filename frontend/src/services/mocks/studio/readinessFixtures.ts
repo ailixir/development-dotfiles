@@ -23,6 +23,9 @@ const BASE_STEPS = [
 
 const CONFIRMED_HASH = 'c'.repeat(64);
 
+/** The recorded (unconfirmed) revision of the RECORDED fixtures. */
+export const RECORDED_FIXTURE_REVISION_ID = '22222222-2222-2222-2222-222222222225';
+
 function draft(id: string, overrides: Partial<TestDto>): TestDto {
   return {
     id,
@@ -83,13 +86,30 @@ export const needsRelearnDraft = draft('a0000000-0000-0000-0000-000000000004', {
   confirmedRevisionId: '22222222-2222-2222-2222-222222222224',
 });
 
+/**
+ * A learned revision was recorded and matches the draft; its model-free proof has not passed
+ * (ADR-SC-008 D5). `verification` names the state and the first step without a PASSED receipt (the
+ * second step of the draft here). Nothing is confirmed: `confirmedRevisionId` is null.
+ */
+export const recordedDraft = draft('a0000000-0000-0000-0000-000000000005', {
+  readiness: 'RECORDED',
+  verification: { state: 'INCOMPLETE', firstUnverifiedStepId: '00000000-0000-4000-8000-000000000002' },
+});
+
+/** The recorded draft whose proof FAILED: Studio offers "Re-learn from step N", not Verify again. */
+export const recordedFailedDraft = draft('a0000000-0000-0000-0000-000000000006', {
+  readiness: 'RECORDED',
+  verification: { state: 'FAILED', firstUnverifiedStepId: '00000000-0000-4000-8000-000000000002' },
+});
+
 /** The draft returned by `GET /tests/{id}` for each readiness state, keyed by state. */
 export const draftsByReadiness: Readonly<Record<TestReadiness, TestDto>> = {
   UNLEARNED: unlearnedDraft,
   LEARNING: learningDraft,
+  RECORDED: recordedDraft,
   READY: readyDraft,
   NEEDS_RELEARN: needsRelearnDraft,
 };
 
 /** Every readiness draft, for the handlers' by-id lookup. */
-export const readinessDrafts: readonly TestDto[] = Object.values(draftsByReadiness);
+export const readinessDrafts: readonly TestDto[] = [...Object.values(draftsByReadiness), recordedFailedDraft];

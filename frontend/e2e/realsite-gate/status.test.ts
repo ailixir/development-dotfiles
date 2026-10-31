@@ -1,15 +1,20 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { test } from 'node:test';
 import Ajv from 'ajv';
 import { GATE_DIR } from './common.ts';
 import {
-  OPERATION_KINDS,
+  STEP_RECEIPT_CLOSED_CODES,
   StatusShapeError,
-  operationKindsFromSchema,
+  learningReceipts,
+  sessionStepIds,
+  parseAttemptReceipts,
   parseAttemptRows,
+  parseHeadPointers,
+  parseStepReceipt,
+  parseStepReceiptRows,
   parseExecutionList,
   parseLatestAttempts,
   parseLedgerRows,
@@ -196,35 +201,132 @@ test('wrong types and unknown enum values throw', () => {
   assert.throws(() => parseExecutionList({ data: [nullTrigger], totalElements: 1 }), StatusShapeError);
 });
 
-const ledgerRow = (over: Record<string, unknown> = {}) => ({ step_id: UUID, ordinal: 0, attempt_ordinal: 0, kind: 'click', value_kind: null, state: 'SUCCEEDED', dispatched: 1, outcome: 'OK', ...over });
+const ledgerRow = (over: Record<string, unknown> = {}) => ({ step_id: UUID, ordinal: 0, attempt_ordinal: 0, state: 'SUCCEEDED', dispatched: 1, outcome: 'OK', ...over });
 
-test('the operation kinds are derived from the action schema', () => {
-  const kinds = operationKindsFromSchema(JSON.parse(readFileSync(join(V3, 'action.schema.json'), 'utf8')));
-  for (const k of ['click', 'check', 'uncheck', 'hover', 'fill', 'press', 'selectOption', 'navigate']) assert.ok(kinds.has(k), k);
-  assert.ok(!kinds.has('secretRef') && !kinds.has('authoredLiteral'), 'value kinds are not operation kinds');
-  assert.ok(OPERATION_KINDS.has('click') && OPERATION_KINDS.has('selectOption'));
-});
-
-test('ledger rows: kind is validated against the closed set and dispatch is consistent with state', () => {
-  const rows = parseLedgerRows([ledgerRow(), ledgerRow({ kind: 'fill', value_kind: 'secretRef', ordinal: 1 }), ledgerRow({ kind: 'selectOption', state: 'REVOKED', dispatched: 0, outcome: null })]);
-  assert.equal(rows[1]?.valueKind, 'secretRef');
+test('ledger rows: dispatch is consistent with state, and no operation kind is read', () => {
+  const rows = parseLedgerRows([ledgerRow(), ledgerRow({ ordinal: 1 }), ledgerRow({ state: 'REVOKED', dispatched: 0, outcome: null })]);
   assert.equal(rows[2]?.dispatched, 0);
-  for (const kind of ['Click', 'tap', 'CLICK', 'select', 'secretRef']) assert.throws(() => parseLedgerRows([ledgerRow({ kind })]), StatusShapeError, kind);
-  assert.throws(() => parseLedgerRows([ledgerRow({ kind: null })]), StatusShapeError);
+  assert.equal('kind' in (rows[0] as object), false);
   assert.throws(() => parseLedgerRows([ledgerRow({ state: 'ADMITTED', dispatched: 1 })]), StatusShapeError);
   assert.throws(() => parseLedgerRows([ledgerRow({ state: 'SUCCEEDED', dispatched: 0 })]), StatusShapeError);
   assert.throws(() => parseLedgerRows([ledgerRow({ state: 'WHATEVER' })]), StatusShapeError);
-  for (const field of ['step_id', 'ordinal', 'attempt_ordinal', 'value_kind', 'state', 'dispatched', 'outcome']) {
+  for (const field of ['step_id', 'ordinal', 'attempt_ordinal', 'state', 'dispatched', 'outcome']) {
     assert.throws(() => parseLedgerRows([withoutField(ledgerRow(), field)]), StatusShapeError, field);
   }
 });
 
+const HASH = 'a'.repeat(64);
+const receipt = (over: Record<string, unknown> = {}) => ({ closedCode: null, stepHash: HASH, fenceCrossed: true, effects: [{ method: 'goto', completed: true }], effectsTruncated: false, offscreen: false, ...over });
+
+test('the receipt parser accepts exactly the step-receipt schema shape', () => {
+  assert.deepEqual(parseStepReceipt(receipt()).effects, [{ method: 'goto', completed: true }]);
+  assert.equal(parseStepReceipt(receipt({ closedCode: 'OUTCOME_UNKNOWN', effects: [{ method: 'selectOption', completed: false }] })).closedCode, 'OUTCOME_UNKNOWN');
+  assert.equal(parseStepReceipt(receipt({ fenceCrossed: false, effects: [] })).fenceCrossed, false);
+  assert.equal(parseStepReceipt(receipt({ effects: Array.from({ length: 64 }, () => ({ method: 'click', completed: true })) })).effects.length, 64);
+  const bad: [string, Record<string, unknown>][] = [
+    ['a closedCode outside the enum', { closedCode: 'TARGET_MISMATCH' }],
+    ['a stepHash that is not hex64', { stepHash: 'A'.repeat(64) }],
+    ['a short stepHash', { stepHash: 'abc' }],
+    ['more than 64 effects', { effects: Array.from({ length: 65 }, () => ({ method: 'click', completed: true })) }],
+    ['an effect without a boolean completed', { effects: [{ method: 'goto', completed: 'yes' }] }],
+    ['an effect without completed', { effects: [{ method: 'goto' }] }],
+    ['an effect with an extra field', { effects: [{ method: 'goto', completed: true, offscreen: true }] }],
+    ['an effect method over 64 characters', { effects: [{ method: 'x'.repeat(65), completed: true }] }],
+    ['an empty effect method', { effects: [{ method: '', completed: true }] }],
+    ['fenceCrossed false with effects', { fenceCrossed: false }],
+    ['a non-boolean fenceCrossed', { fenceCrossed: 1 }],
+    ['an extra field', { extra: 1 }],
+  ];
+  for (const [label, over] of bad) assert.throws(() => parseStepReceipt(receipt(over)), StatusShapeError, label);
+  for (const field of ['closedCode', 'stepHash', 'fenceCrossed', 'effects', 'effectsTruncated', 'offscreen']) assert.throws(() => parseStepReceipt(withoutField(receipt(), field)), StatusShapeError, field);
+  assert.throws(() => parseStepReceipt(null), StatusShapeError);
+  assert.throws(() => parseStepReceipt([]), StatusShapeError);
+});
+
+test('the parser closed-code list equals the repo schema enum (drift test)', () => {
+  const schema = JSON.parse(readFileSync(join(V3, 'step-receipt.schema.json'), 'utf8')) as { properties: { closedCode: { oneOf: { enum?: string[] }[] } } };
+  const fromSchema = schema.properties.closedCode.oneOf.flatMap((branch) => branch.enum ?? []);
+  assert.deepEqual([...STEP_RECEIPT_CLOSED_CODES], fromSchema);
+  const validate = validator('step-receipt.schema.json');
+  for (const sample of [receipt(), receipt({ closedCode: 'TIMEOUT' }), receipt({ closedCode: 'TARGET_MISMATCH' }), receipt({ effects: [{ method: 'goto' }] }), withoutField(receipt(), 'offscreen')]) {
+    let parsed = true;
+    try { parseStepReceipt(sample); } catch { parsed = false; }
+    assert.equal(parsed, validate(sample), JSON.stringify(sample));
+  }
+});
+
+test('learning receipt entries: one per ledger row, a null receipt only for an undispatched row shape', () => {
+  const rows = parseAttemptReceipts([
+    { step_id: 'step-0', ordinal: 0, attempt_ordinal: 0, dispatch_count: 1, receipt: receipt() },
+    { step_id: 'step-1', ordinal: 0, attempt_ordinal: 0, dispatch_count: 0, receipt: null },
+  ]);
+  assert.equal(rows.length, 2);
+  assert.equal(rows[0]?.receipt?.effects[0]?.method, 'goto');
+  assert.equal(rows[1]?.receipt, null);
+  assert.deepEqual(rows.map((r) => [r.stepId, r.ordinal, r.attemptOrdinal]), [['step-0', 0, 0], ['step-1', 0, 0]]);
+  assert.throws(() => parseAttemptReceipts([{ ordinal: 0, attempt_ordinal: 0, dispatch_count: 1, receipt: null }]), StatusShapeError, 'step_id is required');
+  assert.throws(() => parseAttemptReceipts([{ step_id: 'step-0', ordinal: 0, attempt_ordinal: 0, dispatch_count: 2, receipt: null }]), StatusShapeError);
+  assert.throws(() => parseAttemptReceipts([{ step_id: 'step-0', ordinal: 0, attempt_ordinal: 0, dispatch_count: 1, receipt: receipt({ stepHash: 'x' }) }]), StatusShapeError);
+  assert.throws(() => parseAttemptReceipts([{ step_id: 'step-0', ordinal: 0, attempt_ordinal: 0, dispatch_count: 1 }]), StatusShapeError);
+});
+
+test('learningReceipts reads through psql and returns null, never an empty list, when the source is unreadable', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'gate-psql-'));
+  try {
+    const script = (name: string, body: string): string => {
+      const path = join(dir, name);
+      writeFileSync(path, `#!/bin/sh\n${body}\n`);
+      chmodSync(path, 0o755);
+      return path;
+    };
+    const line = JSON.stringify({ step_id: 'step-0', ordinal: 0, attempt_ordinal: 0, dispatch_count: 1, receipt: receipt() });
+    const ok = learningReceipts({ psql: script('ok', `echo '${line}'`), port: '1' }, UUID);
+    assert.equal(ok?.length, 1);
+    assert.equal(learningReceipts({ psql: script('nocolumn', 'echo "ERROR: column \\"receipt\\" does not exist" >&2; exit 1'), port: '1' }, UUID), null);
+    assert.equal(learningReceipts({ psql: script('garbage', 'echo not-json'), port: '1' }, UUID), null);
+    assert.equal(learningReceipts({ psql: script('badreceipt', `echo '${JSON.stringify({ step_id: 'step-0', ordinal: 0, attempt_ordinal: 0, dispatch_count: 1, receipt: receipt({ closedCode: 'NOPE' }) })}'`), port: '1' }, UUID), null);
+    assert.deepEqual(learningReceipts({ psql: script('empty', 'true'), port: '1' }, UUID), [], 'a session without ledger rows is an empty list, an unreadable source is null');
+    assert.throws(() => learningReceipts({ psql: '/bin/true', port: '1' }, "x'; drop table y"), StatusShapeError);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('sessionStepIds reads the authored step order and refuses duplicates or an empty list', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'gate-steps-'));
+  try {
+    const say = (name: string, body: unknown): { psql: string; port: string } => {
+      const path = join(dir, name);
+      writeFileSync(path, `#!/bin/sh\necho '${JSON.stringify(body)}'\n`);
+      chmodSync(path, 0o755);
+      return { psql: path, port: '1' };
+    };
+    assert.deepEqual(sessionStepIds(say('ok', { step_ids: ['a', 'b'] }), UUID), ['a', 'b']);
+    assert.throws(() => sessionStepIds(say('dup', { step_ids: ['a', 'a'] }), UUID), StatusShapeError);
+    assert.throws(() => sessionStepIds(say('empty', { step_ids: [] }), UUID), StatusShapeError);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('head pointers and proof receipt rows are strict', () => {
+  assert.deepEqual(parseHeadPointers([{ candidate: UUID, confirmed: null }]), { candidate: UUID, confirmed: null });
+  assert.throws(() => parseHeadPointers([]), StatusShapeError);
+  assert.throws(() => parseHeadPointers([{ candidate: null, confirmed: null }, { candidate: null, confirmed: null }]), StatusShapeError);
+  assert.throws(() => parseHeadPointers([{ candidate: null }]), StatusShapeError);
+  const proofRow = { revision_id: UUID, step_ordinal: 0, proof_execution_id: UUID, status: 'PASSED', step_hash: HASH, receipt: receipt({ fenceCrossed: false, effects: [] }) };
+  assert.equal(parseStepReceiptRows([proofRow])[0]?.status, 'PASSED');
+  assert.equal(parseStepReceiptRows([{ ...proofRow, status: 'NOT_RUN', step_hash: null, receipt: null }])[0]?.receipt, null);
+  assert.throws(() => parseStepReceiptRows([{ ...proofRow, status: 'DONE' }]), StatusShapeError);
+  assert.throws(() => parseStepReceiptRows([withoutField(proofRow, 'receipt')]), StatusShapeError);
+  assert.throws(() => parseStepReceiptRows([{ ...proofRow, receipt: receipt({ stepHash: 'x' }) }]), StatusShapeError);
+});
+
 test('attempt rows are strict', () => {
-  const row = { kind: 'NEXT_ACTION', attempt_number: 1, status: 'REJECTED', rejection_reason: 'INVALID_CONTRACT', rejection_gate: 'NEXT_TARGET_INTENT', intent_path: null, input_tokens: null, output_tokens: null, created_at: TS, updated_at: TS };
+  const row = { kind: 'STEP_CODE', attempt_number: 1, status: 'REJECTED', rejection_reason: 'INVALID_CONTRACT', rejection_gate: 'STEP_SYNTAX', input_tokens: null, output_tokens: null, created_at: TS, updated_at: TS };
   assert.equal(parseAttemptRows([row])[0]?.rejectionReason, 'INVALID_CONTRACT');
-  assert.equal(parseAttemptRows([row])[0]?.rejectionGate, 'NEXT_TARGET_INTENT');
+  assert.equal(parseAttemptRows([row])[0]?.rejectionGate, 'STEP_SYNTAX');
   assert.throws(() => parseAttemptRows([withoutField(row, 'rejection_gate')]), StatusShapeError);
-  assert.throws(() => parseAttemptRows([withoutField(row, 'intent_path')]), StatusShapeError);
   assert.throws(() => parseAttemptRows([{ ...row, status: 'DONE' }]), StatusShapeError);
   assert.throws(() => parseAttemptRows([withoutField(row, 'rejection_reason')]), StatusShapeError);
 });

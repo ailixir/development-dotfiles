@@ -88,6 +88,20 @@ function toJsonSchema(node: unknown): unknown {
 const specSchema = { ...(toJsonSchema(openapi) as Record<string, unknown>), $id: SPEC_ID };
 ajv.addSchema(specSchema);
 
+// `StepResult.receipt` references the v3 receipt schema by relative path (ADR-SC-008); register the
+// file under the id that reference resolves to, so the execution fixtures validate against it.
+const receiptSchema = JSON.parse(
+  fs.readFileSync(
+    path.resolve(SPEC_DIR, '../studio-observed-authoring/contracts/v3/step-receipt.schema.json'),
+    'utf8',
+  ),
+);
+delete receiptSchema.$schema;
+ajv.addSchema({
+  ...receiptSchema,
+  $id: 'https://put.citi.com/schemas/studio-observed-authoring/contracts/v3/step-receipt.schema.json',
+});
+
 function componentValidator(name: string) {
   expect(openapi.components.schemas[name], `openapi.yaml declares a ${name} schema`).toBeDefined();
   return ajv.compile({ $ref: `${SPEC_ID}#/components/schemas/${name}` });
@@ -775,23 +789,23 @@ describe('STUDIO-OBS-012B AC-3: every public operation has an MSW handler or a P
 });
 
 describe('story 10.11a: the run gate covers the readiness states the document declares', () => {
-  it('every readiness maps to a Run mode, and exactly one of them replays', () => {
+  it('every readiness maps to a Run mode, and only READY and RECORDED replay (RECORDED as a diagnostic)', () => {
     const declared = readinessEnum();
     expect(declared.length).toBeGreaterThan(0);
 
     assertSameSet(declared, Object.keys(RUN_MODE), 'run mode over readiness');
 
     const replaying = declared.filter((state) => runModeFor(state) === 'replay');
-    expect(replaying, 'more or fewer than one state replays without learning').toEqual([
-      EXECUTABLE_READINESS,
-    ]);
+    expect(replaying.slice().sort(), 'only the confirmed state and the recorded diagnostic replay').toEqual(
+      [EXECUTABLE_READINESS, 'RECORDED'].sort(),
+    );
   });
 
   it('every other declared state learns, relearns or keeps Run off', () => {
     const declared = readinessEnum();
     const notReplay = declared.filter((state) => runModeFor(state) !== 'replay');
     expect(notReplay.slice().sort()).toEqual(
-      declared.filter((state) => state !== EXECUTABLE_READINESS).slice().sort(),
+      declared.filter((state) => state !== EXECUTABLE_READINESS && state !== 'RECORDED').slice().sort(),
     );
     for (const state of notReplay) {
       expect(['learn', 'relearn', 'busy'], state).toContain(runModeFor(state));

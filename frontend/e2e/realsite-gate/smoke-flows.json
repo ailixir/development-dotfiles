@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "rule": "The five G0 smoke flows (X-5). Each learns, confirms and replays once under a dry- run id before the counted run. A key is never a gate-table key. Steps are reused verbatim from the gate table (Wikipedia) and from the real-backend diagnostics (IANA, Kernel, GitHub, navigation wording). The navigation-wording flow is INFERRED: the flow identification is a user decision asked before the smoke runner (E22b).",
+  "flows": [
+    {
+      "key": "smoke-wikipedia",
+      "site": "en.wikipedia.org",
+      "steps": [
+        "Go to \"https://en.wikipedia.org/wiki/Python_(programming_language)\"",
+        "Copy the \"Designed by\" value from the infobox",
+        "Type the copied value in the \"Search Wikipedia\" field",
+        "Press Enter",
+        "Check that the page shows the heading \"Guido van Rossum\""
+      ]
+    },
+    {
+      "key": "smoke-iana",
+      "site": "www.iana.org",
+      "steps": [
+        "Go to \"https://www.iana.org/\"",
+        "Check that the page contains \"Internet Assigned Numbers Authority\""
+      ]
+    },
+    {
+      "key": "smoke-kernel",
+      "site": "www.kernel.org",
+      "steps": [
+        "Go to \"https://www.kernel.org/\"",
+        "From the \"stable:\" row, copy the version number for use in the later check",
+        "Check that the page contains the copied version number"
+      ]
+    },
+    {
+      "key": "smoke-github",
+      "site": "github.com",
+      "steps": [
+        "Go to \"https://github.com/microsoft/playwright\"",
+        "Remember the description in the \"About\" section",
+        "Check that the page contains the remembered description"
+      ]
+    },
+    {
+      "key": "smoke-navigation-wording",
+      "site": "www.iana.org",
+      "steps": [
+        "Go to the page \"https://www.iana.org/\""
+      ]
+    }
+  ]
+}

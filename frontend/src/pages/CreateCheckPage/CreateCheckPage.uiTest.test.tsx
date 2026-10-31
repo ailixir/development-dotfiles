@@ -179,8 +179,36 @@ async function openUiTestForm(store?: Store) {
 /** Autosave debounces 400 ms; this is longer, so a write that was going to happen has happened. */
 const afterAutosaveWindow = () => new Promise((resolve) => setTimeout(resolve, 900));
 
+/**
+ * `createMemoryRouter` is a data router: each navigation builds `new Request(url, { signal })` with the
+ * signal of an `AbortController` the router creates. Under jsdom that controller is jsdom's, and the
+ * fetch `Request` is Node's (undici). Node 22 accepts the foreign signal; Node 24's undici rejects it
+ * ("Expected signal to be an instance of AbortSignal"), so `router.navigate` threw and the route never
+ * changed. This test has no loaders or actions, so nothing reads that request or its signal. The wrapper
+ * only retries without the signal when, and only when, that specific refusal happens.
+ */
+const foreignSignalRefusal = /Expected signal .* to be an instance of AbortSignal/;
+const withSignalFallback = (base: typeof Request): typeof Request =>
+  new Proxy(base, {
+    construct(target, args: [RequestInfo | URL, RequestInit?], newTarget) {
+      try {
+        return Reflect.construct(target, args, newTarget);
+      } catch (error) {
+        const init = args[1];
+        if (!(error instanceof TypeError) || !foreignSignalRefusal.test(error.message) || !init?.signal) throw error;
+        const withoutSignal: RequestInit = { ...init, signal: undefined };
+        return Reflect.construct(target, [args[0], withoutSignal], newTarget);
+      }
+    },
+  });
+
+let requestBeforeWrapper: typeof Request;
+
 beforeAll(() => {
   studioMockServer.listen({ onUnhandledRequest: 'error' });
+  // After `listen()`, so the wrapper sits outside MSW's own `Request` wrapper; restored before `close()`.
+  requestBeforeWrapper = globalThis.Request;
+  globalThis.Request = withSignalFallback(requestBeforeWrapper);
 });
 beforeEach(() => {
   user = userEvent.setup({ delay: null });
@@ -195,6 +223,7 @@ afterEach(() => {
   localStorage.clear();
 });
 afterAll(() => {
+  globalThis.Request = requestBeforeWrapper;
   studioMockServer.close();
 });
 

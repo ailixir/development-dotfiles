@@ -98,12 +98,18 @@ describe('AC-7: the guided recording plays from getGuidedSessionVideo (D-2)', ()
   });
 });
 
+/** The recorded actions share one phrase now, so each is found inside its own step's group. */
+const ACTION = 'Seek to action: Ran the step';
+const actionOf = (step: number) => within(screen.getByTestId(`guided-seek-step-${step}`)).queryByRole('button', { name: ACTION });
+
 describe('AC-7 / D-10: named per-step and per-action seek, from server stamps only', () => {
   it('visible labels "Seek to step N" and "Seek to action: <safe label>" for the landed stamps', () => {
     render(<GuidedSeekControls result={recordingResult()} onSeek={() => undefined} />);
-    for (const name of ['Seek to step 1', 'Seek to action: Open page', 'Seek to step 2', 'Seek to action: Click control']) {
+    for (const name of ['Seek to step 1', 'Seek to step 2']) {
       expect(screen.getByRole('button', { name })).toBeEnabled();
     }
+    expect(actionOf(1)).toBeEnabled();
+    expect(actionOf(2)).toBeEnabled();
   });
 
   it('a seek sets currentTime to the stamp / 1000 through the page\'s useVideoSeek', async () => {
@@ -113,7 +119,7 @@ describe('AC-7 / D-10: named per-step and per-action seek, from server stamps on
     await userEvent.click(screen.getByRole('button', { name: 'Seek to step 2' }));
     expect(onSeek).toHaveBeenCalledWith(1210);
     expect(video.currentTime).toBe(1.21);
-    await userEvent.click(screen.getByRole('button', { name: 'Seek to action: Open page' }));
+    await userEvent.click(actionOf(1)!);
     expect(video.currentTime).toBe(0.12);
   });
 
@@ -124,9 +130,9 @@ describe('AC-7 / D-10: named per-step and per-action seek, from server stamps on
     );
     render(<GuidedSeekControls result={result} onSeek={() => undefined} />);
     expect(screen.queryByRole('button', { name: 'Seek to step 2' })).toBeNull();
-    expect(screen.queryByRole('button', { name: 'Seek to action: Open page' })).toBeNull();
+    expect(actionOf(1)).toBeNull();
     expect(screen.getByRole('button', { name: 'Seek to step 1' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Seek to action: Click control' })).toBeInTheDocument();
+    expect(actionOf(2)).toBeInTheDocument();
   });
 
   it('prefixReplay and clarificationWait readings are never seek points; an action joins on admissionId and ordinal', () => {
@@ -158,7 +164,7 @@ describe('AC-7 / D-10: named per-step and per-action seek, from server stamps on
     render(<GuidedSeekControls result={recordingResult()} recording={{ durationMs: 1000 }} onSeek={() => undefined} />);
     expect(screen.getByRole('button', { name: 'Seek to step 1' })).toBeEnabled();
     expect(screen.getByRole('button', { name: 'Seek to step 2' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Seek to action: Click control' })).toBeDisabled();
+    expect(actionOf(2)).toBeDisabled();
   });
 
   it('narrow layout (AC-8 a): seek buttons stack and fill the width at the base breakpoint', () => {
@@ -181,14 +187,14 @@ describe('round 067 D2: a persistent marker of the last seek', () => {
     expect(screen.getByRole('button', { name: 'Seek to step 2' })).toHaveClass('MuiButton-contained');
     expect(screen.getByRole('button', { name: 'Seek to step 1' })).not.toHaveAttribute('data-seek-active');
 
-    await userEvent.click(screen.getByRole('button', { name: 'Seek to action: Click control' }));
-    expect(within(group).getByTestId('guided-seek-marker')).toHaveTextContent('Jumped to step 2, action: Click control.');
+    await userEvent.click(actionOf(2)!);
+    expect(within(group).getByTestId('guided-seek-marker')).toHaveTextContent('Jumped to step 2, action: Ran the step.');
     expect(screen.getAllByTestId('guided-seek-marker')).toHaveLength(1);
     expect(screen.getByRole('button', { name: 'Seek to step 2' })).not.toHaveAttribute('data-seek-active');
-    expect(screen.getByRole('button', { name: 'Seek to action: Click control' })).toHaveAttribute('data-seek-active', 'true');
+    expect(actionOf(2)).toHaveAttribute('data-seek-active', 'true');
     // The names are unchanged and "Seek to step 2" stays unique.
     expect(screen.getAllByRole('button', { name: 'Seek to step 2' })).toHaveLength(1);
-    expect(within(group).getByRole('button', { name: 'Seek to action: Click control' })).toBeInTheDocument();
+    expect(within(group).getByRole('button', { name: ACTION })).toBeInTheDocument();
   });
 
   it('a new key (a new recording) starts with no marker, and the marker never touches the video', async () => {

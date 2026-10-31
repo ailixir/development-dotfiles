@@ -5,7 +5,7 @@ import { positivesOf } from './common.ts';
 import { evaluateRun } from './evaluate.ts';
 import { renderReport } from './report.ts';
 import type { RunReportInput } from './report.ts';
-import { cleanScan, control, flow, goodBundle, result, row, attempt, table } from './testkit.ts';
+import { cleanScan, control, flow, goodBundle, navStep, result, attempt, table } from './testkit.ts';
 
 const input = (bundle = goodBundle()): RunReportInput => ({ bundle, evaluation: evaluateRun(bundle) });
 const SECRET_VALUE = 'cnry-a1b2c3d4e5f6-0a1b2c3d4e5f-9f8e7d6c5b4a';
@@ -22,7 +22,7 @@ test('a passing run renders the verdict first, every test, controls, scan denomi
   assert.match(out.markdown, /70 tables \/ 100 rows/);
   assert.match(out.markdown, /LEAK hits: 0\. PAGE_ORIGIN hits: 0\./);
   assert.match(out.markdown, /Product-admitted rate/);
-  assert.match(out.markdown, /by diagnostics Gate \(persisted rejection_gate\): NEXT_TARGET_INTENT/);
+  assert.match(out.markdown, /by diagnostics Gate \(persisted rejection_gate\): STEP_SYNTAX/);
   assert.match(out.markdown, /p50 2\.0 s, p95 9\.0 s/);
   assert.doesNotMatch(out.markdown, /### Next day|\| Nextday ID|PENDING_NEXT_DAY/);
   assert.match(out.markdown, /user removed next-day\/24-hour replay and L1 login acceptance/);
@@ -49,10 +49,13 @@ test('failures are rendered with their reasons and set a non-zero exit', () => {
   assert.match(out.markdown, /mdn: not learned \(GROUNDING UNSUPPORTED_SURFACE\)/);
 
   const zero = goodBundle();
-  zero.results.N1 = result('N1', 'control', [control('TARGET_MISMATCH', 'SUCCEEDED', [row({})], { afterLearnExecutions: 1 })]);
+  zero.results.N1 = result('N1', 'control', [control('TARGET_DRIFT', 'SUCCEEDED', [navStep()], { afterLearnExecutions: 1 })]);
   const hard = renderReport([input(zero)], 'now');
   assert.equal(hard.exitCode, 1);
   assert.match(hard.markdown, /false pass/);
+  assert.match(hard.markdown, /#1 0: \[goto\] ok/, 'controls list the receipt of every dispatched step');
+  assert.match(hard.markdown, /Playwright reference sha256/);
+  assert.ok(!hard.markdown.includes('Q4 independent region audit'));
 
   const voided = goodBundle();
   voided.voidKeys['iana-home'] = 'ground truth no longer resolves: iana-nav-01 pass:false';

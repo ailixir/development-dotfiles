@@ -26,3 +26,14 @@ test('HN first-story source and three authorized replacements are exact run/day/
 test('duplicate labels retain the first-story association requirement without an easier story or claimed native support',()=>{
   const c=capture();c.commentsGloballyUnique=false;c.commentsMatchCount=2;const a=resolveHnAmendment(c,'dry-20261028-1');assert.equal(a.storyId,c.storyId);assert.equal(a.replacement[1],'Click the "7 comments" link near "publicAuthor"');assert.ok(!a.replacement[1]!.includes(c.title));assert.match(a.reason,/REQUIRE.*native unique\+SAME/);assert.throws(()=>resolveHnAmendment({...capture(),author:''},'dry-20261028-1'),/invalid/);
 });
+test('a no-break space in the HN comments label is normalised in the label and in the page-wide match count',async()=>{
+  const dir=mkdtempSync(join(tmpdir(),'hn-preflight-')),raw='7\u00a0comments';
+  const metadata={locator:(selector:string)=>selector==='a.hnuser'?{count:async()=>1,innerText:async()=>'publicAuthor'}:{last:()=>({innerText:async()=>raw})}};
+  const row={getAttribute:async()=>'123',locator:(selector:string)=>selector==='.titleline > a'?{first:()=>({innerText:async()=>'Show HN: A bounded public story'})}:metadata};
+  const tab={goto:async()=>undefined,close:async()=>undefined,locator:(selector:string)=>selector==='tr.athing:visible'?{first:()=>row}:{evaluateAll:async(fn:(nodes:{textContent:string}[],label:string)=>number,label:string)=>fn([{textContent:raw}],label)}};
+  const page={context:()=>({newPage:async()=>tab})} as unknown as Page;
+  try{
+    const frozen=await captureHnAmendment(page,'dry-20261031-1',dir);
+    assert.equal(frozen.comments,'7 comments');assert.equal(frozen.commentsMatchCount,1);assert.equal(frozen.commentsGloballyUnique,true);assert.equal(frozen.replacement[1],'Click the "7 comments" link');
+  }finally{rmSync(dir,{recursive:true,force:true});}
+});

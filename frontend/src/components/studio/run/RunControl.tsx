@@ -9,7 +9,8 @@ import {
   type GuidedStartFeedbackInput,
 } from '@/components/studio/guided/GuidedCompletion';
 import { ReadinessChip } from '@/components/studio/guided/ReadinessChip';
-import { guidedCopy } from '@/components/studio/guided/guidedNarratives';
+import { guidedCopy, stepNumberIn } from '@/components/studio/guided/guidedNarratives';
+import { LEARNED_LIMITS_CAPTION } from './runEnablement';
 import { useRunGate, type LearnFromRequest, type RunSaveOutcome } from './useRunGate';
 
 /**
@@ -415,6 +416,62 @@ export const RunControl: React.FC<RunControlProps> = ({
             <ReadinessChip test={chipTest} draftStepIds={chipTest.steps.map((step) => step.id)} />
           </Box>
         </Box>
+      )}
+
+      {chipTest !== null && chipTest.readiness === 'READY' && (
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          data-testid="learned-limits"
+          sx={{ display: 'block', mt: 1, maxWidth: RUN_CAPTION_MAX_WIDTH, overflowWrap: 'anywhere' }}
+        >
+          {LEARNED_LIMITS_CAPTION}
+        </Typography>
+      )}
+
+      {chipTest !== null && chipTest.readiness === 'RECORDED' && chipTest.verification && (
+        <Stack spacing={1} sx={{ mt: 1, maxWidth: RUN_CAPTION_MAX_WIDTH }} data-testid="recorded-actions">
+          <Typography variant="caption" color="text.secondary" data-testid="recorded-diagnostic-note">
+            {guidedCopy('recordedDiagnosticNote')}
+          </Typography>
+          {chipTest.verification.state === 'INCOMPLETE' && (
+            <Button
+              size="small"
+              variant="outlined"
+              data-testid="verify-again"
+              disabled={gate.phase !== 'idle'}
+              onClick={() => {
+                dropAutorun();
+                gate.verify();
+              }}
+            >
+              {guidedCopy('verifyAgain')}
+            </Button>
+          )}
+          {chipTest.verification.state === 'FAILED' &&
+            stepNumberIn(
+              chipTest.steps.map((step) => step.id),
+              chipTest.verification.firstUnverifiedStepId,
+            ) !== null && (
+              <Button
+                size="small"
+                variant="outlined"
+                data-testid="relearn-from-step"
+                disabled={gate.phase !== 'idle' || sessionUnreadable}
+                onClick={() => {
+                  dropAutorun();
+                  gate.learnFrom({ kind: 'recorded', stepId: chipTest.verification!.firstUnverifiedStepId });
+                }}
+              >
+                {guidedCopy('relearnFromStep', {
+                  n: stepNumberIn(
+                    chipTest.steps.map((step) => step.id),
+                    chipTest.verification.firstUnverifiedStepId,
+                  )!,
+                })}
+              </Button>
+            )}
+        </Stack>
       )}
 
       {!isRunning && gate.preparationMessage && (

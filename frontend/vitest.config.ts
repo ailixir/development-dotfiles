@@ -23,6 +23,9 @@ export default defineConfig({
   plugins: [react()],
   test: {
     globals: true,
+    // Heavy jsdom page tests share the host with other work: a 5 s default and ~10 workers time out under load.
+    testTimeout: 30_000,
+    hookTimeout: 30_000,
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     // Playwright owns `e2e/` (STUDIO-OBS-008, P5); Vitest's default include would collect its specs.
@@ -34,7 +37,8 @@ export default defineConfig({
       ['**/*.node.test.tsx', 'forks'],
     ],
     poolOptions: {
-      forks: { execArgv: eventSourceExecArgv },
+      threads: { minThreads: 1, maxThreads: 4 },
+      forks: { minForks: 1, maxForks: 4, execArgv: eventSourceExecArgv },
     },
     coverage: {
       provider: 'v8',

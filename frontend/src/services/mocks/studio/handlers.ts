@@ -2,7 +2,14 @@ import { http, HttpResponse } from 'msw';
 import { createAuthoringHandlers } from './authoringHandlers';
 import { resetAuthoringMocks, stepRefsOf } from './authoringState';
 import { createCapabilityHandlers, resetCapabilityMocks } from './capabilityHandlers';
-import { createGuidedHandlers, guidedSessionPublished, guidedSessionsForTest, resetGuidedMocks } from './guidedHandlers';
+import {
+  createGuidedHandlers,
+  guidedSessionPublished,
+  guidedSessionsForTest,
+  recordedRevisionOf,
+  resetGuidedMocks,
+  setRecordedRevision,
+} from './guidedHandlers';
 import { resetSecretsMocks, secretsHandlers } from './secretsHandlers';
 import { createSchedulesHandlers, resetSchedulesMocks } from './schedulesHandlers';
 import {
@@ -271,7 +278,23 @@ function readAcceptedReplay(execution: ExecutionSnapshot): ExecutionSnapshot {
     streamComplete: complete,
   };
   acceptedExecutions = [next, ...acceptedExecutions.filter((candidate) => candidate.executionId !== next.executionId)];
+  if (complete && next.triggerSource === 'AFTER_LEARN') promoteRecorded(next);
   return next;
+}
+
+/**
+ * A passing proof promotes the recorded revision it proved: the draft becomes `READY` on that
+ * revision, as the server does in the report transaction (ADR-SC-008 D5). A proof of any other
+ * revision changes nothing.
+ */
+function promoteRecorded(proof: ExecutionSnapshot): void {
+  const test = allTests().find((candidate) => candidate.id === proof.testId) ?? readinessDraft(proof.testId);
+  if (!test || test.readiness !== 'RECORDED' || recordedRevisionOf(test) !== proof.revisionId) return;
+  created = [
+    { ...test, readiness: 'READY', verification: null, confirmedRevisionId: proof.revisionId },
+    ...created.filter((candidate) => candidate.id !== test.id),
+  ];
+  setRecordedRevision(test.id, null);
 }
 
 /**
@@ -285,12 +308,15 @@ function pendingReplay(
   triggerSource: 'MANUAL' | 'AFTER_LEARN',
 ): ExecutionSnapshot {
   const acceptedAt = new Date().toISOString();
+  // A RECORDED draft runs its recorded revision: the proof, or a labelled diagnostic Run.
+  const recorded = recordedRevisionOf(test);
   return {
     executionId,
     triggerSource,
+    ...(recorded !== null && triggerSource === 'MANUAL' ? { diagnostic: true } : {}),
     testId: test.id,
     csiId: test.csiId,
-    revisionId: test.confirmedRevisionId,
+    revisionId: recorded ?? test.confirmedRevisionId,
     status: 'PENDING',
     errorCode: null,
     acceptedAt,
@@ -464,16 +490,15 @@ export const studioHandlers = [
         !current || String(current.sourceRevision) !== sourceRevision ||
         String(current.configurationRevision) !== configurationRevision
       ) return false;
+      // Finalize records the revision and leaves the confirmed one alone; the proof promotes it.
       const published: TestDto = {
         ...current,
-        readiness: 'READY',
+        readiness: 'RECORDED',
         firstChangedStepId: null,
-        confirmedRevisionId: receipt.revisionId,
-        confirmedRevisionArtifactHash: receipt.artifactHash,
-        // The mirror holds the synthetic receipt, not a validated artifact for this draft.
-        confirmedRevisionArtifact: null,
+        verification: { state: 'PENDING', firstUnverifiedStepId: stepRefsOf(current)[0]?.stepId ?? '' },
         updatedAt: receipt.publishedAt,
       };
+      setRecordedRevision(testId, receipt.revisionId);
       created = [published, ...created.filter(test => test.id !== testId)];
       return true;
     },
@@ -560,7 +585,10 @@ export const studioHandlers = [
   }),
 
   http.post(`${BASE}/tests/:id/execute`, ({ params, request }) => {
-    const test = readable(allTests()).find((candidate) => candidate.id === params.id);
+    const test = readable([
+      ...allTests(),
+      ...readinessDrafts.filter((candidate) => candidate.readiness === 'RECORDED'),
+    ]).find((candidate) => candidate.id === params.id);
     if (!test) {
       return badRequest('BAD_REQUEST', `UI Test not found: ${params.id}`);
     }
@@ -581,7 +609,7 @@ export const studioHandlers = [
      * folded in here for the reason the document gives: `LEARN_REQUIRED` tells an author to run a
      * guided session, which is work a deleted or quarantined draft would refuse too.
      */
-    if (test.readiness !== 'READY') {
+    if (test.readiness !== 'READY' && test.readiness !== 'RECORDED') {
       return HttpResponse.json(executeConflictResponse(LEARN_REQUIRED_CONFLICT_CODE), { status: 409 });
     }
     const key = request.headers.get('Idempotency-Key');
@@ -597,6 +625,46 @@ export const studioHandlers = [
     }
     const pendingExecution = pendingReplay(test, executionId, 'MANUAL');
     acceptedExecutions = [pendingExecution, ...acceptedExecutions];
+    return HttpResponse.json({ executionId, status: 'PENDING' }, { status: 202 });
+  }),
+
+  /*
+   * `POST /tests/{id}/verify` ("Verify again"): re-runs the proof of the recorded revision. Only a
+   * RECORDED draft whose proof is INCOMPLETE (refused, cancelled or timed out) is offered it; a
+   * running or FAILED proof is `409 VERIFY_NOT_AVAILABLE` (D-4), a draft with nothing recorded is
+   * `409 NOT_RECORDED`.
+   */
+  http.post(`${BASE}/tests/:id/verify`, ({ params, request }) => {
+    const test = readable([...allTests(), ...readinessDrafts]).find((candidate) => candidate.id === params.id);
+    if (!test) {
+      return HttpResponse.json(STUDIO_FORBIDDEN_BODY, { status: 403 });
+    }
+    if (test.csiId && MOCK_EXECUTE_DENIED_CSIS.has(test.csiId)) {
+      return HttpResponse.json(STUDIO_FORBIDDEN_BODY, { status: 403 });
+    }
+    if (test.readiness !== 'RECORDED') {
+      return HttpResponse.json(
+        { error: 'NOT_RECORDED', message: 'The draft has no recorded revision to verify' },
+        { status: 409 },
+      );
+    }
+    const key = request.headers.get('Idempotency-Key');
+    if (key && idempotency.has(key)) {
+      return HttpResponse.json({ executionId: idempotency.get(key), status: 'PENDING' }, { status: 202 });
+    }
+    if (test.verification?.state !== 'INCOMPLETE') {
+      return HttpResponse.json(
+        { error: 'VERIFY_NOT_AVAILABLE', message: 'The proof of the recorded revision is running or has failed' },
+        { status: 409 },
+      );
+    }
+    const executionId = crypto.randomUUID();
+    if (key) idempotency.set(key, executionId);
+    created = [
+      { ...test, verification: { ...test.verification, state: 'PENDING' } },
+      ...created.filter((candidate) => candidate.id !== test.id),
+    ];
+    acceptedExecutions = [pendingReplay(test, executionId, 'AFTER_LEARN'), ...acceptedExecutions];
     return HttpResponse.json({ executionId, status: 'PENDING' }, { status: 202 });
   }),
 

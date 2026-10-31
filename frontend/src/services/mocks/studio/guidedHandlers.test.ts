@@ -183,7 +183,7 @@ describe('every body the mirror returns validates against the v3 contract', () =
     expect(final.status).toBe(200);
     expectValid('result.schema.json', final.body);
     expect(final.body.publication.status).toBe('PUBLISHED');
-    expect(final.body.currentReadiness).toMatchObject({ ready: true, code: 'READY' });
+    expect(final.body.currentReadiness).toMatchObject({ ready: false, code: 'NOT_PUBLISHED' });
     expect(final.body.progress.activeStep).toBeNull();
     expect(final.body.explanation.steps.every((step) => step.completed && step.learnedFromThisRun)).toBe(true);
   });

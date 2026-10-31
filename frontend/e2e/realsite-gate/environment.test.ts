@@ -5,7 +5,7 @@ import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {fileManifest,headFromFilesystem,freezeProblems,appendFreezeCheckpoint} from './freeze.ts';
 import {goodBundle} from './testkit.ts';
-import {loadCanaries} from './environment.ts';
+import {loadCanaries,playwrightReferenceHash} from './environment.ts';
 test('full manifest detects additions, deletions, contents and external-core changes',()=>{
   const dir=mkdtempSync(join(tmpdir(),'gate-freeze-'));
   try{writeFileSync(join(dir,'a'),'one');const first=fileManifest(dir,['.']);writeFileSync(join(dir,'b'),'two');assert.notEqual(fileManifest(dir,['.']).digest,first.digest);rmSync(join(dir,'b'));assert.equal(fileManifest(dir,['.']).digest,first.digest);writeFileSync(join(dir,'a'),'changed');assert.notEqual(fileManifest(dir,['.']).digest,first.digest);symlinkSync('/tmp',join(dir,'link'));assert.throws(()=>fileManifest(dir,['.']),/SYMLINK/);}finally{rmSync(dir,{recursive:true,force:true});}
@@ -28,3 +28,5 @@ test('current canary loading never reads the retired login secret and accepts ex
     writeFileSync(path,'');assert.deepEqual(loadCanaries(env),[]);
   } finally {rmSync(dir,{recursive:true,force:true});}
 });
+
+test('the Playwright reference hash is the repo tool output, a sha256',()=>{assert.match(playwrightReferenceHash(),/^[a-f0-9]{64}$/);});

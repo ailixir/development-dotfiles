@@ -80,7 +80,18 @@ test('controls retain the ADR expectations', () => {
   assert.equal(n2?.steps?.[1], 'Check that the RSYNC row of the protocol and location table shows "rsync://wrong.kernel.org/pub/"');
   const n3 = table.tests.find((t) => t.key === 'N3');
   assert.equal(n3?.steps?.[1], 'Click the "Install" button next to the "stable" distribution');
+});
 
+test('control expectations state the effect-receipt rules, not ledger operation kinds', () => {
+  const expect = (key: string) => table.tests.find((t) => t.key === key)?.expect ?? '';
+  assert.match(expect('N1'), /TARGET_DRIFT, OUTCOME_UNKNOWN, ASSERTION_FAILED or TIMEOUT/);
+  assert.match(expect('N1'), /selectOption attempted and not completed/);
+  assert.match(expect('N1'), /failedStepIndex 1/);
+  assert.doesNotMatch(expect('N1'), /TARGET_MISMATCH/);
+  assert.match(expect('N2'), /ASSERTION_FAILED with no effect/);
+  assert.doesNotMatch(expect('N2'), /UNSUPPORTED_SURFACE/);
+  assert.match(expect('N3'), /no effect at the control step and the fence not crossed/);
+  for (const key of ['N1', 'N2', 'N3']) assert.doesNotMatch(expect(key), /dispatched (selectOption|click)/, key);
 });
 
 test('no step carries a secret value: secret steps use <secret NAME> only', () => {

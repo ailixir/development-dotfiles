@@ -19,11 +19,15 @@ import { READY_CHIP_LABEL, guidedCopy, stepNumberIn } from './guidedNarratives';
  */
 
 export function readinessChipLabel(
-  test: Pick<TestDetailDto, 'readiness' | 'firstChangedStepId' | 'readinessReason'>,
+  test: Pick<TestDetailDto, 'readiness' | 'firstChangedStepId' | 'readinessReason' | 'verification'>,
   draftStepIds: readonly string[],
 ): string | null {
   if (test.readiness === 'READY') {
     return READY_CHIP_LABEL;
+  }
+  if (test.readiness === 'RECORDED') {
+    const n = stepNumberIn(draftStepIds, test.verification?.firstUnverifiedStepId);
+    return n === null ? guidedCopy('recordedNotVerifiedNoStep') : guidedCopy('recordedNotVerified', { n });
   }
   if (test.readiness !== 'NEEDS_RELEARN') {
     return null;
@@ -36,7 +40,7 @@ export function readinessChipLabel(
 }
 
 export interface ReadinessChipProps {
-  readonly test: Pick<TestDetailDto, 'readiness' | 'firstChangedStepId' | 'readinessReason'>;
+  readonly test: Pick<TestDetailDto, 'readiness' | 'firstChangedStepId' | 'readinessReason' | 'verification'>;
   /** The current draft's stable step IDs, in order. */
   readonly draftStepIds: readonly string[];
 }

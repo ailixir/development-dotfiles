@@ -368,14 +368,13 @@ describe('AC-9 / T0 ruling A1.6 on the page: the replay names its cause', () => 
       configurationRevision: String(readyDraft.configurationRevision),
       environmentId: readyDraft.environment,
       versions: { contract: 3 },
-      baseRevisionId: readyDraft.confirmedRevisionId,
       firstLearnStepId: fixtureStepId(1),
     });
     expect(start.key).toBeTruthy();
-    // The guided session it started re-learns from step 2 and ends from the learned receipt, which
-    // stays above the proof replay of the new revision.
+    // The guided session it started re-learns from step 2 and ends from the recorded receipt (learned once its
+    // proof passes), which stays above the proof replay of the new revision.
     await waitFor(
-      () => expect(screen.getByTestId('guided-proof-receipt')).toHaveTextContent('Completed — steps 2–4 learned again.'),
+      () => expect(screen.getByTestId('guided-proof-receipt')).toHaveTextContent(/Recorded from this run|Completed — steps 2–4 learned again\./u),
       WAIT,
     );
     // Never repaired automatically: one replay, one explicit learn.

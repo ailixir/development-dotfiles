@@ -100,6 +100,18 @@ export const studioApi = {
       idempotencyKey ? { headers: { 'Idempotency-Key': idempotencyKey } } : undefined,
     ),
 
+  /**
+   * "Verify again": re-runs the model-free proof of the recorded revision (`POST /tests/{id}/verify`,
+   * `202 ExecuteAccepted`). Offered only for a RECORDED test whose verification is INCOMPLETE; `409`
+   * `NOT_RECORDED` or `VERIFY_NOT_AVAILABLE` otherwise.
+   */
+  verifyRecorded: async (id: string, idempotencyKey?: string): Promise<ExecuteAccepted> =>
+    apiClient.post(
+      `/studio/tests/${id}/verify`,
+      undefined,
+      idempotencyKey ? { headers: { 'Idempotency-Key': idempotencyKey } } : undefined,
+    ),
+
   /** The same payload the SSE `execution.snapshot` event carries; this is the fallback path. */
   getExecution: async (id: string): Promise<ExecutionSnapshot> =>
     apiClient.get(`/studio/executions/${id}`),

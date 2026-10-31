@@ -93,22 +93,6 @@ export interface PublicProgress {
   activeStep: GuidedActiveStep | null;
 }
 
-/** `PublicExplanation.steps[].actions[].operationKind`. */
-export const GUIDED_OPERATION_KINDS = [
-  'navigate',
-  'click',
-  'fill',
-  'press',
-  'check',
-  'uncheck',
-  'hover',
-  'selectOption',
-  'read',
-  'assert',
-] as const;
-
-export type GuidedOperationKind = (typeof GUIDED_OPERATION_KINDS)[number];
-
 /** `PublicExplanation.steps[].actions[].outcome`. */
 export const GUIDED_ACTION_OUTCOMES = [
   'ADMITTED',
@@ -121,20 +105,12 @@ export const GUIDED_ACTION_OUTCOMES = [
 
 export type GuidedActionOutcome = (typeof GUIDED_ACTION_OUTCOMES)[number];
 
-/** `PublicExplanation.referenceFlows[].argumentSlot`. */
-export const GUIDED_ARGUMENT_SLOTS = ['fill.value', 'selectOption.value', 'assert.expected'] as const;
-
-export type GuidedArgumentSlot = (typeof GUIDED_ARGUMENT_SLOTS)[number];
-
 export interface PublicExplanationAction {
   admissionId: string;
   /** 0..7. */
   ordinal: number;
   /** 0..1. */
   attemptOrdinal: number;
-  operationKind: GuidedOperationKind;
-  /** The controlled string for `operationKind` (contract `allOf`), never page text. */
-  safeLabel: string;
   outcome: GuidedActionOutcome;
   /** Declared reference IDs only, never a value. At most 32, unique. */
   referenceIds: string[];
@@ -161,7 +137,6 @@ export interface PublicExplanationReferenceFlow {
   bindingId: string;
   producerStepId: string;
   consumerStepId: string;
-  argumentSlot: GuidedArgumentSlot;
 }
 
 /**

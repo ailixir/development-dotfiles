@@ -3,6 +3,7 @@ import { test } from 'node:test';
 import { positivesOf } from './common.ts';
 import {
   computeMetrics,
+  confirmationFindings,
   evaluateControl,
   evaluateRun,
   exitCodeFor,
@@ -15,8 +16,8 @@ import {
   zeroModelCalls,
 } from './evaluate.ts';
 import type { EnvironmentRecord, ScanFile, RunBundle } from './evaluate.ts';
-import type { LedgerRow } from './status.ts';
-import { attempt, cleanScan, control, env, flow, goodBundle, replay, result, row, snap, table } from './testkit.ts';
+import type { StepReceipt } from './status.ts';
+import { attempt, cleanScan, control, dispatched, env, flow, goodBundle, navStep, proofRows, refused, replay, result, snap, stepReceipt, table } from './testkit.ts';
 
 const rule = (b: RunBundle, n: number) => evaluateRun(b).rules.find((entry) => entry.rule === n);
 
@@ -80,7 +81,7 @@ test('rule 1: clarification, grounding failure, no receipt, extra attempts all f
   assert.equal(rule(b2, 1)?.verdict, 'FAIL');
   const b3 = goodBundle();
   b3.results.mdn = result('mdn', 'positive', [flow({ learnAttempts: [attempt({ receipt: false })] })]);
-  assert.equal(rule(b3, 1)?.verdict, 'FAIL');
+  assert.equal(rule(b3, 1)?.verdict, 'PASS', 'the UI receipt text is corroboration only; the database decides');
   const b4 = goodBundle();
   b4.results.mdn = result('mdn', 'positive', [flow({ learnAttempts: [attempt({ cls: 'INFRA', errorCode: 'MODEL_UNAVAILABLE', state: 'FAILED', receipt: false }), attempt({ attempt: 2 })] })]);
   assert.equal(rule(b4, 1)?.verdict, 'PASS');
@@ -168,37 +169,192 @@ test('no proxy and no attempt rows: AC3 is INCOMPLETE, not a pass', () => {
   assert.notEqual(evaluateRun(b).verdict, 'PASS');
 });
 
-test('controls: dispatch is judged on ledger rows, never on counters.actions', () => {
-  const nav = row({});
-  const select = (over: Partial<LedgerRow>) => row({ kind: 'selectOption', ordinal: 1, ...over });
-  assert.equal(evaluateControl('N1', control('TARGET_MISMATCH', 'FAILED', [nav, select({ state: 'REVOKED', dispatched: 0, outcome: null })])).expectationMet, true);
-  assert.equal(evaluateControl('N1', control('TARGET_MISMATCH', 'FAILED', [nav, select({ state: 'ADMITTED', dispatched: 0, outcome: null })])).expectationMet, true);
-  assert.equal(evaluateControl('N1', control('TARGET_MISMATCH', 'FAILED', [nav, select({})])).expectationMet, false, 'a dispatched selectOption fails N1');
-  assert.equal(evaluateControl('N1', control('UNSUPPORTED_SURFACE', 'FAILED', [nav])).expectationMet, false, 'wrong code');
-  const clar = control('X', 'CANCELLED', [nav], {});
-  clar.learnAttempts[0]!.clarifications = [{ atSeconds: 1, question: 'q', choices: [], picked: 'None of these' }];
-  assert.equal(evaluateControl('N1', clar).expectationMet, false, 'N1 must reach exact TARGET_MISMATCH; clarification cannot pass');
-  assert.equal(evaluateControl('N2', control('ASSERTION_FAILED', 'FAILED', [nav])).expectationMet, true);
-  assert.equal(evaluateControl('N2', control('BUDGET_EXCEEDED', 'FAILED', [nav])).expectationMet, false);
-  assert.equal(evaluateControl('N3', control('MISSING_SOURCE', 'FAILED', [nav, row({ kind: 'click', ordinal: 1 })])).expectationMet, false, 'a dispatched click fails N3');
-  assert.equal(evaluateControl('N3', control('MISSING_SOURCE', 'FAILED', [nav])).expectationMet, true);
-  const noLedger = control('TARGET_MISMATCH', 'FAILED', [nav]);
-  noLedger.learnAttempts[0]!.ledger = null;
-  assert.equal(evaluateControl('N1', noLedger).expectationMet, false);
+// ---- controls on effect receipts ---------------------------------------------------------------
+
+const eff = (method: string, completed = true) => ({ method, completed });
+/** A receipt of the control step: effects list (fence crossed when any), closed code, optional overrides. */
+const at1 = (closedCode: StepReceipt['closedCode'], effects: { method: string; completed: boolean }[] = [], over: Partial<StepReceipt> = {}) =>
+  dispatched(1, stepReceipt({ closedCode, fenceCrossed: effects.length > 0, effects, ...over }));
+const met = (key: string, f: ReturnType<typeof control>) => evaluateControl(key, f).expectationMet;
+const asked = (f: ReturnType<typeof control>) => {
+  f.learnAttempts[0]!.clarifications = [{ atSeconds: 1, question: 'q', choices: [], picked: 'None of these' }];
+  return f;
+};
+
+test('N1: only a selectOption attempted and not completed is tolerated; the closed code decides', () => {
+  const nav = navStep();
+  assert.equal(met('N1', control('TARGET_DRIFT', 'FAILED', [nav, at1('TARGET_DRIFT')])), true, 'a pre-fence miss has no effect');
+  assert.equal(met('N1', control('OUTCOME_UNKNOWN', 'UNKNOWN_OUTCOME', [nav, at1('OUTCOME_UNKNOWN', [eff('selectOption', false)])])), true);
+  assert.equal(met('N1', control('ASSERTION_FAILED', 'FAILED', [nav, at1('ASSERTION_FAILED')])), true);
+  assert.equal(met('N1', control('TIMEOUT', 'FAILED', [nav, at1('TIMEOUT')])), true);
+  assert.equal(met('N1', control('OUTCOME_UNKNOWN', 'FAILED', [nav, at1('OUTCOME_UNKNOWN', [eff('selectOption', true)])])), false, 'a completed selectOption fails');
+  assert.equal(met('N1', control('OUTCOME_UNKNOWN', 'FAILED', [nav, at1('OUTCOME_UNKNOWN', [eff('click', false)])])), false, 'an attempted click fails');
+  assert.equal(met('N1', control('OUTCOME_UNKNOWN', 'FAILED', [nav, at1('OUTCOME_UNKNOWN', [eff('selectOption', false), eff('click', false)])])), false);
+  assert.equal(met('N1', control('CANCELLED', 'FAILED', [nav, at1('CANCELLED')])), false, 'a closed code outside the set');
+  assert.equal(met('N1', control('X', 'FAILED', [nav, at1(null)])), false, 'the control step passed');
+  const early = control('TARGET_DRIFT', 'FAILED', [nav, at1('TARGET_DRIFT')]);
+  early.learnAttempts[0]!.failedStepIndex = 0;
+  assert.equal(met('N1', early), false, 'the failedStepIndex 1 pin stays');
+  assert.equal(met('N1', asked(control('X', 'CANCELLED', [nav, refused(1)]))), true, 'a clarification is accepted');
+  assert.equal(met('N1', control('INVALID_CONTRACT', 'FAILED', [nav, refused(1)])), true, 'a pre-dispatch refusal is accepted');
 });
 
-test('a false pass on a control is a hard zero, and a missed expectation fails rule 5 on its own', () => {
-  const publish = control('TARGET_MISMATCH', 'SUCCEEDED', [row({})], { afterLearnExecutions: 1 });
-  const v = evaluateControl('N2', publish);
-  assert.equal(v.falsePass, true);
-  assert.equal(v.expectationMet, false);
-  for (const patch of [{ learned: true }, { learnedChip: true }, { afterLearnExecutions: 1 }]) {
-    assert.equal(evaluateControl('N3', control('MISSING_SOURCE', 'FAILED', [row({})], patch)).falsePass, true);
+test('N2: ASSERTION_FAILED with no effect at all; a clarification or a pre-dispatch refusal', () => {
+  const nav = navStep();
+  assert.equal(met('N2', control('ASSERTION_FAILED', 'FAILED', [nav, at1('ASSERTION_FAILED')])), true);
+  assert.equal(met('N2', control('ASSERTION_FAILED', 'FAILED', [nav, at1('ASSERTION_FAILED', [eff('click')])])), false, 'any effect at the control step fails N2');
+  assert.equal(met('N2', control('OUTCOME_UNKNOWN', 'FAILED', [nav, at1('OUTCOME_UNKNOWN', [eff('selectOption', false)])])), false);
+  assert.equal(met('N2', control('TARGET_DRIFT', 'FAILED', [nav, at1('TARGET_DRIFT')])), false, 'TARGET_DRIFT is N1 only');
+  assert.equal(met('N2', control('UNSUPPORTED_SURFACE', 'FAILED', [nav, refused(1)])), true, 'a session-level refusal before dispatch');
+  assert.equal(met('N2', control('MODEL_UNAVAILABLE', 'FAILED', [nav, refused(1)])), false, 'infrastructure is not a refusal');
+  assert.equal(met('N2', control('INVALID_CONTRACT', 'FAILED', [nav])), true, 'no ordinal-1 row after repair exhaustion');
+  assert.equal(met('N2', asked(control('X', 'CANCELLED', [nav]))), true);
+  assert.equal(met('N2', control('BUDGET_EXCEEDED', 'FAILED', [nav])), false);
+});
+
+test('N3: a clarification or a refusal; any effect or crossed fence at the control step voids it', () => {
+  const nav = navStep();
+  assert.equal(met('N3', asked(control('X', 'CANCELLED', [nav]))), true, 'goto at ordinal 0 plus a clarification');
+  assert.equal(met('N3', control('INVALID_CONTRACT', 'FAILED', [nav])), true, 'no ordinal-1 row after INVALID_CONTRACT');
+  assert.equal(met('N3', control('MISSING_SOURCE', 'FAILED', [nav, refused(1)])), true);
+  assert.equal(met('N3', control('TARGET_DRIFT', 'FAILED', [nav, at1('TARGET_DRIFT')])), true, 'a pre-fence refusal that dispatched no effect');
+  assert.equal(met('N3', control('TARGET_DRIFT', 'FAILED', [nav, at1('TARGET_DRIFT', [eff('click', false)])])), false, 'a click with completed false fails N3');
+  assert.equal(met('N1', control('TARGET_DRIFT', 'FAILED', [nav, at1('TARGET_DRIFT', [eff('click', false)])])), false, 'and N1');
+  assert.equal(met('N3', control('TARGET_DRIFT', 'FAILED', [nav, at1('TARGET_DRIFT', [eff('selectOption', false)])])), false);
+  assert.equal(met('N3', control('X', 'FAILED', [nav, at1(null)])), false, 'the control step passed');
+});
+
+test('controls: a non-goto effect at ordinal 0, an inconsistent or truncated receipt, and a missing receipt fail', () => {
+  const click0 = dispatched(0, stepReceipt({ fenceCrossed: true, effects: [eff('click')] }));
+  for (const key of ['N1', 'N2', 'N3']) {
+    assert.equal(met(key, asked(control('X', 'CANCELLED', [click0]))), false, `${key}: a non-goto effect at ordinal 0`);
+    const fenced = at1('TARGET_DRIFT', [], { fenceCrossed: true });
+    assert.equal(met(key, control('TARGET_DRIFT', 'FAILED', [navStep(), fenced])), false, `${key}: fenceCrossed with effects []`);
+    const truncated = at1('OUTCOME_UNKNOWN', [eff('selectOption', false)], { effectsTruncated: true });
+    assert.equal(met(key, control('OUTCOME_UNKNOWN', 'FAILED', [navStep(), truncated])), false, `${key}: truncated effects`);
+    assert.equal(met(key, control('TARGET_DRIFT', 'FAILED', [navStep(), dispatched(1, null)])), false, `${key}: a dispatched row with a null receipt`);
   }
+  assert.equal(met('N3', asked(control('X', 'CANCELLED', [dispatched(0, null)]))), false, 'a dispatched navigation row with a null receipt');
+  const nav2 = dispatched(0, stepReceipt({ fenceCrossed: true, effects: [eff('goto'), eff('goto'), eff('waitForLoadState')] }));
+  assert.equal(met('N3', asked(control('X', 'CANCELLED', [nav2]))), false, 'only goto is allowed at ordinal 0');
+});
+
+test('controls: receipts and ledger rows must join both ways, and an unread source is never a pass', () => {
+  const nav = navStep();
+  const orphan = control('INVALID_CONTRACT', 'FAILED', [nav]);
+  orphan.learnAttempts[0]!.receipts!.push({ stepId: 'step-1', ordinal: 0, attemptOrdinal: 0, dispatchCount: 1, receipt: stepReceipt({ closedCode: 'TARGET_DRIFT' }) });
+  assert.equal(met('N3', orphan), false, 'a receipt without its ledger row');
+  const bare = control('INVALID_CONTRACT', 'FAILED', [nav]);
+  bare.learnAttempts[0]!.receipts = [];
+  assert.equal(met('N3', bare), false, 'a ledger row without its receipt entry');
+  const unread = control('INVALID_CONTRACT', 'FAILED', [nav]);
+  unread.learnAttempts[0]!.receipts = null;
+  assert.equal(met('N3', unread), false);
+  const noLedger = control('INVALID_CONTRACT', 'FAILED', [nav]);
+  noLedger.learnAttempts[0]!.ledger = null;
+  assert.equal(met('N3', noLedger), false);
+  const unheaded = control('INVALID_CONTRACT', 'FAILED', [nav], { headAtLearn: undefined });
+  assert.equal(met('N3', unheaded), false, 'the pointers were not read');
+  const phantom = control('INVALID_CONTRACT', 'FAILED', [nav, refused(1)]);
+  phantom.learnAttempts[0]!.receipts![1] = { stepId: 'step-1', ordinal: 0, attemptOrdinal: 0, dispatchCount: 0, receipt: stepReceipt() };
+  assert.equal(met('N3', phantom), false, 'a receipt on a row that was never dispatched');
+  const beyond = control('TARGET_DRIFT', 'FAILED', [nav, at1('TARGET_DRIFT'), dispatched(2, stepReceipt({ closedCode: 'TARGET_DRIFT' }))]);
+  assert.equal(met('N3', beyond), false, 'a step beyond the control step was dispatched');
+  const earlier = control('TARGET_DRIFT', 'FAILED', [nav, at1('TARGET_DRIFT')]);
+  earlier.learnAttempts.unshift(attempt({ state: 'FAILED', receipt: false, cls: 'INFRA', ledger: [dispatched(0, stepReceipt({ fenceCrossed: true, effects: [eff('goto'), eff('click', false)] })).row], receipts: [dispatched(0, stepReceipt({ fenceCrossed: true, effects: [eff('goto'), eff('click', false)] })).entry] }));
+  assert.equal(met('N3', earlier), false, 'every attempt is judged, not only the last');
+  const noAttempts = control('TARGET_DRIFT', 'FAILED', [nav]);
+  noAttempts.learnAttempts = [];
+  assert.equal(met('N1', noAttempts), false);
+  assert.equal(evaluateControl('N1', undefined).expectationMet, false);
+  assert.equal(evaluateControl('N9', control('TARGET_DRIFT', 'FAILED', [nav])).expectationMet, false);
+});
+
+test('controls: steps are told apart by step id, since every SC008 ledger row is ordinal 0 / attempt 0', () => {
+  const nav = navStep();
+  for (const step of [nav, at1('ASSERTION_FAILED')]) assert.deepEqual([step.row.ordinal, step.row.attemptOrdinal], [0, 0]);
+  assert.equal(met('N2', control('ASSERTION_FAILED', 'FAILED', [nav, at1('ASSERTION_FAILED')])), true, 'N2 clean ASSERTION_FAILED at step index 1');
+  assert.equal(met('N1', control('OUTCOME_UNKNOWN', 'UNKNOWN_OUTCOME', [nav, at1('OUTCOME_UNKNOWN', [eff('selectOption', false)])])), true, 'N1 attempted selectOption at step index 1');
+  assert.equal(met('N3', control('INVALID_CONTRACT', 'FAILED', [nav, at1('INVALID_CONTRACT', [eff('goto', true)])])), false, 'a completed wrong-target goto at the control step is an effect');
+  assert.equal(met('N3', control('INVALID_CONTRACT', 'FAILED', [nav, at1('INVALID_CONTRACT')])), true);
+  const swapped = control('TARGET_DRIFT', 'FAILED', [at1('TARGET_DRIFT', [eff('goto')]), navStep()]);
+  assert.equal(met('N3', swapped), false, 'step identity comes from the step id, not the row position');
+  const unknown = control('TARGET_DRIFT', 'FAILED', [nav, dispatched(1, stepReceipt({ closedCode: 'TARGET_DRIFT' }), { stepId: 'other' })]);
+  assert.equal(met('N1', unknown), false, 'a step id outside the authored order');
+  const noOrder = control('INVALID_CONTRACT', 'FAILED', [nav]);
+  noOrder.learnAttempts[0]!.stepIds = null;
+  assert.equal(met('N3', noOrder), false, 'unreadable step order');
+  const extra = control('TARGET_DRIFT', 'FAILED', [nav, at1('TARGET_DRIFT'), dispatched(2, stepReceipt({ closedCode: 'TARGET_DRIFT' }))]);
+  assert.equal(met('N1', extra), false, 'a step beyond the control step was dispatched');
+});
+
+test('a false pass on a control is a hard zero whatever the receipts say, and a missed expectation fails rule 5 on its own', () => {
+  const nav = navStep();
+  const clean = () => control('INVALID_CONTRACT', 'FAILED', [nav]);
+  assert.equal(evaluateControl('N3', clean()).falsePass, false);
+  const patches: Partial<ReturnType<typeof control>>[] = [
+    { learned: true },
+    { learnedChip: true },
+    { afterLearnExecutions: 1 },
+    { replays: [replay()] },
+    { headAtLearn: { candidate: 'r', confirmed: null } },
+    { headAtLearn: { candidate: null, confirmed: 'r' } },
+    { publication: { testId: 't', revisionId: 'r', sourceRevision: 1, configurationRevision: 1, learnedCompletedAt: '2026-10-27T12:05:00Z', stepIds: ['s'] } },
+  ];
+  for (const patch of patches) {
+    const verdict = evaluateControl('N3', { ...clean(), ...patch });
+    assert.equal(verdict.falsePass, true, JSON.stringify(patch));
+    assert.equal(verdict.expectationMet, false);
+  }
+  const proved = clean();
+  proved.proof = flow().proof;
+  assert.equal(evaluateControl('N3', proved).falsePass, true);
+  const succeeded = control('TARGET_DRIFT', 'SUCCEEDED', [nav, at1('TARGET_DRIFT')]);
+  assert.equal(evaluateControl('N1', succeeded).falsePass, true);
+  const uiReceipt = clean();
+  uiReceipt.learnAttempts[0]!.receipt = true;
+  assert.equal(evaluateControl('N3', uiReceipt).falsePass, true);
   const b = goodBundle();
-  b.results.N2 = result('N2', 'control', [control('BUDGET_EXCEEDED', 'FAILED', [row({})])]);
+  b.results.N2 = result('N2', 'control', [control('BUDGET_EXCEEDED', 'FAILED', [nav])]);
   assert.equal(rule(b, 5)?.verdict, 'FAIL');
   assert.equal(evaluateRun(b).verdict, 'FAIL');
+});
+
+test('learned is the confirmed pointer plus the proof receipt rows, never UI text', () => {
+  const ui = flow({ learnedChip: true, headAfterProof: { candidate: null, confirmed: null } });
+  ui.learnAttempts[0]!.receipt = true;
+  assert.equal(ui.learnedChip && ui.learnAttempts[0]!.receipt, true);
+  const b = goodBundle();
+  b.results.mdn = result('mdn', 'positive', [ui]);
+  assert.equal(rule(b, 1)?.verdict, 'FAIL', 'chip and receipt text with a null pointer');
+  const good = goodBundle().results.mdn!.flows[0]!;
+  assert.deepEqual(confirmationFindings(good), []);
+  const mutate = (change: (f: typeof good) => void) => { const f = structuredClone(good); change(f); return confirmationFindings(f); };
+  assert.equal(mutate((f) => { f.headAfterProof = { candidate: 'revision-mdn', confirmed: null }; })[0]?.verdict, 'FAIL', 'still only a candidate');
+  assert.equal(mutate((f) => { f.headAfterProof = { candidate: null, confirmed: 'other' }; })[0]?.verdict, 'FAIL', 'a different confirmed revision');
+  assert.equal(mutate((f) => { f.headAfterProof = null; })[0]?.verdict, 'INCOMPLETE');
+  assert.equal(mutate((f) => { f.proofReceipts = null; })[0]?.verdict, 'INCOMPLETE');
+  assert.equal(mutate((f) => { f.proofReceipts = f.proofReceipts!.slice(1); })[0]?.verdict, 'FAIL', 'missing rows');
+  assert.equal(mutate((f) => { f.proofReceipts = proofRows(f.publication!.revisionId, f.publication!.stepIds.length, 'foreign-proof'); })[0]?.verdict, 'FAIL', 'rows of another proof execution');
+  assert.equal(mutate((f) => { f.proofReceipts = proofRows('foreign-revision', f.publication!.stepIds.length, f.proof!.executionId); })[0]?.verdict, 'FAIL', 'rows of another revision');
+  assert.equal(mutate((f) => { f.proofReceipts![1]!.status = 'FAILED'; })[0]?.verdict, 'FAIL');
+  assert.equal(mutate((f) => { f.proofReceipts![1]!.receipt = stepReceipt({ closedCode: 'TIMEOUT' }); })[0]?.verdict, 'FAIL', 'a PASSED row whose receipt carries a closed code');
+  assert.equal(mutate((f) => { f.proofReceipts![1]!.receipt = stepReceipt({ stepHash: 'b'.repeat(64) }); })[0]?.verdict, 'FAIL', 'receipt hash differs from the row hash');
+  assert.equal(mutate((f) => { f.proof = { ...f.proof!, status: 'FAILED' }; })[0]?.verdict, 'FAIL', 'no passed proof');
+  assert.deepEqual(mutate((f) => { f.headAtLearn = { candidate: null, confirmed: 'revision-mdn' }; }), [], 'a pointer that was confirmed early is not a finding');
+});
+
+test('a recorded but unconfirmed revision is not counted as learned in the metrics', () => {
+  const b = goodBundle();
+  const full = computeMetrics(b).stepsLearned.learned;
+  b.results.mdn!.flows[0]!.headAfterProof = { candidate: 'revision-mdn', confirmed: null };
+  assert.equal(computeMetrics(b).stepsLearned.learned, full - b.table.tests.find((t) => t.key === 'mdn')!.steps!.length);
+});
+
+test('the environment must carry the Playwright reference hash', () => {
+  const rec = env();
+  assert.equal(rec.hashes.playwrightReferenceHash.length, 64);
+  assert.deepEqual(validateEnvironment(rec, false), []);
 });
 
 test('scan: zero canaries, a LEAK, a missing source and a missing scan all stop a PASS', () => {
@@ -255,13 +411,15 @@ test('environment validation: required fields, out dir outside the worktree, dry
   const missing: [string, EnvironmentRecord][] = [
     ['git.sha', env({ git: { sha: '', dirty: false, workingTreeDigestStart: 'd', workingTreeDigestEnd: null } })],
     ['model.id', env({ model: { id: null, source: 'declared', wireIds: [] } })],
-    ['hashes.contractMd', env({ hashes: { contractMd: '', contractsV3: 'a', promptStatic: 'b', wireSystemInstruction: [] } })],
-    ['hashes.promptStatic', env({ hashes: { contractMd: 'a', contractsV3: 'a', promptStatic: '', wireSystemInstruction: [] } })],
+    ['hashes.contractMd', env({ hashes: { contractMd: '', contractsV3: 'a', promptStatic: 'b', playwrightReferenceHash: 'c'.repeat(64), wireSystemInstruction: [] } })],
+    ['hashes.promptStatic', env({ hashes: { contractMd: 'a', contractsV3: 'a', promptStatic: '', playwrightReferenceHash: 'c'.repeat(64), wireSystemInstruction: [] } })],
+    ['hashes.playwrightReferenceHash', env({ hashes: { contractMd: 'a', contractsV3: 'a', promptStatic: 'b', playwrightReferenceHash: '', wireSystemInstruction: [] } })],
     ['playwright.driver', env({ playwright: { driver: '', runner: '1', coreBundleSha256: 'x', pinSha256: 'x', chromiumBuild: '1' } })],
     ['playwright.coreBundleSha256', env({ playwright: { driver: '1', runner: '1', coreBundleSha256: '', pinSha256: '', chromiumBuild: '1' } })],
     ['gateway settings', env({ gateway: {} })],
   ];
   for (const [label, rec] of missing) assert.ok(validateEnvironment(rec, false).some((p) => p.includes(label)), label);
+  assert.ok(validateEnvironment(env({ hashes: { contractMd: 'a', contractsV3: 'a', promptStatic: 'b', playwrightReferenceHash: 'not-hex', wireSystemInstruction: [] } }), false).some((p) => /not a sha256/.test(p)));
   assert.ok(validateEnvironment(env({ outDir: '/repo/frontend/node_modules/.cache/x' }), false).some((p) => /inside the worktree|node_modules/.test(p)));
   assert.ok(validateEnvironment(env({ outDir: '/home/me/node_modules/gate' }), false).some((p) => /node_modules/.test(p)));
   assert.ok(validateEnvironment(env(), true).some((p) => /disagree/.test(p)));
@@ -297,8 +455,7 @@ test('metrics: nearest-rank percentiles, admitted rate with denominators, n/a on
   assert.ok(m.admitted.applied > 0 && m.admitted.rejected > 0);
   assert.equal(m.admitted.rate, m.admitted.applied / (m.admitted.applied + m.admitted.rejected));
   assert.equal(m.rejectionsByReason.INVALID_CONTRACT, m.admitted.rejected);
-  assert.equal(m.rejectionsByGate.NEXT_TARGET_INTENT, m.admitted.rejected);
-  assert.equal(m.intentPaths.EXACT_NAME, m.admitted.applied);
+  assert.equal(m.rejectionsByGate.STEP_SYNTAX, m.admitted.rejected);
   const empty = goodBundle();
   empty.results = {};
   empty.proxy = { ...empty.proxy, durationsMs: [] };
@@ -315,13 +472,8 @@ test('missing ordinary lifecycle, cross-case execution IDs and changed authored 
   const source=goodBundle();source.results.mdn!.flows[0]!.publication!.authoredStepsHash='changed';assert.notEqual(evaluateRun(source).verdict,'PASS');
 });
 test('strict scan envelope cannot reuse a clean scan after counted result changes or omit source provenance',()=>{
-  for(const mutation of ['digest','manifest','unknown-truncation','missing-region'] as const){const b=goodBundle();if(mutation==='digest')b.scanFile!.dataDigest='b'.repeat(64);if(mutation==='manifest')delete b.scan!.sources[0]!.digest;if(mutation==='unknown-truncation')b.truncations!.unknown=1;if(mutation==='missing-region')b.regionAudit=undefined;assert.notEqual(evaluateRun(b).verdict,'PASS',mutation);}
+  for(const mutation of ['digest','manifest','unknown-truncation'] as const){const b=goodBundle();if(mutation==='digest')b.scanFile!.dataDigest='b'.repeat(64);if(mutation==='manifest')delete b.scan!.sources[0]!.digest;if(mutation==='unknown-truncation')b.truncations!.unknown=1;assert.notEqual(evaluateRun(b).verdict,'PASS',mutation);}
 });
-test('negative controls inspect earlier attempts and refuse alternate wrong-target operations or wrong failure coordinate',()=>{
-  const f=control('TARGET_MISMATCH','FAILED',[row({})]);f.learnAttempts.unshift(attempt({state:'FAILED',receipt:false,ledger:[row({kind:'fill'})]}));assert.equal(evaluateControl('N1',f).expectationMet,false);
-  const wrong=control('TARGET_MISMATCH','FAILED',[row({})]);wrong.learnAttempts[0]!.failedStepIndex=0;assert.equal(evaluateControl('N1',wrong).expectationMet,false);
-});
-
 test('same-day seal remains required and bound to all14 lifecycle IDs', () => {
   const missing = goodBundle();
   delete missing.anchor;

@@ -123,8 +123,8 @@ describe('a session that has ended (AC-03)', () => {
     );
 
     expect(lineTexts()).toEqual([
-      'Step 1: Open page — done',
-      'Step 2: Fill field — failed',
+      'Step 1: Ran the step — done',
+      'Step 2: Ran the step — failed',
       `Learning ended: ${guidedCopy('assertionFailed')}`,
     ]);
   });
@@ -155,16 +155,17 @@ describe('a session that has ended (AC-03)', () => {
     const twice = result('FAILED', { completed: 2, failedIndex: 2 });
     const [first] = twice.explanation.steps[0].actions;
     twice.explanation.steps[0].actions = [
-      { ...first, ordinal: 1, attemptOrdinal: 0, safeLabel: 'Click control' },
-      { ...first, ordinal: 0, attemptOrdinal: 1, safeLabel: 'Press key' },
-      { ...first, ordinal: 0, attemptOrdinal: 0, safeLabel: 'Open page' },
+      { ...first, ordinal: 1, attemptOrdinal: 0, admissionId: 'third' },
+      { ...first, ordinal: 0, attemptOrdinal: 1, admissionId: 'second' },
+      { ...first, ordinal: 0, attemptOrdinal: 0, admissionId: 'first' },
     ];
     render(<GuidedLearningLog session={session('FAILED')} result={twice} />);
 
+    // The explanation names no operation, so the order shows only in the attempts of one step.
     expect(lineTexts().slice(0, 3).map((line) => line?.replace(/ — .*/u, ''))).toEqual([
-      'Step 1: Open page',
-      'Step 1: Press key',
-      'Step 1: Click control',
+      'Step 1: Ran the step',
+      'Step 1: Ran the step',
+      'Step 1: Ran the step',
     ]);
   });
 
@@ -175,7 +176,7 @@ describe('a session that has ended (AC-03)', () => {
     one.explanation.steps[0].actions[0].outcome = outcome;
     render(<GuidedLearningLog session={session('FAILED')} result={one} />);
 
-    expect(lineTexts()[0]).toBe(`Step 1: Open page — ${word}`);
+    expect(lineTexts()[0]).toBe(`Step 1: Ran the step — ${word}`);
   });
 
   it('maps every action outcome of the contract to one of the four words', () => {
@@ -208,7 +209,7 @@ describe('a session that has ended (AC-03)', () => {
 
     const lines = lineTexts();
     expect(lines).toHaveLength(4);
-    expect(lines[3]).toBe(`Learning ended: ${guidedCopy('completedLearned')}`);
+    expect(lines[3]).toBe(`Learning ended: ${guidedCopy('recordedReceipt').slice(0, guidedCopy('recordedReceipt').indexOf('. ') + 1)}`);
   });
 
   it('a stopped learn ends with the stop narrative\'s title', () => {

@@ -6,7 +6,10 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { test } from 'node:test';
 import { GATE_DIR } from './common.ts';
+import { coreDeclaration } from './stack/core-declaration.mjs';
 import { checkDist } from './stack/dist-check.mjs';
+import { externalCoreDeclaration } from './environment.ts';
+import { fileManifest } from './freeze.ts';
 import { DEFAULT_PORTS, LIVE_PORTS, assertFree, gatePorts, isListening } from './stack/ports.mjs';
 
 const STACK = join(GATE_DIR, 'stack');
@@ -217,3 +220,29 @@ test('down never signals a process that is not the listener of a gate port', asy
 function readScript(path: string): string {
   return spawnSync('cat', [path], { encoding: 'utf8' }).stdout;
 }
+
+test('core declaration: the in-worktree package, package.json and dist only; accepted by the freeze; refused without dist', () => {
+  withDir((dir) => {
+    const pkg = join(dir, 'frontend', 'node_modules', '@put', 'core-components');
+    assert.throws(() => coreDeclaration(dir), /package\.json and dist/);
+    mkdirSync(pkg, { recursive: true });
+    writeFileSync(join(pkg, 'package.json'), '{"name":"@put/core-components"}');
+    assert.throws(() => coreDeclaration(dir), /package\.json and dist/, 'package.json alone is not enough');
+    mkdirSync(join(pkg, 'dist'));
+    writeFileSync(join(pkg, 'dist', 'index.js'), 'export {}');
+    const declaration = coreDeclaration(dir);
+    assert.deepEqual(declaration, { root: pkg, sourceScopes: ['package.json'], artifactRoot: pkg, artifactScopes: ['dist'] });
+    const file = join(dir, 'core-declaration.json');
+    writeFileSync(file, JSON.stringify(declaration));
+    const before = process.env.CHECKS_GATE_EXTERNAL_CORE_DECLARATION;
+    process.env.CHECKS_GATE_EXTERNAL_CORE_DECLARATION = file;
+    try {
+      const read = externalCoreDeclaration();
+      assert.deepEqual(read, declaration);
+      assert.ok(fileManifest(read!.root, read!.sourceScopes).digest.length > 0 && fileManifest(read!.artifactRoot, read!.artifactScopes).digest.length > 0);
+    } finally {
+      if (before === undefined) delete process.env.CHECKS_GATE_EXTERNAL_CORE_DECLARATION;
+      else process.env.CHECKS_GATE_EXTERNAL_CORE_DECLARATION = before;
+    }
+  });
+});

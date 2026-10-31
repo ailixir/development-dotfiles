@@ -36,7 +36,7 @@ test('any other errorCode is never infra, whatever the last attempt reason says'
     const c = classifyLearn(failed({ errorCode: code, lastRejectionReason: 'TRANSPORT_STALL' }));
     assert.equal(c.cls, 'OTHER', code);
   }
-  for (const code of ['UNSUPPORTED_SURFACE', 'TARGET_MISMATCH', 'MISSING_SOURCE', 'ASSERTION_FAILED', 'BUDGET_EXCEEDED']) {
+  for (const code of ['UNSUPPORTED_SURFACE', 'TARGET_DRIFT', 'OUTCOME_UNKNOWN', 'MISSING_SOURCE', 'ASSERTION_FAILED', 'BUDGET_EXCEEDED']) {
     assert.deepEqual(classifyLearn(failed({ errorCode: code, lastRejectionReason: 'TRANSPORT_HTTP_429' })), { cls: 'GROUNDING', subClass: code });
   }
 });

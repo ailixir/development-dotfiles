@@ -17,7 +17,7 @@ import {
 } from '@/types/studio/studioGuidedTypes';
 import { MOCK_READABLE_CSIS, mockTests } from './fixtures';
 import { demoTests } from './demoFixtures';
-import { readinessDrafts } from './readinessFixtures';
+import { RECORDED_FIXTURE_REVISION_ID, readinessDrafts } from './readinessFixtures';
 import { fixtureStepId } from './authoringState';
 import {
   GUIDED_START_REFUSALS,
@@ -221,8 +221,32 @@ export function setGuidedLatency(operation: GuidedOperation, milliseconds: numbe
   latency.set(operation, milliseconds);
 }
 
+/**
+ * The recorded (unconfirmed) revision a published learn left on a draft, by test id. The server's
+ * base for the next learn is this head (the recorded revision when there is one, else the confirmed
+ * one), so the mirror keeps it beside the draft (ADR-SC-008 D5).
+ */
+const recordedRevisions = new Map<string, string>();
+
+export function setRecordedRevision(testId: string, revisionId: string | null): void {
+  if (revisionId === null) recordedRevisions.delete(testId);
+  else recordedRevisions.set(testId, revisionId);
+}
+
+/** The recorded revision of a RECORDED draft, or null. */
+export function recordedRevisionOf(test: TestDto): string | null {
+  if (test.readiness !== 'RECORDED') return null;
+  return recordedRevisions.get(test.id) ?? RECORDED_FIXTURE_REVISION_ID;
+}
+
+/** The latest learned revision: the recorded one, else the confirmed one. */
+function headRevisionOf(test: TestDto): string | null {
+  return recordedRevisionOf(test) ?? test.confirmedRevisionId;
+}
+
 /** Clears sessions, stored responses, the request log, faults, latency and scenarios. */
 export function resetGuidedMocks(): void {
+  recordedRevisions.clear();
   sessions.clear();
   stored.clear();
   requestLog.length = 0;
@@ -615,7 +639,7 @@ function hintRefusal(
   steps: GuidedStepRef[],
   request: GuidedStartRequest,
 ): GuidedMockRefusal | null {
-  if (request.baseRevisionId !== undefined && request.baseRevisionId !== test.confirmedRevisionId) {
+  if (request.baseRevisionId !== undefined && request.baseRevisionId !== headRevisionOf(test)) {
     return GUIDED_START_REFUSALS.BASE_REVISION_MISMATCH();
   }
   if (request.firstLearnStepId !== undefined) {
@@ -630,7 +654,7 @@ function hintRefusal(
 
 /** The boundary this run learns from: the explicit hint, else the server's own `firstChangedStepId`. */
 function boundaryOf(test: TestDto, steps: GuidedStepRef[], request: GuidedStartRequest): number | null {
-  if (test.confirmedRevisionId === null) return null;
+  if (headRevisionOf(test) === null) return null;
   const wanted = request.firstLearnStepId ?? test.firstChangedStepId;
   if (wanted === null || wanted === undefined) return null;
   const index = indexOfStep(steps, wanted);
@@ -754,7 +778,7 @@ export function createGuidedHandlers(environment: GuidedMockEnvironment): HttpHa
           steps,
           plan,
           boundaryIndex,
-          baseRevisionId: boundaryIndex === null ? null : test.confirmedRevisionId,
+          baseRevisionId: boundaryIndex === null ? null : headRevisionOf(test),
           cursor: 0,
           reads: 0,
           forced: null,

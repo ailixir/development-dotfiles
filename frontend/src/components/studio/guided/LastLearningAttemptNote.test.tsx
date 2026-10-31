@@ -36,8 +36,6 @@ function step(number: number, completed: boolean): PublicExplanationStep {
         admissionId: `admission-${number}`,
         ordinal: 0,
         attemptOrdinal: 0,
-        operationKind: 'click',
-        safeLabel: 'Click control',
         outcome: completed ? 'SUCCEEDED' : 'FAILED',
         referenceIds: [],
       },

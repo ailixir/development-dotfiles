@@ -27,7 +27,8 @@ import type { TestReadiness } from '@/types/studio/studioTypes';
 
 /**
  * The three Run modes, plus the one state in which Run is disabled (STUDIO-OBS-008 AC-2):
- *  - `replay`: `READY`, the ordinary execute;
+ *  - `replay`: `READY`, the ordinary execute, and `RECORDED`, the same route run as a diagnostic of the
+ *    recorded revision (it never promotes);
  *  - `learn`: `UNLEARNED`, a guided session with no base and no boundary hint;
  *  - `relearn`: `NEEDS_RELEARN`, a guided session with `baseRevisionId = confirmedRevisionId` and
  *    `firstLearnStepId` = the server's `firstChangedStepId` (D-3), or the first current step when the
@@ -39,6 +40,8 @@ export type RunMode = 'replay' | 'learn' | 'relearn' | 'busy';
 export const RUN_MODE: Readonly<Record<TestReadiness, RunMode>> = {
   UNLEARNED: 'learn',
   LEARNING: 'busy',
+  // A recorded revision runs as a labelled diagnostic through the ordinary execute (ADR-SC-008 D5).
+  RECORDED: 'replay',
   READY: 'replay',
   NEEDS_RELEARN: 'relearn',
 };
@@ -81,3 +84,11 @@ export const EXECUTABLE_READINESS: TestReadiness = 'READY';
 
 /** The learned chip for `READY` (UX panel 2026-10-09 single-path state model). */
 export const LEARNED_READY_LABEL = 'Learned · ready to repeat';
+
+/**
+ * The limits of "learned" (ADR-SC-008 L-1 and L-16), stated beside the learned chip: the proof ran
+ * the saved steps once, repeating their side effects, and a step with no check can pass without the
+ * outcome being right.
+ */
+export const LEARNED_LIMITS_CAPTION =
+  'Learned means the saved steps ran once without an error in a replay. The replay repeats their side effects, and a step that checks nothing can pass even if its outcome is wrong.';

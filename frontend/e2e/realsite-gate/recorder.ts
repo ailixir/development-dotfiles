@@ -20,6 +20,8 @@ export interface RecorderOptions {
   upstream: string;
   /** Directory receiving NNNN.req.json and requests.jsonl. */
   outDir: string;
+  /** Refuse (429, not forwarded, not recorded, not counted) every call once this many were recorded. */
+  maxCalls?: number;
 }
 
 export interface RecorderIndexLine {
@@ -197,6 +199,12 @@ export function startRecorder(options: RecorderOptions): Promise<Recorder> {
     if (req.method === 'GET' && req.url === '/__gate/count') {
       res.writeHead(200, { 'content-type': 'application/json' });
       res.end(JSON.stringify({ count: seen, bodies }));
+      return;
+    }
+    if (options.maxCalls !== undefined && seen >= options.maxCalls) {
+      req.resume();
+      res.writeHead(429, { 'content-type': 'application/json' });
+      res.end('{"error":"gate call cap reached"}');
       return;
     }
     const startedMs = Date.now();

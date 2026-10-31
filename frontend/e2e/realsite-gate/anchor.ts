@@ -12,7 +12,7 @@ export interface SameDayAnchor {
 export function anchorHash(a: Omit<SameDayAnchor,'eventHash'>): string { return sha256Hex(JSON.stringify(a)); }
 /** Deliberately excludes nextday artifacts; every same-day input remains immutable after sealing. */
 export function sameDayEvidenceDigest(dir: string): string {
-  const files = ['environment.json','preconditions.json','verify.json','verify-judgement.json','region-audit.json','gateway/requests.jsonl','hn-amendment.json','hn-preflight.json','hn-preflight.attempt.json'];
+  const files = ['environment.json','preconditions.json','verify.json','verify-judgement.json','gateway/requests.jsonl','hn-amendment.json','hn-preflight.json','hn-preflight.attempt.json'];
   for (const child of ['results','scan/history','freeze']) {
     const path = join(dir,child);
     if (existsSync(path)) for (const f of readdirSync(path).sort()) {

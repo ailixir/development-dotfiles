@@ -28,7 +28,7 @@ import {
  * Run saves the draft if it is dirty and re-reads it. Then the fresh read's readiness decides:
  *  - `READY` replays it through `POST /tests/{id}/execute`, under one key per activation;
  *  - `UNLEARNED` starts a guided learning session with no base and no boundary hint;
- *  - `NEEDS_RELEARN` starts a mixed-mode guided session with `baseRevisionId = confirmedRevisionId`
+ *  - `NEEDS_RELEARN` starts a mixed-mode guided session (no base id is sent: the server's base is the head)
  *    and `firstLearnStepId = firstChangedStepId`, both as served (D-3), or with the first current
  *    step when `readinessReason` is `BASE_IDENTITY_INCOMPLETE` (D-4). The client never sends a step
  *    positioned after the server's k;
@@ -107,11 +107,14 @@ export type LearnStartBlock =
  *  - `drift`: "Learn again from step N" after a replay drift (T0 ruling A1.6). Sent only while the
  *    test is `READY`, its confirmed revision is the replayed one (`revisionId`), and the step is in
  *    the current draft;
+ *  - `recorded`: "Re-learn from step N" after a proof FAILED at step N (ADR-SC-008 D-3). Sent only
+ *    while the test is `RECORDED` with verification `FAILED` and the step is in the current draft;
  *  - `firstStep`: the explicit first-step learn a `BASE_IDENTITY_INCOMPLETE` refusal offers
  *    (architect P4, D-4), from the first current step on the confirmed base.
  */
 export type LearnFromRequest =
   | { readonly kind: 'drift'; readonly stepId: string; readonly revisionId: string }
+  | { readonly kind: 'recorded'; readonly stepId: string }
   | { readonly kind: 'firstStep' };
 
 export interface RunGateState {
@@ -136,6 +139,8 @@ export interface RunGateState {
   readonly run: () => void;
   /** An explicit learn from a named step. Same save, read, capability and start as Run. */
   readonly learnFrom: (request: LearnFromRequest) => void;
+  /** "Verify again": re-runs the proof of the recorded revision (RECORDED with INCOMPLETE only). */
+  readonly verify: () => void;
 }
 
 interface ApiFailure {
@@ -184,31 +189,37 @@ const START_FAILED = 'The run could not be started';
 type StartHints = Pick<GuidedStartRequest, 'baseRevisionId' | 'firstLearnStepId'>;
 
 /**
- * `NEEDS_RELEARN`: the base is the confirmed revision and the boundary is the server's first changed
- * step, both as served (D-3); `BASE_IDENTITY_INCOMPLETE` names the first current step instead (D-4).
- * A value the server did not serve is not sent.
+ * `NEEDS_RELEARN`: the boundary is the server's first changed step as served (D-3);
+ * `BASE_IDENTITY_INCOMPLETE` names the first current step instead (D-4). No learn path sends a base
+ * revision: the server's base is the latest learned revision (the recorded one when there is one),
+ * and a sent id that differs from it is refused (ADR-SC-008 D5). A value the server did not serve is
+ * not sent.
  */
 function relearnHints(test: TestDetailDto): StartHints {
   const firstLearnStepId =
     test.readinessReason === 'BASE_IDENTITY_INCOMPLETE' ? test.steps[0]?.id : test.firstChangedStepId;
-  return {
-    ...(test.confirmedRevisionId ? { baseRevisionId: test.confirmedRevisionId } : {}),
-    ...(firstLearnStepId ? { firstLearnStepId } : {}),
-  };
+  return firstLearnStepId ? { firstLearnStepId } : {};
 }
 
 /** The hints for an explicit learn, or `null` when its conditions no longer hold on the fresh read. */
 function learnFromHints(test: TestDetailDto, request: LearnFromRequest): StartHints | null {
+  if (request.kind === 'recorded') {
+    const holds =
+      test.readiness === 'RECORDED' &&
+      test.verification?.state === 'FAILED' &&
+      test.steps.some((step) => step.id === request.stepId);
+    return holds ? { firstLearnStepId: request.stepId } : null;
+  }
   if (test.confirmedRevisionId === null) return null;
   if (request.kind === 'firstStep') {
     const first = test.steps[0]?.id;
-    return first ? { baseRevisionId: test.confirmedRevisionId, firstLearnStepId: first } : null;
+    return first ? { firstLearnStepId: first } : null;
   }
   const holds =
     test.readiness === 'READY' &&
     test.confirmedRevisionId === request.revisionId &&
     test.steps.some((step) => step.id === request.stepId);
-  return holds ? { baseRevisionId: test.confirmedRevisionId, firstLearnStepId: request.stepId } : null;
+  return holds ? { firstLearnStepId: request.stepId } : null;
 }
 
 /** Plan P6: the capability's start context must agree exactly with the fresh read, or nothing starts. */
@@ -222,7 +233,10 @@ function contextMatches(context: GuidedStartContext, test: TestDetailDto): boole
 }
 
 /** What one activation asks for. */
-type Activation = { readonly type: 'run' } | { readonly type: 'learnFrom'; readonly request: LearnFromRequest };
+type Activation =
+  | { readonly type: 'run' }
+  | { readonly type: 'verify' }
+  | { readonly type: 'learnFrom'; readonly request: LearnFromRequest };
 
 export function useRunGate(
   testId: string | null,
@@ -445,6 +459,20 @@ export function useRunGate(
         const body = await studioApi.getTest(testId);
         if (mounted.current) setTest(body);
 
+        if (intent.type === 'verify') {
+          // Offered only while RECORDED with an INCOMPLETE proof; the fresh read decides (D-4).
+          if (body.readiness !== 'RECORDED' || body.verification?.state !== 'INCOMPLETE') {
+            if (mounted.current) setLearnBlock({ kind: 'mismatch' });
+            settle();
+            return;
+          }
+          setPhase('starting');
+          setPreparationMessage('Starting the browser…');
+          const acceptedProof = await studioApi.verifyRecorded(testId, activationKey);
+          settleAccepted(acceptedProof.executionId);
+          return;
+        }
+
         if (intent.type === 'learnFrom') {
           const hints = learnFromHints(body, intent.request);
           if (hints === null) {
@@ -497,6 +525,7 @@ export function useRunGate(
     (request: LearnFromRequest) => activate({ type: 'learnFrom', request }),
     [activate],
   );
+  const verify = useCallback(() => activate({ type: 'verify' }), [activate]);
 
   return {
     test,
@@ -512,5 +541,6 @@ export function useRunGate(
     preparationMessage,
     run,
     learnFrom,
+    verify,
   };
 }

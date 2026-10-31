@@ -115,9 +115,29 @@ export type VideoStatus = 'PROCESSING' | 'AVAILABLE' | 'FAILED' | 'UNAVAILABLE' 
  * and replays model-free; `NEEDS_RELEARN` — a published revision exists and a step changed (the
  * server emits it only from STUDIO-OBS-015).
  */
-export const TEST_READINESS_VALUES = ['UNLEARNED', 'LEARNING', 'READY', 'NEEDS_RELEARN'] as const;
+export const TEST_READINESS_VALUES = ['UNLEARNED', 'LEARNING', 'RECORDED', 'READY', 'NEEDS_RELEARN'] as const;
 
 export type TestReadiness = (typeof TEST_READINESS_VALUES)[number];
+
+/**
+ * `UITest.verification` (openapi): PENDING — the proof is running; FAILED — a step failed, so
+ * "Re-learn from step N"; INCOMPLETE — the proof was refused, cancelled, timed out or did not
+ * promote, so "Verify again". `firstUnverifiedStepId` is the first step without a PASSED receipt.
+ */
+export interface TestVerification {
+  state: 'PENDING' | 'FAILED' | 'INCOMPLETE';
+  firstUnverifiedStepId: string;
+}
+
+/** `StepResult.receipt` (contracts/v3 step-receipt.schema.json): what the runner computed for the step. */
+export interface StepReceipt {
+  closedCode: string | null;
+  stepHash: string;
+  fenceCrossed: boolean;
+  effects: Array<{ method: string; completed: boolean }>;
+  offscreen: boolean;
+  effectsTruncated: boolean;
+}
 
 /** Same guard as {@link ExecutionErrorCodeIsDerivedFromItsCarrier}, for the readiness carrier. */
 export type TestReadinessIsDerivedFromItsCarrier = AssertTrue<
@@ -257,55 +277,8 @@ export interface AuthoringRevisionInputs {
   selectedEvidenceReferences: Array<{ id: string; revision: number; hash: string }>;
 }
 
-export interface ResolvedOperation {
-  kind: 'navigate' | 'click' | 'fill' | 'press' | 'select' | 'check' | 'assert';
-}
-
-export interface ResolvedTarget {
-  strategy: 'role' | 'label' | 'testId' | 'text' | 'url';
-  value: string;
-  exact?: boolean;
-  evidenceReferenceId?: string | null;
-}
-
-export type ResolvedInput = LiteralInput | VariableReference | SecretReference;
-
-export interface ContextProvenance {
-  field: string;
-  scope: 'explicitStep' | 'stepContext' | 'globalContext' | 'policy' | 'evidence';
-  sourceKind: 'user' | 'supplied' | 'observed' | 'policy';
-  sourceId?: string | null;
-}
-
-export type AuthoringDiagnosticCategory =
-  | 'missingContext'
-  | 'conflictingValue'
-  | 'ambiguousTarget'
-  | 'incompatibleEvidence'
-  | 'staleEvidence'
-  | 'literalMismatch'
-  | 'unsupportedOperation';
-
-export interface AuthoringDiagnostic {
-  category: AuthoringDiagnosticCategory;
-  stepId: string | null;
-  field: string | null;
-  message: string;
-}
-
-export interface ResolvedStepReview {
-  stepId: string;
-  operation: ResolvedOperation | null;
-  target: ResolvedTarget | null;
-  input: ResolvedInput | null;
-  contextProvenance: ContextProvenance[];
-  assertions?: string[];
-  diagnostics: AuthoringDiagnostic[];
-}
-
 export interface AuthoringV2Response extends AuthoringV2Request {
   revisionInputs?: AuthoringRevisionInputs;
-  review?: ResolvedStepReview[];
 }
 
 /**
@@ -357,6 +330,8 @@ export interface TestDto {
   readiness: TestReadiness;
   /** The first changed step's stable ID; non-null only with `NEEDS_RELEARN`. */
   firstChangedStepId: string | null;
+  /** The state of the model-free proof; non-null exactly with `RECORDED` (SC008-E12). */
+  verification?: TestVerification | null;
   confirmedRevisionId: string | null;
   /** Canonical hash of `confirmedRevisionId`; null on list responses or without a confirmation. */
   confirmedRevisionArtifactHash?: string | null;
@@ -394,6 +369,8 @@ export interface StepResult {
   offsetMs: number | null;
   durationMs: number | null;
   message: string | null;
+  /** Null or absent for legacy history and steps that never started. */
+  receipt?: StepReceipt | null;
 }
 
 export interface ExecutionLogEntry {
@@ -427,6 +404,8 @@ export interface RuntimeVersions {
 export interface ExecutionSnapshot {
   /** Absent/null on historical servers or legacy runs; never infer Manual from missing provenance. */
   triggerSource?: 'MANUAL' | 'SCHEDULED' | 'AFTER_LEARN' | null;
+  /** True when the run executed a revision that was not confirmed (a labelled diagnostic run of a RECORDED draft). */
+  diagnostic?: boolean | null;
   /** The shared `/api/v1/schedules` schedule that produced the run; null once that schedule is removed. */
   scheduleId?: string | null;
   scheduledAt?: string | null;

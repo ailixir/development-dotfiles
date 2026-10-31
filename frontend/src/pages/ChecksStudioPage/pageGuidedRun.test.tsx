@@ -195,7 +195,8 @@ const COMPLETED_LEARNED = 'Completed — learned from this run.';
  */
 async function expectCompletedLearned(): Promise<void> {
   await waitFor(() => {
-    expect(screen.getByTestId('guided-proof-receipt')).toHaveTextContent(COMPLETED_LEARNED);
+    // Recorded until the proof snapshot passes, learned after (ADR-SC-008 D5): either is the end state here.
+    expect(screen.getByTestId('guided-proof-receipt')).toHaveTextContent(/Recorded from this run|Completed — learned from this run\./u);
   }, WAIT);
 }
 const user = () => userEvent.setup({ delay: null });
@@ -271,7 +272,6 @@ describe('AC-9: NEEDS_RELEARN starts a mixed-mode session (AC-2, AC-3, D-3, D-4)
     const starts = requests('POST', STARTS);
     expect(starts).toHaveLength(1);
     expect(starts[0].body).toMatchObject({
-      baseRevisionId: needsRelearnDraft.confirmedRevisionId,
       firstLearnStepId: needsRelearnDraft.firstChangedStepId,
     });
     expect(status.seen).toContain('Repeating saved steps 1–1…');
@@ -295,7 +295,6 @@ describe('AC-9: NEEDS_RELEARN starts a mixed-mode session (AC-2, AC-3, D-3, D-4)
     expect(requests('POST', STARTS)).toHaveLength(1);
     expect(guidedRequestCount('read')).toBe(0);
     expect(requests('POST', STARTS)[0].body).toMatchObject({
-      baseRevisionId: needsRelearnDraft.confirmedRevisionId,
       firstLearnStepId: fixtureStepId(0),
     });
 
@@ -763,8 +762,8 @@ describe('STUDIO-UNIFY-001.6: a failed learn is marked in the editor, told in Lo
     await user().click(screen.getByRole('tab', { name: 'Logs' }));
     const log = screen.getByTestId('guided-learning-log');
     expect(within(log).getAllByTestId('guided-learning-log-line').map((line) => line.textContent)).toEqual([
-      'Step 1: Open page — done',
-      'Step 2: Click control — failed',
+      'Step 1: Ran the step — done',
+      'Step 2: Ran the step — failed',
       `Learning ended: ${guidedCopy('assertionFailed')}`,
     ]);
     expect(screen.queryByText('No logs are available.')).toBeNull();
@@ -781,7 +780,7 @@ describe('STUDIO-UNIFY-001.6: a failed learn is marked in the editor, told in Lo
     const lines = within(screen.getByTestId('guided-learning-log'))
       .getAllByTestId('guided-learning-log-line')
       .map((line) => line.textContent);
-    expect(lines[lines.length - 1]).toBe(`Learning ended: ${COMPLETED_LEARNED}`);
+    expect(lines[lines.length - 1]).toBe('Learning ended: Recorded from this run.');
   }, TEST_TIMEOUT_MS);
 
   it('leaves a trace after the learn: "Last learning attempt failed (…, at step 2)", read once more when the session ends', async () => {

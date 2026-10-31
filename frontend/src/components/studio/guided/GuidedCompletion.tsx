@@ -78,8 +78,14 @@ export type GuidedCompletionView =
  * "j…" is filled as the AC writes it.
  */
 function succeededLines(result: GuidedResult, firstLearnStepId: string | null): string[] {
+  // A published learn is only recorded until its proof passes (ADR-SC-008 D5). The page shows the
+  // learned receipt (`learnedReceiptLines`) once the proof snapshot has PASSED; a result re-opened
+  // after the promotion says so through the server's current readiness, as the plan explanation does.
+  if (result.currentReadiness.ready) {
+    return learnedReceiptLines(result, firstLearnStepId);
+  }
   return [
-    ...learnedReceiptLines(result, firstLearnStepId),
+    guidedCopy('recordedReceipt'),
     guidedCopy(result.proof === null ? 'proofNotStarted' : 'proofReplaying'),
   ];
 }
@@ -213,7 +219,8 @@ export function guidedCompletionView(
       if (code === null || code === undefined) {
         return { kind: 'failedUnnamed', code: null, lines: [guidedCopy('failedNoReason'), ...stepLines] };
       }
-      return { kind: 'failedUnnamed', code, lines: [guidedCopy('failedUnnamed'), ...stepLines] };
+      const text = code === 'LEARNING_CONTEXT_LOST' ? 'contextLost' : 'failedUnnamed';
+      return { kind: 'failedUnnamed', code, lines: [guidedCopy(text), ...stepLines] };
     }
     default:
       return null;
@@ -239,6 +246,8 @@ export type GuidedCompletionInput =
       readonly result: GuidedResult;
       /** The session's `firstLearnStepId` (the original k), when the session had one. */
       readonly firstLearnStepId?: string | null;
+      /** Step numbers whose question the author answered in this session (SC008-FIX-24). */
+      readonly answeredSteps?: readonly number[];
     }
   /** A replay execution: only its `PASSED` success is worded here; the rest is the run narratives'. */
   | { readonly kind: 'replay'; readonly snapshot: Pick<ExecutionSnapshot, 'status'> };
@@ -318,6 +327,11 @@ export function GuidedCompletion({
         <>
           {view.kind === 'policyDenied' && <AlertTitle>{view.title}</AlertTitle>}
           <Lines lines={view.lines} />
+          {(input.answeredSteps ?? []).length > 0 && (
+            <Box data-testid="guided-clarified-steps" sx={{ mt: 0.5 }}>
+              <Lines lines={(input.answeredSteps ?? []).map((N) => guidedCopy('clarifiedStepNote', { N }))} />
+            </Box>
+          )}
           {view.kind === 'failedUnnamed' && view.code !== null && (
             <Typography
               variant="caption"

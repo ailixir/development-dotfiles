@@ -18,6 +18,7 @@ const RUN_FILE = 'studio-realsite-gate-real-backend.spec.ts';
 const NEXT_FILE = 'studio-realsite-nextday-real-backend.spec.ts';
 const EDIT_FILE = 'studio-realsite-edit-relearn-real-backend.spec.ts';
 const SMOKE_FILE = 'studio-authoring-real-backend.spec.ts';
+const G0_SMOKE_FILE = 'studio-realsite-smoke-real-backend.spec.ts';
 const table = loadTable();
 
 /** Playwright's own listing, parsed: this is the binding between the files and the projects. */
@@ -60,7 +61,11 @@ test('the removed next-day spec is absent on disk and registers no current execu
 
 test('real-backend project: the existing D5 smoke is still there', () => {
   assert.equal(titlesOf(real, SMOKE_FILE).length, 2);
-  assert.deepEqual([...new Set(real.map((s) => s.file))].sort(), [RUN_FILE, SMOKE_FILE, EDIT_FILE].sort());
+  assert.deepEqual([...new Set(real.map((s) => s.file))].sort(), [RUN_FILE, SMOKE_FILE, EDIT_FILE, G0_SMOKE_FILE].sort());
+});
+
+test('real-backend project: the G0 smoke spec registers one test per smoke-flows.json flow',() => {
+  assert.equal(titlesOf(real, G0_SMOKE_FILE).length, 5);
 });
 
 test('msw project: no gate file, no -real-backend file, and exactly the non-real-backend specs on disk', () => {
@@ -74,4 +79,4 @@ test('msw project: no gate file, no -real-backend file, and exactly the non-real
   assert.ok(!files.includes(RUN_FILE) && !files.includes(NEXT_FILE));
 });
 
-test('supplementary edit/relearn and exactly3 wording probes remain separate real-backend diagnostics',()=>{assert.equal(titlesOf(real,EDIT_FILE).length,5);});
+test('supplementary edit/relearn and exactly3 wording probes remain separate real-backend diagnostics',()=>{assert.equal(titlesOf(real,EDIT_FILE).length,4);});

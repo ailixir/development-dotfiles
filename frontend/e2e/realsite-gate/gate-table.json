@@ -308,7 +308,7 @@
       "corpusTasks": [
         "neg-pydocs-01"
       ],
-      "expect": "TARGET_MISMATCH and no dispatched selectOption",
+      "expect": "At step 2 (failedStepIndex 1): a clarification, a pre-dispatch refusal, or closed code TARGET_DRIFT, OUTCOME_UNKNOWN, ASSERTION_FAILED or TIMEOUT; the only effect tolerated is a selectOption attempted and not completed; never a pass",
       "steps": [
         "Go to \"https://docs.python.org/3/builtins/functions.html\"",
         "Select \"3.99\" in the Python version menu at the top"
@@ -324,7 +324,7 @@
       "corpusTasks": [
         "kern-assert-01"
       ],
-      "expect": "ASSERTION_FAILED or UNSUPPORTED_SURFACE, never a pass",
+      "expect": "ASSERTION_FAILED with no effect at the control step, or a clarification or pre-dispatch refusal; never a pass",
       "steps": [
         "Go to \"https://www.kernel.org/\"",
         "Check that the RSYNC row of the protocol and location table shows \"rsync://wrong.kernel.org/pub/\""
@@ -340,7 +340,7 @@
       "corpusTasks": [
         "deb-neg-01"
       ],
-      "expect": "clarification or refusal and no dispatched click",
+      "expect": "A clarification or a refusal, with no effect at the control step and the fence not crossed; never a pass",
       "steps": [
         "Go to \"https://www.debian.org/distrib/packages\"",
         "Click the \"Install\" button next to the \"stable\" distribution"

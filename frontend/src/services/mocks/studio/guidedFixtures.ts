@@ -6,7 +6,6 @@ import type {
   GuidedErrorCode,
   GuidedFailure,
   GuidedFailureCode,
-  GuidedOperationKind,
   GuidedProof,
   GuidedPublication,
   GuidedResult,
@@ -230,28 +229,6 @@ export function clarificationFor(
 // Explanation (public-ui-projections PublicExplanation)
 // ---------------------------------------------------------------------------
 
-/** The controlled `safeLabel` of each operation kind (`PublicExplanation` `allOf`). */
-const SAFE_LABELS: Record<GuidedOperationKind, string> = {
-  navigate: 'Open page',
-  click: 'Click control',
-  fill: 'Fill field',
-  press: 'Press key',
-  check: 'Check control',
-  uncheck: 'Uncheck control',
-  hover: 'Move over control',
-  selectOption: 'Select option',
-  read: 'Read reference',
-  assert: 'Check expected result',
-};
-
-function operationKindOf(text: string): GuidedOperationKind {
-  const lower = text.toLowerCase();
-  if (lower.startsWith('go to') || lower.startsWith('open')) return 'navigate';
-  if (lower.startsWith('type') || lower.startsWith('enter') || lower.startsWith('fill')) return 'fill';
-  if (lower.startsWith('check that') || lower.startsWith('verify') || lower.startsWith('assert')) return 'assert';
-  return 'click';
-}
-
 /** How a session's steps are accounted for: learned this run, reused, or not reached. */
 export interface ExplanationPlan {
   /** Steps `0..completed-1` completed. */
@@ -274,7 +251,6 @@ export function explanationFor(
     const completed = index < plan.completed;
     const reused = completed && index < plan.reusedBefore && plan.baseRevisionId !== null;
     const attempted = completed || index === plan.failedIndex;
-    const kind = operationKindOf(step.text);
     return {
       stepId: step.stepId,
       number: index + 1,
@@ -288,8 +264,6 @@ export function explanationFor(
               admissionId: `admission-${index + 1}`,
               ordinal: 0,
               attemptOrdinal: 0,
-              operationKind: kind,
-              safeLabel: SAFE_LABELS[kind],
               outcome: completed ? 'SUCCEEDED' : 'FAILED',
               referenceIds: [],
             },
@@ -384,7 +358,8 @@ export function resultFor(input: ResultInputs): GuidedResult {
     publication: input.publication,
     currentReadiness:
       input.publication.status === 'PUBLISHED'
-        ? { revisionId: input.publication.receipt.revisionId, ready: true, code: 'READY' }
+        ? // Recorded, not yet confirmed: only its passing proof makes the revision ready (ADR-SC-008 D5).
+          { revisionId: input.publication.receipt.revisionId, ready: false, code: 'NOT_PUBLISHED' }
         : { revisionId: null, ready: false, code: 'NOT_PUBLISHED' },
     evidence: {
       kind: 'guidedLedger',

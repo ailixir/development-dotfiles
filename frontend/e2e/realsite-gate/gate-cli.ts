@@ -104,8 +104,10 @@ export async function main(argv: string[] = process.argv.slice(2), dependencies:
       const run = requireRun(flags);
       const upstream = flags.get('upstream') ?? 'https://aiplatform.googleapis.com';
       const ports=gatePorts({...process.env,...(flags.has('port')?{CHECKS_GATE_PORT_RECORDER:flags.get('port')}: {})});
-      const recorder = await startRecorder({ port: ports.recorder, upstream, outDir: join(runDir(run, root), 'gateway') });
-      console.log(`recorder for ${run} listening on 127.0.0.1:${recorder.port} -> ${upstream}`);
+      const cap = process.env.CHECKS_GATE_MAX_CALLS ?? '';
+      if (cap !== '' && !/^[1-9][0-9]*$/.test(cap)) throw new Error('CHECKS_GATE_MAX_CALLS must be a positive integer');
+      const recorder = await startRecorder({ port: ports.recorder, upstream, outDir: join(runDir(run, root), 'gateway'), ...(cap === '' ? {} : { maxCalls: Number(cap) }) });
+      console.log(`recorder for ${run} listening on 127.0.0.1:${recorder.port} -> ${upstream}${cap === '' ? '' : ` (call cap ${cap})`}`);
       await new Promise<void>((done) => {
         for (const sig of ['SIGINT', 'SIGTERM'] as const) process.once(sig, () => void recorder.close().then(done));
       });

@@ -150,7 +150,7 @@ function contextOf(test: TestDto) {
 }
 
 describe('AC-1 / STUDIO-OBS-008 AC-2: Run acts in every state but LEARNING', () => {
-  it('enumerating every readiness the document declares — FX-RUNGATE-STATE-UNLEARNED, FX-RUNGATE-STATE-LEARNING, FX-RUNGATE-STATE-READY, FX-RUNGATE-STATE-NEEDS_RELEARN', async () => {
+  it('enumerating every readiness the document declares — FX-RUNGATE-STATE-UNLEARNED, FX-RUNGATE-STATE-LEARNING, FX-RUNGATE-STATE-RECORDED, FX-RUNGATE-STATE-READY, FX-RUNGATE-STATE-NEEDS_RELEARN', async () => {
     expect(DECLARED_STATES.length).toBeGreaterThan(0);
     const enabledIn: string[] = [];
     const modes: Record<string, string | null> = {};
@@ -166,8 +166,14 @@ describe('AC-1 / STUDIO-OBS-008 AC-2: Run acts in every state but LEARNING', () 
     }
 
     // One Run, three modes: replay, learn, mixed-mode learn. A running session disables it.
-    expect(enabledIn.slice().sort()).toEqual(['NEEDS_RELEARN', 'READY', 'UNLEARNED']);
-    expect(modes).toEqual({ UNLEARNED: 'learn', LEARNING: 'busy', READY: 'replay', NEEDS_RELEARN: 'relearn' });
+    expect(enabledIn.slice().sort()).toEqual(['NEEDS_RELEARN', 'READY', 'RECORDED', 'UNLEARNED']);
+    expect(modes).toEqual({
+      UNLEARNED: 'learn',
+      LEARNING: 'busy',
+      RECORDED: 'replay',
+      READY: 'replay',
+      NEEDS_RELEARN: 'relearn',
+    });
   });
 
   it('a state the document does not declare is a loud failure rather than a permissive default', async () => {
@@ -233,7 +239,7 @@ describe('STUDIO-OBS-008 AC-2: one Run, three modes, no hidden executions', () =
     expect(unexpectedRequests()).toEqual([]);
   });
 
-  it('(c) NEEDS_RELEARN: the start carries baseRevisionId = confirmedRevisionId and firstLearnStepId = firstChangedStepId, as served (D-3)', async () => {
+  it('(c) NEEDS_RELEARN: the start carries firstLearnStepId = firstChangedStepId, as served, and no baseRevisionId (the server base is the head, also after a recorded revision plus an edit; D-3)', async () => {
     const startLearn = startLearnSpy();
     serve(fixtureDetail(needsRelearnDraft), { startLearn });
     const control = await settledControl();
@@ -243,7 +249,6 @@ describe('STUDIO-OBS-008 AC-2: one Run, three modes, no hidden executions', () =
     await waitFor(() => expect(startLearn).toHaveBeenCalledTimes(1));
     expect(startLearn.mock.calls[0][0]).toEqual({
       ...contextOf(needsRelearnDraft),
-      baseRevisionId: needsRelearnDraft.confirmedRevisionId,
       firstLearnStepId: needsRelearnDraft.firstChangedStepId,
     });
     expect(executeRequests()).toHaveLength(0);
@@ -262,7 +267,6 @@ describe('STUDIO-OBS-008 AC-2: one Run, three modes, no hidden executions', () =
     await waitFor(() => expect(startLearn).toHaveBeenCalledTimes(1));
     expect(startLearn.mock.calls[0][0]).toEqual({
       ...contextOf(needsRelearnDraft),
-      baseRevisionId: needsRelearnDraft.confirmedRevisionId,
       firstLearnStepId: fixtureStepId(0),
     });
   });
@@ -286,7 +290,6 @@ describe('STUDIO-OBS-008 AC-2: one Run, three modes, no hidden executions', () =
     await waitFor(() => expect(startLearn).toHaveBeenCalledTimes(1));
     expect(startLearn.mock.calls[0][0]).toEqual({
       ...contextOf(needsRelearnDraft),
-      baseRevisionId: needsRelearnDraft.confirmedRevisionId,
       firstLearnStepId: fixtureStepId(0),
     });
   });
@@ -523,7 +526,6 @@ describe('STUDIO-OBS-008 AC-2: one Run, three modes, no hidden executions', () =
     await waitFor(() => expect(startLearn).toHaveBeenCalledTimes(1));
     expect(startLearn.mock.calls[0][0]).toEqual({
       ...contextOf(readyDraft),
-      baseRevisionId: readyDraft.confirmedRevisionId,
       firstLearnStepId: stepId,
     });
 

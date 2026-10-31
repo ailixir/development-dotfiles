@@ -55,6 +55,13 @@ export function contractsV3Hash(repoRoot: string = REPO_ROOT): string {
   return sha256Hex(names.map((n) => `${n}:${sha256File(join(dir, n))}`).join('\n'));
 }
 
+/** sha256 of the generated Playwright reference (the E5 field playwrightReferenceHash), from the repo's own tool. */
+export function playwrightReferenceHash(repoRoot: string = REPO_ROOT): string {
+  const hash = execFileSync(process.execPath, [join(repoRoot, 'tools/build-playwright-reference.cjs'), '--hash'], { encoding: 'utf8', cwd: repoRoot }).trim();
+  if (!/^[a-f0-9]{64}$/.test(hash)) throw new Error('build-playwright-reference --hash did not print a sha256');
+  return hash;
+}
+
 export function summarizeRecorder(gatewayDir: string, configured: boolean): ProxySummary {
   const file = join(gatewayDir, 'requests.jsonl');
   if (!configured || !existsSync(file)) {
@@ -112,6 +119,7 @@ export function collectEnvironment(options: CollectOptions): EnvironmentRecord {
   const versionsFile = join(runnerRoot, 'dist/runtime-versions.json');
   const versions = existsSync(versionsFile) ? readJson<{ observedChromiumBuild?: string }>(versionsFile) : {};
   const contract = join(REPO_ROOT, 'backend/src/main/resources/studio/guided-output-contract.md');
+  const stepCodeContract = join(REPO_ROOT, 'backend/src/main/resources/studio/guided-step-code-contract.md');
   const assembler = join(REPO_ROOT, 'backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPromptAssembler.java');
   const sha = headFromFilesystem(REPO_ROOT);
   const dirty = 'UNKNOWN' as const;
@@ -144,7 +152,8 @@ export function collectEnvironment(options: CollectOptions): EnvironmentRecord {
     hashes: {
       contractMd: sha256File(contract),
       contractsV3: contractsV3Hash(),
-      promptStatic: sha256Hex(readFileSync(contract).toString('hex') + readFileSync(assembler).toString('hex')),
+      promptStatic: sha256Hex(readFileSync(contract).toString('hex') + readFileSync(stepCodeContract).toString('hex') + readFileSync(assembler).toString('hex')),
+      playwrightReferenceHash: playwrightReferenceHash(),
       wireSystemInstruction: proxy.systemInstructionHashes,
     },
     playwright: {

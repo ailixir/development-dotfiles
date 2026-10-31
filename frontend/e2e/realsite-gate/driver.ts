@@ -1,16 +1,15 @@
 import {recordUiText,recordUiCaptureFailure} from './ui-text.ts';
 import type {Canary} from './leakscan.ts';
-import {collectLiteralPageTitles} from './diagnostic-oracles.ts';
-import { capturePublicTruth, inspectOriginalRegion, persistedRegionPicks } from './region-audit.ts';
-import type { PublicRegionDefinition, PublicRegionTruth } from './region-audit.ts';
-import { readJson,sha256Hex } from './common.ts';
-import { psqlJson, safeId } from './status.ts';
+import { sha256Hex } from './common.ts';
+import { psqlJson, readHeadPointers, safeId, stepReceiptRows } from './status.ts';
+import type { HeadPointers } from './status.ts';
 import type { ExecutionLineage, PublishedLineage } from './lifecycle.ts';
 /**
  * The Studio-UI flow of one gate test, ported from the alpha suite.mjs and made stricter: All Checks ->
- * Create Check -> UI Test form -> editor -> author steps -> Save -> Run Test (learn) -> proof replay
- * (AFTER_LEARN) -> two manual replays -> detail page. UI wording decides the receipts; the public API,
- * the action ledger and the attempt rows decide everything else.
+ * Create Check -> UI Test form -> editor -> author steps -> Save -> Run Test (learn: records a revision) ->
+ * proof replay (AFTER_LEARN: confirms it) -> two manual replays -> detail page. UI wording is corroboration
+ * only; the public API, the head pointers, the step receipts, the action ledger and the attempt rows decide
+ * everything else.
  *
  * Secrets are entered only through typeSecret/declareSecret, which redact every canary form from any
  * error before it is rethrown, so a Playwright call log can never carry a fill value.
@@ -32,7 +31,9 @@ import {
   attemptRows,
   latestAttempt,
   ledgerRows,
+  learningReceipts,
   listExecutions,
+  sessionStepIds,
   readSession,
   TERMINAL_EXECUTION,
   expireLearningTiming,
@@ -125,7 +126,10 @@ export async function authorSteps(page: Page, steps: string[]): Promise<void> {
 }
 
 export async function saveDraft(page: Page): Promise<void> {
+  // The chip is derived from local state and can read 'Saved' before the PUT is sent, so wait for the PUT itself.
+  const put = page.waitForResponse((r) => r.request().method() === 'PUT' && /\/api\/v1\/studio\/tests\/[0-9a-f-]{36}$/i.test(new URL(r.url()).pathname));
   await page.getByRole('button', { name: 'Save', exact: true }).click();
+  expect((await put).ok(), 'the draft PUT must succeed').toBe(true);
   await expect(page.getByTestId('studio-save-state')).toHaveText('Saved');
 }
 
@@ -260,6 +264,7 @@ export async function learnAttempt(page: Page, ctx: GateContext, key: string, te
   const before = await latestAttempt(ctx.request, testId);
   const proxyBefore = ctx.proxyUrl === null ? null : (await recorderCount(ctx.proxyUrl)).count;
   const priorSessions = learningSessionIds(ctx.psql, testId);
+  const headBefore = headOf(readHeadPointers(ctx.psql, testId));
   const watch = sharedWatch ?? watchLearning(ctx, key, testId);
   let startRefusal = null as StartRefusal | null;
   let sessionCreated = false as boolean;
@@ -325,7 +330,8 @@ export async function learnAttempt(page: Page, ctx: GateContext, key: string, te
         terminal = latest;
         watch.poll(attemptNo, priorSessions);
         if (watch.timing.failure !== null) break;
-        if (latest.state !== 'SUCCEEDED' || receipt) {
+        // A SUCCEEDED session has recorded its revision once the head moves; the UI receipt only appears after the proof.
+        if (latest.state !== 'SUCCEEDED' || headOf(readHeadPointers(ctx.psql, testId)) !== headBefore) {
           timedOut = false;
           break;
         }
@@ -347,14 +353,18 @@ export async function learnAttempt(page: Page, ctx: GateContext, key: string, te
     if (sharedWatch === undefined) await watch.stop();
   }
   await snapshotUi(page, ctx, key, `learn${attemptNo}-final`);
-  const sessionId = terminal?.sessionId ?? null;
+  // A watchdog stop has no terminal read; the watch is shared across attempts, so only this attempt's receipts count.
+  const sessionId = terminal?.sessionId ?? watch.timing.receipts.filter((r) => r.attempt === attemptNo).at(-1)?.sessionId ?? null;
   const counters = sessionId === null ? null : (await readSession(ctx.request, sessionId)).counters;
   const attempts = sessionId === null ? null : attemptRows(ctx.psql, sessionId);
   const ledger = sessionId === null ? null : ledgerRows(ctx.psql, sessionId);
+  const receipts = sessionId === null ? null : learningReceipts(ctx.psql, sessionId);
+  const stepIds = sessionId === null ? null : sessionStepIds(ctx.psql, sessionId);
+  const recorded = headOf(readHeadPointers(ctx.psql, testId)) !== headBefore;
   const lastRejected = [...(attempts ?? [])].reverse().find((a) => a.status === 'REJECTED');
   const classified = classifyLearn({
     timingFailure: learningFailureCode(watch.timing),
-    succeeded: terminal?.state === 'SUCCEEDED' && receipt,
+    succeeded: terminal?.state === 'SUCCEEDED' && recorded,
     errorCode: terminal?.errorCode ?? null,
     lastRejectionReason: lastRejected?.rejectionReason ?? null,
     startRefusal,
@@ -364,7 +374,7 @@ export async function learnAttempt(page: Page, ctx: GateContext, key: string, te
   return {
     learningTiming: watch.timing,
     timingFailure: learningFailureCode(watch.timing),
-    failedStepIndex:sessionId===null?null:(psqlJson(ctx.psql,`select (progress->>'stepIndex')::int as step_index from studio_guided_sessions where session_id='${safeId(sessionId)}'`)[0] as {step_index:number|null}|undefined)?.step_index ?? null,
+    failedStepIndex:sessionId===null?null:(psqlJson(ctx.psql,`select row_to_json(t) from (select (progress->>'stepIndex')::int as step_index from studio_guided_sessions where session_id='${safeId(sessionId)}') t`)[0] as {step_index:number|null}|undefined)?.step_index ?? null,
     attempt: attemptNo,
     cls: classified.cls,
     subClass: timedOut && classified.cls !== 'OK' ? 'POLL_TIMEOUT' : classified.subClass,
@@ -377,13 +387,18 @@ export async function learnAttempt(page: Page, ctx: GateContext, key: string, te
     counters,
     attempts,
     ledger,
+    receipts,
+    stepIds,
     gatewayRequests,
   };
 }
 
-/** Post-terminal server clock is a conservative UPPER bound on learning completion, never a local UI time. */
+/** The head revision of a test: the recorded candidate when there is one, else the confirmed revision. */
+const headOf = (pointers: HeadPointers): string | null => pointers.candidate ?? pointers.confirmed;
+
+/** The head revision (candidate, else confirmed), so a recorded but unconfirmed revision still has a publication. Post-terminal server clock is a conservative UPPER bound on learning completion, never a local UI time. */
 export function publishedLineage(ctx: GateContext, testId: string): PublishedLineage | undefined {
-  const rows=psqlJson(ctx.psql,`select row_to_json(t) from (select r.test_id::text as test_id,r.id::text as revision_id,r.source_revision,r.configuration_revision,clock_timestamp() as server_post_terminal_at,array(select value->>'id' from jsonb_array_elements(r.authoring->'steps')) as step_ids,array(select value->>'text' from jsonb_array_elements(r.authoring->'steps')) as authored_texts from ui_tests t join ui_test_revisions r on r.id=t.confirmed_revision_id where t.id='${safeId(testId)}'::uuid) t`);
+  const rows=psqlJson(ctx.psql,`select row_to_json(t) from (select r.test_id::text as test_id,r.id::text as revision_id,r.source_revision,r.configuration_revision,clock_timestamp() as server_post_terminal_at,array(select value->>'id' from jsonb_array_elements(r.authoring->'steps')) as step_ids,array(select value->>'text' from jsonb_array_elements(r.authoring->'steps')) as authored_texts from ui_tests t join ui_test_revisions r on r.id=coalesce(t.candidate_revision_id,t.confirmed_revision_id) where t.id='${safeId(testId)}'::uuid) t`);
   if(rows.length!==1) return undefined;
   const r=rows[0] as Record<string,unknown>;
   if(typeof r.test_id!=='string'||typeof r.revision_id!=='string'||typeof r.source_revision!=='number'||typeof r.configuration_revision!=='number'||typeof r.server_post_terminal_at!=='string'||!Array.isArray(r.step_ids)||!r.step_ids.every((id)=>typeof id==='string')) return undefined;
@@ -468,7 +483,6 @@ export interface FlowOptions {
   /** Called after the test exists and before the steps are authored (L1 declares its secret here). */
   beforeSteps?: (page: Page, testId: string) => Promise<void>;
   beforeLearn?: (page: Page, testId: string) => Promise<void>;
-  literalPageTitles?:{stepIndex:number;title:string}[];
 }
 
 export async function runFlow(page: Page, ctx: GateContext, options: FlowOptions): Promise<FlowResult> {
@@ -496,17 +510,6 @@ export async function runFlow(page: Page, ctx: GateContext, options: FlowOptions
     await authorSteps(page, flow.steps);
     await saveDraft(page);
     await snapshotUi(page, ctx, key, 'authored');
-    const truths:PublicRegionTruth[]=[];
-    const definitionsFile=process.env.CHECKS_GATE_REGION_DEFINITIONS;
-    if(definitionsFile!==undefined){
-      const definitions=readJson<PublicRegionDefinition[]>(definitionsFile);
-      const draft=await ctx.request.get(`${ctx.baseUrl}/api/v1/studio/tests/${testId}`);
-      const stepIds=(await draft.json() as {steps:{id:string}[]}).steps.map((s)=>s.id);
-      for(const definition of definitions.filter((d)=>d.caseId===`${key}${flow.id==='main'?'':`/${flow.id}`}`)){
-        const stepId=stepIds[definition.stepIndex];if(stepId===undefined)throw new Error('independent region step index invalid');
-        truths.push(await capturePublicTruth(page,definition,stepId));
-      }
-    }
     if(options.beforeLearn) await options.beforeLearn(page,testId);
     watch = watchLearning(ctx, `${key}-${flow.id}`, testId);
     result.learningTiming = watch.timing;
@@ -519,20 +522,13 @@ export async function runFlow(page: Page, ctx: GateContext, options: FlowOptions
     }
     await watch.stop();
     result.learned = watch.timing.failure === null && result.learnAttempts[result.learnAttempts.length - 1]?.cls === 'OK';
+    result.headAtLearn = readHeadPointers(ctx.psql, testId);
     if (result.learned) { result.publication=publishedLineage(ctx,testId); result.learnedAt=result.publication?.learnedCompletedAt ?? null; }
-    if(result.learned&&result.publication!==undefined){
-      const sessionId=result.learnAttempts[result.learnAttempts.length-1]?.sessionId;
-      if(sessionId!==null&&sessionId!==undefined){
-        const caseId=`${key}${flow.id==='main'?'':`/${flow.id}`}`;
-        const picks=persistedRegionPicks(ctx,sessionId,result.publication);
-        const stepIds=[...new Set([...result.learnAttempts.flatMap((a)=>(a.ledger??[]).filter((r)=>r.kind==='read'&&r.dispatched===1).map((r)=>r.stepId)),...picks.filter((p)=>p.region_required).map((p)=>p.step_id),...truths.map((t)=>t.stepId)])];
-        const witnesses=[];result.publicPickDocuments=picks.map((p)=>({stepId:p.step_id,documentId:p.document_id}));result.literalPageTitles=collectLiteralPageTitles(ctx,result.publication,options.literalPageTitles ?? []);
-        for(const pick of picks){const truth=truths.find((t)=>t.stepId===pick.step_id);if(truth!==undefined&&(pick.region_required||truths.some((t)=>t.stepId===pick.step_id)))witnesses.push(inspectOriginalRegion(pick,truth));}
-        result.regionAudit={required:stepIds.map((stepId)=>({caseId,stepId})),witnesses,truth:truths,collectedAt:new Date().toISOString()};
-      }
-    }
     if (options.proceed && result.learned) {
       result.proof = await waitForProof(ctx, testId,result.publication);
+      // The proof's promotion commits with its FINAL report, so these reads cannot race it.
+      result.headAfterProof = readHeadPointers(ctx.psql, testId);
+      result.proofReceipts = result.publication === undefined ? null : stepReceiptRows(ctx.psql, result.publication.revisionId);
       for (const n of [1, 2]) result.replays.push(await replayOnce(page, ctx, key, testId, n,result.publication));
       result.detailOk = await detailPageOk(page, ctx, testId);
     } else if (!options.proceed) {

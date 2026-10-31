@@ -1,8 +1,8 @@
-# Real-site release gate (ADR-SC-007, WI-5)
+# Real-site release gate (ADR-SC-007 WI-5, adapted to ADR-SC-008 generated step code)
 
 The gate drives the Studio UI on the real stack through 14 positive real-site tests, three safety controls
 (N1, N2, N3), then scans every sink for the declared general privacy canaries. It is the check that decides
-whether the S3 snapshot-ref grounding stays adopted. It is **necessary before the STUDIO-OBS-016 D-C benchmark
+whether the generated-step-code release is accepted. It is **necessary before the STUDIO-OBS-016 D-C benchmark
 and is not a D-C pass**.
 
 > **`CHECKS_E2E_REAL_BACKEND=1 pnpm run test:e2e` goes green by skipping the gate. It is not evidence.**
@@ -15,13 +15,46 @@ and is not a D-C pass**.
 |---|---|
 | `../studio-realsite-gate-real-backend.spec.ts` | run mode: environment test, 14 positives, N1-N3, in-run scan (19 tests) |
 | `gate-table.json` | the single test table (steps verbatim from ADR-SC-007 and the alpha `suite.mjs`) |
-| `driver.ts`, `status.ts`, `specsupport.ts` | UI flow, strict API/ledger/attempt readers, spec glue |
+| `smoke-flows.json` | the five G0 smoke flows (data) |
+| `../studio-realsite-smoke-real-backend.spec.ts` | the G0 smoke runner: learns, confirms and replays each flow of `smoke-flows.json` once; `dry-` run ids only |
+| `driver.ts`, `status.ts`, `specsupport.ts` | UI flow, strict API/ledger/receipt/head-pointer readers, spec glue |
 | `classify.ts`, `evaluate.ts`, `report.ts`, `bundle.ts` | pure verdict logic, report, run loader |
 | `leakscan.ts`, `scanrun.ts`, `page-text-sources.json`, `fixtures/` | leak scanner, orchestration, closed page-text table |
 | `recorder.ts`, `environment.ts` | gateway recording forwarder, environment record |
 | `gate-cli.ts` | operator CLI |
 | `stack/` | launcher and kit: `gate-stack.sh`, `ports.mjs` (the one port set), `dist-check.mjs` (read-only dist verification), token issuer, Core stand-in, config generator |
 | `*.test.ts` | `node:test` tests, run with `pnpm exec node --test` |
+
+## Learned, confirmed and the controls (ADR-SC-008)
+
+**Lifecycle.** Learning records a revision: `ui_tests.candidate_revision_id` is set (the head is
+`COALESCE(candidate_revision_id, confirmed_revision_id)`) and `publishedLineage` reads the head. The model-free
+AFTER_LEARN proof confirms it. A positive flow is **learned** only when, after that proof PASSED, `confirmed_revision_id`
+equals the published revision and every `studio_step_receipts` row of it is PASSED, carries the flow's proof execution id
+and a closed-code-null receipt whose hash matches the row, and the row count equals the step count. The UI receipt text
+(`LEARNED_RECEIPT`) and chip (`LEARNED_CHIP`) are corroboration only and never decide. A pointer that was confirmed early
+is not a finding; the pointers read right after learning (`headAtLearn`) are kept in the result for the report.
+
+**Controls on receipts.** Every learn attempt (repairs and retries included) joins its ledger rows to
+`studio_guided_actions.receipt` (`{closedCode, stepHash, fenceCrossed, effects[{method, completed}], effectsTruncated, offscreen}`,
+bare Playwright method names) through `learningReceipts`. An unreadable receipt source, a dispatched row without a receipt, a
+receipt without a ledger row, or `fenceCrossed` with no effect listed is "not met", never a pass.
+
+- Steps are told apart by their index in the session's authored order (`stepIds`, from `document.sourceSteps`): SC008 writes ordinal 0 and attempt_ordinal 0 for every ledger row, so receipts join ledger rows on step id plus ordinals. Step index 0: the only allowed effect is `goto`, for all three controls.
+- **N1** (select "3.99"), step index 1: the only tolerated effect is a `selectOption` attempted and not completed. Met: closed code
+  TARGET_DRIFT, OUTCOME_UNKNOWN, ASSERTION_FAILED or TIMEOUT, or a clarification or pre-dispatch refusal; the session must stop at step index 1.
+- **N2** (wrong rsync literal): any effect fails. Met: ASSERTION_FAILED, or a clarification or pre-dispatch refusal.
+- **N3** (absent Install button): any effect or crossed fence fails. Met: a clarification or a refusal (a closed code, or a pre-dispatch refusal).
+- A pre-dispatch refusal is a FAILED session whose error code is INVALID_CONTRACT, MISSING_SOURCE or UNSUPPORTED_SURFACE with no ledger row of step index 1 or above dispatched (`dispatchCount` 0). UI text is not read.
+- A control that succeeded, learned, was proved, replayed or published, or whose candidate or confirmed pointer is set, is a false pass: a hard zero.
+
+Wrong-region picks are not a gate rule; the G8 report lists them as a finding.
+
+## Smoke flows
+
+`smoke-flows.json` holds the five G0 flows of X-5 as data (`key`, `site`, `steps`). The navigation-wording flow is the one-step IANA probe and is INFERRED; its identification is a user decision asked before the smoke runner (E22b). The dry run also requires the scan's `db` source to hold dump files named for `ui_test_revisions`, `studio_step_receipts`, `studio_guided_actions` and `studio_step_examples`.
+
+`page-text-sources.json` classifies the tables of V33-V35: `studio_step_receipts` and `studio_step_example_snapshots` must not carry page text; `studio_step_examples` may (it stores generated step code, a copy of the model's output like `studio_guided_model_attempts`). Widening that list was a recorded decision of E22a.
 
 ## Verdicts and exit codes
 
@@ -64,6 +97,8 @@ and measure actual elapsed time without load-based exceptions. Historical eviden
 | `CHECKS_GATE_STACK_MANIFEST` | the launcher's manifest (below) |
 | `CHECKS_GATE_PGPORT`, `CHECKS_GATE_PSQL` | embedded Postgres port; psql path (default `/opt/homebrew/bin/psql`) |
 | `CHECKS_GATE_PROXY_URL` | recorder base URL, e.g. `http://127.0.0.1:18188`; unset means not interposed |
+| `CHECKS_GATE_MAX_CALLS` | optional recorder call cap (positive integer, read by `gate-cli proxy`). Calls over it get 429 and are not forwarded, recorded or counted. Per recorder run directory: after a restart set the remaining budget |
+| `CHECKS_GATE_EXTERNAL_CORE_DECLARATION` | written by `gen-config.mjs` to `<stack dir>/core-declaration.json` (the app's `frontend/node_modules/@put/core-components`, `package.json` and `dist` only); `gate-stack.sh up` prints it with the other exports |
 | `CHECKS_GATE_DRYRUN_SCAN` | `scan.json` of a clean complete authoritative dry run within 24h (ANY-class hits 0, nonempty declared canaries including GATE_CANARY); required for `rg-` runs |
 | `CHECKS_GATE_BASE_URL`, `CHECKS_GATE_SESSION_COOKIE` | app origin override; `put_session` value (default `local-dev-session`) |
 | `CHECKS_E2E_BACKEND_URL` | the backend the Vite proxy forwards to; bound to the manifest |
@@ -93,6 +128,8 @@ Runs only after WI-1..WI-4 are integrated and their own checks are green. Use No
    `node e2e/realsite-gate/gate-cli.ts init --run rg-YYYYMMDD-N` (prints the canary file path; export `CHECKS_GATE_CANARY_FILE`).
 5. **Recorder.** `node e2e/realsite-gate/gate-cli.ts proxy --run rg-... --upstream https://aiplatform.googleapis.com` (port
    `CHECKS_GATE_PORT_RECORDER`) and `export STUDIO_GATEWAY_ENDPOINT=http://127.0.0.1:18188 CHECKS_GATE_PROXY_URL=http://127.0.0.1:18188`.
+   For an `rg-` run, the recorder must hold at least one recorded model request before the environment test (the model id must be
+   observed, not only declared); send one small request through it first, inside the run's call budget.
    With `STUDIO_GATEWAY_PROJECT`, `STUDIO_GATEWAY_LOCATION` (and optionally `STUDIO_GATEWAY_MODEL`) set, run `stack/gate-stack.sh up`. It verifies the
    dist (above), freezes a copy of `dist`, `package.json` and `node_modules`, builds the backend jar in its own Gradle directory
    (`CHECKS_GATE_GRADLE_DIR`), starts a dev-mode Vault (`hashicorp/vault:1.21.4`, in memory, loopback), the token issuer, the Core
@@ -103,6 +140,15 @@ Runs only after WI-1..WI-4 are integrated and their own checks are green. Use No
    `gate-cli scan --run dry-...`. Require complete sink/form coverage, a nonempty declared set including the existing GATE_CANARY,
    and 0 occurrences; export `CHECKS_GATE_DRYRUN_SCAN` as that recent authoritative `scan.json`. No replacement secret setup is required.
    Any PAGE_ORIGIN occurrence also fails. Classification is diagnostic only.
+   **G0 smoke** (X-5), before the counted run, each under its own `dry-` id (the spec refuses `rg-`):
+   ```
+   CHECKS_GATE_MODE=run CHECKS_GATE_RUN_ID=dry-... CHECKS_GATE_DRY_RUN=1 CHECKS_E2E_REAL_BACKEND=1 \
+     PLAYWRIGHT_JSON_OUTPUT_NAME=<out>/dry-.../playwright-report.json \
+     pnpm exec playwright test --project=real-backend e2e/studio-realsite-smoke-real-backend.spec.ts --reporter=list,json
+   node e2e/realsite-gate/gate-cli.ts collect --run dry-...
+   node e2e/realsite-gate/gate-cli.ts scan --run dry-...
+   ```
+   The smoke run ids are leak-scanned like the full dry run: require the same clean scan (nonempty canaries including GATE_CANARY, 0 occurrences). All five flows must pass; a smoke failure blocks the counted run.
 8. **Gate.**
    ```
    node e2e/realsite-gate/gate-cli.ts verify --run rg-...      # same-day corpus ground truth, judged from the JSON
@@ -149,23 +195,21 @@ check, with no next-day execution or waiting requirement.
 
 ## What cannot be proven without the stack
 
-The UI selectors and copy (rehearsed on the MSW harness only), the ledger `operation.kind` path, the live API shapes (the
+The UI selectors and copy (rehearsed on the MSW harness only), the psql queries (`studio_guided_actions.receipt`, `ui_tests` head pointers, `studio_step_receipts`; no unit test runs psql), the live API shapes (the
 status parsers throw on any missing field, which makes the run INVALID rather than passing), the recorder over plain
 http to the GenAI SDK, and the launcher itself. The dry run exists to flush these before any `rg-` run.
 
 ## Revised strict evidence boundary
 
-All port overrides are18000..18999. The registry has 17 entries: 14 ordinary positives and N1-N3. Each of 14 required lifecycles needs full learning with no clarification, PASSED AFTER_LEARN proof with AVAILABLE video, and exactly two distinct new PASSED model-free MANUAL executions. N1 requires exact TARGET_MISMATCH; controls inspect every attempt and cannot hide an earlier dispatch/publication behind a later refusal.
+All port overrides are18000..18999. The registry has 17 entries: 14 ordinary positives and N1-N3. Each of 14 required lifecycles needs full learning with no clarification, PASSED AFTER_LEARN proof with AVAILABLE video, and exactly two distinct new PASSED model-free MANUAL executions. Controls are judged on effect receipts (below) of every attempt and cannot hide an earlier dispatch/publication behind a later refusal.
 
-Results are schemaVersion1/run-bound. The bundle rejects unknown files, duplicate keys and crossed identities. Missing lineage, scans, full external-core/build/settings/process freeze, independent Q4 audits or truncation metadata coverage blocks PASS.
+Results are schemaVersion1/run-bound. The bundle rejects unknown files, duplicate keys and crossed identities. Missing lineage, scans, full external-core/build/settings/process freeze or truncation metadata coverage blocks PASS.
 
 Source checks use full filesystem manifests plus narrow HEAD metadata resolution; no Git command is invoked. `dirty` is UNKNOWN. Before the first counted action and at same-day start/initial checkpoints, record immutable source, external @put/core source/artifact, nonsecret settings, JAR/frozen-dist and process startup identities. `CHECKS_GATE_EXTERNAL_CORE_DECLARATION` points to an approved nonsecret JSON declaration with root/sourceScopes/artifactRoot/artifactScopes. Missing safe closure blocks execution. Checkpoints are create-once and a mismatch stays invalid. Do not change baseline or source to repair a run.
 
-`CHECKS_GATE_REGION_DEFINITIONS` is a same-day independently reviewed public-region definition array. Each case/step index identifies URL, named region, separate human region selector and reviewerReceiptHash. The harness captures source document/region hashes before learning, joins the actual selected ref to its persisted observation/preparation and frozen compiled locator, then audits the ORIGINAL observation/fact hash, exact preparation and frozen scope against independently declared public row/column/heading meaning. No later tab certifies original selection. Changed source, missing joins or same-text wrong-region picks cannot pass. Ground truth never enters model facts or the product locator.
-
 After complete same-day collection/scanning/audits, `gate-cli seal-same-day --run <rg-id> --controller-receipt-sha256 <actual-controller-receipt-hash>` creates the actual first whole-suite SAME_DAY_PASS event once. It cannot seal incomplete evidence. Preserve all underlying files. Then generate the final report immediately. Every fix/restart needs a new full run and seal; no waiting interval is required.
 
-`studio-realsite-edit-relearn-real-backend.spec.ts` contains five separately opted-in supplementary diagnostics (`CHECKS_GATE_DIAGNOSTICS=1`, dry/rehearsal identity): joined real edit/relearn, two distinct captured values with independent source regions and binding/consumer admission joins, and exactly three preselected wording probes. They write diagnostics only and never replace registered cases. Unset mode/listing is NOT_RUN, never runtime evidence.
+`studio-realsite-edit-relearn-real-backend.spec.ts` contains four separately opted-in supplementary diagnostics (`CHECKS_GATE_DIAGNOSTICS=1`, dry/rehearsal identity): joined real edit/relearn and exactly three preselected wording probes. They write diagnostics only and never replace registered cases. Unset mode/listing is NOT_RUN, never runtime evidence.
 
 The recorder forwards original bytes and retains only bounded finish/usage metadata for response diagnostics. Numeric cap4096 plus provider MAX_TOKENS is verified truncation; missing/malformed/oversize/aborted metadata is UNKNOWN and blocks completeness. No response body is persisted. W-AC10 delayed-focus press residual and change-only fill limitations remain. Q9 compliance reconfirmation is a hard gate before any pilot; no compliance receipt is currently claimed.
 
@@ -173,16 +217,10 @@ The recorder forwards original bytes and retains only bounded finish/usage metad
 
 Raw evidence is append-only. `collections/initial-<attempt>/` retains each current Playwright collection; `scan-attempts/initial-<attempt>/` retains fresh DB dumps and immutable copies of every scanned sink. Manifests bind exact path/bytes/content hashes. Recollecting adds new directories; it never replaces sealed artifacts. The same-day event hashes actual initial raw content. Scans cover diagnostic JSON whenever present, in addition to all existing sinks. Missing same-day coverage or raw-content mismatch blocks success. Historical next-day/L1 artifacts remain unchanged and readable as raw JSON, with harmless historical field types retained. The current loader validates the current 17-entry registry and may refuse an old 18-entry registry as current gate input; there is no historical execution mode.
 
-The supplemental two-value diagnostic captures the Python and JavaScript Wikipedia designers before consuming either. It then searches each captured value separately and requires independently fixed FULL page titles, Guido van Rossum - Wikipedia followed by Brendan Eich - Wikipedia. A swap or overwrite reaches the wrong full page title and fails the real flow. Immutable compiled assert/title page predicates, exact authored sourceInputId/span recipes, actual assertionPassed and fresh document identities verify the literal outcomes; actual read→fill binding admission joins remain supplemental lineage. No copied value digest or input-value inspection is exported. All14 registered cases remain unchanged, including mandatory Debian row+column Q4 coverage. Exact steps and GT freeze before live execution; failed wording is never rewritten on the fly. Both initial and edited diagnostic lifecycles use the registered positive validator; edited proof plus two fresh clean model-free MANUAL executions are required.
-
-Q4 authority comes from original persisted observationHash/factHash/document/generation/ref, exact action/preparation/source/revision joins and canonical frozen guard equality. Human truth declares ordered public row+column or heading anchors and the expected closed locator prefix before learning. The optional WI6 `readScope` field has only relation enum3 and1..8 unique refs already shown cleanly in that same observation. It supplies no values/labels/DOM IDs or GT IDs. For Code Name, row identity and governing column identity are both required. Complete unprojected outline paths may support existing explicit scopes; missing/projected boundaries cannot. Native collector and prefix1/final1/SAME-target conformance supply physical relationship trust; the gate independently checks declared intended meaning and immutable joins. No second historical DOM measurement is claimed. Absent safe original provenance stays UNKNOWN.
-
 Current collection never fetches or persists the removed practice-login baseline. Generic privacy regressions remain required.
 
-Actual Studio UI text is scanned BEFORE persistence protection. Clean text is saved unchanged; unsafe text has safe complete hit receipts and fails. Failed capture cannot become empty clean text. Missing, duplicate or cross-run UI receipts block coverage. Original scan bytes and missing counts are reported explicitly; hashes never stand in for required text scanning. The governing-column Q4 path requires an actual readScope source certificate; outline position/nth never proves column ownership. Ambiguous equal original public semantic classes remain UNKNOWN.
-
-Co-build qualified effects audit `scopeRefs` separately from READ_ASSERT_ONLY `readScope`. Sources must be actual same-observation shown clean refs1..8 with complete public names and coherent current identity. The full authored qualifier must equal an expected certified public source label. Near-heading/unlabelled-form witnesses qualify a control; they do not assert ancestor containment. Unknown/foreign/stale/missing sources or an omitted qualifier on a required GT step block. Physical source/target relation is supplied by the approved native producer and wrong-neighbor/unique+SAME conformance, never projected indentation.
+Actual Studio UI text is scanned BEFORE persistence protection. Clean text is saved unchanged; unsafe text has safe complete hit receipts and fails. Failed capture cannot become empty clean text. Missing, duplicate or cross-run UI receipts block coverage. Original scan bytes and missing counts are reported explicitly; hashes never stand in for required text scanning.
 
 The actual HN module is `public-label-preflight.ts` (the former implementation moved, no facade). It captures and freezes actual first-visible title/author/item/comments association before authoring. Unique comments use ordinary exact label; duplicates require the actual surviving public-author association and normal native pipeline, otherwise fail. The final node assertion consumes the actual copied binding near the public author; it never restores a private title or composes a captured binding with branding. P16 unit tests production preflight immutability; actual production masking/native and joined replay evidence remain separately required.
 
-The preflight is create-once at attempt and capture as well as amendment. Source/label drift after failure needs a fresh reviewed run. Repeated comments are not automatically forbidden or declared supported: actual retained public-author association must pass effect-safe/native unique+SAME checks. No readScope authority is borrowed for comments clicks.
+The preflight is create-once at attempt and capture as well as amendment. Source/label drift after failure needs a fresh reviewed run. Repeated comments are not automatically forbidden or declared supported: actual retained public-author association must pass effect-safe/native unique+SAME checks.

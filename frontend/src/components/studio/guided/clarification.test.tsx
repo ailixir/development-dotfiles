@@ -63,6 +63,13 @@ describe('disambiguation: the AC-3 question, a radio group, then "None of these"
     expect(radios[radios.length - 1].closest('label')).toHaveTextContent("None of these — I'll edit step 1");
   });
 
+  it('SC008-FIX-24: says why it is asked and that rewording the step avoids the question', () => {
+    renderQuestion(question({ expiresAt: FAR_FUTURE }));
+    expect(screen.getByTestId('guided-question-why')).toHaveTextContent(
+      "Step 1 matches more than one thing on this page. Pick one to continue, or reword the step to name it exactly (for example, the visible text or where it is) so Studio won't need to ask.",
+    );
+  });
+
   it('choosing a label and pressing Continue answers with that server choiceId', async () => {
     const { onAnswer, onNoneOfThese } = renderQuestion(question({ expiresAt: FAR_FUTURE }));
     const continueButton = screen.getByRole('button', { name: 'Continue' });

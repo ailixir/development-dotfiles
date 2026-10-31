@@ -67,6 +67,8 @@ export const COPY_SOURCE_FILES = {
   errorSchema: 'docs/specs/studio-observed-authoring/contracts/v3/error.schema.json',
   adr002: 'docs/architecture/ADR-002-internal-contract-surface.md',
   adr007: 'docs/architecture/ADR-SC-007-snapshot-ref-grounding.md',
+  adr008: 'docs/architecture/ADR-SC-008-generated-step-code.md',
+  req008: 'docs/specs/studio-generated-step-code/requirements.md',
 } as const;
 
 export type CopySourceFile = (typeof COPY_SOURCE_FILES)[keyof typeof COPY_SOURCE_FILES];
@@ -188,6 +190,21 @@ export const GUIDED_COPY = {
     template: "Step {N} says: '{<step text>}'. Which one did you mean?",
     basis: 'verbatim',
     source: { file: S.story, quote: "Step N says: '<step text>'. Which one did you mean?" },
+  },
+  clarificationWhy: {
+    template:
+      "Step {N} matches more than one thing on this page. Pick one to continue, or reword the step to name it exactly (for example, the visible text or where it is) so Studio won't need to ask.",
+    basis: 'delegated',
+    source: { file: S.req008, quote: 'state with no clarification' },
+    note: 'SC008-FIX-24 (user decision 2026-10-31): a step Studio had to ask about does not count as clean in the gate, so the question says why it is asked and that rewording the step is the fix. States no cause beyond "more than one match".',
+    facts: { file: S.req008, quote: 'state with no clarification' },
+  },
+  clarifiedStepNote: {
+    template: 'Step {N} needed your answer. Reword it to name the target exactly so it learns without asking.',
+    basis: 'delegated',
+    source: { file: S.req008, quote: 'state with no clarification' },
+    note: 'SC008-FIX-24: one line per step whose question the author answered during this learning session, on the completion screen. The step numbers are remembered by the frontend (the public session data does not say which steps needed an answer).',
+    facts: { file: S.req008, quote: 'state with no clarification' },
   },
   noneOfThese: {
     template: "None of these — I'll edit step {N}",
@@ -440,6 +457,13 @@ export const GUIDED_COPY = {
     },
     note: 'The undeclared-refusal sentence, led by "This run stopped." for a session that failed rather than one that was refused. Used for INVALID_CONTRACT (ruling A2: "the generic INVALID_CONTRACT narrative") and every failure code without its own narrative.',
   },
+  contextLost: {
+    template: 'Learning stopped at this step, so nothing from it was saved; the step may need to be learned again.',
+    basis: 'delegated',
+    source: { file: S.adr008, quote: 'CONTEXT_LOST' },
+    note: 'A learn that ended FAILED with LEARNING_CONTEXT_LOST (SC008-FIX-20, user decision 2026-10-31: save and show the failure code). The runner reported CONTEXT_LOST; the backend does not know the cause (the lifecycle callback carries only the reason), so the text states the consequence and does not claim the browser was lost or that a rerun works. Shown with the code line of the unnamed failure.',
+    facts: { file: S.adr008, quote: 'CONTEXT_LOST' },
+  },
   failedNoReason: {
     template: 'This run stopped, and the server gave no reason for it, so there is nothing here to explain it.',
     basis: 'adapted',
@@ -482,6 +506,41 @@ export const GUIDED_COPY = {
   // -------------------------------------------------------------------------------------------
   // Readiness chip (ReadinessChip), AC-3 and D-4
   // -------------------------------------------------------------------------------------------
+  recordedNotVerified: {
+    template: 'Recorded, not verified (step {n})',
+    basis: 'adapted',
+    source: { file: S.adr008, quote: 'Recorded, not verified (step N)' },
+    note: 'N is the first step without a PASSED proof receipt, numbered in the current draft.',
+  },
+  recordedNotVerifiedNoStep: {
+    template: 'Recorded, not verified',
+    basis: 'adapted',
+    source: { file: S.adr008, quote: 'Recorded, not verified (step N)' },
+    note: 'The step clause is dropped when the served step is not in the draft, rather than guessed.',
+  },
+  recordedReceipt: {
+    template: 'Recorded from this run. The steps count as learned once the replay passes.',
+    basis: 'adapted',
+    source: { file: S.adr008, quote: 'Finalize stores the candidate revision' },
+    note: 'Shown instead of the learned receipt until the proof replay has passed.',
+  },
+  recordedDiagnosticNote: {
+    template: 'Run replays the recorded steps as a diagnostic. It does not confirm them.',
+    basis: 'adapted',
+    source: { file: S.adr008, quote: 'A manual Run of a recorded revision is a labelled diagnostic' },
+    note: 'Said in plain words beside the recorded label; the ADR names the run "a labelled diagnostic".',
+  },
+  verifyAgain: {
+    template: 'Verify again',
+    basis: 'verbatim',
+    source: { file: S.adr008, quote: 'Verify again' },
+  },
+  relearnFromStep: {
+    template: 'Re-learn from step {n}',
+    basis: 'adapted',
+    source: { file: S.req008, quote: 'Re-learn from step N' },
+    note: 'N is the step the proof failed at, numbered in the current draft.',
+  },
   needsRelearn: {
     template: 'Steps changed — next Run learns from step {k}',
     basis: 'verbatim',
@@ -607,28 +666,16 @@ export const GUIDED_COPY = {
     note: 'AC-6 fragment, capitalised.',
   },
   referenceFlow: {
-    template: '{binding} from step {producer} → {slot} in step {consumer}',
+    template: '{binding} from step {producer} → step {consumer}',
     basis: 'adapted',
     source: { file: S.story, quote: 'Order number from step 2 → Reference in step 4' },
-    note: 'The AC-6 example as a pattern. binding is the declared ID; slot is the P3 label of the operation that consumes it.',
+    note: 'The AC-6 example as a pattern. binding is the declared ID; the consuming operation is no longer named.',
   },
-  slotFill: {
-    template: 'Fill field',
+  actionRan: {
+    template: 'Ran the step',
     basis: 'adapted',
-    source: { file: S.architectRulings, quote: 'Fill field' },
-    note: 'P3 label of operationKind fill, used for argumentSlot fill.value.',
-  },
-  slotSelectOption: {
-    template: 'Select option',
-    basis: 'adapted',
-    source: { file: S.architectRulings, quote: 'Select option' },
-    note: 'P3 label of operationKind selectOption, used for argumentSlot selectOption.value.',
-  },
-  slotAssertExpected: {
-    template: 'Check expected result',
-    basis: 'adapted',
-    source: { file: S.architectRulings, quote: 'Check expected result' },
-    note: 'P3 label of operationKind assert, used for argumentSlot assert.expected.',
+    source: { file: S.adr008, quote: 'Learned steps are generated Playwright code' },
+    note: 'One fixed phrase for a recorded action: the explanation names no operation kind (ADR-SC-008).',
   },
   notReadyNow: {
     template: 'Steps not ready to repeat.',

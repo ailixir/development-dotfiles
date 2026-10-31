@@ -191,11 +191,13 @@ describe('a learn that published: its proof is the replay of the published revis
     await user().click(await runButton());
 
     const receipt = await screen.findByTestId('guided-proof-receipt', {}, WAIT);
-    expect(receipt).toHaveTextContent('Completed — learned from this run.');
-    // The learned line is shown once: the "Steps as learned" card below does not repeat it.
+    // Only recorded while the proof runs: "learned" is said once the proof snapshot has PASSED.
+    expect(receipt).toHaveTextContent('Recorded from this run. The steps count as learned once the replay passes.');
+    expect(screen.queryByText('Completed — learned from this run.')).toBeNull();
+    // The recorded line is shown once: the "Steps as learned" card below does not repeat it.
     expect(await screen.findByTestId('plan-explanation', {}, WAIT)).toBeInTheDocument();
     expect(screen.queryByTestId('plan-explanation-history')).toBeNull();
-    expect(screen.getAllByText('Completed — learned from this run.')).toHaveLength(1);
+    expect(screen.getAllByText('Recorded from this run. The steps count as learned once the replay passes.')).toHaveLength(1);
     expect(proofId()).toBeTruthy();
     await waitFor(() => expect(subscribed).toEqual([proofId()]), WAIT);
     await quiet();
@@ -265,7 +267,7 @@ describe('a learn that published: its proof is the replay of the published revis
     renderPage();
 
     await waitFor(() => expect(subscribed).toEqual([id, id]), WAIT);
-    expect(await screen.findByTestId('guided-proof-receipt', {}, WAIT)).toHaveTextContent('learned from this run');
+    expect(await screen.findByTestId('guided-proof-receipt', {}, WAIT)).toHaveTextContent('Recorded from this run');
     await quiet();
     expect(subscribed).toEqual([id, id]);
     expect(requests('POST', STARTS)).toHaveLength(1);
@@ -287,7 +289,7 @@ describe('a learn that published: its proof is the replay of the published revis
         ),
       WAIT,
     );
-    expect(completion).toHaveTextContent('Completed — learned from this run.');
+    expect(completion).toHaveTextContent('Recorded from this run');
     expect(completion).not.toHaveTextContent('Replaying the saved steps');
     expect(store.getState().studio.guidedResultById[sessionId()]?.proof).toBeNull();
     // Run is the action, and it is enabled.

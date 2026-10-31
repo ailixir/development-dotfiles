@@ -1,12 +1,11 @@
 import { Box, Chip, Divider, Paper, Stack, Typography } from '@mui/material';
 import type { TestDetailDto } from '@/types/studio/studioTypes';
 import type {
-  GuidedArgumentSlot,
   GuidedResult,
   PublicExplanation,
   PublicExplanationStep,
 } from '@/types/studio/studioGuidedTypes';
-import { READY_CHIP_LABEL, guidedCopy, type GuidedCopyKey } from './guidedNarratives';
+import { READY_CHIP_LABEL, guidedCopy } from './guidedNarratives';
 import { readinessChipLabel } from './ReadinessChip';
 import { stoppedStepOf } from './guidedStoppedStep';
 
@@ -22,7 +21,7 @@ import { stoppedStepOf } from './guidedStoppedStep';
  *    shown as text in code style and never interpreted as markup. Server-generated UUID ids are left
  *    out (round 067 amendment to P3). The authored sentence is shown only as a caption under the step
  *    (round 067 D1a), never as a value source (P2).
- *  - **Reference flows** read "<binding> from step 2 → Fill field in step 4", numbered by the
+ *  - **Reference flows** read "<binding> from step 2 → step 4", numbered by the
  *    explanation's own steps. A flow whose producer or consumer step it does not number is left out,
  *    never linked by guess.
  *  - **A failed learn marks where it stopped** (STUDIO-UNIFY-001.6 AC-02): a "Stopped here" chip on
@@ -32,12 +31,6 @@ import { stoppedStepOf } from './guidedStoppedStep';
  *    comes from the learned receipt (`publication.status: PUBLISHED`), and the current-readiness line
  *    from `currentReadiness.ready`. Neither implies the other.
  */
-
-const SLOT_COPY: Record<GuidedArgumentSlot, GuidedCopyKey> = {
-  'fill.value': 'slotFill',
-  'selectOption.value': 'slotSelectOption',
-  'assert.expected': 'slotAssertExpected',
-};
 
 /** The provenance claims a step's retained facts prove, in AC-6 order. */
 export function stepProvenance(step: PublicExplanationStep): string[] {
@@ -60,7 +53,6 @@ export function referenceFlowLines(explanation: PublicExplanation): string[] {
       guidedCopy('referenceFlow', {
         binding: flow.bindingId,
         producer,
-        slot: guidedCopy(SLOT_COPY[flow.argumentSlot]),
         consumer,
       }),
     );
@@ -73,7 +65,14 @@ export function explanationFacts(
   result: Pick<GuidedResult, 'publication' | 'currentReadiness'>,
 ): { readonly history: string | null; readonly current: string } {
   return {
-    history: result.publication.status === 'PUBLISHED' ? guidedCopy('completedLearned') : null,
+    // A published learn is only recorded until the proof has passed; "learned" is said once the
+    // server's current readiness is ready (ADR-SC-008 D5).
+    history:
+      result.publication.status !== 'PUBLISHED'
+        ? null
+        : result.currentReadiness.ready
+          ? guidedCopy('completedLearned')
+          : guidedCopy('recordedReceipt'),
     current: result.currentReadiness.ready ? READY_CHIP_LABEL : guidedCopy('notReadyNow'),
   };
 }
@@ -237,7 +236,7 @@ export function PlanExplanation({ result, test = null, omitHistory = false }: Pl
                           sx={{ minWidth: 0 }}
                         >
                           <Typography variant="body2" component="span">
-                            {action.safeLabel}
+                            {guidedCopy('actionRan')}
                           </Typography>
                           {action.referenceIds.filter((id) => !UUID_ID.test(id)).map((id) => (
                             <Box key={id} component="code" data-testid="plan-reference-id" sx={{ ...ID_SX, ml: 1 }}>

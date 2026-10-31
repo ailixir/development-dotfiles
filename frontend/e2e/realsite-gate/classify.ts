@@ -15,7 +15,8 @@ export const INFRA_ERROR_CODE = 'MODEL_UNAVAILABLE';
 /** Grounding failures: they fail the test, no retry. */
 export const GROUNDING_CODES: readonly string[] = [
   'UNSUPPORTED_SURFACE',
-  'TARGET_MISMATCH',
+  'TARGET_DRIFT',
+  'OUTCOME_UNKNOWN',
   'MISSING_SOURCE',
   'ASSERTION_FAILED',
   'BUDGET_EXCEEDED',

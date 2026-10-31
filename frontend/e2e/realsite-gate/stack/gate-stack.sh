@@ -119,6 +119,7 @@ cmd_up() {
 
   # 2. catalog + overlays (public values), against the frozen dist; fails fast if a port is taken
   CHECKS_GATE_RUNNER_DIR="$STACK/runner-frozen" node "$HERE/gen-config.mjs" >/dev/null
+  export CHECKS_GATE_EXTERNAL_CORE_DECLARATION="$STACK/core-declaration.json"   # the in-worktree @put/core-components package.json + dist
 
   # 3. token issuer and the Core session stand-in (cookie put_session=local-dev-session), on gate ports only
   if [ ! -f "$STACK/issuer.pid" ] || ! kill -0 "$(cat "$STACK/issuer.pid")" 2>/dev/null; then
@@ -211,7 +212,7 @@ fs.writeFileSync(stack + '/manifest.json', JSON.stringify(manifest, null, 2) + '
 console.log('manifest written: ' + stack + '/manifest.json');
 NODE
   log "stack is up (gate ports only). Export:"
-  log "  CHECKS_GATE_STACK_MANIFEST=$STACK/manifest.json CHECKS_GATE_PGPORT=$PG_PORT CHECKS_E2E_BACKEND_URL=http://127.0.0.1:${BACKEND_PORT} CHECKS_E2E_APP_PORT=${APP_PORT}"
+  log "  CHECKS_GATE_STACK_MANIFEST=$STACK/manifest.json CHECKS_GATE_PGPORT=$PG_PORT CHECKS_GATE_EXTERNAL_CORE_DECLARATION=$STACK/core-declaration.json CHECKS_E2E_BACKEND_URL=http://127.0.0.1:${BACKEND_PORT} CHECKS_E2E_APP_PORT=${APP_PORT}"
 }
 
 cmd_status() {

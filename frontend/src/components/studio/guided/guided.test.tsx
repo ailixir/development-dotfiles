@@ -1,6 +1,6 @@
 import type React from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -287,18 +287,22 @@ describe('ReadinessChip (AC-3, D-4)', () => {
 // ---------------------------------------------------------------------------------------------
 
 describe('GuidedCompletion: success comes from the learned receipt (AC-3, AC-6)', () => {
-  it('SUCCEEDED + PUBLISHED with no relearnedFrom: "Completed — learned from this run."', () => {
+  it('SUCCEEDED + PUBLISHED is only recorded, never "learned", until the proof has passed', () => {
     renderCompletion(publishedResult());
-    expect(screen.getByTestId('guided-completion')).toHaveTextContent('Completed — learned from this run.');
+    const completion = screen.getByTestId('guided-completion');
+    expect(completion).toHaveTextContent('Recorded from this run. The steps count as learned once the replay passes.');
+    expect(completion).not.toHaveTextContent('learned from this run');
+    // The learned receipt is what the page shows once the proof snapshot PASSED.
+    expect(learnedReceiptLines(publishedResult(), null)).toEqual(['Completed — learned from this run.']);
   });
 
-  it('partial: "Completed — steps k–n learned again." from relearnedFrom (BOUNDARY)', () => {
+  it('partial: "Completed — steps k–n learned again." from relearnedFrom (BOUNDARY), as the learned receipt after the proof', () => {
     const result = publishedResult();
     result.relearnedFrom = { stepId: STEP(2) };
-    renderCompletion(result);
     // W5 UX-09: a range of one step is worded as one step, not "steps 2–2".
-    expect(screen.getByTestId('guided-completion')).toHaveTextContent('Completed — step 2 learned again.');
-    expect(screen.getByTestId('guided-completion')).not.toHaveTextContent('2–2');
+    expect(learnedReceiptLines(result, null)).toEqual(['Completed — step 2 learned again.']);
+    renderCompletion(result);
+    expect(screen.getByTestId('guided-completion')).toHaveTextContent('Recorded from this run. The steps count as learned once the replay passes.');
   });
 
   it('after a prefix drift: the learned range, then "steps j… were re-learned because the page changed"', () => {
@@ -314,11 +318,7 @@ describe('GuidedCompletion: success comes from the learned receipt (AC-3, AC-6)'
     const n = result.progress.stepCount;
     expect(guidedCompletionView(result, STEP(3))).toEqual({
       kind: 'succeeded',
-      lines: [
-        `Completed — steps 2–${n} learned again.`,
-        'Step 2 was re-learned because the page changed.',
-        GUIDED_COPY.proofReplaying.template,
-      ],
+      lines: [GUIDED_COPY.recordedReceipt.template, GUIDED_COPY.proofReplaying.template],
     });
     // The receipt kept above the proof replay is the same learned lines without the proof line.
     expect(learnedReceiptLines(result, STEP(3))).toEqual([
@@ -326,22 +326,18 @@ describe('GuidedCompletion: success comes from the learned receipt (AC-3, AC-6)'
       'Step 2 was re-learned because the page changed.',
     ]);
     // Without the session's original k, "j…" is filled as the AC writes it.
-    expect(guidedCompletionView(result, null)).toEqual({
-      kind: 'succeeded',
-      lines: [
-        `Completed — steps 2–${n} learned again.`,
-        'Steps 2… were re-learned because the page changed.',
-        GUIDED_COPY.proofReplaying.template,
-      ],
-    });
+    expect(learnedReceiptLines(result, null)).toEqual([
+      `Completed — steps 2–${n} learned again.`,
+      'Steps 2… were re-learned because the page changed.',
+    ]);
   });
 
-  it('proof replay: the learned line is followed by "Replaying the saved steps to record proof…" while result.proof names it', () => {
+  it('proof replay: the recorded line is followed by "Replaying the saved steps to record proof…" while result.proof names it', () => {
     const result = publishedResult();
     result.proof = { ...PROOF };
     renderCompletion(result);
     const completion = screen.getByTestId('guided-completion');
-    expect(completion).toHaveTextContent('Completed — learned from this run.');
+    expect(completion).toHaveTextContent('Recorded from this run. The steps count as learned once the replay passes.');
     expect(completion).toHaveTextContent('Replaying the saved steps to record proof…');
     expect(completion).not.toHaveTextContent(GUIDED_COPY.proofNotStarted.template);
   });
@@ -351,7 +347,7 @@ describe('GuidedCompletion: success comes from the learned receipt (AC-3, AC-6)'
     expect(result.proof).toBeNull();
     renderCompletion(result);
     const completion = screen.getByTestId('guided-completion');
-    expect(completion).toHaveTextContent('Completed — learned from this run.');
+    expect(completion).toHaveTextContent('Recorded from this run. The steps count as learned once the replay passes.');
     expect(completion).toHaveTextContent('Studio could not start the proof replay. Run the test to record proof.');
     expect(completion).not.toHaveTextContent('Replaying the saved steps');
   });
@@ -547,6 +543,44 @@ describe('GuidedCompletion: success comes from the learned receipt (AC-3, AC-6)'
     expect(screen.getByTestId('guided-completion-code')).toHaveTextContent('INVALID_CONTRACT');
   });
 
+  it('SC008-FIX-20: LEARNING_CONTEXT_LOST gets its own cause-neutral text and shows the code', () => {
+    const result = failedWith('LEARNING_CONTEXT_LOST');
+    result.failure = null;
+    renderCompletion(result);
+    const completion = screen.getByTestId('guided-completion');
+    expect(completion).toHaveTextContent(GUIDED_COPY.contextLost.template);
+    expect(completion).not.toHaveTextContent(GUIDED_COPY.failedUnnamed.template);
+    expect(completion).not.toHaveTextContent(GUIDED_COPY.failedNoReason.template);
+    expect(completion).not.toHaveTextContent(/browser/iu);
+    expect(screen.getByTestId('guided-completion-code')).toHaveTextContent('LEARNING_CONTEXT_LOST');
+  });
+
+  it('SC008-FIX-24: a step the author answered gets one "reword it" line each; none when none was answered', () => {
+    const view = (answeredSteps?: readonly number[]) =>
+      render(
+        <GuidedCompletion
+          input={{ kind: 'guided', result: publishedResult(), answeredSteps }}
+          draftStepIds={DRAFT}
+          onGoToStep={noop}
+          onOpenVariables={noop}
+        />,
+      );
+    const first = view();
+    expect(screen.queryByTestId('guided-clarified-steps')).toBeNull();
+    first.unmount();
+    view([]);
+    expect(screen.queryByTestId('guided-clarified-steps')).toBeNull();
+    cleanup();
+    view([2, 4]);
+    const note = screen.getByTestId('guided-clarified-steps');
+    expect(note).toHaveTextContent(
+      'Step 2 needed your answer. Reword it to name the target exactly so it learns without asking.',
+    );
+    expect(note).toHaveTextContent(
+      'Step 4 needed your answer. Reword it to name the target exactly so it learns without asking.',
+    );
+  });
+
   it('FAILED with no failure and no errorCode says the server gave no reason, with no code line (W5 UX-12)', () => {
     const result = loginResult();
     delete result.detail;
@@ -607,8 +641,6 @@ function explStep(number: number, completed: boolean, ...outcomes: ExplanationOu
       admissionId: `a-${number}-${index}`,
       ordinal: 0,
       attemptOrdinal: index,
-      operationKind: 'click' as const,
-      safeLabel: 'Click control',
       outcome,
       referenceIds: [],
     })),
@@ -1178,7 +1210,7 @@ describe('never-echo (AC-5(c); I-B6/I-C11): clarification, result and explanatio
     first.actions[0].referenceIds = [SECRET_ID];
     second.actions[0].referenceIds = [VARIABLE_ID];
     result.explanation.referenceFlows = [
-      { bindingId: VARIABLE_ID, producerStepId: first.stepId, consumerStepId: second.stepId, argumentSlot: 'fill.value' },
+      { bindingId: VARIABLE_ID, producerStepId: first.stepId, consumerStepId: second.stepId },
     ];
     for (const explained of result.explanation.steps) {
       withCanaryKeys(explained);
@@ -1256,7 +1288,7 @@ describe('never-echo (AC-5(c); I-B6/I-C11): clarification, result and explanatio
       expect(screen.getByTestId('guided-question')).toHaveTextContent(`<secret ${SECRET_ID}>`);
       expect(document.querySelector('[data-label-source="SAVED_INPUT"]')).toHaveTextContent(VARIABLE_ID);
       expect(screen.getAllByTestId('plan-reference-id').map((id) => id.textContent)).toEqual([SECRET_ID, VARIABLE_ID]);
-      expect(screen.getByTestId('plan-reference-flows')).toHaveTextContent(`${VARIABLE_ID} from step 1 → Fill field in step 2`);
+      expect(screen.getByTestId('plan-reference-flows')).toHaveTextContent(`${VARIABLE_ID} from step 1 → step 2`);
       expect(body).toContain('SECRET_UNAVAILABLE');
       expect(screen.getByTestId('login-required-notice')).toBeInTheDocument();
     } finally {

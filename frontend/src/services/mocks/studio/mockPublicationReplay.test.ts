@@ -64,18 +64,29 @@ async function learn(test: TestDetailDto) {
   return { ...session, key, receipt };
 }
 
+/** Reads the AFTER_LEARN proof of a published learn to its PASSED terminal snapshot (three reads). */
+async function passProof(sessionId: string): Promise<string> {
+  const proof = (await studioGuidedApi.readResult(sessionId)).result.proof;
+  if (proof === null) throw new Error('Expected a proof replay');
+  for (let index = 0; index < 3; index += 1) await studioApi.getExecution(proof.executionId);
+  return proof.executionId;
+}
+
 describe('the composed MSW publication and replay lifecycle', () => {
   it('creates, learns, publishes, reads READY and replays the receipt revision to a bounded synthetic terminal snapshot', async () => {
     const draft = await createSavedDraft();
     expect(draft.readiness).toBe('UNLEARNED');
     const other = await createSavedDraft();
     const publication = await learn(draft);
+    // Finalize records the revision; nothing is confirmed until the proof replay passes (ADR-SC-008 D5).
+    expect(await studioApi.getTest(draft.id)).toMatchObject({
+      readiness: 'RECORDED', confirmedRevisionId: null, verification: { state: 'PENDING' },
+    });
+    await passProof(publication.id);
     const current = await studioApi.getTest(draft.id);
     expect(current).toMatchObject({
       readiness: 'READY', sourceRevision: draft.sourceRevision, configurationRevision: draft.configurationRevision,
-      confirmedRevisionId: publication.receipt.revisionId,
-      confirmedRevisionArtifactHash: publication.receipt.artifactHash,
-      confirmedRevisionArtifact: null,
+      confirmedRevisionId: publication.receipt.revisionId, verification: null, confirmedRevisionArtifact: null,
     });
     expect((await studioApi.getTest(other.id)).readiness).toBe('UNLEARNED');
     expect((await studioGuidedApi.readResult(publication.id)).result.publication).toEqual({
@@ -186,8 +197,10 @@ describe('the composed MSW publication and replay lifecycle', () => {
     failGuidedRequests('finalize', { status: 401, body: { error: { code: 'UNAUTHENTICATED', message: 'Synthetic refusal' } } });
     await expect(studioGuidedApi.finalize(session.id, finalizeBody(session.request), key)).rejects.toMatchObject({ response: { status: 401 } });
     expect((await studioApi.getTest(draft.id)).readiness).toBe('UNLEARNED');
-    const receipt = await studioGuidedApi.finalize(session.id, finalizeBody(session.request), key);
-    expect(await studioApi.getTest(draft.id)).toMatchObject({ readiness: 'READY', confirmedRevisionId: receipt.revisionId });
+    await studioGuidedApi.finalize(session.id, finalizeBody(session.request), key);
+    expect(await studioApi.getTest(draft.id)).toMatchObject({ readiness: 'RECORDED', confirmedRevisionId: null });
+    await passProof(session.id);
+    expect((await studioApi.getTest(draft.id)).readiness).toBe('READY');
   });
 
   it('retries a lost finalized response without republishing or reviving READY after a subsequent edit', async () => {
@@ -207,7 +220,7 @@ describe('the composed MSW publication and replay lifecycle', () => {
     expect(retry).toEqual(result.publication.receipt);
     expect(await studioApi.getTest(draft.id)).toMatchObject({
       readiness: 'UNLEARNED', sourceRevision: edited.sourceRevision,
-      confirmedRevisionId: result.publication.receipt.revisionId, updatedAt: edited.updatedAt,
+      confirmedRevisionId: null, updatedAt: edited.updatedAt,
     });
     expect(guidedRequestCount('finalize', { executedOnly: true })).toBe(1);
     await expect(studioGuidedApi.finalize(session.id, {
@@ -235,6 +248,8 @@ describe('the composed MSW publication and replay lifecycle', () => {
     const baseline = structuredClone(mockTests);
     const fixture = await studioApi.getTest(mockTests[0].id);
     const publication = await learn(fixture);
+    expect((await studioApi.getTest(fixture.id)).readiness).toBe('RECORDED');
+    await passProof(publication.id);
     expect((await studioApi.getTest(fixture.id)).confirmedRevisionId).toBe(publication.receipt.revisionId);
     expect(mockTests).toEqual(baseline);
     MOCK_EXECUTE_DENIED_CSIS.add(fixture.csiId!);

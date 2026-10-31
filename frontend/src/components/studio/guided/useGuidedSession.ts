@@ -14,6 +14,7 @@ import { useAppDispatch, useAppSelector, type RootState } from '@/store';
 import {
   clearGuidedSession,
   setGuidedClarification,
+  recordGuidedAnsweredStep,
   setGuidedResult,
   setGuidedSession,
   setGuidedSessionView,
@@ -75,6 +76,8 @@ export interface UseGuidedSessionResult {
   result: GuidedResult | null;
   /** The pending question while the session is `AWAITING_CLARIFICATION`, else `null`. */
   clarification: GuidedClarification | null;
+  /** Step numbers whose question the author answered during this session, ascending (SC008-FIX-24). */
+  answeredSteps: readonly number[];
   /** The refusal of the last start (`409` / `429` / …). No session exists and nothing polls. */
   startRefusal: GuidedStartRefusal | null;
   /** Why the session is held without a final answer (re-authentication, not ready, publication pending). */
@@ -278,6 +281,8 @@ const sameRequest = (left: GuidedStartRequest, right: GuidedStartRequest): boole
 // The hook
 // ---------------------------------------------------------------------------
 
+const NO_STEPS: readonly number[] = [];
+
 export function useGuidedSession(
   testId: string | null,
   options?: UseGuidedSessionOptions,
@@ -295,6 +300,9 @@ export function useGuidedSession(
   );
   const clarification = useAppSelector((state) =>
     sessionId ? (state.studio.guidedClarificationById[sessionId] ?? null) : null,
+  );
+  const answeredSteps = useAppSelector((state) =>
+    sessionId ? (state.studio.guidedAnsweredStepsById[sessionId] ?? NO_STEPS) : NO_STEPS,
   );
   const [startRefusal, setStartRefusal] = useState<GuidedStartRefusal | null>(null);
   const [pending, setPending] = useState<GuidedPendingReason | null>(null);
@@ -635,6 +643,9 @@ export function useGuidedSession(
         studioGuidedApi.clarify(sessionId, clarifyBodyFor(question, choiceId), key),
       );
       if (session) {
+        // The question is about the session's active step (P2); remember it for the completion note.
+        const stepNumber = store.getState().studio.guidedSessionViewById[sessionId]?.session.progress.activeStep?.number;
+        if (stepNumber !== undefined) dispatch(recordGuidedAnsweredStep({ sessionId, stepNumber }));
         dispatch(setGuidedSessionView({ schemaVersion: 3, session, result: null }));
         dispatch(setGuidedClarification({ sessionId, clarification: null }));
         safeSetPending(null);
@@ -664,7 +675,7 @@ export function useGuidedSession(
 
   const unreadable = unreadableSessionId !== null && unreadableSessionId === sessionId && view === null;
 
-  return { view, result, clarification, startRefusal, pending, unreadable, startLearn, answer, cancel, clear, retryFinalize };
+  return { view, result, clarification, answeredSteps, startRefusal, pending, unreadable, startLearn, answer, cancel, clear, retryFinalize };
 }
 
 export default useGuidedSession;

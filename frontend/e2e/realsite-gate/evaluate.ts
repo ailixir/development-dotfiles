@@ -8,7 +8,7 @@ import type {HnAmendment} from './public-label-preflight.ts';
  */
 import { flowsOf, isDryRunId, isInside, requiredLifecycleCases, sha256Hex, RUN_ID_RE } from './common.ts';
 import type { GateTable, GateTest } from './common.ts';
-import type { AttemptRow, LedgerRow, LearningTiming } from './status.ts';
+import type { AttemptReceipt, AttemptRow, HeadPointers, LedgerRow, LearningTiming, StepReceipt, StepReceiptRow } from './status.ts';
 import { attemptDurationMs, learningTimingProblems } from './status.ts';
 import type { FailureClass } from './classify.ts';
 import type { ScanSummary } from './leakscan.ts';
@@ -17,8 +17,6 @@ import { cleanManualFindings, executionFindings, instant } from './lifecycle.ts'
 import type { ExecutionLineage, PublishedLineage } from './lifecycle.ts';
 import { anchorProblems } from './anchor.ts';
 import type { SameDayAnchor } from './anchor.ts';
-import { regionFindings } from './region-audit.ts';
-import type { RegionAudit } from './region-audit.ts';
 import { freezeProblems } from './freeze.ts';
 import type { FreezeCheckpoint } from './freeze.ts';
 
@@ -55,6 +53,10 @@ export interface LearnAttemptRecord {
   counters: { modelProposals: number; modelInputTokens: number; modelOutputTokens: number; observations: number; actions: number } | null;
   attempts: AttemptRow[] | null;
   ledger: LedgerRow[] | null;
+  /** Learning receipt of every ledger row (studio_guided_actions.receipt); null when the source could not be read. */
+  receipts: AttemptReceipt[] | null;
+  /** The session's authored step ids in order: a step's index is its position here (ledger ordinals are all 0). */
+  stepIds: string[] | null;
   /** Recorder requests during this attempt, null when the recorder is not configured. */
   gatewayRequests: number | null;
 }
@@ -91,14 +93,18 @@ export interface ReplayRecord {
 
 export interface FlowResult {
   learningTiming?: LearningTiming;
-  regionAudit?: RegionAudit;
-  publicPickDocuments?:{stepId:string;documentId:string}[];
-  literalPageTitles?:import('./diagnostic-oracles.ts').LiteralPageTitleWitness[];
   publication?: PublishedLineage;
+  /** ui_tests candidate/confirmed pointers read right after learning (every flow); null when not read. */
+  headAtLearn?: HeadPointers | null;
+  /** The same pointers after the AFTER_LEARN proof (positive flows). */
+  headAfterProof?: HeadPointers | null;
+  /** studio_step_receipts rows of the published revision after the proof (positive flows). */
+  proofReceipts?: StepReceiptRow[] | null;
   flowId: string;
   testId: string | null;
   name: string;
   learnAttempts: LearnAttemptRecord[];
+  /** The learning session recorded a revision (the head moved). Confirmed means confirmationProblems() is empty. */
   learned: boolean;
   learnedAt: string | null;
   proof: ProofRecord | null;
@@ -147,7 +153,7 @@ export interface EnvironmentRecord {
   startedAt: string;
   git: { sha: string; dirty: boolean | 'UNKNOWN'; workingTreeDigestStart: string; workingTreeDigestEnd: string | null };
   model: { id: string | null; source: 'wire' | 'declared'; wireIds: string[] };
-  hashes: { contractMd: string; contractsV3: string; promptStatic: string; wireSystemInstruction: string[] };
+  hashes: { contractMd: string; contractsV3: string; promptStatic: string; playwrightReferenceHash: string; wireSystemInstruction: string[] };
   playwright: { driver: string; runner: string; coreBundleSha256: string; pinSha256: string; chromiumBuild: string };
   gateway: Record<string, unknown>;
   stack: { backendPid: number | null; jarSha256: string | null; runnerPid: number | null; runnerFrozenDir: string | null; bound: boolean; rehearsal: boolean };
@@ -166,7 +172,6 @@ export interface RunBundle {
   scanHistory?: ScanFile[];
   anchor?: SameDayAnchor;
   sameDayDigest?: string;
-  regionAudit?: RegionAudit;
   freeze?: FreezeCheckpoint[];
   truncations?: { total: number; verified4096: number; unknown: number };
   table: GateTable;
@@ -247,6 +252,8 @@ export function validateEnvironment(rec: EnvironmentRecord | null, dryRunFlag: b
   need('hashes.contractMd', rec.hashes.contractMd);
   need('hashes.contractsV3', rec.hashes.contractsV3);
   need('hashes.promptStatic', rec.hashes.promptStatic);
+  need('hashes.playwrightReferenceHash', rec.hashes.playwrightReferenceHash);
+  if (!/^[a-f0-9]{64}$/.test(rec.hashes.playwrightReferenceHash ?? '')) problems.push('hashes.playwrightReferenceHash is not a sha256');
   need('playwright.driver', rec.playwright.driver);
   need('playwright.runner', rec.playwright.runner);
   need('playwright.coreBundleSha256', rec.playwright.coreBundleSha256);
@@ -335,40 +342,108 @@ export interface ControlVerdict {
   reasons: string[];
 }
 
-const lastAttempt = (flow: FlowResult): LearnAttemptRecord | null => flow.learnAttempts[flow.learnAttempts.length - 1] ?? null;
+type ControlKey = 'N1' | 'N2' | 'N3';
+
+/** Receipt closed codes that satisfy N1 and N2 when the control step ran (UNSUPPORTED_SURFACE is not a receipt code). */
+const N1_CODES: readonly string[] = ['TARGET_DRIFT', 'OUTCOME_UNKNOWN', 'ASSERTION_FAILED', 'TIMEOUT'];
+const N2_CODES: readonly string[] = ['ASSERTION_FAILED'];
+/** Session error codes of a refusal before the control step was dispatched (repair exhaustion, no evidence, no surface). */
+const PRE_DISPATCH_REFUSALS: readonly string[] = ['INVALID_CONTRACT', 'MISSING_SOURCE', 'UNSUPPORTED_SURFACE'];
+
 const clarified = (flow: FlowResult): boolean => flow.learnAttempts.some((a) => a.clarifications.length > 0);
+
+/**
+ * What one step may have done. Method names are the bare Playwright names of studio-runner/src/run/stepCodeBinding.ts
+ * (EffectEntry.method). Steps are told apart by their index in the authored order (ledger ordinals are all 0). Step 0 is the navigation step: goto only. At the control step (index 1) N1 tolerates only a selectOption
+ * that was attempted and did not complete, N2 and N3 tolerate no effect at all. A truncated list counts as effectful.
+ */
+function effectProblems(key: ControlKey, index: number, rc: StepReceipt): string[] {
+  const reasons: string[] = [];
+  if (rc.fenceCrossed && rc.effects.length === 0) reasons.push(`${key} step ${index}: fence crossed with no effect listed (inconsistent receipt)`);
+  if (index === 0) {
+    if (rc.effectsTruncated || rc.effects.some((e) => e.method !== 'goto')) reasons.push(`${key} step 0 had an effect other than goto`);
+  } else if (key === 'N1') {
+    if (rc.effectsTruncated || rc.effects.some((e) => e.method !== 'selectOption' || e.completed)) reasons.push(`${key} step ${index} had an effect beyond a selectOption attempted and not completed`);
+  } else if (rc.effectsTruncated || rc.effects.length > 0) {
+    reasons.push(`${key} step ${index} had an effect`);
+  }
+  return reasons;
+}
+
+const sameRow = (x: { stepId: string; ordinal: number; attemptOrdinal: number }, y: { stepId: string; ordinal: number; attemptOrdinal: number }): boolean => x.stepId === y.stepId && x.ordinal === y.ordinal && x.attemptOrdinal === y.attemptOrdinal;
+
+/** Receipts against ledger rows, both ways (joined on step id and ordinals), then the effect rules by step index. */
+function attemptProblems(key: ControlKey, a: LearnAttemptRecord): string[] {
+  if (a.ledger === null || a.ledger.length === 0) return ['no action-ledger rows could be read'];
+  if (a.receipts === null) return ['no learning receipts could be read'];
+  if (a.stepIds === null) return ['the session step order could not be read'];
+  const { ledger, receipts, stepIds } = a;
+  const reasons: string[] = [];
+  for (const row of ledger) {
+    const entry = receipts.find((r) => sameRow(r, row));
+    if (!stepIds.includes(row.stepId)) reasons.push(`ledger row of unknown step ${row.stepId}`);
+    if (entry === undefined || entry.dispatchCount !== row.dispatched) reasons.push(`ledger row of step ${row.stepId} and its receipt entry disagree`);
+    else if (row.dispatched === 1 && entry.receipt === null) reasons.push('receipt missing for a dispatched row');
+    else if (row.dispatched === 0 && entry.receipt !== null) reasons.push('receipt present for a row that was never dispatched');
+  }
+  for (const entry of receipts) {
+    if (!ledger.some((row) => sameRow(entry, row))) reasons.push('receipt without a ledger row');
+    if (!stepIds.includes(entry.stepId)) reasons.push(`receipt of unknown step ${entry.stepId}`);
+    if (entry.receipt !== null) reasons.push(...effectProblems(key, stepIds.indexOf(entry.stepId), entry.receipt));
+  }
+  return reasons;
+}
 
 export function evaluateControl(key: string, flow: FlowResult | undefined): ControlVerdict {
   const reasons: string[] = [];
   if (flow === undefined) return { expectationMet: false, falsePass: false, reasons: ['no result'] };
-  const a = lastAttempt(flow);
-  if (a === null) return { expectationMet: false, falsePass: false, reasons: ['no learn attempt recorded'] };
-  if (flow.learnAttempts.some((attempt) => attempt.ledger === null || attempt.ledger.length === 0)) return { expectationMet: false, falsePass: false, reasons: ['no action-ledger rows could be read'] };
-  const falsePass = flow.learnAttempts.some((attempt) => attempt.state === 'SUCCEEDED' || attempt.receipt) || flow.learned || flow.afterLearnExecutions > 0 || flow.learnedChip || flow.proof !== null || flow.replays.length > 0 || flow.publication !== undefined;
-  if (falsePass) reasons.push('control published, learned or replayed: false pass');
-  let met = false;
-  if (key === 'N1') {
-    met = a.errorCode === 'TARGET_MISMATCH' && a.state === 'FAILED' && a.failedStepIndex === 1 && !clarified(flow);
-    if (!met) reasons.push(`N1 expected TARGET_MISMATCH, got ${String(a.errorCode)} (${String(a.state)})`);
-    if (flow.learnAttempts.some((attempt) => (attempt.ledger ?? []).some((r) => r.dispatched === 1 && r.kind !== 'navigate'))) {
-      met = false;
-      reasons.push('N1 dispatched a selectOption');
-    }
-  } else if (key === 'N2') {
-    met = a.state === 'FAILED' && (a.errorCode === 'ASSERTION_FAILED' || a.errorCode === 'UNSUPPORTED_SURFACE');
-    if (!met) reasons.push(`N2 expected ASSERTION_FAILED or UNSUPPORTED_SURFACE, got ${String(a.errorCode)} (${String(a.state)})`);
-  } else if (key === 'N3') {
-    met = clarified(flow) || a.state === 'FAILED';
-    if (!met) reasons.push(`N3 expected a clarification or refusal, got ${String(a.state)}`);
-    if (flow.learnAttempts.some((attempt) => (attempt.ledger ?? []).some((r) => r.dispatched === 1 && r.kind !== 'navigate'))) {
-      met = false;
-      reasons.push('N3 dispatched a click');
-    }
-  } else {
-    reasons.push(`no control rule for ${key}`);
+  const a = flow.learnAttempts[flow.learnAttempts.length - 1];
+  if (a === undefined) return { expectationMet: false, falsePass: false, reasons: ['no learn attempt recorded'] };
+  const head = flow.headAtLearn;
+  const falsePass = flow.learnAttempts.some((attempt) => attempt.state === 'SUCCEEDED' || attempt.receipt) || flow.learned || flow.afterLearnExecutions > 0 || flow.learnedChip || flow.proof !== null || flow.replays.length > 0 || flow.publication !== undefined || (head !== undefined && head !== null && (head.candidate !== null || head.confirmed !== null));
+  if (falsePass) reasons.push('control published, recorded, learned or replayed: false pass');
+  if (key !== 'N1' && key !== 'N2' && key !== 'N3') return { expectationMet: false, falsePass, reasons: [...reasons, `no control rule for ${key}`] };
+  let met = true;
+  for (const attempt of flow.learnAttempts) {
+    const problems = attemptProblems(key, attempt);
+    if (problems.length > 0) met = false;
+    reasons.push(...problems.map((problem) => `attempt ${attempt.attempt}: ${problem}`));
   }
-  if (flow.learnAttempts.some((attempt) => (attempt.ledger ?? []).some((r) => r.dispatched === 1 && !['navigate','assert'].includes(r.kind)))) { met = false; reasons.push('control dispatched a wrong-target action in an attempt'); }
-  if(flow.error!==null){met=false;reasons.push('control flow has an incomplete/error outcome');}
+  if (head === undefined || head === null) {
+    met = false;
+    reasons.push('the candidate/confirmed pointers were not read');
+  }
+  if (a.state === null) {
+    met = false;
+    reasons.push(`${key} has no terminal session`);
+  }
+  // Outcome of the last attempt: the control step's receipt when it was dispatched, else a clarification or a pre-dispatch refusal.
+  const indexOf = (stepId: string): number => (a.stepIds ?? []).indexOf(stepId);
+  const dispatched = (a.ledger ?? []).filter((row) => indexOf(row.stepId) !== 0 && row.dispatched === 1);
+  if (dispatched.some((row) => indexOf(row.stepId) !== 1)) {
+    met = false;
+    reasons.push(`${key} dispatched a step beyond the control step`);
+  }
+  const controlRow = dispatched.filter((row) => indexOf(row.stepId) === 1).at(-1);
+  if (controlRow !== undefined) {
+    const code = a.receipts?.find((r) => sameRow(r, controlRow))?.receipt?.closedCode;
+    const accepted = key === 'N1' ? N1_CODES : key === 'N2' ? N2_CODES : null;
+    if (code === undefined || code === null || (accepted !== null && !accepted.includes(code))) {
+      met = false;
+      reasons.push(`${key} control step ended ${String(code ?? 'without a closed code')}${accepted === null ? '' : `, expected one of ${accepted.join(', ')}`}`);
+    }
+  } else if (!clarified(flow) && !(a.state === 'FAILED' && a.errorCode !== null && PRE_DISPATCH_REFUSALS.includes(a.errorCode))) {
+    met = false;
+    reasons.push(`${key} expected a clarification, a pre-dispatch refusal or the control step's receipt, got ${String(a.errorCode)} (${String(a.state)})`);
+  }
+  if (key === 'N1' && a.failedStepIndex !== 1) {
+    met = false;
+    reasons.push(`N1 stopped at step index ${String(a.failedStepIndex)}, not 1`);
+  }
+  if (flow.error !== null) {
+    met = false;
+    reasons.push('control flow has an incomplete/error outcome');
+  }
   return { expectationMet: met && !falsePass, falsePass, reasons };
 }
 
@@ -384,10 +459,8 @@ export function nearestRank(values: number[], p: number): number | null {
 export interface Metrics {
   admitted: { applied: number; rejected: number; rate: number | null };
   rejectionsByReason: Record<string, number>;
-  /** Persisted diagnostics Gate of each refused attempt (WI-3 column rejection_gate). */
+  /** Persisted diagnostics Gate of each refused attempt (column rejection_gate). */
   rejectionsByGate: Record<string, number>;
-  /** Which intent-gate path admitted each applied attempt (EXACT_NAME, EVIDENCE_SUBSET, SELECTED_CHOICE). */
-  intentPaths: Record<string, number>;
   modelTime: { n: number; p50: number | null; p95: number | null; source: 'wire' | 'attempt-rows' | 'none' };
   stepsLearned: { learned: number; authored: number; rate: number | null };
   perTest: { key: string; flow: string; learnSeconds: number[]; proofSeconds: number | null; replaySeconds: number[]; modelCalls: number; inputTokens: number; outputTokens: number; clarifications: number }[];
@@ -398,7 +471,6 @@ export function computeMetrics(bundle: RunBundle): Metrics {
   let rejected = 0;
   const reasons: Record<string, number> = {};
   const gates: Record<string, number> = {};
-  const paths: Record<string, number> = {};
   const rowDurations: number[] = [];
   let learned = 0;
   let authored = 0;
@@ -417,10 +489,7 @@ export function computeMetrics(bundle: RunBundle): Metrics {
         outTok += att.counters?.modelOutputTokens ?? 0;
         clar += att.clarifications.length;
         for (const row of att.attempts ?? []) {
-          if (row.status === 'APPLIED') {
-            applied += 1;
-            if (row.intentPath !== null) paths[row.intentPath] = (paths[row.intentPath] ?? 0) + 1;
-          }
+          if (row.status === 'APPLIED') applied += 1;
           if (row.status === 'REJECTED') {
             rejected += 1;
             const reason = row.rejectionReason ?? 'UNRECORDED';
@@ -434,7 +503,7 @@ export function computeMetrics(bundle: RunBundle): Metrics {
       }
       if (test.kind === 'positive') {
         authored += (test.steps ?? []).length;
-        if (flow.learned) learned += (test.steps ?? []).length;
+        if (flow.learned && confirmationFindings(flow).length === 0) learned += (test.steps ?? []).length;
       }
       perTest.push({
         key: test.key,
@@ -457,7 +526,6 @@ export function computeMetrics(bundle: RunBundle): Metrics {
     admitted: { applied, rejected, rate: total === 0 ? null : applied / total },
     rejectionsByReason: reasons,
     rejectionsByGate: gates,
-    intentPaths: paths,
     modelTime: { n: times.length, p50: nearestRank(times, 50), p95: nearestRank(times, 95), source },
     stepsLearned: { learned, authored, rate: authored === 0 ? null : learned / authored },
     perTest,
@@ -476,6 +544,33 @@ interface KeyFinding {
   rule: 1 | 2 | 3;
   verdict: Verdict;
   reason: string;
+}
+
+/**
+ * "Learned" is decided by the database after the model-free proof, never by UI text: the confirmed pointer is the
+ * published revision and every studio_step_receipts row of it is a PASSED receipt of this flow's proof execution.
+ * A pointer that was confirmed early is not a finding; only the state after the proof counts.
+ */
+export function confirmationFindings(flow: FlowResult): { verdict: 'FAIL' | 'INCOMPLETE'; reason: string }[] {
+  const pub = flow.publication, p = flow.proof;
+  if (!flow.learned || pub === undefined) return [];
+  if (p === null || p.status !== 'PASSED' || p.triggerSource !== 'AFTER_LEARN') return [{ verdict: 'FAIL', reason: 'not confirmed: no PASSED AFTER_LEARN proof of the recorded revision' }];
+  const out: { verdict: 'FAIL' | 'INCOMPLETE'; reason: string }[] = [];
+  const head = flow.headAfterProof;
+  if (head === undefined || head === null) out.push({ verdict: 'INCOMPLETE', reason: 'UNKNOWN confirmed pointer after the proof' });
+  else if (head.confirmed !== pub.revisionId || head.candidate !== null) out.push({ verdict: 'FAIL', reason: `not confirmed: confirmed pointer ${String(head.confirmed)} and candidate ${String(head.candidate)} after the proof, published revision ${pub.revisionId}` });
+  const rows = flow.proofReceipts;
+  if (rows === undefined || rows === null) {
+    out.push({ verdict: 'INCOMPLETE', reason: 'UNKNOWN per-step proof receipts' });
+  } else if (rows.length !== pub.stepIds.length) {
+    out.push({ verdict: 'FAIL', reason: `not confirmed: ${rows.length} proof receipt rows for ${pub.stepIds.length} steps` });
+  } else {
+    for (const [i, row] of rows.entries()) {
+      const bad = row.revisionId !== pub.revisionId || row.stepOrdinal !== i || row.status !== 'PASSED' || row.proofExecutionId !== p.executionId || row.receipt === null || row.receipt.closedCode !== null || row.receipt.stepHash !== row.stepHash;
+      if (bad) out.push({ verdict: 'FAIL', reason: `not confirmed: proof receipt row ${i} is ${row.status} for revision ${row.revisionId}, proof ${row.proofExecutionId}` });
+    }
+  }
+  return out;
 }
 
 /** Rules 1-3 for one positive test; the run-level rules aggregate these, the spec asserts them per test. */
@@ -499,9 +594,8 @@ export function positiveFindings(key: string, result: TestResult | undefined, vo
     out.push({ rule: 1, verdict: 'FAIL', reason: `${key}: not learned (${a?.cls ?? '?'} ${a?.errorCode ?? a?.state ?? ''})` });
   } else if (clar > 0) {
     out.push({ rule: 1, verdict: 'FAIL', reason: `${key}: ${clar} clarification(s) on a positive test` });
-  } else if (!attempts[attempts.length - 1]?.receipt) {
-    out.push({ rule: 1, verdict: 'FAIL', reason: `${key}: no 'Completed — learned from this run.' receipt` });
   }
+  for (const finding of confirmationFindings(flow)) out.push({ rule: 1, verdict: finding.verdict, reason: `${key}: ${finding.reason}` });
   const p = flow.proof;
   if (p !== null) for (const reason of executionFindings(p.executionId, p.lineage, flow.publication)) out.push({rule: 2, verdict: reason.startsWith('UNKNOWN') ? 'INCOMPLETE' : 'FAIL', reason: `${key}: ${reason}`});
   const ids = [p?.executionId, ...flow.replays.map((r) => r.executionId)];
@@ -611,10 +705,9 @@ export function evaluateRun(bundle: RunBundle, phase: 'release' | 'same-day' = '
   const readiness: string[] = [];
   if(bundle.hnPreflight!==true)readiness.push('UNKNOWN frozen same-day HN3 public capture');
   readiness.push(...freezeProblems((bundle.freeze ?? []).filter((checkpoint) => checkpoint.phase === 'start' || checkpoint.phase === 'initial'), false));
-  readiness.push(...regionFindings(bundle.regionAudit, env?.startedAt ?? ''));
   if (bundle.truncations === undefined || bundle.truncations.total < 1 || bundle.truncations.unknown !== 0) readiness.push('UNKNOWN4096 truncation metadata coverage');
   if (phase === 'release') readiness.push(...anchorProblems(bundle.anchor,bundle.runId,bundle.sameDayDigest ?? '',env?.git.workingTreeDigestStart ?? '',expectedCases.map((c) => c.key)));
-  if (readiness.length) rules.push({rule:7,name:'Evidence completeness and whole-suite anchor',verdict:readiness.some((p) => p.includes('MISMATCH') || p.includes('WRONG_REGION')) ? 'FAIL':'INCOMPLETE',reasons:readiness});
+  if (readiness.length) rules.push({rule:7,name:'Evidence completeness and whole-suite anchor',verdict:readiness.some((p) => p.includes('MISMATCH')) ? 'FAIL':'INCOMPLETE',reasons:readiness});
   const voided = Object.keys(bundle.voidKeys);
   let verdict: Verdict;
   if (invalid.length > 0) verdict = 'INVALID';

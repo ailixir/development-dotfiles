@@ -405,3 +405,26 @@ test('historical records remain byte-identical and receive no invented response 
     assert.equal(readFileSync(join(dir, 'requests.jsonl'), 'utf8'), legacy);
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
+
+test('maxCalls: calls over the cap get 429 and are not forwarded, recorded or counted; without a cap nothing changes', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'gate-recorder-'));
+  try {
+    await withUpstream(async (upstream, seen) => {
+      const recorder = await startRecorder({ port: 0, upstream, outDir: dir, maxCalls: 2 });
+      const base = `http://127.0.0.1:${recorder.port}`;
+      const post = (): Promise<Response> => fetch(`${base}/v1/models/m:generateContent`, { method: 'POST', body: '{"contents":[]}' });
+      assert.equal((await post()).status, 200);
+      assert.equal((await post()).status, 200);
+      const refused = await post();
+      assert.equal(refused.status, 429);
+      assert.match(await refused.text(), /cap reached/);
+      assert.equal((await post()).status, 429);
+      assert.equal(seen.length, 2, 'the upstream saw only the two calls under the cap');
+      assert.deepEqual(await recorderCount(base), { count: 2, bodies: 2 });
+      assert.deepEqual(readdirSync(dir).sort(), ['0001.req.json', '0002.req.json', 'requests.jsonl']);
+      await recorder.close();
+    });
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});

@@ -1,4 +1,5 @@
 import type { GuidedResult } from '@/types/studio/studioGuidedTypes';
+import { guidedCopy } from '@/components/studio/guided/guidedNarratives';
 
 /**
  * The seek points of a guided Run's recording (STUDIO-OBS-008 AC-7; architect P3 "joins"; D-10).
@@ -17,7 +18,7 @@ import type { GuidedResult } from '@/types/studio/studioGuidedTypes';
 export interface GuidedActionSeekTarget {
   readonly admissionId: string;
   readonly ordinal: number;
-  /** The P3 controlled label of the recorded operation, never page text. */
+  /** The fixed phrase for a recorded action, never page text. */
   readonly safeLabel: string;
   readonly offsetMs: number;
 }
@@ -55,7 +56,7 @@ export function guidedSeekTargets(
         actions.push({
           admissionId: action.admissionId,
           ordinal: action.ordinal,
-          safeLabel: action.safeLabel,
+          safeLabel: guidedCopy('actionRan'),
           offsetMs: timing.startMs,
         });
       }

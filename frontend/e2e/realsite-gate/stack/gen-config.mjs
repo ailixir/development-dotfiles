@@ -1,7 +1,7 @@
 // Regenerates catalog.json, backend-guided.yml and runner-extra.json in CHECKS_GATE_STACK_DIR (public values only).
 // STUDIO-FLEX-001: the only navigation control is the allowed-domains list below (backend + runner).
 import fs from 'node:fs';
-import { assertFree, gatePorts } from './ports.mjs';import {execFileSync} from 'node:child_process';import path from 'node:path';import {fileURLToPath} from 'node:url';
+import { assertFree, gatePorts } from './ports.mjs';import { coreDeclaration } from './core-declaration.mjs';import {execFileSync} from 'node:child_process';import path from 'node:path';import {fileURLToPath} from 'node:url';
 const S=process.env.CHECKS_GATE_STACK_DIR,R=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../../../..');
 if(!S){console.error('CHECKS_GATE_STACK_DIR is required');process.exit(2);}
 const P=gatePorts();
@@ -41,4 +41,5 @@ fs.writeFileSync(S+'/runner-extra.json',JSON.stringify({
  STUDIO_RUNNER_GUIDED_CALLBACK_TOKEN_FILE:S+'/tokens/worker-callback.jwt',STUDIO_RUNNER_OBSERVED_VALIDATION_ENABLED:'true',STUDIO_RUNNER_OBSERVED_REPLAY_ENABLED:'true',
  STUDIO_RUNNER_OBSERVED_CATALOG_FILE:S+'/catalog.json',STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST:catalog.build.executableImageDigest,
  STUDIO_RUNNER_RECORDING_WIDTH:'1280',STUDIO_RUNNER_RECORDING_HEIGHT:'720'},null,1),{mode:0o600});
+fs.writeFileSync(S+'/core-declaration.json',JSON.stringify(coreDeclaration(R),null,1)+'\n',{mode:0o600});
 console.log('gen-config ok; catalog',catalogJson.slice(0,60));

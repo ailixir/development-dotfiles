@@ -32,16 +32,16 @@ function richExplanation(): PublicExplanation {
     configurationRevision: '1',
     steps: [
       { stepId: STEP(1), number: 1, completed: true, learnedFromThisRun: false, reusedFrom: { revisionId: '11111111-1111-4111-8111-111111111111', stepId: STEP(1) }, relearnedAfterDrift: false,
-        actions: [{ admissionId: 'a-1', ordinal: 0, attemptOrdinal: 0, operationKind: 'read', safeLabel: 'Read reference', outcome: 'SUCCEEDED', referenceIds: ['ORDER_NUMBER'] }] },
+        actions: [{ admissionId: 'a-1', ordinal: 0, attemptOrdinal: 0, outcome: 'SUCCEEDED', referenceIds: ['ORDER_NUMBER'] }] },
       { stepId: STEP(2), number: 2, completed: true, learnedFromThisRun: true, reusedFrom: null, relearnedAfterDrift: true,
-        actions: [{ admissionId: 'a-2', ordinal: 0, attemptOrdinal: 0, operationKind: 'fill', safeLabel: 'Fill field', outcome: 'SUCCEEDED', referenceIds: ['LOGIN_PASSWORD'] }] },
+        actions: [{ admissionId: 'a-2', ordinal: 0, attemptOrdinal: 0, outcome: 'SUCCEEDED', referenceIds: ['LOGIN_PASSWORD'] }] },
       { stepId: STEP(3), number: 3, completed: true, learnedFromThisRun: true, reusedFrom: null, relearnedAfterDrift: false,
-        actions: [{ admissionId: 'a-3', ordinal: 0, attemptOrdinal: 0, operationKind: 'fill', safeLabel: 'Fill field', outcome: 'SUCCEEDED', referenceIds: ['ORDER_NUMBER'] }] },
+        actions: [{ admissionId: 'a-3', ordinal: 0, attemptOrdinal: 0, outcome: 'SUCCEEDED', referenceIds: ['ORDER_NUMBER'] }] },
       { stepId: STEP(4), number: 4, completed: false, learnedFromThisRun: false, reusedFrom: null, relearnedAfterDrift: false, actions: [] },
     ],
     referenceFlows: [
-      { bindingId: 'ORDER_NUMBER', producerStepId: STEP(1), consumerStepId: STEP(3), argumentSlot: 'fill.value' },
-      { bindingId: 'ORDER_NUMBER', producerStepId: STEP(1), consumerStepId: 'not-in-this-session', argumentSlot: 'assert.expected' },
+      { bindingId: 'ORDER_NUMBER', producerStepId: STEP(1), consumerStepId: STEP(3) },
+      { bindingId: 'ORDER_NUMBER', producerStepId: STEP(1), consumerStepId: 'not-in-this-session' },
     ],
   };
 }
@@ -52,8 +52,8 @@ describe('AC-6: per step, what Studio did and where it came from', () => {
     const section = screen.getByTestId('plan-explanation');
     expect(within(section).getByRole('heading', { name: 'Steps as learned' })).toBeInTheDocument();
     expect(screen.getByTestId('plan-step-1')).toHaveTextContent('Step 1');
-    expect(screen.getByTestId('plan-step-1')).toHaveTextContent('Open page');
-    expect(screen.getByTestId('plan-step-2')).toHaveTextContent('Click control');
+    expect(screen.getByTestId('plan-step-1')).toHaveTextContent('Ran the step');
+    expect(screen.getByTestId('plan-step-2')).toHaveTextContent('Ran the step');
   });
 
   it('provenance claims are only the ones the facts prove, in AC-6 order', () => {
@@ -90,17 +90,8 @@ describe('AC-6: per step, what Studio did and where it came from', () => {
 });
 
 describe('AC-6: reference flows, IDs never values', () => {
-  it('"<binding> from step p → <operation> in step c", and a flow to an unnumbered step is left out', () => {
-    expect(referenceFlowLines(richExplanation())).toEqual(['ORDER_NUMBER from step 1 → Fill field in step 3']);
-  });
-
-  it.each([
-    ['selectOption.value', 'Select option'],
-    ['assert.expected', 'Check expected result'],
-  ] as const)('%s reads as the P3 label "%s"', (argumentSlot, label) => {
-    const explanation = richExplanation();
-    explanation.referenceFlows = [{ bindingId: 'B', producerStepId: STEP(1), consumerStepId: STEP(2), argumentSlot }];
-    expect(referenceFlowLines(explanation)).toEqual([`B from step 1 → ${label} in step 2`]);
+  it('"<binding> from step p → step c", and a flow to an unnumbered step is left out', () => {
+    expect(referenceFlowLines(richExplanation())).toEqual(['ORDER_NUMBER from step 1 → step 3']);
   });
 });
 
@@ -109,11 +100,11 @@ describe('AC-6: published history and current readiness are separate facts', () 
     const result = publishedResult();
     expect(result.currentReadiness.ready).toBe(false);
     expect(explanationFacts(result)).toEqual({
-      history: 'Completed — learned from this run.',
+      history: 'Recorded from this run. The steps count as learned once the replay passes.',
       current: 'Steps not ready to repeat.',
     });
     render(<PlanExplanation result={result} />);
-    expect(screen.getByTestId('plan-explanation-history')).toHaveTextContent('Completed — learned from this run.');
+    expect(screen.getByTestId('plan-explanation-history')).toHaveTextContent('Recorded from this run.');
     expect(screen.getByTestId('plan-explanation-current')).toHaveTextContent('Steps not ready to repeat.');
   });
 
@@ -151,13 +142,12 @@ function serverDraft(over: Partial<NonNullable<React.ComponentProps<typeof PlanE
 }
 
 describe('round 067 D1a: the authored sentence under each step', () => {
-  it('(a) same sourceRevision: every step shows its sentence, and the action stays "Click control"', () => {
+  it('(a) same sourceRevision: every step shows its sentence, and the action stays "Ran the step"', () => {
     const result = publishedRich();
-    result.explanation.steps[2].actions[0].safeLabel = 'Click control';
     render(<PlanExplanation result={result} test={serverDraft()} />);
     const step3 = screen.getByTestId('plan-step-3');
     expect(within(step3).getByTestId('plan-step-text')).toHaveTextContent('Authored sentence 3');
-    expect(within(step3).getByTestId('plan-action')).toHaveTextContent('Click control');
+    expect(within(step3).getByTestId('plan-action')).toHaveTextContent('Ran the step');
     expect(screen.getAllByTestId('plan-step-text')).toHaveLength(4);
   });
 
@@ -229,7 +219,7 @@ describe('round 067 D3: the plan follows the server readiness after an edit', ()
     expect(within(screen.getByTestId('plan-step-3')).getByTestId('plan-step-changed')).toHaveTextContent('Changed since this run');
     expect(screen.getAllByTestId('plan-step-changed')).toHaveLength(1);
     expect(screen.getByTestId('plan-explanation')).not.toHaveTextContent(LEARNED_READY_LABEL);
-    expect(screen.getByTestId('plan-explanation-history')).toHaveTextContent('Completed — learned from this run.');
+    expect(screen.getByTestId('plan-explanation-history')).toHaveTextContent('Recorded from this run.');
   });
 
   it('a different confirmedRevisionId keeps the result-based line and no chip', () => {

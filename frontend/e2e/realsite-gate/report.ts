@@ -4,8 +4,8 @@
  * the verdict of the candidate (last) run, and the same verdict drives the CLI exit code.
  */
 import { isDryRunId, requiredLifecycleCases } from './common.ts';
-import type { RunBundle, RunEvaluation, TestResult, Verdict } from './evaluate.ts';
-import { evaluateControl, exitCodeFor } from './evaluate.ts';
+import type { FlowResult, RunBundle, RunEvaluation, TestResult, Verdict } from './evaluate.ts';
+import { confirmationFindings, evaluateControl, exitCodeFor } from './evaluate.ts';
 import { learningIntervals, learningTimingProblems, STEP_LEARNING_LIMIT_MS } from './status.ts';
 
 export interface RunReportInput {
@@ -25,6 +25,16 @@ function table(header: string[], rows: (string | number | null | undefined)[][])
   return [row(header), row(header.map(() => '---')), ...rows.map(row)];
 }
 
+/** Per attempt: the receipt of every dispatched step by step index (bare effect methods, ! marks an uncompleted one) and any clarification. */
+function attemptEvidence(flow: FlowResult | undefined): string {
+  return (flow?.learnAttempts ?? [])
+    .map((a) => {
+      const steps = (a.receipts ?? []).flatMap((r) => (r.receipt === null ? [] : [`${a.stepIds?.indexOf(r.stepId) ?? '?'}: [${r.receipt.effects.map((e) => `${e.method}${e.completed ? '' : '!'}`).join(' ')}${r.receipt.effectsTruncated ? ' ...' : ''}] ${r.receipt.closedCode ?? 'ok'}`]));
+      return `#${a.attempt} ${steps.join(', ') || 'no receipt'}${a.clarifications.map((c) => `; asked "${c.question}"`).join('')}`;
+    })
+    .join(' | ');
+}
+
 function testRow(result: TestResult | undefined, key: string, flowId='main'): (string | number | null)[] {
   if (result === undefined) return [key, 'no result', null, null, null, null, null, null, null, null];
   if (result.status === 'VOID') return [key, `VOID: ${result.voidReason ?? ''}`, null, null, null, null, null, null, null, null];
@@ -37,7 +47,7 @@ function testRow(result: TestResult | undefined, key: string, flowId='main'): (s
   const retry = flow.learnAttempts.filter((a) => a.cls === 'INFRA').length;
   return [
     key,
-    flow.learned ? 'learned' : `${last?.cls ?? '?'} ${last?.errorCode ?? last?.state ?? ''}`.trim(),
+    flow.learned ? (confirmationFindings(flow).length === 0 ? 'confirmed' : 'recorded, not confirmed') : `${last?.cls ?? '?'} ${last?.errorCode ?? last?.state ?? ''}`.trim(),
     flow.learnAttempts.map((a) => `${a.seconds}s`).join(' + '),
     clar,
     `${calls} / ${tokens}`,
@@ -67,6 +77,7 @@ function renderRun(input: RunReportInput): string[] {
           ['contract md sha256', env.hashes.contractMd],
           ['contracts v3 sha256', env.hashes.contractsV3],
           ['prompt sha256 (static)', env.hashes.promptStatic],
+          ['Playwright reference sha256', env.hashes.playwrightReferenceHash],
           ['system-instruction sha256 (wire)', env.hashes.wireSystemInstruction.join(', ') || 'not interposed'],
           ['Playwright driver / runner', `${env.playwright.driver} / ${env.playwright.runner}`],
           ['coreBundle.js sha256 (pin)', `${env.playwright.coreBundleSha256} (${env.playwright.coreBundleSha256 === env.playwright.pinSha256 ? 'matches pin' : 'DIFFERS'})`],
@@ -92,12 +103,12 @@ function renderRun(input: RunReportInput): string[] {
   out.push('### Controls', '');
   out.push(
     ...table(
-      ['Control', 'Expectation met', 'False pass', 'Details'],
+      ['Control', 'Expectation met', 'False pass', 'Details', 'Attempts (steps: effects, closed code; clarification)'],
       bundle.table.tests
         .filter((t) => t.kind === 'control')
         .map((t) => {
           const v = evaluateControl(t.key, bundle.results[t.key]?.flows[0]);
-          return [t.key, String(v.expectationMet), String(v.falsePass), v.reasons.join('; ')];
+          return [t.key, String(v.expectationMet), String(v.falsePass), v.reasons.join('; '), attemptEvidence(bundle.results[t.key]?.flows[0])];
         }),
     ),
     '',
@@ -129,7 +140,7 @@ function renderRun(input: RunReportInput): string[] {
     `Product-admitted rate (APPLIED / (APPLIED + REJECTED) over model-attempt rows): ${pct(m.admitted.rate)} (${m.admitted.applied} of ${m.admitted.applied + m.admitted.rejected}). ` +
       `Steps learned: ${pct(m.stepsLearned.rate)} (${m.stepsLearned.learned} of ${m.stepsLearned.authored}). ` +
       `Model time (${m.modelTime.source}, n=${m.modelTime.n}): p50 ${ms(m.modelTime.p50)}, p95 ${ms(m.modelTime.p95)}.`,
-    `Gate refusals by diagnostics Gate (persisted rejection_gate): ${Object.entries(m.rejectionsByGate).map(([k, v]) => `${k} x${v}`).join(', ') || 'none'}. By rejection_reason: ${Object.entries(m.rejectionsByReason).map(([k, v]) => `${k} x${v}`).join(', ') || 'none'}. Intent-gate path of admitted attempts: ${Object.entries(m.intentPaths).map(([k, v]) => `${k} x${v}`).join(', ') || 'none'}.`,
+    `Gate refusals by diagnostics Gate (persisted rejection_gate): ${Object.entries(m.rejectionsByGate).map(([k, v]) => `${k} x${v}`).join(', ') || 'none'}. By rejection_reason: ${Object.entries(m.rejectionsByReason).map(([k, v]) => `${k} x${v}`).join(', ') || 'none'}.`,
     '',
     ...table(
       ['Test', 'Flow', 'Learn s', 'Proof s', 'Replay s', 'Model calls', 'In tokens', 'Out tokens', 'Clarifications'],
@@ -160,7 +171,7 @@ function renderRun(input: RunReportInput): string[] {
   const truncations=bundle.truncations;
   out.push('### Coverage and retained release conditions','',
     `4096 truncations VERIFIED by numeric request cap plus provider MAX_TOKENS: ${truncations?.verified4096 ?? 'UNKNOWN'}. Metadata covered ${truncations===undefined?'UNKNOWN':truncations.total-truncations.unknown}/${truncations?.total ?? 'UNKNOWN'}, UNKNOWN ${truncations?.unknown ?? 'UNKNOWN'}. Token totals or adapter finish alone are INFERRED and cannot establish coverage.`,
-    `Q4 independent region audit: ${bundle.regionAudit?.witnesses.length ?? 0} witnesses / ${bundle.regionAudit?.required.length ?? 'UNKNOWN'} required coordinates. Independent meaning comes from predeclared public semantic truth; physical relation rests on the trusted collector/native prefix+SAME conformance. Original observation/fact/preparation/frozen scope joins are required; later tabs cannot certify historical selection. Missing lineage blocks PASS; any wrong-region pick reopens grounding and requires a new whole run.`,
+    'Wrong-region picks are not a gate rule (backlog A16): the reviewer reads each learned step against its page and the report lists any wrong-region pick as a finding; it does not decide PASS.',
     'W-AC10 accepted residual: a delayed focus handler may move focus during press; press has no mitigation. Fill checks for password-held literals after dispatch. Pages requiring change-only after typed text remain unsupported.',
     'Q9 compliance reconfirmation: MISSING unless a separate actual compliance receipt is attached. This remains a HARD GATE BEFORE ANY PILOT. A release-gate PASS is not compliance approval or D-C benchmark success.',
     'Evidence classification: recorded IDs/counters/receipts and checked source-bound comparisons are VERIFIED only when present. Missing data is UNKNOWN; proposed behavior and unexecuted diagnostics remain NOT_RUN/INFERRED.', '');

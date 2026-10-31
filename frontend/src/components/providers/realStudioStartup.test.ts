@@ -8,7 +8,9 @@ describe('full-stack Studio startup', () => {
     expect(script).toContain('Studio production alpha: backend + runner connected');
     expect(script).toContain('export STUDIO_EVIDENCE_PROVIDER="local"');
     expect(script).toContain('export STUDIO_EVIDENCE_DIRECTORY="$RUNNER_WORK_DIR/objects"');
-    expect(script).toContain('STUDIO_RUNNER_OBJECT_STORE_PROVIDER=local');
+    // The runner environment is built by the local TLS helper that dev.sh runs, not by dev.sh itself.
+    const runnerEnv = readFileSync(resolve(process.cwd(), '..', 'tools', 'studio-local-tls.mjs'), 'utf8');
+    expect(runnerEnv).toContain("STUDIO_RUNNER_OBJECT_STORE_PROVIDER: 'local'");
     expect(script).toContain('rm -rf -- "$RUNNER_WORK_DIR"');
     expect(script).not.toContain('VITE_ENABLE_MSW');
   });

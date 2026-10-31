@@ -30,8 +30,8 @@ export async function captureHnAmendment(page:Page,runId:string,directory:string
     const row=tab.locator('tr.athing:visible').first(),storyId=await row.getAttribute('id');if(storyId===null||!/^\d+$/.test(storyId))throw new Error('HN first visible source identity missing');
     const title=(await row.locator('.titleline > a').first().innerText()).trim(),metadata=row.locator('xpath=following-sibling::tr[1]'),authorLink=metadata.locator('a.hnuser');
     if(await authorLink.count()!==1)throw new Error('HN first story author association missing');
-    const author=(await authorLink.innerText()).trim(),comments=(await metadata.locator(`a[href="item?id=${storyId}"]`).last().innerText()).trim();
-    const count=await tab.locator('a:visible').evaluateAll((links,label)=>links.filter((link)=>(link.textContent??'').trim()===label).length,comments);
+    const author=(await authorLink.innerText()).trim(),comments=(await metadata.locator(`a[href="item?id=${storyId}"]`).last().innerText()).replace(/\u00a0/g,' ').trim();
+    const count=await tab.locator('a:visible').evaluateAll((links,label)=>links.filter((link)=>(link.textContent??'').replace(/\u00a0/g,' ').trim()===label).length,comments);
     const captured:HnPublicCapture={url:'https://news.ycombinator.com/show',capturedAt:new Date().toISOString(),storyId,itemUrl:`https://news.ycombinator.com/item?id=${storyId}`,title,author,comments,commentsGloballyUnique:count===1,commentsMatchCount:count};
     writeFileSync(join(directory,'hn-preflight.json'),JSON.stringify({runId,captured,sourceCaptureHash:sha256Hex(JSON.stringify(captureBody(captured)))})+'\n',{flag:'wx'});
     const a=resolveHnAmendment(captured,runId);

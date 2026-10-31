@@ -29,6 +29,8 @@ import { guidedCopy } from './guidedNarratives';
  *    session's `progress.activeStep`, which the server guarantees matches the question's coordinate
  *    (P2). If the two disagree, or the step is not named, no question is shown: a prompt without its
  *    step would be worded from nothing.
+ *  - **A sentence under the question says why it is asked** (SC008-FIX-24): the step matched more than
+ *    one thing, and rewording it to name the target avoids the question next time.
  *  - **"None of these" never answers.** The contract has no "none" choice (plan B6), so it calls
  *    `onNoneOfThese(stepId)` and the page cancels the session, then moves focus to step N (A3).
  *    Nothing here fabricates a `choiceId`.
@@ -168,6 +170,9 @@ export function GuidedClarification({
       <Stack spacing={1.5}>
         <Typography variant="body2" data-testid="guided-question" sx={{ overflowWrap: 'anywhere' }}>
           {guidedCopy('clarificationQuestion', { N: step.number, '<step text>': step.text })}
+        </Typography>
+        <Typography variant="body2" color="text.secondary" data-testid="guided-question-why" sx={{ overflowWrap: 'anywhere' }}>
+          {guidedCopy('clarificationWhy', { N: step.number })}
         </Typography>
         {warning !== null && (
           <Typography variant="body2" color="warning.main" data-testid="guided-expiry-warning">

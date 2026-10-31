@@ -34,6 +34,7 @@ export type UiTestStatusInput = Pick<TestDto, 'readiness' | 'lastRunStatus'>;
 const READINESS_STATUS: Readonly<Record<Exclude<TestReadiness, 'READY'>, UiTestStatus>> = {
   UNLEARNED: { label: 'Not learned', color: 'warning', filterValue: 'UNLEARNED' },
   LEARNING: { label: 'Learning', color: 'info', filterValue: 'LEARNING' },
+  RECORDED: { label: 'Recorded', color: 'warning', filterValue: 'RECORDED' },
   NEEDS_RELEARN: { label: 'Needs re-learn', color: 'warning', filterValue: 'NEEDS_RELEARN' },
 };
 

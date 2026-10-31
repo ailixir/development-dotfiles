@@ -20,8 +20,6 @@ function action(outcome: GuidedActionOutcome, attemptOrdinal = 0): PublicExplana
     admissionId: `a-${outcome}-${attemptOrdinal}`,
     ordinal: 0,
     attemptOrdinal,
-    operationKind: 'click',
-    safeLabel: 'Click control',
     outcome,
     referenceIds: [],
   };

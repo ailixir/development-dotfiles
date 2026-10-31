@@ -1951,6 +1951,7 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                               kind: 'guided',
                               result: guided.result,
                               firstLearnStepId: guidedView.session.firstLearnStepId ?? null,
+                              answeredSteps: guided.answeredSteps,
                             }}
                             draftStepIds={draftStepIds}
                             test={draft}
@@ -1975,7 +1976,11 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                     <>
                       {proofRunId !== null && (snapshot === null || snapshot.executionId === proofRunId) && (
                         <Stack spacing={0.5} sx={{ mb: 1.5 }} data-testid="guided-proof-receipt">
-                          {proofReceiptLines.map((line) => (
+                          {/* Learned only once the proof snapshot PASSED; until then the revision is recorded. */}
+                          {(snapshot !== null && snapshot.executionId === proofRunId && snapshot.status === 'PASSED'
+                            ? proofReceiptLines
+                            : [guidedCopy('recordedReceipt')]
+                          ).map((line) => (
                             <Typography key={line} variant="body2">{line}</Typography>
                           ))}
                         </Stack>

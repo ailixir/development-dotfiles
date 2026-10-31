@@ -179,8 +179,13 @@ describe('a learn from start to published', () => {
     await waitFor(() => expect(result.current.clarification).not.toBeNull());
     expect(result.current.clarification).toMatchObject({ phase: 'source', promptCode: 'CHOOSE_SOURCE' });
     expect(result.current.view?.session.state).toBe('AWAITING_CLARIFICATION');
+    const answeredNumber = result.current.view?.session.progress.activeStep?.number;
+    expect(result.current.answeredSteps).toEqual([]);
     await act(async () => result.current.answer(result.current.clarification!.choices[0].choiceId));
     await waitFor(() => expect(result.current.clarification).toBeNull());
+    // SC008-FIX-24: the step the author answered is remembered for the completion note.
+    expect(answeredNumber).toBeDefined();
+    expect(result.current.answeredSteps).toEqual([answeredNumber]);
     await runToSuccess(result);
   });
 

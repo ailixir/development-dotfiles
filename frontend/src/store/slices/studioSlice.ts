@@ -29,6 +29,11 @@ interface StudioState {
   guidedResultById: Record<string, GuidedResult>;
   /** `null` is "read, none pending"; an absent key is "not read yet". */
   guidedClarificationById: Record<string, GuidedClarification | null>;
+  /**
+   * The step numbers whose clarification the author answered during this session (SC008-FIX-24).
+   * Frontend-only memory: the public session data does not say which steps needed an answer.
+   */
+  guidedAnsweredStepsById: Record<string, number[]>;
 }
 
 const initialState: StudioState = {
@@ -40,6 +45,7 @@ const initialState: StudioState = {
   guidedSessionViewById: {},
   guidedResultById: {},
   guidedClarificationById: {},
+  guidedAnsweredStepsById: {},
 };
 
 const studioSlice = createSlice({
@@ -113,6 +119,14 @@ const studioSlice = createSlice({
       state.guidedClarificationById[action.payload.sessionId] = action.payload.clarification;
     },
 
+    recordGuidedAnsweredStep: (state, action: PayloadAction<{ sessionId: string; stepNumber: number }>) => {
+      const { sessionId, stepNumber } = action.payload;
+      const answered = state.guidedAnsweredStepsById[sessionId] ?? [];
+      if (!answered.includes(stepNumber)) {
+        state.guidedAnsweredStepsById[sessionId] = [...answered, stepNumber].sort((a, b) => a - b);
+      }
+    },
+
     /** Forgets the session a test was following, with its view, result and question. */
     clearGuidedSession: (state, action: PayloadAction<{ testId: string }>) => {
       const sessionId = state.guidedSessionByTestId[action.payload.testId];
@@ -121,6 +135,7 @@ const studioSlice = createSlice({
         delete state.guidedSessionViewById[sessionId];
         delete state.guidedResultById[sessionId];
         delete state.guidedClarificationById[sessionId];
+        delete state.guidedAnsweredStepsById[sessionId];
       }
     },
   },
@@ -136,6 +151,7 @@ export const {
   setGuidedSessionView,
   setGuidedResult,
   setGuidedClarification,
+  recordGuidedAnsweredStep,
   clearGuidedSession,
 } = studioSlice.actions;
 

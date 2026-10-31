@@ -11,7 +11,6 @@ import { summarizeRecorder } from './environment.ts';
 import { sameDayEvidenceDigest } from './anchor.ts';
 import type { SameDayAnchor } from './anchor.ts';
 import { collectFreezeCheckpoints } from './freeze.ts';
-import type { RegionAudit } from './region-audit.ts';
 import type { EnvironmentRecord, NextDayResult, RunBundle, ScanFile, TestResult, VerifyJudgement } from './evaluate.ts';
 import { parseLearningTiming } from './status.ts';
 const readIf = <T>(path: string): T | null => existsSync(path) ? readJson<T>(path) : null;
@@ -89,7 +88,7 @@ export function loadBundle(root: string, runId: string, table: GateTable = loadT
   return {scanDataDigest:scanEvidenceDigest(dir,false),nextdayDataDigest:scanEvidenceDigest(dir,true),hnPreflight,hnAmendment,table,runId,environment,preconditionsOk:preconditions?.ok ?? null,voidKeys:judgement?.voidKeys ?? {},results,proxy,
     scan:scanFile?.scan ?? null,scanNextday:scanNextdayFile?.scan ?? null,scanFile,scanNextdayFile,scanHistory,nextday,
     anchor:readIf<SameDayAnchor>(join(dir,'same-day-pass.json')) ?? undefined,sameDayDigest:sameDayEvidenceDigest(dir),
-    regionAudit:readIf<RegionAudit>(join(dir,'region-audit.json')) ?? {required:Object.values(results).flatMap((r)=>(r?.flows ?? []).flatMap((f)=>f.regionAudit?.required ?? [])),witnesses:Object.values(results).flatMap((r)=>(r?.flows ?? []).flatMap((f)=>f.regionAudit?.witnesses ?? [])),truth:Object.values(results).flatMap((r)=>(r?.flows ?? []).flatMap((f)=>f.regionAudit?.truth ?? [])),collectedAt:new Date().toISOString()},freeze:collectFreezeCheckpoints(join(dir,'freeze')),
+    freeze:collectFreezeCheckpoints(join(dir,'freeze')),
     truncations:proxy.truncations,
   };
 }

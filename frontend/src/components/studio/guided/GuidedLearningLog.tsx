@@ -5,7 +5,7 @@ import type {
   PublicSession,
 } from '@/types/studio/studioGuidedTypes';
 import { isGuidedTerminalState } from '@/types/studio/studioGuidedTypes';
-import { CANCELLED_NARRATIVE } from './guidedNarratives';
+import { CANCELLED_NARRATIVE, guidedCopy } from './guidedNarratives';
 import { guidedCompletionView } from './GuidedCompletion';
 import { loginNoticeSentences } from './LoginRequiredNotice';
 
@@ -91,7 +91,7 @@ export function guidedLearningLogLines(session: PublicSession, result: GuidedRes
     );
     for (const action of actions) {
       lines.push(
-        GUIDED_LEARNING_LOG_COPY.action(step.number, action.safeLabel, GUIDED_ACTION_OUTCOME_WORDS[action.outcome]),
+        GUIDED_LEARNING_LOG_COPY.action(step.number, guidedCopy('actionRan'), GUIDED_ACTION_OUTCOME_WORDS[action.outcome]),
       );
     }
   }
