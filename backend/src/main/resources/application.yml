@@ -238,8 +238,10 @@ studio:
     translation:
       controller-token-file: ${STUDIO_GUIDED_CONTROLLER_TOKEN_FILE:${studio.guided-authoring.controller-token-file:}}
       # Base delay before a definite-transient provider retry (connection refused/reset, HTTP 429/503,
-      # or a pre-response stall). The retry is a new persisted, charged attempt in the same
-      # three-proposal pool; the delay before attempt n is base << (n-2). 0..30000.
+      # or a pre-response stall). The retry is a new persisted, charged attempt that spends no
+      # try of the three-proposal pool; up to four are allowed per pool. The delay before the nth
+      # retry is base, then twice the base and twice the base after that (it doubles once).
+      # 0..30000.
       transient-backoff-millis: ${STUDIO_GUIDED_TRANSIENT_BACKOFF_MILLIS:2000}
       # Longest one provider send may wait for its response (a total-call cap), 1..600. The cap only
       # takes effect while it is shorter than the call budget left after authentication

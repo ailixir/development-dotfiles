@@ -347,28 +347,62 @@ class GuidedTransientRetryIT {
   // ── obligation 5 ───────────────────────────────────────────────────────────────────────────
 
   @Test
-  void threeTransientFailuresEndInModelUnavailableWithExactlyThreeCalls() throws Exception {
+  void fiveTransientFailuresEndInModelUnavailableWithExactlyFiveCalls() throws Exception {
     fixture(Map.of());
     script(
         fail(GuidedModelResponse.Reason.TRANSPORT_HTTP_503),
         fail(GuidedModelResponse.Reason.TRANSPORT_CONNECT),
-        fail(GuidedModelResponse.Reason.TRANSPORT_HTTP_429));
+        fail(GuidedModelResponse.Reason.TRANSPORT_HTTP_429),
+        fail(GuidedModelResponse.Reason.TRANSPORT_STALL),
+        fail(GuidedModelResponse.Reason.TRANSPORT_STALL),
+        unsupported(null, null));
     var refused = refusal();
     assertThat(refused.getMessage()).isEqualTo("MODEL_UNAVAILABLE");
     assertThat(refused.status()).isEqualTo(503);
     assertThat(refused.retryable()).isTrue();
-    assertThat(gateway.requests).hasSize(3);
-    assertThat(gateway.script).isEmpty();
+    assertThat(gateway.requests).hasSize(5);
+    assertThat(gateway.script).hasSize(1);
     assertThat(rows())
         .containsExactly(
             "1:REJECTED:TRANSPORT_HTTP_503",
             "1:REJECTED:TRANSPORT_CONNECT",
-            "1:REJECTED:TRANSPORT_HTTP_429");
-    // The delay before the nth transient retry is base << (n - 1); no wait after the last attempt.
-    assertThat(sleeps).containsExactly(BASE_MILLIS, BASE_MILLIS * 2);
+            "1:REJECTED:TRANSPORT_HTTP_429",
+            "1:REJECTED:TRANSPORT_STALL",
+            "1:REJECTED:TRANSPORT_STALL");
+    // The delay doubles once (SC008-FIX-31) and then stays flat: no wait after the last attempt.
+    assertThat(sleeps)
+        .containsExactly(BASE_MILLIS, BASE_MILLIS * 2, BASE_MILLIS * 2, BASE_MILLIS * 2);
     assertThat(document().path("state").asText()).isEqualTo("FAILED");
     assertThat(errorCode()).isEqualTo("MODEL_UNAVAILABLE");
-    assertThat(document().path("counters").path("modelProposals").asInt()).isEqualTo(3);
+    assertThat(document().path("counters").path("modelProposals").asInt()).isEqualTo(5);
+  }
+
+  /**
+   * SC008-FIX-31 (gate r5): a run of three, then four, consecutive stalls on one request used to
+   * end the call (two hackernews/N2 flows died). The fifth request now answers, on the same
+   * ordinal.
+   */
+  @Test
+  void aRunOfFourStallsIsSurvivedByTheFifthRequestWithAFlatBackoffTail() throws Exception {
+    fixture(Map.of());
+    script(
+        fail(GuidedModelResponse.Reason.TRANSPORT_STALL),
+        fail(GuidedModelResponse.Reason.TRANSPORT_STALL),
+        fail(GuidedModelResponse.Reason.TRANSPORT_STALL),
+        fail(GuidedModelResponse.Reason.TRANSPORT_STALL),
+        unsupported(null, null));
+    plan();
+    assertThat(rows())
+        .containsExactly(
+            "1:REJECTED:TRANSPORT_STALL",
+            "1:REJECTED:TRANSPORT_STALL",
+            "1:REJECTED:TRANSPORT_STALL",
+            "1:REJECTED:TRANSPORT_STALL",
+            "1:APPLIED:-");
+    assertThat(gateway.requests).hasSize(5);
+    assertThat(sleeps)
+        .containsExactly(BASE_MILLIS, BASE_MILLIS * 2, BASE_MILLIS * 2, BASE_MILLIS * 2);
+    assertThat(errorCode()).isEqualTo("MISSING_SOURCE");
   }
 
   // ── obligation 6 ───────────────────────────────────────────────────────────────────────────
@@ -509,7 +543,9 @@ class GuidedTransientRetryIT {
     assertThat(sleeps).containsExactly(BASE_MILLIS);
   }
 
-  /** The allowance is two: the third transient failure ends the call, however many tries remain. */
+  /**
+   * The allowance is four: the fifth transient failure ends the call, however many tries remain.
+   */
   @Test
   void anExhaustedAllowanceEndsInModelUnavailableWithNoFurtherCall() throws Exception {
     fixture(Map.of());
@@ -518,18 +554,23 @@ class GuidedTransientRetryIT {
         fail(GuidedModelResponse.Reason.TRANSPORT_STALL),
         fail(GuidedModelResponse.Reason.TRANSPORT_HTTP_429),
         fail(GuidedModelResponse.Reason.TRANSPORT_STALL),
+        fail(GuidedModelResponse.Reason.TRANSPORT_STALL),
+        fail(GuidedModelResponse.Reason.TRANSPORT_STALL),
         unsupported(null, null));
     var refused = refusal();
     assertThat(refused.getMessage()).isEqualTo("MODEL_UNAVAILABLE");
     assertThat(refused.status()).isEqualTo(503);
-    assertThat(gateway.requests).hasSize(4);
+    assertThat(gateway.requests).hasSize(6);
     assertThat(gateway.script).hasSize(1);
-    assertThat(sleeps).containsExactly(BASE_MILLIS, BASE_MILLIS * 2);
+    assertThat(sleeps)
+        .containsExactly(BASE_MILLIS, BASE_MILLIS * 2, BASE_MILLIS * 2, BASE_MILLIS * 2);
     assertThat(rows())
         .containsExactly(
             "1:REJECTED:INVALID_CONTRACT",
             "2:REJECTED:TRANSPORT_STALL",
             "2:REJECTED:TRANSPORT_HTTP_429",
+            "2:REJECTED:TRANSPORT_STALL",
+            "2:REJECTED:TRANSPORT_STALL",
             "2:REJECTED:TRANSPORT_STALL");
     assertThat(errorCode()).isEqualTo("MODEL_UNAVAILABLE");
   }
@@ -644,7 +685,7 @@ class GuidedTransientRetryIT {
   // ── obligation 12 ──────────────────────────────────────────────────────────────────────────
 
   /**
-   * The closed reason is an internal column only: the public view and the error body after three
+   * The closed reason is an internal column only: the public view and the error body after five
    * transient failures have the same shape and codes as after a failure that is not retried, and
    * carry no reason token or provider prose.
    */
@@ -652,6 +693,8 @@ class GuidedTransientRetryIT {
   void theReasonNeverReachesThePublicViewOrTheErrorBody() throws Exception {
     fixture(Map.of());
     script(
+        fail(GuidedModelResponse.Reason.TRANSPORT_HTTP_503),
+        fail(GuidedModelResponse.Reason.TRANSPORT_HTTP_503),
         fail(GuidedModelResponse.Reason.TRANSPORT_HTTP_503),
         fail(GuidedModelResponse.Reason.TRANSPORT_HTTP_503),
         fail(GuidedModelResponse.Reason.TRANSPORT_HTTP_503));

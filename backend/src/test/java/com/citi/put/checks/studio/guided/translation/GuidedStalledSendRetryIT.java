@@ -75,11 +75,12 @@ import org.testcontainers.containers.PostgreSQLContainer;
  * Round 067, Candidate B (architect ruling): a provider send that receives no response headers
  * within the per-send cap, while the cap is the binding limit, ends as REJECTED/TRANSPORT_STALL and
  * the coordinator makes a new, fully charged attempt. SC008 FIX-28: that retry (like any
- * definite-transient one) is drawn from a separate two-request allowance, with its own request id
- * and the same ordinal, so it spends no try of the three-proposal pool. Real PostgreSQL, real
- * session service, store and coordinator. Stalls are produced by the real adapter and transport
- * against WireMock; successful answers are scripted (they depend on the request id). A SOURCE_PLAN
- * {@code UNSUPPORTED} answer ends {@code plan()} before any runner bootstrap.
+ * definite-transient one) is drawn from a separate four-request allowance (SC008-FIX-31; it was
+ * two), with its own request id and the same ordinal, so it spends no try of the three-proposal
+ * pool. Real PostgreSQL, real session service, store and coordinator. Stalls are produced by the
+ * real adapter and transport against WireMock; successful answers are scripted (they depend on the
+ * request id). A SOURCE_PLAN {@code UNSUPPORTED} answer ends {@code plan()} before any runner
+ * bootstrap.
  */
 class GuidedStalledSendRetryIT {
   private static final PostgreSQLContainer<?> POSTGRES =
@@ -499,11 +500,11 @@ class GuidedStalledSendRetryIT {
   // ── test 2 ─────────────────────────────────────────────────────────────────────────────────
 
   @Test
-  void threeStalledSendsEndTerminalWithExactlyThreeHttpRequestsAndTwoBackoffs() throws Exception {
+  void fiveStalledSendsEndTerminalWithExactlyFiveHttpRequestsAndFourBackoffs() throws Exception {
     realClock();
     fixture(Map.of());
-    startWire(silent(), silent(), silent(), silent());
-    script(wire(), wire(), wire(), wire());
+    startWire(silent(), silent(), silent(), silent(), silent(), silent());
+    script(wire(), wire(), wire(), wire(), wire(), wire());
     var refused = refusal();
     assertThat(refused.getMessage()).isEqualTo("MODEL_UNAVAILABLE");
     assertThat(refused.status()).isEqualTo(503);
@@ -513,13 +514,43 @@ class GuidedStalledSendRetryIT {
         .containsExactly(
             "1:REJECTED:TRANSPORT_STALL",
             "1:REJECTED:TRANSPORT_STALL",
+            "1:REJECTED:TRANSPORT_STALL",
+            "1:REJECTED:TRANSPORT_STALL",
             "1:REJECTED:TRANSPORT_STALL");
-    assertThat(httpRequests()).isEqualTo(3);
-    assertThat(gateway.requests).hasSize(3);
-    assertThat(sleeps).containsExactly(BASE_MILLIS, BASE_MILLIS * 2);
-    // Three stalled ceilings stay charged; nothing is refunded.
+    assertThat(httpRequests()).isEqualTo(5);
+    assertThat(gateway.requests).hasSize(5);
+    // The backoff doubles once and then stays flat.
+    assertThat(sleeps)
+        .containsExactly(BASE_MILLIS, BASE_MILLIS * 2, BASE_MILLIS * 2, BASE_MILLIS * 2);
+    // Five stalled ceilings stay charged; nothing is refunded.
     assertThat(document().path("counters").path("modelOutputTokens").asInt())
-        .isEqualTo(3 * ceiling());
+        .isEqualTo(5 * ceiling());
+  }
+
+  /**
+   * SC008-FIX-31 (gate r5): three consecutive stalls on one request used to end the call
+   * (hackernews, N2). Four stalls are now survived by the fifth request, which answers; each
+   * stalled attempt stays a charged REJECTED row and the final answer is a real APPLIED one.
+   */
+  @Test
+  void aRunOfFourStalledSendsIsSurvivedByTheFifthRequest() throws Exception {
+    realClock();
+    fixture(Map.of());
+    startWire(silent(), silent(), silent(), silent());
+    script(wire(), wire(), wire(), wire(), scripted(unsupported(12, 7)));
+    plan();
+    assertThat(errorCode()).isEqualTo("MISSING_SOURCE");
+    assertThat(rows())
+        .containsExactly(
+            "1:REJECTED:TRANSPORT_STALL",
+            "1:REJECTED:TRANSPORT_STALL",
+            "1:REJECTED:TRANSPORT_STALL",
+            "1:REJECTED:TRANSPORT_STALL",
+            "1:APPLIED:-");
+    assertThat(httpRequests()).isEqualTo(4);
+    assertThat(sleeps)
+        .containsExactly(BASE_MILLIS, BASE_MILLIS * 2, BASE_MILLIS * 2, BASE_MILLIS * 2);
+    assertThat(document().path("counters").path("modelProposals").asInt()).isEqualTo(5);
   }
 
   // ── test 3 ─────────────────────────────────────────────────────────────────────────────────
@@ -548,18 +579,20 @@ class GuidedStalledSendRetryIT {
   }
 
   @Test
-  void aStallThenA429ThenAStallIsTerminalWithNoFourthSend() throws Exception {
+  void aStallAnd429SequenceIsTerminalAtTheFifthTransientWithNoSixthSend() throws Exception {
     realClock();
     fixture(Map.of());
-    startWire(silent(), status(429), silent(), silent());
-    script(wire(), wire(), wire(), wire());
+    startWire(silent(), status(429), silent(), status(429), silent(), silent());
+    script(wire(), wire(), wire(), wire(), wire(), wire());
     assertThat(refusal().getMessage()).isEqualTo("MODEL_UNAVAILABLE");
     assertThat(rows())
         .containsExactly(
             "1:REJECTED:TRANSPORT_STALL",
             "1:REJECTED:TRANSPORT_HTTP_429",
+            "1:REJECTED:TRANSPORT_STALL",
+            "1:REJECTED:TRANSPORT_HTTP_429",
             "1:REJECTED:TRANSPORT_STALL");
-    assertThat(httpRequests()).isEqualTo(3);
+    assertThat(httpRequests()).isEqualTo(5);
   }
 
   @Test
@@ -581,20 +614,22 @@ class GuidedStalledSendRetryIT {
   }
 
   @Test
-  void aRepairThenThreeStallsIsTerminalWithNoFifthSend() throws Exception {
+  void aRepairThenFiveStallsIsTerminalWithNoSixthSend() throws Exception {
     realClock();
     fixture(Map.of());
-    startWire(silent(), silent(), silent(), silent());
-    script(scripted(applyRefusal()), wire(), wire(), wire(), wire());
+    startWire(silent(), silent(), silent(), silent(), silent(), silent());
+    script(scripted(applyRefusal()), wire(), wire(), wire(), wire(), wire(), wire());
     assertThat(refusal().getMessage()).isEqualTo("MODEL_UNAVAILABLE");
     assertThat(rows())
         .containsExactly(
             "1:REJECTED:INVALID_CONTRACT",
             "2:REJECTED:TRANSPORT_STALL",
             "2:REJECTED:TRANSPORT_STALL",
+            "2:REJECTED:TRANSPORT_STALL",
+            "2:REJECTED:TRANSPORT_STALL",
             "2:REJECTED:TRANSPORT_STALL");
-    assertThat(gateway.requests).hasSize(4);
-    assertThat(httpRequests()).isEqualTo(3);
+    assertThat(gateway.requests).hasSize(6);
+    assertThat(httpRequests()).isEqualTo(5);
   }
 
   /**

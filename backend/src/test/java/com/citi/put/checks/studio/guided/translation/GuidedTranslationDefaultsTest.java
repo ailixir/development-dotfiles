@@ -85,9 +85,9 @@ class GuidedTranslationDefaultsTest {
     assertThat(properties.sendTimeoutSeconds()).isEqualTo(20);
     assertThat(properties.callSeconds()).isEqualTo(60);
     assertThat(properties.isCallBudgetCoveringSendCap()).isTrue();
-    // 3 attempts x (60 s call + 2 s settle + 15 s runner prepare) + 2 transient requests x (60 s
-    // call + 2 s settle) + 3 x 2 s backoff = 361 s, plus a 30 s margin.
-    assertThat(properties.continuationTimeout()).isEqualTo(java.time.Duration.ofSeconds(391));
+    // 3 attempts x (60 s call + 2 s settle + 15 s runner prepare) + 4 transient requests x (60 s
+    // call + 2 s settle) + 7 x 2 s backoff = 493 s, plus a 30 s margin (SC008-FIX-31).
+    assertThat(properties.continuationTimeout()).isEqualTo(java.time.Duration.ofSeconds(523));
     assertThat(bindSendTimeout(null).sendTimeoutSeconds()).isEqualTo(20);
     assertThat(
             Files.readString(Path.of("src/main/resources/application.yml"))

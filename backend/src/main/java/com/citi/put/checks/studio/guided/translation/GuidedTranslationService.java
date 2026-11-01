@@ -29,8 +29,29 @@ public final class GuidedTranslationService {
    * Extra requests one pool may spend on definite-transient no-answer failures (a pre-response
    * stall, a refused or reset connection, HTTP 429/503). They are drawn from here, not from the
    * pool, so a repair keeps its tries; once spent, the next such failure ends the call as before.
+   *
+   * <p>SC008-FIX-31: four, not two. In gate r5 a run of three consecutive 20 s stalls on one
+   * request killed two flows; four stalls plus the capped backoff ({@link #MAX_BACKOFF_SHIFT}) cost
+   * about 94 s, so a fifth request still answers inside the 120 s step budget, and even five stalls
+   * end the call (MODEL_UNAVAILABLE, about 114 s) before that budget does.
    */
-  static final int TRANSIENT_ALLOWANCE = 2;
+  static final int TRANSIENT_ALLOWANCE = 4;
+
+  /**
+   * The backoff doubles once and then stays flat: the delay before the nth transient retry is
+   * {@code base << min(n - 1, MAX_BACKOFF_SHIFT)}. A stall has already waited out the send cap, so
+   * a longer wait only spends the step budget (a 429/503 gets the base, then twice the base).
+   */
+  static final int MAX_BACKOFF_SHIFT = 1;
+
+  /** Total backoff, in multiples of the base, if the whole allowance is spent. */
+  static long totalBackoffUnits() {
+    long total = 0;
+    for (int used = 0; used < TRANSIENT_ALLOWANCE; used++) {
+      total += 1L << Math.min(used, MAX_BACKOFF_SHIFT);
+    }
+    return total;
+  }
 
   private final GuidedSessionRepository repository;
   private final GuidedTranslationStore store;
@@ -2059,12 +2080,13 @@ public final class GuidedTranslationService {
   }
 
   /**
-   * Waits {@code base << (attempt - 2)} before a definite-transient retry.
+   * Waits {@code base << min(attempt - 2, MAX_BACKOFF_SHIFT)} before a definite-transient retry.
    *
    * @return false when the wait was interrupted, so the caller ends in today's terminal branch
    */
   private boolean backoffBeforeAttempt(int attempt) {
-    long delay = (long) properties.transientBackoffMillis() << (attempt - 2);
+    long delay =
+        (long) properties.transientBackoffMillis() << Math.min(attempt - 2, MAX_BACKOFF_SHIFT);
     if (delay <= 0) {
       return true;
     }

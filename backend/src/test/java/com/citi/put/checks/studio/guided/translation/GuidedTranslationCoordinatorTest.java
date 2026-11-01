@@ -141,7 +141,7 @@ class GuidedTranslationCoordinatorTest {
     coordinator.continueRuns();
     await().atMost(5, TimeUnit.SECONDS).until(() -> postsTo("a") == 1);
     // The POST is awaited well past 65 s, so the coordinator does not give up on it first.
-    assertThat(posts.getFirst().timeout()).hasValue(Duration.ofSeconds(391));
+    assertThat(posts.getFirst().timeout()).hasValue(Duration.ofSeconds(523));
     for (int poll = 0; poll < 5; poll++) {
       coordinator.continueRuns();
     }
@@ -222,18 +222,19 @@ class GuidedTranslationCoordinatorTest {
 
   @Test
   void theTimeoutCoversTheLongestRequestForDefaultsAndARaisedSendCap() {
-    // One pool of three requests, each (call + 2 s settle + 15 s prepare), two transient requests,
-    // each (call + 2 s settle), the 2 s then 4 s backoff between attempts and a fixed 30 s margin.
+    // One pool of three requests, each (call + 2 s settle + 15 s prepare), four transient requests,
+    // each (call + 2 s settle), the backoff before them (2 s, then 4 s three times: 7 x the base)
+    // and a fixed 30 s margin.
     Duration defaults =
         new GuidedTranslationProperties(true, 65536, 4096, 60, "w").continuationTimeout();
     assertThat(defaults)
-        .isGreaterThanOrEqualTo(Duration.ofSeconds(3 * (60 + 2 + 15) + 2 * (60 + 2) + 2 + 4));
-    assertThat(defaults).isEqualTo(Duration.ofSeconds(3 * (60 + 2 + 15) + 2 * (60 + 2) + 6 + 30));
+        .isGreaterThanOrEqualTo(Duration.ofSeconds(3 * (60 + 2 + 15) + 4 * (60 + 2) + 2 + 4));
+    assertThat(defaults).isEqualTo(Duration.ofSeconds(3 * (60 + 2 + 15) + 4 * (60 + 2) + 14 + 30));
 
     var raised = new GuidedTranslationProperties(true, 65536, 4096, 120, "w", 2000, 110);
     assertThat(raised.isCallBudgetCoveringSendCap()).isTrue();
     assertThat(raised.continuationTimeout())
-        .isGreaterThanOrEqualTo(Duration.ofSeconds(3 * (120 + 2 + 15) + 2 * (120 + 2) + 2 + 4));
+        .isGreaterThanOrEqualTo(Duration.ofSeconds(3 * (120 + 2 + 15) + 4 * (120 + 2) + 14));
   }
 
   @Test

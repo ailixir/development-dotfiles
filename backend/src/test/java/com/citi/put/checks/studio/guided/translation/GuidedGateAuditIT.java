@@ -235,7 +235,7 @@ class GuidedGateAuditIT {
     assertThat(h.reservations(id)).isEqualTo(1);
   }
 
-  /** Three transient failures in one call exceed the allowance and end the step as before. */
+  /** Five transient failures in one call exceed the allowance and end the step as before. */
   @Test
   void anExhaustedTransientAllowanceEndsTheStepModelUnavailable() throws Exception {
     var h = new GroundingItHarness(POSTGRES, "Click Save.");
@@ -243,14 +243,14 @@ class GuidedGateAuditIT {
     h.observe(id, 1, page().element("e1", "button", "Save").build());
     h.stopAtRunner();
     h.translation.useBackoffSleeper(NO_WAIT);
-    for (int stall = 0; stall < 3; stall++) {
+    for (int stall = 0; stall < 5; stall++) {
       h.failNext(GuidedModelRequest.Kind.STEP_CODE, GuidedModelResponse.Reason.TRANSPORT_STALL);
     }
     h.reply(GuidedModelRequest.Kind.STEP_CODE, request -> h.code(request, "await ok();"));
     assertThatThrownBy(() -> h.advance(id))
         .satisfies(
             failure -> assertThat(refusal(failure).getMessage()).isEqualTo("MODEL_UNAVAILABLE"));
-    assertThat(h.requests(GuidedModelRequest.Kind.STEP_CODE)).isEqualTo(3);
+    assertThat(h.requests(GuidedModelRequest.Kind.STEP_CODE)).isEqualTo(5);
     assertThat(h.state(id)).isEqualTo("FAILED");
     assertThat(h.errorCode(id)).isEqualTo("MODEL_UNAVAILABLE");
   }
