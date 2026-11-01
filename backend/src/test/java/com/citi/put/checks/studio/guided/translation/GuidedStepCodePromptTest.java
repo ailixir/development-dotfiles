@@ -63,7 +63,40 @@ class GuidedStepCodePromptTest {
             "return a clarification instead of code",
             "Never guess a target",
             "`- passwordControl` line is a password field",
-            "context.configurationReferences entry of kind secretRef");
+            "context.configurationReferences entry of kind secretRef",
+            "find the element by its role and the region, heading or label that names it, not by"
+                + " the value's own text",
+            "write every regex backslash doubled (\\\\b, \\\\d), or prefer exact strings with"
+                + " { exact: true }");
+    assertThat(contract).doesNotContain("name: /^BK-/");
+  }
+
+  @Test
+  void theSyntaxRepairFactsNameThePositionAndTheBackslashHint() {
+    assertThat(GuidedTranslationService.syntaxFacts(3, 7))
+        .contains("does not parse or contains an invalid character at line 3 column 7")
+        .contains("write every regex backslash doubled (\\\\b, \\\\d)")
+        .hasSizeLessThanOrEqualTo(256);
+    assertThat(GuidedTranslationService.syntaxFacts(null, null))
+        .doesNotContain(" at line ")
+        .contains("regex backslash doubled");
+  }
+
+  @Test
+  void thePreFenceRepairFactsFollowTheMatchCountTheRunnerReported() {
+    assertThat(GuidedTranslationService.preFenceFacts(3))
+        .contains("its target matched 3 elements")
+        .contains("must resolve to exactly one element")
+        .contains("by role, by the region or label that contains it, or by its parent")
+        .hasSizeLessThanOrEqualTo(256);
+    assertThat(GuidedTranslationService.preFenceFacts(0))
+        .contains("matched no element: check the role and name")
+        .doesNotContain("narrow");
+    assertThat(GuidedTranslationService.preFenceFacts(null))
+        .contains("did not resolve to exactly one element")
+        .contains("narrow it by role")
+        .doesNotContain("matched")
+        .hasSizeLessThanOrEqualTo(256);
   }
 
   @Test
