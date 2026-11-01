@@ -223,6 +223,18 @@ describe('a session that has ended (AC-03)', () => {
     expect(lineTexts().at(-1)).toBe(`Learning ended: ${CANCELLED_NARRATIVE.title}`);
   });
 
+  it('a learn paused by "None of these" ends with the paused-for-edit title', () => {
+    render(
+      <GuidedLearningLog
+        session={session('CANCELLED')}
+        result={result('CANCELLED', { completed: 1, failedIndex: null })}
+        pausedForEditStep={2}
+      />,
+    );
+
+    expect(lineTexts().at(-1)).toBe(`Learning ended: ${guidedCopy('pausedForEditTitle', { N: 2 })}`);
+  });
+
   it('carries no time: a line is its text and nothing else', () => {
     render(
       <GuidedLearningLog session={session('FAILED')} result={result('FAILED', { completed: 1, failedIndex: 1 })} />,

@@ -66,7 +66,7 @@ describe('disambiguation: the AC-3 question, a radio group, then "None of these"
   it('SC008-FIX-24: says why it is asked and that rewording the step avoids the question', () => {
     renderQuestion(question({ expiresAt: FAR_FUTURE }));
     expect(screen.getByTestId('guided-question-why')).toHaveTextContent(
-      "Step 1 matches more than one thing on this page. Pick one to continue, or reword the step to name it exactly (for example, the visible text or where it is) so Studio won't need to ask.",
+      'Step 1 matches more than one thing on this page. Pick one to continue, or reword the step to name it exactly, for example by where it is ("the Benefits link in the menu"), so Studio won\'t need to ask.',
     );
   });
 

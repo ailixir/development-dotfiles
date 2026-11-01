@@ -248,6 +248,11 @@ export type GuidedCompletionInput =
       readonly firstLearnStepId?: string | null;
       /** Step numbers whose question the author answered in this session (SC008-FIX-24). */
       readonly answeredSteps?: readonly number[];
+      /**
+       * The step the author chose "None of these — I'll edit step N" for in this session. A session that
+       * ended `CANCELLED` because of it says so, instead of the replay "Someone pressed Stop" text.
+       */
+      readonly pausedForEditStep?: number | null;
     }
   /** A replay execution: only its `PASSED` success is worded here; the rest is the run narratives'. */
   | { readonly kind: 'replay'; readonly snapshot: Pick<ExecutionSnapshot, 'status'> };
@@ -318,7 +323,12 @@ export function GuidedCompletion({
       data-kind={view.kind}
       sx={ALERT_SX}
     >
-      {view.kind === 'cancelled' ? (
+      {view.kind === 'cancelled' && input.pausedForEditStep != null ? (
+        <>
+          <AlertTitle>{guidedCopy('pausedForEditTitle', { N: input.pausedForEditStep })}</AlertTitle>
+          <Lines lines={[guidedCopy('pausedForEditBody', { N: input.pausedForEditStep })]} />
+        </>
+      ) : view.kind === 'cancelled' ? (
         <>
           <AlertTitle>{CANCELLED_NARRATIVE.title}</AlertTitle>
           <Lines lines={[CANCELLED_NARRATIVE.browserClaim, CANCELLED_NARRATIVE.remedyOwner]} />

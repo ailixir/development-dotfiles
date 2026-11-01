@@ -56,10 +56,18 @@ export const GUIDED_ACTION_OUTCOME_WORDS: Readonly<Record<GuidedActionOutcome, s
 };
 
 /** The first sentence of how the session ended, from the view the Proof tab's alert is built from. */
-function endedSentence(result: GuidedResult, firstLearnStepId: string | null): string | null {
+function endedSentence(
+  result: GuidedResult,
+  firstLearnStepId: string | null,
+  pausedForEditStep: number | null,
+): string | null {
   const view = guidedCompletionView(result, firstLearnStepId);
   if (view === null) return null;
-  if (view.kind === 'cancelled') return CANCELLED_NARRATIVE.title;
+  if (view.kind === 'cancelled') {
+    return pausedForEditStep === null
+      ? CANCELLED_NARRATIVE.title
+      : guidedCopy('pausedForEditTitle', { N: pausedForEditStep });
+  }
   // The step number is the editor's to resolve; the log names the outcome without it.
   if (view.kind === 'login') return loginNoticeSentences(view.notice, null)[0] ?? null;
   const line = view.lines[0];
@@ -76,7 +84,11 @@ function firstSentence(line: string): string {
 }
 
 /** The log's lines, in order. Pure, so each branch is asserted without rendering. */
-export function guidedLearningLogLines(session: PublicSession, result: GuidedResult | null): string[] {
+export function guidedLearningLogLines(
+  session: PublicSession,
+  result: GuidedResult | null,
+  pausedForEditStep: number | null = null,
+): string[] {
   if (!isGuidedTerminalState(session.state) || result === null) {
     return [
       GUIDED_LEARNING_LOG_COPY.noLiveLog,
@@ -95,7 +107,7 @@ export function guidedLearningLogLines(session: PublicSession, result: GuidedRes
       );
     }
   }
-  const sentence = endedSentence(result, session.firstLearnStepId ?? null);
+  const sentence = endedSentence(result, session.firstLearnStepId ?? null, pausedForEditStep);
   if (sentence !== null) lines.push(GUIDED_LEARNING_LOG_COPY.ended(sentence));
   return lines;
 }
@@ -105,10 +117,12 @@ export interface GuidedLearningLogProps {
   readonly session: PublicSession;
   /** The result, once the session has ended and it has been read. */
   readonly result: GuidedResult | null;
+  /** The step the author chose "None of these" for in this session; words a `CANCELLED` end. */
+  readonly pausedForEditStep?: number | null;
 }
 
-export function GuidedLearningLog({ session, result }: GuidedLearningLogProps) {
-  const lines = guidedLearningLogLines(session, result);
+export function GuidedLearningLog({ session, result, pausedForEditStep = null }: GuidedLearningLogProps) {
+  const lines = guidedLearningLogLines(session, result, pausedForEditStep);
   return (
     <Paper
       variant="outlined"

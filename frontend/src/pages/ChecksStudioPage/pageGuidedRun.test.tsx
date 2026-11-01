@@ -346,7 +346,11 @@ describe('AC-9: T0 ruling A3, "None of these" cancels, then focuses step N', () 
     await user().click(within(question).getByRole('radio', { name: "None of these — I'll edit step 2" }));
     await user().click(within(question).getByRole('button', { name: 'Continue' }));
 
-    expect(await screen.findByText(EXECUTION_ERROR_NARRATIVES.CANCELLED.title, {}, WAIT)).toBeInTheDocument();
+    // User decision 2026-11-01: this end is "paused to edit", not the Stop text.
+    expect(await screen.findByText(guidedCopy('pausedForEditTitle', { N: 2 }), {}, WAIT)).toBeInTheDocument();
+    expect(screen.getByTestId('guided-completion')).toHaveTextContent(guidedCopy('pausedForEditBody', { N: 2 }));
+    expect(screen.queryByText(EXECUTION_ERROR_NARRATIVES.CANCELLED.title)).toBeNull();
+    expect(screen.queryByText(/Someone pressed Stop/)).toBeNull();
     await waitFor(() => expect(document.activeElement).toBe(screen.getByRole('textbox', { name: 'Step 2' })), WAIT);
     await settle();
     const cancels = requests('POST', CANCELS);
@@ -356,6 +360,20 @@ describe('AC-9: T0 ruling A3, "None of these" cancels, then focuses step N', () 
     expect(requests('POST', CLARIFIES)).toHaveLength(0);
     // Never a new session on its own.
     expect(requests('POST', STARTS)).toHaveLength(1);
+  }, TEST_TIMEOUT_MS);
+
+  it('the Stop button during the same question still shows the existing CANCELLED text, not the paused-for-edit text', async () => {
+    setGuidedScenario(learnWithQuestion('PAGE_CHOICE', 1), unlearnedDraft.id);
+    serveDraft(unlearnedDraft);
+    renderPage();
+    await user().click(await runButton());
+
+    await screen.findByTestId('guided-clarification', {}, WAIT);
+    await user().click(await screen.findByRole('button', { name: 'Stop' }, WAIT));
+
+    expect(await screen.findByText(EXECUTION_ERROR_NARRATIVES.CANCELLED.title, {}, WAIT)).toBeInTheDocument();
+    expect(screen.getByTestId('guided-completion')).toHaveTextContent('Someone pressed Stop');
+    expect(screen.queryByText(guidedCopy('pausedForEditTitle', { N: 2 }))).toBeNull();
   }, TEST_TIMEOUT_MS);
 
   it('A3 cancel/expiry race: the server answers with the session already EXPIRED; the page shows that, sends no second cancel, and still moves focus', async () => {
@@ -492,7 +510,7 @@ describe('AC-9: T0 ruling A3 when the cancel does not end the session at once (t
 
       // The session ends on its own: the existing CANCELLED narrative, then the focus, once.
       sessionEnded = true;
-      expect(await screen.findByText(EXECUTION_ERROR_NARRATIVES.CANCELLED.title, {}, WAIT)).toBeInTheDocument();
+      expect(await screen.findByText(guidedCopy('pausedForEditTitle', { N: 2 }), {}, WAIT)).toBeInTheDocument();
       await waitFor(() => expect(document.activeElement).toBe(screen.getByRole('textbox', { name: 'Step 2' })), WAIT);
       await settle(100);
       expect(requests('POST', CANCELS)).toHaveLength(1);

@@ -169,6 +169,39 @@ describe('VAL-036: the add-step field', () => {
   }, PAGE_TEST_TIMEOUT_MS);
 });
 
+describe('Fix 4 and Fix 6: the add-step tip and the field while the test loads', () => {
+  it('shows the persistent authoring tip beside the add-step field, leaving helper text unchanged', async () => {
+    await readyPage();
+    expect(screen.getByTestId('add-step-tip')).toHaveTextContent(
+      'Tip: after a click, check where you landed, for example Check that the URL contains "/dashboard". A heading that also appears on the previous page proves nothing.',
+    );
+    expect(screen.getByText('Press Enter to add the step. Shift+Enter starts a new line.')).toBeInTheDocument();
+  }, PAGE_TEST_TIMEOUT_MS);
+
+  it('disables the field and Add while the test is loading, then a typed step persists', async () => {
+    serveList(readyDraft);
+    let release: () => void = () => {};
+    const gate = new Promise<void>((resolve) => { release = resolve; });
+    studioMockServer.use(
+      http.get(`${STUDIO_BASE}/tests/:id`, async () => {
+        await gate;
+        return HttpResponse.json(fixtureDetail(readyDraft));
+      }),
+    );
+    renderPage();
+    const field = await screen.findByRole('textbox', { name: 'Add a test step' }, pageWait);
+    expect(field).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Add step' })).toBeDisabled();
+
+    release();
+    await waitFor(() => expect(field).not.toBeDisabled(), pageWait);
+    const user = userEvent.setup({ delay: null });
+    const before = readyDraft.steps.length;
+    await user.type(field, `${PENDING}{Enter}`);
+    expect(screen.getByRole('textbox', { name: `Step ${before + 1}` })).toHaveValue(PENDING);
+  }, PAGE_TEST_TIMEOUT_MS);
+});
+
 describe('VAL-036 + VAL-039: Run with pending text in a focused add-step field', () => {
   it('adds and saves the step first, then sends exactly one execute', async () => {
     const saved = capturePuts();

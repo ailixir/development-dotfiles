@@ -384,6 +384,8 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
   /** A replay in flight, a proof about to be followed, or a guided session that has not ended. Any locks the editor. */
   const running = isRunning || guidedActive || proofStarting;
   const editorLocked = running || isPreparing;
+  /** The first read of the test is still in flight: a step added now would be overwritten by it. */
+  const initialLoad = scenariosLoading && draft === null;
   /** STUDIO-OBS-008 AC-5: the server's capability for this saved test, never a build switch. */
   const capabilities = useStudioCapabilities(selectedScenario);
   const secretsOn = vaultSecretsEnabled(capabilities);
@@ -1097,6 +1099,12 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
 
   /** One answer or cancel at a time for the pending question, so neither is sent twice. */
   const [questionBusy, setQuestionBusy] = useState(false);
+  /**
+   * The step the author left with "None of these — I'll edit step N" and the session that was
+   * cancelled for it, so that session's end reads "Learning paused" and not the Stop text. A new
+   * session has another id and so never matches it.
+   */
+  const [pausedForEdit, setPausedForEdit] = useState<{ sessionId: string; number: number } | null>(null);
   const { answer: answerGuided, cancel: cancelGuided } = guided;
   const answerQuestion = useCallback(
     async (choiceId: string) => {
@@ -1118,6 +1126,10 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
    */
   const noneOfThese = useCallback(
     async (stepId: string) => {
+      const activeStep = guidedView?.session.progress.activeStep ?? null;
+      if (guidedView !== null && activeStep !== null) {
+        setPausedForEdit({ sessionId: guidedView.session.sessionId, number: activeStep.number });
+      }
       setQuestionBusy(true);
       try {
         await cancelGuided();
@@ -1126,7 +1138,7 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
       }
       requestStepFocus(stepId);
     },
-    [cancelGuided, requestStepFocus],
+    [cancelGuided, guidedView, requestStepFocus],
   );
 
   /** Stop during a guided session cancels it, once; the session's own terminal state ends it. */
@@ -1134,6 +1146,8 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
   useEffect(() => {
     if (!guidedActive) setGuidedStopping(false);
   }, [guidedActive]);
+  const pausedForEditStepFor = (result: { sessionId: string } | null): number | null =>
+    pausedForEdit !== null && result !== null && pausedForEdit.sessionId === result.sessionId ? pausedForEdit.number : null;
   const stopGuided = useCallback(() => {
     if (guidedStopping) return;
     setGuidedStopping(true);
@@ -1767,7 +1781,7 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                     label="Add a test step"
                     placeholder="Add new test step..."
                     value={newStep}
-                    disabled={editorLocked}
+                    disabled={editorLocked || initialLoad}
                     onChange={(e) => setNewStep(e.target.value)}
                     helperText="Press Enter to add the step. Shift+Enter starts a new line."
                     inputProps={{
@@ -1778,16 +1792,20 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                       // VAL-036: Enter adds the step; Shift+Enter keeps the multiline newline.
                       if (event.key !== 'Enter' || event.shiftKey || event.nativeEvent.isComposing) return;
                       event.preventDefault();
+                      if (initialLoad) return;
                       addTestStep();
                     }}
                     InputProps={{
                       endAdornment: (
-                        <IconButton aria-label="Add step" size="small" onClick={addTestStep} disabled={editorLocked || !newStep.trim()}>
+                        <IconButton aria-label="Add step" size="small" onClick={addTestStep} disabled={editorLocked || initialLoad || !newStep.trim()}>
                           <Add />
                         </IconButton>
                       )
                     }}
                   />
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }} data-testid="add-step-tip">
+                    {'Tip: after a click, check where you landed, for example Check that the URL contains "/dashboard". A heading that also appears on the previous page proves nothing.'}
+                  </Typography>
                   <Box sx={{ mt: 1 }}>
                     <ReferencePicker
                       testId={selectedScenarioData?.id ?? null}
@@ -1952,6 +1970,10 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                               result: guided.result,
                               firstLearnStepId: guidedView.session.firstLearnStepId ?? null,
                               answeredSteps: guided.answeredSteps,
+                              pausedForEditStep:
+                                pausedForEdit !== null && pausedForEdit.sessionId === guided.result.sessionId
+                                  ? pausedForEdit.number
+                                  : null,
                             }}
                             draftStepIds={draftStepIds}
                             test={draft}
@@ -2063,7 +2085,7 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                   {guidedVisible && guidedView ? (
                     /* A learning run has no log stream: what it did, from its counters and explanation (AC-03). */
                     <>
-                      <GuidedLearningLog session={guidedView.session} result={guided.result} />
+                      <GuidedLearningLog session={guidedView.session} result={guided.result} pausedForEditStep={pausedForEditStepFor(guided.result)} />
                       {rightTab === 'logs' && guidedTerminal && attemptVideo !== null && guided.result !== null && (
                         <Paper variant="outlined" sx={{ p: 2, minWidth: 0 }} data-testid="guided-attempt">
                           <Stack spacing={1.5}>
@@ -2092,7 +2114,7 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                     </>
                   ) : (
                     <>
-                    {proofOfLearn && guidedView && <GuidedLearningLog session={guidedView.session} result={guided.result} />}
+                    {proofOfLearn && guidedView && <GuidedLearningLog session={guidedView.session} result={guided.result} pausedForEditStep={pausedForEditStepFor(guided.result)} />}
                     <Paper variant="outlined" sx={{ minHeight: executionLogs.length === 0 ? 360 : undefined, maxHeight: 520, overflow: 'auto', bgcolor: 'grey.900', color: 'white', fontFamily: 'monospace', fontSize: '0.8rem', p: 1.5, mt: proofOfLearn ? 2 : 0 }}>
                       {executionLogs.map((log: { timestamp: string; message: string; type: 'info' | 'error' | 'success' }, index: number) => (
                         <Box key={`${log.timestamp}-${index}`} sx={{ mb: 0.75, display: 'flex', gap: 1 }}>

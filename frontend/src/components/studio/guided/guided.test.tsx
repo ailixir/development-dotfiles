@@ -410,6 +410,26 @@ describe('GuidedCompletion: success comes from the learned receipt (AC-3, AC-6)'
     expect(completion).not.toHaveTextContent(/so you can edit/iu);
   });
 
+  it('user decision 2026-11-01: a CANCELLED end after "None of these" says learning paused to edit step N, not the Stop text', () => {
+    const result = failedWith('CANCELLED');
+    result.outcome = 'CANCELLED';
+    render(
+      <GuidedCompletion
+        input={{ kind: 'guided', result, pausedForEditStep: 3 }}
+        draftStepIds={DRAFT}
+        onGoToStep={noop}
+        onOpenVariables={noop}
+      />,
+    );
+    const completion = screen.getByTestId('guided-completion');
+    expect(completion).toHaveTextContent('Learning paused so you can edit step 3');
+    expect(completion).toHaveTextContent(
+      'Nothing was saved. Edit step 3, naming the exact control (for example, where it is on the page), then press Run. Studio learns the test again from step 1.',
+    );
+    expect(completion).not.toHaveTextContent(/Someone pressed Stop/u);
+    expect(completion).not.toHaveTextContent(EXECUTION_ERROR_NARRATIVES.CANCELLED.title);
+  });
+
   it('EXPIRED states that the run stopped and what to do', () => {
     const result = failedWith('EXPIRED');
     result.outcome = 'EXPIRED';

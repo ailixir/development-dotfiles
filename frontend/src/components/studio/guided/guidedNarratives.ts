@@ -36,8 +36,10 @@ import {
  *  - The AC-3 secret-fill `POLICY_DENIED` sentence. Struck by T0 ruling A2: no public field can
  *    trigger it, and the story requires it to be absent from this file. `guided.test.tsx` asserts
  *    that this file, every entry and every rendered state lack it.
- *  - A user-initiated `CANCELLED` wording variant. Descoped by the user, 2026-10-17 (ruling A3, story
- *    "PO scope decision", row R5).
+ *  - A general user-initiated `CANCELLED` wording variant. Descoped by the user, 2026-10-17 (ruling
+ *    A3, story "PO scope decision", row R5). One case is superseded: user decision 2026-11-01 fixes the
+ *    misleading "Someone pressed Stop" text after "None of these — I'll edit step N" (`pausedForEditTitle`,
+ *    `pausedForEditBody`). A Stop press still shows the existing `CANCELLED` narrative.
  *  - Neutral guided recording wording (PLAYBACK-COPY). Descoped by the user, 2026-10-17; the
  *    existing `videoEvidenceNarratives.ts` wording is used unchanged.
  */
@@ -193,7 +195,7 @@ export const GUIDED_COPY = {
   },
   clarificationWhy: {
     template:
-      "Step {N} matches more than one thing on this page. Pick one to continue, or reword the step to name it exactly (for example, the visible text or where it is) so Studio won't need to ask.",
+      'Step {N} matches more than one thing on this page. Pick one to continue, or reword the step to name it exactly, for example by where it is ("the Benefits link in the menu"), so Studio won\'t need to ask.',
     basis: 'delegated',
     source: { file: S.req008, quote: 'state with no clarification' },
     note: 'SC008-FIX-24 (user decision 2026-10-31): a step Studio had to ask about does not count as clean in the gate, so the question says why it is asked and that rewording the step is the fix. States no cause beyond "more than one match".',
@@ -204,6 +206,21 @@ export const GUIDED_COPY = {
     basis: 'delegated',
     source: { file: S.req008, quote: 'state with no clarification' },
     note: 'SC008-FIX-24: one line per step whose question the author answered during this learning session, on the completion screen. The step numbers are remembered by the frontend (the public session data does not say which steps needed an answer).',
+    facts: { file: S.req008, quote: 'state with no clarification' },
+  },
+  pausedForEditTitle: {
+    template: 'Learning paused so you can edit step {N}',
+    basis: 'delegated',
+    source: { file: S.req008, quote: 'state with no clarification' },
+    note: 'User decision 2026-11-01: fix the misleading Stop text after "None of these". Title of the notice shown when the author chose "None of these" and the session ended CANCELLED; replaces the replay "Someone pressed Stop" narrative for that case only.',
+    facts: { file: S.req008, quote: 'state with no clarification' },
+  },
+  pausedForEditBody: {
+    template:
+      'Nothing was saved. Edit step {N}, naming the exact control (for example, where it is on the page), then press Run. Studio learns the test again from step 1.',
+    basis: 'delegated',
+    source: { file: S.req008, quote: 'state with no clarification' },
+    note: 'User decision 2026-11-01 (see pausedForEditTitle). Nothing is claimed beyond the recorded facts: the session was cancelled, nothing was published, a new run learns from step 1.',
     facts: { file: S.req008, quote: 'state with no clarification' },
   },
   noneOfThese: {
