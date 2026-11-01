@@ -429,6 +429,21 @@ export const GUIDED_COPY = {
     note: 'Said with every budget refusal and stop.',
     facts: { file: S.architectRulings, quote: 'no automatic start when timerends' },
   },
+  stepNotResolvedTitle: {
+    template: "Studio couldn't work out step {N}",
+    basis: 'delegated',
+    source: { file: S.adr008, quote: 'Playwright strictness (exactly one element) is checked before the effect.' },
+    note: 'User decision 2026-11-01: FIX-38 readable failure for an exhausted step repair. Title of the notice shown when a learn ended FAILED with INVALID_CONTRACT at a step whose number and authored text are both known (no gate is read: the public result does not carry one). Replaces the raw-code view for that case only.',
+    facts: { file: S.req008, quote: 'the repair loop (3 attempts inside the step clock)' },
+  },
+  stepNotResolvedBody: {
+    template:
+      'After 3 tries Studio could not turn "{text}" into an action that works on this page. Reword the step to name the element and where it is (for example, "the description under the About heading"), then press Run.',
+    basis: 'delegated',
+    source: { file: S.adr008, quote: 'Playwright strictness (exactly one element) is checked before the effect.' },
+    note: 'User decision 2026-11-01: FIX-38 readable failure for an exhausted step repair (see stepNotResolvedTitle). States the recorded facts: the repair loop makes 3 attempts per step and the generated code must work on the page; the cause (ambiguity or invalid code) is not named, and the remedy is the author rewording the step. The raw code stays visible as a secondary caption.',
+    facts: { file: S.req008, quote: 'the repair loop (3 attempts inside the step clock)' },
+  },
   stoppedAtStep: {
     template: 'Studio stopped at step {N}.',
     basis: 'delegated',

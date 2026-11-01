@@ -644,14 +644,15 @@ describe('AC-9: terminal outcomes that are not a success (AC-3)', () => {
     expect(document.body.textContent).not.toMatch(/Secrets can only be typed into a password box/);
   }, TEST_TIMEOUT_MS);
 
-  it('ruling A2 negative: an INVALID_CONTRACT result gets the generic narrative and never "Secrets can only be typed into a password box."', async () => {
+  it('ruling A2 negative: an INVALID_CONTRACT result at a known step gets the FIX-38 narrative and never "Secrets can only be typed into a password box."', async () => {
     setGuidedScenario(endsIn('FAILED', { failureCode: 'INVALID_CONTRACT' }), unlearnedDraft.id);
     serveDraft(unlearnedDraft);
     renderPage();
     await user().click(await runButton());
 
     const completion = await screen.findByTestId('guided-completion', {}, WAIT);
-    expect(completion).toHaveAttribute('data-kind', 'failedUnnamed');
+    expect(completion).toHaveAttribute('data-kind', 'stepNotResolved');
+    expect(completion).toHaveTextContent(/Studio couldn't work out step \d+/);
     expect(within(completion).getByTestId('guided-completion-code')).toHaveTextContent('INVALID_CONTRACT');
     expect(document.body.textContent).not.toMatch(/Secrets can only be typed into a password box/);
   }, TEST_TIMEOUT_MS);

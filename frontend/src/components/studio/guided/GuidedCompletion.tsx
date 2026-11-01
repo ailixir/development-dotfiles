@@ -63,7 +63,8 @@ export type GuidedCompletionView =
   | { readonly kind: 'login'; readonly notice: LoginNotice }
   | { readonly kind: 'policyDenied'; readonly title: string; readonly lines: readonly string[] }
   | { readonly kind: 'failed'; readonly code: string; readonly lines: readonly string[] }
-  | { readonly kind: 'failedUnnamed'; readonly code: string | null; readonly lines: readonly string[] };
+  | { readonly kind: 'failedUnnamed'; readonly code: string | null; readonly lines: readonly string[] }
+  | { readonly kind: 'stepNotResolved'; readonly code: string; readonly title: string; readonly lines: readonly string[] };
 
 /**
  * The `SUCCEEDED` + `PUBLISHED` lines: learned, or partial with an optional prefix-drift line, then
@@ -219,6 +220,17 @@ export function guidedCompletionView(
       if (code === null || code === undefined) {
         return { kind: 'failedUnnamed', code: null, lines: [guidedCopy('failedNoReason'), ...stepLines] };
       }
+      if (code === 'INVALID_CONTRACT') {
+        const stepText = stopped === null ? undefined : planStepTexts(result, test).get(stopped.stepId);
+        if (stopped !== null && stepText !== undefined) {
+          return {
+            kind: 'stepNotResolved',
+            code,
+            title: guidedCopy('stepNotResolvedTitle', { N: stopped.number }),
+            lines: [guidedCopy('stepNotResolvedBody', { text: stepText })],
+          };
+        }
+      }
       const text = code === 'LEARNING_CONTEXT_LOST' ? 'contextLost' : 'failedUnnamed';
       return { kind: 'failedUnnamed', code, lines: [guidedCopy(text), ...stepLines] };
     }
@@ -238,6 +250,7 @@ const SEVERITY: Record<GuidedCompletionView['kind'], AlertColor> = {
   policyDenied: 'error',
   failed: 'error',
   failedUnnamed: 'error',
+  stepNotResolved: 'warning',
 };
 
 export type GuidedCompletionInput =
@@ -335,14 +348,14 @@ export function GuidedCompletion({
         </>
       ) : (
         <>
-          {view.kind === 'policyDenied' && <AlertTitle>{view.title}</AlertTitle>}
+          {(view.kind === 'policyDenied' || view.kind === 'stepNotResolved') && <AlertTitle>{view.title}</AlertTitle>}
           <Lines lines={view.lines} />
           {(input.answeredSteps ?? []).length > 0 && (
             <Box data-testid="guided-clarified-steps" sx={{ mt: 0.5 }}>
               <Lines lines={(input.answeredSteps ?? []).map((N) => guidedCopy('clarifiedStepNote', { N }))} />
             </Box>
           )}
-          {view.kind === 'failedUnnamed' && view.code !== null && (
+          {(view.kind === 'failedUnnamed' || view.kind === 'stepNotResolved') && view.code !== null && (
             <Typography
               variant="caption"
               component="p"

@@ -752,6 +752,54 @@ describe('GuidedCompletion: a failed learn names the step it stopped at (STUDIO-
     expect(screen.getByTestId('guided-completion-code')).toHaveTextContent('INVALID_CONTRACT');
   });
 
+  describe('FIX-38: an exhausted step repair is readable', () => {
+    const renderWithDraft = (result: GuidedResult) =>
+      render(
+        <GuidedCompletion
+          input={{ kind: 'guided', result }}
+          draftStepIds={DRAFT}
+          test={draftOver()}
+          onGoToStep={noop}
+          onOpenVariables={noop}
+        />,
+      );
+
+    it('INVALID_CONTRACT at a known step: title with the step number, body quoting the step, code kept as a caption', () => {
+      const result = headingShape('INVALID_CONTRACT');
+      expect(guidedCompletionView(result, null, draftOver())).toEqual({
+        kind: 'stepNotResolved',
+        code: 'INVALID_CONTRACT',
+        title: "Studio couldn't work out step 2",
+        lines: [
+          'After 3 tries Studio could not turn "Authored sentence 2" into an action that works on this page. Reword the step to name the element and where it is (for example, "the description under the About heading"), then press Run.',
+        ],
+      });
+      renderWithDraft(result);
+      const completion = screen.getByTestId('guided-completion');
+      expect(completion).toHaveAttribute('data-kind', 'stepNotResolved');
+      expect(completion).toHaveTextContent("Studio couldn't work out step 2");
+      expect(completion).toHaveTextContent('"Authored sentence 2"');
+      expect(completion).not.toHaveTextContent(GUIDED_COPY.failedUnnamed.template);
+      expect(screen.getByTestId('guided-completion-code')).toHaveTextContent('INVALID_CONTRACT');
+    });
+
+    it('INVALID_CONTRACT with no known step keeps the raw-code view', () => {
+      const noAction = failedOver('INVALID_CONTRACT', explStep(1, false), explStep(2, false));
+      expect(guidedCompletionView(noAction, null, draftOver())?.kind).toBe('failedUnnamed');
+      renderWithDraft(noAction);
+      expect(screen.getByTestId('guided-completion')).toHaveTextContent(GUIDED_COPY.failedUnnamed.template);
+    });
+
+    it('INVALID_CONTRACT without the authored sentence of the step keeps the old view (nothing is guessed)', () => {
+      expect(guidedCompletionView(headingShape('INVALID_CONTRACT'))?.kind).toBe('failedUnnamed');
+    });
+
+    it('other error codes keep their own views', () => {
+      expect(guidedCompletionView(headingShape('MODEL_REFUSED'), null, draftOver())?.kind).toBe('failed');
+      expect(guidedCompletionView(headingShape('SOME_OTHER_CODE'), null, draftOver())?.kind).toBe('failedUnnamed');
+    });
+  });
+
   it('FAILED with no reason still names the step', () => {
     const result = headingShape('X');
     result.errorCode = null;
