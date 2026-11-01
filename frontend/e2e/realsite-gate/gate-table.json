@@ -77,15 +77,29 @@
         "Go to \"https://docs.python.org/3/\"",
         "Select \"3.13\" in the \"Python version\" dropdown at the top of the page",
         "Type \"asyncio\" in the \"Quick search\" field",
-        "Click the \"Go\" button",
+        "Click the \"Go\" button at the top of the page",
         "Check that the page shows the heading \"Search Results\"",
-        "Check that the page shows the link \"asyncio — Asynchronous I/O\""
+        "Check that the page shows the first link \"asyncio — Asynchronous I/O\""
       ],
       "amendments": [
         {
           "step": 2,
           "original": "Select \"3.13\" in the \"Python version\" dropdown",
           "reason": "Architect R4: page has two identical dropdowns; authorized top-of-page location clarification."
+        },
+        {
+          "step": 4,
+          "original": "Click the \"Go\" button",
+          "reason": "The page has two \"Go\" buttons (y 20 and y 1375); the step now names the top one.",
+          "authority": "user 2026-11-01",
+          "evidence": "/Users/brunobuger/.aiox-lean/put-checks-ui-studio/SC008/work/SC008-GATE-PUSH/troubleshoot-page.md section 2"
+        },
+        {
+          "step": 6,
+          "original": "Check that the page shows the link \"asyncio — Asynchronous I/O\"",
+          "reason": "The search results hold two links with this exact name (library/asyncio.html and #module-asyncio); the step keeps the title and adds the ordinal \"first\". Added by the controller as the same class of ambiguity as the other two rewordings; disclosed here.",
+          "authority": "user 2026-11-01 (the Go and stable: rewordings); controller addition for this step, same class",
+          "evidence": "/Users/brunobuger/.aiox-lean/put-checks-ui-studio/SC008/work/SC008-GATE-PUSH/troubleshoot-page.md section 1"
         }
       ]
     },
@@ -214,10 +228,26 @@
       ],
       "steps": [
         "Go to \"https://www.kernel.org/\"",
-        "Copy the version number in the \"stable:\" row of the releases table",
+        "Copy the version number in the first \"stable:\" row of the releases table",
         "Check that the version in the \"linux-next:\" row of the releases table starts with \"next-\"",
-        "Check that the version in the \"stable:\" row of the releases table contains the copied version number",
+        "Check that the version in the first \"stable:\" row of the releases table contains the copied version number",
         "Click the \"browse\" link in the \"linux-next:\" row of the releases table"
+      ],
+      "amendments": [
+        {
+          "step": 2,
+          "original": "Copy the version number in the \"stable:\" row of the releases table",
+          "reason": "The releases table has two \"stable:\" rows (7.3.1 and 7.2.14), a genuine two-target ambiguity; the step now names the first row. Same intent, no engine change.",
+          "authority": "user 2026-11-01",
+          "evidence": "/Users/brunobuger/.aiox-lean/put-checks-ui-studio/SC008/work/SC008-GATE-PUSH/troubleshoot-page.md section 2"
+        },
+        {
+          "step": 4,
+          "original": "Check that the version in the \"stable:\" row of the releases table contains the copied version number",
+          "reason": "Same two-row \"stable:\" ambiguity as step 2; the step now names the first row.",
+          "authority": "user 2026-11-01",
+          "evidence": "/Users/brunobuger/.aiox-lean/put-checks-ui-studio/SC008/work/SC008-GATE-PUSH/troubleshoot-page.md section 2"
+        }
       ]
     },
     {

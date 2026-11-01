@@ -148,7 +148,7 @@ function renderRun(input: RunReportInput): string[] {
     ),
     '',
   );
-  out.push('### Authorized authoring amendments','', 'Python version step: Select "3.13" in the "Python version" dropdown → same wording plus at the top of the page. Reason: two identical dropdowns; explicit named location.','');
+  out.push('### Authorized authoring amendments','', 'Python version step: Select "3.13" in the "Python version" dropdown → same wording plus at the top of the page. Reason: two identical dropdowns; explicit named location.','', 'Amendments by user 2026-11-01 (genuine two-target ambiguity, reworded in gate-table.json): kernel-releases steps 2 and 4 name the first "stable:" row; pythondocs step 4 is Click the "Go" button at the top of the page; pythondocs step 6 names the first link "asyncio — Asynchronous I/O" (added by the controller as the same class of ambiguity).','');
   if(bundle.hnAmendment!==undefined)out.push(...table(['Original HN step','Frozen visible-content step','Reason'],bundle.hnAmendment.original.map((original,i)=>[original,bundle.hnAmendment?.replacement[i],bundle.hnAmendment?.reason])),`HN capture ${bundle.hnAmendment.capturedAt}, first story ${bundle.hnAmendment.storyId}, source hash ${bundle.hnAmendment.sourceCaptureHash}.`,'');
   else out.push('HN frozen source capture: UNKNOWN (blocks counted gate).','');
   out.push('### Per-step learning timing','', 'Conservative monotonic upper bounds include queue/startup, acquisition, model calls, retries and validation. These are observation brackets, not exact backend completion timestamps. Missing coverage blocks PASS; retries and clarifications do not reset the clock. Host load is recorded only when useful and does not admit or excuse a run.', '');
