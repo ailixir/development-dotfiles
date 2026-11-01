@@ -2022,11 +2022,7 @@ public final class GuidedTranslationService {
       }
       boolean pre = refusal.messageCode().equals("STEP_PRE_FENCE");
       String facts =
-          pre
-              ? "the code failed before its first action; its target matched "
-                  + (refusal.matchCount() == null ? "an unknown number of" : refusal.matchCount())
-                  + " elements"
-              : "the code does not parse";
+          pre ? preFenceFacts(refusal.matchCount()) : syntaxFacts(refusal.line(), refusal.column());
       ObjectNode repair =
           repairObject(
               pre ? "TARGET_DRIFT" : "STEP_SYNTAX",
@@ -2038,6 +2034,35 @@ public final class GuidedTranslationService {
       repair.put("gate", refusal.messageCode());
       return repair;
     }
+  }
+
+  private static final String NARROW_HINT =
+      "a locator must resolve to exactly one element: narrow it by role, by the region or label"
+          + " that contains it, or by its parent";
+
+  /**
+   * The repair facts of a STEP_SYNTAX refusal. The wire carries only line and column, so a control
+   * character (a single-backslash regex escape decoded from the JSON string) cannot be told apart
+   * from another syntax error; one general hint covers both.
+   */
+  static String syntaxFacts(Integer line, Integer column) {
+    String where = line == null || column == null ? "" : " at line " + line + " column " + column;
+    return "the code does not parse or contains an invalid character"
+        + where
+        + "; in the JSON code string write every regex backslash doubled (\\\\b, \\\\d), or"
+        + " prefer exact strings";
+  }
+
+  /** The repair facts of a PRE_FENCE refusal, by the match count the runner reported (or not). */
+  static String preFenceFacts(Integer matchCount) {
+    String prefix = "the code failed before its first action; ";
+    if (matchCount == null) {
+      return prefix + "its target did not resolve to exactly one element; " + NARROW_HINT;
+    }
+    if (matchCount == 0) {
+      return prefix + "its target matched no element: check the role and name";
+    }
+    return prefix + "its target matched " + matchCount + " elements; " + NARROW_HINT;
   }
 
   private ObjectNode repairObject(

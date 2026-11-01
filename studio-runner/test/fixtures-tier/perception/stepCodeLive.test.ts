@@ -157,6 +157,14 @@ describe('AC6 (live): absent elements, strictness and time', () => {
     expect(none).toMatchObject({ closedCode: 'TARGET_DRIFT', matchCount: 0 });
   });
 
+  it('a failed READ on a locator reports the real match count (SC008-FIX-36)', async () => {
+    const several = await go("vars.t = await page.getByRole('button', { name: /save/i }).innerText();", 8000, { untilFence: true });
+    expect(several).toMatchObject({ ok: false, closedCode: 'TARGET_DRIFT', matchCount: 2, fenceCrossed: false });
+    const none = await go("vars.t = await page.getByRole('button', { name: /zzz/ }).textContent({ timeout: 800 });", 4000, { untilFence: true });
+    expect(none).toMatchObject({ ok: false, closedCode: 'TARGET_DRIFT', matchCount: 0 });
+    expect(JSON.stringify([several, none])).not.toContain('strict mode');
+  });
+
   it('no match ends TARGET_DRIFT at the step budget, not after Playwright\'s 30 s', async () => {
     const started = Date.now();
     const result = await go("await page.getByRole('button', { name: /zzz/ }).click();", 1200);

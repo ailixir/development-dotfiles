@@ -403,6 +403,7 @@ export class GuidedRuntime {
     const code = outcome.receipt.closedCode;
     // A failing expect here is a result, not a repair: dispatch runs the step again and records it.
     if (code === null || code === 'ASSERTION_FAILED') return;
+    // The bridge schema requires an integer here; a read that failed is counted (FIX-36), so 0 now only stands for an uncountable target.
     if (code === 'TARGET_DRIFT' || code === 'TIMEOUT') throw new StepRefusal('STEP_PRE_FENCE', null, null, outcome.matchCount ?? 0);
     if (code === 'PASSWORD_CONTROL_READ_REFUSED') throw new Error('PASSWORD_CONTROL_READ_REFUSED');
     if (code === 'POLICY_REFUSED' || code === 'REFERENCE_MISMATCH' || code === 'REFERENCE_REFUSED' || code === 'READ_REFUSED') throw new Error('POLICY_DENIED');

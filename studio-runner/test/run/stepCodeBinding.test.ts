@@ -24,6 +24,7 @@ interface World {
   created: object[];
   popup?: FakePage;
   failClick?: 'timeout' | 'lost';
+  countFails?: boolean;
   holdClick?: Promise<void>;
   configured: unknown[];
   matcherOptions: unknown[];
@@ -43,7 +44,14 @@ class FakeLocator {
     if (n === 0) throw named('TimeoutError', 'locator.waitFor: Timeout exceeded. CANARY-TEXT');
     if (n > 1) throw new Error('strict mode violation: CANARY-TEXT');
   }
-  async count(): Promise<number> { this.w.log.push('count'); return this.count_(); }
+  async count(): Promise<number> { this.w.log.push('count'); if (this.w.countFails === true) throw new Error('count unavailable'); return this.count_(); }
+  async innerText(): Promise<string> {
+    this.w.log.push('innerText');
+    const n = this.count_();
+    if (n === 0) throw named('TimeoutError', 'locator.innerText: Timeout exceeded. CANARY-TEXT');
+    if (n > 1) throw new Error('strict mode violation: CANARY-TEXT');
+    return 'text';
+  }
   async isVisible(): Promise<boolean> { this.w.log.push('isVisible'); return this.count_() > 0; }
   async textContent(): Promise<string> { this.w.log.push('textContent'); return 'text'; }
   async click(options?: unknown): Promise<void> {
@@ -656,6 +664,29 @@ describe('AC6: until-fence mode (learning prepare) and match counts', () => {
     const plain = await go(rig(), "throw new Error('x');");
     expect(plain.closedCode).toBe('TARGET_DRIFT');
     expect(plain.matchCount).toBeUndefined();
+  });
+
+  it('a READ that fails on a locator reports the real match count (SC008-FIX-36): 2 for an ambiguous one, 0 for a missing one', async () => {
+    for (const matches of [0, 2, 3]) {
+      const r = rig();
+      r.w.matches.m = matches;
+      const result = await go(r, "vars.t = await page.locator('m').innerText();", { untilFence: true });
+      expect(result, String(matches)).toMatchObject({ ok: false, closedCode: 'TARGET_DRIFT', matchCount: matches, fenceCrossed: false });
+      expect(JSON.stringify(result)).not.toContain('CANARY-TEXT');
+    }
+  });
+
+  it('a read that fails and whose count cannot be obtained leaves matchCount undefined; a read that succeeds counts nothing', async () => {
+    const r = rig();
+    r.w.matches.m = 2;
+    r.w.countFails = true;
+    const unknown = await go(r, "vars.t = await page.locator('m').innerText();", { untilFence: true });
+    expect(unknown.closedCode).toBe('TARGET_DRIFT');
+    expect(unknown.matchCount).toBeUndefined();
+    const fine = rig();
+    const ok = await go(fine, "vars.t = await page.locator('ok').innerText();", { untilFence: true });
+    expect(ok.ok).toBe(true);
+    expect(fine.w.log).not.toContain('count');
   });
 });
 

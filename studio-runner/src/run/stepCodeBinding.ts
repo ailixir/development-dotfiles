@@ -115,6 +115,23 @@ export const READ_ONLY: ReadonlySet<string> = new Set([
 /** Their function arguments are serialized into the page and must reach Playwright unwrapped; their data arguments carry no timeout option. */
 const IN_PAGE: ReadonlySet<string> = new Set(['evaluate', 'evaluateAll', 'evaluateHandle', '$eval', '$$eval', 'waitForFunction', 'addInitScript', 'exposeFunction', 'exposeBinding']);
 const DEFAULT_TIMEOUT_SETTERS: ReadonlySet<string> = new Set(['setDefaultTimeout', 'setDefaultNavigationTimeout']);
+/** The most a failed read waits for locator.count() before it gives the miss up without a count. */
+const COUNT_BOUND_MS = 1_000;
+/** locator.count() bounded by a timer; undefined when it throws or is not answered in time (the miss itself is then the only answer). */
+async function countWithin(locator: { count(): Promise<number> }, boundMs: number): Promise<number | undefined> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    const counted = await Promise.race([
+      locator.count(),
+      new Promise<undefined>(resolve => { timer = setTimeout(() => { resolve(undefined); }, Math.max(1, boundMs)); }),
+    ]);
+    return typeof counted === 'number' && Number.isInteger(counted) && counted >= 0 ? counted : undefined;
+  } catch {
+    return undefined;
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
+}
 /** Used when the control does not report a remaining time. */
 const FALLBACK_MS = 30_000;
 const HEADROOM_MS = 200;
@@ -417,6 +434,19 @@ export function createBinding(options: BindingOptions): StepBinding {
         return locator.waitFor({ state: 'attached', timeout }).then(perform, async (error: unknown) => {
           // Which kind of miss it was, for the repair loop: no element at all, or several.
           try { tally.matchCount = await locator.count(); } catch { /* the miss itself is the answer */ }
+          throw error;
+        });
+      }
+      if (kind === 'Locator' && name !== 'count') {
+        // A read (innerText, textContent, ...) that fails on a locator: the repair loop still needs to know whether it matched nothing or several.
+        const outcome = perform();
+        if (!isThenable(outcome)) return outcome;
+        const locator = target as { count(): Promise<number> };
+        return Promise.resolve(outcome).then(undefined, async (error: unknown) => {
+          if (!control.signal.aborted) {
+            const counted = await countWithin(locator, Math.min(COUNT_BOUND_MS, remaining()));
+            if (counted !== undefined) tally.matchCount = counted;
+          }
           throw error;
         });
       }
