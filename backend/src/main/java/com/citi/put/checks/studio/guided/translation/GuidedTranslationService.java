@@ -15,7 +15,11 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.springframework.security.core.Authentication;
 
 /** The production model-to-ledger join. All network work occurs outside database transactions. */
@@ -2601,11 +2605,13 @@ public final class GuidedTranslationService {
         }
         if (pageNode.has("ordinal")) {
           int indistinguishable = 0;
-          JsonNode region = observedRegionName(facts, pageNode);
+          JsonNode observation = current.progress().path("observation");
+          JsonNode region = choiceRegion(observation, facts, pageNode, ref);
           for (JsonNode offered : candidate.path("choices")) {
-            JsonNode other = facts.path(offered.path("meaning").path("ref").asText());
+            String otherRef = offered.path("meaning").path("ref").asText();
+            JsonNode other = facts.path(otherRef);
             if (other.path("name").equals(pageNode.path("name"))
-                && observedRegionName(facts, other).equals(region)) {
+                && choiceRegion(observation, facts, other, otherRef).equals(region)) {
               indistinguishable++;
             }
           }
@@ -2635,9 +2641,11 @@ public final class GuidedTranslationService {
         emitted.put("role", pageNode.path("role").asText());
         // The group the element sits in, as the runner printed it: untrusted PAGE presentation,
         // never authority.
-        JsonNode region =
-            observedRegionName(current.progress().path("observation").path("facts"), pageNode);
-        emitted.set("region", region);
+        JsonNode observation = current.progress().path("observation");
+        emitted.set(
+            "region",
+            choiceRegion(
+                observation, observation.path("facts"), pageNode, meaning.path("ref").asText()));
       }
       emitted.set(
           "bindingId",
@@ -2697,6 +2705,110 @@ public final class GuidedTranslationService {
           .set("meaning", meaning);
     }
     return converted;
+  }
+
+  private static final Set<String> LANDMARK_ROLES =
+      Set.of(
+          "banner",
+          "navigation",
+          "main",
+          "contentinfo",
+          "complementary",
+          "search",
+          "region",
+          "form",
+          "dialog");
+
+  private static final Map<String, String> LANDMARK_WORDS =
+      Map.of(
+          "banner", "header",
+          "main", "main content",
+          "contentinfo", "footer",
+          "complementary", "sidebar");
+
+  private static final Pattern OUTLINE_LINE =
+      Pattern.compile("^( *)- ([A-Za-z]+)(?: \"((?:[^\"\\\\]|\\\\.)*)\")?");
+
+  private static final Pattern HINT_PART =
+      Pattern.compile("^([A-Za-z]+)(?: '(.*)')?(?:#\\d+/\\d+)?$");
+
+  /**
+   * The region shown with an observed choice: the named scope (or group) the runner printed, else
+   * the landmarks the element sits in, read from the sanitized outline ("header › navigation"),
+   * else the landmark words of the line's {@code in=} hint when the projection dropped the
+   * ancestors. Presentation only (page text, untrusted), never authority; JSON null when nothing is
+   * found.
+   */
+  static JsonNode choiceRegion(JsonNode observation, JsonNode facts, JsonNode fact, String ref) {
+    JsonNode named = observedRegionName(facts, fact);
+    if (!named.isNull()) {
+      return named;
+    }
+    String outline = observation == null ? "" : observation.path("outline").asText("");
+    String marker = " [" + ref + "]";
+    if (ref == null || ref.isBlank() || outline.isEmpty()) {
+      return com.fasterxml.jackson.databind.node.NullNode.instance;
+    }
+    String[] lines = outline.split("\n", -1);
+    int at = -1;
+    for (int i = 0; i < lines.length && at < 0; i++) {
+      if (lines[i].contains(marker)) {
+        at = i;
+      }
+    }
+    if (at < 0) {
+      return com.fasterxml.jackson.databind.node.NullNode.instance;
+    }
+    List<String> nearestFirst = new ArrayList<>();
+    int indent = leadingSpaces(lines[at]);
+    for (int i = at - 1; i >= 0 && nearestFirst.size() < 2 && indent > 0; i--) {
+      int own = leadingSpaces(lines[i]);
+      if (own >= indent) {
+        continue;
+      }
+      indent = own;
+      Matcher line = OUTLINE_LINE.matcher(lines[i]);
+      if (line.find() && LANDMARK_ROLES.contains(line.group(2))) {
+        nearestFirst.add(landmarkWords(line.group(2), unquote(line.group(3))));
+      }
+    }
+    if (nearestFirst.isEmpty()) {
+      Matcher hint = Pattern.compile("\\{in=\"((?:[^\"\\\\]|\\\\.)*)\"\\}").matcher(lines[at]);
+      if (hint.find()) {
+        for (String part : unquote(hint.group(1)).split(" > ")) {
+          Matcher segment = HINT_PART.matcher(part.trim());
+          if (nearestFirst.size() < 2
+              && segment.matches()
+              && LANDMARK_ROLES.contains(segment.group(1))) {
+            nearestFirst.add(landmarkWords(segment.group(1), segment.group(2)));
+          }
+        }
+      }
+    }
+    if (nearestFirst.isEmpty()) {
+      return com.fasterxml.jackson.databind.node.NullNode.instance;
+    }
+    java.util.Collections.reverse(nearestFirst);
+    String joined = String.join(" \u203a ", nearestFirst);
+    return com.fasterxml.jackson.databind.node.TextNode.valueOf(
+        GuidedObservationFacts.bound(joined, 80));
+  }
+
+  private static int leadingSpaces(String line) {
+    int n = 0;
+    while (n < line.length() && line.charAt(n) == ' ') {
+      n++;
+    }
+    return n;
+  }
+
+  private static String unquote(String quoted) {
+    return quoted == null ? null : quoted.replace("\\\"", "\"").replace("\\\\", "\\");
+  }
+
+  private static String landmarkWords(String role, String name) {
+    String words = LANDMARK_WORDS.getOrDefault(role, role);
+    return name == null || name.isBlank() ? words : words + " \"" + name + "\"";
   }
 
   /**

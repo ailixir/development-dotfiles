@@ -3,6 +3,7 @@ package com.citi.put.checks.studio.guided.translation;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.citi.put.checks.studio.support.ObservationFixtures;
@@ -147,6 +148,99 @@ class GuidedQuestionRegionPresentationTest {
     fact.put("region", "Synthetic model suggestion");
     fact.put("parentNodeId", "synthetic-region");
     assertTrue(GuidedTranslationService.observedRegionName(fact).isNull());
+  }
+
+  private static JsonNode observation(String... outlineLines) {
+    ObjectNode observation = new com.fasterxml.jackson.databind.ObjectMapper().createObjectNode();
+    observation.put("outline", String.join("\n", outlineLines));
+    return observation;
+  }
+
+  private static ObjectNode link() {
+    return ObservationFixtures.fact("link", "Benefits", false, null);
+  }
+
+  private static String region(JsonNode observation, String ref) {
+    JsonNode result =
+        GuidedTranslationService.choiceRegion(observation, observation.path("facts"), link(), ref);
+    return result.isNull() ? null : result.asText();
+  }
+
+  @Test
+  void unnamedLandmarksTellSameNameLinksApart() {
+    JsonNode observation =
+        observation(
+            "- document",
+            "  - banner",
+            "    - navigation",
+            "      - link \"Benefits\" [e1]",
+            "  - main",
+            "    - region \"Services and information\"",
+            "      - link \"Benefits\" [e2]",
+            "  - contentinfo",
+            "    - link \"Benefits\" [e3]");
+    assertEquals("header \u203a navigation", region(observation, "e1"));
+    assertEquals(
+        "main content \u203a region \"Services and information\"", region(observation, "e2"));
+    assertEquals("footer", region(observation, "e3"));
+  }
+
+  @Test
+  void aProjectedAwayAncestorFallsBackToTheInToken() {
+    JsonNode observation =
+        observation(
+            "- document",
+            "  - link \"Benefits\" [e1] {in=\"navigation > banner\"}",
+            "  - link \"Benefits\" [e2] {in=\"contentinfo\"}",
+            "  - link \"Benefits\" [e3] {in=\"region 'Help' > list#1/2\"}");
+    assertEquals("header \u203a navigation", region(observation, "e1"));
+    assertEquals("footer", region(observation, "e2"));
+    assertEquals("region \"Help\"", region(observation, "e3"));
+  }
+
+  @Test
+  void aNestedChainKeepsTheTwoNearestLandmarksOutermostFirst() {
+    JsonNode observation =
+        observation(
+            "- document",
+            "  - main",
+            "    - complementary",
+            "      - form",
+            "        - group",
+            "          - link \"Benefits\" [e1]");
+    assertEquals("sidebar \u203a form", region(observation, "e1"));
+  }
+
+  @Test
+  void noLandmarkMeansNoRegion() {
+    JsonNode observation =
+        observation(
+            "- document", "  - list", "    - link \"Benefits\" [e1]", "  - link \"Other\" [e2]");
+    assertNull(region(observation, "e1"));
+    assertNull(region(observation, "e2"));
+    assertNull(region(observation, "e9"));
+  }
+
+  @Test
+  void aLongRegionIsBounded() {
+    JsonNode observation =
+        observation(
+            "- document", "  - region \"" + "x".repeat(200) + "\"", "    - link \"Benefits\" [e1]");
+    assertEquals(
+        80, region(observation, "e1").codePointCount(0, region(observation, "e1").length()));
+  }
+
+  @Test
+  void aNamedScopeStillWinsOverLandmarks() {
+    ObjectNode observation =
+        (ObjectNode) observation("- document", "  - banner", "    - link \"Benefits\" [e1]");
+    ObjectNode facts = observation.putObject("facts");
+    facts.set("e0", ObservationFixtures.fact("group", "Primary workspace", false, null));
+    ObjectNode fact = link();
+    fact.putArray("scopeRefs").add("e0");
+    assertEquals(
+        "Primary workspace",
+        GuidedTranslationService.choiceRegion(observation, facts, fact, "e1").asText());
   }
 
   private static Arguments bad(String name, Consumer<ObjectNode> change) {
