@@ -75,6 +75,25 @@ describe('admission', () => {
     expect((await runStep(frozen(big), run())).closedCode).toBe('INVALID_CONTRACT');
   });
 
+  it('refuses a control character other than tab, newline and carriage return, with its line, column and code point (SC008-FIX-35)', async () => {
+    const backspace = String.fromCharCode(8);
+    const code = `const a = 1;\nawait expect(page).toHaveURL(/^418${backspace}/);`;
+    const admission = admitStep(frozen(code));
+    expect(admission).toMatchObject({ ok: false, reason: 'STEP_SYNTAX', syntax: { line: 2, column: 35 } });
+    expect((admission as { syntax?: { message: string } }).syntax?.message).toBe('control character U+0008 at line 2 column 35; write a regex backslash as \\\\ in the JSON code string');
+    const touched: string[] = [];
+    const result = await runStep(frozen(code), run(touched));
+    expect(result).toMatchObject({ ok: false, closedCode: 'INVALID_CONTRACT', syntax: { line: 2, column: 35 } });
+    expect(touched).toEqual([]);
+    for (const char of [String.fromCharCode(0), String.fromCharCode(31), String.fromCharCode(127)]) expect(admitStep(frozen(`const a = /x${char}/;`))).toMatchObject({ ok: false, reason: 'STEP_SYNTAX' });
+    expect(admitStep(frozen('const a = 1;\r\nconst b = /\\u0008/;'))).toEqual({ ok: true }); // an escape, not the raw character
+    expect(admitStep(frozen(`const a = 1;\r${backspace}`))).toMatchObject({ syntax: { line: 2, column: 1 } });
+  });
+
+  it('accepts tab, newline and carriage return in the code', () => {
+    expect(admitStep(frozen('const a = 1;\n\tconst b = 2;\r\n\tawait Promise.resolve(a + b);'))).toEqual({ ok: true });
+  });
+
   it('refuses a syntax error with the line and column of the model code, and touches nothing', async () => {
     const touched: string[] = [];
     const result = await runStep(frozen('const a = 1;\nawait page.click(;'), run(touched));

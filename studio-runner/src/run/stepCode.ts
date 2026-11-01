@@ -96,6 +96,30 @@ function locateSyntaxError(code: string, fallback: string): SyntaxDiagnostic {
   return { line: Math.max(1, position.line), column: position.character + 1, message: ts.flattenDiagnosticMessageText(diagnostic.messageText, ' ') };
 }
 
+/** Newline, carriage return and tab are the only control characters the code may hold. Every other U+0000-U+001F and U+007F can only come from a mangled escape. */
+function forbiddenControl(unit: number): boolean {
+  return (unit < 0x20 && unit !== 0x09 && unit !== 0x0A && unit !== 0x0D) || unit === 0x7F;
+}
+
+/**
+ * The first forbidden control character, located like locateSyntaxError (1-based line, column in UTF-16 units; \n, \r\n and a lone \r end a line).
+ * A regex written as /^418\b/ inside a JSON string reaches here as U+0008: V8 accepts it and it can never match, so it is refused.
+ */
+function locateControlCharacter(code: string): SyntaxDiagnostic | undefined {
+  let line = 1;
+  let lineStart = 0;
+  for (let index = 0; index < code.length; index += 1) {
+    const unit = code.charCodeAt(index);
+    if (forbiddenControl(unit)) {
+      const column = index - lineStart + 1;
+      const point = unit.toString(16).toUpperCase().padStart(4, '0');
+      return { line, column, message: `control character U+${point} at line ${String(line)} column ${String(column)}; write a regex backslash as \\\\ in the JSON code string` };
+    }
+    if (unit === 0x0A || (unit === 0x0D && code.charCodeAt(index + 1) !== 0x0A)) { line += 1; lineStart = index + 1; }
+  }
+  return undefined;
+}
+
 function refused(vars: Record<string, unknown>, syntax?: SyntaxDiagnostic): StepResult {
   const base = { ok: false, closedCode: 'INVALID_CONTRACT' as const, fenceCrossed: false, effects: [], effectsTruncated: false, vars, offscreen: false, fenceReached: false };
   return syntax === undefined ? base : { ...base, syntax };
@@ -115,6 +139,8 @@ function construct(step: FrozenStep): { readonly fn: StepFunction } | Extract<Ad
   } catch {
     return { ok: false, reason: 'STEP_SHAPE' };
   }
+  const control = locateControlCharacter(code);
+  if (control !== undefined) return { ok: false, reason: 'STEP_SYNTAX', syntax: control };
   try {
     return { fn: new AsyncFunction(...INJECTED, ...SHADOWED, `"use strict";\n${code}`) };
   } catch (error) {
