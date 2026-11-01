@@ -327,5 +327,108 @@ describe('a page-text check where the first copy of the text is hidden', () => {
   });
 });
 
+/**
+ * SC008-FIX-39: the index-pick gate against a real DOM. first()/last()/nth() on a multi-match of UNLIKE elements (an intro row beside story rows, a
+ * top-menu link beside story sublines) is refused in until-fence mode as TARGET_DRIFT with the real match count, and nothing is clicked; identical
+ * siblings (table cells, release rows, the two "Related" navs of a documentation page) go through; outside until-fence mode nothing is judged.
+ */
+describe('SC008-FIX-39: the index-pick gate on real pages', () => {
+  const STORIES = [1, 2, 3].map(n => `<tr class="athing"><td class="title"><span class="rank">${String(n)}.</span> <span class="titleline"><a href="#s${String(n)}">Story ${String(n)}</a></span></td></tr>
+    <tr><td class="subtext"><span class="subline"><a href="#u${String(n)}">user${String(n)}</a> <a href="#c${String(n)}">${String(n * 10)} comments</a></span></td></tr>`).join('\n');
+  const HN = `<div id="o">idle</div>
+    <table id="hnmain"><tbody>
+      <tr><td><span class="pagetop"><a href="#new">new</a> | <a id="menu" href="#menu" onclick="document.getElementById('o').textContent='menu clicked'">comments</a> | <a href="#ask">ask</a></span></td></tr>
+      <tr><td class="intro"><p>Rule 1. Please read the <a href="#tips">tips</a> before posting.</p></td></tr>
+      <tr><td><table class="itemlist"><tbody>${STORIES}</tbody></table></td></tr>
+    </tbody></table>`;
+  const TABLE = '<table><tbody>' + [1, 2, 3].map(n => `<tr><td>a${String(n)}</td><td>b${String(n)}</td><td>c${String(n)}</td></tr>`).join('') + '</tbody></table><div id="o">idle</div>';
+  const KERNEL = '<table class="releases"><tbody>' + ['mainline:', 'stable:', 'stable:', 'longterm:'].map((k, i) => `<tr><td><strong>${k}</strong></td><td>6.${String(i)}</td></tr>`).join('') + '</tbody></table>';
+  const NAV = (cls: string): string => `<div class="${cls}"><nav aria-label="Related"><ul><li><a href="#prev">previous</a></li><li><a href="#next" onclick="document.getElementById('o').textContent='next clicked'">next</a></li></ul></nav></div>`;
+  const DOCS = `<div id="o">idle</div>${NAV('related')}<main>content</main>${NAV('related')}`; // Sphinx: the same navigation block above and below the page
+  const load = (html: string): Promise<unknown> => page.goto(`data:text/html,${encodeURIComponent(html)}`);
+  const prepare = (code: string): Promise<StepResult & { control: Control }> => go(code, 8000, { untilFence: true });
+  const marker = (): Promise<string | null> => page.locator('#o').textContent();
+
+  it('refuses a read of .nth(1) out of the links of rows named "1.": an intro row and a story row (the "tips" read)', async () => {
+    await load(HN);
+    const union = await page.getByRole('row', { name: '1.' }).getByRole('link').count();
+    expect(union).toBeGreaterThan(2);
+    const result = await prepare("vars.t = await page.getByRole('row', { name: '1.' }).getByRole('link').nth(1).innerText();");
+    expect(result).toMatchObject({ ok: false, closedCode: 'TARGET_DRIFT', matchCount: union, fenceReached: false, fenceCrossed: false, effects: [] });
+    expect(result.vars.t).toBeUndefined();
+    expect(JSON.stringify(result)).not.toMatch(/tips|Story/u); // no page text leaves
+  });
+
+  it('refuses .first().click() on a name found in the top menu and in every story subline, and clicks nothing', async () => {
+    await load(HN);
+    const count = await page.getByRole('link', { name: /\bcomments\b/ }).count();
+    expect(count).toBe(4);
+    const result = await prepare("await page.getByRole('link', { name: /\\bcomments\\b/ }).first().click();");
+    expect(result).toMatchObject({ ok: false, closedCode: 'TARGET_DRIFT', matchCount: 4, fenceReached: false, effects: [] });
+    expect(await marker()).toBe('idle');
+    expect(result.control.begun).toBe(0);
+  });
+
+  it('refuses last() and a derived locator the same way', async () => {
+    await load(HN);
+    expect(await prepare("await page.getByRole('link', { name: /\\bcomments\\b/ }).last().click();")).toMatchObject({ closedCode: 'TARGET_DRIFT', matchCount: 4 });
+    expect(await prepare("vars.t = await page.getByRole('link', { name: /\\bcomments\\b/ }).nth(2).locator('xpath=..').innerText();")).toMatchObject({ closedCode: 'TARGET_DRIFT', matchCount: 4 });
+  });
+
+  it('lets uniform table cells through: row.getByRole("cell").nth(1) and the cells of every row', async () => {
+    await load(TABLE);
+    const one = await prepare("vars.t = await page.getByRole('row').first().getByRole('cell').nth(1).innerText();");
+    expect(one).toMatchObject({ ok: true, fenceReached: false });
+    expect(one.vars.t).toBe('b1');
+    const all = await prepare("vars.t = await page.getByRole('cell').nth(4).innerText(); await page.getByRole('cell').nth(4).click();");
+    expect(all).toMatchObject({ ok: true, fenceReached: true, effects: [] });
+    expect(all.vars.t).toBe('b2');
+  });
+
+  it('lets kernel-like uniform rows through', async () => {
+    await load(KERNEL);
+    const result = await prepare("vars.t = await page.getByRole('row').filter({ hasText: 'stable:' }).last().innerText();");
+    expect(result.ok).toBe(true);
+    expect(String(result.vars.t)).toContain('stable:');
+  });
+
+  it('lets two identical nav blocks through: first() among the "Related" navs of a docs page', async () => {
+    await load(DOCS);
+    expect(await page.getByRole('link', { name: 'next' }).count()).toBe(2);
+    const result = await prepare("await page.getByRole('navigation', { name: 'Related' }).first().getByRole('link', { name: 'next' }).click();");
+    expect(result).toMatchObject({ ok: true, fenceReached: true, effects: [] });
+    const direct = await prepare("await page.getByRole('link', { name: 'next' }).first().click();");
+    expect(direct).toMatchObject({ ok: true, fenceReached: true, effects: [] });
+    expect(await marker()).toBe('idle');
+  });
+
+  it('judges nothing outside until-fence mode: the same code reads the wrong element and clicks the menu link', async () => {
+    await load(HN);
+    const read = await go("vars.t = await page.getByRole('row', { name: '1.' }).getByRole('link').nth(1).innerText();");
+    expect(read.ok).toBe(true);
+    expect(typeof read.vars.t).toBe('string');
+    const click = await go("await page.getByRole('link', { name: /\\bcomments\\b/ }).first().click();");
+    expect(click).toMatchObject({ ok: true, fenceCrossed: true });
+    expect(await marker()).toBe('menu clicked');
+    await load(HN);
+    const explicit = await go("await page.getByRole('link', { name: /\\bcomments\\b/ }).first().click();", 8000, { untilFence: false });
+    expect(explicit).toMatchObject({ ok: true, fenceCrossed: true });
+  });
+
+  it('keeps expect(locator.first()) as it was: the matcher\'s own _internals are not judged', async () => {
+    await load(HN);
+    const result = await prepare("await expect(page.getByRole('link', { name: /\\bcomments\\b/ }).first()).toBeVisible();");
+    expect(result).toMatchObject({ ok: true, fenceReached: false, fenceCrossed: false });
+  });
+
+  it('a pick out of a set that disappears, or that has one match, is not flagged (the ordinary miss path decides)', async () => {
+    await load(HN);
+    const none = await go("await page.getByRole('link', { name: /zzz/ }).first().click();", 1500, { untilFence: true });
+    expect(none).toMatchObject({ closedCode: 'TARGET_DRIFT', matchCount: 0 });
+    const single = await prepare("await page.getByRole('link', { name: 'tips' }).first().click();");
+    expect(single).toMatchObject({ ok: true, fenceReached: true });
+  });
+});
+
 // Keep the imports honest: the production import of the browser library lives elsewhere.
 void chromium;

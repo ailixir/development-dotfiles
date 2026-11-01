@@ -25,11 +25,15 @@ interface World {
   popup?: FakePage;
   failClick?: 'timeout' | 'lost';
   countFails?: boolean;
+  /** SC008-FIX-39: count() never answers (the gate's bound must end it). */
+  countHangs?: boolean;
+  /** Distinct ancestor signatures evaluateAll reports for a selector (default 1: a uniform set); a number below 0 makes it throw. */
+  signatures: Record<string, number>;
   holdClick?: Promise<void>;
   configured: unknown[];
   matcherOptions: unknown[];
 }
-const newWorld = (): World => ({ log: [], effects: 0, matches: {}, seen: {}, handlers: {}, created: [], configured: [], matcherOptions: [] });
+const newWorld = (): World => ({ log: [], effects: 0, matches: {}, seen: {}, handlers: {}, created: [], configured: [], matcherOptions: [], signatures: {} });
 const note = (w: World, key: string, value: unknown): void => { (w.seen[key] ??= []).push(value); };
 const named = (name: string, message: string): Error => Object.assign(new Error(message), { name });
 
@@ -44,7 +48,7 @@ class FakeLocator {
     if (n === 0) throw named('TimeoutError', 'locator.waitFor: Timeout exceeded. CANARY-TEXT');
     if (n > 1) throw new Error('strict mode violation: CANARY-TEXT');
   }
-  async count(): Promise<number> { this.w.log.push('count'); if (this.w.countFails === true) throw new Error('count unavailable'); return this.count_(); }
+  async count(): Promise<number> { this.w.log.push('count'); if (this.w.countHangs === true) return new Promise<number>(() => undefined); if (this.w.countFails === true) throw new Error('count unavailable'); return this.count_(); }
   async innerText(): Promise<string> {
     this.w.log.push('innerText');
     const n = this.count_();
@@ -65,7 +69,17 @@ class FakeLocator {
   async fill(value: unknown, options?: unknown): Promise<void> { this.w.log.push('fill'); this.w.effects += 1; note(this.w, 'fill', [value, options]); }
   async _expect(): Promise<object> { this.w.log.push('_expect'); return {}; }
   filter(options: unknown): FakeLocator { note(this.w, 'filter', options); return new FakeLocator(this.w, this.sel, this.owner); }
-  first(): FakeLocator { return new FakeLocator(this.w, this.sel, this.owner); }
+  /** An index pick is one element: its selector is its own, and it matches one unless a test says otherwise. */
+  first(): FakeLocator { return new FakeLocator(this.w, `${this.sel}#first`, this.owner); }
+  last(): FakeLocator { return new FakeLocator(this.w, `${this.sel}#last`, this.owner); }
+  nth(index: number): FakeLocator { return new FakeLocator(this.w, `${this.sel}#${String(index)}`, this.owner); }
+  async evaluateAll(program: unknown): Promise<number> {
+    this.w.log.push(`evaluateAll:${this.sel}`);
+    note(this.w, 'evaluateAll', String(program));
+    const distinct = this.w.signatures[this.sel] ?? 1;
+    if (distinct < 0) throw new Error('evaluateAll unavailable');
+    return distinct;
+  }
   getByRole(): FakeLocator { return new FakeLocator(this.w, `${this.sel}>role`, this.owner); }
   locator(sel: string): FakeLocator { return new FakeLocator(this.w, sel, this.owner); }
   page(): FakePage { return this.owner; }
@@ -687,6 +701,160 @@ describe('AC6: until-fence mode (learning prepare) and match counts', () => {
     const ok = await go(fine, "vars.t = await page.locator('ok').innerText();", { untilFence: true });
     expect(ok.ok).toBe(true);
     expect(fine.w.log).not.toContain('count');
+  });
+});
+
+/**
+ * SC008-FIX-39: the index-pick gate. In until-fence mode, first()/last()/nth() applied to a multi-match of UNLIKE elements is refused as TARGET_DRIFT
+ * (with the match count) when the picked locator is used, because the index hides an ambiguity strictness would have reported. The fake reports the
+ * number of distinct ancestor signatures per selector; the page program itself is exercised against real Chromium in the perception tier.
+ */
+describe('SC008-FIX-39: the index-pick gate (until-fence mode only)', () => {
+  const mixed = (r: Rig, sel = 'm', matches = 4, signatures = 3): void => { r.w.matches[sel] = matches; r.w.signatures[sel] = signatures; };
+  const evaluated = (r: Rig): string[] => r.w.log.filter(entry => entry.startsWith('evaluateAll:'));
+
+  it('refuses a click on an index pick out of unlike elements: TARGET_DRIFT, the match count, no click, no fence', async () => {
+    const r = rig();
+    mixed(r);
+    const result = await go(r, "await page.locator('m').first().click();", { untilFence: true });
+    expect(result).toMatchObject({ ok: false, closedCode: 'TARGET_DRIFT', matchCount: 4, fenceReached: false, fenceCrossed: false, effects: [] });
+    expect(r.w.effects).toBe(0);
+    expect(r.control.begun).toBe(0);
+    expect(r.w.log).not.toContain('click');
+    expect(r.w.log).not.toContain('waitFor:m#first'); // refused before the strict wait
+  });
+
+  it('refuses a read on an index pick, and the text of the read never leaves', async () => {
+    for (const pick of ['first()', 'last()', 'nth(1)']) {
+      const r = rig();
+      mixed(r);
+      const result = await go(r, `vars.t = await page.locator('m').${pick}.innerText();`, { untilFence: true });
+      expect(result, pick).toMatchObject({ ok: false, closedCode: 'TARGET_DRIFT', matchCount: 4 });
+      expect(r.vars.t).toBeUndefined();
+      expect(JSON.stringify(result)).not.toContain('text');
+    }
+  });
+
+  it('a locator derived from an index pick (locator, getByRole, filter) inherits the base of the pick', async () => {
+    for (const derived of ["locator('x')", 'getByRole()', "filter({ hasText: 'x' })", "locator('x').getByRole().filter({ hasText: 'y' })"]) {
+      const r = rig();
+      mixed(r, 'm', 3, 2);
+      const result = await go(r, `await page.locator('m').nth(1).${derived}.click();`, { untilFence: true });
+      expect(result, derived).toMatchObject({ ok: false, closedCode: 'TARGET_DRIFT', matchCount: 3, fenceReached: false });
+      expect(r.w.effects).toBe(0);
+    }
+  });
+
+  it('inherits through a union built before the pick: rows.getByRole(link).nth(1), where the base is the union', async () => {
+    const r = rig();
+    mixed(r, 'row>role', 7, 2);
+    const result = await go(r, "vars.t = await page.locator('row').getByRole('link').nth(1).innerText();", { untilFence: true });
+    expect(result).toMatchObject({ closedCode: 'TARGET_DRIFT', matchCount: 7 });
+    expect(evaluated(r)).toEqual(['evaluateAll:row>role']);
+  });
+
+  it('judges every base of a chain of picks: an earlier mixed base is still refused after a later uniform one', async () => {
+    const r = rig();
+    mixed(r, 'm', 5, 2); // the first pick is from a mixed set; the pick after it is from a (fake-)uniform one
+    r.w.matches['m#first>role'] = 3;
+    const result = await go(r, "await page.locator('m').first().getByRole().last().click();", { untilFence: true });
+    expect(result).toMatchObject({ closedCode: 'TARGET_DRIFT', matchCount: 5 });
+    expect(r.w.effects).toBe(0);
+    const later = rig(); // the reverse: the first base is uniform, the base of the later pick is not
+    later.w.matches.m = 5;
+    later.w.matches['m#first>role'] = 3;
+    later.w.signatures['m#first>role'] = 2;
+    const second = await go(later, "await page.locator('m').first().getByRole().last().click();", { untilFence: true });
+    expect(second).toMatchObject({ closedCode: 'TARGET_DRIFT', matchCount: 3 });
+    expect(evaluated(later)).toEqual(['evaluateAll:m', 'evaluateAll:m#first>role']);
+  });
+
+  it('lets a uniform base through to the fence, and judges a base only once per step', async () => {
+    const r = rig();
+    r.w.matches.m = 6; // signatures default to 1: identical siblings
+    const result = await go(r, "const p = page.locator('m').nth(2); vars.a = await p.innerText(); vars.b = await p.textContent(); await p.click(); vars.after = 1;", { untilFence: true });
+    expect(result).toMatchObject({ ok: true, fenceReached: true, fenceCrossed: false, effects: [] });
+    expect(result.vars).toEqual({ a: 'text', b: 'text' });
+    expect(evaluated(r)).toEqual(['evaluateAll:m']);
+    expect(r.w.log.filter(entry => entry === 'count')).toHaveLength(1);
+    expect(r.w.effects).toBe(0);
+  });
+
+  it('does not run the page program for a base with fewer than two matches', async () => {
+    for (const matches of [0, 1]) {
+      const r = rig();
+      r.w.matches.m = matches;
+      r.w.signatures.m = 5;
+      const result = await go(r, "await page.locator('m').first().click();", { untilFence: true });
+      expect(evaluated(r), String(matches)).toEqual([]);
+      expect(result.closedCode === 'TARGET_DRIFT' && result.matchCount === 5).toBe(false);
+    }
+  });
+
+  it('fails open when the count or the page program fails, or the count is not answered within the bound', async () => {
+    const countFails = rig();
+    mixed(countFails);
+    countFails.w.countFails = true;
+    expect(await go(countFails, "await page.locator('m').first().click();", { untilFence: true })).toMatchObject({ ok: true, fenceReached: true });
+
+    const programFails = rig();
+    mixed(programFails, 'm', 4, -1);
+    expect(await go(programFails, "await page.locator('m').first().click();", { untilFence: true })).toMatchObject({ ok: true, fenceReached: true });
+
+    const hangs = rig();
+    mixed(hangs);
+    hangs.w.countHangs = true;
+    const started = Date.now();
+    expect(await go(hangs, "vars.t = await page.locator('m').first().innerText(); await page.locator('m').last().click();", { untilFence: true })).toMatchObject({ ok: true, fenceReached: true });
+    expect(Date.now() - started).toBeLessThan(4000);
+  });
+
+  it('is off outside until-fence mode: no count, no page program, the effect happens', async () => {
+    for (const overrides of [{}, { untilFence: false }]) {
+      const r = rig();
+      mixed(r);
+      const result = await go(r, "vars.t = await page.locator('m').nth(1).innerText(); await page.locator('m').first().click();", overrides);
+      expect(result, JSON.stringify(overrides)).toMatchObject({ ok: true, fenceCrossed: true });
+      expect(r.w.effects).toBe(1);
+      expect(evaluated(r)).toEqual([]);
+      expect(r.w.log).not.toContain('count');
+    }
+  });
+
+  it('does not judge _internals (what expect calls) or count(), and leaves builders synchronous', async () => {
+    const r = rig();
+    mixed(r);
+    const result = await go(r, `
+      const p = page.locator('m').first();
+      await expect(p).toViaLocator(p);
+      vars.n = await p.count();
+      vars.sync = typeof p.getByRole().page;
+    `, { untilFence: true });
+    expect(result).toMatchObject({ ok: true, fenceReached: false });
+    expect(result.vars).toEqual({ n: 1, sync: 'function' });
+    expect(evaluated(r)).toEqual([]);
+    expect(r.w.log.filter(entry => entry === 'count')).toHaveLength(1); // the code's own count()
+  });
+
+  it('a locator that is not behind an index is not judged', async () => {
+    const r = rig();
+    mixed(r);
+    const result = await go(r, "await page.locator('m').click();", { untilFence: true });
+    expect(result).toMatchObject({ closedCode: 'TARGET_DRIFT', matchCount: 4 }); // the ordinary strict wait, not the gate
+    expect(evaluated(r)).toEqual([]);
+  });
+
+  it('the page program is a constant runner-owned source that returns only a number and excludes the element\'s own class', () => {
+    const r = rig();
+    mixed(r);
+    return go(r, "await page.locator('m').first().click();", { untilFence: true }).then(() => {
+      const [program, ...more] = r.w.seen.evaluateAll as string[];
+      expect(more).toEqual([]);
+      expect(program).toContain('parentElement');
+      expect(program).toContain('depth < 3');
+      expect(program).toContain('return seen.size');
+      expect(program).not.toMatch(/innerText|textContent|getAttribute|innerHTML/u);
+    });
   });
 });
 

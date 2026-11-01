@@ -2041,6 +2041,12 @@ public final class GuidedTranslationService {
           + " that contains it, or by its parent";
 
   /**
+   * An index does not narrow a multi-match of unlike elements (SC008-FIX-39); kept short so the
+   * facts stay within 256 characters.
+   */
+  private static final String INDEX_HINT = "; first/last/nth narrow only among identical siblings";
+
+  /**
    * The repair facts of a STEP_SYNTAX refusal. The wire carries only line and column, so a control
    * character (a single-backslash regex escape decoded from the JSON string) cannot be told apart
    * from another syntax error; one general hint covers both.
@@ -2062,7 +2068,7 @@ public final class GuidedTranslationService {
     if (matchCount == 0) {
       return prefix + "its target matched no element: check the role and name";
     }
-    return prefix + "its target matched " + matchCount + " elements; " + NARROW_HINT;
+    return prefix + "its target matched " + matchCount + " elements; " + NARROW_HINT + INDEX_HINT;
   }
 
   private ObjectNode repairObject(

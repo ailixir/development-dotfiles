@@ -88,13 +88,16 @@ class GuidedStepCodePromptTest {
         .contains("its target matched 3 elements")
         .contains("must resolve to exactly one element")
         .contains("by role, by the region or label that contains it, or by its parent")
+        .contains("first/last/nth narrow only among identical siblings")
         .hasSizeLessThanOrEqualTo(256);
+    assertThat(GuidedTranslationService.preFenceFacts(999_999)).hasSizeLessThanOrEqualTo(256);
     assertThat(GuidedTranslationService.preFenceFacts(0))
         .contains("matched no element: check the role and name")
         .doesNotContain("narrow");
     assertThat(GuidedTranslationService.preFenceFacts(null))
         .contains("did not resolve to exactly one element")
         .contains("narrow it by role")
+        .doesNotContain("first/last/nth")
         .doesNotContain("matched")
         .hasSizeLessThanOrEqualTo(256);
   }

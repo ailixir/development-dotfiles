@@ -9,6 +9,7 @@
  *  - the fence at the first effectful call (anything outside READ_ONLY; unknown counts as effectful), preceded for a
  *    Locator receiver by Playwright's own strict wait for exactly one attached element;
  *  - timeout clamping, so no call outlives its step;
+ *  - the index-pick gate (until-fence mode only): first()/last()/nth() on a multi-match of unlike elements is refused as TARGET_DRIFT;
  *  - a tracking Proxy over expect, and tracked promises, so a floated rejection fails the step instead of killing the process;
  *  - the beforeCall hook that the secrets work (E8) implements.
  *
@@ -132,6 +133,63 @@ async function countWithin(locator: { count(): Promise<number> }, boundMs: numbe
     if (timer !== undefined) clearTimeout(timer);
   }
 }
+/**
+ * The index-pick gate (learning prepare only). first(), last() and nth() turn a multi-match into one element, so Playwright's strictness never fires, and
+ * code such as `rows.getByRole('link').nth(1)` or `getByRole('link', { name: /comments/ }).first()` picks one element out of a union of UNLIKE elements
+ * (an intro row and a story row; a top-menu link and a story's link). An index is a narrowing only among identical siblings, so before such a locator is
+ * used the locator the index was applied to (its base) is judged once: two or more matches whose elements do not share one ancestor signature are refused
+ * as TARGET_DRIFT with the match count, the same refusal an ambiguous locator gets, and the model is asked again. Anything the gate cannot establish
+ * within its bound (a timeout, an error, a base that is gone) lets the call through.
+ */
+const INDEX_PICKS: ReadonlySet<string> = new Set(['first', 'last', 'nth']);
+/** At most this many bases are remembered for one locator (`a.nth(1).locator('x').first()` has two); the most recent ones are kept. */
+const MAX_INDEX_BASES = 8;
+/** What the page program reads of an element: its parent chain. Structural, so this module needs no DOM library. */
+interface SignatureNode {
+  readonly tagName: string;
+  readonly classList: ArrayLike<string>;
+  readonly parentElement: SignatureNode | null;
+}
+/**
+ * Runner-owned page program, closure-free (Playwright sends it to the page as source text, so it may use only its parameter and the page's globals).
+ * For every matched element it builds a signature from the tag name and first class name of its ancestors, three levels up and EXCLUDING the
+ * element's own class, and it returns the number of distinct signatures. Only that integer leaves the page: no text, attribute value or markup.
+ */
+function ancestorSignatures(elements: readonly SignatureNode[]): number {
+  const seen = new Set<string>();
+  for (const element of elements) {
+    const parts: string[] = [];
+    let node = element.parentElement;
+    for (let depth = 0; depth < 3 && node !== null && node.tagName !== 'HTML'; depth += 1) {
+      parts.push(node.tagName.toLowerCase() + (node.classList.length > 0 ? `.${String(node.classList[0])}` : ''));
+      node = node.parentElement;
+    }
+    seen.add(parts.join('<'));
+  }
+  return seen.size;
+}
+/** A bounded call; undefined when it throws or is not answered in time. */
+async function within<T>(run: () => Promise<T>, boundMs: number): Promise<T | undefined> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      run(),
+      new Promise<undefined>(resolve => { timer = setTimeout(() => { resolve(undefined); }, Math.max(1, boundMs)); }),
+    ]);
+  } catch {
+    return undefined;
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
+}
+/** The match count of a base whose matches are two or more UNLIKE elements; undefined for a uniform base and for every failure to tell. */
+async function mixedMatchCount(base: object, boundMs: number): Promise<number | undefined> {
+  const counted = await countWithin(base as { count(): Promise<number> }, boundMs);
+  if (counted === undefined || counted < 2) return undefined;
+  const distinct = await within(() => (base as { evaluateAll(program: typeof ancestorSignatures): Promise<unknown> }).evaluateAll(ancestorSignatures), boundMs);
+  return typeof distinct === 'number' && distinct > 1 ? counted : undefined;
+}
+
 /** Used when the control does not report a remaining time. */
 const FALLBACK_MS = 30_000;
 const HEADROOM_MS = 200;
@@ -139,6 +197,8 @@ const SETTLE_ROUNDS = 4;
 
 /** Proxy to target. Module-level on purpose: a proxy stored by one step is unwrapped and re-wrapped by the next step's binding. */
 const rawOf = new WeakMap<object, object>();
+/** Raw locator -> the raw locators an index (first/last/nth) was applied to on the way to it. Written and read in until-fence mode only. */
+const indexBases = new WeakMap<object, readonly object[]>();
 const DATA_TYPES: readonly (abstract new (...args: never[]) => object)[] = [Date, RegExp, Error, Map, Set, WeakMap, WeakSet, Promise, ArrayBuffer, URL];
 
 type Fn = (...args: unknown[]) => unknown;
@@ -239,6 +299,7 @@ export function createBinding(options: BindingOptions): StepBinding {
   const tally: StepTally = options.tally ?? { fenceCrossed: false, effects: [], effectsTruncated: false, offscreen: false };
   const visiblePages = new Set<object>(options.pages ?? []);
   const adopted = new Set<object>();
+  const verdicts = new Map<object, Promise<number | undefined>>();
   let revoked = false;
   let fenceReached = false;
 
@@ -373,7 +434,33 @@ export function createBinding(options: BindingOptions): StepBinding {
     }
   };
 
-  const afterResult = (kind: CallKind, name: string, args: readonly unknown[], value: unknown): unknown => {
+  /** Until-fence mode: remembers, for a locator a Locator call returned, the bases of the indexes behind it (inherited from the receiver, plus the receiver for first/last/nth). */
+  const noteIndexBases = (target: object, name: string, value: unknown): void => {
+    if (typeof value !== 'object' || value === null || kindOf(value) !== 'Locator') return;
+    const inherited = indexBases.get(target) ?? [];
+    const bases = INDEX_PICKS.has(name) ? [...inherited, target].slice(-MAX_INDEX_BASES) : inherited;
+    if (bases.length > 0) indexBases.set(value, bases);
+  };
+
+  /** Judges each base once per step; throws TARGET_DRIFT with the match count for the first one that mixes unlike elements. */
+  const judgeBases = async (bases: readonly object[]): Promise<void> => {
+    for (const base of bases) {
+      let verdict = verdicts.get(base);
+      if (verdict === undefined) {
+        verdict = control.signal.aborted ? Promise.resolve(undefined) : mixedMatchCount(base, Math.min(COUNT_BOUND_MS, remaining()));
+        verdicts.set(base, verdict);
+      }
+      const mixed = await verdict;
+      assertLive();
+      if (mixed !== undefined) {
+        tally.matchCount = mixed;
+        throw new ObservedRefusal('TARGET_DRIFT');
+      }
+    }
+  };
+
+  const afterResult = (kind: CallKind, target: object, name: string, args: readonly unknown[], value: unknown): unknown => {
+    if (kind === 'Locator' && options.untilFence === true) noteIndexBases(target, name, value);
     if (name === 'pages' && kind === 'BrowserContext' && Array.isArray(value)) return wrapAny(value.filter(page => visiblePages.has(page as object)));
     if (name === 'waitForEvent' && (args[0] === 'popup' || args[0] === 'page') && typeof value === 'object' && value !== null) {
       const url = typeof (value as { url?: unknown }).url === 'function' ? String((value as { url: () => unknown }).url()) : '';
@@ -428,27 +515,33 @@ export function createBinding(options: BindingOptions): StepBinding {
           return native();
         });
       };
+      // Until-fence mode: the bases of the index picks behind this locator, for a call that consumes it (not an _internal, not count()).
+      const bases = options.untilFence === true && kind === 'Locator' && !name.startsWith('_') && name !== 'count' ? indexBases.get(target) : undefined;
       if (effectful && kind === 'Locator') {
         const timeout = explicitTimeout(args);
         const locator = target as { waitFor(options: { state: 'attached'; timeout: number }): Promise<unknown>; count(): Promise<number> };
-        return locator.waitFor({ state: 'attached', timeout }).then(perform, async (error: unknown) => {
+        const strict = (): Promise<unknown> => locator.waitFor({ state: 'attached', timeout }).then(perform, async (error: unknown) => {
           // Which kind of miss it was, for the repair loop: no element at all, or several.
           try { tally.matchCount = await locator.count(); } catch { /* the miss itself is the answer */ }
           throw error;
         });
+        return bases === undefined ? strict() : judgeBases(bases).then(strict);
       }
       if (kind === 'Locator' && name !== 'count') {
         // A read (innerText, textContent, ...) that fails on a locator: the repair loop still needs to know whether it matched nothing or several.
         const outcome = perform();
         if (!isThenable(outcome)) return outcome;
         const locator = target as { count(): Promise<number> };
-        return Promise.resolve(outcome).then(undefined, async (error: unknown) => {
+        const read = Promise.resolve(outcome).then(undefined, async (error: unknown) => {
           if (!control.signal.aborted) {
             const counted = await countWithin(locator, Math.min(COUNT_BOUND_MS, remaining()));
             if (counted !== undefined) tally.matchCount = counted;
           }
           throw error;
         });
+        if (bases === undefined) return read;
+        read.catch(() => undefined); // a refusal below wins; the read's own failure is then not the answer
+        return judgeBases(bases).then(() => read);
       }
       return perform();
     };
@@ -460,7 +553,7 @@ export function createBinding(options: BindingOptions): StepBinding {
       return chain(outcome, settled => {
         assertLive();
         if (entry !== undefined) entry.completed = true;
-        return afterResult(kind, name, args, settled);
+        return afterResult(kind, target, name, args, settled);
       });
     });
   }
