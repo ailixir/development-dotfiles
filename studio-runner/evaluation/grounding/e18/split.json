@@ -1,6 +1,6 @@
 {
   "corpusSha256": "9fe9b0ff9867a3f67031535796ae36f158897d947d632c3c37beedc677d9e938",
-  "gateTableSha256": "92cdc0cccfe93fd23e33f4b5212f926562d42a90f9df1231c0b1c1d447b50c46",
+  "gateTableSha256": "9d8b674745b8b3c76178c9d8de183a00c5b432d994a99c14247fc877cb250f6c",
   "smokeSha256": "d4bd0835392c463d7bab16cee7575da7d03b317bf09daf7370570763ab4e68a8",
   "rule": "drop a task if its id is a gate corpusTask or any step text (normalized) equals a gate-table or smoke-flows step; tune = heldOut:false sites plus fixtures; eval = heldOut:true sites",
   "excluded": [
@@ -87,7 +87,7 @@
     {
       "id": "kern-read-01",
       "byId": true,
-      "byText": true
+      "byText": false
     },
     {
       "id": "kern-assert-01",
