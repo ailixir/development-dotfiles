@@ -25,6 +25,13 @@ public final class GuidedTranslationService {
   /** One pool of STEP_CODE requests per step: rejections, retries and prepare refusals share it. */
   static final int STEP_CODE_POOL = 3;
 
+  /**
+   * Extra requests one pool may spend on definite-transient no-answer failures (a pre-response
+   * stall, a refused or reset connection, HTTP 429/503). They are drawn from here, not from the
+   * pool, so a repair keeps its tries; once spent, the next such failure ends the call as before.
+   */
+  static final int TRANSIENT_ALLOWANCE = 2;
+
   private final GuidedSessionRepository repository;
   private final GuidedTranslationStore store;
   private final GuidedClarificationContextStore questions;
@@ -886,39 +893,26 @@ public final class GuidedTranslationService {
     if (recovered != null) {
       return recovered;
     }
-    if (state.path("translation").path("continuation").asText().equals("REFRESH")
-        || status.equals("OBSERVING")) {
-      refresh(controller, id, fence);
-      sessions.translationTransaction(
-          controller,
-          id,
-          fence,
-          current -> {
-            store.continuation(id, "NEXT");
-            return null;
-          });
-    }
-    boolean fulfilled =
+    // A session OBSERVING after a successful action is first asked whether that step is fulfilled:
+    // completing it needs only the action receipts, never the page. A last step then goes straight
+    // to FINALIZING without the observation nothing would read, and a step completed here sets
+    // continuation REFRESH, so the next advance observes the page the next step needs.
+    boolean observing = status.equals("OBSERVING");
+    boolean fulfilled = observing && stepFulfilled(controller, id, fence);
+    if (!fulfilled) {
+      if (state.path("translation").path("continuation").asText().equals("REFRESH") || observing) {
+        refresh(controller, id, fence);
         sessions.translationTransaction(
             controller,
             id,
             fence,
             current -> {
-              String stepId =
-                  current
-                      .document()
-                      .path("sourceSteps")
-                      .get(current.progress().path("stepIndex").asInt())
-                      .path("stepId")
-                      .asText();
-              List<ObjectNode> actions =
-                  repository.effectiveActions(id).stream()
-                      .filter(
-                          action ->
-                              action.path("coordinate").path("stepId").asText().equals(stepId))
-                      .toList();
-              return store.stepFulfilled(id, stepId, actions);
+              store.continuation(id, "NEXT");
+              return null;
             });
+      }
+      fulfilled = !observing && stepFulfilled(controller, id, fence);
+    }
     if (fulfilled) {
       return sessions.translationTransaction(
           controller, id, fence, current -> completeCurrent(controller, id, fence, current));
@@ -940,6 +934,29 @@ public final class GuidedTranslationService {
       return admitStep(controller, id, fence, attempt, result);
     }
     return result;
+  }
+
+  /** True when the current step's action succeeded once and carries its reserved proposal. */
+  private boolean stepFulfilled(Authentication controller, String id, long fence) {
+    return sessions.translationTransaction(
+        controller,
+        id,
+        fence,
+        current -> {
+          String stepId =
+              current
+                  .document()
+                  .path("sourceSteps")
+                  .get(current.progress().path("stepIndex").asInt())
+                  .path("stepId")
+                  .asText();
+          List<ObjectNode> actions =
+              repository.effectiveActions(id).stream()
+                  .filter(
+                      action -> action.path("coordinate").path("stepId").asText().equals(stepId))
+                  .toList();
+          return store.stepFulfilled(id, stepId, actions);
+        });
   }
 
   /**
@@ -1484,8 +1501,10 @@ public final class GuidedTranslationService {
   /**
    * One model request pool. SOURCE_PLAN: three attempts, a rejected reply is re-asked with its
    * closed code. STEP_CODE ({@code step} non-null): one pool of {@link #STEP_CODE_POOL} requests
-   * per step, shared by validator rejections, transient retries and runner prepare refusals; the
-   * repair carries the closed code, stage, position and a short hint, never page data.
+   * per step, shared by validator rejections and runner prepare refusals; the repair carries the
+   * closed code, stage, position and a short hint, never page data. Definite-transient no-answer
+   * failures are retried from {@link #TRANSIENT_ALLOWANCE} instead: the retry is a new charged
+   * request (its own id, the same ordinal and the same repair input) that spends no pool try.
    */
   private JsonNode call(
       Authentication controller,
@@ -1511,8 +1530,12 @@ public final class GuidedTranslationService {
       }
       pool = STEP_CODE_POOL - spent;
     }
+    int transientUsed = 0;
     for (int index = 1; index <= pool; index++) {
       final int attemptNumber = index;
+      // An ordinal is 1..3 and (request, ordinal) is unique, so a transient retry of the same
+      // ordinal carries a derived request id.
+      final String sendKey = transientUsed == 0 ? key : key + "-transient-" + transientUsed;
       final JsonNode repairNow = stepRepair;
       String translator = UUID.randomUUID().toString();
       GuidedPromptAssembler.PreparedProjection prepared = null;
@@ -1529,7 +1552,7 @@ public final class GuidedTranslationService {
               prompts.preparePure(
                   preparationCapability,
                   captured,
-                  key,
+                  sendKey,
                   attemptNumber,
                   kind,
                   properties.maxOutputTokens());
@@ -1554,7 +1577,7 @@ public final class GuidedTranslationService {
                       "INVALID_CONTRACT",
                       409);
                   JsonNode abandoned = store.state(id).path("activeAttempt");
-                  String effectiveKey = key;
+                  String effectiveKey = sendKey;
                   boolean nestedSettlement = false;
                   if (!abandoned.isNull()
                       && !abandoned.isMissingNode()
@@ -1570,7 +1593,7 @@ public final class GuidedTranslationService {
                         null);
                     store.finishAttempt(
                         id, abandoned.path("attemptId").asText(), "UNKNOWN_CALL", null, null, null);
-                    effectiveKey = key + "-recovery-" + UUID.randomUUID();
+                    effectiveKey = sendKey + "-recovery-" + UUID.randomUUID();
                     nestedSettlement = true;
                   }
                   // Nested settlement updates a different detached wrapper; never borrow it.
@@ -1926,12 +1949,14 @@ public final class GuidedTranslationService {
       }
       // Round 053 (b), extended by round 067: a definite-transient provider failure (refused/reset,
       // HTTP 429/503, or a pre-response stall at the per-send cap) may be followed by a new
-      // persisted, charged attempt in the same pool. The REJECTED row above is committed and no
-      // transaction is open here; the next iteration re-runs every guard (lock, fence, deadline,
-      // source revision, budget fit, reservation).
+      // persisted, charged attempt, drawn from TRANSIENT_ALLOWANCE and not from the pool. The
+      // REJECTED row above is committed and no transaction is open here; the next iteration
+      // re-runs every guard (lock, fence, deadline, source revision, budget fit, reservation).
       if (received.reason().definiteTransient()
-          && index < pool
-          && backoffBeforeAttempt(index + 1)) {
+          && transientUsed < TRANSIENT_ALLOWANCE
+          && backoffBeforeAttempt(transientUsed + 2)) {
+        transientUsed++;
+        index--; // the same ordinal again: no pool try is spent
         continue;
       }
       if (received.code() != GuidedModelResponse.Code.INVALID_RESPONSE || index == pool) {

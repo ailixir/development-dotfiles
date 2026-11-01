@@ -228,6 +228,28 @@ final class GroundingItHarness {
   }
 
   /**
+   * The next model request of this kind gets no answer: the provider failed with {@code reason}.
+   */
+  void failNext(GuidedModelRequest.Kind kind, GuidedModelResponse.Reason reason) {
+    script
+        .get(kind)
+        .add(
+            request -> {
+              throw new SendFailed(reason);
+            });
+  }
+
+  private static final class SendFailed extends RuntimeException {
+    private static final long serialVersionUID = 1L;
+    final GuidedModelResponse.Reason reason;
+
+    SendFailed(GuidedModelResponse.Reason reason) {
+      super(reason.name(), null, false, false);
+      this.reason = reason;
+    }
+  }
+
+  /**
    * The runner accepts the code at prepare and the run ends with a sentinel at admission: the step
    * was prepared, its obligation was reserved, and nothing was dispatched.
    */
@@ -473,7 +495,12 @@ final class GroundingItHarness {
       if (next == null) {
         throw new AssertionError("no scripted " + request.kind() + " reply left");
       }
-      reply = next.apply(request);
+      try {
+        reply = next.apply(request);
+      } catch (SendFailed failed) {
+        return new GuidedModelResponse(
+            failed.reason.code(), null, null, null, "scripted", failed.reason);
+      }
     }
     contracts.validate("v3/guided-model-response", reply);
     return new GuidedModelResponse(

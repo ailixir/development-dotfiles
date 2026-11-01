@@ -248,7 +248,18 @@ public final class GenAiGuidedLlmGatewayClient implements GuidedLlmGatewayClient
       } catch (CancellationException cancelled) {
         deadlineHit = true;
       }
-      if (timeout && generating && capBound && !responseStarted && !cancelledEarlier) {
+      // A provider 429/503 on the cause chain is an answer, even when the per-send cap expired
+      // while it was still being received: it is the definite-transient class, not a timeout.
+      GenAiGatewayTransport.TransportFailure failureClass =
+          GenAiGatewayTransport.transportFailure(failure);
+      boolean refused =
+          timeout
+              && generating
+              && !cancelledEarlier
+              && !deadlineHit
+              && (failureClass == GenAiGatewayTransport.TransportFailure.HTTP_429
+                  || failureClass == GenAiGatewayTransport.TransportFailure.HTTP_503);
+      if (!refused && timeout && generating && capBound && !responseStarted && !cancelledEarlier) {
         // The cap was the binding limit, it expired, and no response headers had arrived: a
         // pre-response stall. The coordinator may make a fresh, fully charged attempt. A timeout
         // after headers (mid-body), with a non-binding cap, or after a cancellation stays TIMEOUT.
@@ -260,7 +271,7 @@ public final class GenAiGuidedLlmGatewayClient implements GuidedLlmGatewayClient
             transport.properties().model(),
             GuidedModelResponse.Reason.TRANSPORT_STALL);
       }
-      if (timeout || deadlineHit) {
+      if (!refused && (timeout || deadlineHit)) {
         return result(GuidedModelResponse.Code.TIMEOUT, inputTokens, outputTokens);
       }
       GuidedModelResponse.Reason reason =

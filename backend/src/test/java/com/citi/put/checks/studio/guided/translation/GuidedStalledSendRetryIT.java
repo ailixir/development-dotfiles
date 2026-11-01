@@ -74,10 +74,12 @@ import org.testcontainers.containers.PostgreSQLContainer;
 /**
  * Round 067, Candidate B (architect ruling): a provider send that receives no response headers
  * within the per-send cap, while the cap is the binding limit, ends as REJECTED/TRANSPORT_STALL and
- * the coordinator makes a new, fully charged attempt in the shared three-proposal pool. Real
- * PostgreSQL, real session service, store and coordinator. Stalls are produced by the real adapter
- * and transport against WireMock; successful answers are scripted (they depend on the request id).
- * A SOURCE_PLAN {@code UNSUPPORTED} answer ends {@code plan()} before any runner bootstrap.
+ * the coordinator makes a new, fully charged attempt. SC008 FIX-28: that retry (like any
+ * definite-transient one) is drawn from a separate two-request allowance, with its own request id
+ * and the same ordinal, so it spends no try of the three-proposal pool. Real PostgreSQL, real
+ * session service, store and coordinator. Stalls are produced by the real adapter and transport
+ * against WireMock; successful answers are scripted (they depend on the request id). A SOURCE_PLAN
+ * {@code UNSUPPORTED} answer ends {@code plan()} before any runner bootstrap.
  */
 class GuidedStalledSendRetryIT {
   private static final PostgreSQLContainer<?> POSTGRES =
@@ -262,7 +264,8 @@ class GuidedStalledSendRetryIT {
   private List<String> rows() {
     return jdbc.queryForList(
         "SELECT attempt_number||':'||status||':'||COALESCE(rejection_reason,'-') FROM"
-            + " studio_guided_model_attempts WHERE session_id=? ORDER BY attempt_number",
+            + " studio_guided_model_attempts WHERE session_id=? ORDER BY attempt_number,"
+            + " created_at",
         String.class,
         sessionId);
   }
@@ -464,7 +467,7 @@ class GuidedStalledSendRetryIT {
     long millis = Duration.ofNanos(System.nanoTime() - started).toMillis();
     assertThat(result.path("state").asText()).isEqualTo("FAILED");
     assertThat(errorCode()).isEqualTo("MISSING_SOURCE");
-    assertThat(rows()).containsExactly("1:REJECTED:TRANSPORT_STALL", "2:APPLIED:-");
+    assertThat(rows()).containsExactly("1:REJECTED:TRANSPORT_STALL", "1:APPLIED:-");
     assertThat(sleeps).containsExactly(BASE_MILLIS);
     assertThat(httpRequests()).isEqualTo(1);
     // The cap, not the 5 s provider delay or the 10 s call budget, ended the stalled send.
@@ -483,12 +486,14 @@ class GuidedStalledSendRetryIT {
     assertThat(
             jdbc.queryForList(
                 "SELECT input_tokens FROM studio_guided_model_attempts WHERE session_id=? AND"
-                    + " attempt_number=1",
+                    + " attempt_number=1 AND status='REJECTED'",
                 Integer.class,
                 sessionId))
         .containsExactly((Integer) null);
-    assertThat(gateway.requests.get(0).requestId()).isEqualTo(gateway.requests.get(1).requestId());
-    assertThat(gateway.requests.get(1).attempt()).isEqualTo(2);
+    // The retry is a new request (own id) at the same ordinal: it spent no pool try.
+    assertThat(gateway.requests.get(1).requestId())
+        .isNotEqualTo(gateway.requests.get(0).requestId());
+    assertThat(gateway.requests.get(1).attempt()).isEqualTo(1);
   }
 
   // ── test 2 ─────────────────────────────────────────────────────────────────────────────────
@@ -507,8 +512,8 @@ class GuidedStalledSendRetryIT {
     assertThat(rows())
         .containsExactly(
             "1:REJECTED:TRANSPORT_STALL",
-            "2:REJECTED:TRANSPORT_STALL",
-            "3:REJECTED:TRANSPORT_STALL");
+            "1:REJECTED:TRANSPORT_STALL",
+            "1:REJECTED:TRANSPORT_STALL");
     assertThat(httpRequests()).isEqualTo(3);
     assertThat(gateway.requests).hasSize(3);
     assertThat(sleeps).containsExactly(BASE_MILLIS, BASE_MILLIS * 2);
@@ -520,7 +525,7 @@ class GuidedStalledSendRetryIT {
   // ── test 3 ─────────────────────────────────────────────────────────────────────────────────
 
   @Test
-  void aStallSharesThePoolWithA429InEitherOrder() throws Exception {
+  void aStallSharesTheAllowanceWithA429InEitherOrder() throws Exception {
     realClock();
     fixture(Map.of());
     startWire(status(429), silent());
@@ -528,7 +533,7 @@ class GuidedStalledSendRetryIT {
     plan();
     assertThat(rows())
         .containsExactly(
-            "1:REJECTED:TRANSPORT_HTTP_429", "2:REJECTED:TRANSPORT_STALL", "3:APPLIED:-");
+            "1:REJECTED:TRANSPORT_HTTP_429", "1:REJECTED:TRANSPORT_STALL", "1:APPLIED:-");
     assertThat(sleeps).containsExactly(BASE_MILLIS, BASE_MILLIS * 2);
     stopWire();
 
@@ -538,7 +543,7 @@ class GuidedStalledSendRetryIT {
     plan();
     assertThat(rows())
         .containsExactly(
-            "1:REJECTED:TRANSPORT_STALL", "2:REJECTED:TRANSPORT_HTTP_429", "3:APPLIED:-");
+            "1:REJECTED:TRANSPORT_STALL", "1:REJECTED:TRANSPORT_HTTP_429", "1:APPLIED:-");
     assertThat(httpRequests()).isEqualTo(2);
   }
 
@@ -552,26 +557,68 @@ class GuidedStalledSendRetryIT {
     assertThat(rows())
         .containsExactly(
             "1:REJECTED:TRANSPORT_STALL",
-            "2:REJECTED:TRANSPORT_HTTP_429",
-            "3:REJECTED:TRANSPORT_STALL");
+            "1:REJECTED:TRANSPORT_HTTP_429",
+            "1:REJECTED:TRANSPORT_STALL");
     assertThat(httpRequests()).isEqualTo(3);
   }
 
   @Test
-  void aRepairThenTwoStallsIsTerminalWithNoFourthSend() throws Exception {
+  void aRepairThenTwoStallsStillLeavesTheRepairTriesAndSucceeds() throws Exception {
     realClock();
     fixture(Map.of());
-    startWire(silent(), silent(), silent());
-    script(scripted(applyRefusal()), wire(), wire(), wire());
+    startWire(silent(), silent());
+    script(scripted(applyRefusal()), wire(), wire(), scripted(unsupported(null, null)));
+    plan();
+    assertThat(rows())
+        .containsExactly(
+            "1:REJECTED:INVALID_CONTRACT",
+            "2:REJECTED:TRANSPORT_STALL",
+            "2:REJECTED:TRANSPORT_STALL",
+            "2:APPLIED:-");
+    assertThat(gateway.requests).hasSize(4);
+    assertThat(httpRequests()).isEqualTo(2);
+    assertThat(sleeps).containsExactly(BASE_MILLIS, BASE_MILLIS * 2);
+  }
+
+  @Test
+  void aRepairThenThreeStallsIsTerminalWithNoFifthSend() throws Exception {
+    realClock();
+    fixture(Map.of());
+    startWire(silent(), silent(), silent(), silent());
+    script(scripted(applyRefusal()), wire(), wire(), wire(), wire());
     assertThat(refusal().getMessage()).isEqualTo("MODEL_UNAVAILABLE");
     assertThat(rows())
         .containsExactly(
             "1:REJECTED:INVALID_CONTRACT",
             "2:REJECTED:TRANSPORT_STALL",
-            "3:REJECTED:TRANSPORT_STALL");
-    assertThat(gateway.requests).hasSize(3);
-    assertThat(httpRequests()).isEqualTo(2);
-    assertThat(sleeps).containsExactly(BASE_MILLIS * 2);
+            "2:REJECTED:TRANSPORT_STALL",
+            "2:REJECTED:TRANSPORT_STALL");
+    assertThat(gateway.requests).hasSize(4);
+    assertThat(httpRequests()).isEqualTo(3);
+  }
+
+  /**
+   * SC008 FIX-28: a provider 429 whose error text also reads as a timeout (the cap expired while it
+   * was still being received) is the HTTP 429 class and is retried, not a TIMEOUT that ends the
+   * call. The provider's error text never reaches the persisted reason.
+   */
+  @Test
+  void aProvider429WhoseTextReadsAsATimeoutIsRetriedAsTransient() throws Exception {
+    realClock();
+    fixture(Map.of());
+    startWire(
+        aResponse()
+            .withStatus(429)
+            .withHeader("Content-Type", "application/json")
+            .withBody(
+                "{\"error\":{\"code\":429,\"message\":\"queue wait timed out\","
+                    + "\"status\":\"RESOURCE_EXHAUSTED\"}}"),
+        silent());
+    script(wire(), scripted(unsupported(null, null)));
+    plan();
+    assertThat(rows()).containsExactly("1:REJECTED:TRANSPORT_HTTP_429", "1:APPLIED:-");
+    assertThat(httpRequests()).isEqualTo(1);
+    assertThat(sleeps).containsExactly(BASE_MILLIS);
   }
 
   // ── test 4 ─────────────────────────────────────────────────────────────────────────────────
@@ -691,7 +738,7 @@ class GuidedStalledSendRetryIT {
     startWire(okJson("{}").withFixedDelay(3000));
     script(wire(), scripted(unsupported(null, null)));
     plan();
-    assertThat(rows()).containsExactly("1:REJECTED:TRANSPORT_STALL", "2:APPLIED:-");
+    assertThat(rows()).containsExactly("1:REJECTED:TRANSPORT_STALL", "1:APPLIED:-");
     assertThat(sleeps).containsExactly(BASE_MILLIS);
   }
 

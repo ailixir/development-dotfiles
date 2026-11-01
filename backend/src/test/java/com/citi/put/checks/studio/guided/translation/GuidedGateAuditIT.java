@@ -49,6 +49,12 @@ class GuidedGateAuditIT {
     return ObservationFixtures.observation();
   }
 
+  private static final GuidedTranslationService.BackoffSleeper NO_WAIT = millis -> noWait();
+
+  private static void noWait() {
+    // Backoff is not under test: do not wait.
+  }
+
   private static GuidedSessionException refusal(Throwable thrown) {
     assertThat(thrown).isInstanceOf(GuidedSessionException.class);
     return (GuidedSessionException) thrown;
@@ -202,6 +208,51 @@ class GuidedGateAuditIT {
     assertThat(h.refusalGate(id)).isEqualTo("STEP_SYNTAX");
     assertThat(h.reservations(id)).isZero();
     assertThat(h.actions(id)).isZero();
+  }
+
+  /**
+   * SC008 FIX-28: two provider failures that gave no answer (a stall, a 429) are retried from the
+   * transient allowance. All three tries of the pool stay for the step: two rejected replies, then
+   * the accepted one.
+   */
+  @Test
+  void transientNoAnswerFailuresSpendNoTryOfTheStepPool() throws Exception {
+    var h = new GroundingItHarness(POSTGRES, "Click Save.");
+    String id = h.session(List.of(Spec.of(0, "Save")));
+    h.observe(id, 1, page().element("e1", "button", "Save").build());
+    h.stopAtRunner();
+    h.translation.useBackoffSleeper(NO_WAIT);
+    h.failNext(GuidedModelRequest.Kind.STEP_CODE, GuidedModelResponse.Reason.TRANSPORT_STALL);
+    h.failNext(GuidedModelRequest.Kind.STEP_CODE, GuidedModelResponse.Reason.TRANSPORT_HTTP_429);
+    h.reply(GuidedModelRequest.Kind.STEP_CODE, request -> h.code(request, "   "));
+    h.reply(GuidedModelRequest.Kind.STEP_CODE, request -> h.code(request, "x", "unplanned"));
+    h.reply(
+        GuidedModelRequest.Kind.STEP_CODE,
+        request -> h.code(request, "await page.getByRole('button').click();"));
+    assertThatThrownBy(() -> h.advance(id)).isInstanceOf(ReachedRunner.class);
+    assertThat(h.requests(GuidedModelRequest.Kind.STEP_CODE)).isEqualTo(5);
+    assertThat(h.stepCodeAttempts(id)).isEqualTo(Map.of("APPLIED", 1, "REJECTED", 4));
+    assertThat(h.reservations(id)).isEqualTo(1);
+  }
+
+  /** Three transient failures in one call exceed the allowance and end the step as before. */
+  @Test
+  void anExhaustedTransientAllowanceEndsTheStepModelUnavailable() throws Exception {
+    var h = new GroundingItHarness(POSTGRES, "Click Save.");
+    String id = h.session(List.of(Spec.of(0, "Save")));
+    h.observe(id, 1, page().element("e1", "button", "Save").build());
+    h.stopAtRunner();
+    h.translation.useBackoffSleeper(NO_WAIT);
+    for (int stall = 0; stall < 3; stall++) {
+      h.failNext(GuidedModelRequest.Kind.STEP_CODE, GuidedModelResponse.Reason.TRANSPORT_STALL);
+    }
+    h.reply(GuidedModelRequest.Kind.STEP_CODE, request -> h.code(request, "await ok();"));
+    assertThatThrownBy(() -> h.advance(id))
+        .satisfies(
+            failure -> assertThat(refusal(failure).getMessage()).isEqualTo("MODEL_UNAVAILABLE"));
+    assertThat(h.requests(GuidedModelRequest.Kind.STEP_CODE)).isEqualTo(3);
+    assertThat(h.state(id)).isEqualTo("FAILED");
+    assertThat(h.errorCode(id)).isEqualTo("MODEL_UNAVAILABLE");
   }
 
   /** The pool also holds across a redrive: a fourth request is never made for the step. */

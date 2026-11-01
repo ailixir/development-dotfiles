@@ -18,6 +18,16 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * Persistence only. Callers hold session then source locks and join existing budget/admission work.
  */
 public final class GuidedTranslationStore {
+  /**
+   * SQL list of the definite-transient rejection reasons (enum names only). Their rows do not spend
+   * the STEP_CODE pool: they are drawn from the transient allowance.
+   */
+  private static final String TRANSIENT_REASONS =
+      java.util.Arrays.stream(GuidedModelResponse.Reason.values())
+          .filter(GuidedModelResponse.Reason::definiteTransient)
+          .map(reason -> "'" + reason.name() + "'")
+          .collect(java.util.stream.Collectors.joining(","));
+
   private final JdbcTemplate jdbc;
   private final GuidedContracts contracts;
 
@@ -855,8 +865,8 @@ public final class GuidedTranslationStore {
 
   /**
    * STEP_CODE requests already spent on a step: attempts of kind STEP_CODE for {@code stepIndex}
-   * that are not a clarification. Validator rejections, transient retries and prepare refusals all
-   * count, so one pool of three bounds the step across redrives.
+   * that are not a clarification. Validator rejections and prepare refusals count, so one pool of
+   * three bounds the step across redrives; definite-transient no-answer rejections do not.
    */
   public int stepCodeRequests(String sessionId, int stepIndex) {
     transaction();
@@ -865,7 +875,9 @@ public final class GuidedTranslationStore {
             "SELECT count(*) FROM studio_guided_model_attempts WHERE session_id=? AND"
                 + " kind='STEP_CODE' AND status IN ('APPLIED','REJECTED') AND"
                 + " identity->>'stepIndex'=? AND COALESCE(safe_result->>'status','')<>"
-                + "'CLARIFICATION'",
+                + "'CLARIFICATION' AND COALESCE(rejection_reason,'') NOT IN ("
+                + TRANSIENT_REASONS
+                + ")",
             Integer.class,
             sessionId,
             Integer.toString(stepIndex));

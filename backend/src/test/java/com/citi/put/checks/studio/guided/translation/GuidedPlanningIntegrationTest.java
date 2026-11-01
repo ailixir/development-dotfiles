@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -223,6 +224,112 @@ class GuidedPlanningIntegrationTest {
     h.advance(id);
     assertThat(h.requests(GuidedModelRequest.Kind.STEP_CODE)).isEqualTo(2);
     assertThat(h.state(id)).isEqualTo("FINALIZING");
+  }
+
+  /**
+   * SC008 FIX-29: a fulfilled last step finalizes without the observation after it. The page is too
+   * heavy to observe (the runner's refresh would end the session UNSUPPORTED_SURFACE), but the
+   * committed click is the last step and nothing would read that observation: the session reaches
+   * FINALIZING and the page is never observed.
+   */
+  @Test
+  void aFulfilledLastStepFinalizesEvenWhenTheObservationAfterItWouldHitItsDeadline()
+      throws Exception {
+    var h = new GroundingItHarness(POSTGRES, "Click Save.");
+    String id = h.session(List.of(Spec.of(0, "Save")));
+    h.observe(id, 1, page().element("e1", "button", "Save").build());
+    h.runnerSucceeds();
+    org.mockito.Mockito.doThrow(new GuidedSessionException("UNSUPPORTED_SURFACE", 422))
+        .when(h.dispatch)
+        .observe(any(), anyString(), anyLong(), anyString(), any());
+    h.reply(
+        GuidedModelRequest.Kind.STEP_CODE,
+        request -> h.code(request, "await page.getByRole('button', { name: 'Save' }).click();"));
+    h.advance(id);
+    assertThat(h.state(id)).isEqualTo("OBSERVING");
+    h.advance(id);
+    assertThat(h.state(id)).isEqualTo("FINALIZING");
+    assertThat(h.requests(GuidedModelRequest.Kind.STEP_CODE)).isEqualTo(1);
+    verify(h.dispatch, never()).observe(any(), anyString(), anyLong(), anyString(), any());
+  }
+
+  /**
+   * SC008 FIX-29: a fulfilled step that is not the last is completed first and leaves the refresh
+   * due (continuation REFRESH); the next advance observes the page and learns the next step.
+   */
+  @Test
+  void aFulfilledStepThatIsNotTheLastStillObservesBeforeTheNextStepIsLearned() throws Exception {
+    var h = new GroundingItHarness(POSTGRES, "Click Save.", "Click Done.");
+    String id = h.session(List.of(Spec.of(0, "Save"), Spec.of(1, "Done")));
+    h.observe(
+        id, 1, page().element("e1", "button", "Save").element("e2", "button", "Done").build());
+    h.runnerSucceeds();
+    h.refreshWith(
+        generation ->
+            page()
+                .document("document-1", generation)
+                .element("e1", "button", "Save")
+                .element("e2", "button", "Done")
+                .build());
+    h.reply(
+        GuidedModelRequest.Kind.STEP_CODE,
+        request -> h.code(request, "await page.getByRole('button', { name: 'Save' }).click();"));
+    h.reply(
+        GuidedModelRequest.Kind.STEP_CODE,
+        request -> h.code(request, "await page.getByRole('button', { name: 'Done' }).click();"));
+    h.advance(id);
+    h.advance(id);
+    assertThat(h.progress(id).path("stepIndex").asInt()).isEqualTo(1);
+    assertThat(continuation(h, id)).isEqualTo("REFRESH");
+    verify(h.dispatch, never()).observe(any(), anyString(), anyLong(), anyString(), any());
+    h.advance(id);
+    verify(h.dispatch, times(1)).observe(any(), anyString(), anyLong(), anyString(), any());
+    assertThat(continuation(h, id)).isEqualTo("NEXT");
+    assertThat(h.requests(GuidedModelRequest.Kind.STEP_CODE)).isEqualTo(2);
+  }
+
+  /**
+   * SC008 FIX-28: the persisted count that bounds a step's STEP_CODE pool across redrives ignores
+   * the requests that got no answer (a stall); it counts only the answered one.
+   */
+  @Test
+  void theStepPoolCountIgnoresRequestsThatGotNoAnswer() throws Exception {
+    var h = new GroundingItHarness(POSTGRES, "Click Save.", "Click Done.");
+    String id = h.session(List.of(Spec.of(0, "Save"), Spec.of(1, "Done")));
+    h.observe(
+        id, 1, page().element("e1", "button", "Save").element("e2", "button", "Done").build());
+    h.runnerSucceeds();
+    h.refreshWith(
+        generation ->
+            page()
+                .document("document-1", generation)
+                .element("e1", "button", "Save")
+                .element("e2", "button", "Done")
+                .build());
+    h.translation.useBackoffSleeper(NO_WAIT);
+    h.reply(
+        GuidedModelRequest.Kind.STEP_CODE,
+        request -> h.code(request, "await page.getByRole('button', { name: 'Save' }).click();"));
+    h.failNext(GuidedModelRequest.Kind.STEP_CODE, GuidedModelResponse.Reason.TRANSPORT_STALL);
+    h.reply(
+        GuidedModelRequest.Kind.STEP_CODE,
+        request -> h.code(request, "await page.getByRole('button', { name: 'Done' }).click();"));
+    h.advance(id);
+    h.advance(id);
+    h.advance(id);
+    assertThat(h.requests(GuidedModelRequest.Kind.STEP_CODE)).isEqualTo(3);
+    assertThat(h.progress(id).path("stepIndex").asInt()).isEqualTo(1);
+    assertThat(h.repository.transaction(() -> h.store.stepCodeRequests(id, 1))).isEqualTo(1);
+  }
+
+  private static final GuidedTranslationService.BackoffSleeper NO_WAIT = millis -> noWait();
+
+  private static void noWait() {
+    // Backoff is not under test: do not wait.
+  }
+
+  private static String continuation(GroundingItHarness h, String id) {
+    return h.repository.transaction(() -> h.store.state(id).path("continuation").asText());
   }
 
   /**

@@ -250,7 +250,8 @@ class GuidedTransientRetryIT {
   private List<String> rows() {
     return jdbc.queryForList(
         "SELECT attempt_number||':'||status||':'||COALESCE(rejection_reason,'-') FROM"
-            + " studio_guided_model_attempts WHERE session_id=? ORDER BY attempt_number",
+            + " studio_guided_model_attempts WHERE session_id=? ORDER BY attempt_number,"
+            + " created_at",
         String.class,
         sessionId);
   }
@@ -317,7 +318,7 @@ class GuidedTransientRetryIT {
     var result = plan();
     assertThat(result.path("state").asText()).isEqualTo("FAILED");
     assertThat(errorCode()).isEqualTo("MISSING_SOURCE");
-    assertThat(rows()).containsExactly("1:REJECTED:TRANSPORT_HTTP_503", "2:APPLIED:-");
+    assertThat(rows()).containsExactly("1:REJECTED:TRANSPORT_HTTP_503", "1:APPLIED:-");
     assertThat(gateway.requests).hasSize(2);
     assertThat(sleeps).containsExactly(BASE_MILLIS);
     int ceiling = gateway.requests.getFirst().maxOutputTokens();
@@ -325,10 +326,12 @@ class GuidedTransientRetryIT {
     assertThat(counters.path("modelProposals").asInt()).isEqualTo(2);
     // Attempt 1 settled with unknown usage keeps its full ceiling; attempt 2 reserved its own.
     assertThat(counters.path("modelOutputTokens").asInt()).isEqualTo(2 * ceiling);
-    // The retried request is the same logical request: same id, next ordinal, no repair text.
-    assertThat(gateway.requests.get(0).requestId()).isEqualTo(gateway.requests.get(1).requestId());
+    // The retry is drawn from the transient allowance: its own request id, the same ordinal (no
+    // pool try spent), and no repair text.
+    assertThat(gateway.requests.get(1).requestId())
+        .isNotEqualTo(gateway.requests.get(0).requestId());
     assertThat(gateway.requests.get(0).attempt()).isEqualTo(1);
-    assertThat(gateway.requests.get(1).attempt()).isEqualTo(2);
+    assertThat(gateway.requests.get(1).attempt()).isEqualTo(1);
     for (var request : gateway.requests) {
       assertThat(request.projection().document().path("repairCodes")).isEmpty();
     }
@@ -359,9 +362,9 @@ class GuidedTransientRetryIT {
     assertThat(rows())
         .containsExactly(
             "1:REJECTED:TRANSPORT_HTTP_503",
-            "2:REJECTED:TRANSPORT_CONNECT",
-            "3:REJECTED:TRANSPORT_HTTP_429");
-    // The delay before attempt n is base << (n - 2); there is no wait after the last attempt.
+            "1:REJECTED:TRANSPORT_CONNECT",
+            "1:REJECTED:TRANSPORT_HTTP_429");
+    // The delay before the nth transient retry is base << (n - 1); no wait after the last attempt.
     assertThat(sleeps).containsExactly(BASE_MILLIS, BASE_MILLIS * 2);
     assertThat(document().path("state").asText()).isEqualTo("FAILED");
     assertThat(errorCode()).isEqualTo("MODEL_UNAVAILABLE");
@@ -440,38 +443,95 @@ class GuidedTransientRetryIT {
   // ── obligation 7 ───────────────────────────────────────────────────────────────────────────
 
   @Test
-  void transientRetriesShareTheThreeAttemptPoolWithSchemaRepairs() throws Exception {
+  void transientRetriesSpendNoTryOfThePoolOfSchemaRepairs() throws Exception {
     fixture(Map.of());
     script(
         applyRefusal(),
         fail(GuidedModelResponse.Reason.TRANSPORT_HTTP_503),
+        applyRefusal(),
         unsupported(null, null));
     plan();
+    // Both repairs and the answer keep their ordinals 2 and 3 although a transient retry sat
+    // between.
     assertThat(rows())
         .containsExactly(
-            "1:REJECTED:INVALID_CONTRACT", "2:REJECTED:TRANSPORT_HTTP_503", "3:APPLIED:-");
-    assertThat(gateway.requests).hasSize(3);
-    // The repair paragraph of attempt 2 is carried unchanged into the transient retry.
+            "1:REJECTED:INVALID_CONTRACT",
+            "2:REJECTED:TRANSPORT_HTTP_503",
+            "2:REJECTED:INVALID_CONTRACT",
+            "3:APPLIED:-");
+    assertThat(gateway.requests).hasSize(4);
+    // The repair paragraph of ordinal 2 is carried unchanged into its transient retry.
     assertThat(gateway.requests.get(1).projection().document().path("repairCodes").toString())
         .contains("INVALID_CONTRACT");
     assertThat(gateway.requests.get(2).projection().document().path("repairCodes"))
         .isEqualTo(gateway.requests.get(1).projection().document().path("repairCodes"));
-    assertThat(sleeps).containsExactly(BASE_MILLIS * 2);
+    assertThat(sleeps).containsExactly(BASE_MILLIS);
+  }
+
+  /** Two transient failures (stalls here) before and between repairs leave all three tries. */
+  @Test
+  void stallsDoNotConsumeRepairTries() throws Exception {
+    fixture(Map.of());
+    script(
+        fail(GuidedModelResponse.Reason.TRANSPORT_STALL),
+        fail(GuidedModelResponse.Reason.TRANSPORT_STALL),
+        applyRefusal(),
+        applyRefusal(),
+        unsupported(null, null));
+    plan();
+    assertThat(rows())
+        .containsExactly(
+            "1:REJECTED:TRANSPORT_STALL",
+            "1:REJECTED:TRANSPORT_STALL",
+            "1:REJECTED:INVALID_CONTRACT",
+            "2:REJECTED:INVALID_CONTRACT",
+            "3:APPLIED:-");
+    assertThat(gateway.requests).hasSize(5);
+    assertThat(sleeps).containsExactly(BASE_MILLIS, BASE_MILLIS * 2);
+    assertThat(errorCode()).isEqualTo("MISSING_SOURCE");
   }
 
   @Test
-  void anExhaustedPoolLeavesNoTransientRetryAndNoFourthCall() throws Exception {
+  void aTransientFailureOnTheLastPoolTryIsStillRetried() throws Exception {
     fixture(Map.of());
-    script(applyRefusal(), applyRefusal(), fail(GuidedModelResponse.Reason.TRANSPORT_HTTP_503));
-    var refused = refusal();
-    assertThat(refused.getMessage()).isEqualTo("MODEL_UNAVAILABLE");
-    assertThat(gateway.requests).hasSize(3);
-    assertThat(sleeps).isEmpty();
+    script(
+        applyRefusal(),
+        applyRefusal(),
+        fail(GuidedModelResponse.Reason.TRANSPORT_HTTP_429),
+        unsupported(null, null));
+    plan();
     assertThat(rows())
         .containsExactly(
             "1:REJECTED:INVALID_CONTRACT",
             "2:REJECTED:INVALID_CONTRACT",
-            "3:REJECTED:TRANSPORT_HTTP_503");
+            "3:REJECTED:TRANSPORT_HTTP_429",
+            "3:APPLIED:-");
+    assertThat(sleeps).containsExactly(BASE_MILLIS);
+  }
+
+  /** The allowance is two: the third transient failure ends the call, however many tries remain. */
+  @Test
+  void anExhaustedAllowanceEndsInModelUnavailableWithNoFurtherCall() throws Exception {
+    fixture(Map.of());
+    script(
+        applyRefusal(),
+        fail(GuidedModelResponse.Reason.TRANSPORT_STALL),
+        fail(GuidedModelResponse.Reason.TRANSPORT_HTTP_429),
+        fail(GuidedModelResponse.Reason.TRANSPORT_STALL),
+        unsupported(null, null));
+    var refused = refusal();
+    assertThat(refused.getMessage()).isEqualTo("MODEL_UNAVAILABLE");
+    assertThat(refused.status()).isEqualTo(503);
+    assertThat(gateway.requests).hasSize(4);
+    assertThat(gateway.script).hasSize(1);
+    assertThat(sleeps).containsExactly(BASE_MILLIS, BASE_MILLIS * 2);
+    assertThat(rows())
+        .containsExactly(
+            "1:REJECTED:INVALID_CONTRACT",
+            "2:REJECTED:TRANSPORT_STALL",
+            "2:REJECTED:TRANSPORT_HTTP_429",
+            "2:REJECTED:TRANSPORT_STALL");
+    assertThat(errorCode()).isEqualTo("MODEL_UNAVAILABLE");
   }
 
   // ── obligation 8 ───────────────────────────────────────────────────────────────────────────

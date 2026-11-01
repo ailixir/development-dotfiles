@@ -69,9 +69,11 @@ public record GuidedTranslationProperties(
    * The longest one continuation POST can run on the server: the step's one pool of three STEP_CODE
    * requests, each bounded by the call budget plus the settlement margin, the runner prepare that
    * follows it, and the transient backoff ({@code base << 0} then {@code base << 1}) between
-   * attempts; the rest of it is runner and database work, covered by a fixed margin. The
-   * coordinator waits this long, so it never gives up on a request that is still running and
-   * re-drives the session over it.
+   * attempts, plus the {@link GuidedTranslationService#TRANSIENT_ALLOWANCE} extra requests a
+   * definite-transient failure may add (each bounded by the call budget plus the settlement margin;
+   * their backoff is inside the two above); the rest of it is runner and database work, covered by
+   * a fixed margin. The coordinator waits this long, so it never gives up on a request that is
+   * still running and re-drives the session over it.
    *
    * @return the coordinator's per-POST timeout
    */
@@ -80,8 +82,11 @@ public record GuidedTranslationProperties(
         Duration.ofSeconds(callSeconds)
             .plus(GuidedTranslationService.SETTLE_MARGIN)
             .plus(PREPARE_WINDOW);
+    Duration transientRetry =
+        Duration.ofSeconds(callSeconds).plus(GuidedTranslationService.SETTLE_MARGIN);
     return attempt
         .multipliedBy(3)
+        .plus(transientRetry.multipliedBy(GuidedTranslationService.TRANSIENT_ALLOWANCE))
         .plusMillis(3L * transientBackoffMillis)
         .plus(Duration.ofSeconds(30));
   }
