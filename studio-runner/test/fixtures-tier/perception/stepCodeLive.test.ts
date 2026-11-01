@@ -277,5 +277,47 @@ describe('a matcher on a locator that matches two elements', () => {
   });
 });
 
+/**
+ * SC008-FIX-32: a check that "the page contains" some text, on a page whose first copy of the text is hidden (a logo heading whose text is display:none)
+ * and whose second copy is shown. The repair of the ambiguous getByText that picks first() lands on the hidden copy and fails; the page-text form the
+ * contract teaches (body, useInnerText) passes on the shown copy, and never passes on text that is only hidden or only in markup the page does not render.
+ */
+describe('a page-text check where the first copy of the text is hidden', () => {
+  const TEXT = 'Acme Registry Authority';
+  const LOGO = `<h1><span style="display:none">${TEXT}</span></h1>`;
+  const SHOWN = `${LOGO}<p>Welcome to the\n  ${TEXT} (ARA) functions.</p>`;
+  const HIDDEN_ONLY = `${LOGO}<p>Nothing else here</p><script type="text/plain">${TEXT}</script><div style="visibility:hidden">${TEXT}</div>`;
+  const run = async (html: string, code: string): Promise<StepResult & { control: Control }> => {
+    await page.goto(`data:text/html,${encodeURIComponent(html)}`);
+    return go(code, 4000);
+  };
+  const strict = `await expect(page.getByText('${TEXT}')).toBeVisible({ timeout: 500 });`;
+  const first = `await expect(page.getByText('${TEXT}').first()).toBeVisible({ timeout: 500 });`;
+  const pageText = `await expect(page.locator('body')).toContainText('${TEXT}', { useInnerText: true, timeout: 500 });`;
+
+  it('reproduces the failure: the strict check is ambiguous and the first() repair resolves the hidden copy', async () => {
+    expect(await run(SHOWN, strict)).toMatchObject({ closedCode: 'TARGET_DRIFT', matchCount: 2 });
+    expect(await run(SHOWN, first)).toMatchObject({ ok: false, closedCode: 'ASSERTION_FAILED' });
+  });
+
+  it('the page-text form passes on the shown copy, whatever the markup around it', async () => {
+    const result = await run(SHOWN, pageText);
+    expect(result.ok).toBe(true);
+    expect(result.closedCode).toBeUndefined();
+    expect(result.fenceCrossed).toBe(false);
+  });
+
+  it('the page-text form is not fooled by text that is hidden, invisible or only in a script', async () => {
+    expect(await run(HIDDEN_ONLY, pageText)).toMatchObject({ ok: false, closedCode: 'ASSERTION_FAILED' });
+    // The same check without useInnerText reads textContent and would pass on this page: the option is what makes the check sound.
+    const textContent = `await expect(page.locator('body')).toContainText('${TEXT}', { timeout: 500 });`;
+    expect((await run(HIDDEN_ONLY, textContent)).ok).toBe(true);
+  });
+
+  it('the page-text form fails when the text is nowhere', async () => {
+    expect(await run('<h1>Other</h1><p>Something else</p>', pageText)).toMatchObject({ ok: false, closedCode: 'ASSERTION_FAILED' });
+  });
+});
+
 // Keep the imports honest: the production import of the browser library lives elsewhere.
 void chromium;

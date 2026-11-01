@@ -55,6 +55,22 @@ describe('split and curated examples (AC1, AC2)', () => {
   });
 });
 
+describe('page-text rule of the step-code contract (SC008-FIX-32)', () => {
+  const contract = readFileSync(fileURLToPath(new URL('backend/src/main/resources/studio/guided-step-code-contract.md', REPO)), 'utf8');
+
+  it('teaches the rendered-text check for a step that names no element, in the rule and in an example', () => {
+    expect(contract).toContain('names no element or region');
+    expect(contract).toContain('hidden text cannot make the check pass');
+    const calls = [...contract.matchAll(/expect\(page\.locator\('body'\)\)\.toContainText\(([^)]*)\)/gu)].map(m => m[1] ?? '');
+    expect(calls).toHaveLength(2);
+    for (const args of calls) expect(args).toMatch(/, \{ useInnerText: true \}$/u);
+  });
+
+  it('names no site and no gate wording', () => {
+    expect(contract).not.toMatch(/iana|wikipedia|kernel\.org|github|datatracker|debian/iu);
+  });
+});
+
 describe('request builder (AC3)', () => {
   const texts = S.loadTexts();
   const task = { id: 'x', url: 'fixture://t1/home', steps: [{ text: 'Click the "Save" button', operation: { kind: 'click' } }] };
