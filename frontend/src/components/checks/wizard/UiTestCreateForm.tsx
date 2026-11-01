@@ -113,6 +113,7 @@ const UiTestCreateForm: React.FC<UiTestCreateFormProps> = ({ values, onChange, o
           <Select
             labelId="ui-test-create-system-label"
             label="System (CSI)"
+            MenuProps={{ transitionDuration: 0 }}
             value={selectedCsiIsRegistered ? values.csiId : ''}
             disabled={csiLoading === 'loading' || registeredCsis.length === 0}
             onChange={(event) => onChange('csiId', String(event.target.value))}
@@ -140,6 +141,7 @@ const UiTestCreateForm: React.FC<UiTestCreateFormProps> = ({ values, onChange, o
           <Select
             labelId="ui-test-create-environment-label"
             label="Environment"
+            MenuProps={{ transitionDuration: 0 }}
             value={values.environment}
             onChange={(event) => onChange('environment', String(event.target.value))}
           >
