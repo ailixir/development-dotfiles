@@ -81,7 +81,7 @@ function locator(r: Rig, over: Partial<{ matchesPassword: number; andThrows: boo
 
 const call = (kind: CallKind, method: string, args: readonly unknown[], receiver: object = {}): HookedCall => ({ kind, method, args, receiver, fenceCrossed: false });
 const thrown = (work: () => unknown): unknown => { try { work(); } catch (error) { return error; } return undefined; };
-const fenceOk = (r: Rig) => () => { r.events.push('fence'); r.control.beginInvocation(); };
+const fenceOk = (r: Rig) => () => { r.events.push('fence'); void r.control.beginInvocation(); };
 const fenceStop = (r: Rig) => () => { r.events.push('fence'); throw new FenceStop('FENCE_REACHED'); };
 
 /** What E1's call() does with a take-over: run(proceed, fence). */

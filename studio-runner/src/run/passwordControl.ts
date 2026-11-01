@@ -36,7 +36,8 @@ export function createPasswordControl(port: PasswordWorldPort, assertLive: () =>
     async fillPassword(target,origin,allowedOrigins,value,control?: InvocationControl){
       control?.check();const before=guard(target);await withhold([value]);control?.check();guard(target);
       if(port.current().navigation!==before.navigation)throw new PasswordNoEffect('TARGET_CHANGED');
-      if(control?.phase==='PREPARING')control.beginInvocation();
+      // A guided control answers with its memoised ack; the replay control answers synchronously and no await is added there.
+      if(control?.phase==='PREPARING'){const begun:unknown=control.beginInvocation();if(begun instanceof Promise){await begun;control.check();}}
       const result=await port.call('fillPassword',[target,origin,[...allowedOrigins],value]);control?.check();outcome(result,before,'passwordWriteCompleted',['PASSWORD_FORM_ACTION_NOT_ALLOWED','POLICY_DENIED']);
     },
   };

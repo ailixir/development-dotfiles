@@ -1,19 +1,17 @@
 import { GuidedDiagnostics } from './diagnostics.js';
 import {createRedactor} from '../executor/redaction.js';
 import type {Redactor} from '../executor/redaction.js';
-import { admit, createSecretRun, newTally, performStep, receiptFromTally } from '../run/observedReplayAdapter.js';
-import type { SecretRun, StepOutcome, StepReceipt } from '../run/observedReplayAdapter.js';
-import { SecretUseEvidence } from '../run/secretUse.js';
+import { admit, newTally, receiptFromTally } from '../run/observedReplayAdapter.js';
+import type { StepReceipt } from '../run/observedReplayAdapter.js';
+import type { SecretUseStatus } from '../run/secretUse.js';
 import { DISPATCH_WINDOW_MS, MIN_AUTOMATIC_OBSERVATION_MS, PREPARE_BUDGET_MS } from '../run/actionBudget.js';
-import { ObservedRefusal } from '../validator/observedReferencePolicy.js';
-import type { InvocationControl } from '../executor/observedReplay.js';
 import type { BridgePrefixPrepare, BridgePrefixPrepareResult, BridgePrefixRequestIdentity, BridgeAdmittedDrift, BridgeContextAcknowledgement, BridgeOrdinaryPrepare } from './types.js';
 import { randomUUID } from 'node:crypto';
 import { canonical, hash, identity, insist, sameIdentity, validate } from './contracts.js';
 import { GuidedJournal } from './journal.js';
 import type { Action, BridgeDispatch, BridgeIdentity, BridgeObservation, BridgeOrdinaryOutcome as BridgeOutcome, BridgePreparation, BridgeStop, ConsumerEdge, ExecutionEvidence, PrefixAction, Producer, RunnerContext, ObservationRefresh } from './types.js';
 import { GuidedLaunchFailure, GUIDED_RECORDING_FINALIZE_MS, GUIDED_START_BUDGET_MS, GUIDED_START_RESERVE_MS } from '../run/guidedBrowser.js';
-import type { GuidedBrowser, GuidedLossReason, GuidedRecordingRequest, GuidedStartup } from '../run/guidedBrowser.js';
+import type { GuidedBrowser, GuidedLaunch, GuidedStepResult, GuidedLossReason, GuidedStartup } from '../run/guidedBrowser.js';
 import { boundedStartup } from '../run/observedBootstrap.js';
 import type { ActionStamp, GuidedRecorder, GuidedSessionRecording } from './evidence.js';
 import type { ObservationConfig, ObservationFocus } from '../run/observationTypes.js';
@@ -45,8 +43,6 @@ export function recordCallbackFailure(error: unknown, facts: CallbackFailureFact
 export interface GuidedRuntimeOptions {
   /** Volatile trusted test observer; never available in a mounted config or wire frame. */
   onRawFailure?: (error: unknown) => void;
-  /** Controlled injected-error seam for the released-canary oracle, absent in production. Called with the value at the one place the secret hook reads it: after the fence, before the trusted write. */
-  beforeSecretFill?: (value: string) => void;
   diagnosticStderr?: (text: string) => void;
   workerId: string;
   /** The runner's navigation whitelist (`STUDIO_RUNNER_ALLOWED_DOMAINS`); every origin and destination is checked against it. */
@@ -59,7 +55,7 @@ export interface GuidedRuntimeOptions {
    * on abort with a {@link GuidedLaunchFailure} whose `close` kills only its own processes. One that
    * ignores it is still cut off by the runtime, which then keeps the slot held until it settles.
    */
-  launch: (config: ObservationConfig, contextId: string, onLost: (reason?: GuidedLossReason) => void, recording: GuidedRecordingRequest | undefined, startup: GuidedStartup) => Promise<GuidedBrowser>;
+  launch: GuidedLaunch;
   callback: (route: 'bootstrap-evidence' | 'observations' | 'outcomes' | 'lifecycle' | 'recording-evidence', message: unknown, idempotencyKey?: string) => Promise<void>;
   /**
    * Session recording composition (STUDIO-OBS-013 AC-1). Absent: the session records nothing and
@@ -100,16 +96,6 @@ export function ledgerOutcomeOf(code: StepReceipt['closedCode']): LedgerOutcome 
   if (code === 'OUTCOME_UNKNOWN') return { state: 'UNKNOWN_OUTCOME', outcomeCode: 'ACK_LOST' };
   return { state: 'FAILED', outcomeCode: FAILED_AS[code] ?? 'POLICY_DENIED' };
 }
-/** The secret evidence of the dispatch that is running: the hook lives for the session, the evidence is reported per dispatch. */
-class DispatchEvidence extends SecretUseEvidence {
-  private current = new SecretUseEvidence([]);
-  constructor() { super([]); }
-  begin(names: readonly string[]): void { this.current = new SecretUseEvidence(names); }
-  override attempting(name: string): void { this.current.attempting(name); }
-  override used(name: string): void { this.current.used(name); }
-  override refusedBeforeEffect(name: string): void { this.current.refusedBeforeEffect(name); }
-  override snapshot(): Record<string, 'USED' | 'NOT_USED' | 'REFUSED'> { return this.current.snapshot(); }
-}
 /** AUTHORED-ECHO-01: source literals are already visible in the authored source. Independent
  * secret, captured-value and DOM-private provenance remains strict in the collector. */
 function privateAuthoredValues(inputs: RunnerContext['authoredInputs']['inputs']): string[] {
@@ -134,11 +120,6 @@ export class GuidedRuntime {
   private busy = false;
   private observationDeadlineHit = false;
   private preparing = false;
-  private readonly secretEvidence = new DispatchEvidence();
-  /** The values of the secrets of the dispatch that is running; cleared in its finally, so the session-long hook never holds one. */
-  private readonly secretHolder = new Map<string, { value: string; allowedOrigins: readonly string[] }>();
-  private secretRun: SecretRun | null = null;
-  private stepControl: InvocationControl | null = null;
   private timer: ReturnType<typeof setTimeout> | null = null;
   private readonly secretValues = new Set<string>();
   private readonly values = new Map<string, LocalValue>();
@@ -288,13 +269,12 @@ export class GuidedRuntime {
     }
     if (this.stopped) { await this.closing; throw new Error('CONTEXT_LOST'); }
     this.startPhase = 'WITHHOLD';
-    insist(typeof this.browser.observations.withhold === 'function', 'CONTEXT_LOST');
-    const started = this.browser;
-    await bounded(() => started.observations.withhold?.(privateAuthoredValues(input.inputs)) ?? Promise.resolve());
+        const started = this.browser;
+    await bounded(() => started.observations.withhold(privateAuthoredValues(input.inputs)));
     this.live(); this.evidence = started.evidence;
     this.startPhase = 'BLANK_MATCH';
     const evidence = this.evidence;
-    insist(evidence.kind === 'initialBlank' && await bounded(() => started.blankMatches()), 'CONTEXT_LOST');
+    insist(evidence.kind === 'initialBlank' && await bounded(() => started.observations.current({ kind: 'blank' })), 'CONTEXT_LOST');
     this.startPhase = 'BOOTSTRAP_CALLBACK';
     await bounded(() => this.options.callback('bootstrap-evidence', { ...identity(this.context), executionEvidence: evidence, evidenceHash: hash(evidence) }));
     this.startPhase = 'STARTED';
@@ -332,7 +312,7 @@ export class GuidedRuntime {
     for (const producer of next.producers) insist(canonical(this.values.get(producer.bindingId)?.producer ?? null) === canonical(producer), 'CONTEXT_LOST');
     if (appended) {
       insist(this.browser, 'CONTEXT_LOST'); this.busy = true;
-      try { await this.browser.observations.withhold?.(privateAuthoredValues(next.authoredInputs.inputs.slice(this.context.authoredInputs.inputs.length))); this.live(); }
+      try { await this.browser.observations.withhold(privateAuthoredValues(next.authoredInputs.inputs.slice(this.context.authoredInputs.inputs.length))); this.live(); }
       catch { await this.stop('CONTEXT_LOST'); throw new Error('CONTEXT_LOST'); }
       finally { this.busy = false; }
       this.prepared.clear();
@@ -370,8 +350,8 @@ export class GuidedRuntime {
   private async pageCurrent(p: Action): Promise<boolean> {
     if (!this.browser) return false;
     const e = p.executionEvidence;
-    if (e.kind === 'initialBlank') return this.browser.blankMatches();
-    return this.browser.observations.documentCurrent({ documentId: e.documentId, generation: e.generation }, e.origin);
+    if (e.kind === 'initialBlank') return this.browser.observations.current({ kind: 'blank' });
+    return this.browser.observations.current({ kind: 'document', documentId: e.documentId, generation: e.generation, origin: e.origin });
   }
   /** The values the step is given: authored inputs by id and captured values by binding id, exactly the ones its `uses` name. */
   private stepGivens(p: Action): { inputs: Record<string, string>; vars: Record<string, string>; secretIds: string[] } {
@@ -382,13 +362,6 @@ export class GuidedRuntime {
       else { const local = this.values.get(use.id); insist(local, 'BINDING_UNAVAILABLE'); vars[use.id] = local.value; }
     }
     return { inputs, vars, secretIds };
-  }
-  /** The one secret run of the session (the secret-bearing window outlives a step); its control and values are the running prepare's or dispatch's. */
-  private secrets(): SecretRun {
-    const browser = this.browser;
-    insist(browser, 'CONTEXT_LOST');
-    this.secretRun ??= createSecretRun({ session: browser.observations, evidence: this.secretEvidence, control: () => { insist(this.stepControl, 'CONTEXT_LOST'); return this.stepControl; }, resolve: id => { const held = this.secretHolder.get(id); if (held) this.options.beforeSecretFill?.(held.value); return held; } });
-    return this.secretRun;
   }
   async prepare(value: unknown): Promise<BridgePreparation> {
     insist(!this.preparing, 'BUSY');
@@ -415,22 +388,15 @@ export class GuidedRuntime {
   }
   private async runToFence(p: Action): Promise<void> {
     const browser = this.browser;
-    insist(browser?.handle?.stepApi, 'CONTEXT_LOST');
+    insist(browser, 'CONTEXT_LOST');
     const givens = this.stepGivens(p);
     const limit = Math.min(this.deadline(), Date.now() + PREPARE_BUDGET_MS);
-    const abort = new AbortController();
-    const control: InvocationControl = {
-      deadlineMs: limit, remainingMs: () => Math.max(0, limit - Date.now()), signal: abort.signal, phase: 'PREPARING',
-      check: () => { this.live(); if (Date.now() >= limit) throw new ObservedRefusal('TIMEOUT'); },
-      // Until-fence mode stops before the fence; reaching here would be a step that crossed it during prepare.
-      beginInvocation: () => { throw new Error('CONTEXT_LOST'); },
-      poison: () => { abort.abort(); },
-    };
-    const tally = newTally();
-    this.preparing = true; this.stepControl = control;
-    let outcome: StepOutcome;
-    try { outcome = await performStep(browser.handle.stepApi, browser.observations, { coordinate: p.coordinate, operation: p.operation, ...givens, control, tally, allowedDomains: this.options.allowedDomains, secrets: this.secrets(), untilFence: true }); }
-    finally { this.preparing = false; this.stepControl = null; }
+    this.preparing = true;
+    let outcome: GuidedStepResult;
+    try {
+      // Until-fence mode stops before the fence; the child refuses a fence request on a prepare, and the proxy kills a child that sends one.
+      outcome = await browser.step({ mode: 'prepare', coordinate: p.coordinate, operation: p.operation, ...givens, deadlineEpochMs: limit }, { onFence: () => Promise.reject(new Error('CONTEXT_LOST')) });
+    } finally { this.preparing = false; }
     this.live();
     // Nothing may have happened: a step that reached an effect before its first effectful call is broken, and the session ends.
     if (outcome.receipt.fenceCrossed || outcome.receipt.effects.length > 0) { await this.stop('UNKNOWN_OUTCOME'); throw new Error('CONTEXT_LOST'); }
@@ -456,7 +422,7 @@ export class GuidedRuntime {
   }
   private async acquirePrefix(envelope: BridgePrefixPrepare): Promise<BridgePrefixPrepareResult> {
     const r = envelope.request, program = this.context.prefixProgram, evidence = this.evidence;
-    insist(program && this.browser?.handle && evidence, 'CONTEXT_LOST');
+    insist(program && this.browser && evidence, 'CONTEXT_LOST');
     const action = program.actions.find(a => canonical(a.coordinate) === canonical(r.coordinate));
     insist(action && r.coordinate.ordinal === (this.ordinals.get(r.coordinate.stepId) ?? 0), 'ACTION_ORDER');
     try {
@@ -513,45 +479,48 @@ export class GuidedRuntime {
     let diagnostics:GuidedDiagnostics|null=this.diagnostics;
     this.exercisedEdges.push(...structuredClone(request.consumerEdges));
     this.busy = true; this.dispatched.add(admissionId); this.prepared.clear();
-    for (const secret of request.secrets) this.secretHolder.set(secret.secretId, { value: secret.value, allowedOrigins: [...secret.allowedOrigins] });
-    this.secretEvidence.begin(secretUses);
+    // The secret values travel only in the dispatch step message; this object is emptied in the finally below.
+    const stepSecrets: Record<string, { value: string; allowedOrigins: readonly string[] }> = {};
+    for (const secret of request.secrets) stepSecrets[secret.secretId] = { value: secret.value, allowedOrigins: [...secret.allowedOrigins] };
     const dispatchStarted = Date.now();
     const windowEnd = Math.min(this.deadline(), dispatchStarted + DISPATCH_WINDOW_MS);
     let consumed = false;
     let completed: BridgeOutcome | null = null;
     const timing: { stamp: ActionStamp | null } = { stamp: null };
     const nativeFence = { started: false };
-    const abort = new AbortController();
     const tally = newTally();
-    const control: InvocationControl = {
-      deadlineMs: windowEnd, remainingMs: () => Math.max(0, windowEnd - Date.now()), signal: abort.signal,
-      get phase() { return nativeFence.started ? 'INVOKING' : 'PREPARING'; },
-      // The dispatch window ends the step: before the fence it is a timeout, after it nobody knows what the page did.
-      check: () => { this.live(); if (Date.now() >= windowEnd) throw new ObservedRefusal(nativeFence.started ? 'OUTCOME_UNKNOWN' : 'TIMEOUT'); },
-      beginInvocation: () => {
-        this.live(); if (nativeFence.started) return;
+    /** The child's own evidence of how each secret was used; empty until its receipt is accepted. */
+    let childSecretUse: Readonly<Record<string, SecretUseStatus>> = {};
+    // The journal fence, asked for by the child before its first native effect. The child waits for the answer: it is acked only after
+    // journal.fence returned, and any failure here is a nack (no native call, no retry); the dispatch catch path ends the session.
+    const onFence = (): Promise<void> => {
+      try {
+        this.live(); if (nativeFence.started) return Promise.resolve();
         insist(this.journal, 'JOURNAL_UNAVAILABLE');
         this.journal.fence({ schemaVersion: 3, sessionId: request.sessionId, contextId: request.contextId, ownerFence: request.ownerFence, admissionId, operationHash, state: 'INVOKING', receiptHash: null });
-        nativeFence.started = true; timing.stamp = this.recording?.begin(admissionId, p.coordinate.stepId, p.coordinate.ordinal) ?? null;
-      },
-      poison: () => { abort.abort(); },
+        nativeFence.started = true; tally.fenceCrossed = true; timing.stamp = this.recording?.begin(admissionId, p.coordinate.stepId, p.coordinate.ordinal) ?? null;
+        return Promise.resolve();
+      } catch (error) { return Promise.reject(error instanceof Error ? error : new Error('JOURNAL_UNAVAILABLE')); }
     };
-    const secretUseOf = (receipt: StepReceipt): Record<string, 'USED' | 'NOT_USED' | 'REFUSED'> => {
-      const seen = this.secretEvidence.snapshot();
-      // A status the evidence lost (an attempt that did not prove an outcome) is reported as used: the secret may have been written.
-      return Object.fromEntries(secretUses.map(id => [id, seen[id] ?? (receipt.fenceCrossed ? 'USED' : 'NOT_USED')]));
+    const secretUseOf = (receipt: StepReceipt): Record<string, SecretUseStatus> => {
+      // A status the child lost (an attempt that did not prove an outcome) is reported as used if the fence was crossed: the secret may have been written.
+      return Object.fromEntries(secretUses.map(id => [id, childSecretUse[id] ?? (receipt.fenceCrossed ? 'USED' : 'NOT_USED')]));
     };
     const outcomeOf = (receipt: StepReceipt, availability: BridgeOutcome['availability'], errorMessage?: string): BridgeOutcome => {
       const derived = ledgerOutcomeOf(receipt.closedCode);
       return { ...identity(request), ledger: { ...ledger, state: derived.state, outcomeCode: derived.outcomeCode }, availability, receipt, secretUse: secretUseOf(receipt), ...(errorMessage ? { errorMessage } : {}) };
     };
     try {
-      insist(this.browser && this.journal && this.browser.handle?.stepApi, 'CONTEXT_LOST');
+      insist(this.browser && this.journal, 'CONTEXT_LOST');
       this.actions++; await this.journal.consume({ sessionId: request.sessionId, contextId: request.contextId, ownerFence: request.ownerFence, admissionId }); consumed = true;
       this.live(); insist(await this.pageCurrent(p), 'TARGET_CHANGED'); this.live();
       // AC-2: the run-clock reading immediately before the browser effect (AR-1 R2 "action"). Timing starts only when the native fence is committed.
-      this.stepControl = control;
-      const outcome = await performStep(this.browser.handle.stepApi, this.browser.observations, { coordinate: p.coordinate, operation: p.operation, ...givens, control, tally, allowedDomains: this.options.allowedDomains, secrets: this.secrets() });
+      const stepped = await this.browser.step({ mode: 'dispatch', coordinate: p.coordinate, operation: p.operation, ...givens, secrets: stepSecrets, deadlineEpochMs: windowEnd }, { onFence });
+      // The server's own fence state decides. If it journalled the fence but the child's receipt shows none (a stop between the ack and the native call),
+      // nobody knows what the page did: the child's receipt is discarded and the outcome is unknown.
+      const disagrees = nativeFence.started && !stepped.receipt.fenceCrossed;
+      const outcome: GuidedStepResult = disagrees ? { receipt: receiptFromTally(p.operation, tally, 'OUTCOME_UNKNOWN'), captured: {}, fenceReached: true, secretUse: {} } : stepped;
+      childSecretUse = outcome.secretUse;
       const receipt = outcome.receipt;
       timing.stamp?.end(receipt.closedCode === null); // The effect's result is known (or proven absent); before any outcome callback.
       this.live();
@@ -567,7 +536,7 @@ export class GuidedRuntime {
           const available = { bindingId, producerAdmissionId: admissionId, contextId: this.context.contextId, workerId: this.context.workerId, ownerFence: this.context.ownerFence };
           const producer: Producer = { bindingId, producerAdmissionId: admissionId, coordinate: p.coordinate, origin: p.executionEvidence.origin, availability: available };
           this.values.set(bindingId, { value: captured, producer, preparationId: request.preparationId });
-          this.browser.observations.commitCapture(captured);
+          await this.browser.observations.commitCapture(captured);
           added.push(producer);
         }
         availability = added.map(producer => producer.availability);
@@ -594,7 +563,6 @@ export class GuidedRuntime {
         // Any other failure ends the session: the outcome is committed as it is, then the stop.
         completed = result;
         await this.options.callback('outcomes', result);
-        this.browser.observations.invalidate();
         await this.stop(result.ledger.state === 'FAILED' ? 'CONTEXT_LOST' : 'UNKNOWN_OUTCOME'); return result;
       }
       // A committed success stays success if its response is lost. No action retry, ever.
@@ -617,14 +585,14 @@ export class GuidedRuntime {
       try { this.options.onRawFailure?.(error); } catch { /* Volatile test observation is non-authoritative. */ }
       const errorMessage = consumed ? await diagnostics?.record({sessionId:request.sessionId,contextId:request.contextId,admissionId,stepId:p.coordinate.stepId,ordinal:p.coordinate.ordinal},error,failureRedactor,this.options.diagnosticStderr ?? (text=>{process.stderr.write(text);})):undefined;
       // A failure outside the step (the session, the journal, a callback): before the fence nothing happened, after it nobody knows.
-      const message = error instanceof ObservedRefusal ? error.code : error instanceof Error ? error.message : '';
-      const closedCode: StepReceipt['closedCode'] = nativeFence.started ? 'OUTCOME_UNKNOWN' : message === 'TARGET_CHANGED' ? 'TARGET_DRIFT' : message === 'POLICY_DENIED' ? 'POLICY_REFUSED' : message === 'CONTEXT_LOST' ? 'CANCELLED' : 'INTERNAL_ERROR';
+      const message = error instanceof Error ? error.message : ''; // a closed error's message is its code
+      const closedCode: StepReceipt['closedCode'] = nativeFence.started ? 'OUTCOME_UNKNOWN' : message === 'TARGET_CHANGED' ? 'TARGET_DRIFT' : message === 'POLICY_DENIED' ? 'POLICY_REFUSED' : message === 'CONTEXT_LOST' ? 'CANCELLED' : message === 'TIMEOUT' ? 'TIMEOUT' : 'INTERNAL_ERROR';
       const receipt = receiptFromTally(p.operation, tally, closedCode);
       timing.stamp?.end(!nativeFence.started && closedCode !== 'INTERNAL_ERROR'); // OUTCOME_UNKNOWN observed no completion: endMs stays null.
       const outcome = outcomeOf(receipt, [], errorMessage);
       if (consumed) await this.options.callback('outcomes', outcome).catch(() => undefined);
       await this.stop(outcome.ledger.state === 'FAILED' ? 'CONTEXT_LOST' : 'UNKNOWN_OUTCOME'); return outcome;
-    } finally { this.busy = false; this.stepControl = null; this.secretHolder.clear(); (request.secrets as BridgeDispatch['secrets'][number][]).length = 0; /* the request object keeps no secret value; `secrets` is a required field, so it is emptied, not deleted (a replayed request must still reach ALREADY_CONSUMED) */ failureValues.length=0;failureRedactor=null;diagnostics=null; }
+    } finally { this.busy = false; for (const id of Object.keys(stepSecrets)) Reflect.deleteProperty(stepSecrets, id); (request.secrets as BridgeDispatch['secrets'][number][]).length = 0; /* the request object keeps no secret value; `secrets` is a required field, so it is emptied, not deleted (a replayed request must still reach ALREADY_CONSUMED) */ failureValues.length=0;failureRedactor=null;diagnostics=null; }
   }
   async refreshObservation(value: unknown, idempotencyKey: string): Promise<BridgeObservation> {
     const request=validate<ObservationRefresh>('observation-refresh',value);this.checkIdentity(request);insist(!this.busy&&!this.preparing,'BUSY');
@@ -682,10 +650,6 @@ export class GuidedRuntime {
     const recording = this.recording; this.recording = null;
     const sessionIdentity = identity(this.context);
     let orderlyClose = false;
-    // dispose starts by dropping local masking bytes synchronously. Never await its renderer
-    // command before close: a stuck renderer must not block the actual shutdown attempt.
-    let disposal: Promise<void> | undefined;
-    try { disposal = browser?.observations.dispose().catch(() => undefined); } catch { /* Continue the browser shutdown even if a disposal port fails synchronously. */ }
     try {
       // Fail closed: browserClosed stays false, so the slot stays occupied until the late settlement has closed what it made.
       if (hung) throw new Error('CONTEXT_LOST');
@@ -693,12 +657,11 @@ export class GuidedRuntime {
       // terminated; any other session (a start that failed after the browser launched, or a launch that came back late) has no
       // step to finish and no recording to finalize, so it takes the hard teardown alone. Both settle only when the browser is
       // confirmed gone; a survivor rejects here and `browserClosed` stays false, so the slot stays held.
-      if (browser) await (this.startPhase === 'STARTED' ? browser.close() : browser.terminate()).catch(() => { throw new Error('CONTEXT_LOST'); });
+      if (browser) await (this.startPhase === 'STARTED' ? browser.close() : browser.terminate()).catch(() => { this.releaseWhenGone(browser); throw new Error('CONTEXT_LOST'); });
       else await this.failedLaunchClose?.().catch(() => { throw new Error('CONTEXT_LOST'); });
       // The browser's own verdict: orderly only if its graceful stage resolved inside the grace.
       orderlyClose = browser?.orderlyClosed() ?? false;
       this.browserClosed = true;
-      await disposal;
       // PUBLISHED is a stop reason only: the session is already terminal and lifecycle never carries it.
       if (reason !== 'PUBLISHED') await this.options.callback('lifecycle', { ...identity(this.context), reason }).catch(() => undefined);
     } finally {
@@ -707,6 +670,10 @@ export class GuidedRuntime {
       this.browser = null; this.launching = null; this.failedLaunchClose = null; this.journal = null; this.diagnostics = null;
       this.exercisedEdges.length = 0; this.dispatched.clear(); this.ordinals.clear();
     }
+  }
+  /** A kill whose quiescence could not be confirmed in time: the slot stays held, but is released as soon as the browser confirms the tree gone. */
+  private releaseWhenGone(browser: GuidedBrowser): void {
+    void browser.confirmGone?.().then(() => { this.browserClosed = true; }, () => undefined);
   }
   /** A launcher that outlived its deadline and the reserve: whatever it finally makes is closed, and only then is the slot released. */
   private releaseWhenLaunchSettles(launching: Promise<GuidedBrowser>): void {
@@ -728,7 +695,10 @@ export class GuidedRuntime {
     if (reason === 'PUBLISHED') this.published = true;
     if (this.closing) return this.closing;
     this.startAbort.abort(new Error('CANCELLED'));
-    this.stopped = true; this.options.onStopping?.(); if (this.timer) clearTimeout(this.timer); this.values.clear(); this.secretValues.clear(); this.prepared.clear(); this.evidence = null;
+    this.stopped = true; this.options.onStopping?.();
+    // Tell the child to end what it is doing (a step in flight ends cancelled, a pending fence is refused); close follows from closeResources.
+    try { this.browser?.abort(); } catch { /* A child that cannot hear it is ended by the close bound. */ }
+ if (this.timer) clearTimeout(this.timer); this.values.clear(); this.secretValues.clear(); this.prepared.clear(); this.evidence = null;
     this.context = { ...this.context, authoredInputs: { ...this.context.authoredInputs, inputs: [] }, allocations: [], producers: [], consumerEdges: [] };
     this.closing = Promise.resolve().then(() => this.closeResources(reason));
     return this.closing;

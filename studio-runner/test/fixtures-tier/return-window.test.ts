@@ -24,8 +24,9 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { OriginNotAllowed } from '../../src/allowedDomains.js';
 import { ObservedInvocationControl } from '../../src/executor/observedReplay.js';
 import type { Guard, ReplayAction, Scope } from '../../src/executor/observedOperations.js';
-import { RETURN_WINDOW_MS, launchGuidedBrowser } from '../../src/run/browser.js';
-import type { GuidedBrowser } from '../../src/run/guidedBrowser.js';
+import { launchGuidedBrowser } from '../../src/run/browser.js';
+import { RETURN_WINDOW_MS } from '../../src/run/observationDeadline.js';
+import type { LaunchedBrowser } from '../../src/run/guidedBrowser.js';
 import type { BrowserHandle } from '../../src/run/browserFactory.js';
 import { createObservedReplayAdapter, newTally } from '../../src/run/observedReplayAdapter.js';
 import { SecretUseEvidence } from '../../src/run/secretUse.js';
@@ -75,13 +76,13 @@ afterAll(async () => {
 afterEach(() => { hits.length = 0; });
 
 const guidedConfig = (domains: readonly string[] = TEST_DOMAINS) => ({ sessionId: 'return-window', scopeHash: 'a'.repeat(64), allowedDomains: domains, knownSecrets: [] });
-const pageOf = (browser: GuidedBrowser): Page => {
+const pageOf = (browser: LaunchedBrowser): Page => {
   if (browser.handle === undefined) throw new Error('HANDLE');
   return browser.handle.page as unknown as Page;
 };
 
 describe('learning (the guided browser)', () => {
-  let guided: GuidedBrowser | undefined;
+  let guided: LaunchedBrowser | undefined;
   afterEach(async () => { await guided?.close().catch(() => undefined); guided = undefined; });
 
   it('continues when the page hops to another host and comes back inside the return window', async () => {

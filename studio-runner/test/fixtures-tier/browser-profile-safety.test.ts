@@ -13,7 +13,7 @@ import {prepareBrowserProfile,BROWSER_PREFERENCES,releaseBrowserProfile} from '.
 import {playwrightBrowserFactory,launchGuidedBrowser} from '../../src/run/browser.js';
 import {GuidedLaunchFailure} from '../../src/run/guidedBrowser.js';
 import {readProcessTableWithArgs} from '../../src/run/tree.js';
-import type {GuidedBrowser} from '../../src/run/guidedBrowser.js';
+import type {LaunchedBrowser} from '../../src/run/guidedBrowser.js';
 import {ProfileSafetyFixture,probeOwnedProfilePid,performLiveProfileRedirect} from '../helpers/profileSafetyFixture.js';
 import {evidencePath} from '../helpers/evidenceOut.js';
 // Typed view of the static JSON import: the file exceeds tsserver's 4 MiB non-TS limit, so ESLint's projectService types it as `error`.
@@ -76,7 +76,7 @@ it('refuses a Default directory redirected after actual launch rather than accep
  const attackFacts={defaultRecreations:0,renamed:false,canaryCreated:false,symlinkInstalled:false,liveBefore:false,liveAfter:false,expectedRefusal:false,canaryUnchanged:false,outsideIdentityUnchanged:false};
  const identity=async(path:string)=>{const stat=await promises.lstat(path);if(!stat.isDirectory()||stat.isSymbolicLink())throw Error('ATTACK_DIRECTORY');return{dev:stat.dev,ino:stat.ino,uid:stat.uid};};
  // A failed launch confirms closure by its hard teardown, so this fixture credits zero production context.close() requests (ruling item 1).
- const harness=new ProfileSafetyFixture<Awaited<ReturnType<typeof real>>,GuidedBrowser>({
+ const harness=new ProfileSafetyFixture<Awaited<ReturnType<typeof real>>,LaunchedBrowser>({
   productionTeardown:'terminate',
   bind:context=>{const browser=context.browser(),rawClose=context.close.bind(context);return{
    value:context,rawClose,installClose:close=>{vi.spyOn(context,'close').mockImplementation(close);},

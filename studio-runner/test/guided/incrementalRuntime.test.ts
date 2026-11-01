@@ -12,6 +12,7 @@ import {stepOp} from '../helpers/stepCode.js';
 import {fakeHandle,newRig} from '../helpers/stepFakes.js';
 import type {BridgeBootstrap,BridgePrefixPrepare,BridgeObservation,BridgeNativeFenceEvent,PrefixAction} from '../../src/guided/types.js';
 import type {GuidedBrowser} from '../../src/run/guidedBrowser.js';
+import { inProcessBrowser } from '../helpers/guidedStepService.js';
 const STEP_IDS={nav:'00000000-0000-4000-8000-000000000001',read:'00000000-0000-4000-8000-000000000002',next:'00000000-0000-4000-8000-000000000003',fill:'00000000-0000-4000-8000-000000000004',submit:'00000000-0000-4000-8000-000000000005'} as const;
 const DELIVERY_IDS={original:'00000000-0000-4000-8000-000000001001',other:'00000000-0000-4000-8000-000000001002',metadata:'00000000-0000-4000-8000-000000001003',gap:'00000000-0000-4000-8000-000000001004'} as const;
 const clean:(()=>Promise<unknown>)[]=[];
@@ -44,7 +45,7 @@ async function harness(options:{code?:string;loseDriftAck?:boolean;programPair?:
   rig.page.goto=effect;if(options.code===MISS)rig.w.matches['#gone']=0;
   const createObservationSession=vi.fn(()=>{throw new Error('SECOND_OBSERVATION_SESSION');});
   const handle={...fakeHandle(rig),createObservationSession};
-  const browser:GuidedBrowser={handle,evidence:{kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:'create',bootstrapId:'bootstrap',documentId:'blank',url:'about:blank',origin:null,generation:0},blankMatches:blank,close:vi.fn(()=>Promise.resolve()),terminate:vi.fn(()=>Promise.resolve()),orderlyClosed:()=>true,observations:rig.session};
+  const browser:GuidedBrowser=inProcessBrowser({handle,evidence:{kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:'create',bootstrapId:'bootstrap',documentId:'blank',url:'about:blank',origin:null,generation:0},blankMatches:blank,close:vi.fn(()=>Promise.resolve()),terminate:vi.fn(()=>Promise.resolve()),orderlyClosed:()=>true,observations:rig.session});
   const launch=vi.fn(()=>Promise.resolve(browser));
   const runtime=new GuidedRuntime(context,{workerId:context.workerId,allowedDomains: TEST_DOMAINS, journalDirectory:directory,launch,capabilities:grant.scope.capabilities,callback:(route,body,key)=>{messages.push({route,body,...key?{key}:{}});return options.loseDriftAck&&route==='outcomes'?Promise.reject(new Error('ACK_LOST')):Promise.resolve();}});clean.push(()=>runtime.stop('CANCELLED'));await runtime.start();
   const evidence=(messages[0]?.body as BridgeBootstrap).executionEvidence;

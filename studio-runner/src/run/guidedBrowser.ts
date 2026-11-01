@@ -1,6 +1,8 @@
+import type { ReplayAction, StepReceipt } from '../executor/observedOperations.js';
 import type { ExecutionEvidence } from '../guided/types.js';
 import type { BrowserHandle } from './browserFactory.js';
-import type { ObservationSession } from './observationTypes.js';
+import type { ObservationConfig, ObservationExport, ObservationFocus, ObservationSession } from './observationTypes.js';
+import type { SecretUseStatus } from './secretUse.js';
 import type {BrowserPreferenceEvidence} from './scratchLayout.js';
 
 /**
@@ -95,7 +97,7 @@ export interface GuidedCloseStagesPorts {
  */
 export function guidedCloseStages(
   ports: GuidedCloseStagesPorts, graceMs: number = GUIDED_CLOSE_GRACE_MS
-): Pick<GuidedBrowser, 'close'> & {
+): Pick<LaunchedBrowser, 'close'> & {
   readonly terminate: () => Promise<void>; readonly orderlyClosed: () => boolean;
   /** True iff the graceful stage FULFILLED (at any time, however late) within `boundMs` of this call. Never starts or stops anything. */
   readonly gracefulFulfilledWithin: (boundMs: number) => Promise<boolean>;
@@ -133,8 +135,11 @@ export function guidedCloseStages(
   return { close, terminate, orderlyClosed: () => orderly, gracefulFulfilledWithin };
 }
 
-/** Private capability; instantiated only in the actual guided worker. */
-export interface GuidedBrowser {
+/**
+ * What `launchGuidedBrowser` returns: the browser itself, in the process that launched it. Only the guided child (and the fixtures that
+ * test the browser directly) hold one; the runtime holds the {@link GuidedBrowser} proxy of a child that does (SC008-E15).
+ */
+export interface LaunchedBrowser {
   readonly preferenceEvidence?:BrowserPreferenceEvidence;
   readonly scratchDirectory?: string;
   readonly evidence: ExecutionEvidence;
@@ -178,6 +183,93 @@ export interface GuidedBrowser {
    */
   readonly handle?: BrowserHandle;
 }
+
+
+/** A document the runtime asks the child about: the blank bootstrap document, or the document of a held observation. */
+export type GuidedDocumentTarget =
+  | { readonly kind: 'blank' }
+  | { readonly kind: 'document'; readonly documentId: string; readonly generation: number; readonly origin: string };
+
+/**
+ * The observation session as the runtime sees it: every call crosses the process boundary, so every call is asynchronous. The session itself
+ * (`ObservationSession`) lives in the child and is untouched; `invalidate` and `dispose` have no counterpart, the child does both.
+ */
+export interface GuidedObservationPort {
+  /** `true` iff the page still is that document (no navigation since, same identity and generation). */
+  current(target: GuidedDocumentTarget): Promise<boolean>;
+  observe(maxBytes?: number, settle?: boolean, focus?: ObservationFocus, deadlineMs?: number): Promise<ObservationExport>;
+  withhold(values: readonly string[]): Promise<void>;
+  /** A value a step captured: masked in every later observation. Resolves once the child holds it, so the next observe() cannot overtake it. */
+  commitCapture(value: string): Promise<void>;
+}
+
+/**
+ * One step to run in the child. `prepare` runs the code up to its first effectful call and stops there; `dispatch` runs it for real.
+ * `secrets` exist only on a dispatch, travel only in this message, and are cleared by the child when the step ends.
+ */
+export interface GuidedStepRequest {
+  readonly mode: 'prepare' | 'dispatch';
+  readonly coordinate: ReplayAction['coordinate'];
+  readonly operation: ReplayAction['operation'];
+  readonly inputs: Readonly<Record<string, string>>;
+  readonly vars: Readonly<Record<string, string>>;
+  readonly secretIds: readonly string[];
+  readonly secrets?: Readonly<Record<string, { readonly value: string; readonly allowedOrigins: readonly string[] }>>;
+  /** Absolute end of the prepare budget or of the dispatch window, in wall-clock epoch milliseconds. */
+  readonly deadlineEpochMs: number;
+}
+
+/** What a step reports: `performStep`'s outcome plus the child's secret evidence for it. `receipt.fenceCrossed` is the child's claim; the server's own fence state decides. */
+export interface GuidedStepResult {
+  readonly receipt: StepReceipt;
+  readonly captured: Readonly<Record<string, string>>;
+  readonly fenceReached: boolean;
+  readonly matchCount?: number;
+  readonly syntax?: { readonly line: number; readonly column: number };
+  readonly secretUse: Readonly<Record<string, SecretUseStatus>>;
+}
+
+export interface GuidedStepHooks {
+  /**
+   * The server's journal fence for this dispatch. The child asks for it before the first native effect and waits for the answer: it resolves
+   * once the journal has written the fence, and rejects if it could not (the child is then refused the effect and never retries).
+   */
+  readonly onFence: () => Promise<void>;
+}
+
+/** The runtime-facing guided browser: a proxy for the browser in the per-session child process. */
+export interface GuidedBrowser {
+  readonly preferenceEvidence?: BrowserPreferenceEvidence;
+  /** Reported by the child at launch; inside the child's private temporary directory. */
+  readonly scratchDirectory?: string;
+  readonly evidence: ExecutionEvidence;
+  readonly observations: GuidedObservationPort;
+  /**
+   * Runs one step in the child. Rejects with a closed error only when the step itself could not end in a receipt: `TIMEOUT` when the child
+   * did not answer in time (it is then killed), `CONTEXT_LOST` when it was lost or broke the protocol.
+   */
+  readonly step: (request: GuidedStepRequest, hooks: GuidedStepHooks) => Promise<GuidedStepResult>;
+  /** Tells the child to stop what it is doing (the session is stopping). A step in flight ends cancelled; nothing waits on it. */
+  readonly abort: () => void;
+  /** As {@link LaunchedBrowser.close}, across the process boundary: the child is confirmed gone when this settles, except for a recording still being finalized. */
+  readonly close: () => Promise<void>;
+  /** As {@link LaunchedBrowser.terminate}: kills the child's whole process tree, no graceful stage. */
+  readonly terminate: () => Promise<void>;
+  /**
+   * After a `close`/`terminate` that rejected because the tree could not be confirmed gone in the bounded time: keeps confirming in the
+   * background; resolves once it is gone (the slot may then be released), rejects if it never is.
+   */
+  readonly confirmGone?: () => Promise<void>;
+  readonly orderlyClosed: () => boolean;
+  readonly recordedVideo?: () => Promise<string | null>;
+  readonly finalizeRecording?: (boundMs: number) => Promise<boolean>;
+}
+
+/** The launch signature the runtime is given (`GuidedRuntimeOptions['launch']`). */
+export type GuidedLaunch = (
+  config: ObservationConfig, contextId: string, onLost: (reason?: GuidedLossReason) => void,
+  recording: GuidedRecordingRequest | undefined, startup: GuidedStartup,
+) => Promise<GuidedBrowser>;
 
 /** Why an already running guided browser reported itself lost. Closed vocabulary, no free text. */
 export type GuidedLossReason = 'PAGE_CRASH' | 'BROWSER_DISCONNECTED';

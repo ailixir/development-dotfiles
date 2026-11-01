@@ -222,9 +222,11 @@ export function createSecretHook(options: SecretHookOptions): { readonly beforeC
     return {
       async run(_proceed, fence) {
         try {
-          fence();
+          // Under a guided control the fence is an asynchronous ack: the value below is read only after it. A synchronous fence adds no await.
+          const crossing: unknown = fence();
+          if (crossing instanceof Promise) await crossing;
         } catch (error) {
-          // FenceReached (prepare run) or a poisoned control: nothing was written and the value was never read.
+          // FenceReached (prepare run), a poisoned control or a refused ack: nothing was written and the value was never read.
           holds.delete(hold);
           throw error;
         }

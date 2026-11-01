@@ -14,6 +14,7 @@ import {createGuidedServer,guidedClaimClient,guidedCallback,verifyGuidedJwt} fro
 import {GuidedRuntime} from '../../src/guided/runtime.js';
 import {PrivateInventory} from '../../src/run/privateInventory.js';
 import {launchGuidedBrowser} from '../../src/run/browser.js';
+import {adaptInProcess} from './helpers/guidedLaunch.js';
 import {GuidedLaunchFailure} from '../../src/run/guidedBrowser.js';
 import {descendantsOf,isAlive} from '../../src/run/tree.js';
 import {hash,identity,validate} from '../../src/guided/contracts.js';
@@ -224,11 +225,11 @@ async function harness(){
     }
     try{await sdkSetup.get(entry.label);if(!browser.scratchDirectory||!browser.preferenceEvidence)throw Error('PROFILE');entry.scratch=browser.scratchDirectory;entry.preferences=browser.preferenceEvidence;}
     catch(error){const deadline=performance.now()+CLEANUP_MS;scanExtant();await boundedRelease('setup-browser-close',()=>browser.close(),deadline,cleanupIssues);restoreMethods(entry.closeRestores,'setup-descriptor',cleanupIssues);delete entry.sdk;sdkSetup.delete(entry.label);throw error;}
-    return {...browser,close:()=>{
+    return adaptInProcess({...browser,close:()=>{
       const original=()=>{scanExtant();return browser.close();};
       const close=gateA&&entry.label==='A'?(gateEntered=true,events.push({kind:'close-gate',label:'A',at:performance.now()}),gateA.pending.then(original)):original();
       void close.then(()=>{live--;entry.closed=true;events.push({kind:'actual-close',label:entry.label,at:performance.now()});restoreMethods(entry.closeRestores,'closed-SDK-descriptor',cleanupIssues);delete entry.sdk;sdkSetup.delete(entry.label);},()=>{events.push({kind:'close-failed',label:entry.label,at:performance.now()});});return close;
-    }};
+    }},args[0].allowedDomains);
   }};
   const path=(entry:Client)=>'/internal/v2/studio/guided-sessions/'+entry.context.sessionId;
   const refresh=(entry:Client):void=>{const notice=messages.filter(m=>m.label===entry.label&&m.route==='observations').at(-1)?.body as BridgeObservation|undefined;if(notice){entry.observation=notice.observation;entry.evidence={kind:'observedDocument',sessionId:entry.context.sessionId,contextId:entry.context.contextId,documentId:notice.observation.documentId,generation:notice.observation.generation,origin:notice.observation.origin,observationHash:hash(notice.observation)};}};

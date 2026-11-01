@@ -1,4 +1,5 @@
-import { gotoPage } from './helpers/guidedLaunch.js';
+import { gotoPage, guidedChildLaunch } from './helpers/guidedLaunch.js';
+import type { Launch } from './helpers/guidedLaunch.js';
 import { stepOp } from '../helpers/stepCode.js';
 import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 /**
@@ -37,7 +38,7 @@ import { createGuidedRecorder } from '../../src/guided/evidence.js';
 import type { RecordingEvidenceBody } from '../../src/guided/evidence.js';
 import { hash, identity, validate } from '../../src/guided/contracts.js';
 import type { Action, BridgeBootstrap, BridgeObservation, BridgeOrdinaryOutcome as BridgeOutcome, ExecutionEvidence } from '../../src/guided/types.js';
-import type { GuidedBrowser, GuidedRecordingRequest } from '../../src/run/guidedBrowser.js';
+import type { GuidedRecordingRequest } from '../../src/run/guidedBrowser.js';
 import type { ObservationConfig } from '../../src/run/observationTypes.js';
 import { createConfiguredObjectStore, evidenceBoundsFrom, NODE_EVIDENCE_FILE_SYSTEM } from '../../src/run/objectStoreFactory.js';
 import type { PutObjectRequest } from '../../src/run/objectStore.js';
@@ -168,7 +169,7 @@ async function guidedLearnRun(fault: 'none' | 'recorderFileLost' | 'published') 
   context.authoredInputs.inputs.push({ inputId: 'input-pass', sourceStepId: 'fill', kind: 'secretRef', secretId: 'PASS', provenance: { referenceKind: 'configuration', configurationRevision: context.configurationRevision, stepId: 'fill', referenceId: 'reference-pass', referenceName: 'PASS', kind: 'secretRef' } });
   context.authoredInputsHash = hash(context.authoredInputs);
   const messages: { route: string; body: unknown; key?: string }[] = [];
-  const launch = async (config: ObservationConfig, contextId: string, onLost: () => void, recording?: GuidedRecordingRequest): Promise<GuidedBrowser> => { request = recording; const browser = await launchGuidedBrowser(config, contextId, onLost, recording); scratch = browser.scratchDirectory; return browser; };
+  const launch: Launch = async (config, contextId, onLost, recording, startup) => { request = recording; const browser = await guidedChildLaunch(config, contextId, onLost, recording, startup); scratch = browser.scratchDirectory; return browser; };
   const runtime = new GuidedRuntime(context, { workerId: context.workerId, allowedDomains: TEST_DOMAINS, journalDirectory: journal, launch, recorder, csiId: 'fixture-csi', callback: (route, body, key) => { messages.push({ route, body, ...(key ? { key } : {}) }); return Promise.resolve(); } });
   const outcomes: BridgeOutcome[] = [];
   try {

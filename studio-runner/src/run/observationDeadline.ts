@@ -18,6 +18,13 @@ export const TRANSPORT_CEILING_MS = 15_000;
 export const DEADLINE_CEILING_MS = 12_000;
 export const SPIKE_P95_MS = 866;
 export const OBSERVATION_DEADLINE_MS = 12_000;
+/**
+ * How long the main frame may stay on a host outside the whitelist (an SSO hop, say) before the work
+ * that needs the page gives up: learning ends `ORIGIN_NOT_ALLOWED`, a replay step `POLICY_REFUSED`.
+ * Replay's own step deadline bounds it further. Nothing is observed or done while the page is away.
+ * It is awaited BEFORE the collection deadline starts, so an observation can take this plus the deadline.
+ */
+export const RETURN_WINDOW_MS = 15_000;
 /** WI-2 measured 1.2 to 1.5 million work units per millisecond; the budget is derived from the remaining time at 1 million per ms so units run out first. */
 export const UNITS_PER_MS = 1_000_000;
 

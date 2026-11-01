@@ -8,7 +8,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { TLSSocket } from 'node:tls';
 import { createGuidedServer,guidedCallback,guidedClaimClient,verifyGuidedJwt } from '../../src/guided/transport.js';
-import { launchGuidedBrowser } from '../../src/run/browser.js';
+import { guidedChildLaunch } from './helpers/guidedLaunch.js';
 import { guidedContext,proposal,dispatch,ownershipSession,assignmentFor } from '../helpers/guided.js';
 import { testTls,testFingerprint,jwtPolicy,jwt,post } from '../helpers/guidedTls.js';
 import { identity,hash,validate } from '../../src/guided/contracts.js';
@@ -24,7 +24,7 @@ it('uses real mTLS + service JWT for blank-to-Chromium control and data-free cal
   const directory=await mkdtemp(join(tmpdir(),'guided-wire-'));const context=guidedContext(`http://localhost:${String(pageAddress.port)}`);
   currentGrant=ownershipSession(context);const assignment=assignmentFor(context);
   const client={baseUrl:`https://127.0.0.1:${String(callbackAddress.port)}`,tls:testTls,controllerCertificateFingerprint256:testFingerprint,token:()=>Promise.resolve(jwt({aud:'studio-guided-controller',role:'owning-worker',sub:context.workerId}))};
-  const app=createGuidedServer({workerId:context.workerId,allowedDomains: TEST_DOMAINS, journalDirectory:directory,tls:testTls,controllerJwt:jwtPolicy,controllerCertificateFingerprint256:testFingerprint,launch:launchGuidedBrowser,claim:guidedClaimClient(client),callback:guidedCallback({baseUrl:`https://127.0.0.1:${String(callbackAddress.port)}`,tls:testTls,controllerCertificateFingerprint256:testFingerprint,token:()=>Promise.resolve(jwt({aud:'studio-guided-controller',role:'owning-worker',sub:context.workerId}))})});
+  const app=createGuidedServer({workerId:context.workerId,allowedDomains: TEST_DOMAINS, journalDirectory:directory,tls:testTls,controllerJwt:jwtPolicy,controllerCertificateFingerprint256:testFingerprint,launch:guidedChildLaunch,claim:guidedClaimClient(client),callback:guidedCallback({baseUrl:`https://127.0.0.1:${String(callbackAddress.port)}`,tls:testTls,controllerCertificateFingerprint256:testFingerprint,token:()=>Promise.resolve(jwt({aud:'studio-guided-controller',role:'owning-worker',sub:context.workerId}))})});
   await new Promise<void>(resolve=>app.server.listen(0,'127.0.0.1',resolve));const address=app.server.address();if(!address||typeof address==='string')throw new Error('PORT');const path=`/internal/v2/studio/guided-sessions/${context.sessionId}`;
   try {
     await expect(post(address.port,`${path}/context`,context,{certificate:false})).rejects.toThrow();

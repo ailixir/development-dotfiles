@@ -19,8 +19,8 @@ import { createGuidedRecorder } from '../../src/guided/evidence.js';
 import { hash, identity } from '../../src/guided/contracts.js';
 import { GuidedOwnership } from '../../src/guided/ownership.js';
 import type { BridgeBootstrap, BridgeObservation, CommandsClaim, Session } from '../../src/guided/types.js';
-import { launchGuidedBrowser } from '../../src/run/browser.js';
 import type { GuidedBrowser } from '../../src/run/guidedBrowser.js';
+import { guidedChildLaunch } from './helpers/guidedLaunch.js';
 import { createConfiguredObjectStore, evidenceBoundsFrom, NODE_EVIDENCE_FILE_SYSTEM } from '../../src/run/objectStoreFactory.js';
 import { WEBM_MAGIC } from '../../src/run/recording.js';
 import { systemOriginSource } from '../../src/run/timeline.js';
@@ -74,7 +74,7 @@ describe('guided capacity 3 on real Chromium', () => {
     const ownership = new GuidedOwnership({
       workerId: 'worker-one', allowedDomains: TEST_DOMAINS, journalDirectory: journal, capacity: 3, recorder,
       launch: async (config, contextId, onLost, recording, startup) => {
-        const browser = await launchGuidedBrowser(config, contextId, onLost, recording, startup);
+        const browser = await guidedChildLaunch(config, contextId, onLost, recording, startup);
         browsers.set(config.sessionId, browser);
         if (recording) recordings.set(config.sessionId, recording.dir);
         return browser;

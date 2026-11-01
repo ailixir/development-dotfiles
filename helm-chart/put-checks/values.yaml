@@ -635,6 +635,9 @@ studioRunner:
     # backend's deployment-wide cap `studio.guided-authoring.max-concurrent-sessions` (the
     # (capacity+1)th start gets 429 LEARNING_CAPACITY_EXHAUSTED; the runner's own CAPACITY refusal is
     # the backstop). Both are chart-managed: setting either elsewhere fails the render.
+    # Each active learning session runs in its own Node child (E15, ADR-SC-008): about 100-150 MB
+    # more per session (inferred, not measured), and after a slow recorded stop that child stays up
+    # to 17 s past the slot release. Re-check the pod memory limit above capacity 3.
     capacity: 1
     # The pinned RSA public key and the issuer/subject of the external guided-token issuer.
     # **Rotation inputs for the OBS-010 runbook** (GuidedInternalSecurity: "rotate by draining

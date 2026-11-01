@@ -11,6 +11,7 @@ import type { GuidedBrowser } from '../../src/run/guidedBrowser.js';
 import type { RunnerContext } from '../../src/guided/types.js';
 import { hash } from '../../src/guided/contracts.js';
 import { guidedContext, ownershipSession, assignmentFor, sessionStub } from '../helpers/guided.js';
+import { inProcessBrowser } from '../helpers/guidedStepService.js';
 
 /**
  * Why a session ends when its lease and its expiry coincide (STUDIO-OBS-007 hard-expiry).
@@ -29,7 +30,7 @@ function fireEarly(earlyMs: number | undefined): void {
 }
 
 function blankBrowser(context: RunnerContext): GuidedBrowser {
-  return { evidence: { kind: 'initialBlank', sessionId: context.sessionId, contextId: context.contextId, creationId: randomUUID(), documentId: randomUUID(), bootstrapId: randomUUID(), url: 'about:blank', origin: null, generation: 0 }, blankMatches: () => Promise.resolve(true), close: vi.fn(() => Promise.resolve()), terminate: vi.fn(() => Promise.resolve()), orderlyClosed: () => true, observations: sessionStub({ withhold: () => Promise.resolve(), dispose: () => Promise.resolve(), observe: () => Promise.reject(new Error('NOT_USED')) }) };
+  return inProcessBrowser({ evidence: { kind: 'initialBlank', sessionId: context.sessionId, contextId: context.contextId, creationId: randomUUID(), documentId: randomUUID(), bootstrapId: randomUUID(), url: 'about:blank', origin: null, generation: 0 }, blankMatches: () => Promise.resolve(true), close: vi.fn(() => Promise.resolve()), terminate: vi.fn(() => Promise.resolve()), orderlyClosed: () => true, observations: sessionStub({ withhold: () => Promise.resolve(), dispose: () => Promise.resolve(), observe: () => Promise.reject(new Error('NOT_USED')) }) });
 }
 
 const lifecycleReason = (messages: { route: string; body: unknown }[]): unknown => (messages.filter(m => m.route === 'lifecycle').at(-1)?.body as { reason?: string } | undefined)?.reason;

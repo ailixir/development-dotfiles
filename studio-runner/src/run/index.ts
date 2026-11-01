@@ -7,6 +7,10 @@
  * and an export is an invitation.
  */
 export { createChildBrowserLauncher, createForkSpawner, assertNoCodeLoadingKeys, isCodeLoadingEnvKey, CODE_LOADING_ENV_PREFIXES, INHERITED_ENV_KEYS, DEFAULT_CHILD_MODULE_PATH } from './launcher.js';
+export { createGuidedChildLauncher, launchGuidedChild, GUIDED_CHILD_MODULE_PATH } from './guidedChildLauncher.js';
+export type { GuidedChildLauncherOptions } from './guidedChildLauncher.js';
+export { createGuidedStepService, serveGuidedChild } from './guidedChildService.js';
+export type { GuidedChildChannel, GuidedChildServiceOptions, GuidedStepHost, GuidedStepService, GuidedStepServiceOptions } from './guidedChildService.js';
 export type {
   ChildLauncherOptions,
   ChildProcessHandle,

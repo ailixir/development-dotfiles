@@ -31,7 +31,7 @@
 
 import { domainAllowed, OriginNotAllowed } from '../allowedDomains.js';
 import { GuidedLaunchFailure, GUIDED_START_BUDGET_MS, GUIDED_START_RESERVE_MS, guidedCloseStages, launchFailureCause } from './guidedBrowser.js';
-import type { GuidedBrowser, GuidedLaunchPhase, GuidedLossReason, GuidedRecordingRequest, GuidedStartup } from './guidedBrowser.js';
+import type { LaunchedBrowser, GuidedLaunchPhase, GuidedLossReason, GuidedRecordingRequest, GuidedStartup } from './guidedBrowser.js';
 import { killLaunchTree, survivorsOf } from './tree.js';
 import { chromium } from 'playwright';
 import { expect } from 'playwright/test';
@@ -47,6 +47,7 @@ import {BootstrapPageGuard,boundedStartup,isAbsoluteStartupTimeout} from './obse
 import {readVersionPaths} from './versionProbe.js';
 import {validateAppVideoPath} from './appVideoOwnership.js';
 import { createObservationFlow } from './observationFlow.js';
+import { RETURN_WINDOW_MS } from './observationDeadline.js';
 import { REPLAY_PROFILE } from './actionBudget.js';
 import type { ObservationConfig, ObservationSession } from './observationTypes.js';
 import { SCRATCH_SUBDIRECTORIES, prepareBrowserProfile, requireBrowserPreferences,assertEffectiveBrowserPreferences,browserProfileConfinement,releaseBrowserProfile } from './scratchLayout.js';
@@ -68,12 +69,8 @@ async function verifyBrowserPreferences(page:Page,profile:string):Promise<Browse
   return {channel:'chromium',browserVersion:page.context().browser()?.version()??'UNKNOWN',activeProfilePath:expected,executablePath:await realpath(executable),effective};
 }
 
-/**
- * How long the main frame may stay on a host outside the whitelist (an SSO hop, say) before the work
- * that needs the page gives up: learning ends `ORIGIN_NOT_ALLOWED`, a replay step `POLICY_REFUSED`.
- * Replay's own step deadline bounds it further. Nothing is observed or done while the page is away.
- */
-export const RETURN_WINDOW_MS = 15_000;
+// The return window lives in observationDeadline.ts (Playwright-free, so the guided child proxy can size its observe bound from it).
+export { RETURN_WINDOW_MS };
 
 /** The host of the main frame when it is an http(s) page outside the whitelist; `null` when nothing is off-list. */
 function offListHost(url: string, allowedDomains: readonly string[]): string | null {
@@ -345,7 +342,7 @@ const LATE_LAUNCH_GRACE_MS = 1000;
  * The evidence directory is the caller's, outside this scratch directory, so `close()` (which
  * disposes scratch) never deletes the finalized webm before the caller's upload attempt.
  */
-export async function launchGuidedBrowser(config: ObservationConfig, contextId: string, onLost: (reason?: GuidedLossReason) => void, recording?: GuidedRecordingRequest, startup?: GuidedStartup): Promise<GuidedBrowser> {
+export async function launchGuidedBrowser(config: ObservationConfig, contextId: string, onLost: (reason?: GuidedLossReason) => void, recording?: GuidedRecordingRequest, startup?: GuidedStartup): Promise<LaunchedBrowser> {
   if (process.env.DEBUG || process.env.PWDEBUG || process.env.NODE_DEBUG || process.env.NODE_OPTIONS) throw new Error('DIAGNOSTICS_DENIED');
   // REL-001/D4: the whole start has one deadline. A direct caller without a budget still gets the default one.
   const deadline = startup?.deadlineEpochMs ?? Date.now() + GUIDED_START_BUDGET_MS;

@@ -625,7 +625,7 @@ describe('AC6: until-fence mode (learning prepare) and match counts', () => {
   it('stops a take-over at fence() and at proceed(), which is where a secret-handle call lands', async () => {
     for (const mode of ['fence', 'proceed'] as const) {
       const checks: string[] = [];
-      const r = rig({ beforeCall: call => (call.method === 'fill' ? { run: async (proceed, fence) => { checks.push('pre-checks ran'); if (mode === 'fence') fence(); else await proceed(); r.w.effects += 1; return undefined; } } : undefined) });
+      const r = rig({ beforeCall: call => (call.method === 'fill' ? { run: async (proceed, fence) => { checks.push('pre-checks ran'); if (mode === 'fence') await fence(); else await proceed(); r.w.effects += 1; return undefined; } } : undefined) });
       const result = await go(r, "await page.locator('ok').fill('v');", { untilFence: true });
       expect(result.ok, mode).toBe(true);
       expect(result.fenceReached, mode).toBe(true);
@@ -798,7 +798,7 @@ describe('AC7: the beforeCall hook', () => {
   });
 
   it('a take-over with its own effect records it after fence(); a refusal before fence() stays repairable; one that calls neither is no effect', async () => {
-    const custom = rig({ beforeCall: call => (call.method === 'fill' ? { run: async (_proceed, fence) => { fence(); custom.w.effects += 1; return undefined; } } : undefined) });
+    const custom = rig({ beforeCall: call => (call.method === 'fill' ? { run: async (_proceed, fence) => { await fence(); custom.w.effects += 1; return undefined; } } : undefined) });
     const result = await go(custom, "await page.locator('ok').fill('v');");
     expect(result.ok).toBe(true);
     expect(result.fenceCrossed).toBe(true);

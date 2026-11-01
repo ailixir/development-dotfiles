@@ -14,6 +14,7 @@ import {GuidedOwnership} from '../../src/guided/ownership.js';
 import {GuidedRuntime} from '../../src/guided/runtime.js';
 import {canonical, hash, identity, validate} from '../../src/guided/contracts.js';
 import {launchGuidedBrowser} from '../../src/run/browser.js';
+import {adaptInProcess} from './helpers/guidedLaunch.js';
 import {GuidedLaunchFailure} from '../../src/run/guidedBrowser.js';
 import {PrivateInventory} from '../../src/run/privateInventory.js';
 import {descendantsOf, isAlive} from '../../src/run/tree.js';
@@ -274,9 +275,9 @@ it('rejects the genuine retired CSI-A grant for a fresh CSI-B assignment before 
         }
         try {await setup.get(client.label); if (!browser.scratchDirectory || !browser.preferenceEvidence) throw Error('PROFILE'); client.scratch = browser.scratchDirectory; client.preferences = browser.preferenceEvidence;}
         catch (error) {scanExtant(); await bounded('setup-browser', () => browser.close(), performance.now() + CLEANUP_MS, cleanup); restore(client.sdkRestores, 'setup-descriptor', cleanup); delete client.sdk; setup.delete(client.label); throw error;}
-        return {...browser, close: () => {
+        return adaptInProcess({...browser, close: () => {
           scanExtant(); const original = browser.close(); void original.then(() => {client.closed = true; facts.push({kind: 'actual-close', label: client.label, at: performance.now()}); restore(client.sdkRestores, 'closed-descriptor', cleanup); delete client.sdk; setup.delete(client.label);}, () => {facts.push({kind: 'close-failed', label: client.label});}); return original;
-        }};
+        }}, args[0].allowedDomains);
       },
     };
     worker = createGuidedServer(options); const ownedWorker = worker; await new Promise<void>((done, reject) => {ownedWorker.server.once('error', reject); ownedWorker.server.listen(0, '127.0.0.1', () => {ownedWorker.server.off('error', reject); done();});}); const address = worker.server.address(); if (!address || typeof address === 'string') throw Error('PORT'); workerPort = address.port;

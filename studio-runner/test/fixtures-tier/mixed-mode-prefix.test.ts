@@ -8,7 +8,8 @@ import {join} from 'node:path';
 // eslint-disable-next-line no-restricted-imports -- Native fixture video duration/decode oracle, no production subprocess.
 import {execFileSync} from 'node:child_process';
 import {GuidedRuntime} from '../../src/guided/runtime.js';
-import {launchGuidedBrowser} from '../../src/run/browser.js';
+import {TEST_CHILD,guidedChildLaunch,guidedChildLauncher} from './helpers/guidedLaunch.js';
+import {childPage} from './helpers/childPage.js';
 import {createGuidedRecorder} from '../../src/guided/evidence.js';
 import type {RecordingEvidenceBody} from '../../src/guided/evidence.js';
 import {createConfiguredObjectStore,evidenceBoundsFrom,NODE_EVIDENCE_FILE_SYSTEM} from '../../src/run/objectStoreFactory.js';
@@ -48,7 +49,7 @@ describe('mixed prefix and suffix on one actual recorded guided session',()=>{
         const settings=loadEvidenceConfig({STUDIO_RUNNER_OBJECT_STORE_DIR:join(root,context.sessionId,'objects'),STUDIO_RUNNER_SCRATCH_DIR:join(root,context.sessionId,'scratch')}),configured=createConfiguredObjectStore(settings),evidenceRoot=join(root,context.sessionId,'evidence');await mkdir(evidenceRoot,{recursive:true});
         const recorder=createGuidedRecorder({store:configured.store,fileSystem:NODE_EVIDENCE_FILE_SYSTEM,bounds:evidenceBoundsFrom(settings),size:{width:settings.recordingWidth,height:settings.recordingHeight},calibrationOffsetMs:settings.seekOriginCalibrationMs,originSource:systemOriginSource,now:()=>performance.now(),sleep:ms=>new Promise(resolve=>{setTimeout(resolve,ms);}),evidenceRoot});
         const messages:{route:string;body:unknown}[]=[],actions:PrefixAction[]=[];let browser:GuidedBrowser|undefined;let observation:Observation|null=null;
-        const launch=vi.fn(async(...args:Parameters<typeof launchGuidedBrowser>)=>{browser=await launchGuidedBrowser(...args);return browser;}),runtime=new GuidedRuntime(context,{workerId:context.workerId,allowedDomains: TEST_DOMAINS, journalDirectory:join(root,context.sessionId,'journal'),launch,recorder,csiId:'mixed-fixture',callback:(route,body)=>{messages.push({route,body});return Promise.resolve();}});
+        const launch=vi.fn(async(...args:Parameters<typeof guidedChildLaunch>)=>{browser=await guidedChildLaunch(...args);return browser;}),runtime=new GuidedRuntime(context,{workerId:context.workerId,allowedDomains: TEST_DOMAINS, journalDirectory:join(root,context.sessionId,'journal'),launch,recorder,csiId:'mixed-fixture',callback:(route,body)=>{messages.push({route,body});return Promise.resolve();}});
         let evidence:ExecutionEvidence;const proposalSupply=vi.fn(()=>undefined);let originalSession:GuidedBrowser['observations']|undefined;
         try {
           await runtime.start();evidence=(messages[0]?.body as BridgeBootstrap).executionEvidence;originalSession=browser?.observations;
@@ -91,8 +92,6 @@ import {createServer} from 'node:http';
 import {settleNativeOperation,withObservedNativeEvidence} from '../helpers/observedNativeEvidence.js';
 import type {ObservedNativeEvidence} from '../helpers/observedNativeEvidence.js';
 import {randomUUID} from 'node:crypto';
-// eslint-disable-next-line no-restricted-imports -- Owned controlled DOM fault and native effect observations.
-import type {Page} from 'playwright';
 import {playwrightBrowserFactory} from '../../src/run/browser.js';
 import {prepareBrowserProfile} from '../../src/run/scratchLayout.js';
 import {createObservedReplayAdapter} from '../../src/run/observedReplayAdapter.js';
@@ -123,7 +122,7 @@ async function runPartial(root:string,origin:string,preserved:ObservedNativeEvid
 
   const settings=loadEvidenceConfig({STUDIO_RUNNER_OBJECT_STORE_DIR:join(root,context.sessionId,'objects'),STUDIO_RUNNER_SCRATCH_DIR:join(root,context.sessionId,'scratch')}),configured=createConfiguredObjectStore(settings),evidenceRoot=join(root,context.sessionId,'evidence');await mkdir(evidenceRoot,{recursive:true});
   const recorder=createGuidedRecorder({store:configured.store,fileSystem:NODE_EVIDENCE_FILE_SYSTEM,bounds:evidenceBoundsFrom(settings),size:{width:settings.recordingWidth,height:settings.recordingHeight},calibrationOffsetMs:settings.seekOriginCalibrationMs,originSource:systemOriginSource,now:()=>performance.now(),sleep:ms=>new Promise(resolve=>setTimeout(resolve,ms)),evidenceRoot});
-  let browser:GuidedBrowser|undefined;const messages:{route:string;body:unknown}[]=[],facts:PartialFact[]=[];const launches=vi.fn(async(...args:Parameters<typeof launchGuidedBrowser>)=>{browser=await launchGuidedBrowser(...args);return browser;});
+  let browser:GuidedBrowser|undefined;const messages:{route:string;body:unknown}[]=[],facts:PartialFact[]=[];const probing=guidedChildLauncher({childModulePath:TEST_CHILD.probe}),launches=vi.fn(async(...args:Parameters<typeof guidedChildLaunch>)=>{browser=await probing(...args);return browser;});
   const runtime=new GuidedRuntime(context,{workerId:context.workerId,allowedDomains: TEST_DOMAINS, journalDirectory:join(root,context.sessionId,'journal'),launch:launches,recorder,csiId:'CSI-123',callback:(route,body)=>{messages.push({route,body});return Promise.resolve();}});
   const role=program?'mixed-guided':'base-guided',video=join(root,context.sessionId,'objects','studio','CSI-123','guided',context.sessionId+'.webm');preserved.media(role,video);preserved.check(role,'assertions','RUNNING');
   let evidence:ExecutionEvidence,observation:Observation|null=null,drift:BridgeAdmittedDrift|undefined,excluded:PartialFact|undefined;
@@ -131,7 +130,7 @@ async function runPartial(root:string,origin:string,preserved:ObservedNativeEvid
   const operationList:Action['operation'][]=[stepOp('await page.goto(inputs["partial-url"]);',{uses:[{kind:'input',id:'partial-url'}]}),stepOp('vars["partial-reference"] = await page.getByRole("status", { name: "Business reference" }).innerText();',{captures:['partial-reference']}),stepOp('await page.getByRole("textbox", { name: "Destination" }).fill(vars["partial-reference"]);',{uses:[{kind:'binding',id:'partial-reference'}]}),stepOp('await page.getByRole("button", { name: "Commit" }).click();'),stepOp('await expect(page.getByRole("textbox", { name: "Destination" })).toBeVisible();')];
   const steps=[need(partialIds[0]),need(partialIds[1]),need(partialIds[1]),need(partialIds[2]),need(partialIds[3])];
   await settleNativeOperation(async()=>{
-    await runtime.start();evidence=(messages[0]?.body as BridgeBootstrap).executionEvidence;const original=need(browser),session=original.observations,handle=original.handle;
+    await runtime.start();evidence=(messages[0]?.body as BridgeBootstrap).executionEvidence;const original=need(browser),session=original.observations,probe=await childPage();
     for(const [index,operation]of operationList.entries()){
       const coordinate={stepId:need(steps[index]),ordinal:index===2?1:0};let p:Action,proof;
       if(program&&index<3){const request={schemaVersion:3 as const,sessionId:context.sessionId,workerId:context.workerId,ownerFence:context.ownerFence,scopeHash:context.scopeHash,contextId:context.contextId,contextRevision:context.contextRevision,authoredInputsHash:context.authoredInputsHash,sourceRevision:context.sourceRevision,configurationRevision:context.configurationRevision,prefixProgramHash:hash(program),coordinate,evidenceHash:hash(evidence)},envelope:BridgePrefixPrepare={kind:'prefix',request,requestDigest:hash(request)},prepared=await runtime.preparePrefix(envelope);p=prepared.proposal;proof=prepared.preparation;}
@@ -140,23 +139,23 @@ async function runPartial(root:string,origin:string,preserved:ObservedNativeEvid
       if(operation.uses.some(use=>use.kind==='binding')){const producer=need(context.producers[0]);const edge:ConsumerEdge={bindingId:producer.bindingId,producerAdmissionId:producer.producerAdmissionId,consumerAdmissionId:request.ledger.admission.admissionId,coordinate,destinationOrigin:origin,transferPolicy:'sameOrigin'};context.consumerEdges.push(edge);request.consumerEdges=[edge];}
       if(program&&index===2){
         // An ambiguous destination after prepare refuses at the strict-mode resolution, before any effect, without a repeat admission.
-        const page=need(handle).page as unknown as Page;await page.locator('[data-testid=destination]').evaluate(element=>{const label=element.closest('label');if(!label)throw new Error('LABEL');const twin=label.cloneNode(true) as HTMLElement;twin.id='twin-destination';label.after(twin);});
-        expect(await page.locator('[data-testid=destination]').count()).toBe(2);
-        const outcome=await runtime.dispatch(request);await page.locator('#twin-destination').evaluate(element=>{element.remove();});expect(outcome.ledger).toMatchObject({state:'FAILED',outcomeCode:'TARGET_CHANGED',attemptOrdinal:0});excluded={proposal:p,guard,outcome};
+        await probe.duplicateLabelOf('[data-testid=destination]','twin-destination');
+        expect(await probe.count('[data-testid=destination]')).toBe(2);
+        const outcome=await runtime.dispatch(request);await probe.remove('#twin-destination');expect(outcome.ledger).toMatchObject({state:'FAILED',outcomeCode:'TARGET_CHANGED',attemptOrdinal:0});excluded={proposal:p,guard,outcome};
         const notice=messages.find(m=>(m.body as {kind?:string}).kind==='prefixDrift')?.body as {receipt:BridgeAdmittedDrift};drift=notice.receipt;expect(drift).toMatchObject({phase:'ADMITTED_PRE_INVOCATION',nativeInvocationStarted:false,coordinate});
-        expect(await page.evaluate(()=>({fills:(window as unknown as {r1Fills:number}).r1Fills,clicks:(window as unknown as {r1Clicks:number}).r1Clicks}))).toEqual({fills:0,clicks:0});await expect(runtime.dispatch(request)).rejects.toThrow('PREPARATION_DENIED');
+        expect(await probe.globals(['r1Fills','r1Clicks'])).toEqual({r1Fills:0,r1Clicks:0});await expect(runtime.dispatch(request)).rejects.toThrow('PREPARATION_DENIED');
         context.materializationRevision++;await runtime.update(context);const before=structuredClone(context),rawGraph=hash({allocations:context.allocations,producers:context.producers,edges:context.consumerEdges});
         const appended=structuredClone(context);appended.contextRevision++;appended.materializationRevision++;appended.authoredInputs.inputs.push({inputId:'suffix-label',sourceStepId:coordinate.stepId,kind:'nonsecretText',value:'fresh-suffix-private',provenance:{referenceKind:'configuration',configurationRevision:'1',stepId:coordinate.stepId,referenceId:'suffix-label',kind:'nonsecretText'}});appended.authoredInputsHash=hash(appended.authoredInputs);
-        const withhold=session.withhold?.bind(session);if(!withhold)throw Error('WITHHOLD');let release:()=>void=()=>undefined;const gate=new Promise<void>(resolve=>{release=resolve;});session.withhold=async values=>{await withhold(values);await gate;};
+        const withhold=session.withhold.bind(session);let release:()=>void=()=>undefined;const gate=new Promise<void>(resolve=>{release=resolve;});session.withhold=async values=>{await withhold(values);await gate;};
         const deliveryId=randomUUID(),pending=runtime.update(appended,deliveryId);await Promise.resolve();const metadata=structuredClone(context);metadata.materializationRevision++;await expect(runtime.update(metadata,randomUUID())).rejects.toThrow('BUSY');await expect(runtime.refreshObservation({...identity(context),expectedGeneration:need<Observation>(observation).generation,focus:{stepText:'',targetIntents:[]}},'pending-no-refresh')).rejects.toThrow('BUSY');expect(runtime.currentIdentity).toEqual(identity(before));
-        expect(launches).toHaveBeenCalledOnce();expect(messages.filter(m=>m.route==='bootstrap-evidence')).toHaveLength(1);expect(need(browser).handle).toBe(handle);expect(need(browser).observations).toBe(session);expect(await page.locator('textarea').inputValue()).toBe('');
+        expect(launches).toHaveBeenCalledOnce();expect(messages.filter(m=>m.route==='bootstrap-evidence')).toHaveLength(1);expect(need(browser).observations).toBe(session);expect(await probe.inputValue('textarea')).toBe('');
         release();const ack=await pending;session.withhold=withhold;expect(validate('bridge',ack,'ContextAcknowledgement')).toMatchObject({deliveryId,contextHash:hash(appended),contextRevision:2});Object.assign(context,appended);const historical=structuredClone(context);context.materializationRevision++;await runtime.update(context);expect(await runtime.update(historical,deliveryId)).toEqual(ack);expect(hash({allocations:context.allocations,producers:context.producers,edges:context.consumerEdges})).toBe(rawGraph);
         await runtime.refreshObservation({...identity(context),expectedGeneration:need<Observation>(observation).generation,focus:{stepText:'',targetIntents:[]}},'after-current-wait');latest();const replacement=proposal(context,evidence,coordinate.stepId,stepOp('await page.getByRole("textbox", { name: "Destination" }).fill(inputs["suffix-label"]);',{uses:[{kind:'input',id:'suffix-label'}]}));replacement.coordinate.ordinal=1;const fresh=await runtime.prepare({...identity(context),proposal:replacement,requestDigest:hash(replacement),expiresAt:new Date(Date.now()+10000).toISOString()}),replacementRequest=dispatch(context,replacement,fresh);replacementRequest.ledger.attemptOrdinal=1;
         const replaced=await runtime.dispatch(replacementRequest);expect(replaced.ledger.state).toBe('SUCCEEDED');facts.push({proposal:replacement,guard:guardFor(replacement,index),outcome:replaced});latest();continue;
       }
       const outcome=await runtime.dispatch(request);expect(outcome.ledger.state).toBe('SUCCEEDED');facts.push({proposal:p,guard,outcome});
       const captured=operation.captures[0];if(captured!==undefined){const availability=need(outcome.availability[0]);context.producers.push({bindingId:captured,producerAdmissionId:outcome.ledger.admission.admissionId,coordinate,origin,availability});}
-      if(operation.captures.length||request.consumerEdges.length){context.materializationRevision++;await runtime.update(context);}latest();expect(need(browser).handle).toBe(handle);expect(need(browser).observations).toBe(session);expect(launches).toHaveBeenCalledOnce();
+      if(operation.captures.length||request.consumerEdges.length){context.materializationRevision++;await runtime.update(context);}latest();expect(need(browser).observations).toBe(session);expect(launches).toHaveBeenCalledOnce();
     }
   },async()=>{try{await runtime.stop('CANCELLED');await runtime.recordingSettled;}finally{configured.close();preserved.recording(role,messages.find(m=>m.route==='recording-evidence')?.body as RecordingEvidenceBody|undefined);for(const fact of facts)preserved.outcome(role,fact.outcome.ledger);preserved.outcome(role,excluded?.outcome.ledger);}});
   const recording=(messages.find(m=>m.route==='recording-evidence')?.body as RecordingEvidenceBody);expect(recording.state).toBe('STORED');expect(recording.timings).toHaveLength(3);const excludedFact=excluded;if(excludedFact)expect(recording.timings.some(t=>t.admissionId===excludedFact.outcome.ledger.admission.admissionId)).toBe(false);

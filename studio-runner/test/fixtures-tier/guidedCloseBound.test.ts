@@ -9,42 +9,48 @@ import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
  * hard teardown; a start that failed takes the hard teardown alone. Rule D5-2: a reply goes out only after the close has
  * settled. Rule D5-3: the slot is released exactly when the close is confirmed.
  *
- * The real guided HTTPS server over real mutual TLS, the real `launchGuidedBrowser`, a stub controller. Chrome is frozen
+ * The real guided HTTPS server over real mutual TLS, the real guided child (`launchGuidedChild`, SC008-E15: the browser is the
+ * child's, so the stop reply is the child's close bound plus the parent's kill step), a stub controller. Chrome is frozen
  * with SIGSTOP on its process group, so only the runner's own kill can end it. The cases are the ruling's:
  *
  *   F1  (i)   frozen after a completed start, then `stop`
  *   F2  (ii)  frozen entering WITHHOLD: the start hits its deadline
  *   F3  (iii) a non-deadline error inside the launch, Chrome already frozen
- *   F4  (iv)  stop before spawn (`launchPersistentContext` never returns): unchanged, pinned to the D4 backstop
+ *   F4  (iv)  stop before spawn (`launchPersistentContext` never returns in the child): the proxy ends the launch at the stop, not at the D4 backstop
  *   H         a healthy recorded close, 5 times, unfrozen: the grace is far above what a good close needs
  *
  * Unit-tier twins of the clock arithmetic: `test/guided/{browser,runtime,ownership}.test.ts` (U1-U5).
  *
- * Signals: only direct children of this test process whose command line names a `checks-guided-` scratch directory, and
- * their descendants. Read-only `ps` listings before and after are the lane receipt's job (`ps -axo pid,ppid,command`).
+ * Signals: only browsers below this test process (grandchildren, under the guided child) whose command line names a
+ * `checks-guided-` scratch directory, and their descendants. Read-only `ps` listings before and after are the lane receipt's job (`ps -axo pid,ppid,command`).
  */
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-// eslint-disable-next-line no-restricted-imports -- Launch-promise fault oracle for path (iv): the launch is held pending so nothing spawns (same oracle as guided-start-deadline.test.ts).
-import { chromium } from 'playwright';
 import { identity } from '../../src/guided/contracts.js';
 import { launchGuidedBrowser } from '../../src/run/browser.js';
 import { GUIDED_CLOSE_GRACE_MS, GUIDED_START_BUDGET_MS, GUIDED_START_RESERVE_MS } from '../../src/run/guidedBrowser.js';
+import { GUIDED_CHILD_CLOSE_BOUND_MS, GUIDED_END_CHILD_BOUND_MS } from '../../src/run/guidedChildLauncher.js';
+import { descendantsOf, isAlive, readProcessTableWithArgs } from '../../src/run/tree.js';
 import { MIN_PLAYABLE_RECORDING_BYTES, WEBM_MAGIC } from '../../src/run/recording.js';
 import { startSecretLoginFixture } from '../fixtures/secret-login/server.js';
 import {
-  answeredWithin, assignAndWait, cleanupAll, closeFacts, describeBrowser, freezeOwnBrowser, gotoPage, launcherFreezing, newControl, onCleanup, outcomeOf,
-  rounded, send, sleep, slotProbe, startHarness, survivorsOf, trackScratch,
+  answeredWithin, assignAndWait, cleanupAll, closeFacts, describeBrowser, freezeOwnBrowser, gotoPage, launcherFreezing, newControl, outcomeOf,
+  rounded, send, sleep, slotProbe, startHarness, survivorsOf, trackScratch, TEST_CHILD, guidedChildLauncher,
 } from './helpers/guidedLaunch.js';
 import type { Exchange } from './helpers/guidedLaunch.js';
 
 /** The backend gives up on a runner call after this long (`HttpRunnerDispatchClient`, `guidedBrowser.ts` doc). */
 const BACKEND_CEILING_MS = 15_000;
-/** The terminate stage on a readable process table (ruling 2.2): two listings, a survivor poll of at most 500 ms, and `rm`. */
-const TERMINATE_BOUND_MS = 1_500;
+/**
+ * Everything the stop reply spends after the 3 s grace (SC008-E15, plan 'close and recording finalization'): the child's hard teardown on a
+ * readable process table (ruling 2.2: two listings, a survivor poll of at most 500 ms, and `rm`; at most 1.5 s, enforced by the proxy's close
+ * bound) plus the parent's kill step (kill, quiescence and removal of the session directory, at most 0.3 s). So the stop reply is
+ * 3 s + 1.5 s + 0.3 s = 4.8 s at the latest, before the lifecycle callback.
+ */
+const TERMINATE_BOUND_MS = (GUIDED_CHILD_CLOSE_BOUND_MS - GUIDED_CLOSE_GRACE_MS) + GUIDED_END_CHILD_BOUND_MS;
 /** A healthy recorded close must finish far inside the grace. Above this the ruling sends the lane back to @architect. */
 const HEALTHY_RETURN_MS = 1_500;
 
@@ -146,34 +152,34 @@ describe('KL-015-D5 the close of a guided browser is bounded (frozen Chromium, r
     expect(slot.held).toBe(false);
   }, 120_000);
 
-  it('F4 (iv-a) stop before spawn: unchanged, the reply is pinned to the D4 backstop (start + 15 s) and the slot is free after it', async () => {
+  it('F4 (iv-a) stop before spawn: the browser launch never returns in the child, the stop ends the launch at once, nothing is spawned and the slot is free', async () => {
     const control = newControl();
-    const spawnProbe: { calledAt: number | null } = { calledAt: null };
-    let failLaunch: (error: Error) => void = () => undefined;
-    const pending = new Promise<Awaited<ReturnType<typeof chromium.launchPersistentContext>>>((_resolve, reject) => { failLaunch = reject; });
-    pending.catch(() => undefined);
-    onCleanup(() => { failLaunch(new Error('case over')); });
-    vi.spyOn(chromium, 'launchPersistentContext').mockImplementation(() => { spawnProbe.calledAt ??= performance.now(); return pending; });
-    const harness = await startHarness(launcherFreezing('NEVER', control), control);
+    // The child's `launchPersistentContext` never returns (the test entry patches it before serving): Chrome is never spawned.
+    const harness = await startHarness(guidedChildLauncher({ childModulePath: TEST_CHILD.hungLaunch }), control);
     const session = harness.session();
     await assignAndWait(harness, session);
     const start = send(harness.port, `${session.path}/context`, session.context, 'context', 1);
-    for (let waited = 0; spawnProbe.calledAt === null && waited < 10_000; waited += 20) await sleep(20);
-    expect(spawnProbe.calledAt).not.toBeNull();
-    const launchBeganAt = spawnProbe.calledAt ?? start.sentAt;
-    await sleep(Math.max(0, launchBeganAt + 1_000 - performance.now()));
+    const hungChildren = (): number[] => readProcessTableWithArgs().filter((row) => row.ppid === process.pid && row.args.includes('guidedTestChildHungLaunch')).map((row) => row.pid);
+    for (let waited = 0; hungChildren().length === 0 && waited < 10_000; waited += 50) await sleep(50);
+    const children = hungChildren();
+    expect(children).not.toHaveLength(0);
+    // The child needs a moment past its own start to enter the launch it hangs in; one second is the old case's margin too.
+    await sleep(1_000);
     const stop: Exchange = send(harness.port, `${session.path}/stop`, { ...identity(session.context), reason: 'CANCELLED' }, 'stop', 1);
     expect(await answeredWithin(stop, 30_000)).toBe(true);
     expect(await answeredWithin(start, 30_000)).toBe(true);
     const slot = await slotProbe(harness);
-    const stopRepliedAfterLaunchMs = rounded((stop.repliedAt ?? NaN) - launchBeganAt);
-    results.set('F4', { path: 'iv-a: stop 1 s into a launch that never spawns', chromeSpawned: control.pids.size > 0, stop: outcomeOf(stop), start: outcomeOf(start), stopRepliedAfterLaunchEnteredMs: stopRepliedAfterLaunchMs, slotHeldAfterReply: slot });
+    const stopReplyMs = rounded((stop.repliedAt ?? NaN) - stop.sentAt);
+    const survivors = children.flatMap((pid) => [pid, ...descendantsOf(pid)]).filter((pid) => isAlive(pid));
+    results.set('F4', { path: 'iv-a: stop 1 s into a launch that never spawns', chromeSpawned: control.pids.size > 0, stop: outcomeOf(stop), start: outcomeOf(start), stopReplyAfterSentMs: stopReplyMs, childSurvivors: survivors.length, slotHeldAfterReply: slot });
     expect(control.pids.size).toBe(0);
     expect(stop.status).toBe(200);
-    // Ruled unchanged: the backstop (deadline + 3 s) plus the teardown, never earlier than the backstop and never as long as 30 s.
-    expect(stopRepliedAfterLaunchMs ?? 0).toBeGreaterThanOrEqual(GUIDED_START_BUDGET_MS + GUIDED_START_RESERVE_MS - 500);
-    expect(stopRepliedAfterLaunchMs ?? Infinity).toBeLessThanOrEqual(16_500);
+    // Changed by SC008-E15: the in-process launcher could not honour the abort of a launch stuck in Playwright, so the stop was pinned to the D4
+    // backstop (start + 15 s). The child's proxy ends the launch the moment the stop aborts it and kills only that child's tree: the reply costs
+    // the kill step (at most 0.3 s) and the stub callback, far inside the start reserve.
+    expect(stopReplyMs ?? Infinity).toBeLessThan(GUIDED_START_RESERVE_MS);
     expect(start.status).toBe(409);
+    expect(survivors).toEqual([]);
     expect(slot.held).toBe(false);
   }, 120_000);
 });

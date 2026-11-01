@@ -8,6 +8,7 @@ import { GuidedRuntime } from '../../src/guided/runtime.js';
 import { hash } from '../../src/guided/contracts.js';
 import type { GuidedBrowser } from '../../src/run/guidedBrowser.js';
 import { guidedContext, sessionStub } from '../helpers/guided.js';
+import { inProcessBrowser } from '../helpers/guidedStepService.js';
 
 const cleanups: (() => Promise<void>)[] = [];
 afterEach(async () => { for (const clean of cleanups.reverse()) await clean(); cleanups.length = 0; });
@@ -33,11 +34,11 @@ it('AUTHORED-ECHO-01 installs strict configuration values before the first possi
   const withhold = vi.fn(() => withholding);
   const blankMatches = vi.fn(() => Promise.resolve(true));
   const callback = vi.fn(() => Promise.resolve());
-  const browser: GuidedBrowser = {
+  const browser: GuidedBrowser = inProcessBrowser({
     evidence: { kind: 'initialBlank', sessionId: context.sessionId, contextId: context.contextId, creationId: randomUUID(), documentId: randomUUID(), bootstrapId: randomUUID(), url: 'about:blank', origin: null, generation: 0 },
     blankMatches, close: () => Promise.resolve(), terminate: () => Promise.resolve(), orderlyClosed: () => true,
     observations: sessionStub({ withhold, dispose: () => Promise.resolve(), observe: () => Promise.reject(new Error('unused')) }),
-  };
+  });
   const runtime = new GuidedRuntime(context, { workerId: context.workerId, allowedDomains: TEST_DOMAINS, journalDirectory: directory, launch: () => Promise.resolve(browser), callback });
   cleanups.push(() => runtime.stop('CANCELLED'));
   const starting = runtime.start();

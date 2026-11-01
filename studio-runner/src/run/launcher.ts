@@ -62,6 +62,7 @@ import { stepReceiptAgrees } from './protocol.js';
 import type { ObservedChildMessage } from './protocol.js';
 import type { StepReporter } from '../executor/stepReporter.js';
 import { fork } from 'node:child_process';
+import type { Serializable } from 'node:child_process';
 import { ALLOW_ALL_DOMAINS_ENV_KEY, ALLOWED_DOMAINS_ENV_KEY, isAllowAll } from '../allowedDomains.js';
 import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
@@ -80,14 +81,14 @@ import {descendantsOf,isAlive,canEnumerateProcessTree,readProcessTableAsync} fro
 import type {ProcessRow} from './tree.js';
 import {createAppVideoRegistry,sealAppVideoOwner,observeOwnedAppRecording} from './appVideoOwnership.js';
 import type {AppVideoSnapshot} from './appVideoOwnership.js';
-import type { ParentMessage } from './protocol.js';
 
 /** A spawned child, reduced to what the launcher needs. Injected so the unit tier spawns none. */
 export interface ChildProcessHandle {
   /** Private observed recovery: retain live descendants and prove all writers stopped. */
   trackTree?():void;
   quiesce?(remainingMs:number):Promise<boolean>;
-  send(message: ParentMessage): void;
+  /** Any JSON-serialisable frame: the replay protocol's `ParentMessage` or a guided child frame. */
+  send(message: unknown): void;
   onMessage(listener: (value: unknown) => void): void;
   onExit(listener: (code: number | null, signal: string | null) => void): void;
   /**
@@ -278,8 +279,8 @@ export function createForkSpawner(): ChildSpawner {
           const pids=[...remembered,pid];for(const member of pids)if(isAlive(member))signalProcessTree(member,'SIGKILL',undefined,table);
           while(pids.some(member=>isAlive(member))){if(Date.now()>=end)return false;await new Promise<void>(r=>{setTimeout(r,Math.max(1,Math.min(5,end-Date.now())));});}return enumerated;
         },
-        send(message: ParentMessage): void {
-          if (child.connected) child.send(message, () => { /* Exit handling owns a closed IPC channel; raw error text is never emitted. */ });
+        send(message: unknown): void {
+          if (child.connected) child.send(message as Serializable, () => { /* Exit handling owns a closed IPC channel; raw error text is never emitted. */ });
         },
         onMessage(listener: (value: unknown) => void): void {
           child.on('message', listener);
@@ -335,9 +336,13 @@ export function createForkSpawner(): ChildSpawner {
   };
 }
 
-function childEnvironment(
+/**
+ * The one environment a browser child is given, replay and guided alike: the allowlist above, `TMPDIR` at the caller's directory (replay: the
+ * run's scratch temp directory; guided: the session's private 0700 directory), and the navigation whitelist. Nothing else is inherited.
+ */
+export function confinedEnvironment(
   parentEnv: Readonly<Record<string, string | undefined>>,
-  scratchPath: string,
+  tmpDir: string,
   allowedDomains: readonly string[],
 ): Record<string, string> {
   const env: Record<string, string> = {};
@@ -346,7 +351,7 @@ function childEnvironment(
     if (value !== undefined && value !== '') env[key] = value;
   }
   // Chromium's temporary output follows `TMPDIR` into the per-run scratch directory (AC-22).
-  env.TMPDIR = join(scratchPath, SCRATCH_SUBDIRECTORIES.temp);
+  env.TMPDIR = tmpDir;
   // The browsers come from the image; a child must never fetch one at run time (ADR-001 §4.2).
   env.PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = '1';
   // The one runner fact the child needs: the navigation whitelist. Always written (empty denies everything); an inherited
@@ -424,7 +429,7 @@ async function launchObservedChild(options: ChildLauncherOptions, launchOptions:
     mkdirSync(join(launchOptions.scratchPath, SCRATCH_SUBDIRECTORIES.temp), { recursive: true });
     secureScratchDirectory(launchOptions.scratchPath);
     const videoRegistry=createAppVideoRegistry(launchOptions.scratchPath);
-    const env = childEnvironment(parentEnv, launchOptions.scratchPath, options.allowedDomains);
+    const env = confinedEnvironment(parentEnv, join(launchOptions.scratchPath, SCRATCH_SUBDIRECTORIES.temp), options.allowedDomains);
     for (const key of ['STUDIO_RUNNER_OBSERVED_CATALOG_FILE', 'STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST'])
         if (parentEnv[key])
             env[key] = parentEnv[key] ?? '';

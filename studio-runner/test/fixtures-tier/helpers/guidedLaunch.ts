@@ -4,31 +4,84 @@ import { TEST_DOMAINS } from '../../helpers/allowedDomains.js';
  * (`guidedCloseProbe.test.ts`, replaced by `guidedCloseBound.test.ts`), minus the observation windows: after D5 every
  * close settles, so the cases measure the instant it does instead of waiting to see whether it will.
  *
- * Real Chromium, the real guided HTTPS server (`createGuidedServer`), real mutual TLS with the test CA, the real
- * `launchGuidedBrowser`, and a stub controller that only grants claims and acknowledges callbacks. Chrome is frozen
- * with SIGSTOP on its process group (a browser that tidied itself up would make any close look correct), so a result
- * is a statement about the runner, not about Chromium.
+ * Real Chromium, the real guided HTTPS server (`createGuidedServer`), real mutual TLS with the test CA, the real guided
+ * child (`launchGuidedChild`, forked from the built `dist/run/guidedChild.js`, SC008-E15), and a stub controller that only
+ * grants claims and acknowledges callbacks. Chrome is frozen with SIGSTOP on its process group (a browser that tidied
+ * itself up would make any close look correct), so a result is a statement about the runner, not about Chromium.
  *
- * Signals: only direct children of this test process whose command line names a `checks-guided-` scratch directory
- * (D4's selection), plus their descendants. Nothing else is ever signalled, and nothing is logged from argv.
+ * Signals: only browsers that are descendants of this test process, whose command line names a `checks-guided-` scratch
+ * directory and whose parent is not itself such a browser process (the leader: under the child it is the child's
+ * grandchild, no longer this process's direct child), plus their descendants. Nothing else is ever signalled, and
+ * nothing is logged from argv.
  */
 import { createServer as httpsServer, request as httpsRequest } from 'node:https';
 import type { Server } from 'node:https';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import type { GuidedRuntimeOptions } from '../../../src/guided/runtime.js';
 import { validate } from '../../../src/guided/contracts.js';
 import { createGuidedServer, guidedCallback, guidedClaimClient } from '../../../src/guided/transport.js';
 import type { CommandsClaim } from '../../../src/guided/types.js';
 import { launchGuidedBrowser } from '../../../src/run/browser.js';
 import { GuidedLaunchFailure } from '../../../src/run/guidedBrowser.js';
-import type { GuidedBrowser } from '../../../src/run/guidedBrowser.js';
+import type { GuidedBrowser, LaunchedBrowser } from '../../../src/run/guidedBrowser.js';
+import { createGuidedChildLauncher } from '../../../src/run/guidedChildLauncher.js';
+import type { GuidedChildLauncherOptions } from '../../../src/run/guidedChildLauncher.js';
 import { descendantsOf, isAlive, readProcessTableWithArgs } from '../../../src/run/tree.js';
 import { assignmentFor, guidedContext, ownershipSession } from '../../helpers/guided.js';
+import { inProcessBrowser } from '../../helpers/guidedStepService.js';
 import { jwt, jwtPolicy, testFingerprint, testTls } from '../../helpers/guidedTls.js';
 
 export type Launch = GuidedRuntimeOptions['launch'];
+
+// ── The child under test ─────────────────────────────────────────────────────────────────────────
+
+/** The built child entry. The launcher's own default resolves next to the importing module, which under vitest is `src/` (no `.js` there). */
+export const GUIDED_CHILD_DIST = fileURLToPath(new URL('../../../dist/run/guidedChild.js', import.meta.url));
+
+/** A launcher over the built `dist/run/guidedChild.js` (or another child module), with the product's bounds unless a case says otherwise. */
+export function guidedChildLauncher(options: GuidedChildLauncherOptions = {}): Launch {
+  return createGuidedChildLauncher({ childModulePath: GUIDED_CHILD_DIST, ...options });
+}
+
+/** The test entries of the child (`guidedTestChildCore.mjs`): the product service plus a page probe, a throwing secret hook, or a launch that never returns. */
+export const TEST_CHILD = {
+  probe: fileURLToPath(new URL('./guidedTestChild.mjs', import.meta.url)),
+  fillThrows: fileURLToPath(new URL('./guidedTestChildFillThrows.mjs', import.meta.url)),
+  hungLaunch: fileURLToPath(new URL('./guidedTestChildHungLaunch.mjs', import.meta.url)),
+} as const;
+
+/** The production path: a real fork per session. Fixtures that feed `launch` into a runtime or a server use this. */
+export const guidedChildLaunch: Launch = guidedChildLauncher();
+
+/**
+ * The same step service the child serves, hosted in THIS process over a directly launched browser. Only for the cases whose oracle patches
+ * the Playwright SDK or exposes bindings in the test process (the secret-isolation, stale-grant and ownership harnesses): a fork would put the
+ * browser out of their reach. The runtime-facing behaviour (steps, fence, secret hook, evidence) is the production code; only the process
+ * boundary is absent, and every other fixture covers that boundary with a real fork.
+ */
+export function inProcessGuided(launch: (...args: Parameters<Launch>) => Promise<LaunchedBrowser> = launchGuidedBrowser): Launch {
+  return async (config, contextId, onLost, recording, startup) => adaptInProcess(await launch(config, contextId, onLost, recording, startup), config.allowedDomains);
+}
+
+/**
+ * One launched browser as the runtime-facing {@link GuidedBrowser}. `close` does what the child's close request does (the masking bytes are dropped
+ * while the shutdown starts, and awaited after it), then the browser's own close; `terminate` is the browser's own.
+ */
+export function adaptInProcess(browser: LaunchedBrowser, allowedDomains: readonly string[]): GuidedBrowser {
+  return inProcessBrowser({
+    evidence: browser.evidence, observations: browser.observations, blankMatches: browser.blankMatches,
+    close: async () => { const disposal = browser.observations.dispose().catch(() => undefined); await browser.close(); await disposal; },
+    terminate: browser.terminate, orderlyClosed: browser.orderlyClosed, allowedDomains,
+    ...(browser.preferenceEvidence === undefined ? {} : { preferenceEvidence: browser.preferenceEvidence }),
+    ...(browser.scratchDirectory === undefined ? {} : { scratchDirectory: browser.scratchDirectory }),
+    ...(browser.handle === undefined ? {} : { handle: browser.handle }),
+    ...(browser.recordedVideo === undefined ? {} : { recordedVideo: browser.recordedVideo }),
+    ...(browser.finalizeRecording === undefined ? {} : { finalizeRecording: browser.finalizeRecording }),
+  });
+}
 type Grant = ReturnType<typeof ownershipSession>;
 type Context = ReturnType<typeof guidedContext>;
 
@@ -36,7 +89,7 @@ type Context = ReturnType<typeof guidedContext>;
 export const ORIGIN = 'http://localhost:9';
 
 /** Takes a launched guided browser to `url`: the blank-page navigation the old browser API did, now plain Playwright on the guided page (the domain policy is step code's, tested in stepRunLive). */
-export async function gotoPage(guided: GuidedBrowser, url: string): Promise<void> {
+export async function gotoPage(guided: LaunchedBrowser, url: string): Promise<void> {
   if (guided.handle === undefined) throw new Error('HANDLE');
   await (guided.handle.page as { goto(url: string): Promise<unknown> }).goto(url);
 }
@@ -132,12 +185,20 @@ export const newControl = (): Control => ({ frozen: false, frozenAt: null, launc
 
 const PROFILE = /--user-data-dir=\S*\/(checks-guided-[A-Za-z0-9]+)\//u;
 
-/** SIGSTOP the group of every browser this process launched. Returns how many leaders were frozen. */
+/**
+ * SIGSTOP the group of every browser this process's guided children launched. Returns how many leaders were frozen.
+ *
+ * The browser is no longer this process's direct child: the guided child (a Node process) is, and the browser is its child. A leader is a
+ * process below this one whose command line names a guided profile and whose parent's does not (the helper processes of one browser share the
+ * flag and are reached as descendants instead).
+ */
 export function freezeOwnBrowser(control: Control): number {
   const table = readProcessTableWithArgs();
+  const below = new Set(descendantsOf(process.pid, table));
+  const named = new Set(table.filter((row) => PROFILE.test(row.args)).map((row) => row.pid));
   let frozen = 0;
   for (const row of table) {
-    if (row.ppid !== process.pid) continue;
+    if (!below.has(row.pid) || !named.has(row.pid) || named.has(row.ppid)) continue;
     const own = PROFILE.exec(row.args);
     if (own?.[1] === undefined) continue;
     control.scratch.add(own[1]);
@@ -303,29 +364,37 @@ export async function slotProbe(harness: Harness): Promise<SlotProbe> {
 
 export type FreezePoint = 'NEVER' | 'AFTER_LAUNCH' | 'AFTER_WITHHOLD' | 'AFTER_BLANK_MATCH' | 'LAUNCH_ERROR_AFTER_FREEZE';
 
-/** The real launcher, with Chrome frozen at the named point. `NEVER` leaves freezing to the case. */
+/**
+ * The real guided child, with Chrome frozen at the named point. `NEVER` leaves freezing to the case.
+ *
+ * `LAUNCH_ERROR_AFTER_FREEZE` freezes the browser when the child reports the recording ready and ends the launch right then with a failure that
+ * is neither the deadline nor a stop (the old in-process variant threw from `ready`; that callback now runs in this process, between two frames
+ * of the child, so the failure is raised through the launch signal instead).
+ */
 export function launcherFreezing(point: FreezePoint, control: Control): Launch {
   return async (config, contextId, onLost, _recording, startup) => {
     control.launchEnteredAt ??= performance.now();
     if (point === 'LAUNCH_ERROR_AFTER_FREEZE') {
-      // A launch that fails for a reason that is neither the deadline nor a stop, with Chrome already stuck: `ready` runs
-      // inside the launch's try block, so its throw is the non-deadline launch failure (path (iii)).
       const dir = trackScratch(await mkdtemp(join(tmpdir(), 'guided-d5-rec-')));
+      const inner = new AbortController();
+      const relay = (): void => { inner.abort(startup.signal.reason); };
+      if (startup.signal.aborted) relay(); else startup.signal.addEventListener('abort', relay, { once: true });
       try {
-        return await launchGuidedBrowser(config, contextId, onLost, { dir, size: { width: 640, height: 360 }, ready: () => { freezeOwnBrowser(control); throw new Error('NON_DEADLINE_LAUNCH_FAILURE'); } }, startup);
+        return trackBrowser(control, await guidedChildLaunch(config, contextId, onLost, { dir, size: { width: 640, height: 360 }, ready: () => { freezeOwnBrowser(control); inner.abort(new Error('NON_DEADLINE_LAUNCH_FAILURE')); } }, { deadlineEpochMs: startup.deadlineEpochMs, signal: inner.signal }));
       } catch (error) {
-        // Same failure (cause and phase), with its `close` observed.
-        if (error instanceof GuidedLaunchFailure) throw new GuidedLaunchFailure(trackClose(control, 'failure.close', error.close), error.cause, error.phase);
+        // The failure the case means (cause and phase), with its `close` observed.
+        if (error instanceof GuidedLaunchFailure) throw new GuidedLaunchFailure(trackClose(control, 'failure.close', error.close), startup.signal.aborted ? error.cause : new Error('NON_DEADLINE_LAUNCH_FAILURE'), error.phase);
         throw error;
-      }
+      } finally { startup.signal.removeEventListener('abort', relay); }
     }
-    const launched = trackBrowser(control, await launchGuidedBrowser(config, contextId, onLost, undefined, startup));
+    const launched = trackBrowser(control, await guidedChildLaunch(config, contextId, onLost, undefined, startup));
     if (point === 'AFTER_LAUNCH') freezeOwnBrowser(control);
     if (point === 'AFTER_WITHHOLD') {
-      const real = launched.observations.withhold?.bind(launched.observations);
-      return { ...launched, observations: { ...launched.observations, withhold: async (values) => { await real?.(values); freezeOwnBrowser(control); } } };
+      return { ...launched, observations: { ...launched.observations, withhold: async (values) => { await launched.observations.withhold(values); freezeOwnBrowser(control); } } };
     }
-    if (point === 'AFTER_BLANK_MATCH') return { ...launched, blankMatches: async () => { const matched = await launched.blankMatches(); freezeOwnBrowser(control); return matched; } };
+    if (point === 'AFTER_BLANK_MATCH') {
+      return { ...launched, observations: { ...launched.observations, current: async (target) => { const matched = await launched.observations.current(target); if (target.kind === 'blank') freezeOwnBrowser(control); return matched; } } };
+    }
     return launched;
   };
 }

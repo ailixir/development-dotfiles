@@ -11,9 +11,11 @@ import { hash, identity } from '../../src/guided/contracts.js';
 import type { Action, BridgeBootstrap, BridgeObservation, ExecutionEvidence } from '../../src/guided/types.js';
 import { launchGuidedBrowser } from '../../src/run/browser.js';
 import { CLOSED_ACTION_CODES, CLOSED_REPLAY_REASONS } from '../../src/run/closedError.js';
-import type { GuidedBrowser } from '../../src/run/guidedBrowser.js';
+import type { LaunchedBrowser } from '../../src/run/guidedBrowser.js';
 import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 import { dispatch, guidedContext, proposal } from '../helpers/guided.js';
+import { childPage } from './helpers/childPage.js';
+import { TEST_CHILD, guidedChildLauncher } from './helpers/guidedLaunch.js';
 import { html, serve } from './perception/cutover-support.js';
 import type { Served } from './perception/cutover-support.js';
 
@@ -28,7 +30,7 @@ const TEXT = 'CANARY-OVERLAY-TEXT-4471';
 const VALUE = 'CANARY-VALUE-2208';
 const CLOSED: readonly string[] = [...CLOSED_ACTION_CODES, ...CLOSED_REPLAY_REASONS];
 
-const handleOf = (browser: GuidedBrowser | undefined): NonNullable<GuidedBrowser['handle']> => {
+const handleOf = (browser: LaunchedBrowser | undefined): NonNullable<LaunchedBrowser['handle']> => {
   const handle = browser?.handle;
   if (handle === undefined) throw new Error('the guided browser has no handle');
   return handle;
@@ -59,16 +61,12 @@ describe('guided canary boundary', () => {
     const context = guidedContext(served.origin);
     const messages: { route: string; body: unknown }[] = [];
     const stderr: string[] = [];
-    let browser: GuidedBrowser | undefined;
     const runtime = new GuidedRuntime(context, {
       workerId: context.workerId,
       allowedDomains: TEST_DOMAINS,
       journalDirectory: directory,
       diagnosticStderr: (text) => { stderr.push(text); },
-      launch: async (...args: Parameters<typeof launchGuidedBrowser>) => {
-        browser = await launchGuidedBrowser(...args);
-        return browser;
-      },
+      launch: guidedChildLauncher({ childModulePath: TEST_CHILD.probe }),
       callback: (route, body) => {
         messages.push({ route, body });
         return Promise.resolve();
@@ -76,6 +74,9 @@ describe('guided canary boundary', () => {
     });
     cleanups.push(() => runtime.stop('CANCELLED'));
     await runtime.start();
+    // The page is in the guided child now: the test reaches it through the child's probe, with the same Playwright calls.
+    const probe = await childPage();
+    cleanups.push(() => { probe.close(); return Promise.resolve(); });
     let evidence = (messages[0]?.body as BridgeBootstrap).executionEvidence as ExecutionEvidence;
     const act = async (step: string, operation: Action['operation'], between?: () => Promise<void>) => {
       const p = proposal(context, evidence, step, operation);
@@ -89,19 +90,11 @@ describe('guided canary boundary', () => {
     expect((await act('nav', stepOp('await page.goto(inputs["input-nav"]);', { uses: [{ kind: 'input', id: 'input-nav' }] }))).ledger.state).toBe('SUCCEEDED');
     const seen = (messages.filter((m) => m.route === 'observations').at(-1)?.body as BridgeObservation).observation;
     if (!Object.values(seen.facts).some((fact) => fact.name === 'Pay now')) throw new Error('the button is not in the observation');
-    const page = handleOf(browser).page as unknown as Page;
-    const cover = (): Promise<void> => page.evaluate(([attr, text]) => {
-      document.body.insertAdjacentHTML('beforeend', `<div id="overlay" data-canary="${attr}" style="position:fixed;inset:0;background:rgba(0,0,0,.2)">${text}</div>`);
-    }, [ATTR, TEXT] as const);
+    const cover = (): Promise<void> => probe.insertHtml(`<div id="overlay" data-canary="${ATTR}" style="position:fixed;inset:0;background:rgba(0,0,0,.2)">${TEXT}</div>`);
     // The page state that fails the click: Playwright's own error for it carries the canaries (the control).
-    let raw = '';
     await cover();
-    try {
-      await page.locator('button').click({ timeout: 700 });
-    } catch (error) {
-      raw = (error as Error).message;
-    }
-    await page.locator('#overlay').evaluate((element) => { element.remove(); });
+    const raw = await probe.clickError('button', 700);
+    await probe.remove('#overlay');
     expect([ATTR, TEXT].some((canary) => raw.includes(canary)), 'the raw Playwright error shows the page text, so the test can see a leak').toBe(true);
 
     const outcome = await act('read', stepOp('await page.getByRole("button", { name: "Pay now", exact: true }).click();'), cover);

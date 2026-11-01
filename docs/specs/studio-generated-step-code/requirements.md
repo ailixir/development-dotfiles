@@ -173,7 +173,7 @@
 | **L-10** | No per-step parity evidence between modes (E11 deferred). C2 rests on one `runStep`, the same frozen code, and G3 and G4. | E11 |
 | **L-11** | No static pre-scan (E13 deferred): no free-identifier, member or provenance rules, and the "no invented literal bytes" input policy is enforced only for secrets. | E13 |
 | **L-12** | No wrong-target tripwire (E14 deferred): a wrong-but-unique target or an unrequested side-effecting click is caught only afterwards, by Playwright errors, a model-written `expect` or the proof. | E14 |
-| **L-13** | During learning, generated code runs with the runner server's privileges (E15 deferred). "Boundary as is" holds for replay in the killable child. | E15 |
+| **L-13** | Narrowed by E15 (built 2026-10-31): learning runs generated code in a killable per-session child with replay's allow-listed env, so the server's identity and TLS names are not in its process.env, argv or spawn request. Residual R-1b (accepted): same uid, so escaped code can still read mounted credential files, `/proc/<server>/environ` and other sessions' processes and files (ADR-SC-008 row 6). | E15 |
 | **L-14** | No prompt caching (E17 deferred): cost and latency rise. | E17 |
 | **L-15** | An S-min planner vocabulary remains: one open `step` kind (E20 deferred). | E20 |
 | **L-16** | **Validation is execution only (X-1).** A step with no assertion whose code runs without error is learned, even if the outcome is wrong. Playwright's auto-wait and actionability errors and any `expect` the model wrote are the only checks. Learned does not mean correct. The learned-state copy says so. | X-1 |

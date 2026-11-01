@@ -21,6 +21,7 @@ import { parseWireJson } from '../../src/guided/json.js';
 import { assignmentFor,guidedContext,ownershipSession, sessionStub, proposal, dispatch } from '../helpers/guided.js';
 import { stepOp } from '../helpers/stepCode.js';
 import { fakeHandle, newRig } from '../helpers/stepFakes.js';afterEach(()=>{vi.restoreAllMocks();});
+import { inProcessBrowser } from '../helpers/guidedStepService.js';
 describe('closed callback failure diagnostics',()=>{
   const sentinel='PRIVATE-SENTINEL-MUST-NEVER-APPEAR';
   it('records local schema refusal without credentials, free text or values',async()=>{
@@ -74,7 +75,7 @@ describe('closed callback failure diagnostics',()=>{
       const callback=guidedCallback({baseUrl:`https://127.0.0.1:${String(port)}`,tls:testTls,controllerCertificateFingerprint256:testFingerprint,token:()=>Promise.resolve(sentinel),diagnosticStderr:write});
       const evidence:GuidedBrowser['evidence']={kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:randomUUID(),documentId:randomUUID(),bootstrapId:randomUUID(),url:'about:blank',origin:null,generation:0};
       const rig=newRig('about:blank',{observe:()=>Promise.reject(new Error(sentinel)),withhold:()=>Promise.resolve()});
-      const browser:GuidedBrowser={evidence,blankMatches:()=>Promise.resolve(true),handle:fakeHandle(rig),close:()=>{events.push('close');return Promise.resolve();},terminate:()=>Promise.resolve(),orderlyClosed:()=>true,observations:rig.session};
+      const browser:GuidedBrowser=inProcessBrowser({evidence,blankMatches:()=>Promise.resolve(true),handle:fakeHandle(rig),close:()=>{events.push('close');return Promise.resolve();},terminate:()=>Promise.resolve(),orderlyClosed:()=>true,observations:rig.session});
       runtime=new GuidedRuntime(context,{workerId:context.workerId,allowedDomains:TEST_DOMAINS,journalDirectory:directory,launch:()=>Promise.resolve(browser),callback,diagnosticStderr:write});
       await runtime.start();
       const action=proposal(context,evidence,'nav',stepOp('await page.goto(inputs["input-nav"]);',{uses:[{kind:'input',id:'input-nav'}]}));
@@ -103,7 +104,7 @@ describe('the cause of a session that ends after a committed outcome (SC008-FIX-
       const context=guidedContext('https://example.test');
       const evidence:GuidedBrowser['evidence']={kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:randomUUID(),documentId:randomUUID(),bootstrapId:randomUUID(),url:'about:blank',origin:null,generation:0};
       const rig=newRig('about:blank',{observe:()=>Promise.reject(thrown()),withhold:()=>Promise.resolve()});
-      const browser:GuidedBrowser={evidence,blankMatches:()=>Promise.resolve(true),handle:fakeHandle(rig),close:()=>Promise.resolve(),terminate:()=>Promise.resolve(),orderlyClosed:()=>true,observations:rig.session};
+      const browser:GuidedBrowser=inProcessBrowser({evidence,blankMatches:()=>Promise.resolve(true),handle:fakeHandle(rig),close:()=>Promise.resolve(),terminate:()=>Promise.resolve(),orderlyClosed:()=>true,observations:rig.session});
       runtime=new GuidedRuntime(context,{workerId:context.workerId,allowedDomains:TEST_DOMAINS,journalDirectory:directory,launch:()=>Promise.resolve(browser),callback:()=>Promise.resolve(undefined as never),diagnosticStderr:line=>{lines.push(line);}});
       await runtime.start();
       const action=proposal(context,evidence,'nav',stepOp('await page.goto(inputs["input-nav"]);',{uses:[{kind:'input',id:'input-nav'}]}));
@@ -294,7 +295,7 @@ describe('STUDIO-OBS-014 AC-1 definite context refusal on the wire (AR-2 r14-sto
   it('answers a context that differs from its grant and a context without the policy fields with schema-valid 409 refusals and changes nothing on the worker',async()=>{
     const directory=await mkdtemp(join(tmpdir(),'guided-refusal-'));
     const context=guidedContext('https://example.test');const grant=ownershipSession(context);const assignment=assignmentFor(context);
-    const browser:GuidedBrowser={evidence:{kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:randomUUID(),documentId:randomUUID(),bootstrapId:randomUUID(),url:'about:blank',origin:null,generation:0},blankMatches:()=>Promise.resolve(true),close:()=>Promise.resolve(),terminate:vi.fn(()=>Promise.resolve()),orderlyClosed:()=>true,observations: sessionStub({withhold:()=>Promise.resolve(),dispose:()=>Promise.resolve(),observe:()=>Promise.reject(new Error('unused'))})};
+    const browser:GuidedBrowser=inProcessBrowser({evidence:{kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:randomUUID(),documentId:randomUUID(),bootstrapId:randomUUID(),url:'about:blank',origin:null,generation:0},blankMatches:()=>Promise.resolve(true),close:()=>Promise.resolve(),terminate:vi.fn(()=>Promise.resolve()),orderlyClosed:()=>true,observations: sessionStub({withhold:()=>Promise.resolve(),dispose:()=>Promise.resolve(),observe:()=>Promise.reject(new Error('unused'))})});
     const launch=vi.fn(()=>Promise.resolve(browser));const callbacks:string[]=[];
     const app=createGuidedServer({workerId:context.workerId,allowedDomains: TEST_DOMAINS, journalDirectory:directory,tls:testTls,controllerJwt:jwtPolicy,controllerCertificateFingerprint256:testFingerprint,launch,
       claim:()=>Promise.resolve({...structuredClone(grant),owner:{...grant.owner,leaseExpiresAt:new Date(Math.min(Date.now()+30_000,Date.parse(grant.expiresAt))).toISOString()}}),

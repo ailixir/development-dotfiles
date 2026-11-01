@@ -8,7 +8,7 @@ import { randomUUID } from 'node:crypto';
 import { afterEach, describe, expect, it } from 'vitest';
 import { GuidedRuntime } from '../../src/guided/runtime.js';
 import { hash, identity } from '../../src/guided/contracts.js';
-import { launchGuidedBrowser } from '../../src/run/browser.js';
+import { guidedChildLaunch } from './helpers/guidedLaunch.js';
 import type { Action, BridgeBootstrap, BridgeObservation, ExecutionEvidence } from '../../src/guided/types.js';
 import { dispatch, guidedContext, proposal } from '../helpers/guided.js';
 
@@ -35,7 +35,7 @@ async function harness(html: string, value: string, options: { configuration?: b
   context.authoredInputsHash = hash(context.authoredInputs);
   const messages: { route: string; body: unknown }[] = [];
   const runtime = new GuidedRuntime(context, { workerId: context.workerId, allowedDomains: TEST_DOMAINS, journalDirectory: directory, 
-    launch: (config, ...args) => launchGuidedBrowser({ ...config, knownSecrets: options.knownSecret ? [value] : [] }, ...args),
+    launch: (config, ...args) => guidedChildLaunch({ ...config, knownSecrets: options.knownSecret ? [value] : [] }, ...args),
     callback: (route, body) => { messages.push({ route, body }); return Promise.resolve(); } });
   resources.push(() => runtime.stop('CANCELLED'));
   await runtime.start();

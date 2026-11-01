@@ -13,6 +13,7 @@ import {expect,it,vi} from 'vitest';
 import {createGuidedServer,guidedCallback,guidedClaimClient,verifyGuidedJwt} from '../../src/guided/transport.js';
 import {GuidedRuntime} from '../../src/guided/runtime.js';
 import {launchGuidedBrowser} from '../../src/run/browser.js';
+import {adaptInProcess} from './helpers/guidedLaunch.js';
 import {descendantsOf,isAlive} from '../../src/run/tree.js';
 import {hash,identity,validate} from '../../src/guided/contracts.js';
 import type {BridgeBootstrap,BridgeObservation,BridgePreparation,BridgeOrdinaryOutcome as BridgeOutcome,BridgeLifecycle,CommandsClaim} from '../../src/guided/types.js';
@@ -104,7 +105,7 @@ it.each(modes)('uses actual mTLS and native focus for guided secret ownership: %
     const fact={started:performance.now(),timeoutMs:timeout,key};claimFacts.push(fact);
     try{const acknowledged=await actualClaim(command,key,timeout,signal);Object.assign(fact,{completed:performance.now()});if(focusAt!==undefined&&t0===undefined&&(mode==='revoked'||mode==='lost-body-late-grant'))t0=performance.now();return acknowledged;}
     catch(error){Object.assign(fact,{failed:performance.now()});throw error;}
-  },callback:guidedCallback(client),launch:async(...args)=>{const browser=await launchGuidedBrowser(...args);scratchPath=browser.scratchDirectory;return {...browser,close:async()=>{closeRequestedAt??=performance.now();await browser.close();closeFinishedAt=performance.now();}};}});
+  },callback:guidedCallback(client),launch:async(...args)=>{const browser=await launchGuidedBrowser(...args);scratchPath=browser.scratchDirectory;return adaptInProcess({...browser,close:async()=>{closeRequestedAt??=performance.now();await browser.close();closeFinishedAt=performance.now();}},args[0].allowedDomains);}});
   await new Promise<void>(r=>app.server.listen(0,'127.0.0.1',r));const address=app.server.address();if(!address||typeof address==='string')throw Error('PORT');const path='/internal/v2/studio/guided-sessions/'+context.sessionId;
   let pendingFill:Promise<Awaited<ReturnType<typeof post>>>|undefined;
   const facts:Record<string,unknown>={mode,sourceGuidedWorker:true,compiledWorker:false,realMtlsJwt:true,backendRevocationAuditProved:false,scopeHash:context.scopeHash,sessionId:context.sessionId,absoluteExpiresAt:context.expiresAt};

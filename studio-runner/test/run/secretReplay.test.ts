@@ -25,7 +25,7 @@ function frame(): Execute3 {
     steps: [{stepIndex: 0, stepId, operations: [{coordinate: {stepId, ordinal: 0}, guardId: 'g0', operation: stepOp('await page.locator(\'input[type="password"]\').fill(secrets["PASS"]);', {uses: [{kind: 'secret', id: 'PASS'}]})}]}], guards: [{guardId: 'g0', origin}]};
 }
 function adapter(refused = false): ObservedAdapter {
-  return scriptedAdapter((action, _guard, io, control) => { expect(io.secrets).toEqual({PASS: 'run-scoped-canary', UNREACHED: 'other-canary'}); expect(io.secretIds).toEqual(['PASS']); expect(io.secretOrigins.PASS).toEqual([origin]); control.beginInvocation(); for (const id of io.secretIds) { io.secretUse.attempting(id); if (refused) io.secretUse.refusedBeforeEffect(id); else io.secretUse.used(id); } if (refused) return Promise.reject(new ObservedRefusal('POLICY_REFUSED',undefined,true)); return Promise.resolve(stepResult(action)); });
+  return scriptedAdapter((action, _guard, io, control) => { expect(io.secrets).toEqual({PASS: 'run-scoped-canary', UNREACHED: 'other-canary'}); expect(io.secretIds).toEqual(['PASS']); expect(io.secretOrigins.PASS).toEqual([origin]); void control.beginInvocation(); for (const id of io.secretIds) { io.secretUse.attempting(id); if (refused) io.secretUse.refusedBeforeEffect(id); else io.secretUse.used(id); } if (refused) return Promise.reject(new ObservedRefusal('POLICY_REFUSED',undefined,true)); return Promise.resolve(stepResult(action)); });
 }
 const run = (message: Execute3, browser: ObservedAdapter) => executeObservedReplay(message, browser, scope, TEST_DOMAINS, {now: () => performance.now()}, {stepStarted() { return; }, stepFinished() { return; }}, new AbortController().signal);
 function secretArtifact(): Artifact3 {
@@ -143,7 +143,7 @@ describe('run-scoped secret metadata and usage summary', () => {
     expect(() => validateObservedExecute(message, scope, TEST_DOMAINS)).toThrow('REFERENCE_MISMATCH');
   });
   it('omits uncertain invocation status instead of fabricating a refusal',async()=>{
-    const browser=adapter();browser.perform=(_action,_guard,io,control)=>{control.beginInvocation();for(const id of io.secretIds)io.secretUse.attempting(id);return Promise.reject(new Error('transport interrupted after possible typing'));};
+    const browser=adapter();browser.perform=(_action,_guard,io,control)=>{void control.beginInvocation();for(const id of io.secretIds)io.secretUse.attempting(id);return Promise.reject(new Error('transport interrupted after possible typing'));};
     const result=await run(frame(),browser);expect(result.ok).toBe(false);expect(result.secretUse).toEqual({UNREACHED:'NOT_USED'});
   });
   it('keeps confirmed use monotone through later unknown or pre-effect refusal',()=>{

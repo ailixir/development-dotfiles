@@ -173,7 +173,12 @@ export interface InvocationControl {
     readonly signal: AbortSignal;
     readonly phase: 'PREPARING' | 'INVOKING' | 'FINISHED' | 'POISONED';
     check(): void;
-    beginInvocation(): void;
+    /**
+     * Crosses the fence. Replay's control is synchronous and returns undefined (no extra microtask). A guided control returns ONE memoised
+     * promise that settles on the server's ack: nothing may take effect, and no secret value may be read, before it resolves; a rejection
+     * is final and never retried.
+     */
+    beginInvocation(): void | Promise<void>;
     poison(reason: 'TIMEOUT' | 'CANCELLED'): void;
 }
 /** The timer poisons authority before rejecting; late work can only clean up. */

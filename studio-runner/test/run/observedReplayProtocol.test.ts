@@ -37,7 +37,9 @@ function virtualChild(mode: 'pass' | 'wrong-build' | 'wrong-attempt' | 'unsafe-r
     let onMessage: (v: unknown) => void = () => undefined, onExit: () => void = () => undefined, onOutput: (stream: 'stdout' | 'stderr', chunk: string) => void = () => undefined;
     let launch: Launch3 | null = null, kills = 0,possibleEffects=0;
     const sent: (ParentMessage | ObservedParentMessage)[] = [];
-    const child: ChildProcessHandle = { pid: 123, onMessage(fn) { onMessage = fn; }, onExit(fn) { onExit = () => { fn(0, null); }; }, onOutput(fn) { onOutput = fn; }, kill() { kills++; onExit(); }, send(m) {
+    const child: ChildProcessHandle = { pid: 123, onMessage(fn) { onMessage = fn; }, onExit(fn) { onExit = () => { fn(0, null); }; }, onOutput(fn) { onOutput = fn; }, kill() { kills++; onExit(); }, send(message) {
+            // The port takes any message (the guided child's frames use the same handle); this child only ever receives the replay protocol's.
+            const m = message as ParentMessage | ObservedParentMessage;
             sent.push(m);
             if (m.kind === 'stop') {
                 if(mode==='ipc-backpressure-loss')return;

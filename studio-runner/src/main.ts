@@ -51,7 +51,7 @@ import { currentRuntimeVersions } from './compat/index.js';
 import { assertObservedBrowserStartup } from './compat/runtime-versions.js';
 import { canEnumerateProcessTree, createChildBrowserLauncher, readProcessTable } from './run/index.js';
 import type { ChildLauncherOptions, ProcessRow } from './run/index.js';
-import { launchGuidedBrowser } from './run/browser.js';
+import { launchGuidedChild } from './run/guidedChildLauncher.js';
 import { prepareRecordingScratch } from './run/recordingScratch.js';
 import type { RecordingScratch } from './run/recordingScratch.js';
 import { canEnumerateLaunchTree } from './run/tree.js';
@@ -119,7 +119,7 @@ export function createConfiguredLauncher(config: RunnerConfig): BrowserLauncher 
  * block passes only the process's own environment and streams.
  */
 export interface GuidedStartupSeams {
-  /** Defaults to `launchGuidedBrowser`: the guided browser runs inside this process, unlike the replay child. */
+  /** Defaults to `launchGuidedChild`: the guided browser runs in a per-session child process, like the replay child. */
   readonly launch?: GuidedModeDependencies['launch'] | undefined;
   /** Defaults to `assertObservedBrowserStartup()`. */
   readonly assertBuild?: (() => void) | undefined;
@@ -294,7 +294,7 @@ export async function main(options: MainOptions): Promise<MainResult> {
           workerId: guidedConfig.workerId,
           journalDirectory: guidedConfig.journalDirectory,
         });
-        launch = seams.launch ?? launchGuidedBrowser;
+        launch = seams.launch ?? launchGuidedChild;
       } catch {
         return refuse(GUIDED_WORKER_UNAVAILABLE, 1);
       }

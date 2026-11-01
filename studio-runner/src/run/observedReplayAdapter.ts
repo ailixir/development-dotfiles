@@ -120,7 +120,8 @@ export async function performStep(host: StepApi, session: ObservationSession, re
       // A secret goes only to the password control of the page the run records.
       if (call.kind === 'Locator' && !onRunPage(call.receiver, host.page)) throw new ObservedRefusal('POLICY_REFUSED', undefined, true);
       // Prepare stops at the fence. The value arrives with the dispatch, so nothing is read or observed here.
-      if (untilFence === true) return { run: (_proceed, fence) => { fence(); return undefined; } };
+      // Under untilFence the fence throws FenceReached synchronously, so no ack promise is ever returned here.
+      if (untilFence === true) return { run: (_proceed, fence) => { void fence(); return undefined; } };
     }
     return secrets.beforeCall(call);
   };

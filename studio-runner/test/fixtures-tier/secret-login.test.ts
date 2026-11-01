@@ -1,5 +1,8 @@
 import { stepOp } from '../helpers/stepCode.js';
-import { gotoPage } from './helpers/guidedLaunch.js';
+import { TEST_CHILD, gotoPage, guidedChildLauncher } from './helpers/guidedLaunch.js';
+import type { Launch } from './helpers/guidedLaunch.js';
+import { childPage } from './helpers/childPage.js';
+import type { ChildPage } from './helpers/childPage.js';
 import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
 // eslint-disable-next-line no-restricted-imports -- Actual controlled Chromium oracle.
 import type { Page } from 'playwright';
@@ -161,8 +164,9 @@ it.each(['native-guard','injected-released-value'] as const)('measures actual Gu
   context.authoredInputs.inputs.push({inputId:'input-pass',sourceStepId:'fill',kind:'secretRef',secretId:'PASS',provenance:{referenceKind:'configuration',configurationRevision:context.configurationRevision,stepId:'fill',referenceId:'reference-pass',referenceName:'PASS',kind:'secretRef'}});
   context.authoredInputsHash=hash(context.authoredInputs);
   const messages:{route:string;body:unknown}[]=[],stderr:string[]=[],raw:string[]=[];let nativeGuardClose:CapturedPrivateClose|undefined,validDuplicate:ReturnType<typeof dispatch>|undefined;
-  const diagnosticLaunch:typeof launchGuidedBrowser=mode==='native-guard'?async(...args)=>{nativeGuardClose=capturePrivateClose(await launchGuidedBrowser(...args));return nativeGuardClose.browser;}:launchGuidedBrowser;
-  const runtime=new GuidedRuntime(context,{workerId:context.workerId,allowedDomains: TEST_DOMAINS, journalDirectory:directory,launch:diagnosticLaunch,callback:(route,body)=>{messages.push({route,body});return Promise.resolve();},diagnosticStderr:text=>{stderr.push(text);},onRawFailure:error=>{raw.push(error instanceof Error?error.message:'');},...(mode==='injected-released-value'?{beforeSecretFill:(value:string)=>{throw new Error(value+' '+encodeURIComponent(value)+' '+Buffer.from(value).toString('base64')+' '+'🙂'.repeat(2000));}}:{})});
+  const childLaunch=guidedChildLauncher({childModulePath:mode==='native-guard'?TEST_CHILD.probe:TEST_CHILD.fillThrows});
+  const diagnosticLaunch:Launch=mode==='native-guard'?async(...args)=>{const original=await childLaunch(...args);nativeGuardClose=capturePrivateClose(original,await childPage());return nativeGuardClose.browser;}:childLaunch;
+  const runtime=new GuidedRuntime(context,{workerId:context.workerId,allowedDomains: TEST_DOMAINS, journalDirectory:directory,launch:diagnosticLaunch,callback:(route,body)=>{messages.push({route,body});return Promise.resolve();},diagnosticStderr:text=>{stderr.push(text);},onRawFailure:error=>{raw.push(error instanceof Error?error.message:'');}});
   try{
     await runtime.start();const bootstrap=messages.find(message=>message.route==='bootstrap-evidence')?.body as BridgeBootstrap;
     const navigation=proposal(context,bootstrap.executionEvidence,'nav',stepOp('await page.goto(inputs["input-nav"]);', { uses: [{ kind: 'input', id: 'input-nav' }] }));
@@ -327,11 +331,11 @@ import {evidencePath} from '../helpers/evidenceOut.js';
 const secretPrefixIds=['00000000-0000-4000-8000-000000000801','00000000-0000-4000-8000-000000000802','00000000-0000-4000-8000-000000000803'] as const;
 function present<T>(value:T|undefined|null):T {if(value===undefined||value===null)throw Error('MISSING_SECRET_NATIVE_FACT');return value;}
 interface CapturedPrivateClose {browser:GuidedBrowser;facts:{attempts:number;reached:boolean;passed:boolean;failed:boolean;emptyInputs?:boolean;hits?:string[];error?:unknown}}
-function capturePrivateClose(original:GuidedBrowser,onEmpty?:(value:boolean)=>void):CapturedPrivateClose {
+function capturePrivateClose(original:GuidedBrowser,probe:ChildPage,onEmpty?:(value:boolean)=>void):CapturedPrivateClose {
   const facts:CapturedPrivateClose['facts']={attempts:0,reached:false,passed:false,failed:false};let closing:Promise<void>|undefined;
   return {facts,browser:{...original,close:()=>{closing??=(async()=>{facts.attempts++;facts.reached=true;try{
     const root=present(original.scratchDirectory),info=await lstat(root);expect(info.isDirectory()&&!info.isSymbolicLink()).toBe(true);
-    const nativePage=present(original.handle).page as unknown as Page;facts.emptyInputs=await nativePage.locator('input').evaluateAll(elements=>elements.every(element=>(element as HTMLInputElement).value===''));onEmpty?.(facts.emptyInputs);
+    facts.emptyInputs=await probe.allEmpty('input');onEmpty?.(facts.emptyInputs);
     facts.hits=await scan(root);expect(facts.hits).toEqual([]);facts.passed=true;
   }catch(error){facts.failed=true;facts.error=error;throw error;}finally{await original.close();}})();return closing;}}};
 }
@@ -361,13 +365,14 @@ it.each(['valid','bad-origin','zero-password','two-passwords','focus-typeflip','
   const settings=loadEvidenceConfig({STUDIO_RUNNER_OBJECT_STORE_DIR:join(directory,'objects'),STUDIO_RUNNER_SCRATCH_DIR:join(directory,'scratch')}),configured=createConfiguredObjectStore(settings),evidenceRoot=join(directory,'evidence');await mkdir(evidenceRoot,{recursive:true});
   const recorder=createGuidedRecorder({store:configured.store,fileSystem:NODE_EVIDENCE_FILE_SYSTEM,bounds:evidenceBoundsFrom(settings),size:{width:settings.recordingWidth,height:settings.recordingHeight},calibrationOffsetMs:settings.seekOriginCalibrationMs,originSource:systemOriginSource,now:()=>performance.now(),sleep:ms=>new Promise(resolve=>{setTimeout(resolve,ms);}),evidenceRoot});
   const messages:{route:string;body:unknown}[]=[],stderr:string[]=[];let guided:GuidedBrowser|undefined,emptyBeforeClose:boolean|undefined,capturedClose:CapturedPrivateClose|undefined;
-  const launch=vi.fn(async(...args:Parameters<typeof launchGuidedBrowser>)=>{const original=await launchGuidedBrowser(...args);capturedClose=capturePrivateClose(original,empty=>{emptyBeforeClose=empty;});guided=capturedClose.browser;return guided;});
+  const probingLaunch=guidedChildLauncher({childModulePath:TEST_CHILD.probe});let probe:ChildPage|undefined;
+  const launch=vi.fn(async(...args:Parameters<Launch>)=>{const original=await probingLaunch(...args);probe=await childPage();capturedClose=capturePrivateClose(original,probe,empty=>{emptyBeforeClose=empty;});guided=capturedClose.browser;return guided;});
   const runtime=new GuidedRuntime(context,{workerId:context.workerId,allowedDomains: TEST_DOMAINS, journalDirectory:join(directory,'journal'),launch,recorder,csiId:'CSI-123',diagnosticStderr:text=>{stderr.push(text);},callback:(route,body)=>{messages.push({route,body});return Promise.resolve();}});
   let fillAdmission:string|undefined,terminal:BridgeOutcome|undefined,navigationLedger:Ledger|undefined,fillLedger:Ledger|undefined;const initialInputsHash=context.authoredInputsHash;
   const video=join(directory,'objects','studio','CSI-123','guided',context.sessionId+'.webm');
   await withObservedNativeEvidence(directory,`secret-${fault}`,async preserved=>{
     preserved.media('secret-prefix',video);preserved.check('secret-prefix','assertions','RUNNING');
-    await runtime.start();const native=present(guided),handle=present(native.handle),observationSession=native.observations,nativePage=handle.page as unknown as Page;
+    await runtime.start();const native=present(guided),observationSession=native.observations,nativePage=present(probe);
     const prepare=(coordinate:PrefixAction['coordinate'],evidence:ExecutionEvidence)=>{const request={schemaVersion:3 as const,sessionId:context.sessionId,workerId:context.workerId,ownerFence:context.ownerFence,scopeHash:context.scopeHash,contextId:context.contextId,contextRevision:context.contextRevision,authoredInputsHash:context.authoredInputsHash,sourceRevision:context.sourceRevision,configurationRevision:context.configurationRevision,prefixProgramHash:present(context.prefixProgramHash),coordinate,evidenceHash:hash(evidence)};return {kind:'prefix' as const,request,requestDigest:hash(request)} satisfies BridgePrefixPrepare;};
     const navigation=await runtime.preparePrefix(prepare(nav.coordinate,(messages[0]?.body as BridgeBootstrap).executionEvidence));const navigationRequest=dispatch(context,navigation.proposal,navigation.preparation);navigationLedger=navigationRequest.ledger;expect((await runtime.dispatch(navigationRequest)).ledger.state).toBe('SUCCEEDED');
     const observation=(messages.filter(m=>m.route==='observations').at(-1)?.body as BridgeObservation).observation,evidence:ExecutionEvidence={kind:'observedDocument',sessionId:context.sessionId,contextId:context.contextId,documentId:observation.documentId,generation:observation.generation,origin:observation.origin,observationHash:hash(observation)},request=prepare(fill.coordinate,evidence);
@@ -375,17 +380,17 @@ it.each(['valid','bad-origin','zero-password','two-passwords','focus-typeflip','
     {
       expect(observation.coverage.passwordControls).toBe(fault==='zero-password'?0:fault==='two-passwords'?2:1);const prepared=await runtime.preparePrefix(request);
       expect(prepared.proposal.executionEvidence).toEqual(evidence);expect(prepared.preparation.evidenceHash).toBe(hash(evidence));expect(prepared.preparation.authoredInputsHash).toBe(initialInputsHash);
-      if(fault!=='zero-password')expect(await nativePage.locator('input[name=password]').inputValue()).toBe('');expect(launch).toHaveBeenCalledOnce();expect(present(guided).handle).toBe(handle);expect(present(guided).observations).toBe(observationSession);
+      if(fault!=='zero-password')expect(await nativePage.inputValue('input[name=password]')).toBe('');expect(launch).toHaveBeenCalledOnce();expect(present(guided).observations).toBe(observationSession);
       const message={...dispatch(context,prepared.proposal,prepared.preparation),secrets:[{secretId:'PASS',value:fault==='oversize-frame'?CANARY+'x'.repeat(4097):CANARY,versionId:'controlled-native-frame',allowedOrigins:[fault==='bad-origin'?declaredAliasOrigin:fixture.origin]}]};fillAdmission=message.ledger.admission.admissionId;fillLedger=message.ledger;
       if(fault==='stopped-lease'){
         // Actual owning runtime lease stop, not a claim that a TestVault value was revoked.
         await runtime.stop('LEASE_LOST');await expect(runtime.dispatch(message)).rejects.toThrow('CONTEXT_LOST');
       }else if(fault==='oversize-frame'){
-        await expect(runtime.dispatch(message)).rejects.toThrow('SCHEMA');expect(await nativePage.locator('input[name=password]').inputValue()).toBe('');
+        await expect(runtime.dispatch(message)).rejects.toThrow('SCHEMA');expect(await nativePage.inputValue('input[name=password]')).toBe('');
       }else{
         terminal=await runtime.dispatch(message);expect(()=>validate('bridge',terminal,'outcome')).not.toThrow();expect(message).not.toHaveProperty('secret');
         if(fault==='valid'){
-          expect(terminal.ledger).toMatchObject({state:'SUCCEEDED',outcomeCode:'OK',contextRevision:1,authoredInputsHash:initialInputsHash});expect(await nativePage.locator('input[type=password]').inputValue()).toBe(CANARY);
+          expect(terminal.ledger).toMatchObject({state:'SUCCEEDED',outcomeCode:'OK',contextRevision:1,authoredInputsHash:initialInputsHash});expect(await nativePage.inputValue('input[type=password]')).toBe(CANARY);
           const next=structuredClone(context);next.contextRevision++;next.materializationRevision++;next.authoredInputs.inputs.push({inputId:'after-secret',sourceStepId:secretPrefixIds[2],kind:'nonsecretText',value:'new-prefix-suffix-input',provenance:{referenceKind:'configuration',configurationRevision:'1',stepId:secretPrefixIds[2],referenceId:'after-secret',kind:'nonsecretText'}});next.authoredInputsHash=hash(next.authoredInputs);
           const deliveryId=randomUUID(),ack=await runtime.update(next,deliveryId);expect(validate('bridge',ack,'ContextAcknowledgement')).toMatchObject({contextRevision:2,contextHash:hash(next),deliveryId});expect(await runtime.update(next,deliveryId)).toEqual(ack);
           expect(terminal.ledger.contextRevision).toBe(1);expect(terminal.ledger.authoredInputsHash).toBe(initialInputsHash);await expect(runtime.preparePrefix(request)).rejects.toThrow('IDENTITY_MISMATCH');
@@ -401,8 +406,8 @@ it.each(['valid','bad-origin','zero-password','two-passwords','focus-typeflip','
       }
       delete (message as {secrets?:unknown}).secrets;
     }
-    expect(launch).toHaveBeenCalledOnce();expect(present(guided).handle).toBe(handle);expect(present(guided).observations).toBe(observationSession);expect(fixture.receipts()).toEqual([]);
-    if(runtime.accepting&&fault!=='valid')expect(await nativePage.locator('input[name=password]').evaluateAll(elements=>elements.every(element=>(element as HTMLInputElement).value===''))).toBe(true);
+    expect(launch).toHaveBeenCalledOnce();expect(present(guided).observations).toBe(observationSession);expect(fixture.receipts()).toEqual([]);
+    if(runtime.accepting&&fault!=='valid')expect(await nativePage.allEmpty('input[name=password]')).toBe(true);
     for(const sink of [JSON.stringify(messages),stderr.join('')])for(const value of [CANARY,encodeURIComponent(CANARY),Buffer.from(CANARY).toString('base64')])expect(sink).not.toContain(value);
   },async preserved=>{try{await runtime.stop('CANCELLED');await runtime.recordingSettled;}finally{configured.close();preserved.recording('secret-prefix',messages.find(m=>m.route==='recording-evidence')?.body as RecordingEvidenceBody|undefined);preserved.outcome('secret-prefix',terminal?.ledger);}},()=>rm(directory,{recursive:true,force:true}),async preserved=>{
     const recording=messages.find(m=>m.route==='recording-evidence')?.body as RecordingEvidenceBody;expect(recording.state).toBe('STORED');expect(JSON.stringify(recording)).not.toContain(CANARY);expect(emptyBeforeClose).toBe(fault!=='valid');assertPrivateClose(capturedClose);

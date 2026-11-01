@@ -17,6 +17,7 @@ import { hashObserved } from '../../src/validator/observedReferencePolicy.js';
 import { FakeLocator, fakeHandle, must, newRig, operation } from '../helpers/stepFakes.js';
 import type { Rig } from '../helpers/stepFakes.js';
 import { readFileSync } from 'node:fs';
+import { inProcessBrowser } from '../helpers/guidedStepService.js';
 
 const documents = (JSON.parse(readFileSync(new URL('../../../docs/specs/studio-observed-authoring/contracts/v3/fixtures.json', import.meta.url), 'utf8')) as { documents: Record<string, any> }).documents; // eslint-disable-line @typescript-eslint/no-explicit-any
 const clone = <T>(value: T): T => structuredClone(value);
@@ -57,11 +58,12 @@ async function harness(rigOverride?: (rig: Rig) => void, withSecret = false, bef
     const observation = { ...clone(documents.observation.observation), generation, documentId: 'document-1' } as Observation;
     return { observation, json: JSON.stringify(observation), bytes: 100, observationHash: hash(observation) };
   };
-  const bootstrap: GuidedBrowser = {
+  const bootstrap: GuidedBrowser = inProcessBrowser({
     evidence: clone(documents.bootstrap.executionEvidence) as ExecutionEvidence, observations: rig.session, blankMatches: async () => true,
     close: async () => undefined, terminate: async () => undefined, orderlyClosed: () => true, handle: fakeHandle(rig),
-  };
-  const runtime = new GuidedRuntime(context, { workerId: context.workerId, allowedDomains: ['*'], ...(beforeSecretFill === undefined ? {} : { beforeSecretFill }), journalDirectory: journal, launch: async () => bootstrap, callback: async (route, body) => { messages.push({ route, body }); } });
+    allowedDomains: ['*'], ...(beforeSecretFill === undefined ? {} : { beforeSecretFill }),
+  });
+  const runtime = new GuidedRuntime(context, { workerId: context.workerId, allowedDomains: ['*'], journalDirectory: journal, launch: async () => bootstrap, callback: async (route, body) => { messages.push({ route, body }); } });
   await runtime.start();
   const state: Harness = { runtime, context, rig, messages, journal, evidence: bootstrap.evidence, get observed() { return h.observed; } } as Harness;
   return state;

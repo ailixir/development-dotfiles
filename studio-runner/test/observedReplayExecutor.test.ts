@@ -15,7 +15,7 @@ describe('private source-free replay graph', () => {
     it('carries a successful capture to the next step as a variable, and commits it to the withholding mask, not to the report', async () => {
         const seen: Record<string, string>[] = [], withheld: string[] = [], events: StepFinishedEvent[] = [], fresh = 'fresh private typed capture';
         const result = await run(frame(), (action, _guard, io, control) => {
-            control.beginInvocation();
+            void control.beginInvocation();
             seen.push({ ...io.vars });
             const id = action.operation.captures[0];
             return Promise.resolve(stepResult(action, id === undefined ? {} : { [id]: fresh }));
@@ -39,7 +39,7 @@ describe('private source-free replay graph', () => {
         for (const fresh of ['first-value-42', 'second-value-73']) {
             const consumed: string[] = [], events: StepFinishedEvent[] = [], withheld: string[] = [];
             const result = await run(m, (a, _g, io, control) => {
-                control.beginInvocation();
+                void control.beginInvocation();
                 const id = a.operation.captures[0];
                 if (a.operation.uses.some(use => use.kind === 'binding')) consumed.push(io.vars['binding-reference'] ?? '');
                 return Promise.resolve(stepResult(a, id === undefined ? {} : { [id]: fresh }));
@@ -55,7 +55,7 @@ describe('private source-free replay graph', () => {
         const events: StepFinishedEvent[] = [];
         let calls = 0;
         const result = await run(frame(), (a, _g, _io, control) => {
-            control.beginInvocation();
+            void control.beginInvocation();
             calls++;
             if (a.operation.captures.length > 0) return Promise.reject(Error('CANARY'));
             return Promise.resolve(stepResult(a));
@@ -161,7 +161,7 @@ describe('one-way observed invocation deadlines', () => {
                 deadlines.push(control.deadlineMs);
                 if (action.coordinate.ordinal === 1) { now = 1001; control.check(); }
             }
-            control.beginInvocation();
+            void control.beginInvocation();
             if (action.coordinate.stepId === stepId) now = 600;
             const id = action.operation.captures[0];
             return Promise.resolve(stepResult(action, id === undefined ? {} : { [id]: 'FRESH' }));

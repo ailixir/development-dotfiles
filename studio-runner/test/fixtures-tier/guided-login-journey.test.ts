@@ -19,7 +19,7 @@ import { createServer } from 'node:http';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { launchGuidedBrowser } from '../../src/run/browser.js';
+import { guidedChildLaunch } from './helpers/guidedLaunch.js';
 import { GuidedRuntime } from '../../src/guided/runtime.js';
 import { hash, identity } from '../../src/guided/contracts.js';
 import type { Action, BridgeBootstrap, BridgeObservation, BridgePreparation, ExecutionEvidence } from '../../src/guided/types.js';
@@ -77,7 +77,7 @@ async function harness(login: string, withUser: boolean) {
   ];
   context.authoredInputsHash = hash(context.authoredInputs);
   const messages: { route: string; body: unknown }[] = [];
-  const runtime = new GuidedRuntime(context, { workerId: context.workerId, allowedDomains: TEST_DOMAINS, journalDirectory: directory, launch: launchGuidedBrowser, callback: (route, body) => { messages.push({ route, body }); return Promise.resolve(); } });
+  const runtime = new GuidedRuntime(context, { workerId: context.workerId, allowedDomains: TEST_DOMAINS, journalDirectory: directory, launch: guidedChildLaunch, callback: (route, body) => { messages.push({ route, body }); return Promise.resolve(); } });
   resources.push(() => runtime.stop('CANCELLED')); await runtime.start();
   let evidence = (messages[0]?.body as BridgeBootstrap).executionEvidence as ExecutionEvidence;
   const observation = (): BridgeObservation['observation'] | undefined => (messages.filter(m => m.route === 'observations').at(-1)?.body as BridgeObservation | undefined)?.observation;

@@ -12,6 +12,7 @@ import { hash, identity, validate } from '../../src/guided/contracts.js';
 import { OriginNotAllowed } from '../../src/allowedDomains.js';
 import { ClosedActionError } from '../../src/run/closedError.js';
 import { guidedContext, dispatch, proposal, sessionStub } from '../helpers/guided.js';
+import { inProcessBrowser } from '../helpers/guidedStepService.js';
 import { GuidedLaunchFailure, GUIDED_RECORDING_FINALIZE_MS, GUIDED_START_BUDGET_MS, GUIDED_START_RESERVE_MS, GUIDED_START_TRANSPORT_CEILING_MS, launchFailureCause } from '../../src/run/guidedBrowser.js';
 import {PasswordNoEffect} from '../../src/run/passwordControl.js';
 import type { GuidedBrowser, GuidedRecordingRequest, GuidedStartup } from '../../src/run/guidedBrowser.js';
@@ -25,7 +26,7 @@ import type { BridgeBootstrap, BridgeOrdinaryOutcome as BridgeOutcome, BridgeObs
 
 describe('REL-001/D4 the guided start has one deadline',()=>{
   const chainOf=(failure:unknown):Error[]=>{const chain:Error[]=[];for(let link:unknown=failure;link instanceof Error;link=link.cause)chain.push(link);return chain;};
-  const blank=(context:ReturnType<typeof guidedContext>):GuidedBrowser=>({evidence:{kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:randomUUID(),documentId:randomUUID(),bootstrapId:randomUUID(),url:'about:blank',origin:null,generation:0},blankMatches:()=>Promise.resolve(true),close:()=>Promise.resolve(),terminate:vi.fn(()=>Promise.resolve()),orderlyClosed:()=>true,observations:sessionStub({withhold:()=>Promise.resolve(),observe:()=>Promise.reject(new Error('unused'))})});
+  const blank=(context:ReturnType<typeof guidedContext>):GuidedBrowser=>inProcessBrowser({evidence:{kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:randomUUID(),documentId:randomUUID(),bootstrapId:randomUUID(),url:'about:blank',origin:null,generation:0},blankMatches:()=>Promise.resolve(true),close:()=>Promise.resolve(),terminate:vi.fn(()=>Promise.resolve()),orderlyClosed:()=>true,observations:sessionStub({withhold:()=>Promise.resolve(),observe:()=>Promise.reject(new Error('unused'))})});
   /** Fake clock from before the runtime exists, so `began` is the fake epoch. The launcher receives the real `startup`. */
   async function harness(launch:(startup:GuidedStartup,context:ReturnType<typeof guidedContext>)=>Promise<GuidedBrowser>,options:{leaseMs?:number;callback?:GuidedRuntimeOptions['callback']}={}){
     vi.useFakeTimers();
@@ -158,6 +159,15 @@ describe('REL-001/D4 the guided start has one deadline',()=>{
     expect(h.runtime.startFailure).toEqual({phase:'BOOTSTRAP_CALLBACK',loss:null});
     await h.runtime.stop('CONTEXT_LOST');expect(terminate).toHaveBeenCalledOnce();expect(h.runtime.active).toBe(false);
   });
+  it('SC008-E15 F1: a terminate whose quiescence was unconfirmed keeps the slot held until the browser confirms the tree gone',async()=>{
+    let confirmed:()=>void=()=>undefined;const confirmGone=vi.fn(()=>new Promise<void>(resolve=>{confirmed=resolve;}));const terminate=vi.fn(()=>Promise.reject(new Error('CONTEXT_LOST')));
+    let called:()=>void=()=>undefined;const reached=new Promise<void>(resolve=>{called=resolve;});
+    const h=await harness((_startup,context)=>Promise.resolve({...blank(context),terminate,confirmGone}),{callback:route=>{if(route!=='bootstrap-evidence')return Promise.resolve();called();return new Promise<void>(()=>undefined);}});
+    await reached;await vi.advanceTimersByTimeAsync(GUIDED_START_BUDGET_MS);await h.outcome;
+    await expect(h.runtime.stop('CONTEXT_LOST')).rejects.toThrow('CONTEXT_LOST');
+    expect(h.runtime.active).toBe(true);expect(confirmGone).toHaveBeenCalledOnce();
+    confirmed();await vi.advanceTimersByTimeAsync(1);expect(h.runtime.active).toBe(false);
+  });
   it('keeps a start that finishes inside the budget exactly as before, and leaves nothing armed',async()=>{
     const h=await harness((_startup,context)=>Promise.resolve(blank(context)));
     expect(await h.outcome).toBeNull();expect(h.runtime.startFailure.phase).toBe('STARTED');expect(h.startup().signal.aborted).toBe(false);
@@ -172,12 +182,12 @@ describe('REL-001/D4 the guided start has one deadline',()=>{
 describe('KL-015-D5 the runtime closes by start phase',()=>{
   const chainOf=(failure:unknown):Error[]=>{const chain:Error[]=[];for(let link:unknown=failure;link instanceof Error;link=link.cause)chain.push(link);return chain;};
   interface Hooks{close?:()=>Promise<void>;terminate?:()=>Promise<void>;orderly?:boolean;withhold?:()=>Promise<void>;blankMatches?:()=>Promise<boolean>}
-  const fake=(context:ReturnType<typeof guidedContext>,hooks:Hooks={}):GuidedBrowser&{close:ReturnType<typeof vi.fn>;terminate:ReturnType<typeof vi.fn>}=>({
+  const fake=(context:ReturnType<typeof guidedContext>,hooks:Hooks={}):GuidedBrowser&{close:ReturnType<typeof vi.fn>;terminate:ReturnType<typeof vi.fn>}=>inProcessBrowser({
     evidence:{kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:randomUUID(),documentId:randomUUID(),bootstrapId:randomUUID(),url:'about:blank',origin:null,generation:0},
     blankMatches:hooks.blankMatches??(()=>Promise.resolve(true)),
     close:vi.fn(hooks.close??(()=>Promise.resolve())),terminate:vi.fn(hooks.terminate??(()=>Promise.resolve())),orderlyClosed:()=>hooks.orderly??false,
     observations:sessionStub({withhold:hooks.withhold??(()=>Promise.resolve()),observe:()=>Promise.reject(new Error('unused'))}),
-  });
+  }) as unknown as GuidedBrowser&{close:ReturnType<typeof vi.fn>;terminate:ReturnType<typeof vi.fn>};
   async function started(hooks:Hooks,options:{callback?:GuidedRuntimeOptions['callback'];recorder?:GuidedRecorder}={}){
     vi.useFakeTimers();
     const context=guidedContext('https://example.test');const browser=fake(context,hooks);
@@ -287,7 +297,7 @@ async function setup(options:{failedOutcomeCallback?:boolean;secret?:boolean;fai
   rig.w.matches['input[type="password" i]']=1;
   const goto=vi.fn(async()=>{const files=await readdir(path);const journal=await readFile(join(path,files.find(f=>f.endsWith('.journal'))??''),'utf8');expect(journal.trim().split('\n')).toHaveLength(3);expect(JSON.parse(journal.trim().split('\n')[2]??'{}')).toMatchObject({state:'INVOKING',receiptHash:null});rig.w.effects.push('goto');if(options.failEffect)throw new Error('captured-canary-private');});
   rig.page.goto=goto;
-  const browser:GuidedBrowser={evidence:{kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:randomUUID(),bootstrapId:randomUUID(),documentId:randomUUID(),url:'about:blank',origin:null,generation:0},blankMatches:vi.fn(()=>Promise.resolve(true)),close:vi.fn(()=>Promise.resolve()),terminate:vi.fn(()=>Promise.resolve()),orderlyClosed:()=>true,handle:fakeHandle(rig),observations:rig.session};
+  const browser=inProcessBrowser({evidence:{kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:randomUUID(),bootstrapId:randomUUID(),documentId:randomUUID(),url:'about:blank',origin:null,generation:0},blankMatches:vi.fn(()=>Promise.resolve(true)),close:vi.fn(()=>Promise.resolve()),terminate:vi.fn(()=>Promise.resolve()),orderlyClosed:()=>true,handle:fakeHandle(rig),observations:rig.session});
   const runtime=new GuidedRuntime(context,{workerId:context.workerId,allowedDomains: TEST_DOMAINS, journalDirectory:path,launch:(_config,_contextId,onLost)=>{options.onLostObserver?.(onLost);return Promise.resolve(browser);},callback:(route,body,key)=>{messages.push({route,body,...(key?{key}:{})});return route==='observations'&&options.observationCallback?options.observationCallback(body,key):route==='outcomes'&&(options.loseOutcomeAck||options.failedOutcomeCallback&&(body as BridgeOutcome).ledger.state==='UNKNOWN_OUTCOME')?Promise.reject(new Error('lost')):Promise.resolve();}});cleanup.push(()=>runtime.stop('CANCELLED'));await runtime.start();
   const evidence=(messages[0]?.body as BridgeBootstrap).executionEvidence;const p=proposal(context,evidence,'nav',NAV_OP);
   const prep=await runtime.prepare({...identity(context),proposal:p,requestDigest:hash(p),expiresAt:new Date(Math.min(Date.now()+10_000,Date.parse(context.leaseExpiresAt)-1)).toISOString()});
@@ -310,8 +320,8 @@ describe('durable worker consumption and recovery',()=>{
     const h=await setup({secret:true,onLostObserver:callback=>{originalLoss=callback;}});await h.runtime.dispatch(h.request);
     let nativeFulfill:()=>void=()=>undefined,nativeReject:(error:Error)=>void=()=>undefined,closeFinish:()=>void=()=>undefined;
     const native=new Promise<void>((resolve,reject)=>{nativeFulfill=resolve;nativeReject=reject;});
-    h.browser.observations.preparePassword=()=>Promise.resolve();
-    const fill=vi.fn(()=>native);h.browser.observations.fillPassword=fill;
+    h.rig.session.preparePassword=()=>Promise.resolve();
+    const fill=vi.fn(()=>native);h.rig.session.fillPassword=fill;
     vi.mocked(h.browser.close).mockImplementationOnce(()=>new Promise<void>(resolve=>{closeFinish=resolve;}));
     const{request}=await fillStep(h,'managed-unit-canary');
     const stderr=vi.spyOn(process.stderr,'write').mockImplementation(()=>true);
@@ -324,7 +334,7 @@ describe('durable worker consumption and recovery',()=>{
       expect((h.runtime as unknown as {busy:boolean}).busy).toBe(true);expect(h.runtime.active).toBe(true);
       closeFinish();await stopping;await vi.advanceTimersByTimeAsync(12_500);
       const result=await pending;expect(result.ledger.state).toBe('UNKNOWN_OUTCOME');expect(result.ledger.outcomeCode).toBe('ACK_LOST');
-      expect((h.runtime as unknown as {busy:boolean}).busy).toBe(false);expect(h.runtime.active).toBe(false);expect((h.runtime as unknown as {secretHolder:Map<string,unknown>}).secretHolder.size).toBe(0);
+      expect((h.runtime as unknown as {busy:boolean}).busy).toBe(false);expect(h.runtime.active).toBe(false);expect(request.secrets).toHaveLength(0);
       const before=JSON.stringify(h.messages),errCount=stderr.mock.calls.length;
       const name=(await readdir(h.path)).find(f=>f.endsWith('.diagnostic.jsonl'));if(!name)throw new Error('DIAGNOSTIC');
       const diagnostic=await readFile(join(h.path,name),'utf8');
@@ -348,7 +358,7 @@ describe('durable worker consumption and recovery',()=>{
   const failingCapture=(h:H,stop:()=>Promise<void>,message:()=>string)=>{h.rig.session.commitCapture=()=>{void stop();throw new Error(message());};};
   const capture=(id:string)=>`vars["${id}"] = await page.locator('#v').innerText();`;
   it.each(['stderr','callback','file'] as const)('keeps prior-value redaction and immutable success when %s diagnostic delivery fails',async sink=>{
-    const h=await setup({secret:true,failedOutcomeCallback:sink==='callback'});await h.runtime.dispatch(h.request);h.browser.observations.preparePassword=()=>Promise.resolve();h.browser.observations.fillPassword=()=>Promise.resolve();
+    const h=await setup({secret:true,failedOutcomeCallback:sink==='callback'});await h.runtime.dispatch(h.request);h.rig.session.preparePassword=()=>Promise.resolve();h.rig.session.fillPassword=()=>Promise.resolve();
     expect((await h.runtime.dispatch((await fillStep(h,'prior-sink-canary')).request)).ledger.state).toBe('SUCCEEDED');const texts:string[]=[];const stderr=vi.spyOn(process.stderr,'write').mockImplementation(text=>{texts.push(String(text));if(sink==='stderr')throw new Error('stderr unavailable');return true;});
     const path=join(h.path,hash(h.context.sessionId)+'.diagnostic.jsonl');if(sink==='file')await mkdir(path);
     h.rig.w.text['#v']='captured-value';failingCapture(h,()=>h.runtime.stop('CANCELLED'),()=>'prior-sink-canary '+Buffer.from('prior-sink-canary').toString('base64'));
@@ -356,7 +366,7 @@ describe('durable worker consumption and recovery',()=>{
     finally{stderr.mockRestore();}
   });
   it.each(['CANCELLED','EXPIRED','CONTEXT_LOST'].flatMap(reason=>['immediate','delayed'].flatMap(close=>['nonsecret','secret'].map(action=>({reason:reason as 'CANCELLED'|'EXPIRED'|'CONTEXT_LOST',close,action})))))('redacts all earlier/current values through $reason/$close/$action after inventory erasure',async({reason,close,action})=>{
-    const h=await setup({secret:true});await h.runtime.dispatch(h.request);h.browser.observations.preparePassword=()=>Promise.resolve();h.browser.observations.fillPassword=()=>Promise.resolve();
+    const h=await setup({secret:true});await h.runtime.dispatch(h.request);h.rig.session.preparePassword=()=>Promise.resolve();h.rig.session.fillPassword=()=>Promise.resolve();
     await h.runtime.dispatch((await fillStep(h,'earlier-released-é')).request);
     let release:()=>void=()=>undefined;vi.mocked(h.browser.close).mockImplementationOnce(()=>close==='immediate'?Promise.resolve():new Promise<void>(resolve=>{release=resolve;}));
     const known=['earlier-released-é',...(action==='secret'?['current-released-é']:[]),'current-assertion-canary'],variants=known.flatMap(v=>[v,encodeURIComponent(v),Buffer.from(v).toString('base64')]);
@@ -369,9 +379,9 @@ describe('durable worker consumption and recovery',()=>{
   it.each(['trusted-pre-write','uncertain-after-call'] as const)('preserves %s secret target-change evidence without inventing refusal',async mode=>{
     const h=await setup({secret:true});await h.runtime.dispatch(h.request);
     const refreshed=await h.runtime.refreshObservation({...identity(h.context),expectedGeneration:1,focus:{stepText:'',targetIntents:[]}},'secret-count');void refreshed;
-    h.browser.observations.preparePassword=()=>Promise.resolve();h.browser.observations.fillPassword=()=>Promise.reject(mode==='trusted-pre-write'?new PasswordNoEffect('TARGET_CHANGED'):new Error('socket hang up'));
+    h.rig.session.preparePassword=()=>Promise.resolve();h.rig.session.fillPassword=()=>Promise.reject(mode==='trusted-pre-write'?new PasswordNoEffect('TARGET_CHANGED'):new Error('socket hang up'));
     const{request}=await fillStep(h,'released-unit-canary');
-    const result=await h.runtime.dispatch(request);expect(result.ledger.state).toBe(mode==='trusted-pre-write'?'FAILED':'UNKNOWN_OUTCOME');expect(result.ledger.outcomeCode).toBe(mode==='trusted-pre-write'?'TARGET_CHANGED':'ACK_LOST');expect(()=>validate('bridge',result,'outcome')).not.toThrow();expect((h.runtime as unknown as {secretHolder:Map<string,unknown>}).secretHolder.size).toBe(0);
+    const result=await h.runtime.dispatch(request);expect(result.ledger.state).toBe(mode==='trusted-pre-write'?'FAILED':'UNKNOWN_OUTCOME');expect(result.ledger.outcomeCode).toBe(mode==='trusted-pre-write'?'TARGET_CHANGED':'ACK_LOST');expect(()=>validate('bridge',result,'outcome')).not.toThrow();expect(request.secrets).toHaveLength(0);
   });
   it('excludes independent writers and refuses missing/corrupt expected journal state',async()=>{
     const path=await directory();const journal=await GuidedJournal.open(path,'session');
@@ -503,9 +513,9 @@ describe('guided session recording on the runtime (STUDIO-OBS-013 AC-1, AC-2)', 
     let opening=0;const gated:GuidedRecorder={async open(session){opening++;await options.openGate;const recording=await recorder.open(session);if(recording.directory===null)throw new Error('RECORDING_DIRECTORY_NOT_ALLOCATED');allocatedDirectories.push(recording.directory);return recording;}};
     const messages:{route:Route;body:unknown;key?:string}[]=[];const launches:unknown[][]=[];let video:string|null=null;
     const rig=newRig('about:blank');const goto=vi.fn(()=>{rig.w.effects.push('goto');return options.effect==='unknown'?Promise.reject(new Error('lost')):Promise.resolve();});rig.page.goto=goto;
-    const browser:GuidedBrowser={evidence:{kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:randomUUID(),bootstrapId:randomUUID(),documentId:randomUUID(),url:'about:blank',origin:null,generation:0},blankMatches:vi.fn(()=>Promise.resolve(true)),
+    const browser=inProcessBrowser({evidence:{kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:randomUUID(),bootstrapId:randomUUID(),documentId:randomUUID(),url:'about:blank',origin:null,generation:0},blankMatches:vi.fn(()=>Promise.resolve(true)),
       handle:fakeHandle(rig),close:vi.fn(()=>Promise.resolve()),terminate:vi.fn(()=>Promise.resolve()),orderlyClosed:()=>true,recordedVideo:()=>Promise.resolve(video),
-      observations:Object.assign(rig.session,{withhold:()=>Promise.resolve(),observe:()=>Promise.resolve({observation:{schemaVersion:3,sessionId:context.sessionId,scopeHash:context.scopeHash,documentId:'page-document',generation:1,origin:'https://example.test',observedAt:new Date().toISOString(),coverage:{withheldRegions:0,unsupportedRegions:0,passwordControls:0},projection:{projected:false,tier:null,totalNodes:1,shownNodes:1,notShown:0,outlineBytes:15},outline:'- text "x" [e1]',facts:{e1:{role:'text',name:'x',editable:false, nameComplete: true, ownTextComplete: true,evidence:'x',evidenceSegments:[]}}},json:'',bytes:0,observationHash:''}),dispose:()=>Promise.resolve()})};
+      observations:Object.assign(rig.session,{withhold:()=>Promise.resolve(),observe:()=>Promise.resolve({observation:{schemaVersion:3,sessionId:context.sessionId,scopeHash:context.scopeHash,documentId:'page-document',generation:1,origin:'https://example.test',observedAt:new Date().toISOString(),coverage:{withheldRegions:0,unsupportedRegions:0,passwordControls:0},projection:{projected:false,tier:null,totalNodes:1,shownNodes:1,notShown:0,outlineBytes:15},outline:'- text "x" [e1]',facts:{e1:{role:'text',name:'x',editable:false, nameComplete: true, ownTextComplete: true,evidence:'x',evidenceSegments:[]}}},json:'',bytes:0,observationHash:''}),dispose:()=>Promise.resolve()})});
     const runtime=new GuidedRuntime(context,{workerId:context.workerId,allowedDomains: TEST_DOMAINS, journalDirectory:path,...(options.recorder===false?{}:{recorder:gated}),csiId:options.csiId??'CSI-123',
       launch:async(...args:unknown[])=>{launches.push(args);const request=args[3] as GuidedRecordingRequest|undefined;if(request){request.ready(options.ready??true);video=join(request.dir,'page.webm');const bytes=Buffer.alloc(4096,1);bytes.set(WEBM_MAGIC,0);await writeFile(video,bytes);}return browser;},
       callback:(route,body,key)=>{messages.push({route,body,...(key?{key}:{})});return Promise.resolve();}});
@@ -637,7 +647,7 @@ describe('STUDIO-OBS-014 AC-1 guided learning takes no field rules (ar-mounted-r
   });
 });
 describe('REL-001 the failed start step and the launch error stay visible',()=>{
-  const blankBrowser=(context:ReturnType<typeof guidedContext>,blank:boolean):GuidedBrowser=>({evidence:{kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:randomUUID(),documentId:randomUUID(),bootstrapId:randomUUID(),url:'about:blank',origin:null,generation:0},blankMatches:()=>Promise.resolve(blank),close:()=>Promise.resolve(),terminate:vi.fn(()=>Promise.resolve()),orderlyClosed:()=>true,observations:sessionStub({withhold:()=>Promise.resolve(),observe:()=>Promise.reject(new Error('unused'))})});
+  const blankBrowser=(context:ReturnType<typeof guidedContext>,blank:boolean):GuidedBrowser=>inProcessBrowser({evidence:{kind:'initialBlank',sessionId:context.sessionId,contextId:context.contextId,creationId:randomUUID(),documentId:randomUUID(),bootstrapId:randomUUID(),url:'about:blank',origin:null,generation:0},blankMatches:()=>Promise.resolve(blank),close:()=>Promise.resolve(),terminate:vi.fn(()=>Promise.resolve()),orderlyClosed:()=>true,observations:sessionStub({withhold:()=>Promise.resolve(),observe:()=>Promise.reject(new Error('unused'))})});
   it('keeps a plain launch rejection as the cause and records LAUNCH',async()=>{
     const context=guidedContext('https://example.test');const original=new Error('launch exploded');
     const runtime=new GuidedRuntime(context,{workerId:context.workerId,allowedDomains: TEST_DOMAINS, journalDirectory:await directory(),launch:()=>Promise.reject(original),callback:()=>Promise.resolve()});

@@ -37,7 +37,8 @@ export interface HookedCall {
  * A take-over that calls neither is not an effect.
  */
 export interface TakeOver {
-  run(proceed: () => unknown, fence: () => void): unknown;
+  /** `fence()` returns the one memoised ack promise under a guided control (await it before the effect), undefined under a synchronous one. */
+  run(proceed: () => unknown, fence: () => void | Promise<void>): unknown;
 }
 
 /** May return a Promise, but only for methods whose native call is asynchronous (a sync builder such as `locator` must not be made async). */
@@ -318,17 +319,30 @@ export function createBinding(options: BindingOptions): StepBinding {
     return remaining();
   };
 
-  /** The fence, set synchronously: no await between the check and the set, so two concurrent effectful calls begin the invocation once. */
-  const fence = (): void => {
+  /**
+   * The fence. Under a synchronous control it is set synchronously: no await between the check and the set, so two concurrent effectful calls
+   * begin the invocation once. Under a guided control beginInvocation answers with ONE ack promise: it is memoised here on every path (a call
+   * that races the ack, or comes after it, gets the same memo), tally.fenceCrossed is set only when the ack arrives, and a rejection is
+   * final (no retry, the flag stays false).
+   */
+  let fenceMemo: Promise<void> | undefined;
+  const fence = (): void | Promise<void> => {
     assertLive();
-    if (tally.fenceCrossed) return;
+    if (tally.fenceCrossed || fenceMemo !== undefined) return fenceMemo;
     if (options.untilFence === true) {
       fenceReached = true;
       throw new FenceReached();
     }
-    if (control.phase === 'PREPARING') control.beginInvocation();
+    let begun: unknown;
+    if (control.phase === 'PREPARING') begun = control.beginInvocation();
     else control.check();
+    if (isThenable(begun)) {
+      fenceMemo = Promise.resolve(begun).then(() => { tally.fenceCrossed = true; });
+      fenceMemo.catch(() => undefined); // every caller gets the rejection; this only keeps an unconsumed one from being unhandled
+      return fenceMemo;
+    }
     tally.fenceCrossed = true;
+    return undefined;
   };
 
   /** Whether a call's receiver belongs to an adopted page (a Page is its own owner; Locator and Frame report theirs). */
@@ -363,15 +377,23 @@ export function createBinding(options: BindingOptions): StepBinding {
     if (name === 'goto' && (kind === 'Page' || kind === 'Frame') && !(typeof args[0] === 'string' && domainAllowed(allowedDomains, args[0]))) throw new ObservedRefusal('POLICY_REFUSED');
     const effectful = !name.startsWith('_') && !READ_ONLY.has(name);
     let entry: EffectEntry | undefined;
-    const fenceNow = (): void => {
-      fence();
-      if (entry === undefined) {
-        const offscreen = actsOffscreen(target);
-        entry = offscreen ? { method: name, completed: false, offscreen: true } : { method: name, completed: false };
-        if (tally.effects.length < MAX_EFFECTS) tally.effects.push(entry);
-        else tally.effectsTruncated = true;
-        if (offscreen) tally.offscreen = true;
+    const fenceNow = (): void | Promise<void> => {
+      // The effect is recorded once the fence is crossed: after the ack under a guided control.
+      const record = (): void => {
+        if (entry === undefined) {
+          const offscreen = actsOffscreen(target);
+          entry = offscreen ? { method: name, completed: false, offscreen: true } : { method: name, completed: false };
+          if (tally.effects.length < MAX_EFFECTS) tally.effects.push(entry);
+          else tally.effectsTruncated = true;
+          if (offscreen) tally.offscreen = true;
+        }
+      };
+      const crossing = fence();
+      if (crossing === undefined) {
+        record();
+        return undefined;
       }
+      return crossing.then(record);
     };
     const native = (): unknown => member.apply(target, args);
     const proceed = (): unknown => {
@@ -379,8 +401,15 @@ export function createBinding(options: BindingOptions): StepBinding {
       const perform = (): unknown => {
         // A call that started before the step ended (a pending wait or hook) must not land after it.
         assertLive();
-        if (effectful) fenceNow();
-        return native();
+        if (!effectful) return native();
+        const crossing = fenceNow();
+        if (crossing === undefined) return native();
+        // Fence-before-effect under an asynchronous ack: native() is entered only after it, and only if the step is still live.
+        return crossing.then(() => {
+          assertLive();
+          control.check();
+          return native();
+        });
       };
       if (effectful && kind === 'Locator') {
         const timeout = explicitTimeout(args);
