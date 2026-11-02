@@ -13,6 +13,7 @@ import type { AdmissionReceipt, ObservedJob } from '../executor/observedOperatio
  * secrets are never written here (AC-21, architecture §9.2).
  */
 import type { StepReporter } from '../executor/stepReporter.js';
+import type { ConsoleLogEntry } from '../run/protocol.js';
 
 /**
  * The two adjacent reads of one instant: the run clock's zero and `browserStartedAt` (AC-11.2).
@@ -47,6 +48,8 @@ export interface SessionOrigin {
 export interface SessionRunRequest {
   /** 10.6's `RunReporter`, reached unchanged from the other side of the process boundary (AC-16). */
   readonly reporter: StepReporter;
+  /** Page console entries from the child, unredacted. Optional: a session without a browser console has none to give. */
+  readonly onConsole?: (entry: ConsoleLogEntry) => void;
 }
 
 /** What the session observed about the recording. Evidence, never outcome (AC-8). */

@@ -194,9 +194,7 @@ describe('a learn that published: its proof is the replay of the published revis
     // Only recorded while the proof runs: "learned" is said once the proof snapshot has PASSED.
     expect(receipt).toHaveTextContent('Recorded from this run. The steps count as learned once the replay passes.');
     expect(screen.queryByText('Completed — learned from this run.')).toBeNull();
-    // The recorded line is shown once: the "Steps as learned" card below does not repeat it.
-    expect(await screen.findByTestId('plan-explanation', {}, WAIT)).toBeInTheDocument();
-    expect(screen.queryByTestId('plan-explanation-history')).toBeNull();
+    // The recorded line is shown once.
     expect(screen.getAllByText('Recorded from this run. The steps count as learned once the replay passes.')).toHaveLength(1);
     expect(proofId()).toBeTruthy();
     await waitFor(() => expect(subscribed).toEqual([proofId()]), WAIT);

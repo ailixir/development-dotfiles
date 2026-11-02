@@ -601,7 +601,7 @@ describe('AC-07 (page part): a replay that was accepted and has not started', ()
   it('shows no time, the run-in-progress evidence message and one waiting word per step, with nothing of the previous run', async () => {
     await openAndRun([pending]);
 
-    await waitFor(() => expect(screen.getByTestId('step-status-0')).toHaveTextContent('PENDING'), WAIT);
+    await waitFor(() => expect(screen.getByTestId('step-status-0')).toHaveAttribute('data-status', 'PENDING'), WAIT);
     expect(screen.queryByTestId('execution-time')).toBeNull();
     expect(screen.queryByText(/^Time /u)).toBeNull();
     expect(screen.getByTestId('video-evidence-pending-run')).toHaveTextContent(RUN_IN_PROGRESS_EVIDENCE_MESSAGE);
@@ -619,7 +619,7 @@ describe('AC-07 (page part): a replay that was accepted and has not started', ()
     await openAndRun([pending, running]);
 
     const chip = await screen.findByTestId('execution-time', {}, WAIT);
-    await waitFor(() => expect(screen.getByTestId('step-status-0')).toHaveTextContent('RUNNING'), WAIT);
+    await waitFor(() => expect(screen.getByTestId('step-status-0')).toHaveAttribute('data-status', 'RUNNING'), WAIT);
     // From `startedAt`, not from `acceptedAt` nine seconds earlier... and not run 1's "Time 3.0s".
     expect(chip.textContent).toMatch(/^Time /u);
     expect(chip).not.toHaveTextContent('Time 3.0s');
@@ -630,8 +630,7 @@ describe('AC-07 (page part): a replay that was accepted and has not started', ()
     await openAndRun([passed]);
 
     await waitFor(() => expect(screen.getByTestId('execution-time')).toHaveTextContent('Time 3.0s'), WAIT);
-    expect(screen.getByTestId('step-offset-1')).toHaveTextContent('starts at 1510ms');
-    expect(screen.getByTestId('step-duration-1')).toHaveTextContent('took 900ms');
+    expect(screen.getByTestId('step-duration-1')).toHaveTextContent('900 ms');
     expect(screen.getByTestId('video-evidence')).toHaveAttribute('data-video-status', 'AVAILABLE');
     expect(screen.queryByTestId('video-evidence-pending-run')).toBeNull();
   }, TEST_TIMEOUT_MS);

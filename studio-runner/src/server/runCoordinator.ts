@@ -723,7 +723,13 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
 
       let result: SessionRunResult;
       try {
-        result = await runSession.execute({ reporter: stepReporter });
+        // The run redactor above is empty on purpose; page text is arbitrary, so it is scrubbed here with this job's own values.
+        // Short non-secret input values would blank ordinary words, so only those of 4+ characters are scrubbed.
+        const consoleRedactor = createRedactor([...Object.values(observed.job.secrets), ...observed.job.inputs.map(input => input.value).filter(value => value.length >= 4)]);
+        result = await runSession.execute({
+          reporter: stepReporter,
+          onConsole: entry => { snapshot.appendLog({ atMs: entry.atMs, level: entry.level, message: consoleRedactor.redact(entry.message), stepIndex: entry.stepIndex }); },
+        });
       } finally {
         deadline.cancel();
         await session.close();

@@ -32,6 +32,9 @@ export interface BrowserLaunchRequest {
   readonly startup?:{readonly deadlineEpochMs:number;readonly signal:AbortSignal};
 }
 
+/** A console message (`type` is Playwright's, e.g. `log`, `warning`) or an uncaught page error (`type` is `pageerror`). Text only: no locations, URLs or handles. */
+export interface BrowserConsoleEntry { readonly type: string; readonly text: string }
+
 export interface BrowserHandle {
   readonly preferenceEvidence?:BrowserPreferenceEvidence;
   /**
@@ -52,6 +55,8 @@ export interface BrowserHandle {
   createObservationSession?(config: ObservationConfig): ObservationSession;
   /** What step code runs against (ADR-SC-008 D3.2). Optional only on browser-free unit fakes. */
   readonly stepApi?: StepApi;
+  /** Subscribes to the recorded context's console messages and uncaught page errors. Optional on browser-free unit fakes. */
+  onConsole?(listener: (entry: BrowserConsoleEntry) => void): void;
   /** Every host the browser issued a request to, deduplicated and bounded (AC-19). */
   observedHosts(): readonly string[];
   /**
@@ -116,6 +121,8 @@ export interface StepApi {
    * commit and load, all within `maxMs`. Never rejects: a timeout just ends the wait (FIX-25).
    */
   settleNavigation?(maxMs: number): Promise<void>;
+  /** SC008-FIX-40: the HTTP status of the last main-frame document response since `beginStep` (after redirects), or null when the step loaded no document. Never throws. */
+  navigationHttpStatus?(): number | null;
   endStep(): Promise<void>;
   adopt(page: object): void;
   adoptedPages(): readonly object[];

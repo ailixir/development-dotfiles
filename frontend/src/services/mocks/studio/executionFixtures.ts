@@ -156,6 +156,40 @@ export const failedWithSkippedTailExecution: ExecutionSnapshot = baseSnapshot({
   ],
   logs: [
     { at: '2026-09-14T10:00:33Z', level: 'ERROR', message: 'Step 3 failed', stepIndex: 2 },
+    { at: '2026-09-14T10:00:33Z', level: 'WARN', message: 'console.warn: deprecated API', stepIndex: 2 },
+    { at: '2026-09-14T10:00:33Z', level: 'ERROR', message: 'console.error: Uncaught TypeError: x is undefined', stepIndex: 2 },
+    { at: '2026-09-14T10:00:33Z', level: 'ERROR', message: 'page error: ReferenceError: foo is not defined', stepIndex: 2 },
+  ],
+  video: { status: 'AVAILABLE', error: null, expiresAt: '2026-10-14T10:00:33Z', partial: false },
+});
+
+/**
+ * SC008-FIX-40: a replay step's click landed on a main-frame page answering an HTTP error. The step
+ * is `FAIL` with the closed code as its message, the execution `FAILED` with no API code, and the
+ * page's own console errors do not turn the failed step amber: the page-errors warning is for passes.
+ */
+export const failedNavigationHttpErrorExecution: ExecutionSnapshot = baseSnapshot({
+  executionId: executionId('a2'),
+  status: 'FAILED',
+  errorCode: null,
+  endedAt: '2026-09-14T10:00:33Z',
+  durationMs: 31000,
+  stepResults: [
+    { stepIndex: 0, originalText: STEP_TEXT[0], status: 'PASS', offsetMs: 137, durationMs: 8921, message: null },
+    { stepIndex: 1, originalText: STEP_TEXT[1], status: 'PASS', offsetMs: 9058, durationMs: 7413, message: null },
+    {
+      stepIndex: 2,
+      originalText: STEP_TEXT[2],
+      status: 'FAIL',
+      offsetMs: 16471,
+      durationMs: 14529,
+      message: 'NAVIGATION_HTTP_ERROR',
+    },
+    { stepIndex: 3, originalText: STEP_TEXT[3], status: 'SKIPPED', offsetMs: null, durationMs: null, message: null },
+  ],
+  logs: [
+    { at: '2026-09-14T10:00:33Z', level: 'ERROR', message: 'Step 3 failed', stepIndex: 2 },
+    { at: '2026-09-14T10:00:33Z', level: 'ERROR', message: 'console.error: Failed to load resource: 403', stepIndex: 2 },
   ],
   video: { status: 'AVAILABLE', error: null, expiresAt: '2026-10-14T10:00:33Z', partial: false },
 });

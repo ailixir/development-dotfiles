@@ -46,7 +46,8 @@ export interface LogEntry {
   /**
    * The 0-based position of the step this line is **about**, in the same index space as
    * `SnapshotStep.stepIndex` (ADR-002 §33). Set only by the `step N started` and
-   * `step N PASS|FAIL|SKIPPED` producers; run-level lines omit it and are retained as `null`.
+   * `step N PASS|FAIL|SKIPPED` producers and by browser console lines (the step running when the page
+   * emitted them); run-level lines omit it and are retained as `null`.
    * Never inferred from message text.
    */
   readonly stepIndex?: number | null;

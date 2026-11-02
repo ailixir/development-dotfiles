@@ -13,6 +13,8 @@ import { READY_CHIP_LABEL, guidedCopy, stepNumberIn } from './guidedNarratives';
  *  - `NEEDS_RELEARN` with `readinessReason: BASE_IDENTITY_INCOMPLETE` (D-4): saved learning cannot
  *    be reused, and the next Run learns from step 1. The wording never says the author changed
  *    steps, because they may not have.
+ *  - `RECORDED`: "Failing at step N" in red when the proof replay failed there, otherwise
+ *    "Recorded · not verified from step N", N being the first step without a PASSED receipt.
  *  - `UNLEARNED` and `LEARNING` have no chip: the empty state and the live Run status speak for them.
  *
  * The label wraps instead of overflowing, so the chip fits a narrow viewport (AC-8 a).
@@ -27,6 +29,9 @@ export function readinessChipLabel(
   }
   if (test.readiness === 'RECORDED') {
     const n = stepNumberIn(draftStepIds, test.verification?.firstUnverifiedStepId);
+    if (test.verification?.state === 'FAILED') {
+      return n === null ? guidedCopy('recordedFailingNoStep') : guidedCopy('recordedFailing', { n });
+    }
     return n === null ? guidedCopy('recordedNotVerifiedNoStep') : guidedCopy('recordedNotVerified', { n });
   }
   if (test.readiness !== 'NEEDS_RELEARN') {
@@ -37,6 +42,12 @@ export function readinessChipLabel(
   }
   const k = stepNumberIn(draftStepIds, test.firstChangedStepId);
   return k === null ? guidedCopy('needsRelearnNoBoundary') : guidedCopy('needsRelearn', { k });
+}
+
+function chipColor(test: Pick<TestDetailDto, 'readiness' | 'verification'>): 'success' | 'error' | 'warning' {
+  if (test.readiness === 'READY') return 'success';
+  if (test.readiness === 'RECORDED' && test.verification?.state === 'FAILED') return 'error';
+  return 'warning';
 }
 
 export interface ReadinessChipProps {
@@ -54,7 +65,7 @@ export function ReadinessChip({ test, draftStepIds }: ReadinessChipProps) {
     <Chip
       size="small"
       variant="outlined"
-      color={test.readiness === 'READY' ? 'success' : 'warning'}
+      color={chipColor(test)}
       label={label}
       data-testid="guided-readiness-chip"
       data-readiness={test.readiness}

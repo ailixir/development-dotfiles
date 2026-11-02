@@ -22,7 +22,7 @@ Reviewer: Quinn (@qa, security-scan remit). Date: 2026-10-09. Subject: `secret-l
 | Executor redactor built from `knownValues()` incl. secrets | `executor.ts:93`; `childRuntime.ts:237-245` | VERIFIED |
 | Guided runtime binds input to declaring step and slot | `guided/runtime.ts:144` (authoredLiteral only today) | VERIFIED |
 | Legacy secret accepted only as `fill()` value; origin pinned to element handle | `validator/references.ts:101-110`; `playwrightAdapter.ts:504-540` | VERIFIED |
-| No `tracing.start`/`recordHar`/`on('console')`/`screenshot` in runner | grep over `studio-runner/src` | VERIFIED (but see F-6) |
+| No `tracing.start`/`recordHar`/`on('console')`/`screenshot` in runner | grep over `studio-runner/src` | VERIFIED (but see F-6) Amended 2026-11-01 (user decision): replay runs capture console.error, console.warn and uncaught page errors only, from `src/run/browser.ts`, redacted with job secrets and inputs, ≤100 entries/run, ≤400 chars each, shown in the run logs; tracing/HAR/screenshot and all other console levels stay absent. |
 | Frontend: debug log redacts body; rejected error strips `config.data`; input is `type=password autoComplete=new-password` | `apiClient.ts:43-46,112-121`; `SecretInput.tsx:168-169` | VERIFIED |
 | Revocation signalling to a running runner | `ExecutionControlService.java:11,31` carries only `cancel_requested_at` | VERIFIED — see F-2 |
 

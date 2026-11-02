@@ -35,13 +35,6 @@ export type {
 export { ReadinessChip, readinessChipLabel } from './ReadinessChip';
 export type { ReadinessChipProps } from './ReadinessChip';
 export {
-  PlanExplanation,
-  stepProvenance,
-  referenceFlowLines,
-  explanationFacts,
-} from './PlanExplanation';
-export type { PlanExplanationProps } from './PlanExplanation';
-export {
   GUIDED_COPY,
   COPY_SOURCE_FILES,
   READY_CHIP_LABEL,

@@ -41,7 +41,7 @@ import { readdir, rm, mkdtemp,realpath,lstat } from 'node:fs/promises';
 import { join,dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 
-import type { BrowserFactory, BrowserHandle, BrowserLaunchRequest, StepApi } from './browserFactory.js';
+import type { BrowserConsoleEntry, BrowserFactory, BrowserHandle, BrowserLaunchRequest, StepApi } from './browserFactory.js';
 import {BrowserStartupCleanupFailure, StepPages} from './browserFactory.js';
 import {BootstrapPageGuard,boundedStartup,isAbsoluteStartupTimeout} from './observedBootstrap.js';
 import {readVersionPaths} from './versionProbe.js';
@@ -134,15 +134,21 @@ async function removeStrayRecordings(videoDir: string, keep: string): Promise<vo
  * `reset` at the start of a step; `settle` after its code: wait up to navStartMs for a main-frame navigation request (or a commit that
  * already happened), then up to navGraceMs for the commit, then for `load`, never beyond `maxMs`. Timeouts are swallowed.
  */
-function trackNavigation(page: Page): { reset(): void; settle(maxMs: number): Promise<void> } {
+function trackNavigation(page: Page): { reset(): void; settle(maxMs: number): Promise<void>; httpStatus(): number | null } {
   let started = false, committed = false;
+  /** SC008-FIX-40: the status of the last main-frame document response since `reset` (a redirect hop is overwritten by the next one); sub-resources and sub-frames never set it. */
+  let status: number | null = null;
   page.on('request', request => {
     try { if (request.isNavigationRequest() && request.frame() === page.mainFrame()) started = true; } catch { /* a request without a frame */ }
   });
   page.on('framenavigated', frame => { if (frame === page.mainFrame()) committed = true; });
+  page.on('response', response => {
+    try { if (response.request().isNavigationRequest() && response.frame() === page.mainFrame()) status = response.status(); } catch { /* a response without a frame */ }
+  });
   const sleep = (ms: number): Promise<void> => new Promise<void>(resolve => { setTimeout(resolve, Math.max(1, ms)); });
   return {
-    reset() { started = false; committed = false; },
+    reset() { started = false; committed = false; status = null; },
+    httpStatus: () => status,
     async settle(maxMs) {
       const begin = Date.now(), end = begin + maxMs;
       try {
@@ -166,6 +172,7 @@ function makeStepApi(page: Page, context: BrowserContext, pages: StepPages): Ste
     awaitWhitelistedMainFrame: allowedDomains => awaitWhitelistedMainFrame(page, allowedDomains),
     beginStep: () => { pages.begin(); navigation.reset(); },
     settleNavigation: maxMs => navigation.settle(maxMs),
+    navigationHttpStatus: () => navigation.httpStatus(),
     endStep: () => pages.end(),
     adopt: adopted => { pages.adopt(adopted as Page); },
     adoptedPages: () => pages.openAdopted(),
@@ -254,6 +261,21 @@ export const playwrightBrowserFactory: BrowserFactory = {
       if (host !== null) hosts.add(host);
     });
 
+    // Replay logs only, errors only (user decision 2026-11-01, I-B5/C-6): console.error, console.warn and uncaught page errors. The text of any
+    // other console type is never read. Never locations or handles. A listener cannot break the page.
+    const consoleListeners: ((entry: BrowserConsoleEntry) => void)[] = [];
+    const emitConsole = (read: () => BrowserConsoleEntry): void => {
+      if (consoleListeners.length === 0) return;
+      try { const entry = read(); for (const listener of consoleListeners) listener(entry); } catch { /* ignored */ }
+    };
+    context.on('console', (message) => {
+      const type = message.type();
+      if (type !== 'error' && type !== 'warning') return;
+      emitConsole(() => ({ type, text: message.text() }));
+    });
+    // String(error) is the page's own error text ("TypeError: ..."), not a Playwright or CDP error (the concern of the sharedExecutor guard).
+    context.on('weberror', (webError) => { emitConsole(() => ({ type: 'pageerror', text: String(webError.error()) })); });
+
     if(!guard)context.on('page', (opened) => { if (opened !== page) pages.opened(opened); });
 
     let disposed=false;
@@ -277,6 +299,8 @@ export const playwrightBrowserFactory: BrowserFactory = {
       observedHosts(): readonly string[] {
         return [...hosts].sort();
       },
+
+      onConsole(listener): void { consoleListeners.push(listener); },
 
       async close(): Promise<string | null> {
         if (disposed) return null;

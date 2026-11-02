@@ -9,7 +9,6 @@ import {
   Divider,
   Drawer,
   IconButton,
-  Link,
   Skeleton,
   Stack,
   Tooltip,
@@ -24,7 +23,6 @@ import {
   Link as LinkIcon,
   Terminal,
 } from '@mui/icons-material';
-import { Link as RouterLink } from 'react-router-dom';
 import studioApi from '@/services/api/studioApi';
 import {
   subscribeToExecution,
@@ -32,13 +30,14 @@ import {
 } from '@/services/api/studioTransportWiring';
 import { isTerminalExecutionStatus, type ExecutionLogEntry, type ExecutionSnapshot } from '@/types/studio/studioTypes';
 import { ExecutionProgressView, LOGS_TRUNCATED_STATEMENT } from '@/components/studio/run/ExecutionProgressView';
+import { FailedStepSummary } from '@/components/studio/run/FailedStepSummary';
 import { VideoEvidencePanel } from '@/components/studio/evidence/VideoEvidencePanel';
 import { useVideoSeek } from '@/components/studio/evidence/useVideoSeek';
-import { formatAbsoluteTime, formatDuration, formatRelativeTime, toIsoDateTime } from '@/utils/time';
+import { formatAbsoluteTime, formatDuration, toIsoDateTime } from '@/utils/time';
 import { displayLogMessage, logEntryTime } from '@/utils/studio/logTime';
 import { RunStatusChip } from './RunStatusChip';
 import { newerSnapshot } from './runSnapshots';
-import { runDurationText, runQueueWaitMs, runTestLabel, shortRunId } from './runPresentation';
+import { formatRunTime, runDurationText, runOriginLabel, runQueueWaitMs, shortRunId } from './runPresentation';
 
 export const RUN_NOT_FOUND_MESSAGE =
   'This run was not found. It may have been removed, or you may not have access to it.';
@@ -54,8 +53,6 @@ export interface RunDetailsDrawerProps {
   /** Opens another run of the current page (Prev/Next). */
   onNavigateRun: (executionId: string) => void;
   onCopyLink: (executionId: string) => void;
-  /** The Studio editor URL for a test. */
-  testHref: (testId: string) => string;
   /** Live snapshots flow back to the list row. */
   onSnapshot?: (snapshot: ExecutionSnapshot) => void;
   /**
@@ -140,20 +137,6 @@ function RunLogs({ snapshot }: { snapshot: ExecutionSnapshot }) {
   );
 }
 
-/** A `FAILED` run carries no error code; its narrative is the first failing step (§8.2). */
-function FailedStepSummary({ snapshot }: { snapshot: ExecutionSnapshot }) {
-  if (snapshot.status !== 'FAILED' || snapshot.errorCode !== null) return null;
-  const failed = snapshot.stepResults.find((step) => step.status === 'FAIL');
-  if (!failed) return null;
-  return (
-    <Alert severity="error" variant="outlined" data-testid="run-failed-step">
-      <AlertTitle>Failed at step {failed.stepIndex + 1}</AlertTitle>
-      <Typography variant="body2" sx={{ fontWeight: 600 }}>{failed.originalText}</Typography>
-      {failed.message && <Typography variant="body2" sx={{ mt: 0.5 }}>{failed.message}</Typography>}
-    </Alert>
-  );
-}
-
 interface RunDetailsContentProps extends Omit<RunDetailsDrawerProps, 'executionId'> {
   executionId: string;
 }
@@ -164,7 +147,6 @@ function RunDetailsContent({
   onClose,
   onNavigateRun,
   onCopyLink,
-  testHref,
   onSnapshot,
   expectedTestId,
 }: RunDetailsContentProps) {
@@ -233,7 +215,6 @@ function RunDetailsContent({
   const index = pageRuns.findIndex((run) => run.executionId === executionId);
   const previous = index > 0 ? pageRuns[index - 1] : null;
   const next = index >= 0 && index < pageRuns.length - 1 ? pageRuns[index + 1] : null;
-  const name = snapshot ? runTestLabel(snapshot) : null;
   const terminal = snapshot !== null && isTerminalExecutionStatus(snapshot.status);
   const canSeek = snapshot !== null && terminal && snapshot.video.status === 'AVAILABLE' && snapshot.videoPath !== null;
   const queueWait = snapshot ? runQueueWaitMs(snapshot) : null;
@@ -306,39 +287,22 @@ function RunDetailsContent({
         </Stack>
 
         <Box sx={{ mt: 1.25 }}>
-          {snapshot && name ? (
-            name.deleted ? (
-              <Typography variant="h6" component="h2" color="text.secondary" sx={{ fontStyle: 'italic' }} data-testid="run-details-title">
-                {name.text}
-              </Typography>
-            ) : (
-              <Typography variant="h6" component="h2" data-testid="run-details-title" sx={{ overflowWrap: 'anywhere' }}>
-                <Link component={RouterLink} to={testHref(snapshot.testId)} underline="hover" color="inherit">
-                  {name.text}
-                </Link>
-              </Typography>
-            )
+          {snapshot ? (
+            <Typography variant="h6" component="h2" data-testid="run-details-title">
+              <Box component="time" dateTime={toIsoDateTime(snapshot.acceptedAt)}>
+                {formatRunTime(snapshot.acceptedAt)}
+              </Box>
+            </Typography>
           ) : (
             !loadFailed && <Skeleton variant="text" width="60%" sx={{ fontSize: '1.25rem' }} />
           )}
           {snapshot && (
-            <Stack direction="row" spacing={1.5} useFlexGap flexWrap="wrap" sx={{ mt: 0.5, color: 'text.secondary' }}>
-              <Typography variant="body2" component="span">
-                Requested{' '}
-                <Tooltip title={formatAbsoluteTime(snapshot.acceptedAt)} describeChild>
-                  <Box component="time" dateTime={toIsoDateTime(snapshot.acceptedAt)} data-testid="run-details-requested">
-                    {formatRelativeTime(snapshot.acceptedAt)}
-                  </Box>
-                </Tooltip>
-              </Typography>
-              <Typography variant="body2" component="span" data-testid="run-details-duration">
-                Duration {runDurationText(snapshot)}
-                {queueWait !== null ? ` · queued ${formatDuration(queueWait)}` : ''}
-              </Typography>
-              {snapshot.csiId && <Typography variant="body2" component="span">CSI {snapshot.csiId}</Typography>}
-              <Typography variant="body2" component="span" sx={{ fontFamily: 'monospace' }}>#{shortRunId(executionId)}</Typography>
-              <Typography variant="body2" component="span">Origin: {snapshot.triggerSource === 'SCHEDULED' ? 'Scheduled' : snapshot.triggerSource === 'MANUAL' ? 'Manual' : snapshot.triggerSource === 'AFTER_LEARN' ? 'After learning' : 'Unknown'}</Typography>
-            </Stack>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }} data-testid="run-details-meta">
+              <span data-testid="run-details-duration">{runDurationText(snapshot)}</span>
+              {queueWait !== null ? ` · queued ${formatDuration(queueWait)}` : ''}
+              {` · ${runOriginLabel(snapshot.triggerSource)} · `}
+              <Box component="span" sx={{ fontFamily: 'monospace' }} data-testid="run-details-id">#{shortRunId(executionId)}</Box>
+            </Typography>
           )}
         </Box>
       </Box>
@@ -384,8 +348,13 @@ function RunDetailsContent({
                   : 'The browser is running this test. Steps update here as they finish.'}
               </Alert>
             )}
-            <ExecutionProgressView snapshot={snapshot} showLogs={false} onSeekStep={canSeek ? seekToOffset : undefined} />
-            {terminal && <VideoEvidencePanel ref={videoRef} snapshot={snapshot} />}
+            {terminal && <VideoEvidencePanel ref={videoRef} snapshot={snapshot} compact />}
+            <ExecutionProgressView
+              snapshot={snapshot}
+              showStatus={false}
+              showLogs={false}
+              onSeekStep={canSeek ? seekToOffset : undefined}
+            />
             <RunLogs snapshot={snapshot} />
           </>
         )}

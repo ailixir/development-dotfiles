@@ -33,7 +33,7 @@ import { testTls } from './guidedTls.js';
 
 import {publicationFixture as fixture} from './publicationFixture.js';
 import type { BuildIdentity, ObservedJob } from '../../src/executor/observedOperations.js';
-import type { StepReporter } from '../../src/executor/stepReporter.js';
+import type { ConsoleLogEntry } from '../../src/run/protocol.js';
 import type { ObservedRunnerSupport } from '../../src/server/runCoordinator.js';
 import { OBSERVED_SCHEMA_BUNDLE_HASH } from '../../src/validator/observedReferencePolicy.js';
 import type {
@@ -44,6 +44,7 @@ import type {
   ScratchStore,
   SessionKillReason,
   SessionRecording,
+  SessionRunRequest,
   SessionRunResult,
 } from '../../src/server/adapters.js';
 import type { HttpClient, HttpOutcome, HttpRequest } from '../../src/reporting/httpClient.js';
@@ -238,6 +239,8 @@ export interface FakeRunScript {
   readonly recording?: SessionRecording | undefined;
   /** Whether the ordered stop the kill performs "completes". Defaults to true. */
   readonly orderedStop?: boolean | undefined;
+  /** Console entries the page "produced", delivered through `onConsole` while step 0 runs. */
+  readonly console?: readonly ConsoleLogEntry[] | undefined;
 }
 
 /** A recording that flushed cleanly: playable, complete, not yet stored. */
@@ -367,7 +370,7 @@ export function createFakeBrowserLauncher(log?: EventLog): FakeBrowserLauncher {
         },
         run: {
           origin: { browserStartedAt: new Date('2026-09-11T10:00:00.000Z'), startedAtMs: 0 },
-          async execute({ reporter }: { reporter: StepReporter }): Promise<SessionRunResult> {
+          async execute({ reporter, onConsole }: SessionRunRequest): Promise<SessionRunResult> {
             const recording = script.recording ?? FAKE_RECORDING;
             const result = (ok: boolean, failureKind: string | null, failureMessage: string | null): SessionRunResult => ({
               ok,
@@ -382,6 +385,7 @@ export function createFakeBrowserLauncher(log?: EventLog): FakeBrowserLauncher {
               const startedAtMs = 10 * (index + 1);
               session.started.push(index);
               reporter.stepStarted({ stepIndex: index, startedAtMs });
+              if (index === 0) for (const entry of script.console ?? []) onConsole?.(entry);
               if (script.hangAt === index && killReason === null) {
                 session.hanging = true;
                 await new Promise<void>((resolve) => {

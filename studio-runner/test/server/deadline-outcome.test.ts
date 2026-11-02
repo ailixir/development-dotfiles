@@ -223,6 +223,15 @@ describe('AC-3 — every deadline outcome is a distinguishable, truthful code', 
     expect(final.outcome?.errorCode).not.toBe('TIMEOUT');
   });
 
+  it('row 4b (FIX-40): a step that landed on an HTTP error page → FAILED / STEP_FAILED like row 4 (the step receipt carries NAVIGATION_HTTP_ERROR), never ERROR', async () => {
+    const { final } = await runWithout({
+      result: { ok: false, errorCode: 'NAVIGATION_HTTP_ERROR', failAt: 0 },
+      onStop: 'flush',
+    });
+    expect(final.outcome?.result).toBe('FAILED');
+    expect(final.outcome?.errorCode).toBe('STEP_FAILED');
+  });
+
   it('row 5: the child died for another reason → ERROR / RUN_ERROR', async () => {
     const scheduler = createFakeScheduler();
     const driver = createChildDriver({ hangOnStep: 0, onStop: 'ignore' });

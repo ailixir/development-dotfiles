@@ -1,33 +1,30 @@
 import type { MouseEvent } from 'react';
-import { TableCell, TableRow, Tooltip, Typography, type SxProps, type Theme } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
+import { Button, TableCell, TableRow, Typography, type SxProps, type Theme } from '@mui/material';
 import { hideBelowMd } from '@/components/studio/list/studioListSx';
-import { formatAbsoluteTime, formatDuration, formatRelativeTime, toIsoDateTime } from '@/utils/time';
+import { toIsoDateTime } from '@/utils/time';
 import type { ExecutionSnapshot } from '@/types/studio/studioTypes';
 import { RunStatusChip } from './RunStatusChip';
-import { RunRowMenu } from './RunRowMenu';
-import { runDurationText, runQueueWaitMs, shortRunId } from './runPresentation';
+import { formatRunTime, runDurationText, shortRunId } from './runPresentation';
+
+export const RUN_VIEW_DETAILS_LABEL = 'View details';
 
 export interface RunRowProps {
   run: ExecutionSnapshot;
-  /** The run's drawer URL (keeps the list's query string). */
-  href: string;
   selected?: boolean;
   onOpenRun: () => void;
-  onCopyLink: () => void;
 }
 
 /** Clicks on the row's own controls keep their meaning; anywhere else opens the run. */
 function isFromControl(event: MouseEvent<HTMLElement>): boolean {
   const target = event.target as HTMLElement | null;
-  return target?.closest('a, button, [role="menuitem"], [role="menu"]') != null;
+  return target?.closest('a, button') != null;
 }
 
-/** One replay of a single UI test. The run's short id is the row's single link; the trigger sits below it. */
-export function RunRow({ run, href, selected = false, onOpenRun, onCopyLink }: RunRowProps) {
-  const runLabel = `#${shortRunId(run.executionId)}`;
-  const queueWait = runQueueWaitMs(run);
-
+/**
+ * One replay of a single UI test: the run's time (with its short id as a caption), status, duration and
+ * a "View details" action. The whole row opens the run too.
+ */
+export function RunRow({ run, selected = false, onOpenRun }: RunRowProps) {
   return (
     <TableRow
       hover
@@ -38,48 +35,39 @@ export function RunRow({ run, href, selected = false, onOpenRun, onCopyLink }: R
       }}
       sx={{ cursor: 'pointer' }}
     >
-      <TableCell sx={{ maxWidth: 320 }}>
+      <TableCell data-column="time">
+        <Typography variant="body2" component="time" dateTime={toIsoDateTime(run.acceptedAt)} data-testid="run-time">
+          {formatRunTime(run.acceptedAt)}
+        </Typography>
         <Typography
-          component={RouterLink}
-          to={href}
-          variant="subtitle2"
-          data-testid="run-link"
-          sx={{
-            color: 'primary.main',
-            fontWeight: 600,
-            fontFamily: 'monospace',
-            textDecoration: 'none',
-            '&:hover': { textDecoration: 'underline' },
-          }}
+          variant="caption"
+          color="text.secondary"
+          component="div"
+          data-testid="run-id"
+          sx={{ fontFamily: 'monospace' }}
         >
-          {runLabel}
-        </Typography>
-        <Typography variant="caption" color="text.secondary" component="div">
-          {run.triggerSource === 'SCHEDULED' ? 'Scheduled' : run.triggerSource === 'MANUAL' ? 'Manual' : run.triggerSource === 'AFTER_LEARN' ? 'After learning' : 'Unknown origin'}
+          #{shortRunId(run.executionId)}
         </Typography>
       </TableCell>
-      <TableCell sx={{ whiteSpace: 'nowrap', width: 140 }}>
+      <TableCell sx={{ whiteSpace: 'nowrap' }}>
         <RunStatusChip status={run.status} errorCode={run.errorCode} />
-      </TableCell>
-      <TableCell data-column="requested" sx={{ whiteSpace: 'nowrap' }}>
-        <Tooltip title={formatAbsoluteTime(run.acceptedAt)} placement="top" describeChild>
-          <Typography variant="body2" component="time" dateTime={toIsoDateTime(run.acceptedAt)} data-testid="run-requested">
-            {formatRelativeTime(run.acceptedAt)}
-          </Typography>
-        </Tooltip>
       </TableCell>
       <TableCell data-column="duration" sx={[{ whiteSpace: 'nowrap' }, hideBelowMd] as SxProps<Theme>}>
         <Typography variant="body2" component="div" data-testid="run-duration" sx={{ fontVariantNumeric: 'tabular-nums' }}>
           {runDurationText(run)}
         </Typography>
-        {queueWait !== null && (
-          <Typography variant="caption" color="text.secondary" component="div" data-testid="run-queue-wait">
-            Queued {formatDuration(queueWait)}
-          </Typography>
-        )}
       </TableCell>
-      <TableCell align="right" sx={{ width: 56 }}>
-        <RunRowMenu label={`run ${runLabel}`} onOpenRun={onOpenRun} onCopyLink={onCopyLink} />
+      <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
+        <Button
+          size="small"
+          data-testid="run-view-details"
+          onClick={(event) => {
+            event.stopPropagation();
+            onOpenRun();
+          }}
+        >
+          {RUN_VIEW_DETAILS_LABEL}
+        </Button>
       </TableCell>
     </TableRow>
   );

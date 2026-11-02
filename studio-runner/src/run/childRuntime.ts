@@ -30,7 +30,8 @@ import { SecretUseEvidence } from './secretUse.js';
  */
 
 import type { Launch3, Execute3, BuildIdentity } from '../executor/observedOperations.js';
-import type { ObservedChildMessage } from './protocol.js';
+import type { ConsoleLogEntry, ObservedChildMessage } from './protocol.js';
+import { CONSOLE_ENTRY_CAP, CONSOLE_MESSAGE_MAX_LENGTH, consoleLogFor } from './protocol.js';
 import { assertBuild, assertProfile, demand, equalObserved, hashObserved, OBSERVED_LIMITS, validateObserved } from '../validator/observedReferencePolicy.js';
 import { executeObservedReplay, replayError, stepHashOf, validateObservedExecute } from '../executor/observedReplay.js';
 import type { ReplayError } from '../executor/observedReplay.js';
@@ -114,6 +115,14 @@ function attachObservedChildRuntime(dependencies: ChildRuntimeDependencies): voi
     const startedSteps = new Map<number, number>(), completedSteps = new Set<number>();
     let phase: 'NEW' | 'READY' | 'EXECUTING' | 'DONE' = 'NEW', finished = false, closing: Promise<void> | null = null, deadline: ReturnType<typeof setTimeout> | null = null;
     let queue = Promise.resolve();
+    // Page console entries, flushed to the parent before each step-finished frame and before the result. Capped for the whole run.
+    let consoleStep: number | null = null, consoleTotal = 0;
+    const consoleBuffer: ConsoleLogEntry[] = [];
+    const flushConsole = (): void => {
+        if (!launch || consoleBuffer.length === 0)
+            return;
+        channel.send({ kind: 'console', protocolVersion: 3, mode: 'observed', runId: launch.runId, attemptId: launch.attemptId, entries: consoleBuffer.splice(0) });
+    };
     const finish = async (errorCode: ReplayError | null): Promise<void> => {
         if (finished)
             return;
@@ -141,6 +150,7 @@ function attachObservedChildRuntime(dependencies: ChildRuntimeDependencies): voi
             const e = evidenceFor(inspected);
             recording = { path: e.path, bytes: e.bytes, errorCode: e.error === null ? null : 'RECORDING_FAILED', state: e.state, partial: e.partial };
         }
+        flushConsole();
         if (execution && launch) {
             // A step a stop cut off reports what its binding recorded, never a guess: the last operation that ran is the one in flight.
             const inFlight = adapter?.lastRun?.() ?? null;
@@ -195,6 +205,15 @@ function attachObservedChildRuntime(dependencies: ChildRuntimeDependencies): voi
                     return;
                 }
                 handle = opened;
+                opened.onConsole?.(entry => {
+                    if (finished || consoleTotal >= CONSOLE_ENTRY_CAP || !clock)
+                        return;
+                    const mapped = consoleLogFor(entry.type, entry.text);
+                    if (mapped === null)
+                        return;
+                    consoleTotal += 1;
+                    consoleBuffer.push({ level: mapped.level, message: mapped.message.slice(0, CONSOLE_MESSAGE_MAX_LENGTH), stepIndex: consoleStep, atMs: clock.now() });
+                });
                 live();demand(opened.observedStartupReady?.()??true,'TARGET_DRIFT');
                 demand(typeof opened.observedAppVideoPath==='function','INVALID_CONTRACT');
                 const nativePath=await boundedStartup(()=>opened.observedAppVideoPath?opened.observedAppVideoPath():Promise.reject(new Error('RECORDING_FAILED')),startupDeadline,abort.signal);
@@ -225,8 +244,8 @@ function attachObservedChildRuntime(dependencies: ChildRuntimeDependencies): voi
             execution = m; usageEvidence = new SecretUseEvidence(Object.keys(m.secrets));
             const fixed = launch, steps = m.steps;
             const reporter: StepReporter = { stepStarted(e) { if (finished)
-                    return; startedSteps.set(e.stepIndex, e.startedAtMs); const step = steps[e.stepIndex]; demand(step); channel.send({ kind: 'step-started', protocolVersion: 3, mode: 'observed', runId: fixed.runId, attemptId: fixed.attemptId, stepIndex: e.stepIndex, stepId: step.stepId, startedAtMs: e.startedAtMs }); }, stepFinished(e) { if (finished)
-                    return; completedSteps.add(e.stepIndex); const step = steps[e.stepIndex]; demand(step); channel.send({ kind: 'step-finished', protocolVersion: 3, mode: 'observed', runId: fixed.runId, attemptId: fixed.attemptId, stepIndex: e.stepIndex, stepId: step.stepId, status: e.status, startedAtMs: e.startedAtMs, finishedAtMs: e.finishedAtMs, durationMs: e.durationMs, receipt: e.receipt ?? { closedCode: e.failure as ReplayError | null, stepHash: stepHashOf(step.operations), fenceCrossed: false, effects: [], effectsTruncated: false, offscreen: false }, ...(e.detail ? {detail: e.detail} : {}) }); } };
+                    return; startedSteps.set(e.stepIndex, e.startedAtMs); consoleStep = e.stepIndex; const step = steps[e.stepIndex]; demand(step); channel.send({ kind: 'step-started', protocolVersion: 3, mode: 'observed', runId: fixed.runId, attemptId: fixed.attemptId, stepIndex: e.stepIndex, stepId: step.stepId, startedAtMs: e.startedAtMs }); }, stepFinished(e) { if (finished)
+                    return; completedSteps.add(e.stepIndex); const step = steps[e.stepIndex]; demand(step); flushConsole(); channel.send({ kind: 'step-finished', protocolVersion: 3, mode: 'observed', runId: fixed.runId, attemptId: fixed.attemptId, stepIndex: e.stepIndex, stepId: step.stepId, status: e.status, startedAtMs: e.startedAtMs, finishedAtMs: e.finishedAtMs, durationMs: e.durationMs, receipt: e.receipt ?? { closedCode: e.failure as ReplayError | null, stepHash: stepHashOf(step.operations), fenceCrossed: false, effects: [], effectsTruncated: false, offscreen: false }, ...(e.detail ? {detail: e.detail} : {}) }); } };
             adapter = createObservedReplayAdapter(handle, launch.scope, dependencies.allowedDomains, launch.runId, live);
             const result = await executeObservedReplay(m, adapter, launch.scope, dependencies.allowedDomains, clock, reporter, abort.signal,runDeadlineMs,usageEvidence,fixed);
             detail = result.detail;

@@ -1,6 +1,7 @@
-import { forwardRef, useEffect, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useState } from 'react';
 import { Alert, Box, Stack, Typography } from '@mui/material';
 import type { ExecutionErrorCode, ExecutionSnapshot, VideoEvidence, VideoStatus } from '@/types/studio/studioTypes';
+import { TERMINAL_EXECUTION_STATUSES } from '@/types/studio/studioTypes';
 import { studioGuidedApi } from '@/services/api/studioGuidedApi';
 import {
   NO_RUN_EVIDENCE_MESSAGE,
@@ -12,6 +13,10 @@ import {
 } from './videoEvidenceNarratives';
 import { studioVideoUrl } from './studioVideoUrl';
 import { formatEvidenceInstant } from './formatEvidenceInstant';
+import { failedStepOf, failureSecondsOf, useFailureStop } from './useFailureStop';
+import { VideoFailureOverlay } from './VideoFailureOverlay';
+import { BrowserConsoleLogs } from './BrowserConsoleLogs';
+import { passedWithPageErrorsNotice } from './consoleLines';
 
 /**
  * The run's evidence, and the only playback surface on the Studio page (story 10.16a, AC-2 – AC-4,
@@ -76,11 +81,19 @@ export type VideoEvidencePanelProps =
       readonly guided?: undefined;
       /** Round 067 D7: a Run is live, so a null snapshot means "not yet", not "no run". */
       readonly runInProgress?: boolean;
+      /**
+       * A recording that is playable needs no title or statement ("The recording is available ..."): the
+       * surrounding card already says what it is. Every other state keeps both, as they carry the only
+       * information there is. Default false; the runs drawer, the detail page and the Studio editor's
+       * replay proof all pass it.
+       */
+      readonly compact?: boolean;
     }
   | {
       readonly guided: GuidedVideoEvidence;
       readonly snapshot?: undefined;
       readonly runInProgress?: undefined;
+      readonly compact?: undefined;
     };
 
 /** What the panel renders, whichever recording it is. */
@@ -131,6 +144,22 @@ export const VideoEvidencePanel = forwardRef<HTMLVideoElement, VideoEvidencePane
     const playbackUrl = source?.playbackUrl ?? null;
 
     const [playbackFailed, setPlaybackFailed] = useState(false);
+
+    // A replay's failed step pauses the video once and explains itself over it (guided: unchanged).
+    const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(null);
+    const setVideoRef = useCallback(
+      (element: HTMLVideoElement | null) => {
+        setVideoElement(element);
+        if (typeof videoRef === 'function') {
+          videoRef(element);
+        } else if (videoRef !== null) {
+          videoRef.current = element;
+        }
+      },
+      [videoRef],
+    );
+    const failedStep = props.snapshot ? failedStepOf(props.snapshot) : null;
+    const failureReached = useFailureStop(videoElement, failureSecondsOf(failedStep));
     // A new recording starts with no failure carried over from the previous one.
     useEffect(() => {
       setPlaybackFailed(false);
@@ -161,6 +190,7 @@ export const VideoEvidencePanel = forwardRef<HTMLVideoElement, VideoEvidencePane
     const statement =
       narrative.usesServerError && video.error !== null ? video.error : narrative.statement;
     const isAvailable = status === 'AVAILABLE';
+    const showHeading = !(props.compact === true && isAvailable);
     const isPartial = isAvailable && video.partial;
     // Keyed on the run outcome, not on `partial`: an orderly stop leaves `partial: false`.
     const stoppedRunStatement = isAvailable ? stoppedRunRecordingStatement(source.errorCode) : null;
@@ -168,6 +198,9 @@ export const VideoEvidencePanel = forwardRef<HTMLVideoElement, VideoEvidencePane
       (status === 'AVAILABLE' || status === 'EXPIRED') && video.expiresAt !== null
         ? formatEvidenceInstant(video.expiresAt)
         : null;
+
+    const passedNotice =
+      props.snapshot?.status === 'PASSED' ? passedWithPageErrorsNotice(props.snapshot.logs) : null;
 
     return (
       <Box
@@ -179,12 +212,16 @@ export const VideoEvidencePanel = forwardRef<HTMLVideoElement, VideoEvidencePane
         data-evidence-kind={props.guided !== undefined ? 'guided' : 'replay'}
       >
         <Stack spacing={1}>
-          <Typography variant="subtitle2" component="h3" data-testid="video-evidence-title">
-            {narrative.title}
-          </Typography>
-          <Typography variant="body2" data-testid="video-evidence-statement">
-            {statement}
-          </Typography>
+          {showHeading && (
+            <Typography variant="subtitle2" component="h3" data-testid="video-evidence-title">
+              {narrative.title}
+            </Typography>
+          )}
+          {showHeading && (
+            <Typography variant="body2" data-testid="video-evidence-statement">
+              {statement}
+            </Typography>
+          )}
           {stoppedRunStatement !== null && (
             <Typography variant="body2" data-testid="video-evidence-stopped-run">
               {stoppedRunStatement}
@@ -203,22 +240,35 @@ export const VideoEvidencePanel = forwardRef<HTMLVideoElement, VideoEvidencePane
             </Typography>
           )}
           {playbackUrl !== null && (
-            <video
-              ref={videoRef}
-              key={playbackUrl}
-              src={playbackUrl}
-              controls
-              preload="metadata"
-              aria-label={`Recording of execution ${source.executionId}`}
-              data-testid="video-evidence-player"
-              style={{ width: '100%', maxHeight: 360, backgroundColor: 'black' }}
-              onError={() => setPlaybackFailed(true)}
-            />
+            <Box sx={{ position: 'relative' }}>
+              <video
+                ref={setVideoRef}
+                key={playbackUrl}
+                src={playbackUrl}
+                controls
+                preload="metadata"
+                aria-label={`Recording of execution ${source.executionId}`}
+                data-testid="video-evidence-player"
+                style={{ display: 'block', width: '100%', maxHeight: 360, backgroundColor: 'black' }}
+                onError={() => setPlaybackFailed(true)}
+              />
+              {failedStep !== null && failureReached && (
+                <VideoFailureOverlay stepIndex={failedStep.stepIndex} message={failedStep.message} />
+              )}
+            </Box>
           )}
           {playbackUrl !== null && playbackFailed && (
             <Alert severity="warning" data-testid="video-playback-failed">
               {PLAYBACK_FAILED_MESSAGE}
             </Alert>
+          )}
+          {passedNotice !== null && (
+            <Alert severity="warning" data-testid="passed-with-page-errors">
+              {passedNotice}
+            </Alert>
+          )}
+          {props.snapshot && (
+            <BrowserConsoleLogs logs={props.snapshot.logs} terminal={TERMINAL_EXECUTION_STATUSES.includes(props.snapshot.status)} />
           )}
         </Stack>
       </Box>

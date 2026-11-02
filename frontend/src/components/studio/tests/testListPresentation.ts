@@ -26,7 +26,7 @@ export const READINESS: Readonly<Record<TestReadiness, ReadinessPresentation>> =
     hint: 'The learned steps match the saved draft, so Run repeats them.',
   },
   RECORDED: {
-    label: 'Recorded, not verified',
+    label: 'Recorded · not verified yet',
     tone: 'warning',
     hint: 'The steps were recorded, but the replay that confirms them has not passed yet.',
   },

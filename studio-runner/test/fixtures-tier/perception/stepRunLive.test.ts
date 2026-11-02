@@ -91,6 +91,10 @@ beforeAll(async () => {
     // SC008-FIX-25: a select whose change navigates 150 ms later (the docs.python.org version switcher), and the page it lands on.
     '/late-nav': page('<main><h1>Docs</h1><input aria-label="Query" type="search"><select aria-label="Version" onchange="setTimeout(() => { location.href = \'/late-nav-target\'; }, 150)"><option value="a">A</option><option value="b">B</option></select><button id="mutate" onclick="document.body.insertAdjacentHTML(\'beforeend\', \'<p>changed</p>\')">Change</button></main>'),
     '/late-nav-target': page('<main><h1>Docs next</h1><input aria-label="Query" type="search"></main>'),
+    // SC008-FIX-40: a start page with failing sub-resources, a link to a document that answers 403 (bot protection), a link that redirects to a 200, and a link to a page whose own sub-resources and sub-frame fail.
+    '/err-start': page('<main><h1>Releases</h1><img alt="logo" src="/missing.png"><a href="/blocked">browse blocked</a> <a href="/nav-go">browse redirected</a> <a href="/broken-parts">browse broken parts</a></main>'),
+    '/blocked': (_request, response) => { response.writeHead(403, { 'content-type': 'text/html' }); response.end(page('<h1>Access Denied</h1>')); },
+    '/broken-parts': page('<h1>Fine page</h1><img alt="gone" src="/missing-too.png"><iframe title="gone frame" src="/missing-frame"></iframe>'),
   });
 });
 afterAll(async () => { await site.close(); });
@@ -414,3 +418,37 @@ describe('a step whose page navigates 150 ms after it returns (FIX-25)', () => {
     } finally { await run.dispose(); }
   }, 120_000);
 });
+
+/**
+ * SC008-FIX-40 (AC-1 to AC-3, AC-6 shape): in replay mode (failOnHttpError) a click that lands on a 403 document fails the step, whatever the
+ * sub-resources of the starting page did; a redirect to a 200 and a page with failing sub-resources and sub-frame pass; a step that only reads on
+ * the error page passes. Without the flag (guided learning) the 403 does not fail.
+ */
+describe('a step that lands on an HTTP error page (FIX-40)', () => {
+  const link = (name: string): string => `await page.getByRole('link', { name: '${name}' }).click();`;
+  async function from(code: string, failOnHttpError: boolean): Promise<{ closedCode: string | null; afterRead: string | null }> {
+    const run = await launch();
+    try {
+      await run.step(`await page.goto('${site.origin}/err-start');`, { failOnHttpError });
+      const outcome = await run.step(code, { failOnHttpError });
+      const read = await run.step("await page.locator('h1').innerText();", { failOnHttpError });
+      return { closedCode: outcome.receipt.closedCode, afterRead: read.receipt.closedCode };
+    } finally { await run.dispose(); }
+  }
+  it('the 403 document fails the click; the 404 image of the starting page does not matter; a read on the error page afterwards passes', async () => {
+    expect(await from(link('browse blocked'), true)).toEqual({ closedCode: 'NAVIGATION_HTTP_ERROR', afterRead: null });
+  }, 60_000);
+  it('a redirect that ends in a 200 document passes', async () => {
+    expect((await from(link('browse redirected'), true)).closedCode).toBeNull();
+  }, 60_000);
+  it('a document whose images and iframe answer 404 passes', async () => {
+    expect((await from(link('browse broken parts'), true)).closedCode).toBeNull();
+  }, 60_000);
+  it('the starting page itself (a 404 image, no navigation) passes an action that does not navigate', async () => {
+    expect((await from("await page.getByRole('heading', { name: 'Releases' }).click();", true)).closedCode).toBeNull();
+  }, 60_000);
+  it('without the flag the 403 document does not fail the step', async () => {
+    expect((await from(link('browse blocked'), false)).closedCode).toBeNull();
+  }, 60_000);
+});
+

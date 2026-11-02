@@ -35,6 +35,8 @@ export interface StepRequest {
   readonly secrets?: SecretRun;
   /** Learning prepare: run up to the first effectful call and stop there (nothing is committed, nothing is invalidated). */
   readonly untilFence?: boolean;
+  /** Replay only (SC008-FIX-40): an action step that lands on a main-frame document answering HTTP 400 or more fails with NAVIGATION_HTTP_ERROR. Guided learning leaves it off: its outcome codes are a separate closed contract. */
+  readonly failOnHttpError?: boolean;
 }
 
 export interface StepOutcome {
@@ -145,6 +147,10 @@ export async function performStep(host: StepApi, session: ObservationSession, re
     if (request.tally.fenceCrossed || request.tally.effects.length > 0) session.invalidate();
   }
   let closedCode = result.ok ? null : (result.closedCode ?? 'INTERNAL_ERROR');
+  if (closedCode === null && request.failOnHttpError === true && !result.fenceReached && (request.tally.fenceCrossed || request.tally.effects.length > 0)) {
+    const status = host.navigationHttpStatus?.();
+    if (typeof status === 'number' && status >= 400) closedCode = 'NAVIGATION_HTTP_ERROR';
+  }
   const captured: Record<string, string> = {};
   if (result.ok && !result.fenceReached) {
     for (const id of operation.captures) {
@@ -222,7 +228,7 @@ export function createObservedReplayAdapter(handle: BrowserHandle, scope: Scope,
             current = { control, io };
             last = { operation: action.operation, tally };
             try {
-                const outcome = await performStep(host, observations, { coordinate: action.coordinate, operation: action.operation, inputs: io.inputs, vars: io.vars, secretIds: io.secretIds, control, tally, allowedDomains, secrets: run });
+                const outcome = await performStep(host, observations, { coordinate: action.coordinate, operation: action.operation, inputs: io.inputs, vars: io.vars, secretIds: io.secretIds, control, tally, allowedDomains, secrets: run, failOnHttpError: true });
                 const code = outcome.receipt.closedCode;
                 if ((code === 'TARGET_DRIFT' || code === 'POLICY_REFUSED') && io.secretIds.length === 0 && JSON.stringify(io.secretUse.snapshot()) === before) { control.check(); guardLive(); await annotate(); }
                 return outcome;

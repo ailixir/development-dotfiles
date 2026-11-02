@@ -184,7 +184,7 @@ class GuidedGateAuditIT {
     assertThat(repair.path("closedCode").asText()).isEqualTo("TARGET_DRIFT");
     assertThat(repair.path("stage").asText()).isEqualTo("PRE_FENCE");
     assertThat(repair.path("line").isNull()).isTrue();
-    assertThat(repair.path("facts").asText()).contains("0 elements");
+    assertThat(repair.path("facts").asText()).contains("matched no element");
     verify(h.dispatch, times(1)).observe(any(), anyString(), anyLong(), anyString(), any());
   }
 

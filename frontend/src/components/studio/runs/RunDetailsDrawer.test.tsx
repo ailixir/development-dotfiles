@@ -4,11 +4,12 @@ import { MemoryRouter } from 'react-router-dom';
 import { http, HttpResponse } from 'msw';
 import { studioMockServer } from '@/services/mocks/studio/server';
 import { resetStudioMocks } from '@/services/mocks/studio/handlers';
-import { passedExecution } from '@/services/mocks/studio/executionFixtures';
+import { failedNavigationHttpErrorExecution, passedExecution } from '@/services/mocks/studio/executionFixtures';
 import { createScriptedTransport } from '@/services/mocks/studio/executionScenarios';
 import { resetExecutionTransportSeam, setExecutionTransportSeam } from '@/services/api/studioTransportWiring';
 import type { ExecutionSnapshot } from '@/types/studio/studioTypes';
 import { RUN_NOT_FOUND_MESSAGE, RunDetailsDrawer } from './RunDetailsDrawer';
+import { formatRunTime, shortRunId } from './runPresentation';
 
 /**
  * The drawer can be bound to one test (`expectedTestId`): a list row, a read or a live snapshot that
@@ -56,7 +57,6 @@ function renderDrawer(
         onClose={() => undefined}
         onNavigateRun={() => undefined}
         onCopyLink={() => undefined}
-        testHref={(testId) => `/checks/ui-tests/${testId}/studio`}
         {...props}
       />
     </MemoryRouter>,
@@ -87,9 +87,64 @@ describe('RunDetailsDrawer expectedTestId', { timeout: 20_000 }, () => {
     const reads = serveRead(() => undefined);
     renderDrawer(own.executionId, [own], { expectedTestId: OWN_TEST });
 
-    expect(await screen.findByTestId('run-details-title')).toHaveTextContent('Checkout journey');
+    expect(await screen.findByTestId('run-details-title')).toHaveTextContent(formatRunTime(own.acceptedAt));
     expect(drawer().getByTestId('step-text-0')).toBeInTheDocument();
     expect(reads).toEqual([]);
+  });
+
+  it('titles the drawer with the run time, not the test name, and has no grey status chip or test link', async () => {
+    const own = run('e0000000-0000-0000-0000-0000000000b1');
+    serveRead(() => undefined);
+    renderDrawer(own.executionId, [own], { expectedTestId: OWN_TEST });
+
+    const title = await screen.findByTestId('run-details-title');
+    expect(title).toHaveTextContent(formatRunTime(own.acceptedAt));
+    expect(title).not.toHaveTextContent('Checkout journey');
+    expect(screen.queryByRole('link', { name: 'Checkout journey' })).toBeNull();
+    expect(drawer().queryByText(/^CSI /)).toBeNull();
+    expect(screen.queryByTestId('execution-status')).toBeNull();
+  });
+
+  it('shows duration, queue wait, origin and the short id in the caption row', async () => {
+    const own = run('e0000000-0000-0000-0000-0000000000b2', {
+      triggerSource: 'MANUAL',
+      acceptedAt: '2026-09-14T10:00:00Z',
+      startedAt: '2026-09-14T10:00:04Z',
+      durationMs: 38000,
+    });
+    serveRead(() => undefined);
+    renderDrawer(own.executionId, [own], { expectedTestId: OWN_TEST });
+
+    const meta = await screen.findByTestId('run-details-meta');
+    expect(meta).toHaveTextContent(`38 s · queued 4 s · Manual · #${shortRunId(own.executionId)}`);
+  });
+
+  it('puts the recording above the steps', async () => {
+    const own = run('e0000000-0000-0000-0000-0000000000b3');
+    serveRead(() => undefined);
+    renderDrawer(own.executionId, [own], { expectedTestId: OWN_TEST });
+
+    const video = await screen.findByTestId('video-evidence');
+    const steps = screen.getByTestId('execution-steps');
+    expect(video.compareDocumentPosition(steps) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    // A playable recording needs no title or statement here.
+    expect(screen.queryByTestId('video-evidence-title')).toBeNull();
+    expect(screen.queryByTestId('video-evidence-statement')).toBeNull();
+  });
+
+  it('explains a failed step in plain words, with its code as a caption', async () => {
+    const own = run('e0000000-0000-0000-0000-0000000000b4', {
+      stepResults: failedNavigationHttpErrorExecution.stepResults,
+      status: 'FAILED',
+      errorCode: null,
+    });
+    serveRead(() => undefined);
+    renderDrawer(own.executionId, [own], { expectedTestId: OWN_TEST });
+
+    const summary = await screen.findByTestId('run-failed-step');
+    expect(summary).toHaveTextContent('Failed at step 3');
+    expect(screen.getByTestId('run-failed-step-sentence')).toHaveTextContent(/returned an HTTP error/);
+    expect(screen.getByTestId('run-failed-step-message')).toHaveTextContent('NAVIGATION_HTTP_ERROR');
   });
 
   it.each([
@@ -102,7 +157,7 @@ describe('RunDetailsDrawer expectedTestId', { timeout: 20_000 }, () => {
     renderDrawer(own.executionId, [own], { expectedTestId: OWN_TEST });
 
     expect(await screen.findByTestId('run-details-title')).toBeInTheDocument();
-    expect(drawer().getByText(`Origin: ${label}`)).toBeInTheDocument();
+    expect(screen.getByTestId('run-details-meta')).toHaveTextContent(` · ${label} · #`);
   });
 
   it('shows not-found, and none of the run, when the list row belongs to another test', async () => {
@@ -132,7 +187,7 @@ describe('RunDetailsDrawer expectedTestId', { timeout: 20_000 }, () => {
     serveRead((id) => (id === own.executionId ? own : undefined));
     renderDrawer(own.executionId, [], { expectedTestId: OWN_TEST });
 
-    await waitFor(() => expect(drawer().getByTestId('run-details-title')).toHaveTextContent('Archived journey'), WAIT);
+    await waitFor(() => expect(drawer().getByTestId('run-details-title')).toHaveTextContent(formatRunTime(own.acceptedAt)), WAIT);
     expect(screen.queryByTestId('run-details-not-found')).toBeNull();
   });
 
@@ -166,7 +221,7 @@ describe('RunDetailsDrawer expectedTestId', { timeout: 20_000 }, () => {
     const foreign = run('e0000000-0000-0000-0000-000000000007', { testId: OTHER_TEST });
     renderDrawer(foreign.executionId, [foreign]);
 
-    expect(await screen.findByTestId('run-details-title')).toHaveTextContent('Checkout journey');
+    expect(await screen.findByTestId('run-details-title')).toHaveTextContent(formatRunTime(foreign.acceptedAt));
     expect(screen.queryByTestId('run-details-not-found')).toBeNull();
   });
 });

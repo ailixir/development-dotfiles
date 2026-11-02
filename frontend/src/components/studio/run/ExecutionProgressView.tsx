@@ -5,11 +5,13 @@ import {
   Box,
   Button,
   Chip,
+  CircularProgress,
   List,
   ListItem,
   Stack,
   Typography,
 } from '@mui/material';
+import { CheckCircle, Error as ErrorIcon, RadioButtonUnchecked, WarningAmber } from '@mui/icons-material';
 import {
   isTerminalExecutionStatus,
   type ExecutionSnapshot,
@@ -23,8 +25,10 @@ import {
   replayFailureNarrative,
   type ReplayFailureNarrative,
 } from './executionErrorNarratives';
-import { executionStatusLabel, isCancelledOutcome } from './executionStatus';
+import { executionStatusLabel, executionStatusTone, isCancelledOutcome } from './executionStatus';
 import { seekEligibility } from '@/components/studio/evidence/seekEligibility';
+import { stepFailureSentence } from '@/components/studio/evidence/VideoFailureOverlay';
+import { consoleErrorCountByStep } from '@/components/studio/evidence/consoleLines';
 import { guidedCopy, stepNumberIn } from '@/components/studio/guided/guidedNarratives';
 import {
   InlineCopy,
@@ -87,6 +91,13 @@ export interface ExecutionProgressViewProps {
   readonly snapshot: ExecutionSnapshot | null;
   /** The Studio Logs tab supplies its own console, so it can suppress this plain log rendering. */
   readonly showLogs?: boolean;
+  /** Default true. False drops the grey status chip, for a surface that already shows the run's status. */
+  readonly showStatus?: boolean;
+  /**
+   * Default true. False renders only the notices (replay failure, cancelled, error) and no step list,
+   * for a surface that shows the steps elsewhere.
+   */
+  readonly showSteps?: boolean;
   /** Offered only where the document clears the condition with *"a new execution"* — AC-6. */
   readonly onRerun?: () => void;
   /**
@@ -120,39 +131,97 @@ export interface ReplayFailureContext {
 }
 
 /**
- * A timing slot, rendered from the snapshot and from nothing else.
+ * A step's duration, as the snapshot carries it ("111 ms"), or {@link NOT_ATTEMPTED} for a null.
  *
- * Null is *not attempted*, in words. It is never `0`, never `0ms`, and never absent-but-implied:
+ * Null is *not attempted*, in words. It is never `0`, never `0 ms`, and never absent-but-implied:
  * the epic's own finding is that an absent slot and a zero slot read the same to a reviewer and
- * differently to a seek bar.
+ * differently to a seek bar. The step's start offset is not shown (the seek control uses it).
  */
-function timingText(value: number | null, label: string): string {
-  return value === null ? NOT_ATTEMPTED : `${label} ${value}ms`;
+function durationText(value: number | null): string {
+  return value === null ? NOT_ATTEMPTED : `${value} ms`;
 }
 
 /**
  * In a snapshot that has not ended, a step that is still `PENDING` or `RUNNING` has no reading to
- * show, so it says so with one word instead of two "not attempted" slots. "Not attempted" stays
- * what it always was: the words for a step a finished run never reached (and the seek control's
- * 10.16a name, {@link seekControlLabel}).
+ * show, so it says so with one word. "Not attempted" stays what it always was: the words for a step
+ * a finished run never reached (and the seek control's 10.16a name, {@link seekControlLabel}).
  */
 const StepTimings: React.FC<{ step: StepResult; runEnded: boolean }> = ({ step, runEnded }) => {
   if (!runEnded && (step.status === 'PENDING' || step.status === 'RUNNING')) {
     return (
-      <Typography variant="caption" data-testid={`step-waiting-${step.stepIndex}`}>
+      <Typography variant="caption" color="text.secondary" data-testid={`step-waiting-${step.stepIndex}`}>
         {step.status === 'RUNNING' ? STEP_RUNNING_WORD : STEP_WAITING_WORD}
       </Typography>
     );
   }
   return (
-    <Stack direction="row" spacing={2}>
-      <Typography variant="caption" data-testid={`step-offset-${step.stepIndex}`}>
-        {timingText(step.offsetMs, 'starts at')}
+    <Typography
+      variant="caption"
+      color="text.secondary"
+      sx={{ whiteSpace: 'nowrap' }}
+      data-testid={`step-duration-${step.stepIndex}`}
+    >
+      {durationText(step.durationMs)}
+    </Typography>
+  );
+};
+
+/**
+ * The step's status as an icon, the same marks and colours as the step list beside it: a green tick,
+ * a red error, an amber warning for a pass whose page reported errors, a spinner while it runs, and a
+ * grey ring for a step not reached. `data-status` carries the snapshot's status word.
+ */
+const StepStatusIcon: React.FC<{ step: StepResult; pageErrors: number }> = ({ step, pageErrors }) => {
+  const iconSx = { fontSize: 18 } as const;
+  let icon: React.ReactNode;
+  if (step.status === 'PASS') {
+    icon = pageErrors > 0 ? (
+      <WarningAmber sx={iconSx} color="warning" />
+    ) : (
+      <CheckCircle sx={iconSx} color="success" />
+    );
+  } else if (step.status === 'FAIL') {
+    icon = <ErrorIcon sx={iconSx} color="error" />;
+  } else if (step.status === 'RUNNING') {
+    icon = <CircularProgress size={16} />;
+  } else {
+    icon = <RadioButtonUnchecked sx={{ ...iconSx, color: 'grey.400' }} />;
+  }
+  return (
+    <Box
+      component="span"
+      data-testid={`step-status-${step.stepIndex}`}
+      data-status={step.status}
+      sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20, flexShrink: 0 }}
+    >
+      {icon}
+    </Box>
+  );
+};
+
+/**
+ * What a step says about itself below its row: for a failed step the plain sentence for its closed
+ * code with the code as a small secondary caption; otherwise the step's message as sent.
+ */
+const StepMessage: React.FC<{ step: StepResult }> = ({ step }) => {
+  if (!step.message) return null;
+  const sentence = step.status === 'FAIL' ? stepFailureSentence(step.message) : undefined;
+  return (
+    <>
+      {sentence !== undefined && (
+        <Typography variant="body2" color="error" data-testid={`step-failure-${step.stepIndex}`} sx={{ overflowWrap: 'anywhere' }}>
+          {sentence}
+        </Typography>
+      )}
+      <Typography
+        variant="caption"
+        color={sentence !== undefined ? 'text.secondary' : undefined}
+        data-testid={`step-message-${step.stepIndex}`}
+        sx={{ overflowWrap: 'anywhere' }}
+      >
+        {step.message}
       </Typography>
-      <Typography variant="caption" data-testid={`step-duration-${step.stepIndex}`}>
-        {timingText(step.durationMs, 'took')}
-      </Typography>
-    </Stack>
+    </>
   );
 };
 
@@ -182,7 +251,7 @@ const StepSeekControl: React.FC<{
 }> = ({ step, onSeekStep, active, onUsed }) => {
   const eligibility = seekEligibility(step);
   return (
-    <Box>
+    <Box sx={{ flexShrink: 0, ml: 'auto', textAlign: 'right' }}>
       <Button
         size="small"
         variant={active ? 'outlined' : 'text'}
@@ -190,8 +259,7 @@ const StepSeekControl: React.FC<{
         aria-label={seekControlLabel(step)}
         data-testid={`step-seek-${step.stepIndex}`}
         data-seek-active={active ? 'true' : undefined}
-        // Text variant: no side padding, so the label sits on the column's left edge with the step's text.
-        sx={{ px: active ? 0.75 : 0, minWidth: 0 }}
+        sx={{ px: active ? 0.75 : 0.5, minWidth: 0, whiteSpace: 'nowrap' }}
         onClick={() => {
           if (eligibility.seekable) {
             onUsed();
@@ -358,6 +426,8 @@ export const ExecutionProgressView: React.FC<ExecutionProgressViewProps> = ({
   onRerun,
   onSeekStep,
   showLogs = true,
+  showStatus = true,
+  showSteps = true,
   replayContext,
 }) => {
   // Round 067 D2: the step seek control last used, keyed by execution so a new run starts with none.
@@ -383,16 +453,26 @@ export const ExecutionProgressView: React.FC<ExecutionProgressViewProps> = ({
   // — a status, not an alert — so the two facts render in the same slots either way.
   const cancelled = replayFailure === null && isCancelledOutcome(snapshot.status, code);
   const narrative = replayFailure === null && code !== null ? executionErrorNarrative(code) : null;
+  // A step can pass while the page it landed on reported errors; the list says so beside PASS.
+  const pageErrorsByStep = consoleErrorCountByStep(snapshot.logs);
+
+  // Nothing of this view is wanted and there is no notice: render nothing, not an empty box.
+  const hasNotice =
+    replayFailure !== null || narrative !== null || (snapshot.status === 'ERROR' && code === null);
+  if (!showStatus && !showSteps && !showLogs && !hasNotice) return null;
 
   return (
     <Box data-testid="execution-progress">
-      <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-        <Chip
-          size="small"
-          label={executionStatusLabel(snapshot.status, code)}
-          data-testid="execution-status"
-        />
-      </Stack>
+      {showStatus && (
+        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+          <Chip
+            size="small"
+            color={executionStatusTone(snapshot.status, code)}
+            label={executionStatusLabel(snapshot.status, code)}
+            data-testid="execution-status"
+          />
+        </Stack>
+      )}
 
       {replayFailure !== null && (
         <ReplayFailureNotice
@@ -456,40 +536,55 @@ export const ExecutionProgressView: React.FC<ExecutionProgressViewProps> = ({
         </Alert>
       )}
 
-      <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
-        Steps
-      </Typography>
-      <List dense disablePadding data-testid="execution-steps">
-        {snapshot.stepResults.map((step) => (
-          <ListItem key={step.stepIndex} disableGutters alignItems="flex-start">
-            <Stack spacing={0.25} sx={{ width: '100%' }}>
-              <Typography variant="body2" data-testid={`step-text-${step.stepIndex}`}>
-                {`${step.stepIndex + 1}. ${step.originalText}`}
-              </Typography>
-              <Typography variant="caption" data-testid={`step-status-${step.stepIndex}`}>
-                {step.status}
-              </Typography>
-              <StepTimings step={step} runEnded={isTerminalExecutionStatus(snapshot.status)} />
-              {onSeekStep && failureSeekOffset(snapshot, step) === null && (
-                <StepSeekControl
-                  step={step}
-                  onSeekStep={onSeekStep}
-                  active={lastSeek?.executionId === snapshot.executionId && lastSeek.stepIndex === step.stepIndex}
-                  onUsed={() => setLastSeek({ executionId: snapshot.executionId, stepIndex: step.stepIndex })}
-                />
-              )}
-              {step.message && (
-                <Typography variant="caption" data-testid={`step-message-${step.stepIndex}`}>
-                  {step.message}
-                </Typography>
-              )}
-              {onSeekStep && (
-                <WatchFailureControl snapshot={snapshot} step={step} onSeekStep={onSeekStep} />
-              )}
-            </Stack>
-          </ListItem>
-        ))}
-      </List>
+      {showSteps && (
+        <>
+          <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
+            Steps
+          </Typography>
+          <List dense disablePadding data-testid="execution-steps">
+            {snapshot.stepResults.map((step) => {
+              const pageErrors = step.status === 'PASS' ? (pageErrorsByStep.get(step.stepIndex) ?? 0) : 0;
+              return (
+                <ListItem key={step.stepIndex} disableGutters alignItems="flex-start" sx={{ py: 0.5 }}>
+                  <Stack direction="row" spacing={1} alignItems="flex-start" sx={{ width: '100%', minWidth: 0 }}>
+                    <Box sx={{ pt: 0.25 }}>
+                      <StepStatusIcon step={step} pageErrors={pageErrors} />
+                    </Box>
+                    <Stack spacing={0.25} sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography variant="body2" data-testid={`step-text-${step.stepIndex}`} sx={{ minWidth: 0, overflowWrap: 'anywhere' }}>
+                        {`${step.stepIndex + 1}. ${step.originalText}`}
+                      </Typography>
+                      <Stack direction="row" alignItems="center" columnGap={1} rowGap={0.25} flexWrap="wrap">
+                        <StepTimings step={step} runEnded={isTerminalExecutionStatus(snapshot.status)} />
+                        {pageErrors > 0 && (
+                          <Chip
+                            size="small"
+                            color="warning"
+                            label={`${pageErrors} page ${pageErrors === 1 ? 'error' : 'errors'}`}
+                            data-testid={`step-page-errors-${step.stepIndex}`}
+                          />
+                        )}
+                        {onSeekStep && failureSeekOffset(snapshot, step) === null && (
+                          <StepSeekControl
+                            step={step}
+                            onSeekStep={onSeekStep}
+                            active={lastSeek?.executionId === snapshot.executionId && lastSeek.stepIndex === step.stepIndex}
+                            onUsed={() => setLastSeek({ executionId: snapshot.executionId, stepIndex: step.stepIndex })}
+                          />
+                        )}
+                      </Stack>
+                      <StepMessage step={step} />
+                      {onSeekStep && (
+                        <WatchFailureControl snapshot={snapshot} step={step} onSeekStep={onSeekStep} />
+                      )}
+                    </Stack>
+                  </Stack>
+                </ListItem>
+              );
+            })}
+          </List>
+        </>
+      )}
 
       {showLogs && (
         <>

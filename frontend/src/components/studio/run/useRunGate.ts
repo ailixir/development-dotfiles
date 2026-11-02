@@ -32,7 +32,10 @@ import {
  *    and `firstLearnStepId = firstChangedStepId`, both as served (D-3), or with the first current
  *    step when `readinessReason` is `BASE_IDENTITY_INCOMPLETE` (D-4). The client never sends a step
  *    positioned after the server's k;
- *  - `LEARNING` keeps Run disabled: a session is already running.
+ *  - `LEARNING` keeps Run disabled: a session is already running;
+ *  - `RECORDED` follows its proof: `FAILED` (with the step still in the draft) starts a guided learn
+ *    from the failed step, `INCOMPLETE` re-runs the proof through `POST /tests/{id}/verify`, and
+ *    otherwise (`PENDING`) it replays as a diagnostic that never promotes.
  *
  * A guided start follows plan P6: after the save, a fresh `GET /tests/{id}` and then
  * `GET /tests/{id}/capabilities` (read directly, never from a cached hook answer). The capability's
@@ -126,7 +129,10 @@ export interface RunGateState {
   readonly readDone: boolean;
   readonly loading: boolean;
   readonly loadError: string | null;
-  /** The Run mode for the draft's declared state (`replay`, `learn`, `relearn` or `busy`). */
+  /**
+   * The Run mode for the draft's declared state (`replay`, `learn`, `relearn` or `busy`). A RECORDED
+   * test with a FAILED proof reports `replay` here but Run starts a learn for it (see the module comment).
+   */
   readonly mode: RunMode | null;
   readonly canRun: boolean;
   readonly refusal: RunRefusalState | null;
@@ -139,7 +145,7 @@ export interface RunGateState {
   readonly run: () => void;
   /** An explicit learn from a named step. Same save, read, capability and start as Run. */
   readonly learnFrom: (request: LearnFromRequest) => void;
-  /** "Verify again": re-runs the proof of the recorded revision (RECORDED with INCOMPLETE only). */
+  /** Re-runs the proof of the recorded revision (RECORDED with INCOMPLETE only). */
   readonly verify: () => void;
 }
 
@@ -441,6 +447,14 @@ export function useRunGate(
       settle();
     };
 
+    /** Re-runs the proof of the recorded revision (`POST /tests/{id}/verify`), one key per activation. */
+    const startVerify = async (): Promise<void> => {
+      setPhase('starting');
+      setPreparationMessage('Starting the browser…');
+      const acceptedProof = await studioApi.verifyRecorded(testId, activationKey);
+      settleAccepted(acceptedProof.executionId);
+    };
+
     void (async () => {
       try {
         const { saveBeforeRun, isDirty } = runOptions.current ?? {};
@@ -466,10 +480,7 @@ export function useRunGate(
             settle();
             return;
           }
-          setPhase('starting');
-          setPreparationMessage('Starting the browser…');
-          const acceptedProof = await studioApi.verifyRecorded(testId, activationKey);
-          settleAccepted(acceptedProof.executionId);
+          await startVerify();
           return;
         }
 
@@ -497,6 +508,23 @@ export function useRunGate(
         if (freshMode === 'relearn') {
           await startGuided(body, relearnHints(body));
           return;
+        }
+
+        if (body.readiness === 'RECORDED') {
+          const verification = body.verification;
+          // A FAILED proof: Run re-learns from the step it failed at, when that step is still in the draft.
+          if (verification?.state === 'FAILED') {
+            const hints = learnFromHints(body, { kind: 'recorded', stepId: verification.firstUnverifiedStepId });
+            if (hints !== null) {
+              await startGuided(body, hints);
+              return;
+            }
+          }
+          // An INCOMPLETE proof: Run verifies the recorded steps again.
+          if (verification?.state === 'INCOMPLETE') {
+            await startVerify();
+            return;
+          }
         }
 
         setPhase('starting');

@@ -1,4 +1,4 @@
-import { formatDuration, parseInstant } from '@/utils/time';
+import { EMPTY_TIME_PLACEHOLDER, formatDuration, parseInstant, type InstantInput } from '@/utils/time';
 import { isTerminalExecutionStatus, type ExecutionSnapshot } from '@/types/studio/studioTypes';
 
 export const DELETED_TEST_LABEL = 'Deleted test';
@@ -36,4 +36,16 @@ export function runQueueWaitMs(run: Pick<ExecutionSnapshot, 'acceptedAt' | 'star
 
 export function shortRunId(executionId: string): string {
   return executionId.length > 8 ? executionId.slice(0, 8) : executionId;
+}
+
+/** A run's time as the page shows it everywhere (table, Latest run, drawer): absolute, local. */
+export function formatRunTime(value: InstantInput): string {
+  return parseInstant(value)?.toLocaleString() ?? EMPTY_TIME_PLACEHOLDER;
+}
+
+export function runOriginLabel(triggerSource: ExecutionSnapshot['triggerSource']): string {
+  if (triggerSource === 'SCHEDULED') return 'Scheduled';
+  if (triggerSource === 'MANUAL') return 'Manual';
+  if (triggerSource === 'AFTER_LEARN') return 'After learning';
+  return 'Unknown origin';
 }

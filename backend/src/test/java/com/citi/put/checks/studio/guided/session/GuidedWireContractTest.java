@@ -1813,12 +1813,12 @@ class GuidedWireContractTest {
     org.assertj.core.api.Assertions.assertThat(expanded.path("oneOf").isArray()).isTrue();
     org.assertj.core.api.Assertions.assertThat(expanded.path("oneOf").size()).isEqualTo(2);
     org.assertj.core.api.Assertions.assertThat(rootHash)
-        // SC008-E5 reseal; equals GuidedContracts.OUTCOME_SCHEMA_EPOCH.
-        .isEqualTo("c05da0f10a7b5c57b1886ffde9a718b9211f56e866c9fdc8e09667d38fcbe35b");
+        // SC008-FIX-40 reseal; equals GuidedContracts.OUTCOME_SCHEMA_EPOCH.
+        .isEqualTo("4c380195a4a5738ef05d9a20093b20da3a596e851655b17bba04b1724ca17d5d");
     JsonNode ordinaryNode = expanded.path("oneOf").get(0);
     JsonNode prefixNode = expanded.path("oneOf").get(1);
     org.assertj.core.api.Assertions.assertThat(GuidedContracts.hash(ordinaryNode))
-        .isEqualTo("406f1d8d0143abdc41fe0b670181baa4a3cae40c29d3228f5d64e0154deb8019");
+        .isEqualTo("3acd91f24692cf738cf217aaeccf0256504a77103a5126e264b3c60ab1474cbb");
     org.assertj.core.api.Assertions.assertThat(GuidedContracts.hash(prefixNode))
         .isEqualTo("13607e9867b94d0675dba793b27f9b7d79d2b9e80d373fe319adea7a21332975");
     var originalConfig = whole.getValidationContext().getConfig();

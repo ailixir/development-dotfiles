@@ -38,7 +38,6 @@ import {
   guidedStartFeedbackView,
 } from './GuidedCompletion';
 import { GuidedClarification } from './GuidedClarification';
-import { PlanExplanation } from './PlanExplanation';
 import { VideoEvidencePanel } from '@/components/studio/evidence/VideoEvidencePanel';
 import { GuidedSeekControls } from '@/components/studio/evidence/GuidedSeekControls';
 
@@ -1319,7 +1318,6 @@ describe('never-echo (AC-5(c); I-B6/I-C11): clarification, result and explanatio
             onGoToStep={onGoToStep}
             onOpenVariables={onOpenVariables}
           />
-          <PlanExplanation result={explained} />
           <VideoEvidencePanel
             guided={{
               sessionId: explained.sessionId,
@@ -1355,8 +1353,6 @@ describe('never-echo (AC-5(c); I-B6/I-C11): clarification, result and explanatio
       const body = document.body.textContent ?? '';
       expect(screen.getByTestId('guided-question')).toHaveTextContent(`<secret ${SECRET_ID}>`);
       expect(document.querySelector('[data-label-source="SAVED_INPUT"]')).toHaveTextContent(VARIABLE_ID);
-      expect(screen.getAllByTestId('plan-reference-id').map((id) => id.textContent)).toEqual([SECRET_ID, VARIABLE_ID]);
-      expect(screen.getByTestId('plan-reference-flows')).toHaveTextContent(`${VARIABLE_ID} from step 1 → step 2`);
       expect(body).toContain('SECRET_UNAVAILABLE');
       expect(screen.getByTestId('login-required-notice')).toBeInTheDocument();
     } finally {

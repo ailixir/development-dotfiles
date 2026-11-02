@@ -237,10 +237,8 @@ describe('AC-9: first guided Run, through the automatic finalize (AC-2, AC-3, AC
     expect(status.seen).toContain(`Running step 4 of 4.`);
     expect(status.seen).toContain('Saving what this run learned…');
 
-    // AC-6: the read-only plan explanation, learned in this run, IDs never values.
-    const plan = screen.getByTestId('plan-explanation');
-    expect(within(plan).getByText('Steps as learned')).toBeInTheDocument();
-    expect(within(plan).getAllByText('Learned in this run').length).toBe(STEP_TEXTS.length);
+    // The "Steps as learned" card was removed (user decision 2026-11-01): the step list says it.
+    expect(screen.queryByTestId('plan-explanation')).toBeNull();
     // Proof = replay of the published revision: the page follows the AFTER_LEARN execution the result
     // names, never executes for it, and shows no learning recording (a published learn has none).
     const sessionId = store.getState().studio.guidedSessionByTestId[unlearnedDraft.id] as string;
@@ -737,13 +735,11 @@ describe('STUDIO-UNIFY-001.6: a failed learn is marked in the editor, told in Lo
     await waitFor(() => expect(screen.getByTestId('guided-completion')).toHaveAttribute('data-kind', 'failed'), WAIT);
   }
 
-  it('marks only the stopped step in the editor and in the plan, and no step before it', async () => {
+  it('marks only the stopped step in the editor, and no step before it', async () => {
     await runToFailure();
 
     expect(within(rowOf(2)).getByTestId(marker)).toBeInTheDocument();
     expect(within(rowOf(1)).queryByTestId(marker)).toBeNull();
-    expect(within(screen.getByTestId('plan-step-2')).getByTestId('plan-step-stopped')).toBeInTheDocument();
-    expect(within(screen.getByTestId('plan-step-1')).queryByTestId('plan-step-stopped')).toBeNull();
   }, TEST_TIMEOUT_MS);
 
   it('the marker belongs to the step, not to its position: moving the step moves the marker', async () => {
@@ -772,7 +768,6 @@ describe('STUDIO-UNIFY-001.6: a failed learn is marked in the editor, told in Lo
     await user().click(await runButton());
     await expectCompletedLearned();
     expect(screen.queryByTestId(marker)).toBeNull();
-    expect(screen.queryByTestId('plan-step-stopped')).toBeNull();
   }, TEST_TIMEOUT_MS);
 
   it('the Logs tab lists each action by step with its outcome, then how learning ended', async () => {

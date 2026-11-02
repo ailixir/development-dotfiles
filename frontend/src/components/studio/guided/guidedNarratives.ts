@@ -472,13 +472,6 @@ export const GUIDED_COPY = {
       quote: 'that Studio most likely could not find what step {N} describes and that the author can check the page or reword the step and press Run again',
     },
   },
-  stoppedHere: {
-    template: 'Stopped here',
-    basis: 'delegated',
-    source: { file: S.storyUnify0016, quote: 'wording is `delegated` to @ux (D1)' },
-    note: 'STUDIO-UNIFY-001.6 AC-02 / D1 (N1). Error-coloured chip on the plan step where a failed learn stopped; it replaces "Learned in this run" on that step.',
-    facts: { file: S.storyUnify0016, quote: 'carries a "Stopped here" chip (error colour)' },
-  },
   failedUnnamed: {
     template:
       'This run stopped. The reason the server gave is shown below exactly as it arrived, so it can be quoted in a ticket.',
@@ -538,14 +531,26 @@ export const GUIDED_COPY = {
   // -------------------------------------------------------------------------------------------
   // Readiness chip (ReadinessChip), AC-3 and D-4
   // -------------------------------------------------------------------------------------------
+  recordedFailing: {
+    template: 'Failing at step {n}',
+    basis: 'adapted',
+    source: { file: S.adr008, quote: 'Recorded, not verified (step N)' },
+    note: 'The proof replay failed: N is the step it failed at, numbered in the current draft (SC008-FIX-40).',
+  },
+  recordedFailingNoStep: {
+    template: 'Failing',
+    basis: 'adapted',
+    source: { file: S.adr008, quote: 'Recorded, not verified (step N)' },
+    note: 'The step clause is dropped when the failed step is not in the draft, rather than guessed.',
+  },
   recordedNotVerified: {
-    template: 'Recorded, not verified (step {n})',
+    template: 'Recorded · not verified from step {n}',
     basis: 'adapted',
     source: { file: S.adr008, quote: 'Recorded, not verified (step N)' },
     note: 'N is the first step without a PASSED proof receipt, numbered in the current draft.',
   },
   recordedNotVerifiedNoStep: {
-    template: 'Recorded, not verified',
+    template: 'Recorded · not verified yet',
     basis: 'adapted',
     source: { file: S.adr008, quote: 'Recorded, not verified (step N)' },
     note: 'The step clause is dropped when the served step is not in the draft, rather than guessed.',
@@ -562,28 +567,22 @@ export const GUIDED_COPY = {
     source: { file: S.adr008, quote: 'A manual Run of a recorded revision is a labelled diagnostic' },
     note: 'Said in plain words beside the recorded label; the ADR names the run "a labelled diagnostic".',
   },
-  verifyAgain: {
-    template: 'Verify again',
-    basis: 'verbatim',
-    source: { file: S.adr008, quote: 'Verify again' },
-  },
-  relearnFromStep: {
-    template: 'Re-learn from step {n}',
+  recordedRunRelearns: {
+    template: 'Run Test re-learns from step {n}.',
     basis: 'adapted',
     source: { file: S.req008, quote: 'Re-learn from step N' },
-    note: 'N is the step the proof failed at, numbered in the current draft.',
+    note: 'N is the step the proof failed at, numbered in the current draft. Run Test itself starts the re-learn; there is no separate button.',
+  },
+  recordedRunVerifies: {
+    template: 'Run Test verifies the recorded steps again.',
+    basis: 'adapted',
+    source: { file: S.adr008, quote: 'Verify again' },
+    note: 'Said for a proof that did not finish. Run Test itself re-runs the proof; there is no separate button.',
   },
   needsRelearn: {
     template: 'Steps changed — next Run learns from step {k}',
     basis: 'verbatim',
     source: { file: S.story, quote: 'Steps changed — next Run learns from step k' },
-  },
-  changedSinceThisRun: {
-    template: 'Changed since this run',
-    basis: 'delegated',
-    source: { file: S.uxFix067, quote: '@ux-design-expert writes the copy for the round-067 Studio UX fixes' },
-    note: 'Round 067 D3: chip on the step the server names as first changed since the published revision.',
-    facts: { file: S.uxFix067, quote: "The step is the server's firstChangedStepId for the revision this run published" },
   },
   needsRelearnNoBoundary: {
     template: 'Steps changed',
@@ -666,43 +665,8 @@ export const GUIDED_COPY = {
   },
 
   // -------------------------------------------------------------------------------------------
-  // Plan explanation (PlanExplanation), AC-6 and architect P3
+  // Learned-action phrase and not-ready line (the "Steps as learned" card was removed 2026-11-01)
   // -------------------------------------------------------------------------------------------
-  planTitle: {
-    template: 'Steps as learned',
-    basis: 'verbatim',
-    source: { file: S.story, quote: 'Steps as learned' },
-  },
-  stepHeading: {
-    template: 'Step {N}',
-    basis: 'adapted',
-    source: { file: S.story, quote: "Step N says: '<step text>'" },
-    note: 'The AC-3 step reference, alone, as the heading of a step.',
-  },
-  learnedInThisRun: {
-    template: 'Learned in this run',
-    basis: 'adapted',
-    source: { file: S.story, quote: 'whether the step was learned in this run' },
-    note: 'AC-6 fragment, capitalised.',
-  },
-  reusedFromPreviousRevision: {
-    template: 'Reused from a previous revision',
-    basis: 'adapted',
-    source: { file: S.story, quote: 'reused from a previous revision (`reusedFrom`)' },
-    note: 'AC-6 fragment, capitalised.',
-  },
-  relearnedAfterDrift: {
-    template: 'Re-learned after drift',
-    basis: 'adapted',
-    source: { file: S.story, quote: 're-learned after drift (`relearnedFrom`)' },
-    note: 'AC-6 fragment, capitalised.',
-  },
-  referenceFlow: {
-    template: '{binding} from step {producer} → step {consumer}',
-    basis: 'adapted',
-    source: { file: S.story, quote: 'Order number from step 2 → Reference in step 4' },
-    note: 'The AC-6 example as a pattern. binding is the declared ID; the consuming operation is no longer named.',
-  },
   actionRan: {
     template: 'Ran the step',
     basis: 'adapted',

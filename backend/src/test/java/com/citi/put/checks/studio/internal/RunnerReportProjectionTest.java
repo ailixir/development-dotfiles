@@ -722,6 +722,7 @@ class RunnerReportProjectionTest {
     for (String reason :
         List.of(
             "PASSWORD_CONTROL_READ_REFUSED",
+            "NAVIGATION_HTTP_ERROR",
             "REFERENCE_MISMATCH",
             "INTERNAL_ERROR",
             "PROFILE_MISMATCH",

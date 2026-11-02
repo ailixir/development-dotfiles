@@ -1,15 +1,16 @@
 import React, { useCallback, useEffect, useRef } from 'react';
-import { Alert, Box, Button, Card, CardContent, CardHeader, LinearProgress, Stack, Tooltip, Typography } from '@mui/material';
+import { Alert, Box, Button, Card, CardContent, CardHeader, LinearProgress, Stack, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { DEFAULT_EXECUTION_SORT, isTerminalExecutionStatus } from '@/types/studio/studioTypes';
 import { useStudioRuns } from '@/components/studio/runs/useStudioRuns';
 import { useLiveRunsRefresh } from '@/components/studio/runs/useLiveRunsRefresh';
 import { RunStatusChip } from '@/components/studio/runs/RunStatusChip';
-import { runDurationText, shortRunId } from '@/components/studio/runs/runPresentation';
+import { formatRunTime, runDurationText, shortRunId } from '@/components/studio/runs/runPresentation';
 import { ExecutionProgressView } from '@/components/studio/run/ExecutionProgressView';
+import { FailedStepSummary } from '@/components/studio/run/FailedStepSummary';
 import { VideoEvidencePanel } from '@/components/studio/evidence/VideoEvidencePanel';
 import { uiTestRunPath } from '@/components/studio/uiTestPaths';
-import { formatAbsoluteTime, formatRelativeTime, toIsoDateTime } from '@/utils/time';
+import { toIsoDateTime } from '@/utils/time';
 
 export const UI_TEST_LATEST_RUN_EMPTY_MESSAGE = 'No replays yet. Learning happens in Studio; run the test from there and its result appears here.';
 // The same two sentences as the run drawer's in-progress notice (RunDetailsDrawer), kept local so the drawer stays untouched.
@@ -36,7 +37,8 @@ export interface UiTestLatestRunCardProps {
 
 /**
  * The "Latest run" card of the UI test detail page (STUDIO-UNIFY-001.7, AC-06..AC-08): the newest replay
- * of this test, with its status, duration, request time, recording, step results and logs. It reads its
+ * of this test: status, time and duration, and, once it ended, why it failed and the recording (the steps
+ * and logs are in the run details drawer; while it is live the steps show here). It reads its
  * own one-row page of the newest-first list (a list item is the full execution snapshot), so it stays the
  * newest replay while the Recent Runs table is on another page. It re-reads in the background until the
  * run is settled (`streamComplete`: terminal status and a recording that is no longer processing).
@@ -104,7 +106,7 @@ export const UiTestLatestRunCard: React.FC<UiTestLatestRunCardProps> = ({ testId
               data-testid="ui-test-latest-run-open"
               onClick={() => navigate(uiTestRunPath(testId, latest.executionId))}
             >
-              Open run details
+              View details
             </Button>
           ) : undefined
         }
@@ -139,17 +141,16 @@ export const UiTestLatestRunCard: React.FC<UiTestLatestRunCardProps> = ({ testId
               data-testid="ui-test-latest-run-meta"
             >
               <RunStatusChip status={latest.status} errorCode={latest.errorCode} data-testid="ui-test-latest-run-status" />
-              <Typography variant="body2" component="span" data-testid="ui-test-latest-run-duration">
-                Duration {runDurationText(latest)}
-              </Typography>
               <Typography variant="body2" component="span">
-                Requested{' '}
-                <Tooltip title={formatAbsoluteTime(latest.acceptedAt)} describeChild>
-                  <Box component="time" dateTime={toIsoDateTime(latest.acceptedAt)} data-testid="ui-test-latest-run-requested">
-                    {formatRelativeTime(latest.acceptedAt)}
-                  </Box>
-                </Tooltip>
+                <Box component="time" dateTime={toIsoDateTime(latest.acceptedAt)} data-testid="ui-test-latest-run-time">
+                  {formatRunTime(latest.acceptedAt)}
+                </Box>
               </Typography>
+              <Typography variant="body2" component="span" color="text.secondary">·</Typography>
+              <Typography variant="body2" component="span" data-testid="ui-test-latest-run-duration">
+                {runDurationText(latest)}
+              </Typography>
+              <Typography variant="body2" component="span" color="text.secondary">·</Typography>
               <Typography variant="body2" component="span" sx={{ fontFamily: 'monospace' }} data-testid="ui-test-latest-run-id">
                 #{shortRunId(latest.executionId)}
               </Typography>
@@ -167,9 +168,17 @@ export const UiTestLatestRunCard: React.FC<UiTestLatestRunCardProps> = ({ testId
               </Alert>
             )}
 
-            {terminal && <VideoEvidencePanel snapshot={latest} />}
-
-            <ExecutionProgressView snapshot={latest} />
+            {terminal ? (
+              <>
+                {/* Once the run has ended the card is a summary: the steps and logs are in the run's drawer. */}
+                <FailedStepSummary snapshot={latest} />
+                <ExecutionProgressView snapshot={latest} showStatus={false} showSteps={false} showLogs={false} />
+                <VideoEvidencePanel snapshot={latest} compact />
+              </>
+            ) : (
+              // Live: the steps still update here as they finish.
+              <ExecutionProgressView snapshot={latest} showStatus={false} showLogs={false} />
+            )}
           </Stack>
         )}
       </CardContent>

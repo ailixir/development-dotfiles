@@ -358,6 +358,7 @@ export const STEP_RECEIPT_CLOSED_CODES = [
   'LOGIN_REQUIRED',
   'PASSWORD_CONTROL_READ_REFUSED',
   'REFERENCE_MISMATCH',
+  'NAVIGATION_HTTP_ERROR',
 ] as const;
 
 /** One effectful Playwright call of a step: the bare method name (for example goto) and whether it returned. */

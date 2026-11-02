@@ -7,7 +7,7 @@ import type { Clock, StepReporter } from './stepReporter.js';
 import { boundedObserved, demand, equalObserved, hashObserved, isRecord, OBSERVED_SCHEMA_BUNDLE_HASH, OBSERVED_LIMITS, OBSERVED_PROFILE, ObservedRefusal, validateObserved } from '../validator/observedReferencePolicy.js';
 export type ReplayError = NonNullable<NonNullable<StepFinished3['receipt']['closedCode']>>;
 export function replayError(error: unknown): ReplayError {
-    if (error instanceof ObservedRefusal && ['INVALID_CONTRACT', 'PROFILE_MISMATCH', 'AUTHORIZATION_EXPIRED', 'REFERENCE_MISMATCH', 'POLICY_REFUSED', 'TARGET_DRIFT', 'READ_REFUSED', 'REFERENCE_REFUSED', 'ASSERTION_FAILED', 'CANCELLED', 'TIMEOUT', 'OUTCOME_UNKNOWN', 'INTERNAL_ERROR', 'LOGIN_REQUIRED', 'PASSWORD_CONTROL_READ_REFUSED'].includes(error.code))
+    if (error instanceof ObservedRefusal && ['INVALID_CONTRACT', 'PROFILE_MISMATCH', 'AUTHORIZATION_EXPIRED', 'REFERENCE_MISMATCH', 'POLICY_REFUSED', 'TARGET_DRIFT', 'READ_REFUSED', 'REFERENCE_REFUSED', 'ASSERTION_FAILED', 'CANCELLED', 'TIMEOUT', 'OUTCOME_UNKNOWN', 'INTERNAL_ERROR', 'LOGIN_REQUIRED', 'PASSWORD_CONTROL_READ_REFUSED', 'NAVIGATION_HTTP_ERROR'].includes(error.code))
         return error.code as ReplayError;
     return 'INTERNAL_ERROR';
 }

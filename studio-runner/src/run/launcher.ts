@@ -59,7 +59,8 @@ import type { Execute3, Launch3, Ready3, Result3 } from '../executor/observedOpe
 import { demand, equalObserved, hashObserved, isRecord, OBSERVED_LIMITS, validateObserved } from '../validator/observedReferencePolicy.js';
 import { stepHashOf, validateObservedExecute } from '../executor/observedReplay.js';
 import { stepReceiptAgrees } from './protocol.js';
-import type { ObservedChildMessage } from './protocol.js';
+import type { ConsoleLogEntry, ObservedChildMessage } from './protocol.js';
+import { CONSOLE_ENTRY_CAP, validConsoleEntries } from './protocol.js';
 import type { StepReporter } from '../executor/stepReporter.js';
 import { fork } from 'node:child_process';
 import type { Serializable } from 'node:child_process';
@@ -439,7 +440,7 @@ async function launchObservedChild(options: ChildLauncherOptions, launchOptions:
     child.trackTree?.();
     // Drain and discard all raw output from BEFORE the first launch message.
     child.onOutput(() => undefined);
-    let result: Result3 | null = null, ready: Ready3 | null = null, exited = false, violation = false, executed = false, reporter: StepReporter | null = null, killReason: SessionKillReason | null = null;
+    let result: Result3 | null = null, ready: Ready3 | null = null, exited = false, violation = false, executed = false, reporter: StepReporter | null = null, onConsole: ((entry: ConsoleLogEntry) => void) | undefined, consoleCount = 0, killReason: SessionKillReason | null = null;
     const startedSteps = new Map<number, number>(), completedSteps = new Map<number, string>();
     const waiters = new Set<() => void>();
     const wake = (): void => { for (const f of waiters)
@@ -451,10 +452,20 @@ async function launchObservedChild(options: ChildLauncherOptions, launchOptions:
     child.onMessage(raw => {
         try {
             const kind = isRecord(raw) && typeof raw.kind === 'string' ? raw.kind : '';
+            if (kind === 'console') {
+                // Log lines are not authority: a malformed, late or over-cap console frame is dropped and the run goes on.
+                const entries = executed && !result ? validConsoleEntries(raw, b.executionId, b.attemptId, execute.steps.length) : null;
+                if (entries && consoleCount + entries.length <= CONSOLE_ENTRY_CAP) {
+                    consoleCount += entries.length;
+                    for (const entry of entries)
+                        onConsole?.(entry);
+                }
+                return;
+            }
             const names: Readonly<Record<string, string>> = { ready: 'Ready3', result: 'Result3', 'step-started': 'StepStarted3', 'step-finished': 'StepFinished3' };
             const name = names[kind];
             demand(name);
-            const m = validateObserved<ObservedChildMessage>('replay-ipc#/definitions/' + name, raw, OBSERVED_LIMITS.result);
+            const m = validateObserved<Exclude<ObservedChildMessage, { kind: 'console' }>>('replay-ipc#/definitions/' + name, raw, OBSERVED_LIMITS.result);
             demand(m.runId === b.executionId && m.attemptId === b.attemptId);
             if (m.kind === 'ready' || m.kind === 'result')
                 demand(m.admissionId === admission.admissionId && m.profileHash === hashObserved(b.requiredProfile) && equalObserved(m.build, b.requiredBuild), 'PROFILE_MISMATCH');
@@ -541,6 +552,7 @@ async function launchObservedChild(options: ChildLauncherOptions, launchOptions:
                 // private attempt before entering transport; missing child receipts stay unknown.
                 executed = true;
                 reporter = request.reporter;
+                onConsole = request.onConsole;
                 child.send(execute);
                 await wait(() => result !== null || exited || violation, runtimeDeadlineEpochMs-Date.now());
                 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- IPC callbacks and stop may change this state while the parent awaits.
@@ -554,7 +566,7 @@ async function launchObservedChild(options: ChildLauncherOptions, launchOptions:
                 const usage=mergeSecretUseEvidence(provenSecretUseAfterLoss(Object.keys(job.secrets),job.artifact.steps,executed,completedSteps),final?.secretUse,Object.keys(job.secrets));
                 const recording=observeOwnedAppRecording(sealedVideo(),final?.recording.path,wasOrderly(final),quiescent);
                 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- IPC callbacks and stop may change this state while the parent awaits.
-                return { ok: killReason === null && !violation && final?.ok === true, failureKind: killReason ? KILL_FAILURE_KINDS[killReason] : final?.errorCode === 'ASSERTION_FAILED' ? 'step' : final?.ok ? null : 'run-fault', failureMessage: killReason ? KILL_MESSAGES[killReason] : final?.errorCode ?? (violation ? 'INVALID_CONTRACT' : null), recording, observedHosts: [], secretUse: usage.facts, ...(final?.detail ? {detail: final.detail} : {}) };
+                return { ok: killReason === null && !violation && final?.ok === true, failureKind: killReason ? KILL_FAILURE_KINDS[killReason] : final?.errorCode === 'ASSERTION_FAILED' || final?.errorCode === 'NAVIGATION_HTTP_ERROR' ? 'step' : final?.ok ? null : 'run-fault', failureMessage: killReason ? KILL_MESSAGES[killReason] : final?.errorCode ?? (violation ? 'INVALID_CONTRACT' : null), recording, observedHosts: [], secretUse: usage.facts, ...(final?.detail ? {detail: final.detail} : {}) };
             } } };
 }
 

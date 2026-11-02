@@ -3,7 +3,7 @@ import schemasJson from './observedSchemas.json' with { type: 'json' };
 import { parseWireJson } from '../guided/json.js';
 import type { BuildIdentity, Profile } from '../executor/observedOperations.js';
 export const OBSERVED_LIMITS = Object.freeze({ artifact: 1048576, policy: 524288, basis: 6291456, validation: 8388608, verdict: 65536, job: 4194304, launch: 131072, execute: 2097152, ready: 4096, step: 8192, result: 65536, inputs: 262144 });
-export type ObservedErrorCode = 'INVALID_CONTRACT' | 'EVIDENCE_MISMATCH' | 'OPERATION_MISMATCH' | 'REFERENCE_MISMATCH' | 'PROFILE_MISMATCH' | 'LIMIT_EXCEEDED' | 'AUTHORIZATION_EXPIRED' | 'POLICY_REFUSED' | 'TARGET_DRIFT' | 'READ_REFUSED' | 'REFERENCE_REFUSED' | 'ASSERTION_FAILED' | 'CANCELLED' | 'TIMEOUT' | 'OUTCOME_UNKNOWN' | 'INTERNAL_ERROR' | 'LOGIN_REQUIRED' | 'PASSWORD_CONTROL_READ_REFUSED';
+export type ObservedErrorCode = 'INVALID_CONTRACT' | 'EVIDENCE_MISMATCH' | 'OPERATION_MISMATCH' | 'REFERENCE_MISMATCH' | 'PROFILE_MISMATCH' | 'LIMIT_EXCEEDED' | 'AUTHORIZATION_EXPIRED' | 'POLICY_REFUSED' | 'TARGET_DRIFT' | 'READ_REFUSED' | 'REFERENCE_REFUSED' | 'ASSERTION_FAILED' | 'CANCELLED' | 'TIMEOUT' | 'OUTCOME_UNKNOWN' | 'INTERNAL_ERROR' | 'LOGIN_REQUIRED' | 'PASSWORD_CONTROL_READ_REFUSED' | 'NAVIGATION_HTTP_ERROR';
 export class ObservedRefusal extends Error {
     constructor(readonly code: ObservedErrorCode, readonly reason?: string, readonly noEffect=false) { super(code); this.name = 'ObservedRefusal'; }
 }

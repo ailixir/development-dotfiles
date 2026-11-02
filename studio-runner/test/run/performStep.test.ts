@@ -212,3 +212,47 @@ describe('admit', () => {
     if (!verdict.ok && verdict.reason === 'STEP_SYNTAX') expect(verdict.syntax?.line).toBeGreaterThanOrEqual(1);
   });
 });
+
+/**
+ * SC008-FIX-40: an action step that lands on a main-frame document answering HTTP 400 or more fails with NAVIGATION_HTTP_ERROR, in replay only
+ * (`failOnHttpError`). The status comes from the step API (browser.ts tracks main-frame document responses); here it is scripted.
+ */
+describe('performStep: a step that lands on an HTTP error page (FIX-40)', () => {
+  const click = "await page.locator('#browse').click();";
+  const withStatus = (rig: Rig, status: number | null): Rig['api'] => ({ ...rig.api, navigationHttpStatus: () => status });
+  const replay = (rig: Rig, code: string, extra: Partial<StepRequest> = {}): StepRequest => request(rig, code, { failOnHttpError: true, ...extra });
+
+  it.each([400, 403, 404, 500, 503])('an action step landing on a %i document fails, with its effects reported as they happened', async status => {
+    const rig = newRig();
+    const outcome = await performStep(withStatus(rig, status), rig.session, replay(rig, click));
+    expect(outcome.receipt).toMatchObject({ closedCode: 'NAVIGATION_HTTP_ERROR', fenceCrossed: true, effects: [{ method: 'click', completed: true }] });
+    expect(outcome.captured).toEqual({});
+    expect(rig.session.calls).toContain('invalidate');
+  });
+
+  it.each([200, 204, 301, 302, 304, 399, null])('an action step whose last main-frame document status is %s passes (a redirect hop that ends in a 2xx is the final status)', async status => {
+    const rig = newRig();
+    const outcome = await performStep(withStatus(rig, status), rig.session, replay(rig, click));
+    expect(outcome.receipt).toMatchObject({ closedCode: null, fenceCrossed: true });
+  });
+
+  it('a step that only reads does not evaluate the rule, even when the page it is on is an error page', async () => {
+    const rig = newRig();
+    rig.w.text['#price'] = '$ 12';
+    const outcome = await performStep(withStatus(rig, 403), rig.session, replay(rig, "const text = await page.locator('#price').innerText();"));
+    expect(outcome.receipt).toMatchObject({ closedCode: null, fenceCrossed: false, effects: [] });
+  });
+
+  it('without the flag (guided learning dispatch) the same status passes, and a host without the method passes too', async () => {
+    const rig = newRig();
+    expect((await performStep(withStatus(rig, 403), rig.session, request(rig, click))).receipt.closedCode).toBeNull();
+    expect((await performStep(rig.api, rig.session, replay(rig, click))).receipt.closedCode).toBeNull();
+  });
+
+  it('a step that already failed keeps its own code', async () => {
+    const rig = newRig();
+    rig.w.matches['#browse'] = 0;
+    const outcome = await performStep(withStatus(rig, 403), rig.session, replay(rig, click));
+    expect(outcome.receipt.closedCode).toBe('TARGET_DRIFT');
+  });
+});

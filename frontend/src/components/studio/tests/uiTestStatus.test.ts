@@ -28,6 +28,13 @@ describe('uiTestStatus (spec §9.3)', () => {
     }
   });
 
+  it('describes a RECORDED test by a failed or errored proof run, and by its readiness otherwise (SC008-FIX-40)', () => {
+    expect(status('RECORDED', 'FAILED')).toEqual({ label: 'Failing', color: 'error', filterValue: 'FAILING' });
+    expect(status('RECORDED', 'ERROR')).toEqual({ label: 'Error', color: 'warning', filterValue: 'WARNING' });
+    expect(status('RECORDED', null)).toEqual({ label: 'Recorded', color: 'warning', filterValue: 'RECORDED' });
+    expect(status('RECORDED', 'PASSED')).toEqual({ label: 'Recorded', color: 'warning', filterValue: 'RECORDED' });
+  });
+
   it('never puts a readiness state in the Warning or Pending group (DC-08)', () => {
     const readiness: TestReadiness[] = ['UNLEARNED', 'LEARNING', 'NEEDS_RELEARN'];
     const lastRuns: LastRun[] = [null, 'PASSED', 'FAILED', 'ERROR'];

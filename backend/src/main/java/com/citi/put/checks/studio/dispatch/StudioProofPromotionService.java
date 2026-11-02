@@ -48,7 +48,9 @@ public class StudioProofPromotionService {
 
   /**
    * Whether a finished execution must leave the draft's last run alone: a diagnostic run, and a
-   * proof that did not promote (it ran a revision that is not the confirmed one).
+   * proof that did not promote (it ran a revision that is not the confirmed one). A proof that
+   * failed or errored still sets the last run, so a test whose proof failed reads as failing rather
+   * than never run (SC008-FIX-40).
    *
    * @param executionId the execution
    * @param promoted whether {@link #onFinal} promoted its revision
@@ -56,12 +58,15 @@ public class StudioProofPromotionService {
   public boolean excludesLastRun(UUID executionId, boolean promoted) {
     List<Map<String, Object>> rows =
         jdbc.queryForList(
-            "SELECT diagnostic, trigger_source FROM ui_test_executions WHERE id = ?", executionId);
+            "SELECT diagnostic, trigger_source, status FROM ui_test_executions WHERE id = ?",
+            executionId);
     if (rows.isEmpty()) {
       return false;
     }
-    return Boolean.TRUE.equals(rows.get(0).get("diagnostic"))
-        || (PROOF_TRIGGER.equals(rows.get(0).get("trigger_source")) && !promoted);
+    Map<String, Object> row = rows.get(0);
+    boolean failed = "FAILED".equals(row.get("status")) || "ERROR".equals(row.get("status"));
+    return Boolean.TRUE.equals(row.get("diagnostic"))
+        || (PROOF_TRIGGER.equals(row.get("trigger_source")) && !promoted && !failed);
   }
 
   /**

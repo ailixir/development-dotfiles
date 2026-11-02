@@ -8,8 +8,9 @@ import { resetStudioMocks } from '@/services/mocks/studio/handlers';
 import { passedExecution } from '@/services/mocks/studio/executionFixtures';
 import { createScriptedTransport } from '@/services/mocks/studio/executionScenarios';
 import { resetExecutionTransportSeam, setExecutionTransportSeam } from '@/services/api/studioTransportWiring';
-import { uiTestEditorPath, uiTestPath, uiTestRunPath } from '@/components/studio/uiTestPaths';
+import { uiTestPath, uiTestRunPath } from '@/components/studio/uiTestPaths';
 import type { ExecutionSnapshot } from '@/types/studio/studioTypes';
+import { formatRunTime } from '@/components/studio/runs/runPresentation';
 import { UiTestRecentRunsCard } from './UiTestRecentRunsCard';
 
 /**
@@ -189,41 +190,42 @@ describe('AC-04: the Recent Runs card lists this test\'s replays', { timeout: TE
     expect(list).toMatchObject({ sort: 'acceptedAt,desc', page: 0 });
   });
 
-  it('puts the note and the card\'s own header above rows that link by short id, with no Open test', async () => {
+  it('lists Time, Status, Duration, Actions: the time first with its short id beneath, "View details" last, no note or origin', async () => {
     serve({ runs: [runOf(1, { triggerSource: 'SCHEDULED' }), runOf(2), runOf(3, { triggerSource: 'AFTER_LEARN' })] });
     const user = userEvent.setup({ delay: null });
     renderAt(uiTestPath(TEST_ID));
 
     await screen.findByTestId(`run-${runIdOf(2)}`, {}, WAIT);
     expect(within(screen.getByTestId('ui-test-recent-runs')).getByText('Recent Runs')).toBeInTheDocument();
-    expect(screen.getByTestId('ui-test-runs-note')).toHaveTextContent(
-      'Runs lists replays of this test, including the replay that records proof after each learn. Learning happens in Studio.',
-    );
+    expect(screen.queryByTestId('ui-test-runs-note')).toBeNull();
 
-    // The card's own header: a Run column, no Test column and no System column.
+    // The columns mirror the HTTP check table: Time first, Actions last; no Run, Requested, Test or System.
     const table = screen.getByRole('table', { name: 'Runs of this UI test' });
     const headers = within(table).getAllByRole('columnheader').map((cell) => cell.textContent);
-    expect(headers).toEqual(['Run', 'Status', 'Requested', 'Duration', 'Actions']);
-    expect(headers).not.toContain('Test');
-    expect(headers).not.toContain('System');
+    expect(headers).toEqual(['Time', 'Status', 'Duration', 'Actions']);
 
-    // The short id is the row's only link, and the test's name is not repeated in the row.
+    // The first cell is the absolute run time with the short id as a plain caption (not a link).
     const row = within(rowOf(2));
-    const link = row.getByTestId('run-link');
-    expect(link).toHaveTextContent(`#${shortOf(2)}`);
-    expect(link).toHaveAttribute('href', uiTestRunPath(TEST_ID, runIdOf(2)));
-    expect(row.getAllByRole('link')).toHaveLength(1);
-    expect(rowOf(2)).not.toHaveTextContent('Checkout journey');
-    expect(within(rowOf(1)).getByText('Scheduled')).toBeInTheDocument();
-    // The proof replay a learn accepts is listed as a run of its own origin.
-    expect(within(rowOf(3)).getByText('After learning')).toBeInTheDocument();
-    expect(row.getByText('Manual')).toBeInTheDocument();
+    const cells = within(rowOf(2)).getAllByRole('cell');
+    expect(cells).toHaveLength(4);
+    expect(cells[0]).toHaveTextContent(formatRunTime(runOf(2).acceptedAt));
+    expect(row.getByTestId('run-time')).toHaveTextContent(formatRunTime(runOf(2).acceptedAt));
+    expect(row.getByTestId('run-id')).toHaveTextContent(`#${shortOf(2)}`);
+    expect(within(cells[0]).queryByRole('link')).toBeNull();
+    expect(row.queryAllByRole('link')).toHaveLength(0);
+    expect(within(cells[3]).getByRole('button', { name: 'View details' })).toBeInTheDocument();
 
-    // The row menu offers no 'Open test'.
-    await user.click(row.getByRole('button', { name: `More actions for run #${shortOf(2)}` }));
-    const items = (await screen.findAllByRole('menuitem')).map((item) => item.textContent);
-    expect(items).toEqual(['Open run', 'Copy link']);
-    expect(screen.queryByText(/open test/i)).toBeNull();
+    // The test name, the origin and the queue wait are not repeated in the row; there is no row menu.
+    expect(rowOf(2)).not.toHaveTextContent('Checkout journey');
+    expect(within(rowOf(1)).queryByText('Scheduled')).toBeNull();
+    expect(within(rowOf(3)).queryByText('After learning')).toBeNull();
+    expect(row.queryByText('Manual')).toBeNull();
+    expect(row.queryByTestId('run-queue-wait')).toBeNull();
+    expect(row.queryByRole('button', { name: /more actions/i })).toBeNull();
+
+    // "View details" opens the drawer and does not open it twice (the row click is stopped).
+    await user.click(within(cells[3]).getByRole('button', { name: 'View details' }));
+    expect(pathname()).toBe(uiTestRunPath(TEST_ID, runIdOf(2)));
   });
 
   it('reaches the next page through the existing paging', async () => {
@@ -233,19 +235,19 @@ describe('AC-04: the Recent Runs card lists this test\'s replays', { timeout: TE
     renderAt(uiTestPath(TEST_ID));
 
     await screen.findByTestId(`run-${runIdOf(30)}`, {}, WAIT);
-    expect(screen.getAllByTestId(/^run-e/)).toHaveLength(25);
-    expect(screen.getByTestId(`run-${runIdOf(6)}`)).toBeInTheDocument();
-    expect(screen.queryByTestId(`run-${runIdOf(5)}`)).toBeNull();
-    expect(screen.getByText('1–25 of 30')).toBeInTheDocument();
+    expect(screen.getAllByTestId(/^run-e/)).toHaveLength(10);
+    expect(screen.getByTestId(`run-${runIdOf(21)}`)).toBeInTheDocument();
+    expect(screen.queryByTestId(`run-${runIdOf(20)}`)).toBeNull();
+    expect(screen.getByText('1–10 of 30')).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: /next page/i }));
 
-    await screen.findByTestId(`run-${runIdOf(5)}`, {}, WAIT);
-    await waitFor(() => expect(screen.getAllByTestId(/^run-e/)).toHaveLength(5), WAIT);
+    await screen.findByTestId(`run-${runIdOf(20)}`, {}, WAIT);
+    await waitFor(() => expect(screen.getAllByTestId(/^run-e/)).toHaveLength(10), WAIT);
     expect(screen.queryByTestId(`run-${runIdOf(30)}`)).toBeNull();
-    expect(screen.getByText('26–30 of 30')).toBeInTheDocument();
+    expect(screen.getByText('11–20 of 30')).toBeInTheDocument();
     const second = served.listCalls.find((call) => call.status === null && call.page === 1);
-    expect(second).toMatchObject({ testId: TEST_ID, sort: 'acceptedAt,desc', size: 25 });
+    expect(second).toMatchObject({ testId: TEST_ID, sort: 'acceptedAt,desc', size: 10 });
   });
 
   it('keeps the pager structure the phone layout relies on (STUDIO-UNIFY-001.6 AC-06; pixels in e2e)', async () => {
@@ -254,14 +256,14 @@ describe('AC-04: the Recent Runs card lists this test\'s replays', { timeout: TE
 
     await screen.findByTestId(`run-${runIdOf(30)}`, {}, WAIT);
     const pager = screen.getByTestId('ui-test-runs-pagination');
-    expect(within(pager).getByText('1–25 of 30')).toBeInTheDocument();
+    expect(within(pager).getByText('1–10 of 30')).toBeInTheDocument();
     expect(within(pager).getByRole('button', { name: /previous page/i })).toBeInTheDocument();
     expect(within(pager).getByRole('button', { name: /next page/i })).toBeInTheDocument();
     // The rows-per-page selector is still rendered (hidden below `xl` by CSS, which jsdom does not apply).
     expect(pager.querySelector('.MuiTablePagination-input')).not.toBeNull();
   });
 
-  it('opens the drawer at ui-tests/{id}/runs/{executionId} from a row, with the test link and copy-link on the ui-tests URLs', async () => {
+  it('opens the drawer at ui-tests/{id}/runs/{executionId} from a row, titled with the run time, with copy-link on the ui-tests URL', async () => {
     serve({ runs: [runOf(1), runOf(2)] });
     const user = userEvent.setup({ delay: null });
     renderAt(uiTestPath(TEST_ID));
@@ -269,13 +271,12 @@ describe('AC-04: the Recent Runs card lists this test\'s replays', { timeout: TE
     await screen.findByTestId(`run-${runIdOf(2)}`, {}, WAIT);
     expect(screen.queryByTestId('run-details')).toBeNull();
 
-    await user.click(within(rowOf(2)).getByTestId('run-link'));
+    await user.click(within(rowOf(2)).getByTestId('run-time'));
 
     expect(pathname()).toBe(uiTestRunPath(TEST_ID, runIdOf(2)));
     const title = await screen.findByTestId('run-details-title', {}, WAIT);
-    expect(title).toHaveTextContent('Checkout journey');
+    expect(title).toHaveTextContent(formatRunTime(runOf(2).acceptedAt));
     expect(screen.getByTestId('run-details')).toHaveAttribute('data-execution-id', runIdOf(2));
-    expect(within(title).getByRole('link')).toHaveAttribute('href', uiTestEditorPath(TEST_ID));
 
     await user.click(drawer().getByRole('button', { name: 'Copy link' }));
     expect(await navigator.clipboard.readText()).toBe(
@@ -294,9 +295,8 @@ describe('AC-04: the Recent Runs card lists this test\'s replays', { timeout: TE
 
     // Run 1 is the oldest, so it is on page two: the drawer reads it by id.
     const title = await screen.findByTestId('run-details-title', {}, WAIT);
-    expect(title).toHaveTextContent('Checkout journey');
+    expect(title).toHaveTextContent(formatRunTime(runOf(1).acceptedAt));
     expect(screen.getByTestId('run-details')).toHaveAttribute('data-execution-id', runIdOf(1));
-    expect(within(title).getByRole('link')).toHaveAttribute('href', uiTestEditorPath(TEST_ID));
     expect(drawer().getByTestId('step-text-0')).toBeInTheDocument();
     expect(served.readCalls).toEqual([runIdOf(1)]);
     expect(served.listCalls.every((call) => call.testId === TEST_ID)).toBe(true);
@@ -374,7 +374,7 @@ describe('AC-25: replays and learns in the Recent Runs card', { timeout: TEST_TI
       'No replays yet. Run the test from Studio and its result appears here.',
     );
     expect(screen.queryAllByTestId(/^run-e/)).toHaveLength(0);
-    expect(screen.queryByTestId('run-link')).toBeNull();
+    expect(screen.queryByTestId('run-time')).toBeNull();
     expect(screen.queryByTestId('ui-test-runs-pagination')).toBeNull();
     expect(served.listCalls.every((call) => call.testId === TEST_ID)).toBe(true);
   });

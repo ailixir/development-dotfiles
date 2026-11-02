@@ -21,7 +21,6 @@ import studioApi from '@/services/api/studioApi';
 import { schedulesApi } from '@/services/api/schedulesApi';
 import { CANCELLED_ERROR_CODE, type ExecutionSnapshot, type TestDetailDto } from '@/types/studio/studioTypes';
 import { passedExecution } from '@/services/mocks/studio/executionFixtures';
-import { executionStatusLabel } from '@/components/studio/run/executionStatus';
 import { LEARNED_READY_LABEL } from '@/components/studio/run/runEnablement';
 import { uiTestEditorPath, uiTestPath, uiTestRunPath } from '@/components/studio/uiTestPaths';
 import { formatRelativeTime } from '@/utils/time';
@@ -251,7 +250,7 @@ function mountAt(path: string, store: TestStore): Mounted {
 const heading = (name: string) => screen.findByRole('heading', { level: 1, name }, WAIT);
 
 describe('AC-10: the header', () => {
-  it('shows name, status chip, UI Test chip, CSI name, environment and last run', async () => {
+  it('shows name, status chip, UI Test chip, CSI name and environment, and no last run', async () => {
     serveDetail(detailOf());
     mountAt(uiTestPath(TEST_ID), settledStore());
 
@@ -261,18 +260,18 @@ describe('AC-10: the header', () => {
     // The CSI shows its registered name once the registry has been read.
     await waitFor(() => expect(screen.getByTestId('ui-test-csi')).toHaveTextContent('CSI: Retail Banking Portal'), WAIT);
     expect(screen.getByTestId('ui-test-environment')).toHaveTextContent('Environment: UAT');
-    const lastRun = screen.getByTestId('ui-test-last-run');
-    expect(lastRun).toHaveTextContent(executionStatusLabel('PASSED'));
-    expect(lastRun).toHaveTextContent(formatRelativeTime(detailOf().lastRunAt!));
+    // The run's status and time live in Latest run, not in the header.
+    expect(screen.queryByTestId('ui-test-last-run')).toBeNull();
+    expect(within(screen.getByTestId('ui-test-detail-header')).queryByText(/Last run/)).toBeNull();
   }, TEST_TIMEOUT_MS);
 
-  it('shows "Never run" for a test without a run, and the CSI id when the registry does not know it', async () => {
+  it('shows the "Not run" chip for a test without a run, and the CSI id when the registry does not know it', async () => {
     registeredCsis = [];
     serveDetail(detailOf({ lastRunStatus: null, lastRunAt: null }));
     mountAt(uiTestPath(TEST_ID), settledStore());
 
     await heading('Checkout smoke');
-    expect(screen.getByTestId('ui-test-last-run')).toHaveTextContent('Last run: Never run');
+    expect(screen.queryByTestId('ui-test-last-run')).toBeNull();
     expect(screen.getByTestId('ui-test-status')).toHaveTextContent('Not run');
     await waitFor(() => expect(observed.some((entry) => entry.path.endsWith('/api/v1/csi'))).toBe(true), WAIT);
     await sleep(100);
@@ -546,14 +545,13 @@ describe('AC-04 (STUDIO-UNIFY-001.6): the last learning attempt on the header', 
     });
   const attemptDate = formatRelativeTime(SEEDED_FAILED_ATTEMPT_STARTED_AT);
 
-  it('shows "Last learning attempt failed (date, at step N)" beside "Last run" for an UNLEARNED test, from exactly one read', async () => {
+  it('shows "Last learning attempt failed (date, at step N)" in the header for an UNLEARNED test, from exactly one read', async () => {
     serveDetail(failedAttemptDetail());
     mountAt(uiTestPath(SEEDED_FAILED_ATTEMPT_TEST_ID), settledStore());
 
     await heading('Checkout smoke');
     const note = await screen.findByTestId(NOTE, {}, WAIT);
     expect(note).toHaveTextContent(`Last learning attempt failed (${attemptDate}, at step 1)`);
-    expect(screen.getByTestId('ui-test-last-run')).toHaveTextContent('Last run: Never run');
     expect(within(screen.getByTestId('ui-test-detail-header')).getByTestId(NOTE)).toBe(note);
     await sleep(150);
     expect(guidedRequestCount('latest')).toBe(1);
@@ -618,7 +616,6 @@ describe('AC-04 (STUDIO-UNIFY-001.6): the last learning attempt on the header', 
     await sleep(150);
     expect(screen.queryByTestId(NOTE)).toBeNull();
     expect(screen.queryByRole('alert')).toBeNull();
-    expect(screen.getByTestId('ui-test-last-run')).toHaveTextContent('Last run: Never run');
   }, TEST_TIMEOUT_MS);
 });
 
@@ -740,8 +737,8 @@ describe('the shell: one page of cards, no tabs (STUDIO-UNIFY-001.7 AC-01)', () 
     expect(screen.getByTestId('ui-test-latest-run')).toBe(latest);
     expect(testReads(TEST_ID)).toHaveLength(1);
 
-    // "Open run details" on the Latest run card opens the newest run at its URL.
-    await user().click(screen.getByRole('button', { name: 'Open run details' }));
+    // "View details" on the Latest run card opens the newest run at its URL.
+    await user().click(screen.getByTestId('ui-test-latest-run-open'));
     expect(view.getLocation().pathname).toBe(uiTestRunPath(TEST_ID, runOf(2).executionId));
     expect(await screen.findByTestId('run-details', {}, WAIT)).toHaveAttribute('data-execution-id', runOf(2).executionId);
     expect(screen.getByTestId('ui-test-overview')).toBe(overview);
@@ -811,7 +808,6 @@ describe('the shell: one page of cards, no tabs (STUDIO-UNIFY-001.7 AC-01)', () 
 describe('STUDIO-UNIFY-001.8 AC-03..AC-05: the header follows a run watched on the page', () => {
   const LONG_WAIT = { timeout: 25_000 } as const;
   const headerStatus = () => screen.getByTestId('ui-test-status');
-  const lastRun = () => screen.getByTestId('ui-test-last-run');
 
   /** A replay the page can watch: live (recording still processing, so the Latest run card polls). */
   const liveRun = (n: number) =>
@@ -840,7 +836,7 @@ describe('STUDIO-UNIFY-001.8 AC-03..AC-05: the header follows a run watched on t
     await heading('Checkout smoke');
     expect(await screen.findByTestId('ui-test-latest-run-status', {}, WAIT)).toHaveTextContent('Running');
     expect(headerStatus()).toHaveTextContent('Not run');
-    expect(lastRun()).toHaveTextContent('Last run: Never run');
+    expect(screen.queryByTestId('ui-test-last-run')).toBeNull();
     const nodes = ['ui-test-detail-header', 'ui-test-overview', 'ui-test-recent-runs', 'ui-test-latest-run'].map(
       (id) => [id, screen.getByTestId(id)] as const,
     );
@@ -855,8 +851,6 @@ describe('STUDIO-UNIFY-001.8 AC-03..AC-05: the header follows a run watched on t
     runs[0] = runOf(1, { revision: 9 });
     await waitFor(() => expect(testReads(TEST_ID)).toHaveLength(2), LONG_WAIT);
     await waitFor(() => expect(headerStatus()).toHaveTextContent('Passing'), WAIT);
-    expect(lastRun()).toHaveTextContent('Passed');
-    expect(lastRun()).toHaveTextContent(formatRelativeTime(endedAt));
     expect(screen.getByTestId('ui-test-latest-run-status')).toHaveTextContent('Passed');
 
     // No further read, and the same DOM nodes: nothing was remounted.
@@ -865,7 +859,7 @@ describe('STUDIO-UNIFY-001.8 AC-03..AC-05: the header follows a run watched on t
     for (const [id, node] of nodes) expect(screen.getByTestId(id), id).toBe(node);
 
     // Opening and closing the drawer adds no test read either.
-    await user().click(screen.getByRole('button', { name: 'Open run details' }));
+    await user().click(screen.getByTestId('ui-test-latest-run-open'));
     const drawer = await screen.findByTestId('run-details', {}, WAIT);
     await user().click(within(drawer).getByRole('button', { name: 'Close' }));
     await waitFor(() => expect(screen.queryByTestId('run-details')).toBeNull(), WAIT);
@@ -884,7 +878,7 @@ describe('STUDIO-UNIFY-001.8 AC-03..AC-05: the header follows a run watched on t
     await sleep(300);
     expect(testReads(TEST_ID)).toHaveLength(1);
 
-    await user().click(screen.getByRole('button', { name: 'Open run details' }));
+    await user().click(screen.getByTestId('ui-test-latest-run-open'));
     const drawer = await screen.findByTestId('run-details', {}, WAIT);
     await user().click(within(drawer).getByRole('button', { name: 'Close' }));
     await waitFor(() => expect(screen.queryByTestId('run-details')).toBeNull(), WAIT);
@@ -936,8 +930,7 @@ describe('STUDIO-UNIFY-001.8 AC-03..AC-05: the header follows a run watched on t
     await waitFor(() => expect(testReads(TEST_ID)).toHaveLength(2), LONG_WAIT);
     expect(screen.getByTestId('ui-test-latest-run-status')).toHaveTextContent('Cancelled');
     await waitFor(() => expect(headerStatus()).toHaveTextContent('Error'), WAIT);
-    expect(lastRun()).toHaveTextContent('Error');
-    expect(lastRun()).not.toHaveTextContent('Cancelled');
+    expect(headerStatus()).not.toHaveTextContent('Cancelled');
     await sleep(3_800);
     expect(testReads(TEST_ID)).toHaveLength(2);
   }, 90_000);
@@ -960,7 +953,6 @@ describe('STUDIO-UNIFY-001.8 AC-03..AC-05: the header follows a run watched on t
     expect(screen.getByTestId('ui-test-latest-run-status')).toHaveTextContent('Cancelled');
     await sleep(300);
     expect(headerStatus()).toHaveTextContent('Passing');
-    expect(lastRun()).toHaveTextContent(formatRelativeTime(earlier.lastRunAt!));
     await sleep(3_800);
     expect(testReads(TEST_ID)).toHaveLength(2);
   }, 90_000);

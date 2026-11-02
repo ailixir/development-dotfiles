@@ -47,9 +47,13 @@ const READY_STATUS = {
 
 /**
  * Maps a test to its chip. Readiness other than READY wins over the last run (the "any" rows of
- * §9.3); a READY test is described by its last run.
+ * §9.3); a READY test is described by its last run. One exception: a RECORDED test whose proof run
+ * failed or errored is described by that run, so a failed test never reads "Recorded" (SC008-FIX-40).
  */
 export function uiTestStatus(test: UiTestStatusInput): UiTestStatus {
+  if (test.readiness === 'RECORDED' && (test.lastRunStatus === 'FAILED' || test.lastRunStatus === 'ERROR')) {
+    return READY_STATUS[test.lastRunStatus];
+  }
   if (test.readiness !== 'READY') {
     const status = (READINESS_STATUS as Record<string, UiTestStatus | undefined>)[test.readiness];
     if (status) return status;

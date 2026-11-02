@@ -179,7 +179,7 @@ describe('AC-2: the page’s own Run control is governed by the server and not b
     expect(executeRequests()).toHaveLength(1);
   }, AC2_TEST_TIMEOUT_MS);
 
-  it('STUDIO-OBS-008: an unlearned draft offers Run (it learns), with no Code tab and no review controls', async () => {
+  it('STUDIO-OBS-008: an unlearned draft offers Run (it learns), with no review controls', async () => {
     serveList(unlearnedDraft);
     renderPage(unlearnedDraft.id);
 
@@ -187,7 +187,6 @@ describe('AC-2: the page’s own Run control is governed by the server and not b
     // The STUDIO-OBS-012B interim sentence is gone: Run learns an unlearned draft (AC-2).
     await waitFor(() => expect(control).not.toBeDisabled(), pageWait);
     expect(document.body.textContent).not.toMatch(/learning is not yet available/i);
-    expect(screen.queryByRole('tab', { name: 'Code' })).toBeNull();
     expect(screen.queryByRole('button', { name: /confirm|translation/i })).toBeNull();
     expect(document.body.textContent).not.toMatch(/translation|candidate|confirm this exact/i);
     // COPY-001: the Proof-tab empty state uses no retired compile-phase verb.

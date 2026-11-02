@@ -4,19 +4,17 @@ import { DeleteOutline, Edit, MoreVert, PlayArrow, Schedule } from '@mui/icons-m
 import { useNavigate } from 'react-router-dom';
 import DeleteTestDialog from '@/components/studio/tests/DeleteTestDialog';
 import UiTestScheduleDialog from '@/components/scheduling/UiTestScheduleDialog';
-import { executionStatusLabel, executionStatusTone } from '@/components/studio/run/executionStatus';
 import { LastLearningAttemptNote } from '@/components/studio/guided/LastLearningAttemptNote';
 import { useLatestLearningAttempts } from '@/components/studio/guided/useLatestLearningAttempts';
 import { uiTestStatus } from '@/components/studio/tests/uiTestStatus';
 import { uiTestEditorPath } from '@/components/studio/uiTestPaths';
 import { useAppDispatch, useAppSelector } from '@/store';
 import { fetchCSIs } from '@/store/slices/csiSlice';
-import { formatAbsoluteTime, formatRelativeTime } from '@/utils/time';
 import type { UiTestDetailHeaderProps } from './useUiTestDetail';
 
 /**
  * The UI test detail header (spec §8.2; AC-10, AC-14): name, status chip (the shared mapping), the
- * "UI Test" chip, CSI, environment and last run, with the actions Edit in Studio, Schedule, Run in
+ * "UI Test" chip, CSI and environment, with the actions Edit in Studio, Schedule, Run in
  * Studio and (overflow menu) Delete.
  *
  * Run in Studio only navigates to the editor with `?autorun=1`. This page never sends an execute
@@ -96,23 +94,6 @@ const UiTestDetailHeader: React.FC<UiTestDetailHeaderProps> = ({ testId, test, r
               </Typography>
               <Typography variant="body2" color="text.secondary" data-testid="ui-test-environment">
                 Environment: {test.environment || 'Not specified'}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" component="div" data-testid="ui-test-last-run">
-                Last run:{' '}
-                {test.lastRunStatus ? (
-                  <>
-                    <Chip
-                      size="small"
-                      label={executionStatusLabel(test.lastRunStatus)}
-                      color={executionStatusTone(test.lastRunStatus)}
-                    />
-                    {test.lastRunAt && (
-                      <Tooltip title={formatAbsoluteTime(test.lastRunAt)} describeChild>
-                        <span> {formatRelativeTime(test.lastRunAt)}</span>
-                      </Tooltip>
-                    )}
-                  </>
-                ) : 'Never run'}
               </Typography>
               <LastLearningAttemptNote
                 testId={testId}

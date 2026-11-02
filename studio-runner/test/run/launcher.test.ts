@@ -460,7 +460,8 @@ describe('AC-1, AC-20 — launch resolving means Chromium started', () => {
 });
 
 describe('AC-16 — step events reach 10.6’s reporter, across the process boundary', () => {
-  it('forwards the executor’s outcomes unchanged, null timings included', async () => {
+  // SC008-FIX-40: a failed navigation step ends the run FAILED exactly as a failed assertion does (a step failure, not a run fault).
+  it.each(['ASSERTION_FAILED', 'NAVIGATION_HTTP_ERROR'] as const)('forwards the executor’s outcomes unchanged, null timings included: %s', async code => {
     const spawner = createFakeSpawner();
     const { session, child } = await launched(spawner, scratchPath());
     const started: unknown[] = [];
@@ -476,18 +477,18 @@ describe('AC-16 — step events reach 10.6’s reporter, across the process boun
     const [first, second, third] = wire.job.artifact.steps;
     if (first === undefined || second === undefined || third === undefined) throw new Error('fixture');
     child.emit({ ...base, kind: 'step-started', stepIndex: 0, stepId: first.stepId, startedAtMs: 1.25 });
-    child.emit({ ...base, kind: 'step-finished', stepIndex: 0, stepId: first.stepId, status: 'FAIL', startedAtMs: 1.25, finishedAtMs: 9.5, durationMs: 8.25, receipt: stepReceipt({ closedCode: 'ASSERTION_FAILED', stepHash: stepHashOf(first.operations), fenceCrossed: true, effects: [{ method: 'click', completed: true }] }) });
+    child.emit({ ...base, kind: 'step-finished', stepIndex: 0, stepId: first.stepId, status: 'FAIL', startedAtMs: 1.25, finishedAtMs: 9.5, durationMs: 8.25, receipt: stepReceipt({ closedCode: code, stepHash: stepHashOf(first.operations), fenceCrossed: true, effects: [{ method: 'click', completed: true }] }) });
     child.emit({ ...base, kind: 'step-finished', stepIndex: 1, stepId: second.stepId, status: 'SKIPPED', startedAtMs: null, finishedAtMs: null, durationMs: null, receipt: stepReceipt({ stepHash: stepHashOf(second.operations) }) });
     child.emit({ ...base, kind: 'step-finished', stepIndex: 2, stepId: third.stepId, status: 'SKIPPED', startedAtMs: null, finishedAtMs: null, durationMs: null, receipt: stepReceipt({ stepHash: stepHashOf(third.operations) }) });
-    emitResult(child, false, 'ASSERTION_FAILED');
+    emitResult(child, false, code);
     child.end();
     const result = await pending;
 
     expect(started).toEqual([{ stepIndex: 0, startedAtMs: 1.25 }]);
     expect(finished).toHaveLength(3);
-    expect(finished[0]).toMatchObject({ status: 'FAIL', startedAtMs: 1.25, finishedAtMs: 9.5, durationMs: 8.25, failure: 'ASSERTION_FAILED' });
+    expect(finished[0]).toMatchObject({ status: 'FAIL', startedAtMs: 1.25, finishedAtMs: 9.5, durationMs: 8.25, failure: code });
     expect(finished[1]).toMatchObject({ status: 'SKIPPED', startedAtMs: null, durationMs: null });
-    expect(result).toMatchObject({ ok: false, failureKind: 'step', failureMessage: 'ASSERTION_FAILED' });
+    expect(result).toMatchObject({ ok: false, failureKind: 'step', failureMessage: code });
   });
 
   it('reports a run fault when the child exits without a result', async () => {
@@ -508,6 +509,49 @@ describe('AC-16 — step events reach 10.6’s reporter, across the process boun
     const result = await session.run.execute({ reporter: silentReporter() });
     // A run fault, and no claim about why: the child said nothing the parent could validate.
     expect(result).toMatchObject({ ok: false, failureKind: 'run-fault', failureMessage: null });
+  });
+});
+
+describe('page console frames reach the run’s onConsole sink', () => {
+  const entry = (message: string, stepIndex: number | null = 0) => ({ level: 'warn' as const, message, stepIndex, atMs: 2 });
+  const consoleFrame = (child: FakeChildProcess, entries: unknown[]) => ({ ...frameBase(child), kind: 'console', entries });
+
+  it('delivers valid entries in order and drops malformed, foreign and over-cap frames without failing the run', async () => {
+    const spawner = createFakeSpawner();
+    const { session, child } = await launched(spawner, scratchPath());
+    const received: unknown[] = [], started: unknown[] = [];
+    const pending = session.run.execute({ reporter: { stepStarted: (e) => started.push(e), stepFinished: () => undefined }, onConsole: (e) => received.push(e) });
+    const first = entry('console.warn: one'), second = entry('console.warn: two', null);
+
+    child.emit(consoleFrame(child, [first, second]));
+    child.emit(consoleFrame(child, [{ ...first, extra: true }]));
+    child.emit(consoleFrame(child, [entry('x'.repeat(4097))]));
+    child.emit({ ...consoleFrame(child, [first]), runId: 'other' });
+    child.emit(consoleFrame(child, [{ ...first, level: 'info' }]));
+    child.emit(consoleFrame(child, Array.from({ length: 98 }, () => entry('console.warn: fill'))));
+    child.emit(consoleFrame(child, [entry('console.warn: over the cap')]));
+    // The child is still trusted: a dropped log frame is not a protocol violation.
+    const step = wire.job.artifact.steps[0];
+    if (step === undefined) throw new Error('fixture');
+    child.emit({ ...frameBase(child), kind: 'step-started', stepIndex: 0, stepId: step.stepId, startedAtMs: 1 });
+    expect(started).toEqual([{ stepIndex: 0, startedAtMs: 1 }]);
+    await session.close();
+    await pending;
+
+    expect(received).toHaveLength(100);
+    expect(received.slice(0, 2)).toEqual([first, second]);
+    expect(received).not.toContainEqual(entry('console.warn: over the cap'));
+  });
+
+  it('ignores a console frame sent before the run was executed', async () => {
+    const spawner = createFakeSpawner();
+    const { session, child } = await launched(spawner, scratchPath());
+    const received: unknown[] = [];
+    child.emit(consoleFrame(child, [entry('console.warn: early')]));
+    const pending = session.run.execute({ reporter: silentReporter(), onConsole: (e) => received.push(e) });
+    await session.close();
+    await pending;
+    expect(received).toEqual([]);
   });
 });
 

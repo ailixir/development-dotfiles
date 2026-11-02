@@ -40,12 +40,10 @@ describe('AC-19: step timings reach the surface unaltered', () => {
     expect(attempted.length).toBeGreaterThan(2);
 
     for (const step of attempted) {
-      const offset = screen.getByTestId(`step-offset-${step.stepIndex}`);
       const duration = screen.getByTestId(`step-duration-${step.stepIndex}`);
-      expect(offset.textContent, `step ${step.stepIndex} offset`).toContain(`${step.offsetMs}ms`);
-      expect(duration.textContent, `step ${step.stepIndex} duration`).toContain(
-        `${step.durationMs}ms`,
-      );
+      expect(duration.textContent, `step ${step.stepIndex} duration`).toBe(`${step.durationMs} ms`);
+      // The start offset is the seek control's, not shown as a timing.
+      expect(screen.queryByTestId(`step-offset-${step.stepIndex}`)).toBeNull();
     }
   });
 
@@ -71,12 +69,11 @@ describe('AC-19: step timings reach the surface unaltered', () => {
     expect(unattempted.length).toBeGreaterThan(0);
 
     for (const step of unattempted) {
-      for (const slot of [`step-offset-${step.stepIndex}`, `step-duration-${step.stepIndex}`]) {
-        const text = screen.getByTestId(slot).textContent ?? '';
-        expect(text, `${slot} should say it was not attempted`).toContain(NOT_ATTEMPTED);
-        // No timing *at all* — not `0`, not `0ms`, not a stray digit that reads as one.
-        expect(text, `${slot} rendered a number for a null timing`).not.toMatch(/\d/);
-      }
+      const slot = `step-duration-${step.stepIndex}`;
+      const text = screen.getByTestId(slot).textContent ?? '';
+      expect(text, `${slot} should say it was not attempted`).toContain(NOT_ATTEMPTED);
+      // No timing *at all* — not `0`, not `0 ms`, not a stray digit that reads as one.
+      expect(text, `${slot} rendered a number for a null timing`).not.toMatch(/\d/);
     }
   });
 
@@ -92,8 +89,7 @@ describe('AC-19: step timings reach the surface unaltered', () => {
     );
 
     for (const step of tail) {
-      expect(screen.getByTestId(`step-status-${step.stepIndex}`).textContent).toBe('SKIPPED');
-      expect(screen.getByTestId(`step-offset-${step.stepIndex}`).textContent).toBe(NOT_ATTEMPTED);
+      expect(screen.getByTestId(`step-status-${step.stepIndex}`).getAttribute('data-status')).toBe('SKIPPED');
       expect(screen.getByTestId(`step-duration-${step.stepIndex}`).textContent).toBe(NOT_ATTEMPTED);
     }
   });
@@ -242,7 +238,6 @@ describe('AC-07: waiting words for steps that have not started', () => {
     );
 
     expect(screen.queryByTestId('step-waiting-1')).toBeNull();
-    expect(screen.getByTestId('step-offset-1').textContent).toBe(NOT_ATTEMPTED);
     expect(screen.getByTestId('step-duration-1').textContent).toBe(NOT_ATTEMPTED);
   });
 });
@@ -270,14 +265,34 @@ describe('Studio v1 D1: the step a cancel interrupted', () => {
     render(<ExecutionProgressView snapshot={cancelledMidStep} onSeekStep={() => undefined} />);
 
     expect(screen.getByTestId('execution-cancelled')).toBeTruthy();
-    expect(screen.getByTestId('step-status-1').textContent).toBe('SKIPPED');
+    expect(screen.getByTestId('step-status-1').getAttribute('data-status')).toBe('SKIPPED');
     expect(screen.getByTestId('step-message-1').textContent).toBe(STOPPED);
-    expect(screen.getByTestId('step-offset-1').textContent).toContain('1234ms');
+    expect(screen.getByTestId('step-duration-1').textContent).toBe('567 ms');
     expect(screen.getByTestId('step-seek-1').hasAttribute('disabled')).toBe(false);
     // The step after it never started: no timing, no seek, no message.
-    expect(screen.getByTestId('step-offset-2').textContent).toContain(NOT_ATTEMPTED);
+    expect(screen.getByTestId('step-duration-2').textContent).toContain(NOT_ATTEMPTED);
     expect(screen.getByTestId('step-seek-2').hasAttribute('disabled')).toBe(true);
     expect(screen.queryByTestId('step-message-2')).toBeNull();
     expect(screen.queryByText('FAIL')).toBeNull();
+  });
+});
+
+describe('showStatus and showSteps (the UI test page summarises a run; Studio keeps today\'s output)', () => {
+  it('renders the grey status chip, steps and logs by default', () => {
+    render(<ExecutionProgressView snapshot={failedWithSkippedTailExecution} />);
+
+    expect(screen.getByTestId('execution-status')).toBeTruthy();
+    expect(screen.getByTestId('execution-steps')).toBeTruthy();
+    expect(screen.getByTestId('execution-logs')).toBeTruthy();
+  });
+
+  it('drops the status chip with showStatus={false} and the step list with showSteps={false}', () => {
+    render(<ExecutionProgressView snapshot={failedWithSkippedTailExecution} showStatus={false} showSteps={false} showLogs={false} />);
+
+    expect(screen.queryByTestId('execution-status')).toBeNull();
+    expect(screen.queryByTestId('execution-steps')).toBeNull();
+    expect(screen.queryByTestId('execution-logs')).toBeNull();
+    // Nothing to explain for a FAILED run with no code: no empty box either.
+    expect(screen.queryByTestId('execution-progress')).toBeNull();
   });
 });

@@ -10,7 +10,7 @@ import type { ExecutionSnapshot } from '@/types/studio/studioTypes';
 import { studioMockServer } from '@/services/mocks/studio/server';
 import { resetStudioMocks } from '@/services/mocks/studio/handlers';
 import { fixtureDetail } from '@/services/mocks/studio/authoringState';
-import { readyDraft, unlearnedDraft } from '@/services/mocks/studio/readinessFixtures';
+import { readyDraft } from '@/services/mocks/studio/readinessFixtures';
 import {
   TERMINAL_EVIDENCE_PROCESSING,
   TERMINAL_EVIDENCE_SETTLED,
@@ -121,13 +121,16 @@ describe('AC-21: the page has exactly one playback path', () => {
     serveDraft();
     renderPage();
     await screen.findByRole('button', { name: 'Run Test' });
-    expect(screen.getAllByRole('tab').map((tab) => tab.textContent)).toEqual(['Proof', 'Logs']);
+    expect(screen.getAllByRole('tab').map((tab) => tab.textContent)).toEqual(['Proof', 'Logs', 'Code']);
     expect(screen.getByRole('tab', { name: 'Proof' })).toHaveAttribute('aria-selected', 'true');
     expect(screen.queryByRole('tab', { name: 'Run' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'Change…' })).toBeNull();
     // The legacy region rendered a fallback player whenever the store held a source.
     expect(document.querySelectorAll('video')).toHaveLength(0);
-    expect(screen.getByTestId('video-evidence-empty')).toBeInTheDocument();
+    // With no run on screen the "Run your test" card is the only empty state.
+    expect(screen.getByText('Run your test')).toBeInTheDocument();
+    expect(screen.queryByTestId('video-evidence-empty')).toBeNull();
+    expect(screen.queryByTestId('test-last-run-status')).toBeNull();
     // A full page render with no interaction to trim; bounded like the run tests below.
   }, 15000);
 
@@ -215,8 +218,8 @@ describe('AC-21: the page has exactly one playback path', () => {
   });
 });
 
-describe('round 067 D6: the "Previous run" chip follows the run', () => {
-  it('a terminal run with settled evidence causes exactly one test re-read, and the chip shows the server status', async () => {
+describe('round 067 D6: a finished run refreshes the test once', () => {
+  it('a terminal run with settled evidence causes exactly one test re-read, and no "Previous run" chip is shown', async () => {
     let executed = false;
     let readsAfterRun = 0;
     setExecutionTransportSeam({ primary: createScriptedTransport([TERMINAL_EVIDENCE_SETTLED], 0), fallback: null });
@@ -237,32 +240,12 @@ describe('round 067 D6: the "Previous run" chip follows the run', () => {
     renderPage();
     const control = await screen.findByRole('button', { name: 'Run Test' });
     await waitFor(() => expect(control).not.toBeDisabled());
-    expect(screen.queryByTestId('test-last-run-status')).toBeNull();
     await user.click(control);
-    await waitFor(() => expect(screen.getByTestId('test-last-run-status')).toHaveTextContent('Previous run: Passed'));
+    await waitFor(() => expect(readsAfterRun).toBe(1));
     await screen.findByTestId('video-evidence-player');
     expect(readsAfterRun).toBe(1);
-  }, 15000);
-
-  it('a learned test with no run status shows no chip', async () => {
-    serveDraft();
-    renderPage();
-    await screen.findByRole('button', { name: 'Run Test' });
-    expect(readyDraft.lastRunStatus).toBeNull();
     expect(screen.queryByTestId('test-last-run-status')).toBeNull();
-  }, 15000);
-
-  it('an UNLEARNED draft with no run status says "No run history"', async () => {
-    studioMockServer.use(
-      ...bootstrapHandlers,
-      http.get(`${STUDIO_BASE}/tests`, () =>
-        HttpResponse.json({ data: [unlearnedDraft], page: 0, size: 20, totalElements: 1, totalPages: 1 }),
-      ),
-      http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(fixtureDetail(unlearnedDraft))),
-    );
-    // The editor shows the test its URL names, so it mounts on the id the fixture serves.
-    renderStudioAt(unlearnedDraft.id, <ChecksStudioPage />, { wrapper: StoreProvider });
-    await waitFor(() => expect(screen.getByTestId('test-last-run-status')).toHaveTextContent('No run history'));
+    expect(screen.queryByText(/Previous run:/u)).toBeNull();
   }, 15000);
 });
 

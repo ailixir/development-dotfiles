@@ -147,7 +147,7 @@ class ProofReportIT {
   }
 
   @Test
-  void aFailingProofReportPromotesNothingAndLeavesTheLastRunAlone() {
+  void aFailingProofReportPromotesNothingAndSetsTheLastRunToFailed() {
     UUID execution =
         studioService
             .verifyRecorded(
@@ -162,8 +162,8 @@ class ProofReportIT {
     assertThat(pointer("confirmed_revision_id")).isNull();
     assertThat(pointer("candidate_revision_id")).isEqualTo(revisionId);
     assertThat(lastRunStatus())
-        .as("an unconfirmed revision's failure is not the test's last run")
-        .isNull();
+        .as("a failed proof is the test's last run, so the test reads as failing (SC008-FIX-40)")
+        .isEqualTo("FAILED");
   }
 
   // ── helpers ──────────────────────────────────────────────────────────────

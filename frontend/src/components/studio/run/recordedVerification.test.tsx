@@ -14,9 +14,10 @@ import { LEARNED_LIMITS_CAPTION, LEARNED_READY_LABEL } from './runEnablement';
 
 /**
  * ADR-SC-008 D5 on the Studio side: a RECORDED draft says it is not verified, names the first step
- * without a PASSED receipt, offers "Verify again" only after a proof that did not finish and
- * "Re-learn from step N" only after a FAILED one, runs as a diagnostic, and never sends a base
- * revision to a learn.
+ * without a PASSED receipt, and Run Test itself does the next action: it verifies again after a
+ * proof that did not finish, re-learns from the failed step after a FAILED one, and otherwise runs
+ * as a diagnostic. There are no separate "Verify again" / "Re-learn" buttons, and a learn never sends
+ * a base revision.
  */
 
 const STUDIO_BASE = '*/api/v1/studio';
@@ -58,40 +59,54 @@ async function settled(): Promise<HTMLElement> {
 }
 
 describe('a RECORDED draft', () => {
-  it('says "Recorded, not verified (step N)" with N the first unverified step, and is not the learned chip', async () => {
+  it('says "Recorded · not verified from step N" with N the first unverified step, and is not the learned chip', async () => {
     serve(fixtureDetail(recordedDraft));
     await settled();
     const chip = await screen.findByTestId('guided-readiness-chip');
-    expect(chip).toHaveTextContent('Recorded, not verified (step 2)');
+    expect(chip).toHaveTextContent('Recorded · not verified from step 2');
     expect(chip.textContent).not.toContain(LEARNED_READY_LABEL);
     expect(chip.textContent).not.toMatch(/learned from this run/u);
     expect(screen.queryByTestId('learned-limits')).toBeNull();
   });
 
-  it('INCOMPLETE offers Verify again and not Re-learn; pressing it posts to /verify once and never starts a learn', async () => {
+  it('INCOMPLETE says Run Test verifies again; Run posts to /verify once and never starts a learn or an execute', async () => {
     const startLearn = serve(fixtureDetail(recordedDraft));
-    await settled();
+    const run = await settled();
+    expect(screen.queryByTestId('verify-again')).toBeNull();
     expect(screen.queryByTestId('relearn-from-step')).toBeNull();
-    await userEvent.click(await screen.findByTestId('verify-again'));
+    expect(screen.getByTestId('recorded-diagnostic-note')).toHaveTextContent(guidedCopy('recordedRunVerifies'));
+    await userEvent.click(run);
     await waitFor(() => expect(postsTo('/verify')).toHaveLength(1));
     expect(postsTo('/execute')).toHaveLength(0);
     expect(startLearn).not.toHaveBeenCalled();
   });
 
-  it('FAILED offers "Re-learn from step N" and not Verify again; it starts a learn from that step with no base revision', async () => {
+  it('FAILED says Run Test re-learns from step N; Run starts a learn from that step with no base revision and no execute', async () => {
     const startLearn = serve(fixtureDetail(recordedFailedDraft));
-    await settled();
+    const run = await settled();
     expect(screen.queryByTestId('verify-again')).toBeNull();
-    const button = await screen.findByTestId('relearn-from-step');
-    expect(button).toHaveTextContent('Re-learn from step 2');
-    await userEvent.click(button);
+    expect(screen.queryByTestId('relearn-from-step')).toBeNull();
+    expect(await screen.findByTestId('recorded-diagnostic-note')).toHaveTextContent('Run Test re-learns from step 2.');
+    // No "Failing at step N" chip in the Studio header: the caption and the red step say it.
+    expect(screen.queryByTestId('guided-readiness-chip')).toBeNull();
+    await userEvent.click(run);
     await waitFor(() => expect(startLearn).toHaveBeenCalledTimes(1));
     expect(startLearn.mock.calls[0][0]).toMatchObject({ firstLearnStepId: fixtureStepId(1) });
     expect(startLearn.mock.calls[0][0]).not.toHaveProperty('baseRevisionId');
     expect(postsTo('/verify')).toHaveLength(0);
+    expect(postsTo('/execute')).toHaveLength(0);
   });
 
-  it('PENDING offers neither action', async () => {
+  it('FAILED with an unreadable stored session leaves Run disabled, because Run would learn', async () => {
+    studioMockServer.use(
+      http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(fixtureDetail(recordedFailedDraft))),
+    );
+    render(<RunControl testId={recordedFailedDraft.id} startLearn={startLearnSpy()} sessionUnreadable />);
+    const run = await settled();
+    expect(run).toBeDisabled();
+  });
+
+  it('PENDING keeps the diagnostic note, with no extra buttons', async () => {
     serve(fixtureDetail({ ...recordedDraft, verification: { state: 'PENDING', firstUnverifiedStepId: fixtureStepId(0) } }));
     await settled();
     expect(screen.queryByTestId('verify-again')).toBeNull();
@@ -99,8 +114,10 @@ describe('a RECORDED draft', () => {
     expect(screen.getByTestId('recorded-diagnostic-note')).toHaveTextContent(guidedCopy('recordedDiagnosticNote'));
   });
 
-  it('Run executes the recorded revision through the ordinary route (a diagnostic), and starts no learn', async () => {
-    const startLearn = serve(fixtureDetail(recordedDraft));
+  it('PENDING: Run executes the recorded revision through the ordinary route (a diagnostic), and starts no learn', async () => {
+    const startLearn = serve(
+      fixtureDetail({ ...recordedDraft, verification: { state: 'PENDING', firstUnverifiedStepId: fixtureStepId(0) } }),
+    );
     await userEvent.click(await settled());
     await waitFor(() => expect(postsTo('/execute')).toHaveLength(1));
     expect(startLearn).not.toHaveBeenCalled();

@@ -5,11 +5,11 @@ import { MemoryRouter, Route, Routes, useLocation, type Location } from 'react-r
 import { http, HttpResponse } from 'msw';
 import { studioMockServer } from '@/services/mocks/studio/server';
 import { resetStudioMocks } from '@/services/mocks/studio/handlers';
-import { failedWithSkippedTailExecution, passedExecution } from '@/services/mocks/studio/executionFixtures';
+import { failedNavigationHttpErrorExecution, passedExecution } from '@/services/mocks/studio/executionFixtures';
 import { studioVideoUrl } from '@/components/studio/evidence/studioVideoUrl';
 import { RUNS_LOAD_ERROR } from '@/components/studio/runs/useStudioRuns';
 import { uiTestPath, uiTestRunPath } from '@/components/studio/uiTestPaths';
-import { formatRelativeTime } from '@/utils/time';
+import { formatRunTime } from '@/components/studio/runs/runPresentation';
 import { CANCELLED_ERROR_CODE, type ExecutionSnapshot } from '@/types/studio/studioTypes';
 import {
   UI_TEST_LATEST_RUN_EARLIER_VERSION_MESSAGE,
@@ -221,7 +221,7 @@ describe('AC-06: the newest replay of this test', { timeout: TEST_TIMEOUT_MS }, 
 
     await screen.findByTestId('ui-test-latest-run-status', {}, WAIT);
     expect(idText()).toBe(`#${shortOf(3)}`);
-    expect(screen.getByTestId('ui-test-latest-run-requested')).not.toHaveTextContent(shortOf(9));
+    expect(screen.getByTestId('ui-test-latest-run-time')).not.toHaveTextContent(shortOf(9));
 
     await waitFor(() => expect(served.listCalls.length).toBeGreaterThanOrEqual(2), WAIT);
     expect(served.listCalls.every((call) => call.testId === TEST_ID)).toBe(true);
@@ -229,7 +229,7 @@ describe('AC-06: the newest replay of this test', { timeout: TEST_TIMEOUT_MS }, 
     expect(runReads(served)[0]).toMatchObject({ sort: 'acceptedAt,desc', page: 0, size: 1 });
   });
 
-  it('shows a terminal run with chip, duration, time, short id, recording, step results and numbered logs', async () => {
+  it('shows a terminal run as a summary: chip, absolute time, duration, short id and the recording, with no steps, logs or grey status chip', async () => {
     const run = runOf(4, {
       logs: [
         { at: '2026-09-14T00:04:01Z', level: 'INFO', message: 'step 0 started', stepIndex: 0 },
@@ -241,44 +241,64 @@ describe('AC-06: the newest replay of this test', { timeout: TEST_TIMEOUT_MS }, 
 
     expect(await screen.findByText('Latest run')).toBeInTheDocument();
     expect(await screen.findByTestId('ui-test-latest-run-status', {}, WAIT)).toHaveTextContent('Passed');
-    expect(screen.getByTestId('ui-test-latest-run-duration')).toHaveTextContent('Duration 38 s');
-    const requested = screen.getByTestId('ui-test-latest-run-requested');
-    expect(requested).toHaveTextContent(formatRelativeTime(run.acceptedAt));
-    expect(requested.tagName).toBe('TIME');
-    expect(requested).toHaveAttribute('datetime', '2026-09-14T00:04:00.000Z');
+    expect(screen.getByTestId('ui-test-latest-run-duration')).toHaveTextContent(/^38 s$/);
+    const time = screen.getByTestId('ui-test-latest-run-time');
+    expect(time).toHaveTextContent(formatRunTime(run.acceptedAt));
+    expect(time.tagName).toBe('TIME');
+    expect(time).toHaveAttribute('datetime', '2026-09-14T00:04:00.000Z');
     expect(idText()).toBe(`#${shortOf(4)}`);
+    // One meta row, in order: status chip, time, duration, short id.
+    expect(screen.getByTestId('ui-test-latest-run-meta').textContent).toBe(
+      `Passed${formatRunTime(run.acceptedAt)}\u00b738 s\u00b7#${shortOf(4)}`,
+    );
+    expect(screen.queryByText(/Requested/)).toBeNull();
 
-    // The recording, through the existing panel.
+    // The recording, through the existing panel, compact: no title or statement.
     expect(card().getByTestId('video-evidence')).toHaveAttribute('data-video-status', 'AVAILABLE');
     expect(card().getByTestId('video-evidence-player')).toHaveAttribute('src', studioVideoUrl(videoPathOf(runIdOf(4))));
-    // Steps and logs, through the existing view, with the .6 numbering (step 0 reads "step 1") and the
-    // closing line taking the run's end time.
-    expect(card().getByTestId('step-text-0')).toBeInTheDocument();
-    expect(card().getByTestId('step-status-0')).toBeInTheDocument();
-    expect(card().getByTestId('log-line-0').textContent).toBe('2026-09-14T00:04:01Z INFO step 1 started');
-    expect(card().getByTestId('log-line-1').textContent).toBe(`${run.endedAt} INFO run PASSED`);
+    expect(card().queryByTestId('video-evidence-title')).toBeNull();
+    expect(card().queryByTestId('video-evidence-statement')).toBeNull();
+    // Steps, logs and the grey status chip are in the run's drawer, not here.
+    expect(screen.queryByTestId('execution-status')).toBeNull();
+    expect(screen.queryByTestId('execution-steps')).toBeNull();
+    expect(screen.queryByTestId('step-text-0')).toBeNull();
+    expect(screen.queryByTestId('execution-logs')).toBeNull();
+    expect(screen.queryByTestId('log-line-0')).toBeNull();
     expect(screen.queryByTestId('ui-test-latest-run-in-progress')).toBeNull();
-    // No seek or rerun controls: the card is a read of the latest run.
-    expect(screen.queryByTestId('step-seek-0')).toBeNull();
     expect(screen.queryByRole('button', { name: /run again/i })).toBeNull();
   });
 
-  it('shows the failing step of a failed run', async () => {
+  it('explains a failed run with the failing step, in plain words, and keeps the video', async () => {
     serve([
       runOf(5, {
         status: 'FAILED',
-        errorCode: failedWithSkippedTailExecution.errorCode,
-        durationMs: failedWithSkippedTailExecution.durationMs,
-        stepResults: failedWithSkippedTailExecution.stepResults,
-        logs: failedWithSkippedTailExecution.logs,
+        errorCode: null,
+        durationMs: failedNavigationHttpErrorExecution.durationMs,
+        stepResults: failedNavigationHttpErrorExecution.stepResults,
+        logs: failedNavigationHttpErrorExecution.logs,
       }),
     ]);
     renderCard();
 
     expect(await screen.findByTestId('ui-test-latest-run-status', {}, WAIT)).toHaveTextContent('Failed');
-    expect(card().getByTestId('step-status-2')).toBeInTheDocument();
-    expect(card().getByTestId('step-message-2')).toHaveTextContent('Timed out waiting for the field "Password"');
-    expect(card().getByTestId('log-line-0')).toHaveTextContent('Step 3 failed');
+    expect(card().getByTestId('run-failed-step')).toHaveTextContent('Failed at step 3');
+    expect(card().getByTestId('run-failed-step-sentence')).toHaveTextContent(/returned an HTTP error/);
+    expect(card().getByTestId('run-failed-step-message')).toHaveTextContent('NAVIGATION_HTTP_ERROR');
+    expect(card().getByTestId('video-evidence-player')).toBeInTheDocument();
+    // Exactly one "Failed" chip in the card, and no step list or logs.
+    expect(screen.queryByTestId('execution-status')).toBeNull();
+    expect(screen.queryByTestId('step-status-2')).toBeNull();
+    expect(screen.queryByTestId('log-line-0')).toBeNull();
+  });
+
+  it('shows the named cause of a run that ended in an error, still without steps or logs', async () => {
+    serve([runOf(5, { status: 'ERROR', errorCode: 'DISPATCH_FAILED', durationMs: null, video: { status: 'UNAVAILABLE', error: null, expiresAt: null, partial: false }, videoPath: null })]);
+    renderCard();
+
+    await screen.findByTestId('ui-test-latest-run-status', {}, WAIT);
+    expect(card().getByTestId('execution-error')).toBeInTheDocument();
+    expect(screen.queryByTestId('execution-status')).toBeNull();
+    expect(screen.queryByTestId('execution-steps')).toBeNull();
   });
 
   it('keeps each evidence state\'s own narrative for a terminal run', async () => {
@@ -290,13 +310,13 @@ describe('AC-06: the newest replay of this test', { timeout: TEST_TIMEOUT_MS }, 
     expect(card().queryByTestId('video-evidence-player')).toBeNull();
   });
 
-  it('opens the run in the drawer route with "Open run details"', async () => {
+  it('opens the run in the drawer route with "View details"', async () => {
     serve([runOf(1), runOf(2)]);
     const user = userEvent.setup({ delay: null });
     renderCard();
 
     await screen.findByTestId('ui-test-latest-run-status', {}, WAIT);
-    await user.click(screen.getByRole('button', { name: 'Open run details' }));
+    await user.click(screen.getByRole('button', { name: 'View details' }));
 
     expect(pathname()).toBe(uiTestRunPath(TEST_ID, runIdOf(2)));
     expect(screen.getByTestId('run-drawer-route')).toBeInTheDocument();
@@ -325,6 +345,10 @@ describe('AC-07: the latest run stays current until it is settled', { timeout: T
     );
     expect(screen.queryByTestId('video-evidence')).toBeNull();
     expect(screen.queryByTestId('video-evidence-player')).toBeNull();
+    // While the run is live the steps still show here (without the grey chip or logs).
+    expect(card().getByTestId('execution-steps')).toBeInTheDocument();
+    expect(screen.queryByTestId('execution-status')).toBeNull();
+    expect(screen.queryByTestId('execution-logs')).toBeNull();
 
     // The server finishes the replay; the card's background re-read picks it up without any user action.
     served.runs = [runOf(1, { revision: 9 })];
@@ -333,7 +357,9 @@ describe('AC-07: the latest run stays current until it is settled', { timeout: T
     });
     expect(await screen.findByTestId('video-evidence-player', {}, WAIT)).toBeInTheDocument();
     expect(screen.queryByTestId('ui-test-latest-run-in-progress')).toBeNull();
-    expect(screen.getByTestId('ui-test-latest-run-duration')).toHaveTextContent('Duration 38 s');
+    expect(screen.getByTestId('ui-test-latest-run-duration')).toHaveTextContent(/^38 s$/);
+    // Once terminal it collapses to the summary.
+    expect(screen.queryByTestId('execution-steps')).toBeNull();
     expect(runReads(served).length).toBeGreaterThanOrEqual(2);
 
     // Settled: no further read.
@@ -349,7 +375,7 @@ describe('AC-07: the latest run stays current until it is settled', { timeout: T
     expect(await screen.findByTestId('ui-test-latest-run-in-progress', {}, WAIT)).toHaveTextContent(
       'Waiting for a browser. This view updates by itself.',
     );
-    expect(screen.getByTestId('ui-test-latest-run-duration')).toHaveTextContent('Duration Queued');
+    expect(screen.getByTestId('ui-test-latest-run-duration')).toHaveTextContent(/^Queued$/);
     expect(screen.queryByTestId('video-evidence')).toBeNull();
   });
 

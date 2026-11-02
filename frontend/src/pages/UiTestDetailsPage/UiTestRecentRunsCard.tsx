@@ -6,6 +6,7 @@ import {
   CardContent,
   CardHeader,
   LinearProgress,
+  Paper,
   Snackbar,
   Table,
   TableBody,
@@ -25,12 +26,10 @@ import { RunRow } from '@/components/studio/runs/RunRow';
 import { RunDetailsDrawer } from '@/components/studio/runs/RunDetailsDrawer';
 import { copyText } from '@/components/studio/runs/runLinks';
 import { isActiveRunStatus } from '@/components/studio/runs/runSnapshots';
-import { uiTestEditorPath, uiTestPath, uiTestRunPath } from '@/components/studio/uiTestPaths';
+import { uiTestPath, uiTestRunPath } from '@/components/studio/uiTestPaths';
 
-const UI_TEST_RUNS_PAGE_SIZE = 25;
+const UI_TEST_RUNS_PAGE_SIZE = 10;
 const UI_TEST_RUNS_PAGE_SIZE_OPTIONS: readonly number[] = [10, 25, 50];
-const UI_TEST_RUNS_NOTE =
-  'Runs lists replays of this test, including the replay that records proof after each learn. Learning happens in Studio.';
 const UI_TEST_RUNS_EMPTY_MESSAGE = 'No replays yet. Run the test from Studio and its result appears here.';
 
 export interface UiTestRecentRunsCardProps {
@@ -96,10 +95,6 @@ export const UiTestRecentRunsCard: React.FC<UiTestRecentRunsCardProps> = ({ test
     <Card variant="outlined" data-testid="ui-test-recent-runs">
       <CardHeader title="Recent Runs" />
       <CardContent>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }} data-testid="ui-test-runs-note">
-          {UI_TEST_RUNS_NOTE}
-        </Typography>
-
         {error !== null && (
           <Alert
             severity="error"
@@ -120,7 +115,7 @@ export const UiTestRecentRunsCard: React.FC<UiTestRecentRunsCardProps> = ({ test
 
         {runs.length > 0 && (
           <>
-            <TableContainer sx={{ opacity: loading ? 0.6 : 1 }}>
+            <TableContainer component={Paper} variant="outlined" sx={{ opacity: loading ? 0.6 : 1 }}>
               <Table
                 size="small"
                 aria-label="Runs of this UI test"
@@ -134,19 +129,13 @@ export const UiTestRecentRunsCard: React.FC<UiTestRecentRunsCardProps> = ({ test
                   // AC-01); from sm up both are MUI's.
                   '& .MuiTableCell-head': { fontSize: { xs: '0.75rem', sm: '0.875rem' } },
                   '& .MuiChip-label': { px: { xs: 0.75, sm: 1 } },
-                  // From lg up the card sits beside the Latest run card and is only 300-400 px wide at
-                  // every desktop width, so Requested and Duration drop (STUDIO-UNIFY-001.7 AC-05); the
-                  // Run link, Status and the row menu are never hidden, and the table never scrolls.
-                  '& [data-column="requested"], & [data-column="duration"]': { display: { lg: 'none' } },
-                  // The requested time may wrap to two lines on a phone; from sm up it stays on one line.
-                  '& [data-testid="run-requested"]': { whiteSpace: { xs: 'normal', sm: 'nowrap' } },
+                  // The time wraps onto two lines where the column is narrow, like the HTTP check table.
                 }}
               >
                 <TableHead>
                   <TableRow>
-                    <TableCell>Run</TableCell>
+                    <TableCell>Time</TableCell>
                     <TableCell>Status</TableCell>
-                    <TableCell data-column="requested">Requested</TableCell>
                     <TableCell data-column="duration" sx={hideBelowMd}>Duration</TableCell>
                     <TableCell align="right">Actions</TableCell>
                   </TableRow>
@@ -156,10 +145,8 @@ export const UiTestRecentRunsCard: React.FC<UiTestRecentRunsCardProps> = ({ test
                     <RunRow
                       key={run.executionId}
                       run={run}
-                      href={runHref(run.executionId)}
                       selected={run.executionId === executionId}
                       onOpenRun={() => openRun(run.executionId)}
-                      onCopyLink={() => copyRunLink(run.executionId)}
                     />
                   ))}
                 </TableBody>
@@ -195,7 +182,6 @@ export const UiTestRecentRunsCard: React.FC<UiTestRecentRunsCardProps> = ({ test
         onClose={closeRun}
         onNavigateRun={switchRun}
         onCopyLink={copyRunLink}
-        testHref={(id) => uiTestEditorPath(id)}
         onSnapshot={applySnapshot}
         expectedTestId={testId}
       />

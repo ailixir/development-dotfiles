@@ -310,7 +310,7 @@ describe('AC-6: a terminal ERROR says what happened to the browser and who can c
     render(<ExecutionProgressView snapshot={failedWithSkippedTailExecution} />);
     expect(screen.queryByTestId('execution-error')).toBeNull();
     expect(screen.getByTestId('execution-status').textContent).toBe('Failed');
-    expect(screen.getByTestId('step-status-2').textContent).toBe('FAIL');
+    expect(screen.getByTestId('step-status-2').getAttribute('data-status')).toBe('FAIL');
     const rendered = document.body.textContent ?? '';
     expect(rendered).not.toContain('The run hit its total time cap');
   });

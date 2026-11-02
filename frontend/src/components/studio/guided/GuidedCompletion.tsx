@@ -16,7 +16,7 @@ import {
 } from './guidedNarratives';
 import { LoginRequiredNotice, guidedLoginNotice, type LoginNotice } from './LoginRequiredNotice';
 import { stoppedStepOf } from './guidedStoppedStep';
-import { planStepTexts, type PlanTest } from './PlanExplanation';
+import { planStepTexts, type PlanTest } from './planStepTexts';
 
 /**
  * How a guided Run ended, and why a guided start was refused (STUDIO-OBS-008 AC-3, AC-4, AC-6;

@@ -63,6 +63,7 @@ public final class GuidedActionLedger {
       case "POLICY_REFUSED",
               "READ_REFUSED",
               "PASSWORD_CONTROL_READ_REFUSED",
+              "NAVIGATION_HTTP_ERROR",
               "REFERENCE_REFUSED",
               "REFERENCE_MISMATCH",
               "LOGIN_REQUIRED",

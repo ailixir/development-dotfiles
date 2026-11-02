@@ -159,9 +159,13 @@ export const RunControl: React.FC<RunControlProps> = ({
     isRunning,
     startLearn,
   });
-  // A replay posts `POST /tests/{id}/execute` and never touches the guided session, so only the modes
-  // that start learning are blocked by an unreadable stored session (W5-1).
-  const runnable = gate.canRun && hasSteps && !(sessionUnreadable && gate.mode !== 'replay');
+  // A replay posts `POST /tests/{id}/execute` and never touches the guided session, so only the runs
+  // that start learning are blocked by an unreadable stored session (W5-1). A RECORDED test whose
+  // proof FAILED learns from the failed step when Run is pressed, so it counts as one of them.
+  const runLearns =
+    gate.mode !== 'replay' ||
+    (gate.test?.readiness === 'RECORDED' && gate.test.verification?.state === 'FAILED');
+  const runnable = gate.canRun && hasSteps && !(sessionUnreadable && runLearns);
   /** A learn-again request arrived while the stored session was unreadable: dropped, and said so. */
   const [learnBlocked, setLearnBlocked] = useState(false);
 
@@ -171,6 +175,22 @@ export const RunControl: React.FC<RunControlProps> = ({
    * and so the readiness (UX-A11Y-001); and while a run is on screen, which speaks for itself.
    */
   const chipTest = !isDirty && !isRunning ? gate.test : null;
+
+  /** What Run Test does next for a RECORDED test, said beside it; `null` for any other readiness. */
+  const recordedNote = (() => {
+    if (chipTest === null || chipTest.readiness !== 'RECORDED' || !chipTest.verification) return null;
+    const { state, firstUnverifiedStepId } = chipTest.verification;
+    const failedAt =
+      state === 'FAILED'
+        ? stepNumberIn(
+            chipTest.steps.map((step) => step.id),
+            firstUnverifiedStepId,
+          )
+        : null;
+    if (failedAt !== null) return guidedCopy('recordedRunRelearns', { n: failedAt });
+    if (state === 'INCOMPLETE') return guidedCopy('recordedRunVerifies');
+    return guidedCopy('recordedDiagnosticNote');
+  })();
 
   /** `LEARNING`, and not a session this page is following: state and consequence, in text. */
   const learningElsewhere = gate.mode === 'busy' && !isRunning && !followsLearningSession;
@@ -400,7 +420,8 @@ export const RunControl: React.FC<RunControlProps> = ({
         </Typography>
       )}
 
-      {chipTest !== null && (
+      {/* A failed proof needs no chip here: the red step and "Run Test re-learns from step N" say it. */}
+      {chipTest !== null && !(chipTest.readiness === 'RECORDED' && chipTest.verification?.state === 'FAILED') && (
         // From `lg` the chip takes no width in the Run column: it hangs from the column's right edge
         // and grows leftward, so it never moves Run or the buttons beside it. Below `lg` it flows.
         <Box
@@ -429,49 +450,15 @@ export const RunControl: React.FC<RunControlProps> = ({
         </Typography>
       )}
 
-      {chipTest !== null && chipTest.readiness === 'RECORDED' && chipTest.verification && (
-        <Stack spacing={1} sx={{ mt: 1, maxWidth: RUN_CAPTION_MAX_WIDTH }} data-testid="recorded-actions">
-          <Typography variant="caption" color="text.secondary" data-testid="recorded-diagnostic-note">
-            {guidedCopy('recordedDiagnosticNote')}
-          </Typography>
-          {chipTest.verification.state === 'INCOMPLETE' && (
-            <Button
-              size="small"
-              variant="outlined"
-              data-testid="verify-again"
-              disabled={gate.phase !== 'idle'}
-              onClick={() => {
-                dropAutorun();
-                gate.verify();
-              }}
-            >
-              {guidedCopy('verifyAgain')}
-            </Button>
-          )}
-          {chipTest.verification.state === 'FAILED' &&
-            stepNumberIn(
-              chipTest.steps.map((step) => step.id),
-              chipTest.verification.firstUnverifiedStepId,
-            ) !== null && (
-              <Button
-                size="small"
-                variant="outlined"
-                data-testid="relearn-from-step"
-                disabled={gate.phase !== 'idle' || sessionUnreadable}
-                onClick={() => {
-                  dropAutorun();
-                  gate.learnFrom({ kind: 'recorded', stepId: chipTest.verification!.firstUnverifiedStepId });
-                }}
-              >
-                {guidedCopy('relearnFromStep', {
-                  n: stepNumberIn(
-                    chipTest.steps.map((step) => step.id),
-                    chipTest.verification.firstUnverifiedStepId,
-                  )!,
-                })}
-              </Button>
-            )}
-        </Stack>
+      {recordedNote !== null && (
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          data-testid="recorded-diagnostic-note"
+          sx={{ display: 'block', mt: 1, maxWidth: RUN_CAPTION_MAX_WIDTH }}
+        >
+          {recordedNote}
+        </Typography>
       )}
 
       {!isRunning && gate.preparationMessage && (

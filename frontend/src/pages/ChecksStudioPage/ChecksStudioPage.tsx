@@ -52,6 +52,7 @@ import {
   Code,
   CheckCircle,
   Error,
+  WarningAmber,
   Save,
   ListAlt,
   PlaylistAdd,
@@ -63,6 +64,7 @@ import {
   PlayArrow,
 } from '@mui/icons-material';
 import OnboardingCoach from '@/components/studio/OnboardingCoach';
+import { consoleErrorCountByStep } from '@/components/studio/evidence/consoleLines';
 import { useDispatch } from 'react-redux';
 import { useAppSelector } from '@/store';
 import { useUiTestAvailability } from '@/hooks/useUiTestAvailability';
@@ -96,17 +98,15 @@ import {
   ExecutionProgressView,
   RunControl,
   type RunControlProps,
-  executionStatusLabel,
-  executionStatusTone,
   type LearnFromRequest,
 } from '@/components/studio/run';
 import { GuidedSeekControls, VideoEvidencePanel, useVideoSeek } from '@/components/studio/evidence';
+import { STEP_CODE_COPY, StepCodeView } from '@/components/studio/code';
 import { availableQuickStartTemplates, type QuickStartTemplate } from '@/components/studio/templates';
 import {
   GuidedClarification,
   GuidedCompletion,
   GuidedRunStatus,
-  PlanExplanation,
   guidedCopy,
   learnedReceiptLines,
 } from '@/components/studio/guided';
@@ -394,6 +394,8 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
   const draftStepIds = useMemo(() => testSteps.map((step) => step.id), [testSteps]);
   /** The last snapshot the API returned, rendered by `ExecutionProgressView` (AC-18, AC-19). */
   const [snapshot, setSnapshot] = useState<ExecutionSnapshot | null>(null);
+  /** Steps that passed while the page reported console errors: shown amber, not plain green. */
+  const pageErrorsByStep = useMemo(() => consoleErrorCountByStep(snapshot?.logs ?? []), [snapshot]);
   /** The terminal-error surface's "Run again". Never `?autorun=1`, which has its own request below. */
   const [runRequest, setRunRequest] = useState(0);
   const [saveSnack, setSaveSnack] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({ open: false, message: '', severity: 'success' });
@@ -412,7 +414,7 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
   /** The secret ID whose insert was refused because a variable of that name exists (W5-2). */
   const [referenceRefusal, setReferenceRefusal] = useState<string | null>(null);
   const [environment, setEnvironment] = useState('');
-  const [rightTab, setRightTab] = useState<'proof' | 'logs'>('proof');
+  const [rightTab, setRightTab] = useState<'proof' | 'logs' | 'code'>('proof');
   const [coachStep, setCoachStep] = useState<number>(() => {
     try {
       const saved = localStorage.getItem('studio:coachStep');
@@ -1431,7 +1433,7 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
             <Box sx={{ order: 4 }}>
               <RunControl
                 testId={selectedScenarioData?.id ?? null}
-                refreshToken={`${selectedScenarioData?.sourceRevision ?? 0}:${selectedScenarioData?.configurationRevision ?? 0}:${selectedScenarioData?.readiness ?? ''}:${selectedScenarioData?.confirmedRevisionId ?? ''}:${guidedRefresh}`}
+                refreshToken={`${selectedScenarioData?.sourceRevision ?? 0}:${selectedScenarioData?.configurationRevision ?? 0}:${selectedScenarioData?.readiness ?? ''}:${selectedScenarioData?.confirmedRevisionId ?? ''}:${draft?.verification?.state ?? ''}:${draft?.verification?.firstUnverifiedStepId ?? ''}:${guidedRefresh}`}
                 isRunning={running}
                 onPreparingChange={setIsPreparing}
                 isDirty={isDirty || hasPendingStep}
@@ -1491,26 +1493,12 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
               subheader="Write your steps in plain English, then press Run"
             />
             <CardContent sx={{ flex: 1, overflow: 'auto', p: 0 }}>
-              {/* Current Test Summary */}
-              <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+              {/* Current Test Summary: sits right under the card subtitle (the name is the page title). */}
+              <Box sx={{ px: 2, pt: 0, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
                 {scenariosLoading ? (
                   <Typography variant="body2" color="text.secondary">Loading test…</Typography>
                 ) : selectedScenarioData ? (
                   <Stack spacing={0.5}>
-                    <Stack direction="row" alignItems="center" justifyContent="space-between" gap={1} flexWrap="wrap">
-                      <Typography variant="subtitle2" sx={{ fontWeight: 600, minWidth: 0, overflowWrap: 'anywhere' }}>{selectedScenarioData.name}</Typography>
-                      <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
-                        {(selectedScenarioData.lastRunStatus || !selectedScenarioData.confirmedRevisionId) && (
-                          <Chip
-                            label={selectedScenarioData.lastRunStatus ? `Previous run: ${executionStatusLabel(selectedScenarioData.lastRunStatus)}` : 'No run history'}
-                            size="small"
-                            color={selectedScenarioData.lastRunStatus ? executionStatusTone(selectedScenarioData.lastRunStatus) : 'default'}
-                            data-testid="test-last-run-status"
-                            sx={{ fontSize: 11 }}
-                          />
-                        )}
-                      </Stack>
-                    </Stack>
                     {selectedScenarioData.description && (
                       <Typography variant="caption" color="text.secondary">{selectedScenarioData.description}</Typography>
                     )}
@@ -1632,19 +1620,21 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                     // marked as failed (STUDIO-UNIFY-001.6 AC-02).
                     const stepResult = stepResultsMap[index] ?? (step.id === guidedStoppedStepId ? 'failed' : undefined);
                     const isCurrentStep = index === currentStep;
-                    
+                    const passedWithPageErrors = stepResult === 'passed' && (pageErrorsByStep.get(index) ?? 0) > 0;
+                    const passedColor = passedWithPageErrors ? 'warning' : 'success';
+
                     return (
                       <ListItem
                         key={step.id}
                         sx={{
                           border: '1px solid',
                           borderColor: isCurrentStep && isRunning ? 'primary.main' : 
-                                       stepResult === 'passed' ? 'success.main' :
+                                       stepResult === 'passed' ? `${passedColor}.main` :
                                        stepResult === 'failed' ? 'error.main' : 'divider',
                           borderRadius: 1,
                           mb: 1,
                           bgcolor: isCurrentStep && isRunning ? alpha(theme.palette.primary.main, 0.08) : 
-                                   stepResult === 'passed' ? alpha(theme.palette.success.main, 0.05) :
+                                   stepResult === 'passed' ? alpha(theme.palette[passedColor].main, 0.05) :
                                    stepResult === 'failed' ? alpha(theme.palette.error.main, 0.05) : 'transparent',
                           transition: 'all 0.3s ease',
                           alignItems: 'flex-start',
@@ -1658,12 +1648,12 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                             width: 32,
                             height: 32,
                             fontSize: 13,
-                            bgcolor: stepResult === 'passed' ? 'success.main' :
+                            bgcolor: stepResult === 'passed' ? `${passedColor}.main` :
                                      stepResult === 'failed' ? 'error.main' :
                                      isCurrentStep && isRunning ? 'primary.main' : 'grey.300',
                             color: 'white'
                           }}>
-                            {stepResult === 'passed' ? <CheckCircle sx={{ fontSize: 16 }} /> : 
+                            {stepResult === 'passed' ? (passedWithPageErrors ? <WarningAmber sx={{ fontSize: 16 }} /> : <CheckCircle sx={{ fontSize: 16 }} />) : 
                              stepResult === 'failed' ? <Error sx={{ fontSize: 16 }} /> :
                              isCurrentStep && isRunning ? <CircularProgress aria-label={`Running step ${index + 1}`} size={16} sx={{ color: 'white' }} /> :
                              index + 1}
@@ -1867,6 +1857,7 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
               >
                 <Tab value="proof" label="Proof" id="studio-tab-proof" aria-controls="studio-panel-proof" />
                 <Tab value="logs" label="Logs" id="studio-tab-logs" aria-controls="studio-panel-logs" />
+                <Tab value="code" label="Code" id="studio-tab-code" aria-controls="studio-panel-code" />
               </Tabs>
 
               <Box sx={{ p: 2, flex: 1 }}>
@@ -1913,18 +1904,6 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                       <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
                         Run saves your steps and records proof.
                       </Typography>
-                      {selectedScenarioData?.lastRunStatus && (
-                        <Stack spacing={0.5} alignItems="center" sx={{ mt: 2 }}>
-                          <Chip
-                            size="small"
-                            color={executionStatusTone(selectedScenarioData.lastRunStatus)}
-                            label={`Previous run: ${executionStatusLabel(selectedScenarioData.lastRunStatus)}`}
-                          />
-                          <Typography variant="caption" color="text.secondary">
-                            Run history may describe an earlier saved version.
-                          </Typography>
-                        </Stack>
-                      )}
                     </Paper>
                   ) : null}
 
@@ -1980,7 +1959,6 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                             onGoToStep={requestStepFocus}
                             onOpenVariables={openVariables}
                           />
-                          <PlanExplanation result={guided.result} test={draft} />
                         </>
                       )}
                       {guidedActive && (
@@ -2057,22 +2035,21 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                           />
                         </Box>
                       )}
-                      <Paper variant="outlined" sx={{ p: 2 }}>
-                        {/*
-                         * A run that has not ended has no outcome to describe, and its recording is not
-                         * "still being produced" yet: only a terminal snapshot reaches the evidence
-                         * narratives; before that the panel says the run is in progress (AC-07).
-                         */}
-                        <VideoEvidencePanel
-                          ref={videoRef}
-                          snapshot={snapshot !== null && isTerminalExecutionStatus(snapshot.status) ? snapshot : null}
-                          runInProgress={isRunning}
-                        />
-                      </Paper>
-                      {proofOfLearn && guided.result !== null && (
-                        <Box sx={{ mt: 2 }}>
-                          <PlanExplanation result={guided.result} test={draft} omitHistory />
-                        </Box>
+                      {/*
+                       * A run that has not ended has no outcome to describe, and its recording is not
+                       * "still being produced" yet: only a terminal snapshot reaches the evidence
+                       * narratives; before that the panel says the run is in progress (AC-07). With no
+                       * run on screen the "Run your test" card above is the only empty state.
+                       */}
+                      {(isRunning || (snapshot !== null && isTerminalExecutionStatus(snapshot.status))) && (
+                        <Paper variant="outlined" sx={{ p: 2 }}>
+                          <VideoEvidencePanel
+                            ref={videoRef}
+                            snapshot={snapshot !== null && isTerminalExecutionStatus(snapshot.status) ? snapshot : null}
+                            runInProgress={isRunning}
+                            compact
+                          />
+                        </Paper>
                       )}
                     </>
                   )}
@@ -2126,6 +2103,13 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                     </Paper>
                     </>
                   )}
+                </Box>
+
+                <Box role="tabpanel" id="studio-panel-code" aria-labelledby="studio-tab-code" hidden={rightTab !== 'code'}>
+                  <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Code sx={{ fontSize: 18 }} /> {STEP_CODE_COPY.heading}
+                  </Typography>
+                  {draft !== null && <StepCodeView test={draft} />}
                 </Box>
               </Box>
             </CardContent>

@@ -139,3 +139,41 @@ describe('actual observed child lifecycle against the browser-free factory seam'
     await vi.waitFor(()=>{ expect(h.exits).toEqual([0]); }); expect(h.messages.filter(message=>message.kind==='result')).toHaveLength(1);expect(h.close).toHaveBeenCalledOnce();
   });
 });
+
+describe('page console entries from the browser handle', () => {
+  type Frame = Extract<ObservedChildMessage,{kind:'console'}>;
+  async function ready(){
+    const h=driver('none');let emit:(entry:{type:string;text:string})=>void=()=>undefined;
+    h.handle.onConsole=listener=>{emit=listener;};
+    h.send(h.launch);await vi.waitFor(()=>{expect(h.messages.some(m=>m.kind==='ready')).toBe(true);});
+    return {h,emit:(type:string,text:string)=>{emit({type,text});}};
+  }
+  const frames=(messages:ObservedChildMessage[]):Frame[]=>messages.filter((m):m is Frame=>m.kind==='console');
+  it('maps error, warning and pageerror to prefix and level, forwards no other type, and flushes before the first step-finished and before the result',async()=>{
+    const {h,emit}=await ready();
+    for(const [type,text] of [['log','a'],['warning','b'],['error','c'],['pageerror','d'],['trace','e'],['info','f'],['debug','g']] as const)emit(type,text);
+    h.send(h.execute);await vi.waitFor(()=>{expect(h.exits).toEqual([0]);});
+    const entries=frames(h.messages).flatMap(f=>f.entries);
+    expect(entries.map(({level,message,stepIndex})=>({level,message,stepIndex}))).toEqual([
+      {level:'warn',message:'console.warn: b',stepIndex:null},{level:'error',message:'console.error: c',stepIndex:null},
+      {level:'error',message:'page error: d',stepIndex:null}]);
+    expect(entries.every(e=>Number.isFinite(e.atMs))).toBe(true);
+    const kinds=h.messages.map(m=>m.kind);
+    expect(kinds.indexOf('console')).toBeLessThan(kinds.indexOf('step-finished'));
+    expect(frames(h.messages)[0]).toMatchObject({protocolVersion:3,mode:'observed',runId:h.launch.runId,attemptId:h.launch.attemptId});
+  });
+  it('keeps at most 100 entries and bounds the message length',async()=>{
+    const {h,emit}=await ready();
+    for(let i=0;i<150;i++){emit('log','ignored');emit('error',i===0?'x'.repeat(5000):`n${String(i)}`);}
+    h.send(h.execute);await vi.waitFor(()=>{expect(h.exits).toEqual([0]);});
+    const entries=frames(h.messages).flatMap(f=>f.entries);
+    expect(entries).toHaveLength(100);
+    expect(entries[0]?.message).toHaveLength(4096);
+  });
+  it('drops entries that arrive after the run finished',async()=>{
+    const {h,emit}=await ready();
+    h.send(h.execute);await vi.waitFor(()=>{expect(h.exits).toEqual([0]);});
+    const before=frames(h.messages).length;emit('error','late');
+    expect(frames(h.messages)).toHaveLength(before);
+  });
+});

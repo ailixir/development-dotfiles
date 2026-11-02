@@ -156,8 +156,10 @@ public final class GuidedContracts {
   // The only constraint of this frozen root is exactly one COMPLETE native alternative.
   // WI6: prefix-drift receipts include required nullable press metadata and optional sealed source
   // metadata. Pin the complete current root to retain independent native-branch validation.
+  // SC008-FIX-40 re-epochs it again: the step receipt's closed code list gained
+  // NAVIGATION_HTTP_ERROR.
   private static final String OUTCOME_SCHEMA_EPOCH =
-      "c05da0f10a7b5c57b1886ffde9a718b9211f56e866c9fdc8e09667d38fcbe35b";
+      "4c380195a4a5738ef05d9a20093b20da3a596e851655b17bba04b1724ca17d5d";
 
   private record ArraySchema(JsonSchema shape, JsonSchema item, CompiledSchema itemObject) {
     ArraySchema(JsonSchema shape, JsonSchema item) {

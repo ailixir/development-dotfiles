@@ -178,8 +178,7 @@ async function putIntoList(request: APIRequestContext, id: string): Promise<void
 
 const stepEditor = (page: Page, n: number) => page.getByRole('textbox', { name: `Step ${n}`, exact: true });
 /**
- * The completion receipt. The same sentence is also shown, as history, in the plan explanation
- * (`plan-explanation-history`), so a bare text locator is ambiguous; the receipt is scoped by its id.
+ * The completion receipt, scoped by its id.
  * A learn that published hands the screen to its proof replay, so its learned sentence is kept above the
  * replay as `guided-proof-receipt`; any other ending stays in `guided-completion`.
  */

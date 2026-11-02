@@ -94,6 +94,20 @@ describe('replay of frozen step code', () => {
     expect(rig.w.effects).toEqual(['goto']);
   });
 
+  it('an action step that lands on an HTTP error document fails the run at that step with NAVIGATION_HTTP_ERROR (FIX-40), the read after it is skipped, and a 200 passes', async () => {
+    const lands = async (status: number): Promise<{ result: Awaited<ReturnType<typeof executeObservedReplay>>; finished: StepFinishedEvent[] }> => {
+      const rig = newRig('about:blank');
+      const api = { ...rig.api, navigationHttpStatus: () => (rig.w.effects.includes('click') ? status : 200) };
+      const message = execute([{ code: "await page.goto('https://app.example.test/start');" }, { code: "await page.locator('#browse').click();" }, { code: "await page.locator('#ok').innerText();" }]);
+      return run(message, { ...rig, api });
+    };
+    const blocked = await lands(403);
+    expect(blocked.result).toMatchObject({ ok: false, errorCode: 'NAVIGATION_HTTP_ERROR' });
+    expect(blocked.finished.map(event => event.status)).toEqual(['PASS', 'FAIL', 'SKIPPED']);
+    expect(blocked.finished[1]).toMatchObject({ failure: 'NAVIGATION_HTTP_ERROR', receipt: { closedCode: 'NAVIGATION_HTTP_ERROR', fenceCrossed: true } });
+    expect((await lands(200)).result).toMatchObject({ ok: true });
+  });
+
   it('a failure after the fence is OUTCOME_UNKNOWN and keeps the effect in the receipt', async () => {
     const rig = newRig('about:blank');
     rig.w.failClick = true;

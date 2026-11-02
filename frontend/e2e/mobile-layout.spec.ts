@@ -389,9 +389,9 @@ test.describe('UI test detail page at 390x844', () => {
         const row = rows.nth(index);
         const status = (await row.getByTestId('run-status').textContent()) ?? '';
         const parts = [
-          ['Run link', row.getByTestId('run-link')],
+          ['Run time', row.getByTestId('run-time')],
           ['Status chip', row.getByTestId('run-status')],
-          ['row menu button', row.getByRole('button')],
+          ['View details button', row.getByRole('button', { name: 'View details' })],
         ] as const;
         for (const [what, locator] of parts) {
           const found = await box(locator, `row ${index + 1} (${status}) ${what}`);
@@ -408,14 +408,9 @@ test.describe('UI test detail page at 390x844', () => {
       }
 
       if (alignment) {
-        // AC-02: the note and the table line up with the card title (D7: the note and the container, not
-        // the first cell's text, which keeps its cell padding).
+        // AC-02: the table lines up with the card title (the runs note was removed with the proposal).
         const titleBox = await box(card.locator('.MuiCardHeader-title'), 'the card title');
-        const noteBox = await box(card.getByTestId('ui-test-runs-note'), 'the runs note');
-        console.log(
-          `8.2 390 alignment: title x = ${titleBox.x}, note x = ${noteBox.x}, table container x = ${containerBox.x}`,
-        );
-        expect.soft(Math.abs(noteBox.x - titleBox.x), `the note (x ${noteBox.x}) lines up with the title (x ${titleBox.x})`).toBeLessThanOrEqual(1);
+        console.log(`8.2 390 alignment: title x = ${titleBox.x}, table container x = ${containerBox.x}`);
         expect
           .soft(Math.abs(containerBox.x - titleBox.x), `the table container (x ${containerBox.x}) lines up with the title (x ${titleBox.x})`)
           .toBeLessThanOrEqual(1);

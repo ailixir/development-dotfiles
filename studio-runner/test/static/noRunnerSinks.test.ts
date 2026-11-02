@@ -11,11 +11,20 @@ async function sources(directory: string): Promise<string[]> {
   }
   return result;
 }
+// User decision 2026-11-01 (narrow errors-only exception to I-B5/C-6): src/run/browser.ts alone may listen to the console, and only for error/warning.
+const CONSOLE_LISTENER_FILE = join('src', 'run', 'browser.ts');
 it('keeps recording diagnostics absent from every production runner module', async () => {
   for (const path of await sources(resolve('src'))) {
     const source = await readFile(path, 'utf8');
-    for (const forbidden of [/tracing\s*\.\s*start/u, /recordHar/u, /\.on\s*\(\s*['"]console['"]/u, /\.screenshot\s*\(/u]) expect(source, path).not.toMatch(forbidden);
+    const forbidden = [/tracing\s*\.\s*start/u, /recordHar/u, /\.screenshot\s*\(/u];
+    if (!path.endsWith(CONSOLE_LISTENER_FILE)) forbidden.push(/\.on\s*\(\s*['"]console['"]/u);
+    for (const pattern of forbidden) expect(source, path).not.toMatch(pattern);
   }
+});
+it('limits the one console listener to error and warning messages', async () => {
+  const source = await readFile(resolve(CONSOLE_LISTENER_FILE), 'utf8');
+  expect(source.match(/\.on\s*\(\s*['"]console['"]/gu)).toHaveLength(1);
+  expect(source).toMatch(/type\s*!==\s*'error'\s*&&\s*type\s*!==\s*'warning'/u);
 });
 it('defines password candidate count and resolution once inside the isolated collector', async () => {
   const collector = await readFile(resolve('src/run/pageStateInPage.ts'), 'utf8');
