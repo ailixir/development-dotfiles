@@ -1,3 +1,0 @@
-# Proposed Unit06 only
-
-This proposal binds exact composition/phase hashes and preserves all99 cases, unchanged nativeargv except label05 to06, exact peer5f85 filter and immutable guard. No source/native/retry/runtime/credit/readiness release. Exact new Aria/Quinn prototype/whole-code/recipe/order review and root binding remain required. Aria8a9c and Quinn8ab650 support design only; Quinn25c959 supports the prior partial components only. Normal05 remains91PASS8FAIL/0SKIP with full passing gateFAIL. Fresh resources/preimages/tooling/lock/guard denial and SAME held proof must precede stage. Root alone handles future actual writer/keeper/ordered verification, permit and guarded exit decisions. No old release/denial evidence substitutes. No command ran during preparation.

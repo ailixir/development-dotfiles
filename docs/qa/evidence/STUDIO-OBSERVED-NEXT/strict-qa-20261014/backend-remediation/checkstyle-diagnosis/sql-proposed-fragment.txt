@@ -1,5 +1,0 @@
-                  "SELECT scope_hash,context_id,context_revision,worker_id,owner_fence,source_revision,"
-                      // Keep the constant in bounded chunks across formatter reflow.
-                      + "configuration_revision,authored_inputs_hash,authored_inputs::text"
-                      + " AS authored_inputs,live FROM studio_guided_materializations WHERE"
-                      + " session_id=?",

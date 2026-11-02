@@ -1,3 +1,0 @@
-# Restricted recipe3 — no execution release
-
-Use the composed candidate DESIGN.md as the source design. Keep resume2 Spotless init byte-exact. Change phase.py only by three fixed pointers: candidate resume4, unit03, proposal03. Reversal must recover the exact phase source and AST. Keep all source/ownership/restore/result algorithms unchanged. Updated bindings and manual one-command/devnull/one-lock procedure are for independent review; do not execute any phase/native/helper main in preparation. Prior failed data, original source, all release/credit holds and protected output custody remain immutable.

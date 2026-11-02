@@ -1,5 +1,0 @@
-Traceback (most recent call last):
-  File "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gateway-runner-resume8-exact-review/verify_source.py", line 42, in <module>
-    check('interpretation '+str((row['source'],row['line'])),any(isinstance(n,ast.Call) and n.lineno==row['line'] and ast.unparse(n.func)==row['call'] for n in ast.walk(trees[row['source']])))
-                                               ~~~^^^^^^^^
-KeyError: 'line'

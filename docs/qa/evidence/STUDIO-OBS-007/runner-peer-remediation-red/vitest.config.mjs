@@ -1,1 +1,0 @@
-export default {root:'/tmp/studio-obs007-aria-probes',cacheDir:'/tmp/studio-obs007-aria-probes/cache',test:{include:['review.test.ts'],environment:'node',coverage:{enabled:false},fileParallelism:false,maxWorkers:1}};

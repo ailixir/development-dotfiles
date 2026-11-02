@@ -1,9 +1,0 @@
-{
-  "phase": "AMENDMENT_DOCUMENTATION_FIRST_BEFORE_JAVA",
-  "parentReceiptSha256": "cb93dc11055223aa3de1b31f8803f4fdc8f8dfad0c01bf5bb328bc036b13774e",
-  "parentPublisherSha256": "a60b5e812ff2fc65b6a75d77dfb096cc3ae1673c902cca2bc280bed21548a061",
-  "parentDocSha256": "6a08f7353a33722c17d36d884497373111712571b5d3994f52ce26a3091e1ed2",
-  "amendedDocSha256": "bfd23476cee679b18073ec1fb7bcc988adf2a884ec8187d5bc60fb7e463456ca",
-  "documentAddition": "\n### Ambient transaction fallback\n\nOptional detached lowering is unavailable when the current thread already has an actual\nSpring transaction. The private preparation entry returns null before its extra capture;\ndefault REQUIRED participation cannot be assumed to release existing owner/source locks.\nThe original prefix, authorization, guarded preparation and downstream validator no-TX\nrule remain unchanged. This fallback adds no speculative reads under an ambient transaction.\n",
-  "publisherStillParent": true
-}

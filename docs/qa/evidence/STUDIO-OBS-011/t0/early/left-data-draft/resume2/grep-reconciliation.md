@@ -1,3 +1,0 @@
-# Current v7 grep reconciliation
-
-LEFT-V20-1 is adopted by root in lanes.v7.json and left-v20-allowed-matches.json. The broad matcher has78 actual S_011 lines and exactly4 overlay matches, all in the untouched V20 fixture whose whole-file SHA256 is0f60fabce9dab238203682de49a031a8ec103e4ac18b1694375059f20ab312df. Match path, line, exact text and line digest must equal that allowlist at1296/1309/1489/1561. Reject every other match or hash drift. No sixth-path V20 rename/edit is authorized. The V18-specific matcher has70 baseline hits and zero after this virtual overlay. verify.py regenerates both scans. This is static evidence only; no source application or lane exit is implied. The original pending-ruling discussion is preserved in the parent draft unchanged.

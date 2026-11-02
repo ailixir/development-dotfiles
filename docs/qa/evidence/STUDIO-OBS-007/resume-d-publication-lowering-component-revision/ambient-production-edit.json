@@ -1,4 +1,0 @@
-{
-  "before": "  private LoweringPreparation prepareLowering(String id, JsonNode expected) {\n",
-  "after": "  private LoweringPreparation prepareLowering(String id, JsonNode expected) {\n    if (org.springframework.transaction.support.TransactionSynchronizationManager.isActualTransactionActive()) {\n      return null;\n    }\n"
-}

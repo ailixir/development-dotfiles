@@ -1,7 +1,0 @@
-**Scoped verdict: CONCERNS.** Both TERM-PEER repairs are supported by current source and root runtime evidence; source drift is zero.
-
-The strict root gate failed: **264 cases, 1 failure**. At `SecretUseAuditIT.java:1508`, the retained test expects the former deferred error; the repair rejects the mutation earlier. Correct that exact assertion and rerun without weakening the invariant. All six new D methods and three genuine JVM cuts passed.
-
-Artifacts: [review](docs/qa/evidence/STUDIO-OBS-007/d-terminal-independent-rereview.json) · [source hashes](docs/qa/evidence/STUDIO-OBS-007/d-terminal-independent-rereview-source-hashes.json).
-
-No independent SQL probes or lifecycle changes. Core HTTP, guided/browser/provider, revocation, allSink, all19 and external obligations remain uncredited.

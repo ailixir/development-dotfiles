@@ -1,5 +1,0 @@
-Traceback (most recent call last):
-  File "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway-runner-resume8-exact-review/static_checks.py", line 30, in <module>
-    check('SITE_'+r['source']+str(r['line'])+r['call'],any(isinstance(n,ast.Call) and n.lineno==r['line'] and ast.unparse(n.func)==r['call'] for n in ast.walk(trees[r['source']])))
-                                  ~^^^^^^^^
-KeyError: 'line'

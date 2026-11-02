@@ -1,8 +1,0 @@
-Traceback (most recent call last):
-  File "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gateway-runner-resume8-exact-review/verify_source.py", line 49, in <module>
-    check('span '+row['qualifiedName'],any(isinstance(n,ast.FunctionDef) and n.name==row['name'] and n.lineno==row['startLine'] and n.end_lineno==row['endLine'] for n in ast.walk(trees[row['source']])))
-    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/gateway-runner-resume8-exact-review/verify_source.py", line 7, in check
-    if ok is not True:raise AssertionError(name)
-                      ^^^^^^^^^^^^^^^^^^^^^^^^^^
-AssertionError: span Ownership

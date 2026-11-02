@@ -1,6 +1,0 @@
-while (!sessions
-        .transaction(() -> sessions.lock(id).document().path("state").asText())
-        .equals("AWAITING_CLARIFICATION")) {
-      assertThat(Clock.nanoTime()).isLessThan(end);
-      Clock.startElapsed(); probeIntervalEntered.countDown(); Thread.sleep(25); if (noAwaitGap) Clock.advance(1_000_000_000L);
-    }

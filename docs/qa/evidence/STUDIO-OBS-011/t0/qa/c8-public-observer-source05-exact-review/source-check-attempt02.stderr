@@ -1,8 +1,0 @@
-Traceback (most recent call last):
-  File "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/qa/c8-public-observer-source05-exact-review/check_review.py", line 85, in <module>
-    text=buffers[n].decode();check('active current binding '+n,'ecb74d5f9ab42e3888d8e05f419f107213030873ca84d2b0dfc0ce4964da0b35' not in text and 'entry-NNNN-pins.json' in text and '3a6fddda4946106f143783640746464cf2c775256f2340b9d24d1a4701adadbd' in text)
-                             ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/qa/c8-public-observer-source05-exact-review/check_review.py", line 12, in check
-    if ok is not True:raise AssertionError(name)
-                      ^^^^^^^^^^^^^^^^^^^^^^^^^^
-AssertionError: active current binding RUNTIME-RECIPE.md

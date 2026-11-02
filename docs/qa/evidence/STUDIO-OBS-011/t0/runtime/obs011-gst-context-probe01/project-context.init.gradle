@@ -1,4 +1,0 @@
-gradle.projectsEvaluated {
-    def p = gradle.rootProject
-    println('GST_BUILD_CONTEXT|' + p.name + '|' + p.projectDir.canonicalPath + '|' + (gradle.parent != null))
-}

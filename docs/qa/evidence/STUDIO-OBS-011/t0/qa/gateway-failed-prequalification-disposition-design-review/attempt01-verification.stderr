@@ -1,8 +1,0 @@
-Traceback (most recent call last):
-  File "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway-failed-prequalification-disposition-design-review/verify_design.py", line 77, in <module>
-    check('COMPLETE_VALIDATION_REQUIREMENTS',len(f['requiredValidation'])==8 and 'seven' in f['requiredSet'])
-    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/qa/gateway-failed-prequalification-disposition-design-review/verify_design.py", line 12, in check
-    if not ok:raise ValueError(name)
-              ^^^^^^^^^^^^^^^^^^^^^^
-ValueError: COMPLETE_VALIDATION_REQUIREMENTS

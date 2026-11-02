@@ -1,1 +1,0 @@
-allprojects { afterEvaluate { if (plugins.hasPlugin('com.diffplug.spotless')) { spotless { java { target 'src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java' } } } } }

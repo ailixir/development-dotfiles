@@ -1,1 +1,0 @@
-allprojects { afterEvaluate { if (plugins.hasPlugin('com.diffplug.spotless')) { spotless { java { target 'src/main/java/com/citi/put/checks/studio/guided/publication/ObservedValidationClient.java', 'src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java', 'src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java' } } } } }

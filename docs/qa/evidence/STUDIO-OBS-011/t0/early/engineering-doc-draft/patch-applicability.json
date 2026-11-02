@@ -1,9 +1,0 @@
-{
-  "command": "patch --dry-run --batch -p1 < docs/qa/evidence/STUDIO-OBS-011/t0/early/engineering-doc-draft/patches/all-documentation.patch",
-  "exitCode": 0,
-  "stdout": "patching file CLAUDE.md\npatching file AGENTS.md\npatching file ARCH.md\npatching file 'docs/runbooks/studio-inference-rollout.md'\npatching file 'docs/runbooks/studio-runner.md'\npatching file 'studio-runner/README.md'\npatching file 'docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011-cleanup-inventory.md'\n",
-  "dryRun": true,
-  "fuzzOrOffsetMessages": false,
-  "actualTargetHashesRevalidatedBy": "static-checks.json",
-  "note": "Final patch layout adds separate patch-set files only; combined target diff is unchanged since successful dry-run."
-}

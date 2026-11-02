@@ -1,8 +1,0 @@
-Traceback (most recent call last):
-  File "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/c8-synthetic-local-report-source01-exact-review/verify_source.py", line 41, in <module>
-    check('caller_template_exact',(SUB/'root-caller.template.bash').read_bytes()==(SUB/'root-caller.bash').read_bytes())
-    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/qa/evidence/STUDIO-OBS-011/t0/resume-architecture/resume2/c8-synthetic-local-report-source01-exact-review/verify_source.py", line 8, in check
-    if ok is not True:raise ValueError(n)
-                      ^^^^^^^^^^^^^^^^^^^
-ValueError: caller_template_exact

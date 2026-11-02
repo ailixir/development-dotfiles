@@ -1,1 +1,0 @@
-- [Untracked migrations before delete](feedback_untracked_migrations.md) — check git ls-files; OBS-007 V34 was untracked, only build/ held a copy

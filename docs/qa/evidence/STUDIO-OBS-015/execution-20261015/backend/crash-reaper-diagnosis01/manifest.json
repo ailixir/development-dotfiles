@@ -1,8 +1,0 @@
-{"id":"crash-reaper-diagnosis01","agent":"Dex-D6","classification":"harness-flake-toctou","product_regression":false,
- "failing_test":"GuidedPublicationReplayIT.actualCommittedSecretProgressSurvivesOwnedChildAndParentCrashThenRunningReaper",
- "exception":"IllegalStateException@GuidedPublicationReplayIT.java:30660 caused by NoSuchElementException@:501",
- "site":"registerOwnedProcess:555 ownedCommandHash(root.handle) second info() snapshot",
- "patch":"fix.patch","patch_apply_check":"git apply --check -p0 PASS (live tree)",
- "files":["review.md","fix.patch","manifest.json","live-log-failure-excerpt.txt","Race2.java.source"],
- "not_verified":["XML unavailable (written at Gradle task end)","test not re-run (no Gradle)"],
- "touched_outside_evidence":false}

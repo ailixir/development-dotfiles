@@ -97,9 +97,9 @@ logs/
 .aiox/install-log.txt
 .aiox/
 
-# QA evidence binaries (coverage archives, run videos) stay on disk, out of git history
-docs/qa/evidence/**/*.tar.gz
-docs/qa/evidence/**/*.webm
+# QA evidence stays local only: on disk, out of the repo (user decision 2026-11-02;
+# its long and Windows-reserved file names broke checkouts on Windows)
+docs/qa/evidence/
 
 # Recorded public-site HARs (contain a public page API key string); never commit
 studio-runner/evaluation/grounding/e18/**/runs/

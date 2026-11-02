@@ -1,7 +1,0 @@
-# PM decision — 10.34 AC-24 carrier of record
-
-Morgan (@pm) names **STUDIO-OBS-008** as carrier of record for superseded 10.34 AC-24 / 10.11 AC-3(b). This confirms the current PO recommendation under 10.34's Definition of done and its later ADR-SC-005 disposition, also explicitly assigned to PM by `docs/epics/EPIC-10-SINGLE-PATH-DISPOSITION.md`. The later disposition keeps this confirmation actionable; this decision does not invent a historical same-wave transfer.
-
-ADR-SC-005 is the architecture authority deleting CodeTab/review and assigning the replacement plan explanation to 008. Existing OBS-008 AC-6 already owns read-only “Steps as learned”, provenance and honest learned-versus-replayed evidence. This decision places that successor scope; it creates no new 008 acceptance criterion or implementation work and does not reopen its Done lifecycle. It is not a ruling on architecture or proof of staging, product acceptance or a passed old Code-view criterion.
-
-The product carrier-choice input is now supplied in this off-tree record. **PO/register-owner application and independent review remain pending** after root opens the quoted inputs. Original 10.34 AC-24 text, unticked checkbox, dissent and chronology remain byte-preserved; no register or story is edited now. The append-only proposal records the decision and pending administrative application. All other 10.34 staging criteria retain their actual gates. Structured authority links and scope are in `pm-ac24-carrier-decision.json`.

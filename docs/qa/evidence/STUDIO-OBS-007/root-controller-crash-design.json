@@ -1,8 +1,0 @@
-{
-  "scope": "New ObservedResolverProcessCrashIT only; design recorded before test implementation",
-  "authority": "Existing AC13/19 and approved committed-read-entry / actual-terminal-cut architecture",
-  "mechanism": "A real child JVM executes the production resolver and trackedReadEntry against the parent's isolated fully guarded PostgreSQL fixture. A parent-owned loopback HTTP fixture supplies one actual counted provider read. Fixed stage receipts block at pre-marker, post-commit/pre-read, or post-physical-read/pre-resolver-return. Parent observes receipt, forcibly terminates the exact JVM, awaits death, and invokes production PendingReaper through a real guarded terminal transaction.",
-  "oracles": ["Parent independently queries committed markers and actual provider request counts", "Before marker: zero read and NOT_USED; after marker: conservative UNKNOWN_OUTCOME regardless of whether actual read occurred", "No fabricated RELEASE, Vault version, admission or coordinate; one real terminal receipt and immutable winner", "Repeated actual recovery does not read or dispatch", "All owned process/config/socket/database resources close on failure"],
-  "isolation": "New root-owned class only. Private directory0700 and configuration0600; no secrets or JDBC credentials in process arguments/logs. B/D/R sources and 186 existing cases untouched. Shared Gradle waits for B/D freeze.",
-  "limits": "This proves real resolver JVM termination and fixture-provider effects, not full Core HTTP/controller boot, guided consumed-admission crash, enterprise Vault, model, Chromium or release readiness. No whole-AC/QA credit."
-}

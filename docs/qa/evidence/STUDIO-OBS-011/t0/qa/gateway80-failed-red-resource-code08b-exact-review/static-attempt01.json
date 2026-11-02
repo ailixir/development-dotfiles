@@ -1,9 +1,0 @@
-{
-  "kind": "REVIEW_LOCAL_STATIC_VERIFIER_AUTHOR_ERROR",
-  "tool": "3f04ef",
-  "actualExit": 1,
-  "error": "KeyError: mode in trace.literalComponents, which declares bytes/SHA but no mode",
-  "scope": "Static checker only; no target or test execution. Source packet remains unchanged.",
-  "correction": "Compare every declared expected SHA/bytes/mode field; independently require each public file actual mode0644 before comparison.",
-  "dispatcherReplayAlreadyRun": false
-}

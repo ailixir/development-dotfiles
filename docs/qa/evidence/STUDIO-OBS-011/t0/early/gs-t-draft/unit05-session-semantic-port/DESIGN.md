@@ -1,3 +1,0 @@
-# Bounded semantic port — legitimate-input check before implementation
-
-Read root9f65/Aria d475/QA b238 bounds first. Preserve the partial trusted-policy correction18dd and all234 Session assertions. Before constructing meanings, independently compare the original question target with the exact ordinary observation and available real planner state. Do not introduce a new mapping schema solely because create accepts any object. If the preserved node identity has no observed witness or a complete observed meaning has no legitimate obligation/locator, stop with exact field/source conflict rather than seed/intercept/change subjects or claim a complete port.

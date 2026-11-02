@@ -1,1 +1,0 @@
-allprojects { afterEvaluate { if (plugins.hasPlugin('com.diffplug.spotless')) { spotless { java { target 'src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java' } } } } }

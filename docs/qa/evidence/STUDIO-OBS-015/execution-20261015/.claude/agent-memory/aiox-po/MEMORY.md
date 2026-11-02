@@ -1,1 +1,0 @@
-- [Bridge ruling + F-1 placement](project_bridge_ruling_f1_placement.md) — 2026-10-16 bridge 38→9+16+13 disclosed; F-1 dead translation-absent branch → OBS-011 AC-2 (CLN-F1)

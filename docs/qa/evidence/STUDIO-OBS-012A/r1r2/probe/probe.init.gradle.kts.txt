@@ -1,8 +1,0 @@
-// Out-of-tree init script (dex-r1r2): add the scratch probe source dir to the test source set. Never committed.
-allprojects {
-    plugins.withId("java") {
-        extensions.getByType<SourceSetContainer>().named("test") {
-            java.srcDir("/private/tmp/claude-501/-Users-brunobuger-orca-workspaces-put-checks-ui-studio/009f819d-5e88-49fc-b7b4-6f36928034e8/scratchpad/r1r2/probe-src")
-        }
-    }
-}

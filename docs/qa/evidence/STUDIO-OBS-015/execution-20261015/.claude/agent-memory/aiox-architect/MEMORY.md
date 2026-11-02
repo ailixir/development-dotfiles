@@ -1,4 +1,0 @@
-- [OBS-015 H8/H6 rulings](project_obs015_h8_h6_rulings.md) — teardown stop durable re-drive (no fake ACK); containsText whitespace-normalized (F4)
-- [OBS-015 append rulings](project_obs015_append_rulings.md) — pre-append sync; keyed refusal terminal, ≤3 same-key resends; assignment stop; Q4 deferred
-- [OBS-015 step-text cap](project_obs015_step_text_cap_ruling.md) — single bound 500; delete max-line-chars 1024 (compile leftover); keep SOURCE_LINE_TOO_LONG
-- [OBS-015 bridge planner authority](project_obs015_bridge_planner_authority.md) — no seeded plan/obligation rows; process-stop helper; 16M/12R/1 obsolete; F-1 dormant branch
