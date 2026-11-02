@@ -41,7 +41,12 @@ Run this inside the split **backend** repo. The goal is to bring in every backen
 
 ## Sources and pinned commits
 
-- Monorepo, read-only: `MONO=/Users/brunobuger/orca/workspaces/put-checks/ui-studio`. It is a shared git worktree. Read it only through `git -C "$MONO" show|diff|log|ls-tree|cat-file|merge-base` at the pinned commits below. Never edit, check out, stash, reset or commit there.
+- **Monorepo location.** Before you start, set `MONO` to your local clone of the put-checks monorepo, for example:
+  - Windows (Git Bash): `MONO=C:/Users/bb68376/workspace/EAMP/development-dotfiles`
+  - Mac: `MONO=/Users/brunobuger/orca/workspaces/put-checks/ui-studio`
+
+  If I haven't said which one to use, ask me. Then check that the clone has the pinned commit, using `git -C "$MONO" cat-file -e "$SOURCE_HEAD^{commit}"`. If that fails, stop and ask me to fetch.
+- **Read-only access.** Read the monorepo only through `git -C "$MONO" show|diff|log|ls-tree|cat-file|merge-base` at the pinned commits below. This works whatever branch the clone has checked out. Never edit, check out, stash, reset or commit there.
 - `SOURCE_HEAD=2597277e4893ae24565fb4f2f01e21e9de701c55` (branch `brunobuger/ui-studio`, 2026-11-02 14:22). This is the version to bring in.
 - `WINDOW_BASE=6e71f916b`: the last monorepo commit before 2026-09-02. The first commit in the window is `9fbd3970c` "stable version" (2026-09-09). Monorepo `main` is `c81911b30` (2026-09-20), an ancestor of `SOURCE_HEAD`.
 - `COMP` (this repo's folder in the monorepo) and the expected change count are in "Component facts" above.

@@ -7,7 +7,12 @@ Run this inside the split **studio-runner** repo. This repo holds only a boilerp
 
 ## Sources
 
-- Monorepo, read-only: `MONO=/Users/brunobuger/orca/workspaces/put-checks/ui-studio`. It is a shared git worktree. Read it only through `git -C "$MONO" archive|show|ls-tree|log` at the pinned commit. Never edit, check out, stash, reset or commit there.
+- **Monorepo location.** Before you start, set `MONO` to your local clone of the put-checks monorepo, for example:
+  - Windows (Git Bash): `MONO=C:/Users/bb68376/workspace/EAMP/development-dotfiles`
+  - Mac: `MONO=/Users/brunobuger/orca/workspaces/put-checks/ui-studio`
+
+  If I haven't said which one to use, ask me. Then check that the clone has the pinned commit, using `git -C "$MONO" cat-file -e "$SOURCE_HEAD^{commit}"`. If that fails, stop and ask me to fetch.
+- **Read-only access.** Read the monorepo only through `git -C "$MONO" archive|show|ls-tree|log` at the pinned commit. This works whatever branch the clone has checked out. Never edit, check out, stash, reset or commit there.
 - `SOURCE_HEAD=2597277e4893ae24565fb4f2f01e21e9de701c55` (branch `brunobuger/ui-studio`, 2026-11-02 14:22).
 - The runner is `studio-runner/` at that commit, with 716 tracked files. Check the count with `git -C "$MONO" ls-tree -r --name-only "$SOURCE_HEAD" -- studio-runner | wc -l`. If you get a different number, stop and report. Skip `studio-runner/.claude/` (agent memory, 3 files).
 - The 2026-11-02 commits added `dev.sh`, `scripts/local-stack.mjs`, `scripts/local-stack.check.mjs` and `scripts/local-tokens.mjs`. They also changed `eslint.config.js`, `vitest.config.ts`, `README.md` and `test/deployment/*`.
