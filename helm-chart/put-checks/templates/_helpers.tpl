@@ -621,6 +621,121 @@ the runner's.
 {{- end }}
 
 {{/*
+The Studio translation gateway, shared by the API and the worker.
+
+`StudioGatewayConfig.studioTranslationReadinessGuard` runs in EVERY pod (no profile condition): a
+staging/prod profile with `checks.sources.UI_TEST` true and a provider other than `vertex` refuses
+to start. The worker therefore needs the same gateway selection as the API even though only the API
+translates, and both render from these templates so they cannot be configured apart. Credentials
+(`service-account-file`) are mounted wherever the Vertex transport is built, which is also both.
+*/}}
+{{- define "put-checks.studioGateway.env" -}}
+{{- $g := .Values.studioGateway }}
+{{- $vertex := eq $g.provider "vertex" }}
+{{- $cm := $g.vertexConfigMap.name | default "" }}
+- name: STUDIO_GATEWAY_PROVIDER
+  value: {{ $g.provider | quote }}
+{{- range $pair := list (list "STUDIO_GATEWAY_ENDPOINT" "endpointKey" "endpoint") (list "STUDIO_GATEWAY_PROJECT" "projectKey" "project") (list "STUDIO_GATEWAY_LOCATION" "locationKey" "location") }}
+- name: {{ index $pair 0 }}
+{{- if and $vertex $cm }}
+  valueFrom:
+    configMapKeyRef:
+      name: {{ $cm | quote }}
+      key: {{ get $g.vertexConfigMap (index $pair 1) | quote }}
+{{- else }}
+  value: {{ get $g (index $pair 2) | quote }}
+{{- end }}
+{{- end }}
+- name: STUDIO_GATEWAY_MODEL
+  value: {{ $g.model | quote }}
+- name: STUDIO_GATEWAY_CREDENTIALS_MODE
+  value: {{ $g.credentialsMode | quote }}
+- name: STUDIO_GATEWAY_CREDENTIALS_KEY_FILE
+  value: {{ printf "%s/%s" $g.credentialsMountPath $g.credentialsKey | quote }}
+{{- end }}
+
+{{- define "put-checks.studioGateway.credentialsFile" -}}
+{{- if and (eq .Values.studioGateway.provider "vertex") (eq .Values.studioGateway.credentialsMode "service-account-file") -}}true{{- end -}}
+{{- end }}
+
+{{- define "put-checks.studioGateway.mounts" -}}
+{{- if include "put-checks.studioGateway.credentialsFile" . }}
+- name: studio-gateway-credentials
+  mountPath: {{ .Values.studioGateway.credentialsMountPath }}
+  readOnly: true
+{{- end }}
+{{- end }}
+
+{{- define "put-checks.studioGateway.volumes" -}}
+{{- if include "put-checks.studioGateway.credentialsFile" . }}
+- name: studio-gateway-credentials
+  secret:
+    secretName: {{ required "studioGateway.credentialsSecret is required for service-account-file" .Values.studioGateway.credentialsSecret }}
+    items:
+      - key: {{ .Values.studioGateway.credentialsKey }}
+        path: {{ .Values.studioGateway.credentialsKey }}
+{{- end }}
+{{- end }}
+
+{{/*
+The gateway's render guard for one backend role (`api` or `worker`); takes a dict of `root`, `role`,
+`springProfile`, `configOverrides` and `env` (that role's own values). The deployed-profile rules
+mirror the application guard above: a staging/prod profile needs `vertex`, the matching
+`studioGateway.environment`, and an enabled UI_TEST source. The API must enable UI_TEST explicitly
+(the chart's rule since Studio shipped); the worker inherits the `application.yml` default (true),
+so for it only an explicit `false` is refused.
+*/}}
+{{- define "put-checks.studioGateway.profileGuard" -}}
+{{- $root := .root }}
+{{- $g := $root.Values.studioGateway }}
+{{- $key := ternary "backend" "worker" (eq .role "api") }}
+{{- $provider := required "studioGateway.provider is required" $g.provider -}}
+{{- if not (has $provider (list "disabled" "vertex")) -}}
+{{- fail (printf "studioGateway.provider must be one of disabled, vertex; got %q" $provider) -}}
+{{- end -}}
+{{- $environment := required "studioGateway.environment is required" $g.environment -}}
+{{- if not (has $environment (list "local" "ci" "staging" "production")) -}}
+{{- fail (printf "studioGateway.environment must be one of local, ci, staging, production; got %q" $environment) -}}
+{{- end -}}
+{{- $profiles := splitList "," .springProfile -}}
+{{- $isStaging := has "staging" $profiles -}}
+{{- $isProduction := has "prod" $profiles -}}
+{{- $isDeployed := or $isStaging $isProduction -}}
+{{- if and $isStaging (ne $environment "staging") -}}
+{{- fail (printf "%s.springProfile=%q requires studioGateway.environment=staging; the environment label cannot weaken deployed Studio guards" $key .springProfile) -}}
+{{- end -}}
+{{- if and $isProduction (ne $environment "production") -}}
+{{- fail (printf "%s.springProfile=%q requires studioGateway.environment=production; the environment label cannot weaken deployed Studio guards" $key .springProfile) -}}
+{{- end -}}
+{{- if and $isDeployed (ne $provider "vertex") -}}
+{{- fail (printf "%s.springProfile=%q requires studioGateway.provider=vertex; disabled translation cannot serve an enabled Studio" $key .springProfile) -}}
+{{- end -}}
+{{- $uiTestOverride := index .configOverrides "checks.sources.UI_TEST" | default "" | toString | lower -}}
+{{- $uiTestEnv := index .env "CHECKS_SOURCES_UI_TEST" | default "" | toString | lower -}}
+{{- $uiTestEnabled := or (eq $uiTestOverride "true") (eq $uiTestEnv "true") -}}
+{{- $uiTestDisabled := or (eq $uiTestOverride "false") (eq $uiTestEnv "false") -}}
+{{- if and $isDeployed (eq .role "api") (not $uiTestEnabled) -}}
+{{- fail (printf "%s.springProfile=%q requires checks.sources.UI_TEST=true (backend.configOverrides) or CHECKS_SOURCES_UI_TEST=true (backend.env); Studio cannot be advertised with its source disabled" $key .springProfile) -}}
+{{- end -}}
+{{- if and $isDeployed (eq .role "worker") $uiTestDisabled -}}
+{{- fail (printf "worker.springProfile=%q must not set checks.sources.UI_TEST=false: the worker inherits the enabled default and the gateway it renders is the API's" .springProfile) -}}
+{{- end -}}
+{{- if eq $provider "vertex" -}}
+{{- $cm := $g.vertexConfigMap.name | default "" -}}
+{{- $_ := required "studioGateway.model is required for provider=vertex" $g.model -}}
+{{- if $cm -}}
+{{- $_ := required "studioGateway.vertexConfigMap.endpointKey is required for provider=vertex" $g.vertexConfigMap.endpointKey -}}
+{{- $_ := required "studioGateway.vertexConfigMap.projectKey is required for provider=vertex" $g.vertexConfigMap.projectKey -}}
+{{- $_ := required "studioGateway.vertexConfigMap.locationKey is required for provider=vertex" $g.vertexConfigMap.locationKey -}}
+{{- else -}}
+{{- $_ := required "studioGateway.endpoint or studioGateway.vertexConfigMap.name is required for provider=vertex" $g.endpoint -}}
+{{- $_ := required "studioGateway.project or studioGateway.vertexConfigMap.name is required for provider=vertex" $g.project -}}
+{{- $_ := required "studioGateway.location or studioGateway.vertexConfigMap.name is required for provider=vertex" $g.location -}}
+{{- end -}}
+{{- end -}}
+{{- end }}
+
+{{/*
 The studio audit stream's routing guard (STUDIO-OBS-009 AC-5). Enabled routing must name its sink.
 */}}
 {{- define "put-checks.studioAuditSiem.guard" -}}

@@ -155,7 +155,10 @@ describe('production integration provider wiring', () => {
     expect(apiPod.volumes?.map((volume) => volume.name)).toContain('studio-vault-token');
     expect(workerPod.volumes?.map((volume) => volume.name)).toContain('studio-vault-token');
     expect(apiMounts.map((mount) => mount.name)).toContain('studio-gateway-credentials');
-    expect(workerMounts.map((mount) => mount.name)).not.toContain('studio-gateway-credentials');
+    // The worker builds the same Vertex transport (the readiness guard runs in every pod), so the
+    // key file is mounted there too.
+    expect(workerMounts.map((mount) => mount.name)).toContain('studio-gateway-credentials');
+    expect(workerPod.volumes?.map((volume) => volume.name)).toContain('studio-gateway-credentials');
   });
 
   it.each([
@@ -185,6 +188,58 @@ describe('production integration provider wiring', () => {
           key,
         });
       }
+    },
+  );
+
+  it.each([
+    ['values-uat.yaml', 'checks-studio-vertex-uat'],
+    ['values-prod.yaml', 'checks-studio-vertex-prod'],
+  ] as const)(
+    '%s gives the worker the API\'s Vertex gateway: StudioGatewayConfig refuses to start any pod without it',
+    (valuesFile, configMapName) => {
+      const outcome = render({ valuesFile });
+      const api = soleContainer(deploymentNamed(outcome, '-api'));
+      const worker = soleContainer(deploymentNamed(outcome, '-worker'));
+      const gateway = (container: typeof api) =>
+        (container.env ?? []).filter((entry) => entry.name.startsWith('STUDIO_GATEWAY_'));
+
+      expect(envValues(worker).STUDIO_GATEWAY_PROVIDER).toBe('vertex');
+      expect(gateway(worker).length).toBeGreaterThanOrEqual(7);
+      // Identical to the API's: provider, model, credentials and the three ConfigMap references.
+      expect(gateway(worker)).toEqual(gateway(api));
+      const byName = new Map(gateway(worker).map((entry) => [entry.name, entry]));
+      for (const [name, key] of [
+        ['STUDIO_GATEWAY_ENDPOINT', 'endpoint'],
+        ['STUDIO_GATEWAY_PROJECT', 'project'],
+        ['STUDIO_GATEWAY_LOCATION', 'location'],
+      ] as const) {
+        expect(byName.get(name)?.valueFrom?.configMapKeyRef).toEqual({ name: configMapName, key });
+      }
+    },
+  );
+
+  it.each([
+    ['values-uat.yaml', 'worker.springProfile', 'worker,prod', 'requires studioGateway.environment=production'],
+    ['values-prod.yaml', 'worker.springProfile', 'worker,staging', 'requires studioGateway.environment=staging'],
+  ] as const)(
+    '%s: the environment label cannot be weakened through the worker profile (%s=%s)',
+    (valuesFile, key, profile, message) => {
+      const outcome = renderOutcome({ valuesFile, args: ['--set-string', `${key}=${profile.replace(',', '\\,')}`] });
+      expect(outcome.ok).toBe(false);
+      expect(outcome.error).toContain(message);
+    },
+  );
+
+  it.each(['values-uat.yaml', 'values-prod.yaml'])(
+    '%s: the worker cannot disable UI_TEST to dodge the gateway it now renders',
+    (valuesFile) => {
+      const outcome = renderOutcome({
+        valuesFile,
+        args: ['--set-string', 'worker.configOverrides.checks\\.sources\\.UI_TEST=false'],
+      });
+      expect(outcome.ok).toBe(false);
+      expect(outcome.error).toContain('worker.springProfile');
+      expect(outcome.error).toContain('must not set checks.sources.UI_TEST=false');
     },
   );
 
@@ -376,4 +431,59 @@ describe('gateway chart-owned facts in mounted Spring configuration', () => {
       },
     );
   }
+});
+
+describe('frontend run-time configuration (window.__CHECKS_CONFIG__ from /config.js)', () => {
+  // The same URLs the values files already gave REACT_APP_API_BASE_URL.
+  it.each([
+    [null, 'http://checks-api.dev.citi.com/api/v1'],
+    ['values-dev.yaml', 'https://checks-api.dev.citi.com/api/v1'],
+    ['values-uat.yaml', 'https://checks-api.uat.citi.com/api/v1'],
+    ['values-prod.yaml', 'https://checks-api.citi.com/api/v1'],
+  ] as const)('%s renders a config.js carrying %s and mounts it at the configured path', (valuesFile, apiBaseUrl) => {
+    const outcome = render({ valuesFile });
+    const deployment = deploymentNamed(outcome, '-frontend');
+    const pod = podSpec(deployment);
+    const container = soleContainer(deployment);
+
+    const volume = pod.volumes?.find((entry) => entry.name === 'runtime-config');
+    const configMap = byKind(outcome, 'ConfigMap').find(
+      (item) => item.metadata?.name === volume?.configMap?.name,
+    );
+    expect(configMap, 'the frontend runtime-config ConfigMap is rendered').toBeDefined();
+    const script = configMap?.data?.['config.js'] ?? '';
+    expect(script).toContain(`apiBaseUrl: ${JSON.stringify(apiBaseUrl)},`);
+    expect(script).toContain('window.__CHECKS_CONFIG__ = {');
+
+    // The legacy env still names the same URL, so the two cannot say different things.
+    const env = byKind(outcome, 'ConfigMap').find((item) => item.metadata?.name?.endsWith('-frontend-config'));
+    expect(env?.data?.REACT_APP_API_BASE_URL).toBe(apiBaseUrl);
+
+    const mount = container.volumeMounts?.find((entry) => entry.name === 'runtime-config');
+    expect(mount?.mountPath).toBe('/usr/share/nginx/html/config.js');
+    expect(mount?.subPath).toBe('config.js');
+    expect(mount?.readOnly).toBe(true);
+  });
+
+  it('JSON-encodes the values, and leaves debugMode undefined unless set', () => {
+    const hostile = render({
+      args: ['--set-string', 'frontend.runtimeConfig.apiBaseUrl=x";alert(1)//', '--set', 'frontend.runtimeConfig.debugMode=true'],
+    });
+    const script = byKind(hostile, 'ConfigMap').find((item) => item.metadata?.name?.endsWith('-runtime-config'))
+      ?.data?.['config.js'] ?? '';
+    expect(script).toContain('apiBaseUrl: "x\\";alert(1)//",');
+    expect(script).toContain('debugMode: true,');
+
+    const unset = render();
+    const defaults = byKind(unset, 'ConfigMap').find((item) => item.metadata?.name?.endsWith('-runtime-config'))
+      ?.data?.['config.js'] ?? '';
+    expect(defaults).toContain('debugMode: undefined,');
+  });
+
+  it('renders no ConfigMap, volume or mount when runtimeConfig.enabled is false', () => {
+    const outcome = render({ set: { 'frontend.runtimeConfig.enabled': 'false' } });
+    expect(byKind(outcome, 'ConfigMap').some((item) => item.metadata?.name?.endsWith('-runtime-config'))).toBe(false);
+    expect(podSpec(deploymentNamed(outcome, '-frontend')).volumes ?? []).toEqual([]);
+    expect(soleContainer(deploymentNamed(outcome, '-frontend')).volumeMounts ?? []).toEqual([]);
+  });
 });

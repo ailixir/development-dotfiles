@@ -156,9 +156,12 @@ frontend:
     REACT_APP_API_BASE_URL: "https://checks-api.citi.com/api/v1"
     VITE_API_URL: "https://checks-api.citi.com"
     VITE_API_BASE_URL: "/api/v1"
-    VITE_ENABLE_STUDIO: "true"
-    VITE_ENABLE_REPORTS: "true"
     VITE_DEBUG_MODE: "false"
+
+  # What the bundle reads at run time (see values.yaml); the `env` above is not read by it.
+  runtimeConfig:
+    apiBaseUrl: "https://checks-api.citi.com/api/v1"
+    debugMode: false
 
 # ---------------------------------------------------------------------------
 # Studio runner (story 10.18a).

@@ -344,13 +344,28 @@ frontend:
     capabilities:
       drop: ["ALL"]
 
+  # Container environment only. The static bundle does NOT read these at run time (they are
+  # build-time inputs); the API URL the browser uses comes from `runtimeConfig` below. Kept because
+  # an image entrypoint may template from them. (VITE_ENABLE_STUDIO / VITE_ENABLE_REPORTS were
+  # dropped: nothing in frontend/src reads them.)
   env:
     REACT_APP_API_BASE_URL: "http://checks-api.dev.citi.com/api/v1"
     VITE_API_URL: "http://checks-api.dev.citi.com"
     VITE_API_BASE_URL: "/api/v1"
-    VITE_ENABLE_STUDIO: "true"
-    VITE_ENABLE_REPORTS: "true"
     VITE_DEBUG_MODE: "false"
+
+  # Run-time configuration of the bundle: `window.__CHECKS_CONFIG__` from `/config.js`
+  # (`frontend/public/config.js`, loaded by `index.html`; resolved in `appConfig.ts`).
+  # Rendered as a ConfigMap and mounted read-only at `mountPath` with a subPath.
+  # ASSUMPTION: the frontend image is not built in this repository; `mountPath` assumes an nginx
+  # image serving `/usr/share/nginx/html`. Change it if the image serves from elsewhere.
+  runtimeConfig:
+    enabled: true
+    # Full API base URL including /api/v1, or "/api/v1" when the ingress proxies the API.
+    apiBaseUrl: "http://checks-api.dev.citi.com/api/v1"
+    # Unset (null) leaves the bundle's build default.
+    debugMode: null
+    mountPath: /usr/share/nginx/html/config.js
 
   podAnnotations: {}
   nodeSelector: {}
@@ -369,6 +384,9 @@ frontend:
 # forgetting to configure it.
 # ---------------------------------------------------------------------------
 studioRunner:
+  # Turning this on also needs `studioObserved.replayEnabled`/`validationEnabled` plus
+  # `studioObserved.catalog` (the runner image's catalog entry; no default) and
+  # `checks.sources.UI_TEST=true`, else the catalog is empty and Studio runs get 409 RUNTIME_INCOMPATIBLE.
   enabled: false
 
   image:

@@ -9,46 +9,9 @@
 {{- $_ := include "put-checks.studioNavigation.guard" . }}
 {{- if .Values.backend.enabled }}
 {{- include "put-checks.springConfig.validate" (index .Values "backend") }}
-{{- $gatewayProvider := required "studioGateway.provider is required" .Values.studioGateway.provider -}}
-{{- if not (has $gatewayProvider (list "disabled" "vertex")) -}}
-{{- fail (printf "studioGateway.provider must be one of disabled, vertex; got %q" $gatewayProvider) -}}
-{{- end -}}
-{{- $gatewayEnvironment := required "studioGateway.environment is required" .Values.studioGateway.environment -}}
-{{- if not (has $gatewayEnvironment (list "local" "ci" "staging" "production")) -}}
-{{- fail (printf "studioGateway.environment must be one of local, ci, staging, production; got %q" $gatewayEnvironment) -}}
-{{- end -}}
-{{- $apiProfiles := splitList "," .Values.backend.springProfile -}}
-{{- $isStagingProfile := has "staging" $apiProfiles -}}
-{{- $isProductionProfile := has "prod" $apiProfiles -}}
-{{- $isDeployedProfile := or $isStagingProfile $isProductionProfile -}}
-{{- if and $isStagingProfile (ne $gatewayEnvironment "staging") -}}
-{{- fail (printf "backend.springProfile=%q requires studioGateway.environment=staging; the environment label cannot weaken deployed Studio guards" .Values.backend.springProfile) -}}
-{{- end -}}
-{{- if and $isProductionProfile (ne $gatewayEnvironment "production") -}}
-{{- fail (printf "backend.springProfile=%q requires studioGateway.environment=production; the environment label cannot weaken deployed Studio guards" .Values.backend.springProfile) -}}
-{{- end -}}
-{{- if and $isDeployedProfile (ne $gatewayProvider "vertex") -}}
-{{- fail (printf "backend.springProfile=%q requires studioGateway.provider=vertex; disabled translation cannot serve an enabled Studio" .Values.backend.springProfile) -}}
-{{- end -}}
-{{- $uiTestOverride := index .Values.backend.configOverrides "checks.sources.UI_TEST" | default "false" | toString | lower -}}
-{{- $uiTestEnv := index .Values.backend.env "CHECKS_SOURCES_UI_TEST" | default "false" | toString | lower -}}
-{{- $uiTestEnabled := or (eq $uiTestOverride "true") (eq $uiTestEnv "true") -}}
-{{- if and $isDeployedProfile (not $uiTestEnabled) -}}
-{{- fail (printf "backend.springProfile=%q requires checks.sources.UI_TEST=true (backend.configOverrides) or CHECKS_SOURCES_UI_TEST=true (backend.env); Studio cannot be advertised with its source disabled" .Values.backend.springProfile) -}}
-{{- end -}}
-{{- $vertexConfigMapName := .Values.studioGateway.vertexConfigMap.name | default "" -}}
-{{- if eq $gatewayProvider "vertex" -}}
-{{- $_ := required "studioGateway.model is required for provider=vertex" .Values.studioGateway.model -}}
-{{- if $vertexConfigMapName -}}
-{{- $_ := required "studioGateway.vertexConfigMap.endpointKey is required for provider=vertex" .Values.studioGateway.vertexConfigMap.endpointKey -}}
-{{- $_ := required "studioGateway.vertexConfigMap.projectKey is required for provider=vertex" .Values.studioGateway.vertexConfigMap.projectKey -}}
-{{- $_ := required "studioGateway.vertexConfigMap.locationKey is required for provider=vertex" .Values.studioGateway.vertexConfigMap.locationKey -}}
-{{- else -}}
-{{- $_ := required "studioGateway.endpoint or studioGateway.vertexConfigMap.name is required for provider=vertex" .Values.studioGateway.endpoint -}}
-{{- $_ := required "studioGateway.project or studioGateway.vertexConfigMap.name is required for provider=vertex" .Values.studioGateway.project -}}
-{{- $_ := required "studioGateway.location or studioGateway.vertexConfigMap.name is required for provider=vertex" .Values.studioGateway.location -}}
-{{- end -}}
-{{- end -}}
+{{- /* The gateway selection, the deployed-profile rules and the UI_TEST rule, shared with the worker
+       below (the worker needs the same Vertex gateway: see `put-checks.studioGateway.env`). */ -}}
+{{- include "put-checks.studioGateway.profileGuard" (dict "root" . "role" "api" "springProfile" .Values.backend.springProfile "configOverrides" .Values.backend.configOverrides "env" .Values.backend.env) }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -173,41 +136,7 @@ spec:
               value: {{ .Values.studioVault.requestTimeout | quote }}
             - name: STUDIO_VAULT_MAX_RESPONSE_BYTES
               value: {{ .Values.studioVault.maxResponseBytes | quote }}
-            - name: STUDIO_GATEWAY_PROVIDER
-              value: {{ $gatewayProvider | quote }}
-            - name: STUDIO_GATEWAY_ENDPOINT
-              {{- if and (eq $gatewayProvider "vertex") $vertexConfigMapName }}
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ $vertexConfigMapName | quote }}
-                  key: {{ .Values.studioGateway.vertexConfigMap.endpointKey | quote }}
-              {{- else }}
-              value: {{ .Values.studioGateway.endpoint | quote }}
-              {{- end }}
-            - name: STUDIO_GATEWAY_PROJECT
-              {{- if and (eq $gatewayProvider "vertex") $vertexConfigMapName }}
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ $vertexConfigMapName | quote }}
-                  key: {{ .Values.studioGateway.vertexConfigMap.projectKey | quote }}
-              {{- else }}
-              value: {{ .Values.studioGateway.project | quote }}
-              {{- end }}
-            - name: STUDIO_GATEWAY_LOCATION
-              {{- if and (eq $gatewayProvider "vertex") $vertexConfigMapName }}
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ $vertexConfigMapName | quote }}
-                  key: {{ .Values.studioGateway.vertexConfigMap.locationKey | quote }}
-              {{- else }}
-              value: {{ .Values.studioGateway.location | quote }}
-              {{- end }}
-            - name: STUDIO_GATEWAY_MODEL
-              value: {{ .Values.studioGateway.model | quote }}
-            - name: STUDIO_GATEWAY_CREDENTIALS_MODE
-              value: {{ .Values.studioGateway.credentialsMode | quote }}
-            - name: STUDIO_GATEWAY_CREDENTIALS_KEY_FILE
-              value: {{ printf "%s/%s" .Values.studioGateway.credentialsMountPath .Values.studioGateway.credentialsKey | quote }}
+            {{- include "put-checks.studioGateway.env" . | nindent 12 }}
             # ── The kill switch and the dispatcher, on the API (story 10.18b, AC-23a) ─────
             #
             # The kill switch comes from its own values key. The dispatcher is `false` here as a
@@ -333,10 +262,8 @@ spec:
               mountPath: {{ .Values.studioVault.tokenMountPath }}
               readOnly: true
             {{- end }}
-            {{- if and (eq $gatewayProvider "vertex") (eq .Values.studioGateway.credentialsMode "service-account-file") }}
-            - name: studio-gateway-credentials
-              mountPath: {{ .Values.studioGateway.credentialsMountPath }}
-              readOnly: true
+            {{- with (include "put-checks.studioGateway.mounts" .) }}
+            {{- . | nindent 12 }}
             {{- end }}
             {{- with (include "put-checks.backend.runnerMounts" .) }}
             {{- . | nindent 12 }}
@@ -374,13 +301,8 @@ spec:
               - key: {{ .Values.studioVault.tokenKey }}
                 path: {{ .Values.studioVault.tokenKey }}
         {{- end }}
-        {{- if and (eq $gatewayProvider "vertex") (eq .Values.studioGateway.credentialsMode "service-account-file") }}
-        - name: studio-gateway-credentials
-          secret:
-            secretName: {{ required "studioGateway.credentialsSecret is required for service-account-file" .Values.studioGateway.credentialsSecret }}
-            items:
-              - key: {{ .Values.studioGateway.credentialsKey }}
-                path: {{ .Values.studioGateway.credentialsKey }}
+        {{- with (include "put-checks.studioGateway.volumes" .) }}
+        {{- . | nindent 8 }}
         {{- end }}
         {{- with (include "put-checks.backend.runnerVolumes" .) }}
         {{- . | nindent 8 }}
@@ -400,6 +322,7 @@ spec:
 {{- end }}
 {{- if .Values.worker.enabled }}
 {{- include "put-checks.springConfig.validate" (index .Values "worker") }}
+{{- include "put-checks.studioGateway.profileGuard" (dict "root" . "role" "worker" "springProfile" .Values.worker.springProfile "configOverrides" .Values.worker.configOverrides "env" .Values.worker.env) }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -570,6 +493,15 @@ spec:
               value: {{ .Values.studioVault.requestTimeout | quote }}
             - name: STUDIO_VAULT_MAX_RESPONSE_BYTES
               value: {{ .Values.studioVault.maxResponseBytes | quote }}
+            # ── The Vertex gateway, on the WORKER too ──────────────────────────────────────────
+            #
+            # `StudioGatewayConfig.studioTranslationReadinessGuard` has no profile condition: any
+            # pod in a staging/prod profile with `checks.sources.UI_TEST` true (the `application.yml`
+            # default, which the worker does not override) refuses to START unless
+            # `studio.gateway.provider` is `vertex`. The worker does not translate, but without
+            # these it would come up with the default `disabled` and crash-loop in UAT and prod. It
+            # renders from the same template as the API, so the two pods cannot be configured apart.
+            {{- include "put-checks.studioGateway.env" . | nindent 12 }}
             {{- range $key, $val := .Values.worker.env }}
             - name: {{ $key }}
               value: {{ $val | quote }}
@@ -621,6 +553,9 @@ spec:
               mountPath: {{ .Values.studioVault.tokenMountPath }}
               readOnly: true
             {{- end }}
+            {{- with (include "put-checks.studioGateway.mounts" .) }}
+            {{- . | nindent 12 }}
+            {{- end }}
             {{- with (include "put-checks.backend.runnerMounts" .) }}
             {{- . | nindent 12 }}
             {{- end }}
@@ -656,6 +591,9 @@ spec:
             items:
               - key: {{ .Values.studioVault.tokenKey }}
                 path: {{ .Values.studioVault.tokenKey }}
+        {{- end }}
+        {{- with (include "put-checks.studioGateway.volumes" .) }}
+        {{- . | nindent 8 }}
         {{- end }}
         {{- with (include "put-checks.backend.runnerVolumes" .) }}
         {{- . | nindent 8 }}
@@ -694,7 +632,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: {{ .Values.frontend.env | toYaml | sha256sum }}
+        checksum/config: {{ dict "env" .Values.frontend.env "runtimeConfig" .Values.frontend.runtimeConfig | toYaml | sha256sum }}
         {{- with .Values.frontend.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -740,6 +678,20 @@ spec:
             periodSeconds: {{ .Values.frontend.probes.liveness.periodSeconds }}
           resources:
             {{- toYaml .Values.frontend.resources | nindent 12 }}
+          {{- if .Values.frontend.runtimeConfig.enabled }}
+          volumeMounts:
+            # One file over the image's own `config.js` (subPath), read-only.
+            - name: runtime-config
+              mountPath: {{ .Values.frontend.runtimeConfig.mountPath }}
+              subPath: config.js
+              readOnly: true
+          {{- end }}
+      {{- if .Values.frontend.runtimeConfig.enabled }}
+      volumes:
+        - name: runtime-config
+          configMap:
+            name: {{ include "put-checks.frontend.fullname" . }}-runtime-config
+      {{- end }}
       {{- with .Values.frontend.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

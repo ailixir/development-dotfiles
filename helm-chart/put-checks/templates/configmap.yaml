@@ -56,6 +56,26 @@ data:
   {{- range $key, $val := .Values.frontend.env }}
   {{ $key }}: {{ $val | quote }}
   {{- end }}
+{{- if .Values.frontend.runtimeConfig.enabled }}
+---
+# The file the bundle actually reads at run time: `index.html` loads `/config.js`, and
+# `appConfig.ts` resolves `window.__CHECKS_CONFIG__.apiBaseUrl` / `.debugMode` from it before any
+# build-time value. Values are JSON-encoded (toJson), so nothing in them can break out of the
+# script. `debugMode` is left `undefined` when unset, which is the bundle's "use the build default".
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "put-checks.frontend.fullname" . }}-runtime-config
+  labels:
+    {{- include "put-checks.labels" . | nindent 4 }}
+    {{- include "put-checks.frontend.selectorLabels" . | nindent 4 }}
+data:
+  config.js: |
+    window.__CHECKS_CONFIG__ = {
+      apiBaseUrl: {{ .Values.frontend.runtimeConfig.apiBaseUrl | default "" | toJson }},
+      debugMode: {{ if kindIs "invalid" .Values.frontend.runtimeConfig.debugMode }}undefined{{ else }}{{ .Values.frontend.runtimeConfig.debugMode | toJson }}{{ end }},
+    };
+{{- end }}
 {{- end }}
 {{- if .Values.studioRunner.enabled }}
 ---
