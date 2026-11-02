@@ -48,3 +48,4 @@
 - [Flexible v1 = domain whitelist](project_flexible_v1_domain_whitelist.md) — 2026-10-25 binding: suffix whitelist only nav control, proxy/IP deny deleted, N learn sessions; V28 next
 - [Compliance latency analysis](compliance_latency_analysis.md) — 2026-10-25: 50 s stall cap, 600 s contract wall, fixedDelay scheduler coupling, capacity 1; R1-R7 levers
 - [Learn/replay parity review](learn_replay_parity_review.md) — 2026-10-29: artifact+executor shared; gap = replay driver pacing + terminal transients; 1/912 claim HEAD-only
+- [Index-pick gate design](index_pick_gate_design.md) — 2026-11-01: HN .first()/.nth() defect; FIX-26 N1 flip cause; peer-signature prepare gate recommended

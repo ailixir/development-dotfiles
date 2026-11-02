@@ -1,0 +1,1664 @@
+{
+ "seed": 20261026,
+ "rng": "mulberry32",
+ "samplingScheme": "page uniform over pool, then interactive aria-ref uniform within the page",
+ "interactiveRoles": [
+  "button",
+  "link",
+  "textbox",
+  "searchbox",
+  "combobox",
+  "checkbox",
+  "radio",
+  "switch",
+  "tab",
+  "menuitem",
+  "spinbutton"
+ ],
+ "pool": [
+  "https://arxiv.org/search/advanced",
+  "https://developer.mozilla.org/en-US/docs/Web/HTML",
+  "https://docs.python.org/3/",
+  "https://docs.python.org/3/builtins/functions.html",
+  "https://en.wikipedia.org/w/index.php?search=python&title=Special%3ASearch&profile=advanced&fulltext=1&ns0=1",
+  "https://en.wikipedia.org/wiki/Python_(programming_language)",
+  "https://news.ycombinator.com/login",
+  "https://www.gov.uk/",
+  "https://www.gov.uk/search/all?keywords=passport&order=relevance",
+  "https://www.gutenberg.org/",
+  "https://www.gutenberg.org/ebooks/1342",
+  "https://www.python.org/",
+  "https://www.rfc-editor.org/search/",
+  "https://www.usa.gov/",
+  "https://www.weather.gov/"
+ ],
+ "excludedUrls": [
+  "https://news.ycombinator.com/",
+  "https://news.ycombinator.com/newest",
+  "https://en.wikipedia.org/wiki/Main_Page",
+  "https://store.steampowered.com/search/?term=portal",
+  "https://openlibrary.org/search?q=dune",
+  "https://forecast.weather.gov/MapClick.php?lat=40.7146&lon=-74.0071"
+ ],
+ "draws": 41,
+ "rejected": {
+  "duplicate draw": 1
+ },
+ "generatedAt": "2026-10-26T16:05:23.947Z",
+ "items": [
+  {
+   "id": "rnd-001",
+   "url": "https://www.rfc-editor.org/search/",
+   "png": "random/rnd-001.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "checkbox",
+       {
+        "name": "Search only Metadata and"
+       }
+      ]
+     }
+    ]
+   },
+   "role": "checkbox",
+   "site": "rfc-editor.org",
+   "heldOut": true,
+   "tag": "input",
+   "ref": "e83",
+   "draw": 1,
+   "operation": {
+    "kind": "check"
+   },
+   "box": {
+    "x": 80,
+    "y": 334,
+    "width": 13,
+    "height": 13
+   },
+   "clip": {
+    "x": 0,
+    "y": 204,
+    "width": 313,
+    "height": 273
+   }
+  },
+  {
+   "id": "rnd-002",
+   "url": "https://www.rfc-editor.org/search/",
+   "png": "random/rnd-002.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "searchbox",
+       {
+        "name": "Search working group"
+       }
+      ]
+     }
+    ]
+   },
+   "role": "searchbox",
+   "site": "rfc-editor.org",
+   "heldOut": true,
+   "tag": "input",
+   "ref": "e141",
+   "draw": 2,
+   "operation": {
+    "kind": "fill",
+    "value": "spk07"
+   },
+   "box": {
+    "x": 80,
+    "y": 897,
+    "width": 352,
+    "height": 38
+   },
+   "clip": {
+    "x": 0,
+    "y": 767,
+    "width": 652,
+    "height": 298
+   }
+  },
+  {
+   "id": "rnd-003",
+   "url": "https://www.gov.uk/",
+   "png": "random/rnd-003.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "contentinfo"
+      ]
+     },
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "Policy papers and"
+       }
+      ]
+     }
+    ]
+   },
+   "role": "link",
+   "site": "gov.uk",
+   "heldOut": false,
+   "tag": "a",
+   "ref": "e396",
+   "draw": 3,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 820,
+    "y": 4404,
+    "width": 259,
+    "height": 23
+   },
+   "clip": {
+    "x": 600,
+    "y": 4274,
+    "width": 680,
+    "height": 284
+   }
+  },
+  {
+   "id": "rnd-004",
+   "url": "https://www.gutenberg.org/",
+   "png": "random/rnd-004.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "Linking to Project Gutenberg"
+       }
+      ]
+     }
+    ]
+   },
+   "role": "link",
+   "site": "gutenberg.org",
+   "heldOut": true,
+   "tag": "a",
+   "ref": "e265",
+   "draw": 4,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 89,
+    "y": 2302,
+    "width": 204,
+    "height": 18
+   },
+   "clip": {
+    "x": 0,
+    "y": 2171,
+    "width": 513,
+    "height": 279
+   }
+  },
+  {
+   "id": "rnd-005",
+   "url": "https://docs.python.org/3/",
+   "png": "random/rnd-005.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "index"
+       }
+      ]
+     },
+     {
+      "m": "nth",
+      "a": [
+       4
+      ]
+     }
+    ]
+   },
+   "role": "link",
+   "site": "docs.python.org",
+   "heldOut": false,
+   "tag": "a",
+   "ref": "e175",
+   "draw": 5,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 1219,
+    "y": 1375,
+    "width": 35,
+    "height": 17
+   },
+   "clip": {
+    "x": 998,
+    "y": 1245,
+    "width": 282,
+    "height": 278
+   }
+  },
+  {
+   "id": "rnd-006",
+   "url": "https://www.rfc-editor.org/search/",
+   "png": "random/rnd-006.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "IETF.org"
+       }
+      ]
+     }
+    ]
+   },
+   "role": "link",
+   "site": "rfc-editor.org",
+   "heldOut": true,
+   "tag": "a",
+   "ref": "e787",
+   "draw": 6,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 656,
+    "y": 5243,
+    "width": 62,
+    "height": 20
+   },
+   "clip": {
+    "x": 436,
+    "y": 5112,
+    "width": 503,
+    "height": 281
+   }
+  },
+  {
+   "id": "rnd-007",
+   "url": "https://www.rfc-editor.org/search/",
+   "png": "random/rnd-007.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "Page 1"
+       }
+      ]
+     }
+    ]
+   },
+   "role": "link",
+   "site": "rfc-editor.org",
+   "heldOut": true,
+   "tag": "a",
+   "ref": "e743",
+   "draw": 7,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 666,
+    "y": 5016,
+    "width": 31,
+    "height": 40
+   },
+   "clip": {
+    "x": 446,
+    "y": 4886,
+    "width": 472,
+    "height": 301
+   }
+  },
+  {
+   "id": "rnd-008",
+   "url": "https://en.wikipedia.org/w/index.php?search=python&title=Special%3ASearch&profile=advanced&fulltext=1&ns0=1",
+   "png": "random/rnd-008.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "Indian python",
+        "exact": true
+       }
+      ]
+     }
+    ]
+   },
+   "role": "link",
+   "site": "en.wikipedia.org",
+   "heldOut": false,
+   "tag": "a",
+   "ref": "e296",
+   "draw": 8,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 148,
+    "y": 1800,
+    "width": 101,
+    "height": 18
+   },
+   "clip": {
+    "x": 0,
+    "y": 1670,
+    "width": 470,
+    "height": 279
+   }
+  },
+  {
+   "id": "rnd-009",
+   "url": "https://www.gov.uk/search/all?keywords=passport&order=relevance",
+   "png": "random/rnd-009.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "Apply with a paper form"
+       }
+      ]
+     }
+    ]
+   },
+   "role": "link",
+   "site": "gov.uk",
+   "heldOut": false,
+   "tag": "a",
+   "ref": "e107",
+   "draw": 9,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 493,
+    "y": 1256,
+    "width": 169,
+    "height": 19
+   },
+   "clip": {
+    "x": 272,
+    "y": 1126,
+    "width": 610,
+    "height": 279
+   }
+  },
+  {
+   "id": "rnd-010",
+   "url": "https://docs.python.org/3/",
+   "png": "random/rnd-010.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "Python setup and usage"
+       }
+      ]
+     }
+    ]
+   },
+   "role": "link",
+   "site": "docs.python.org",
+   "heldOut": false,
+   "tag": "a",
+   "ref": "e50",
+   "draw": 10,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 395,
+    "y": 561,
+    "width": 219,
+    "height": 24
+   },
+   "clip": {
+    "x": 175,
+    "y": 431,
+    "width": 660,
+    "height": 285
+   }
+  },
+  {
+   "id": "rnd-011",
+   "url": "https://www.gutenberg.org/ebooks/1342",
+   "png": "random/rnd-011.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "British Literature"
+       }
+      ]
+     }
+    ]
+   },
+   "role": "link",
+   "site": "gutenberg.org",
+   "heldOut": true,
+   "tag": "a",
+   "ref": "e115",
+   "draw": 11,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 597,
+    "y": 1013,
+    "width": 157,
+    "height": 45
+   },
+   "clip": {
+    "x": 377,
+    "y": 883,
+    "width": 598,
+    "height": 305
+   }
+  },
+  {
+   "id": "rnd-012",
+   "url": "https://www.gutenberg.org/",
+   "png": "random/rnd-012.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "ibiblio"
+       }
+      ]
+     }
+    ]
+   },
+   "role": "link",
+   "site": "gutenberg.org",
+   "heldOut": true,
+   "tag": "a",
+   "ref": "e327",
+   "draw": 13,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 585,
+    "y": 3284,
+    "width": 110,
+    "height": 16
+   },
+   "clip": {
+    "x": 365,
+    "y": 3154,
+    "width": 550,
+    "height": 150
+   }
+  },
+  {
+   "id": "rnd-013",
+   "url": "https://docs.python.org/3/",
+   "png": "random/rnd-013.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "Static Typing with Python"
+       }
+      ]
+     }
+    ]
+   },
+   "role": "link",
+   "site": "docs.python.org",
+   "heldOut": false,
+   "tag": "a",
+   "ref": "e78",
+   "draw": 14,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 771,
+    "y": 753,
+    "width": 230,
+    "height": 24
+   },
+   "clip": {
+    "x": 551,
+    "y": 622,
+    "width": 670,
+    "height": 285
+   }
+  },
+  {
+   "id": "rnd-014",
+   "url": "https://www.usa.gov/",
+   "png": "random/rnd-014.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "Find unclaimed money"
+       }
+      ]
+     }
+    ]
+   },
+   "role": "link",
+   "site": "usa.gov",
+   "heldOut": true,
+   "tag": "a",
+   "ref": "e82",
+   "draw": 15,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 912,
+    "y": 598,
+    "width": 153,
+    "height": 44
+   },
+   "clip": {
+    "x": 692,
+    "y": 467,
+    "width": 588,
+    "height": 305
+   }
+  },
+  {
+   "id": "rnd-015",
+   "url": "https://www.python.org/",
+   "png": "random/rnd-015.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "Beginner's Guide"
+       }
+      ]
+     }
+    ]
+   },
+   "role": "link",
+   "site": "python.org",
+   "heldOut": false,
+   "tag": "a",
+   "ref": "e280",
+   "draw": 16,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 444,
+    "y": 2233,
+    "width": 196,
+    "height": 35
+   },
+   "clip": {
+    "x": 224,
+    "y": 2103,
+    "width": 636,
+    "height": 296
+   }
+  },
+  {
+   "id": "rnd-016",
+   "url": "https://www.gutenberg.org/",
+   "png": "random/rnd-016.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "Double take Read free →"
+       }
+      ]
+     }
+    ]
+   },
+   "role": "link",
+   "site": "gutenberg.org",
+   "heldOut": true,
+   "tag": "a",
+   "ref": "e98",
+   "draw": 17,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 1240,
+    "y": 486,
+    "width": 106,
+    "height": 217
+   },
+   "clip": {
+    "x": 1020,
+    "y": 356,
+    "width": 260,
+    "height": 478
+   }
+  },
+  {
+   "id": "rnd-017",
+   "url": "https://en.wikipedia.org/wiki/Python_(programming_language)",
+   "png": "random/rnd-017.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "Rossum",
+        "exact": true
+       }
+      ]
+     }
+    ]
+   },
+   "role": "link",
+   "site": "en.wikipedia.org",
+   "heldOut": false,
+   "tag": "a",
+   "ref": "e713",
+   "draw": 18,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 775,
+    "y": 3222,
+    "width": 59,
+    "height": 18
+   },
+   "clip": {
+    "x": 555,
+    "y": 3091,
+    "width": 499,
+    "height": 279
+   }
+  },
+  {
+   "id": "rnd-018",
+   "url": "https://arxiv.org/search/advanced",
+   "png": "random/rnd-018.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "button",
+       {
+        "name": "Dismiss announcement"
+       }
+      ]
+     }
+    ]
+   },
+   "role": "button",
+   "site": "arxiv.org",
+   "heldOut": true,
+   "tag": "button",
+   "ref": "e8",
+   "draw": 19,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 1244,
+    "y": 1,
+    "width": 28,
+    "height": 28
+   },
+   "clip": {
+    "x": 1024,
+    "y": 0,
+    "width": 256,
+    "height": 160
+   }
+  },
+  {
+   "id": "rnd-019",
+   "url": "https://developer.mozilla.org/en-US/docs/Web/HTML",
+   "png": "random/rnd-019.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "textbox",
+       {
+        "name": "Filter sidebar"
+       }
+      ]
+     }
+    ]
+   },
+   "role": "textbox",
+   "site": "developer.mozilla.org",
+   "heldOut": false,
+   "tag": "input",
+   "ref": "e388",
+   "draw": 20,
+   "operation": {
+    "kind": "fill",
+    "value": "spk07"
+   },
+   "box": {
+    "x": 16,
+    "y": 197,
+    "width": 216,
+    "height": 36
+   },
+   "clip": {
+    "x": 0,
+    "y": 67,
+    "width": 452,
+    "height": 296
+   }
+  },
+  {
+   "id": "rnd-020",
+   "url": "https://www.python.org/",
+   "png": "random/rnd-020.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "PSF",
+        "exact": true
+       }
+      ]
+     }
+    ]
+   },
+   "role": "link",
+   "site": "python.org",
+   "heldOut": false,
+   "tag": "a",
+   "ref": "e10",
+   "draw": 21,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 241,
+    "y": 3,
+    "width": 198,
+    "height": 42
+   },
+   "clip": {
+    "x": 21,
+    "y": 0,
+    "width": 638,
+    "height": 176
+   }
+  },
+  {
+   "id": "rnd-021",
+   "url": "https://www.gutenberg.org/ebooks/1342",
+   "png": "random/rnd-021.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "Privacy policy"
+       }
+      ]
+     }
+    ]
+   },
+   "role": "link",
+   "site": "gutenberg.org",
+   "heldOut": true,
+   "tag": "a",
+   "ref": "e210",
+   "draw": 22,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 460,
+    "y": 2328,
+    "width": 89,
+    "height": 16
+   },
+   "clip": {
+    "x": 240,
+    "y": 2198,
+    "width": 529,
+    "height": 199
+   }
+  },
+  {
+   "id": "rnd-022",
+   "url": "https://www.weather.gov/",
+   "png": "random/rnd-022.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "Beach Hazards Statement"
+       }
+      ]
+     }
+    ]
+   },
+   "role": "link",
+   "site": "weather.gov",
+   "heldOut": true,
+   "tag": "a",
+   "ref": "e151",
+   "draw": 23,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 965,
+    "y": 849,
+    "width": 68,
+    "height": 22
+   },
+   "clip": {
+    "x": 745,
+    "y": 719,
+    "width": 509,
+    "height": 283
+   }
+  },
+  {
+   "id": "rnd-023",
+   "url": "https://news.ycombinator.com/login",
+   "png": "random/rnd-023.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "locator",
+      "a": [
+       "form"
+      ]
+     },
+     {
+      "m": "filter",
+      "a": [
+       {
+        "hasText": "username:password: login"
+       }
+      ]
+     },
+     {
+      "m": "locator",
+      "a": [
+       "input[name=\"pw\"]"
+      ]
+     }
+    ]
+   },
+   "role": "textbox",
+   "site": "news.ycombinator.com",
+   "heldOut": false,
+   "tag": "input",
+   "ref": "e12",
+   "draw": 24,
+   "operation": {
+    "kind": "fill",
+    "value": "spk07"
+   },
+   "box": {
+    "x": 81,
+    "y": 72,
+    "width": 153,
+    "height": 21
+   },
+   "clip": {
+    "x": 0,
+    "y": 0,
+    "width": 454,
+    "height": 223
+   }
+  },
+  {
+   "id": "rnd-024",
+   "url": "https://en.wikipedia.org/wiki/Python_(programming_language)",
+   "png": "random/rnd-024.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "\"More Control Flow Tools\""
+       }
+      ]
+     }
+    ]
+   },
+   "role": "link",
+   "site": "en.wikipedia.org",
+   "heldOut": false,
+   "tag": "a",
+   "ref": "e2282",
+   "draw": 25,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 323,
+    "y": 23632,
+    "width": 180,
+    "height": 16
+   },
+   "clip": {
+    "x": 102,
+    "y": 23502,
+    "width": 621,
+    "height": 277
+   }
+  },
+  {
+   "id": "rnd-025",
+   "url": "https://docs.python.org/3/builtins/functions.html",
+   "png": "random/rnd-025.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "sign"
+       }
+      ]
+     },
+     {
+      "m": "first",
+      "a": []
+     }
+    ]
+   },
+   "role": "link",
+   "site": "docs.python.org",
+   "heldOut": false,
+   "tag": "a",
+   "ref": "e947",
+   "draw": 26,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 622,
+    "y": 7011,
+    "width": 38,
+    "height": 18
+   },
+   "clip": {
+    "x": 402,
+    "y": 6881,
+    "width": 479,
+    "height": 279
+   }
+  },
+  {
+   "id": "rnd-026",
+   "url": "https://www.gutenberg.org/",
+   "png": "random/rnd-026.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "Project Gutenberg",
+        "exact": true
+       }
+      ]
+     }
+    ]
+   },
+   "role": "link",
+   "site": "gutenberg.org",
+   "heldOut": true,
+   "tag": "a",
+   "ref": "e5",
+   "draw": 27,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 0,
+    "y": 0,
+    "width": 192,
+    "height": 120
+   },
+   "clip": {
+    "x": 0,
+    "y": 0,
+    "width": 412,
+    "height": 250
+   }
+  },
+  {
+   "id": "rnd-027",
+   "url": "https://www.gutenberg.org/",
+   "png": "random/rnd-027.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "Tales of Muscovy and the"
+       }
+      ]
+     }
+    ]
+   },
+   "role": "link",
+   "site": "gutenberg.org",
+   "heldOut": true,
+   "tag": "a",
+   "ref": "e44",
+   "draw": 28,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 88,
+    "y": 486,
+    "width": 106,
+    "height": 217
+   },
+   "clip": {
+    "x": 0,
+    "y": 356,
+    "width": 414,
+    "height": 478
+   }
+  },
+  {
+   "id": "rnd-028",
+   "url": "https://developer.mozilla.org/en-US/docs/Web/HTML",
+   "png": "random/rnd-028.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "Tutorials",
+        "exact": true
+       }
+      ]
+     }
+    ]
+   },
+   "role": "link",
+   "site": "developer.mozilla.org",
+   "heldOut": false,
+   "tag": "a",
+   "ref": "e501",
+   "draw": 29,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 1024,
+    "y": 5173,
+    "width": 64,
+    "height": 20
+   },
+   "clip": {
+    "x": 804,
+    "y": 5042,
+    "width": 476,
+    "height": 281
+   }
+  },
+  {
+   "id": "rnd-029",
+   "url": "https://www.gov.uk/search/all?keywords=passport&order=relevance",
+   "png": "random/rnd-029.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "button",
+       {
+        "name": "Show search menu"
+       }
+      ]
+     }
+    ]
+   },
+   "role": "button",
+   "site": "gov.uk",
+   "heldOut": false,
+   "tag": "button",
+   "ref": "e42",
+   "draw": 30,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 1059,
+    "y": 325,
+    "width": 61,
+    "height": 61
+   },
+   "clip": {
+    "x": 839,
+    "y": 195,
+    "width": 441,
+    "height": 321
+   }
+  },
+  {
+   "id": "rnd-030",
+   "url": "https://en.wikipedia.org/w/index.php?search=python&title=Special%3ASearch&profile=advanced&fulltext=1&ns0=1",
+   "png": "random/rnd-030.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "Thumbnail for Zen of Python"
+       }
+      ]
+     }
+    ]
+   },
+   "role": "link",
+   "site": "en.wikipedia.org",
+   "heldOut": false,
+   "tag": "a",
+   "ref": "e365",
+   "draw": 31,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 44,
+    "y": 2782,
+    "width": 92,
+    "height": 17
+   },
+   "clip": {
+    "x": 0,
+    "y": 2652,
+    "width": 356,
+    "height": 278
+   }
+  },
+  {
+   "id": "rnd-031",
+   "url": "https://docs.python.org/3/builtins/functions.html",
+   "png": "random/rnd-031.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "super()"
+       }
+      ]
+     },
+     {
+      "m": "nth",
+      "a": [
+       2
+      ]
+     }
+    ]
+   },
+   "role": "link",
+   "site": "docs.python.org",
+   "heldOut": false,
+   "tag": "a",
+   "ref": "e3384",
+   "draw": 32,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 633,
+    "y": 33294,
+    "width": 67,
+    "height": 18
+   },
+   "clip": {
+    "x": 413,
+    "y": 33164,
+    "width": 508,
+    "height": 279
+   }
+  },
+  {
+   "id": "rnd-032",
+   "url": "https://www.rfc-editor.org/search/",
+   "png": "random/rnd-032.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "Page 2"
+       }
+      ]
+     }
+    ]
+   },
+   "role": "link",
+   "site": "rfc-editor.org",
+   "heldOut": true,
+   "tag": "a",
+   "ref": "e745",
+   "draw": 33,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 702,
+    "y": 5016,
+    "width": 34,
+    "height": 40
+   },
+   "clip": {
+    "x": 481,
+    "y": 4886,
+    "width": 475,
+    "height": 301
+   }
+  },
+  {
+   "id": "rnd-033",
+   "url": "https://www.gov.uk/search/all?keywords=passport&order=relevance",
+   "png": "random/rnd-033.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "Housing and local services"
+       }
+      ]
+     }
+    ]
+   },
+   "role": "link",
+   "site": "gov.uk",
+   "heldOut": false,
+   "tag": "a",
+   "ref": "e205",
+   "draw": 34,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 490,
+    "y": 2854,
+    "width": 216,
+    "height": 23
+   },
+   "clip": {
+    "x": 270,
+    "y": 2724,
+    "width": 657,
+    "height": 283
+   }
+  },
+  {
+   "id": "rnd-034",
+   "url": "https://www.usa.gov/",
+   "png": "random/rnd-034.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "Complaints File complaints"
+       }
+      ]
+     }
+    ]
+   },
+   "role": "link",
+   "site": "usa.gov",
+   "heldOut": true,
+   "tag": "a",
+   "ref": "e114",
+   "draw": 35,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 646,
+    "y": 1087,
+    "width": 271,
+    "height": 285
+   },
+   "clip": {
+    "x": 426,
+    "y": 956,
+    "width": 711,
+    "height": 546
+   }
+  },
+  {
+   "id": "rnd-035",
+   "url": "https://www.python.org/",
+   "png": "random/rnd-035.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "Python Wiki"
+       }
+      ]
+     }
+    ]
+   },
+   "role": "link",
+   "site": "python.org",
+   "heldOut": false,
+   "tag": "a",
+   "ref": "e311",
+   "draw": 36,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 640,
+    "y": 2445,
+    "width": 196,
+    "height": 35
+   },
+   "clip": {
+    "x": 420,
+    "y": 2315,
+    "width": 636,
+    "height": 296
+   }
+  },
+  {
+   "id": "rnd-036",
+   "url": "https://developer.mozilla.org/en-US/docs/Web/HTML",
+   "png": "random/rnd-036.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "HTML attributes"
+       }
+      ]
+     }
+    ]
+   },
+   "role": "link",
+   "site": "developer.mozilla.org",
+   "heldOut": false,
+   "tag": "a",
+   "ref": "e309",
+   "draw": 37,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 288,
+    "y": 3682,
+    "width": 121,
+    "height": 20
+   },
+   "clip": {
+    "x": 68,
+    "y": 3552,
+    "width": 561,
+    "height": 280
+   }
+  },
+  {
+   "id": "rnd-037",
+   "url": "https://www.gov.uk/search/all?keywords=passport&order=relevance",
+   "png": "random/rnd-037.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "Cookies",
+        "exact": true
+       }
+      ]
+     }
+    ]
+   },
+   "role": "link",
+   "site": "gov.uk",
+   "heldOut": false,
+   "tag": "a",
+   "ref": "e243",
+   "draw": 38,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 296,
+    "y": 3170,
+    "width": 67,
+    "height": 23
+   },
+   "clip": {
+    "x": 76,
+    "y": 3040,
+    "width": 507,
+    "height": 283
+   }
+  },
+  {
+   "id": "rnd-038",
+   "url": "https://www.usa.gov/",
+   "png": "random/rnd-038.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "Check my voter registration"
+       }
+      ]
+     }
+    ]
+   },
+   "role": "link",
+   "site": "usa.gov",
+   "heldOut": true,
+   "tag": "a",
+   "ref": "e76",
+   "draw": 39,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 144,
+    "y": 598,
+    "width": 183,
+    "height": 44
+   },
+   "clip": {
+    "x": 0,
+    "y": 467,
+    "width": 547,
+    "height": 305
+   }
+  },
+  {
+   "id": "rnd-039",
+   "url": "https://www.python.org/",
+   "png": "random/rnd-039.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "getByRole",
+      "a": [
+       "link",
+       {
+        "name": "Anthropic"
+       }
+      ]
+     }
+    ]
+   },
+   "role": "link",
+   "site": "python.org",
+   "heldOut": false,
+   "tag": "a",
+   "ref": "e209",
+   "draw": 40,
+   "operation": {
+    "kind": "click"
+   },
+   "box": {
+    "x": 664,
+    "y": 1465,
+    "width": 64,
+    "height": 21
+   },
+   "clip": {
+    "x": 444,
+    "y": 1334,
+    "width": 505,
+    "height": 282
+   }
+  },
+  {
+   "id": "rnd-040",
+   "url": "https://news.ycombinator.com/login",
+   "png": "random/rnd-040.png",
+   "gt": {
+    "chain": [
+     {
+      "m": "locator",
+      "a": [
+       "form"
+      ]
+     },
+     {
+      "m": "filter",
+      "a": [
+       {
+        "hasText": "username:password: create"
+       }
+      ]
+     },
+     {
+      "m": "locator",
+      "a": [
+       "input[name=\"pw\"]"
+      ]
+     }
+    ]
+   },
+   "role": "textbox",
+   "site": "news.ycombinator.com",
+   "heldOut": false,
+   "tag": "input",
+   "ref": "e25",
+   "draw": 41,
+   "operation": {
+    "kind": "fill",
+    "value": "spk07"
+   },
+   "box": {
+    "x": 81,
+    "y": 251,
+    "width": 153,
+    "height": 21
+   },
+   "clip": {
+    "x": 0,
+    "y": 121,
+    "width": 454,
+    "height": 281
+   }
+  }
+ ]
+}

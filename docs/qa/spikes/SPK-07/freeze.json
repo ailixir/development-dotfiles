@@ -1,0 +1,99 @@
+{
+ "freezeVersion": 1,
+ "sha256": "9fe9b0ff9867a3f67031535796ae36f158897d947d632c3c37beedc677d9e938",
+ "frozenAt": "2026-10-27T11:28:54.970Z",
+ "counts": {
+  "total": 298,
+  "byStratum": {
+   "labeledField": 19,
+   "selectCheck": 23,
+   "duplicateNeedsContext": 39,
+   "uniqueNav": 29,
+   "iconOnly": 18,
+   "readTarget": 19,
+   "assertTarget": 19,
+   "chain": 19,
+   "fixtureRegression": 15,
+   "menuNameDiffers": 16,
+   "visualOnlyField": 17,
+   "negative": 25,
+   "random": 40
+  },
+  "byExpect": {
+   "ACTION": 270,
+   "CLARIFICATION": 23,
+   "UNSUPPORTED": 5
+  },
+  "heldOut": 175,
+  "sites": 18
+ },
+ "contracts": {
+  "sha256": "eb0bc83aee4c9db94d97fb6934ddb7e46d3fac622fd616e067344a7bcd87c8a3",
+  "files": {
+   "frozen-production/guided-output-contract.md": "bbb6726ec2a19df83edb0b1be87e4a5c5cfde89edf581e1fe05de7b523bc180a",
+   "frozen-production/v3/action.schema.json": "cf6844f8eb31169c343af9c19d34458169b50aa6404af793b3989fb4e66b9608",
+   "frozen-production/v3/execution-evidence.schema.json": "5f9eda27221c948decd17ff876cb110dc3f9df9195a521bf5dac97ba8187edd9",
+   "frozen-production/v3/guided-model-response.schema.json": "04917c5b46522edeafb84d3b485f58bcc7f0ac606c1b5cb1915a6844b935cec0",
+   "frozen-production/v3/observation.schema.json": "31afe5aa601b10ea1c81434797ff401ceef16ef5df90d49ffb700dfe7ff58963",
+   "frozen-production/v3/planning-context.schema.json": "afce03609d4aff3909321b3d1b26e36651564595fc3fdb22da7c3971593ad063",
+   "frozen-production/v3/planning-fixtures.json": "d4be1c94ec76f9f4c1d65a2b7b614e04cd2b33439c40dd7eac56d53b7874be36",
+   "frozen-production/v3/source-reference.schema.json": "184a99cc4018f5899eb8dc743dcb0a9283c19f3ff7371da99098eeee432e229c",
+   "frozen-production/v3/source-selection.schema.json": "f6905ea1bbf66aeea8711a501512f9f9b5eef1093452daca9eb6586da6f07d7c",
+   "s1-contract.md": "6eb8b507b21f4b5abd4b3535721a350b4c44a500a7a3feaafb20d16314761498",
+   "s3-contract.md": "498e1040d8b2141d26348cf68f7ac3841bb2099fbca5bc14379c9e8987b8e782",
+   "s3-response.schema.json": "afeac3a0da30081358a9d27e5ffee1e118d46987a2e837d45c1214ac28e558b3",
+   "s4-addendum.md": "620aeec0c89ee0c4c6f549cb15d71fe67908ff16b8498d0ef121adcc98f48dfb"
+  }
+ },
+ "harness": {
+  "sha256": "dc2a5d26193326e347eb76274cf9dd5e58ef6fd34599b3e4f51c3e6ef09f34ee",
+  "fileCount": 37,
+  "files": {
+   "INTERFACES.md": "fc95052f80fb4406e87f3f021614119f0375249567bc5e1d70874474dcc8e832",
+   "assemble-v2.mjs": "24d579b81de073a77f508b00b32ce3bf11530b535d2fc1ab326dc06d3f577c55",
+   "durability.mjs": "e91989c5bad066c549f2cbb1c9494117be15f8964bee83725ed9586c9481059a",
+   "f1-conformance.mjs": "c530d5232652d5001c84a17ca889e28e2f366eb8de111f666b1cb13f3eb5d9f2",
+   "freeze.mjs": "8a3c089417a6e9641fa64acf602a588945ad78526b81a33d6c55200423e2cc2f",
+   "generated/frozen-dist/allowedDomains.js": "e88630f1dbb1f08c95edc8cb5faac86df9cad2508252a49c5c9e1e6258c11fda",
+   "generated/frozen-dist/run/observationCollector.js": "06457ea43ab64c4c97b2a64afb561b0534cfcfb17b1a1c9548cda89b5a812dbc",
+   "generated/frozen-dist/run/observationReadProfile.js": "587c52e8867353f125e4816a641442a5f4f2da4bf4558ee58521d5a5471acdf3",
+   "generated/frozen-dist/run/observationSanitizer.js": "74562c9174a01f450be7cc0093a90716f3bc379f557b837fdea92443c6b1ac52",
+   "generated/observationCollector.instrumented.meta.json": "8f77d0997ce22dbf0e8b2387634ffd80cae82f6de3ca33706332437c68ac2752",
+   "generated/observationCollector.instrumented.mjs": "9664babb68d5389d326148d926d5f826ea3e5883a2c444cfcbbf473490d74a02",
+   "lib/arms/A0.mjs": "8c35d15ec76d8e251c95d2c42223d7c8148957dc9f5325cdea24bd55f4191a5b",
+   "lib/arms/A1.mjs": "36a12b795abf6d3d2f033ad33363482433fe83e8740fe596bce10c609f1d7f77",
+   "lib/arms/S1.mjs": "8b29a689e55aa356e1473fdf1971d379c527c13ef28c7af8e3b3cc481ddabf0e",
+   "lib/arms/S2.mjs": "21f7a8e76777cb6f9ddc7ef233a7f9330c249d670fed7b166907e3ee1843cbe2",
+   "lib/arms/S3.mjs": "7775a02b7f56d94d01307854fcb1ed7cc67c654082d0ed666b2a5042cf052638",
+   "lib/arms/S4.mjs": "e22643e9f59a05081ea199d2be7f8d52713fe2301e6cf7e454fcec6bece8ba88",
+   "lib/cdp.mjs": "9ee989be88a0cce9e1d33bed3e3e6c61295812ca55d541982aef6229b966e19c",
+   "lib/collectorInstrumented.mjs": "811414f73c395256a6deb284c0abf867b0b9c8ecf03a84a7ce814b9481567eea",
+   "lib/gt.mjs": "33202e2818167456eb468de98682c600f73032d875f4f2d8cd5476088652327b",
+   "lib/leakscan.mjs": "1ef5ca0b8fd1ebf22b7a1ec8e9027d940c1a53fa4c14423f35a1f3c752fe5c86",
+   "lib/limiter.mjs": "38842270b606096422c73df7d631752c517859353d56a658a1816d7a05169a35",
+   "lib/perceive.mjs": "aea4000b663a5453d6d970f2fe697399056a8801d6dacb732f9eeb8334c84e38",
+   "lib/pwEngine.mjs": "af63e643dfff6c35092303f6e3080997b627a93cc1ef79eb0c1893b4f7fe37d7",
+   "lib/renderCurrent.mjs": "bbc45fbd59d52f7e682562004bbec1619ce038eb9ced1bb2178f95945c968711",
+   "lib/requests.mjs": "292be312c0f03eb27edca6b0e060ab25bf5991682f1871eaf92c45c4ad95b54b",
+   "lib/stats.mjs": "5fcc74bba23892e7ca3609a9024d88b132fa6d15ef5e9152133990312ef8cf29",
+   "lib/synth.mjs": "0d4bc19d03b7557743a082285dd9615a37935bba395f1de9458f13b6161b54f0",
+   "lib/vertex.mjs": "221aca38fc739d9dd02200278c0a88bc64e840ac9c4db92cefb042df9e4cf3a7",
+   "lib/visual.mjs": "86bcb2a3e24583f94f5e384cd5efa259d7b2d1e4df80b168d931f3c0658f17a3",
+   "report.mjs": "590f2807e7052d666da68a8b12feb5a685865cd252387f77d7040c33210caa28",
+   "run.mjs": "d839967c28f10511d0c5bd14289d27ccb3954526921f83861e71625870d91494",
+   "safety.mjs": "bbc04890ae440aef4df0250c9e2e899fccb30f5375b573c8c20b208e1b10c0b0",
+   "safety/config.json": "adac0a4b49bbc7eacb0aed1a746f6baa939980f10d482879c1f8daf124748a80",
+   "safety/verify-tasks.jsonl": "74ea427a287442599ca3c3d176eb29fe1c03fc4849a7c5732a20a9a449fb2afc",
+   "templates/next-action.req.json": "56445875c8e3cc3083f191fc12ee680610b211c1a6b1a025b871efc1d1c5bba3",
+   "templates/source-plan.req.json": "ff66b2e946a491554771c3153e8b1737a3482c5866699c02d04c583ff9c20cbc"
+  }
+ },
+ "productionContract": {
+  "path": "studio-runner/evaluation/grounding/contracts/frozen-production/guided-output-contract.md",
+  "sha256": "bbb6726ec2a19df83edb0b1be87e4a5c5cfde89edf581e1fe05de7b523bc180a"
+ },
+ "playwright": {
+  "version": "1.63.0",
+  "bundleSha256": "549070af3acabb3efcc4f55bfe6210f9f7c2fcf633cf7eaa59bfe60719969171"
+ }
+}

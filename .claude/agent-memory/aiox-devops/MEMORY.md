@@ -8,4 +8,4 @@
 - [case438 code438 prep](project_case438_code438_prep.md) — round 068: Candidate B refreeze, vite-served frontend allow-list (17 files), call-seconds 60, closed-hunk QA selector
 - [OBS-009 push 2026-10-23](project_obs009_push_20261023.md) — 9 commits pushed; unstaged L1/settings files; push hook env prefix; gitleaks usage
 - [Local guided stack 2026-10-24](project_local_guided_stack.md) — overlay launcher/token issuer/Core stand-in/seed for local guided learn+replay
-- [E22b gate runs 2026-10-31](project_e22b_gate_runs.md) — SC008 real-site gate: run1 RED, r2 RED 7/12; rg env needs a wire-model probe; N1 gate bug driver.ts:377
+- [E22b gate runs 2026-10-31..11-01](project_e22b_gate_runs.md) — SC008 real-site gate, run1..r7 all RED; r7 8/14 clean, 5 stall cascades (45% stall rate unchanged), scripts/traps
