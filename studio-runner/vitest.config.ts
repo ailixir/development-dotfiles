@@ -67,6 +67,11 @@ export default defineConfig({
         'src/run/child.ts',
         'src/run/perceptionInPage.ts',
         'src/run/pageStateInPage.ts',
+        // Local-start tooling (dev.sh): checked by `node --test scripts/local-stack.check.mjs` against real openssl/keytool
+        // and the real runner, which the unit tier's v8 run cannot see. Not shipped; not part of the `scripts/**` gate.
+        'scripts/local-stack.mjs',
+        'scripts/local-tokens.mjs',
+        'scripts/local-stack.check.mjs',
       ],
       thresholds: {
         lines: 85,

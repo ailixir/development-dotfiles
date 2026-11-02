@@ -22,11 +22,12 @@ import org.springframework.test.context.DynamicPropertySource;
  * Studio v1 gaps: a month whose rows reached the DEFAULT partition first must still get its
  * partition.
  *
- * <p>That is the {@code dev.sh --seed} failure (the seed runs inside Flyway, before any bootstrap,
- * and writes current-month {@code ui_test_executions} into DEFAULT), and the production one: an API
- * pod accepting a run before a worker bootstrapped, or a missed monthly run. A bare {@code CREATE
- * TABLE … PARTITION OF} then fails on every attempt and the {@code partitions} health indicator is
- * DOWN for good. The month used here is far in the future so the test owns it outright.
+ * <p>That is the {@code backend/dev.sh --seed} failure (the seed runs inside Flyway, before any
+ * bootstrap, and writes current-month {@code ui_test_executions} into DEFAULT), and the production
+ * one: an API pod accepting a run before a worker bootstrapped, or a missed monthly run. A bare
+ * {@code CREATE TABLE … PARTITION OF} then fails on every attempt and the {@code partitions} health
+ * indicator is DOWN for good. The month used here is far in the future so the test owns it
+ * outright.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("local")

@@ -53,21 +53,21 @@ management:
 studio:
   # Local navigation allow-list (STUDIO-FLEX-001): the local fixtures, the guided example site and
   # the practice login site. `localhost` replaces IP-literal targets, which no entry can name. The
-  # same list is in tools/studio-local-tls.mjs for the local runner.
+  # same list is in studio-runner/scripts/local-stack.mjs for the local runner.
   navigation:
     allowed-domains: ${STUDIO_ALLOWED_DOMAINS:localhost,example.com,practicetestautomation.com}
     # Allow-all is on by default for now: local Studio navigates to every domain and the list above is
-    # ignored. To enforce the list, export STUDIO_ALLOW_ALL_DOMAINS=false before dev.sh: this backend reads
-    # it through application.yml (studio.navigation.allow-all-domains) and tools/studio-local-tls.mjs
+    # ignored. To enforce the list, export STUDIO_ALLOW_ALL_DOMAINS=false before backend/dev.sh: this backend reads
+    # it through application.yml (studio.navigation.allow-all-domains) and studio-runner/scripts/local-stack.mjs
     # hands the same value to the local runner, so the two sides agree.
   # The local e2e path (Studio v1 WP2): one bootRun is both the API and the worker, so the
   # dispatcher and the reapers run here (their schedulers are gated `worker` or `local & !api`).
   # The runner side is NOT configured here on purpose: `studio.runner.base-url` and
   # `studio.runner.service-identity-token` come from STUDIO_RUNNER_BASE_URL and
   # STUDIO_RUNNER_SERVICE_TOKEN (application.yml, no fallback), and the callback token from
-  # STUDIO_CALLBACK_SERVICE_TOKEN. `dev.sh` exports all three and hands the same
-  # values to the runner. Without them a run is closed ERROR/DISPATCH_FAILED naming the missing
-  # key, rather than left PENDING.
+  # STUDIO_CALLBACK_SERVICE_TOKEN. studio-runner/dev.sh writes all three to the shared
+  # backend.env that backend/dev.sh sources, so both sides hold the same values. Without them a
+  # run is closed ERROR/DISPATCH_FAILED naming the missing key, rather than left PENDING.
   #
   # STUDIO-OBS-009 AC-3: `local` and `test` are the only profiles that accept a plaintext
   # studio.runner.base-url and a context with no studio.runner.tls. Without tls settings the backend's

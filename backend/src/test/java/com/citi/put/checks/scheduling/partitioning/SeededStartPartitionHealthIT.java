@@ -18,12 +18,12 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
 /**
- * Studio v1 gaps: {@code dev.sh --seed} starts {@code local,dev}, whose Flyway locations include
- * the seed. An earlier seed wrote current-month {@code ui_test_executions} during migration, before
- * any partition bootstrap, so they landed in DEFAULT and the current month's partition could never
- * be created, leaving {@code partitions} DOWN. The seed no longer writes Studio history (results
- * must come from real runs); {@link PartitionDefaultRowsIT} covers rows already in DEFAULT
- * directly. This keeps the seeded start itself honest, on an embedded database.
+ * Studio v1 gaps: {@code backend/dev.sh --seed} starts {@code local,dev}, whose Flyway locations
+ * include the seed. An earlier seed wrote current-month {@code ui_test_executions} during
+ * migration, before any partition bootstrap, so they landed in DEFAULT and the current month's
+ * partition could never be created, leaving {@code partitions} DOWN. The seed no longer writes
+ * Studio history (results must come from real runs); {@link PartitionDefaultRowsIT} covers rows
+ * already in DEFAULT directly. This keeps the seeded start itself honest, on an embedded database.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles({"local", "dev"})

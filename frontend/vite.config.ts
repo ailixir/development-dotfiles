@@ -15,6 +15,20 @@ export default defineConfig(({ mode }) => {
         '/api/v1': {
           target: env.VITE_API_URL || 'http://localhost:8080',
           changeOrigin: true,
+          // Guided publication and replay re-check Core with the browser's put_session cookie.
+          // Locally there is no Core login, and backend/scripts/local-core.mjs accepts exactly
+          // this dev value. Only active when ./dev.sh sets VITE_DEV_SESSION_COOKIE.
+          configure: (proxy) => {
+            const devSession = env.VITE_DEV_SESSION_COOKIE;
+            if (!devSession) return;
+            proxy.on('proxyReq', (proxyReq) => {
+              const cookie = proxyReq.getHeader('cookie');
+              const existing = Array.isArray(cookie) ? cookie.join('; ') : String(cookie ?? '');
+              if (/(^|;\s*)put_session=/.test(existing)) return;
+              const session = `put_session=${devSession}`;
+              proxyReq.setHeader('cookie', existing ? `${existing}; ${session}` : session);
+            });
+          },
         },
       },
     },

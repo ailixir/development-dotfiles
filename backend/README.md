@@ -40,7 +40,7 @@ Run from `backend/`:
 
 | Command | Purpose |
 |---|---|
-| `./gradlew bootRun --args='--spring.profiles.active=local'` | Start the app on `:8080`. Health probe: `GET /actuator/health` → `{"status":"UP"}`. |
+| `./dev.sh` (`--seed` for sample data) | Run the backend locally on `:8080` with hot reload and the Core stand-in; see [Run locally](#run-locally). Health probe: `GET /actuator/health` → `{"status":"UP"}`. |
 | `./gradlew check` | Full quality gate: Spotless (format), Checkstyle, SpotBugs, JUnit 5, JaCoCo 80% line coverage. |
 | `./gradlew bootJar` | Build the executable jar at `build/libs/checks-backend-0.1.0-SNAPSHOT.jar`. |
 
@@ -69,10 +69,10 @@ Five Spring profiles are defined. Activate via `--spring.profiles.active=<name>`
 ### Dev profile (sample data for development and demos)
 
 ```bash
-./gradlew bootRun --args='--spring.profiles.active=dev'
+./dev.sh --seed
 ```
 
-Starts the app with Zonky embedded Postgres pre-populated with realistic sample data:
+Starts the app (profiles `local,dev`) with Zonky embedded Postgres pre-populated with realistic sample data:
 - **3 CSI systems** at different health levels (healthy, degraded, green)
 - **15 checks** (HTTP + TCP) with valid configurations
 - **~450 execution results** spanning 28 days with mixed statuses
@@ -84,28 +84,71 @@ Use for development, frontend integration, and stakeholder presentations.
 
 ---
 
-## Checks Studio end to end on a laptop
+## Run locally
 
-`../dev.sh` starts the backend (`local` profile), a real `studio-runner` and the Vite frontend, and
-wires them together. **Verified 2026-09-18** with `./dev.sh --seed` (on non-default ports, see
-below): a test created in the Studio, confirmed in the UI and started with **Run Test** ran in
-real Chromium and showed `Passed` on the Studio page and on the Runs page.
+One command, no Docker:
 
 ```bash
-cd studio-runner && npm run browsers:install   # once: the pinned Chromium
-cd .. && ./dev.sh --seed                       # --seed: CSIs to own a test (local alone has none)
+./dev.sh          # backend (local profile) + Core stand-in
+./dev.sh --seed   # same, with sample CSIs, checks and executions (local alone has none)
 ```
 
-What `dev.sh` wires, and why each piece is needed:
+Needs JDK 21 (found automatically; otherwise Gradle provisions one), Node (for the Core stand-in)
+and `lsof`. The script runs in the foreground and Ctrl+C stops only what it started. If the backend
+or Core port is held by a leftover of this checkout it stops that one; any other process is reported
+by PID and left alone.
 
-| Setting | Value | Without it |
+**Start order.** Three components, each in its own terminal and each with its own `dev.sh`:
+`studio-runner/dev.sh`, then `backend/dev.sh`, then `frontend/dev.sh`. The backend works without the
+runner, but a Studio run then closes `ERROR`/`DISPATCH_FAILED` (the script warns "studio-runner not
+prepared"). If you rebuild the runner and its catalog changes, restart the backend.
+
+**Shared directory.** `PUT_CHECKS_LOCAL_DIR` (default `$HOME/.put-checks/local`) is the only thing the
+components share. `studio-runner/dev.sh` writes `backend.env` there; this script `source`s it. It
+carries the wiring the backend needs, so you never set these by hand:
+
+| Setting | Source | Without it |
 |---|---|---|
-| `STUDIO_RUNNER_BASE_URL` | `http://127.0.0.1:8090` (`DEV_STUDIO_RUNNER_PORT`) | dispatch closes `ERROR`/`DISPATCH_FAILED` naming `studio.runner.base-url` |
-| `STUDIO_RUNNER_SERVICE_TOKEN` | generated per session; the runner gets the same value as `STUDIO_RUNNER_SERVICE_IDENTITY` | dispatch closes `ERROR`/`DISPATCH_FAILED` naming `studio.runner.service-identity-token` |
-| `STUDIO_CALLBACK_SERVICE_TOKEN` | generated per session; the runner gets it as `STUDIO_RUNNER_CALLBACK_IDENTITY` | the API refuses every runner callback (its callback chain has no token to accept), so nothing the runner reports is recorded |
-| `STUDIO_GATEWAY_PROVIDER` | `vertex` | plain-English steps cannot be compiled |
-| `STUDIO_GATEWAY_ENDPOINT`, `PROJECT`, `LOCATION`, `MODEL` | your Vertex deployment | startup refuses incomplete translation configuration |
-| `STUDIO_GATEWAY_CREDENTIALS_MODE` | `application-default` or `service-account-file` | Vertex authentication fails explicitly |
+| `STUDIO_RUNNER_BASE_URL` | the runner's mutual-TLS URL (`https://127.0.0.1:8090`) | dispatch closes `ERROR`/`DISPATCH_FAILED` naming `studio.runner.base-url` |
+| `STUDIO_RUNNER_SERVICE_TOKEN` | token the runner also holds as its service identity | dispatch closes `ERROR`/`DISPATCH_FAILED` naming `studio.runner.service-identity-token` |
+| `STUDIO_CALLBACK_SERVICE_TOKEN` | token the runner presents as its callback identity | the API refuses every runner callback, so nothing the runner reports is recorded |
+| `STUDIO_RUNNER_TLS_*` | backend key store and trust store from the local CA | any `https://` hop to the runner fails closed |
+| `STUDIO_EVIDENCE_PROVIDER`, `STUDIO_EVIDENCE_DIRECTORY` | `local`, and the directory the runner writes | recordings and manifests are not found |
+| `SPRING_CONFIG_ADDITIONAL_LOCATION` | an overlay turning on the guided bridge (`PUT_CHECKS_GUIDED_PORT`, default 8092) | guided learning and replay are unreachable |
+
+**Ports.** `PUT_CHECKS_BACKEND_PORT` (8080), `PUT_CHECKS_CORE_PORT` (8081) and
+`PUT_CHECKS_FRONTEND_PORT` (5173) move the listeners; the guided bridge and the runner use
+`PUT_CHECKS_GUIDED_PORT` (8092) and `PUT_CHECKS_RUNNER_PORT` (8090). The script adds the frontend port
+to `CHECKS_CORS_ALLOWED_ORIGINS` (unless you set that yourself), because otherwise every browser POST
+from a non-default port gets `403 Invalid CORS request`.
+
+**Learning (Run Test).** Plain-English steps are translated by Vertex. By default
+`STUDIO_GATEWAY_PROVIDER=disabled`, so Run Test answers that learning is unavailable. To enable it,
+put these in `backend/.env.local` (gitignored, loaded by `dev.sh`):
+
+```bash
+STUDIO_GATEWAY_PROVIDER=vertex
+STUDIO_GATEWAY_ENDPOINT=<Vertex or Vertex-compatible proxy base URL>
+STUDIO_GATEWAY_PROJECT=<project>
+STUDIO_GATEWAY_LOCATION=<location>
+STUDIO_GATEWAY_MODEL=<model>   # default gemini-3.8-flash
+```
+
+Credentials come from Application Default Credentials (`gcloud auth application-default login`);
+`STUDIO_GATEWAY_CREDENTIALS_MODE` selects `application-default` (default) or `service-account-file`.
+Startup refuses an incomplete Vertex configuration.
+
+**Core stand-in.** Guided publication and replay re-check the caller against PUT Core with the
+browser's `put_session` cookie. Locally there is no Core, so `dev.sh` starts
+`scripts/local-core.mjs` on `PUT_CHECKS_CORE_PORT` and points `CHECKS_CORE_SERVICE_URL` at it. It
+answers `GET /api/v1/users/me[/permissions]` with the developer identity for exactly one fixed cookie
+value (`put_session=local-dev-session`) and `401` for anything else. The frontend dev proxy adds that
+cookie, which is why you reach the backend through `frontend/dev.sh` rather than calling the API
+without it.
+
+**Embedded database.** The `local` profile uses Zonky embedded Postgres in the JVM, so data is reset
+on every restart. That includes the DevTools restarts `dev.sh` triggers whenever Gradle recompiles a
+class (a continuous `classes` build runs alongside `bootRun`). Use `--seed` to get sample data back.
 
 **Allowed domains (STUDIO-FLEX-001).** Where Studio may navigate is one deployment list,
 `studio.navigation.allowed-domains` (`STUDIO_ALLOWED_DOMAINS`): comma-separated lowercase punycode host
@@ -134,11 +177,6 @@ using the same client and model request/response contract. Gateway operation and
 to the external owners; no separate gateway provider or administration feature is needed here.
 Direct Vertex validation can proceed independently of proxy availability; it establishes results
 for the route actually exercised.
-
-**Ports.** `DEV_BACKEND_PORT`, `DEV_FRONTEND_PORT` and `DEV_STUDIO_RUNNER_PORT` move the three
-listeners (defaults 8080, 5173, 8090). With a non-default frontend port, `dev.sh` adds that origin to
-`CHECKS_CORS_ALLOWED_ORIGINS`, because otherwise every browser POST gets `403 Invalid CORS request`.
-`--no-studio-runner` skips the runner.
 
 **Evidence.** Local development shares one filesystem evidence directory between the runner and
 API. If that store is unavailable, recording and manifest errors are reported; the application does

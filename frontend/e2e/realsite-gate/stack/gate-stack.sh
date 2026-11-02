@@ -155,9 +155,12 @@ EOF
   WORK="$(mktemp -d "${TMPDIR:-/tmp}/put-checks-studio-runner.XXXXXX")"
   export STUDIO_RUNNER_SERVICE_TOKEN="${STUDIO_RUNNER_SERVICE_TOKEN:-$(openssl rand -hex 32)}"
   export STUDIO_CALLBACK_SERVICE_TOKEN="${STUDIO_CALLBACK_SERVICE_TOKEN:-$(openssl rand -hex 32)}"
-  DEV_BACKEND_PORT="$BACKEND_PORT" DEV_STUDIO_RUNNER_PORT="$RUNNER_PORT" node "$ROOT/tools/studio-local-tls.mjs" prepare "$WORK"
+  # The local-start helper lives in studio-runner/; its catalog comes from the frozen runner copy, its files go to the work dir.
+  LOCAL_STACK="$ROOT/studio-runner/scripts/local-stack.mjs"
+  PUT_CHECKS_RUNNER_PORT="$RUNNER_PORT" PUT_CHECKS_BACKEND_PORT="$BACKEND_PORT" PUT_CHECKS_GUIDED_PORT="$CONNECTOR_PORT" \
+    PUT_CHECKS_RUNNER_DIR="$STACK/runner-frozen" node "$LOCAL_STACK" init "$WORK"
   # shellcheck disable=SC1091
-  source "$WORK/tls-environment.sh"
+  source "$WORK/backend.env"
   export STUDIO_RUNNER_BASE_URL="https://127.0.0.1:${RUNNER_PORT}"
   export STUDIO_EVIDENCE_PROVIDER=local STUDIO_EVIDENCE_DIRECTORY="$WORK/objects"
   mkdir -p "$WORK/objects"
@@ -166,10 +169,10 @@ EOF
     const f=w+"/runner-environment.json",e=JSON.parse(fs.readFileSync(f,"utf8"));
     Object.assign(e,JSON.parse(fs.readFileSync(d+"/runner-extra.json","utf8")));
     fs.writeFileSync(f,JSON.stringify(e),{mode:0o600});' "$STACK" "$WORK"
-  (cd "$STACK/runner-frozen" && exec env -i PATH="$PATH" HOME="$HOME" node "$ROOT/tools/studio-local-tls.mjs" run "$WORK" >"$WORK/studio-runner.log" 2>&1) &
+  (cd "$STACK/runner-frozen" && exec env -i PATH="$PATH" HOME="$HOME" node "$LOCAL_STACK" run "$WORK" >"$WORK/studio-runner.log" 2>&1) &
   RUNNER_PID=$!
-  for _ in $(seq 1 40); do node "$ROOT/tools/studio-local-tls.mjs" health "$WORK" >/dev/null 2>&1 && break; kill -0 "$RUNNER_PID" 2>/dev/null || die "the runner exited during startup (log: $WORK/studio-runner.log)"; sleep 1; done
-  node "$ROOT/tools/studio-local-tls.mjs" health "$WORK" >/dev/null 2>&1 || die "the runner did not pass mutual-TLS readiness"
+  for _ in $(seq 1 40); do node "$LOCAL_STACK" health "$WORK" >/dev/null 2>&1 && break; kill -0 "$RUNNER_PID" 2>/dev/null || die "the runner exited during startup (log: $WORK/studio-runner.log)"; sleep 1; done
+  node "$LOCAL_STACK" health "$WORK" >/dev/null 2>&1 || die "the runner did not pass mutual-TLS readiness"
 
   # 7. backend from the jar (profile local+dev: embedded Postgres, 3 seeded CSIs incl. 178672), on the gate port
   export SPRING_CONFIG_ADDITIONAL_LOCATION="file:$STACK/backend-guided.yml"

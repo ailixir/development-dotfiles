@@ -8,15 +8,24 @@
 [![Module Federation](https://img.shields.io/badge/Module%20Federation-Enhanced-green.svg)](https://module-federation.io)
 [![MSW](https://img.shields.io/badge/MSW-Mock%20API-orange.svg)](https://mswjs.io)
 
-## Quick Start
+## Run locally
+
+Prerequisites: Node.js, pnpm (never npm or yarn; `.npmrc` sets `node-linker=hoisted`, which the webpack build needs) and a built `@put/core-components` (`cd ../../put-core-components && npm run build`, then `pnpm install` here). No Docker.
 
 ```bash
-# Install dependencies (pnpm only; .npmrc sets node-linker=hoisted, which the webpack build needs)
-pnpm install
+./dev.sh              # Vite standalone on http://localhost:5173
+./dev.sh --port 5190  # or PUT_CHECKS_FRONTEND_PORT=5190
+```
 
-# Start development (Module Federation dev server)
-pnpm start
+`dev.sh` installs dependencies when `node_modules` is missing, frees its port only if this checkout's Vite holds it (any other process on the port stops the script and is named), then runs Vite in the foreground. Ctrl+C stops it.
 
+Start order for the whole local stack: `studio-runner/dev.sh`, then `backend/dev.sh`, then `frontend/dev.sh`. The frontend alone works against any backend listening on `PUT_CHECKS_BACKEND_PORT` (default 8080). With a non-default frontend port, start the backend with the same `PUT_CHECKS_FRONTEND_PORT`: `backend/dev.sh` adds that origin to its CORS list.
+
+The dev server proxies `/api/v1` to `http://localhost:$PUT_CHECKS_BACKEND_PORT` and adds the local dev session cookie (`put_session=local-dev-session`, via `VITE_DEV_SESSION_COOKIE`) unless the request already carries one. Guided publication and replay re-check Core with that cookie, and the local Core stand-in started by `backend/dev.sh` accepts it. Vite also reads `frontend/.env.local` (not committed).
+
+`pnpm run dev` (Webpack Module Federation, port 3002) is for integrating with the PUT platform host shell, not for running the app locally.
+
+```bash
 # Unit tests, and browser specs (Playwright, MSW project)
 pnpm exec vitest run
 pnpm run test:e2e

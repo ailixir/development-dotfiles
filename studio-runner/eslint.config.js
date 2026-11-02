@@ -87,6 +87,14 @@ export default tseslint.config(
     },
   },
   {
+    // The local-start tooling (dev.sh's helper and its node:test check) runs `openssl`, the JDK `keytool` and
+    // `scripts/print-observed-catalog.mjs`. **This does not spend ADR-001 §6**: the property it protects is that artifact
+    // content never reaches a process spawn in the shipped package (`test/run/confinement.test.ts` scans `src/**`). These
+    // two files are not shipped, never see an artifact, and pass only arguments written in them.
+    files: ['scripts/local-stack.mjs', 'scripts/local-stack.check.mjs'],
+    rules: { 'no-restricted-imports': 'off' },
+  },
+  {
     files: ['test/**/*.ts', '*.config.ts', 'eslint.config.js', 'eslint.boundary-rules.js'],
     rules: {
       'import/no-extraneous-dependencies': ['error', { devDependencies: true }],

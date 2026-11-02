@@ -20,7 +20,7 @@ export const DIGEST_PATHS = [
   'studio-runner/src','studio-runner/scripts','studio-runner/package.json','studio-runner/pnpm-lock.yaml','studio-runner/package-lock.json','studio-runner/tsconfig.json','studio-runner/tsconfig.build.json',
   'studio-runner/evaluation/grounding/corpus',
   'frontend/src','frontend/e2e','frontend/package.json','frontend/pnpm-lock.yaml','frontend/.npmrc','frontend/tsconfig.json','frontend/tsconfig.node.json','frontend/playwright.config.ts','frontend/vite.config.ts','frontend/webpack.config.js','frontend/vitest.config.ts',
-  'docs/architecture/ADR-SC-007-snapshot-ref-grounding.md','docs/specs/studio-observed-authoring','tools/studio-local-tls.mjs','tools/studio-contracts',
+  'docs/architecture/ADR-SC-007-snapshot-ref-grounding.md','docs/specs/studio-observed-authoring','studio-runner/scripts/local-stack.mjs','tools/studio-contracts',
 ];
 
 export interface StackManifest {

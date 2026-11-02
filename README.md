@@ -22,24 +22,19 @@ put-checks/
 
 ## Quick Start
 
-### Frontend
-```bash
-cd frontend/
-pnpm install             # frontend uses pnpm (frontend/.npmrc: node-linker=hoisted)
-pnpm run dev              # Webpack/MF on :3002
-pnpm run dev:standalone   # Vite standalone on :5173
-pnpm exec vitest run      # unit tests; MSW runs in Node, there is no browser mock worker
-pnpm run test:e2e         # Playwright specs against the MSW proxy (e2e/mswProxy.ts)
-```
-See [`frontend/README.md`](./frontend/README.md) for full details.
+Each component starts with its own `dev.sh`, in its own terminal, in this order. No Docker.
 
-### Backend
 ```bash
-cd backend/
-./gradlew bootRun        # Spring Boot on :8080, local profile (Zonky embedded Postgres)
-./gradlew test           # Unit + Testcontainers integration tests
+cd studio-runner && ./dev.sh   # 1. browser runner (and the shared local setup the backend reads)
+cd backend && ./dev.sh         # 2. Spring Boot on :8080 (--seed for sample data) + Core stand-in
+cd frontend && ./dev.sh        # 3. Vite on :5173, proxying /api/v1 to the backend
 ```
-_(Backend scaffold in progress — see [`docs/specs/backend/`](./docs/specs/backend/).)_
+
+Each can be restarted on its own. See "Run locally" in [`studio-runner/README.md`](./studio-runner/README.md),
+[`backend/README.md`](./backend/README.md) and [`frontend/README.md`](./frontend/README.md) for
+prerequisites, ports, the shared directory and `.env.local` keys (including Vertex for Run Test).
+
+Tests: `cd frontend && pnpm exec vitest run` (MSW runs in Node); `cd backend && ./gradlew test`.
 
 ## Development Methodology
 

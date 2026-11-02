@@ -108,6 +108,77 @@ The child-output relay and report paths use the run's redactor. After the bounde
 phase, the coordinator clears scratch and wipes input and secret values before terminal
 delivery. The former artifact-1 `resolvedVars` correspondence validator is retired.
 
+## Run locally
+
+No Docker. Prerequisites: Node 24 (`.nvmrc`), `openssl`, a JDK `keytool` (JDK 21), and the pinned Chromium,
+installed once with `npm run browsers:install`.
+
+```bash
+./dev.sh          # from studio-runner/: build, prepare the shared files, start the runner on https://127.0.0.1:8090
+```
+
+It runs in the foreground; Ctrl+C drains the runner (up to 30 s) and stops its token issuer. Start order is
+**runner, then `backend/dev.sh`, then `frontend/dev.sh`**. The backend without the runner's files still starts,
+but Studio runs close `ERROR/DISPATCH_FAILED`.
+
+`dev.sh` depends on this folder only. It checks Node, `keytool` and Chromium, runs `npm ci` when `node_modules` is
+missing, runs `npm run build`, and frees the port only if the listener runs from this checkout (any other listener
+is reported by PID and left alone). It then runs `scripts/local-stack.mjs init`, starts `scripts/local-tokens.mjs`,
+and starts the runner under `env -i` (its config loader refuses any unknown `STUDIO_RUNNER_*` key) with the whole
+environment from `runner-environment.json`. Guided learning (capacity 1) and observed replay are on. Per-developer
+overrides go in `studio-runner/.env.local` (gitignored).
+
+### The shared directory
+
+The runner and the backend share state only through `$PUT_CHECKS_LOCAL_DIR` (default `~/.put-checks/local`, mode
+700, every file 0600). `init` is idempotent: it reuses what is valid, so a restart of either side keeps the same identity.
+
+| Path | Holds |
+|---|---|
+| `tls/` | local CA, runner and backend leaves, `backend.p12`, `trust.p12`, store password, health probe files |
+| `identity/service.token`, `identity/callback.token` | the two bearer identities (backend to runner, runner to backend) |
+| `issuer/issuer.{private,public}.pem`, `tokens/*.jwt` | guided-bridge issuer key and the 240 s service JWTs, refreshed every 30 s |
+| `catalog.json`, `backend-overlay.yml` | the runner build's observed catalog; the backend's guided/replay overlay (public values only) |
+| `backend.env` | `export` lines the backend `source`s: runner URL, both tokens, its TLS stores, local evidence store, overlay location |
+| `runner-environment.json`, `journal/`, `objects/`, `scratch/`, `tmp/`, `logs/` | the runner's environment and working data; `objects/` is also what the backend plays back; `logs/runner.log` is the runner's log |
+
+Certificates and the CA are valid 30 days and are regenerated when they would expire within a day.
+
+### Ports and environment
+
+| Variable | Default | |
+|---|---|---|
+| `PUT_CHECKS_LOCAL_DIR` | `~/.put-checks/local` | shared directory |
+| `PUT_CHECKS_RUNNER_PORT` | 8090 | the runner |
+| `PUT_CHECKS_BACKEND_PORT` | 8080 | where the runner reports back |
+| `PUT_CHECKS_GUIDED_PORT` | 8092 | the backend's guided connector |
+| `STUDIO_ALLOW_ALL_DOMAINS` | unset (on) | `true`/`false`, passed to the runner as `STUDIO_RUNNER_ALLOW_ALL_DOMAINS` |
+| `STUDIO_RUNNER_SERVICE_TOKEN`, `STUDIO_CALLBACK_SERVICE_TOKEN` | stored | use these identities instead |
+
+Navigation is limited to `localhost,example.com,practicetestautomation.com` unless allow-all is on (the default
+for now), the same list the backend's `application-local.yml` carries.
+
+### Restarting
+
+The runner can restart alone: the same CA, tokens and keys come back, so a running backend keeps dispatching. After a
+rebuild that changes the observed catalog (or after TLS is regenerated) `dev.sh` prints "restart the backend", because
+the backend reads `catalog.json` and its key stores at start.
+
+### Your own TLS identities
+
+To supply your own, set all eight keys; a partial or invalid set fails before anything is stopped and is never mixed
+with generated trust: `STUDIO_RUNNER_TLS_KEY_FILE`, `STUDIO_RUNNER_TLS_CERT_FILE`, `STUDIO_RUNNER_TLS_CA_FILE`,
+`STUDIO_RUNNER_CONTROLLER_CERTIFICATE_FINGERPRINT256` (backend leaf, uppercase colon-separated SHA256),
+`STUDIO_RUNNER_TLS_KEY_STORE`, `STUDIO_RUNNER_TLS_KEY_STORE_PASSWORD_FILE`, `STUDIO_RUNNER_TLS_TRUST_STORE`,
+`STUDIO_RUNNER_TLS_TRUST_STORE_PASSWORD_FILE`. `..._KEY_STORE_TYPE` and `..._TRUST_STORE_TYPE` default to `PKCS12`
+(`JKS` is accepted). Key, store and password files must have no group/other permissions; leaves need loopback SANs and
+both serverAuth and clientAuth usages; the runner CA file authenticates the backend, the backend trust store
+authenticates the runner (they may be independent issuers). Operator files are left untouched.
+
+The helper's checks run with `node --test scripts/local-stack.check.mjs` (temporary directories and an owned mTLS
+listener; they touch no port you run). `npm run test:fixtures` is the real-browser tier; `../tools/corun.sh` is the
+automated backend-plus-runner run.
+
 ## The real browser (story 10.12)
 
 **The browser is real from this story onward.** `src/main.ts` no longer ships a launcher that
@@ -161,51 +232,6 @@ as well as at compile time.
 A report with `browserStartedAt: null` carries **no** reading at all: every `startedAtMs`,
 `finishedAtMs`, `durationMs` and `atMs` is `null` and `steps` is empty. The snapshot enforces that
 as the producer.
-
-### Running it locally
-
-```bash
-npm run browsers:install   # pinned Chromium, at the version in package.json
-npm run build              # the child entry is spawned from dist/
-npm run test:fixtures      # the real-browser tier
-```
-
-`npm test` (the unit tier) launches **no** browser and downloads none: the Playwright adapter is
-written against a structural page/locator surface and is exercised against a hand-written page, and
-the child runtime is exercised against a fake browser factory.
-
-### Running it against the local backend (Studio v1 WP2)
-
-Verified 2026-09-18. From the repository root, `./dev.sh` builds this package, starts it on
-`127.0.0.1:8090` and starts the backend so that the two agree on both credentials. The runner's
-environment is **enumerated**, not inherited (`env -i`), because the loader refuses any unknown
-`STUDIO_RUNNER_*` key and the backend's own `STUDIO_RUNNER_BASE_URL`/`STUDIO_RUNNER_SERVICE_TOKEN` are
-exactly such keys. To start it by hand beside a backend on `:8080`:
-
-```bash
-npm run build
-env -i PATH="$PATH" HOME="$HOME" TMPDIR="$WORK" \
-  STUDIO_RUNNER_HOST=127.0.0.1 STUDIO_RUNNER_PORT=8090 STUDIO_RUNNER_POOL_SIZE=1 STUDIO_RUNNER_ALLOWED_DOMAINS=localhost,example.com,practicetestautomation.com \
-  STUDIO_RUNNER_SERVICE_IDENTITY="$STUDIO_RUNNER_SERVICE_TOKEN" \
-  STUDIO_RUNNER_CALLBACK_IDENTITY="$STUDIO_CALLBACK_SERVICE_TOKEN" \
-  STUDIO_RUNNER_CALLBACK_BASE_URL=http://127.0.0.1:8080 \
-  STUDIO_RUNNER_TLS_KEY_FILE="$TLS/runner.key" STUDIO_RUNNER_TLS_CERT_FILE="$TLS/runner.crt" \
-  STUDIO_RUNNER_TLS_CA_FILE="$TLS/ca.crt" \
-  STUDIO_RUNNER_CONTROLLER_CERTIFICATE_FINGERPRINT256="$BACKEND_CERT_FINGERPRINT256" \
-  STUDIO_RUNNER_SCRATCH_DIR="$WORK/scratch" STUDIO_RUNNER_OBJECT_STORE_DIR="$WORK/objects" \
-  node dist/main.js
-```
-
-`$WORK` is any directory you own; the scratch root must be a **child** of it, because the runner
-removes its scratch root on exit. The backend side is `STUDIO_RUNNER_BASE_URL=http://127.0.0.1:8090`
-plus the same two tokens (see `backend/README.md`, "Checks Studio end to end on a laptop"). The
-recording and terminal manifest land in `$WORK/objects`; `dev.sh` exports that exact directory as
-the backend's `STUDIO_EVIDENCE_DIRECTORY`, so playback, ranged reads and recovery work locally.
-The default provider is `local`. To activate Sonic, select `s3` and provide its endpoint, region,
-bucket, path-style choice and the two mounted credential-file paths.
-
-`../tools/corun.sh` is the automated form: `StudioCoRunIT` starts this process the same way and its
-leg 4 requires a real run against a loopback page to end `PASSED` with the ledger row `DONE`.
 
 ### Secrets and the video — a disclosed limitation
 
