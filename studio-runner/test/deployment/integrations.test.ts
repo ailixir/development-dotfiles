@@ -162,6 +162,8 @@ describe('production integration provider wiring', () => {
   });
 
   it.each([
+    // values-dev.yaml joined on the user decision of 2026-11-02 (same Studio flexibility everywhere).
+    ['values-dev.yaml', 'checks-studio-vertex-dev'],
     ['values-uat.yaml', 'checks-studio-vertex-uat'],
     ['values-prod.yaml', 'checks-studio-vertex-prod'],
   ] as const)(
@@ -192,6 +194,7 @@ describe('production integration provider wiring', () => {
   );
 
   it.each([
+    ['values-dev.yaml', 'checks-studio-vertex-dev'],
     ['values-uat.yaml', 'checks-studio-vertex-uat'],
     ['values-prod.yaml', 'checks-studio-vertex-prod'],
   ] as const)(

@@ -109,10 +109,10 @@ export const GUIDED_OVERLAY_FILE: string = (() => {
 /**
  * The three guided token inputs only, for value sets that turn guided mode ON themselves.
  *
- * `values-uat.yaml` enables guided learning (one replica, capacity 3) but, like the controller pin
- * and the observed catalog, commits no token input: the issuer, controller subject and public key
+ * `values-dev/uat/prod.yaml` enable guided learning (one replica, capacity 3) but, like the controller
+ * pin and the observed catalog, commit no token input: the issuer, controller subject and public key
  * come from the external token issuer at deploy time, and the render fails without them. Layered
- * for every UAT render in this tier (see `guidedInputs`); the negative cases omit it.
+ * for every dev, UAT and prod render in this tier (see `guidedInputs`); the negative cases omit it.
  */
 export const GUIDED_TOKEN_OVERLAY_FILE: string = writeValuesOverlay('guided-token-overlay.json', {
   studioRunner: { guided: { token: GUIDED_FIXTURE } },
@@ -154,15 +154,27 @@ export function writeValuesOverlay(name: string, values: unknown): string {
 /**
  * The fixture catalog as a values overlay, with the flags untouched.
  *
- * `values-uat.yaml` turns observed replay ON and commits no catalog on purpose (it comes at deploy
- * time), so a UAT render fails by design without them. This is the deploy-time input every
- * UAT render in this tier is given, exactly as {@link TEST_PIN} is, so the criteria that are not
+ * `values-dev/uat/prod.yaml` turn observed replay ON and commit no catalog on purpose (it comes at
+ * deploy time), so those renders fail by design without it. This is the deploy-time input every
+ * dev, UAT and prod render in this tier is given, exactly as {@link TEST_PIN} is, so the criteria that are not
  * about observed replay keep rendering. The negative cases (`observedInputs: false`) prove that
  * dropping it still fails the render.
  */
 export const OBSERVED_OVERLAY_FILE: string = writeValuesOverlay('observed-overlay.json', {
   studioObserved: { catalog: OBSERVED_FIXTURE.catalog },
 });
+
+/**
+ * The shipped environment value sets that turn Studio ON and so need the deploy-time inputs (the
+ * guided token inputs and the observed catalog) that no values file commits. Since the user decision
+ * of 2026-11-02 ("make sure all the environments have the same flexibility as we have local") that is
+ * dev, uat and prod alike; the base `values.yaml` (`null`) leaves the runner off and needs neither.
+ */
+export const STUDIO_ENV_VALUE_SETS: readonly string[] = ['values-dev.yaml', 'values-uat.yaml', 'values-prod.yaml'];
+
+function isStudioEnvValueSet(valuesFile: string | null | undefined): boolean {
+  return valuesFile !== undefined && valuesFile !== null && STUDIO_ENV_VALUE_SETS.includes(valuesFile);
+}
 
 /** Why `helm` cannot be used, or `null` when it can. Never a bare boolean: the reason is the test. */
 export function helmUnavailableReason(): string | null {
@@ -233,8 +245,9 @@ export interface RenderOptions {
   readonly enableRunner?: boolean;
   /**
    * `true` layers {@link GUIDED_OVERLAY_FILE} over the value set: guided mode on, one replica.
-   * `false` forces guided mode OFF, because `values-uat.yaml` ships it on (STUDIO-FLEX-001 item 5);
-   * every other shipped value set is off already. Left out, the value set is rendered as shipped.
+   * `false` forces guided mode OFF, because `values-dev/uat/prod.yaml` ship it on (STUDIO-FLEX-001
+   * item 5; dev and prod since the user decision of 2026-11-02); the base `values.yaml` is off
+   * already. Left out, the value set is rendered as shipped.
    */
   readonly guided?: boolean;
   /** Leaves the controller pin unset, to prove the render refuses without it. */
@@ -243,14 +256,14 @@ export interface RenderOptions {
   readonly observed?: boolean;
   /**
    * Layers {@link OBSERVED_OVERLAY_FILE} (the fixture catalog, flags untouched).
-   * Defaults to true for `values-uat.yaml`, which enables observed replay without committing the
-   * inputs, and for `observed: true`. Pass `false` to prove the render refuses without them.
+   * Defaults to true for `values-dev/uat/prod.yaml`, which enable observed replay without committing
+   * the inputs, and for `observed: true`. Pass `false` to prove the render refuses without them.
    */
   readonly observedInputs?: boolean;
   /**
    * Layers {@link GUIDED_TOKEN_OVERLAY_FILE} (the three guided token inputs, nothing else).
-   * Defaults to true for `values-uat.yaml`, which turns guided learning on without committing the
-   * inputs. Pass `false` to prove the render refuses without them.
+   * Defaults to true for `values-dev/uat/prod.yaml`, which turn guided learning on without committing
+   * the inputs. Pass `false` to prove the render refuses without them.
    */
   readonly guidedInputs?: boolean;
 }
@@ -269,9 +282,9 @@ export function renderOutcome(options: RenderOptions = {}): RenderOutcome {
   }
   if (options.guided === true) args.push('-f', GUIDED_OVERLAY_FILE);
   const observedInputs =
-    options.observedInputs ?? (options.observed === true || options.valuesFile === 'values-uat.yaml');
+    options.observedInputs ?? (options.observed === true || isStudioEnvValueSet(options.valuesFile));
   if (observedInputs) args.push('-f', OBSERVED_OVERLAY_FILE);
-  const guidedInputs = options.guidedInputs ?? options.valuesFile === 'values-uat.yaml';
+  const guidedInputs = options.guidedInputs ?? isStudioEnvValueSet(options.valuesFile);
   if (guidedInputs && options.guided !== true) args.push('-f', GUIDED_TOKEN_OVERLAY_FILE);
   if (options.observed === true) {
     args.push('--set', 'studioObserved.validationEnabled=true', '--set', 'studioObserved.replayEnabled=true');

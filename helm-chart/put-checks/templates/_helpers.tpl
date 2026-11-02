@@ -371,7 +371,7 @@ to 1 as well. The default is deliberately not changed.
 Studio navigation: the domain whitelist (STUDIO-FLEX-001 item 1). One list,
 `studioNavigation.allowedDomains`, feeds BOTH images: the backend's `studio.navigation.allowed-domains` and the runner's
 `STUDIO_RUNNER_ALLOWED_DOMAINS`. Empty denies every navigation. One boolean,
-`studioNavigation.allowAllDomains` (default false), feeds both images the same way: the backend's
+`studioNavigation.allowAllDomains` (default true, as in local), feeds both images the same way: the backend's
 `studio.navigation.allow-all-domains` and the runner's `STUDIO_RUNNER_ALLOW_ALL_DOMAINS`.
 ------------------------------------------------------------------------------------------------
 */}}

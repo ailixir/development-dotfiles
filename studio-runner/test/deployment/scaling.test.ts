@@ -22,6 +22,7 @@ import {
   runnerDeployment,
   RUNNER_FRAGMENT,
   soleContainer,
+  STUDIO_ENV_VALUE_SETS,
   VALUE_SETS,
   valueSetName,
 } from './helm.js';
@@ -74,18 +75,27 @@ function runnerHpas(outcome: RenderOutcome): readonly K8sDocument[] {
   });
 }
 
+/** The value sets that ship guided learning on: dev, uat and prod (user decision 2026-11-02). */
+function shipsGuided(valuesFile: string | null): boolean {
+  return valuesFile !== null && STUDIO_ENV_VALUE_SETS.includes(valuesFile);
+}
+
 /**
- * `AUTOSCALING_ON`, with guided learning off for the value set that ships it on (`values-uat.yaml`,
- * STUDIO-FLEX-001 item 5): guided mode and the autoscaler are exclusive, and the exclusion is asserted
+ * `AUTOSCALING_ON`, with guided learning off for the value sets that ship it on (`values-dev/uat/prod.yaml`;
+ * STUDIO-FLEX-001 item 5, and dev and prod since the user decision of 2026-11-02 that every environment
+ * has UAT's Studio shape): guided mode and the autoscaler are exclusive, and the exclusion is asserted
  * by its own block below.
  */
 function autoscalingOn(valuesFile: string | null): Readonly<Record<string, string>> {
-  return valuesFile === 'values-uat.yaml' ? { ...AUTOSCALING_ON, 'studioRunner.guided.enabled': 'false' } : AUTOSCALING_ON;
+  return shipsGuided(valuesFile) ? { ...AUTOSCALING_ON, 'studioRunner.guided.enabled': 'false' } : AUTOSCALING_ON;
 }
 
-/** Static replicas per value set: two, except UAT, whose guided learning needs exactly one pod (A2.6). */
+/**
+ * Static replicas per value set: two for the base chart, one for every environment, whose guided
+ * learning needs exactly one pod (A2.6).
+ */
 function staticReplicas(valuesFile: string | null): number {
-  return valuesFile === 'values-uat.yaml' ? 1 : 2;
+  return shipsGuided(valuesFile) ? 1 : 2;
 }
 
 const EACH_SET = VALUE_SETS.map((file) => [valueSetName(file), file] as const);

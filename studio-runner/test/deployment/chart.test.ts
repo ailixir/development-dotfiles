@@ -44,6 +44,7 @@ import {
   RUNNER_FRAGMENT,
   sharedNamespaceViolations,
   soleContainer,
+  STUDIO_ENV_VALUE_SETS,
   VALUE_SETS,
   valueSetName,
   CHART_DIR,
@@ -1988,15 +1989,21 @@ describe('STUDIO-OBS-009 OI-06 B5 — the closed list and the chart-managed rule
 });
 
 describe('STUDIO-OBS-009 OI-06 B5 — observed replay OFF (the chart default)', () => {
+  // Only the base `values.yaml` ships replay off. Since the user decision of 2026-11-02 (every
+  // environment has the same Studio flexibility as local) dev, uat and prod ship it ON, so their
+  // "off" shape is reached by turning both flags off, as UAT's always was.
   const OFF: readonly (readonly [string, string | null, Record<string, string>])[] = [
-    ...VALUE_SETS.filter((file) => file !== UAT).map(
+    ...VALUE_SETS.filter((file) => file === null).map(
       (file) => [valueSetName(file), file, {}] as const,
     ),
-    [
-      'values-uat.yaml with both flags turned off',
-      UAT,
-      { 'studioObserved.validationEnabled': 'false', 'studioObserved.replayEnabled': 'false' },
-    ],
+    ...STUDIO_ENV_VALUE_SETS.map(
+      (file) =>
+        [
+          `${file} with both flags turned off`,
+          file,
+          { 'studioObserved.validationEnabled': 'false', 'studioObserved.replayEnabled': 'false' },
+        ] as const,
+    ),
   ];
 
   it.each(OFF)(
@@ -2027,9 +2034,13 @@ describe('STUDIO-OBS-009 OI-06 B5 — observed replay OFF (the chart default)', 
 describe('STUDIO-OBS-009 OI-06 B5 — observed replay ON', () => {
   const EACH = VALUE_SETS.map((file) => [valueSetName(file), file] as const);
 
-  it('is on in values-uat.yaml, with no catalog committed', () => {
-    const env = envValues(soleContainer(runnerDeployment(render({ valuesFile: UAT }))));
+  // User decision 2026-11-02: dev and prod are on exactly like UAT, and none commits a catalog.
+  it.each(STUDIO_ENV_VALUE_SETS)('is on in %s, with no catalog committed', (valuesFile) => {
+    const env = envValues(soleContainer(runnerDeployment(render({ valuesFile }))));
     for (const key of OBSERVED_FLAG_KEYS) expect(env[key], key).toBe('true');
+    const none = renderOutcome({ valuesFile, observedInputs: false });
+    expect(none.ok, `${valuesFile} rendered observed replay with no catalog`).toBe(false);
+    expect(none.error).toContain('studioObserved.catalog');
   });
 
   it.each(EACH)(
@@ -2498,8 +2509,10 @@ describe('STUDIO-FLEX-001 item 5 — concurrent learning sessions on the one gui
     expect(outcome.error).toContain('studioRunner.replicaCount: 1');
   });
 
-  it('values-uat.yaml ships guided learning on: one replica, capacity 3, a replay pool of 2', () => {
-    const outcome = render({ valuesFile: UAT });
+  // User decision 2026-11-02: "make sure all the environments have the same flexibility as we have
+  // local". Dev and prod ship guided learning on exactly like UAT, so each assertion runs over all three.
+  it.each(STUDIO_ENV_VALUE_SETS)('%s ships guided learning on: one replica, capacity 3, a replay pool of 2', (valuesFile) => {
+    const outcome = render({ valuesFile });
     const deployment = runnerDeployment(outcome);
     const env = envValues(soleContainer(deployment));
     expect(env['STUDIO_RUNNER_GUIDED_ENABLED']).toBe('true');
@@ -2510,15 +2523,18 @@ describe('STUDIO-FLEX-001 item 5 — concurrent learning sessions on the one gui
     for (const role of ['api', 'worker'] as const) {
       expect(mountedSpringProperties(outcome, role)['studio.guided-authoring.max-concurrent-sessions'], role).toBe(3);
     }
+    // The guided mTLS chain is mandatory on the API in every environment, the dev one included, whatever
+    // the Spring profile file says.
+    expect(mountedSpringProperties(outcome, 'api')['studio.guided-authoring.mtls-required'], valuesFile).toBe(true);
   });
 
-  it('values-uat.yaml commits no token input: the render fails without them, naming each, and invents none', () => {
-    const none = renderOutcome({ valuesFile: UAT, guidedInputs: false });
-    expect(none.ok, 'UAT rendered guided mode with no issuer, subject or public key').toBe(false);
+  it.each(STUDIO_ENV_VALUE_SETS)('%s commits no token input: the render fails without them, naming each, and invents none', (valuesFile) => {
+    const none = renderOutcome({ valuesFile, guidedInputs: false });
+    expect(none.ok, `${valuesFile} rendered guided mode with no issuer, subject or public key`).toBe(false);
     expect(none.error).toContain('studioRunner.guided.token.issuer is required');
 
     const issuerOnly = renderOutcome({
-      valuesFile: UAT,
+      valuesFile,
       guidedInputs: false,
       args: ['--set-string', 'studioRunner.guided.token.issuer=https://issuer.example.test'],
     });
@@ -2526,7 +2542,7 @@ describe('STUDIO-FLEX-001 item 5 — concurrent learning sessions on the one gui
     expect(issuerOnly.error).toContain('studioRunner.guided.token.controllerSubject is required');
 
     const noKey = renderOutcome({
-      valuesFile: UAT,
+      valuesFile,
       guidedInputs: false,
       args: [
         '--set-string',
@@ -2538,8 +2554,39 @@ describe('STUDIO-FLEX-001 item 5 — concurrent learning sessions on the one gui
     expect(noKey.ok).toBe(false);
     expect(noKey.error).toContain('studioRunner.guided.token.publicKey is required');
 
-    const committed = readFileSync(join(CHART_DIR, 'values-uat.yaml'), 'utf8');
-    expect(committed, 'a token input is committed in values-uat.yaml').not.toMatch(/\n\s+(issuer|controllerSubject|publicKey):\s*\S/u);
+    const committed = readFileSync(join(CHART_DIR, valuesFile), 'utf8');
+    expect(committed, `a token input is committed in ${valuesFile}`).not.toMatch(/\n\s+(issuer|controllerSubject|publicKey):\s*\S/u);
+  });
+});
+
+// User decision 2026-11-02: Studio is on in EVERY environment, not just UAT. This block pins the
+// decision itself so that reverting dev or prod to "runner off" (the old by-design shape) fails here
+// by name rather than showing up as a run that is refused DISPATCH_FAILED / 409 RUNTIME_INCOMPATIBLE.
+describe('Studio is on in every shipped environment (user decision 2026-11-02)', () => {
+  it.each(STUDIO_ENV_VALUE_SETS)('%s: the runner is on by itself, with no --set studioRunner.enabled', (valuesFile) => {
+    // enableRunner: false => the harness does NOT add `studioRunner.enabled=true`; the value set decides.
+    const outcome = render({ valuesFile, enableRunner: false });
+    expect(
+      byKind(outcome, 'Deployment').filter((d) => (d.metadata?.name ?? '').includes(RUNNER_FRAGMENT)),
+      `${valuesFile} does not render the runner`,
+    ).toHaveLength(1);
+  });
+
+  it.each(STUDIO_ENV_VALUE_SETS)('%s: install demands the deploy-time inputs (fail-closed), naming the first missing one', (valuesFile) => {
+    const bare = renderOutcome({ valuesFile, enableRunner: false, omitPin: true, guidedInputs: false, observedInputs: false });
+    expect(bare.ok, `${valuesFile} rendered with none of the deploy-time inputs`).toBe(false);
+    expect(bare.error).toMatch(/studioRunner\.guided\.token\.issuer is required|controllerCertificateFingerprint256 is required|studioObserved\.catalog/u);
+  });
+
+  it.each(STUDIO_ENV_VALUE_SETS)('%s: the API advertises UI_TEST and the runner, API and worker share the Vertex gateway', (valuesFile) => {
+    const outcome = render({ valuesFile, enableRunner: false });
+    expect(mountedSpringProperties(outcome, 'api')['checks.sources.UI_TEST'], valuesFile).toBe('true');
+    // The worker carries no override: it inherits the application default (true), and the chart
+    // refuses an explicit false on it in the deployed profiles.
+    expect(mountedSpringProperties(outcome, 'worker')['checks.sources.UI_TEST'], valuesFile).not.toBe('false');
+    for (const component of ['-api', '-worker']) {
+      expect(envValues(soleContainer(deploymentNamed(outcome, component))).STUDIO_GATEWAY_PROVIDER, `${valuesFile} ${component}`).toBe('vertex');
+    }
   });
 });
 

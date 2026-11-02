@@ -379,12 +379,15 @@ frontend:
 # backend container: it runs untrusted pages in a real browser and holds none of the platform's
 # credentials.
 #
-# **Disabled by default.** CI stage 8 renders with `--set studioRunner.enabled=true`, and the
-# staging values turn it on deliberately. An off-by-default component cannot be deployed by
-# forgetting to configure it.
+# **Disabled by default in this base file, ON in every shipped environment file** (dev, uat, prod;
+# user decision 2026-11-02: every environment has the same Studio flexibility as local). CI stage 8
+# renders the base with `--set studioRunner.enabled=true`. An environment install therefore needs the
+# deploy-time inputs and Secrets listed in its `values-<env>.yaml` (controller pin, guided token
+# issuer/subject/public key, observed catalog) and fails the render naming the key without them.
 # ---------------------------------------------------------------------------
 studioRunner:
-  # Turning this on also needs `studioObserved.replayEnabled`/`validationEnabled` plus
+  # Off in this base file only: values-dev/uat/prod all set it to true (user decision 2026-11-02).
+  # Turning it on also needs `studioObserved.replayEnabled`/`validationEnabled` plus
   # `studioObserved.catalog` (the runner image's catalog entry; no default) and
   # `checks.sources.UI_TEST=true`, else the catalog is empty and Studio runs get 409 RUNTIME_INCOMPATIBLE.
   enabled: false

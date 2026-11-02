@@ -216,7 +216,7 @@ spec:
             # runner denies every navigation. Chart-managed: not settable through `runnerEnv`.
             - name: STUDIO_RUNNER_ALLOWED_DOMAINS
               value: {{ include "put-checks.studioNavigation.allowedDomains" . | quote }}
-            # The allow-all switch (default "false"): the same single value the backend reads as
+            # The allow-all switch (default "true", as in local): the same single value the backend reads as
             # `studio.navigation.allow-all-domains`. When "true" the list above is ignored.
             - name: STUDIO_RUNNER_ALLOW_ALL_DOMAINS
               value: {{ include "put-checks.studioNavigation.allowAllDomains" . | quote }}
