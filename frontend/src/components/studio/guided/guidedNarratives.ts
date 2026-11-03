@@ -170,20 +170,6 @@ export const GUIDED_COPY = {
     note: 'A published learn whose result has proof: null. The refusal code is never public (the contract carries none); Run, a replay, is the action. Nothing retries on its own.',
     facts: { file: S.openapi, quote: '`proof` is `null` while the replay was refused or has not been' },
   },
-  learningAttemptTitle: {
-    template: 'Learning attempt',
-    basis: 'delegated',
-    source: { file: S.prd, quote: 'labelled as an attempt and never as a proof' },
-    note: 'Heading of the recording kept for a learn that did not publish.',
-    facts: { file: S.prd, quote: 'the player shows the **learning attempt**' },
-  },
-  learningAttemptNote: {
-    template: 'Recording of the learning attempt. It is not a proof: a proof is a replay of the saved steps.',
-    basis: 'delegated',
-    source: { file: S.prd, quote: 'labelled as an attempt and never as a proof' },
-    note: 'Beside the kept recording of a learn that did not publish (FAILED, CANCELLED, EXPIRED, UNKNOWN_OUTCOME, PUBLICATION_CONFLICT, or SUCCEEDED with publication PENDING or REFUSED).',
-    facts: { file: S.prd, quote: 'After a learn that did not publish, the player shows the **learning attempt**' },
-  },
 
   // -------------------------------------------------------------------------------------------
   // Clarification (GuidedClarification), AC-3
@@ -444,6 +430,29 @@ export const GUIDED_COPY = {
     note: 'User decision 2026-11-01: FIX-38 readable failure for an exhausted step repair (see stepNotResolvedTitle). States the recorded facts: the repair loop makes 3 attempts per step and the generated code must work on the page; the cause (ambiguity or invalid code) is not named, and the remedy is the author rewording the step. The raw code stays visible as a secondary caption.',
     facts: { file: S.req008, quote: 'the repair loop (3 attempts inside the step clock)' },
   },
+  targetNotFoundTitle: {
+    template: "Studio couldn't find what step {N} describes",
+    basis: 'delegated',
+    source: { file: S.errorSchema, quote: 'MISSING_SOURCE' },
+    note: 'User decision 2026-11-03: readable failure for a learn that FAILED with MISSING_SOURCE (the model answered INSUFFICIENT_EVIDENCE: nothing on the page matched the step). Title of the notice shown at a step whose number and authored text are both known. Replaces the raw-code view for that case only; the start refusal MISSING_SOURCE (Open Variables) is unchanged.',
+    facts: { file: S.errorSchema, quote: 'MISSING_SOURCE' },
+  },
+  targetNotFoundBody: {
+    template:
+      'Studio looked at the page after the previous step and found nothing that matches "{text}". Watch the recording to see what the page showed at that moment, then reword the step to name the element by the text it shows (for example, the option or button label), and press Run.',
+    basis: 'delegated',
+    source: { file: S.errorSchema, quote: 'MISSING_SOURCE' },
+    note: 'User decision 2026-11-03 (see targetNotFoundTitle). States the recorded fact (the page, as observed after the previous step, held nothing matching the authored sentence) and the remedy (watch the recording, reword the step to name the element by its visible text, press Run). The raw code stays visible as a secondary caption.',
+    facts: { file: S.errorSchema, quote: 'MISSING_SOURCE' },
+  },
+  targetNotFoundBodyFirstStep: {
+    template:
+      'Studio looked at the page and found nothing that matches "{text}". Watch the recording to see what the page showed at that moment, then reword the step to name the element by the text it shows (for example, the option or button label), and press Run.',
+    basis: 'delegated',
+    source: { file: S.errorSchema, quote: 'MISSING_SOURCE' },
+    note: 'User decision 2026-11-03 (see targetNotFoundBody). The same sentence for step 1, which has no previous step to say "after".',
+    facts: { file: S.errorSchema, quote: 'MISSING_SOURCE' },
+  },
   stoppedAtStep: {
     template: 'Studio stopped at step {N}.',
     basis: 'delegated',
@@ -688,25 +697,12 @@ export const GUIDED_COPY = {
     basis: 'verbatim',
     source: { file: S.story, quote: 'Seek to step N' },
   },
-  seekToAction: {
-    template: 'Seek to action: {<safe label>}',
-    basis: 'verbatim',
-    source: { file: S.story, quote: 'Seek to action: <safe label>' },
-  },
-
   seekMarkerStep: {
     template: 'Jumped to step {N}.',
     basis: 'delegated',
     source: { file: S.uxFix067, quote: '@ux-design-expert writes the copy for the round-067 Studio UX fixes' },
     note: 'Round 067 D2: caption under the used seek control.',
     facts: { file: S.uxFix067, quote: 'The last seek on this recording went to the start stamp of the step' },
-  },
-  seekMarkerAction: {
-    template: 'Jumped to step {N}, action: {<safe label>}.',
-    basis: 'delegated',
-    source: { file: S.uxFix067, quote: '@ux-design-expert writes the copy for the round-067 Studio UX fixes' },
-    note: 'Round 067 D2: caption under the used action seek control.',
-    facts: { file: S.uxFix067, quote: 'The last seek went to the stamp of that action' },
   },
   runInProgressEvidence: {
     template: 'The recording will appear here when this run ends.',

@@ -14,6 +14,10 @@ The outline is the current page, one line per node: `- role "name" [ref] {states
 
 When the step names a containing region (`Click Open in Primary workspace`), the target is the node whose name matches the step and whose enclosing outline node, an ancestor line or its in hint, is named by that region. If exactly one node qualifies, write the code for it. If several qualify, return a clarification with only those nodes.
 
+A step may name a widget by its kind (autocomplete, suggestions, dropdown, menu, picker, popup, results) instead of by its text. That widget is whatever the outline shows doing that job, whatever its role: often a popup or group that appeared after the previous step typed into or opened a control, drawn as a listbox, menu, dialog, tooltip or list, or as a group of button, link, option, menuitem or listitem lines, frequently at the end of the outline (portals). Lines marked `{value withheld}` are real items you can target. A positional choice ("the first option", "the second result") selects by position among that popup's items, scoped to its container (for example `page.getByRole('tooltip').getByRole('button').first()`), never by a page-wide `.first()`. Only when the outline shows no such popup or group is the target missing, and the clarification above applies. A step that names a specific text the page does not show stays a missing target.
+
+`context.pageChanges` is null on the first step. Otherwise it says what the previous step did (`previousStep`: its number, text and code) and what the page shows now that it did not show when that step's code was written (`appeared`: outline lines, at most 40; `goneCount`: how many lines disappeared). Content that appeared right after the previous step, such as a popup, suggestions or a loaded panel, is usually what the current step acts on.
+
 A null observation means the browser is on a blank page and there is nothing to act on. If the step names a destination (an address or a page to open), navigate with page.goto to it and add an expect only if the step states an outcome such as the title or URL. If the step names no destination, return a clarification with reason INSUFFICIENT_EVIDENCE and no choices.
 
 Examples. The pages are invented; copy the shape of the reply, not the names.
@@ -32,3 +36,5 @@ vars['B1'] = (await page.getByRole('row', { name: 'Booking number' }).getByRole(
 await page.goto('https://shop.example.test/orders');
 8. Step "Check that the page contains "Order received"." (outline has - heading "Order received" [e2] and - paragraph "Order received. A receipt was sent." [e3]). The step names no element, so check the page text, not one of the two nodes:
 await expect(page.locator('body')).toContainText('Order received', { useInnerText: true });
+9. Step "Select the first suggestion." after the previous step typed into the search box (outline has - textbox "Find a venue" [e4] and, at the end, - tooltip [e20] {value withheld} holding - button [e22] {value withheld} and - button [e25] {value withheld}). The suggestions are the popup, so the first one is chosen by position inside its container, not by a name:
+await page.getByRole('tooltip').getByRole('button').first().click();

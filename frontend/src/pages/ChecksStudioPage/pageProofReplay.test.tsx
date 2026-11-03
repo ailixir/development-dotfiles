@@ -1,6 +1,6 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { ReactNode } from 'react';
-import { act, cleanup, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
 import { http, HttpResponse } from 'msw';
@@ -302,7 +302,7 @@ describe('a learn that published: its proof is the replay of the published revis
 });
 
 describe('a learn that did not publish keeps its recording as the learning attempt', () => {
-  it('keeps learning recording and seek in Logs, no receipt or proof, and Run enabled', async () => {
+  it('shows learning recording and seek on Proof, none in Logs, no receipt or proof, and Run enabled', async () => {
     setGuidedScenario(
       endsIn('FAILED', { atStepIndex: 1, failureCode: 'ASSERTION_FAILED', video: 'AVAILABLE' }),
       unlearnedDraft.id,
@@ -312,14 +312,23 @@ describe('a learn that did not publish keeps its recording as the learning attem
     renderPage();
     await user().click(await runButton());
 
-    await screen.findByTestId('learning-recording-in-logs', {}, WAIT);
-    expect(document.querySelector('video')).toBeNull();
+    const attempt = await screen.findByTestId('guided-attempt', {}, WAIT);
+    expect(screen.queryByTestId('learning-recording-in-logs')).toBeNull();
+    expect(screen.queryByText(/available in Logs/u)).toBeNull();
+    const proof = screen.getByRole('tabpanel', { name: 'Proof' });
     expect(screen.getByTestId('guided-completion')).toHaveAttribute('data-kind', 'failed');
-    await user().click(screen.getByRole('tab', { name: 'Logs' }));
-    expect(await screen.findByTestId('guided-attempt-title', {}, WAIT)).toHaveTextContent('Learning attempt');
-    expect(screen.getByTestId('guided-attempt-note')).toHaveTextContent('It is not a proof');
-    expect(await screen.findByTestId('video-evidence-player', {}, WAIT)).toBeInTheDocument();
+    expect(within(attempt).getByTestId('execution-steps')).toBeInTheDocument();
+    expect(await within(attempt).findByTestId('video-evidence-player', {}, WAIT)).toBeInTheDocument();
+    expect(within(proof).getByTestId('step-status-1')).toHaveAttribute('data-status', 'FAIL');
+    expect(screen.queryByText('Learning attempt')).toBeNull();
     expect(screen.getByTestId('video-evidence')).toHaveAttribute('data-evidence-kind', 'guided');
+    expect(within(proof).getByRole('button', { name: 'Seek to step 1' })).toBeInTheDocument();
+    await user().click(screen.getByRole('tab', { name: 'Logs' }));
+    const logs = screen.getByRole('tabpanel', { name: 'Logs' });
+    expect(within(logs).queryByTestId('guided-attempt')).toBeNull();
+    expect(within(logs).queryByTestId('video-evidence-player')).toBeNull();
+    expect(within(logs).queryByRole('button', { name: /^Seek to step/u })).toBeNull();
+    await user().click(screen.getByRole('tab', { name: 'Proof' }));
     expect(screen.getByRole('button', { name: 'Seek to step 1' })).toBeInTheDocument();
     expect(screen.getByTestId('guided-completion')).toHaveAttribute('data-kind', 'failed');
     expect(screen.queryByTestId('guided-proof-receipt')).toBeNull();
@@ -415,5 +424,79 @@ describe('?autorun=1 and a proof', () => {
     // The draft is still unlearned in this fixture, so the autorun is a learn: one more start.
     await waitFor(() => expect(requests('POST', STARTS)).toHaveLength(2), WAIT);
     expect(requests('POST', EXECUTES)).toHaveLength(0);
+  }, TEST_TIMEOUT_MS);
+});
+
+describe('after a reload in a fresh tab, Proof restores the latest attempt only when it FAILED (read-only)', () => {
+  const READS_OF_SESSION = /\/studio\/guided-sessions\/(?!latest$)[^/]+$/u;
+  const FINALIZES = /\/studio\/guided-sessions\/[^/]+\/finalize$/u;
+
+  /** What a fresh tab has: no pointer, no store session, no latches; the server keeps the attempt. */
+  function reloadInFreshTab(): void {
+    cleanup();
+    window.sessionStorage.clear();
+    resetGuidedSessionRuntime();
+    store.dispatch(clearGuidedSession({ testId: unlearnedDraft.id }));
+    observed.length = 0;
+  }
+
+  it('follows a FAILED attempt: failure, recording and seek on Proof, with no start, finalize, execute or pointer', async () => {
+    setGuidedScenario(
+      endsIn('FAILED', { atStepIndex: 1, failureCode: 'ASSERTION_FAILED', video: 'AVAILABLE' }),
+      unlearnedDraft.id,
+    );
+    useProofTransport('never');
+    serveDraft(unlearnedDraft);
+    renderPage();
+    await user().click(await runButton());
+    await screen.findByTestId('guided-attempt', {}, WAIT);
+    const failedSessionId = sessionId();
+
+    reloadInFreshTab();
+    renderPage();
+
+    const proof = screen.getByRole('tabpanel', { name: 'Proof' });
+    const attempt = await within(proof).findByTestId('guided-attempt', {}, WAIT);
+    expect(within(attempt).getByTestId('execution-steps')).toBeInTheDocument();
+    expect(await within(attempt).findByTestId('video-evidence-player', {}, WAIT)).toBeInTheDocument();
+    expect(within(proof).getByTestId('guided-completion')).toHaveAttribute('data-kind', 'failed');
+    expect(within(proof).getByRole('button', { name: 'Seek to step 1' })).toBeInTheDocument();
+    expect(screen.queryByText('Run your test')).toBeNull();
+    expect(sessionId()).toBe(failedSessionId);
+    expect(requests('GET', READS_OF_SESSION).length).toBeGreaterThan(0);
+    expect(requests('POST', STARTS)).toHaveLength(0);
+    expect(requests('POST', FINALIZES)).toHaveLength(0);
+    expect(requests('POST', EXECUTES)).toHaveLength(0);
+    expect(window.sessionStorage.length).toBe(0);
+  }, TEST_TIMEOUT_MS);
+
+  it('follows nothing when the latest attempt SUCCEEDED', async () => {
+    useProofTransport('never');
+    serveDraft(unlearnedDraft);
+    renderPage();
+    await user().click(await runButton());
+    await screen.findByTestId('guided-proof-receipt', {}, WAIT);
+
+    reloadInFreshTab();
+    useProofTransport('never');
+    renderPage();
+
+    expect(await screen.findByText('Run your test', {}, WAIT)).toBeInTheDocument();
+    await quiet();
+    expect(sessionId()).toBeUndefined();
+    expect(requests('GET', READS_OF_SESSION)).toHaveLength(0);
+    expect(screen.queryByTestId('guided-attempt')).toBeNull();
+    expect(requests('POST', STARTS)).toHaveLength(0);
+  }, TEST_TIMEOUT_MS);
+
+  it('follows nothing when the test has no attempt', async () => {
+    serveDraft(unlearnedDraft);
+    renderPage();
+
+    expect(await screen.findByText('Run your test', {}, WAIT)).toBeInTheDocument();
+    await quiet();
+    expect(sessionId()).toBeUndefined();
+    expect(requests('GET', READS_OF_SESSION)).toHaveLength(0);
+    expect(screen.queryByTestId('guided-completion')).toBeNull();
   }, TEST_TIMEOUT_MS);
 });

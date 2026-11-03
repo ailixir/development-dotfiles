@@ -757,7 +757,10 @@ describe('STUDIO-UNIFY-001.6: a failed learn is marked in the editor, told in Lo
     await user().click(screen.getByRole('button', { name: 'Actions for step 2' }));
     await user().click(await screen.findByRole('menuitem', { name: 'Delete step' }));
     await waitFor(() => expect(screen.queryByRole('textbox', { name: 'Step 2' })).toBeNull(), WAIT);
-    expect(screen.queryByTestId(marker)).toBeNull();
+    // The editor rows only: Proof's step list keeps the run's own record of the failed step.
+    for (const field of screen.getAllByRole('textbox', { name: /^Step \d+$/ })) {
+      expect(within(field.closest('li') as HTMLElement).queryByTestId(marker)).toBeNull();
+    }
   }, TEST_TIMEOUT_MS);
 
   it('the marker is gone when the next Run learns the test', async () => {

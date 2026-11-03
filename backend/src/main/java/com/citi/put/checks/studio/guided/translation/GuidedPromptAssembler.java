@@ -185,6 +185,89 @@ public final class GuidedPromptAssembler {
     return masked;
   }
 
+  /** The most outline lines {@code pageChanges.appeared} carries. */
+  static final int MAX_APPEARED_LINES = 40;
+
+  private static final java.util.regex.Pattern OUTLINE_REF =
+      java.util.regex.Pattern.compile("\\s*\\[e\\d+\\]");
+
+  /**
+   * What the step just completed did and what the page shows now that it did not show when that
+   * step's code was generated. Null on the first step and whenever the before-outline or the
+   * previous step's code was not recorded for the step directly before the current one. Only the
+   * sanitized outline and the (secret-masked) code and step text cross; the outline is not changed.
+   */
+  private JsonNode pageChanges(JsonNode session, JsonNode progress, JsonNode state) {
+    var none = com.fasterxml.jackson.databind.node.NullNode.instance;
+    int stepIndex = progress.path("stepIndex").asInt();
+    JsonNode steps = session.path("sourceSteps");
+    if (stepIndex < 1
+        || stepIndex > steps.size()
+        || !progress.path("outlineBeforeLastAction").isTextual()
+        || !progress.path("lastActionCode").isTextual()
+        || !progress.path("observation").path("outline").isTextual()
+        || !progress
+            .path("lastActionStepId")
+            .asText()
+            .equals(steps.get(stepIndex - 1).path("stepId").asText())) {
+      return none;
+    }
+    String previousStepId = steps.get(stepIndex - 1).path("stepId").asText();
+    String previousText = null;
+    for (JsonNode step : state.path("manifest").path("sourceSteps")) {
+      if (step.path("stepId").asText().equals(previousStepId) && step.path("text").isTextual()) {
+        previousText = step.path("text").asText();
+      }
+    }
+    if (previousText == null || previousText.isEmpty()) {
+      return none;
+    }
+    List<String> appeared = new java.util.ArrayList<>();
+    int gone =
+        diffOutlines(
+            progress.path("outlineBeforeLastAction").asText(),
+            progress.path("observation").path("outline").asText(),
+            appeared);
+    ObjectNode changes = contracts.object();
+    changes
+        .putObject("previousStep")
+        .put("number", stepIndex)
+        .put("text", maskSecretTokens(previousText))
+        .put("code", maskSecretTokens(progress.path("lastActionCode").asText()));
+    var lines = changes.putArray("appeared");
+    appeared.stream().limit(MAX_APPEARED_LINES).forEach(lines::add);
+    changes.put("goneCount", gone);
+    return changes;
+  }
+
+  /**
+   * Fills {@code appeared} with the lines of {@code after} that {@code before} lacks (compared with
+   * the {@code [eN]} refs stripped and whitespace trimmed, as a multiset; the line is kept as
+   * written) and returns how many lines of {@code before} are gone.
+   */
+  static int diffOutlines(String before, String after, List<String> appeared) {
+    java.util.Map<String, Integer> remaining = new java.util.HashMap<>();
+    for (String line : before.split("\n")) {
+      remaining.merge(outlineKey(line), 1, Integer::sum);
+    }
+    for (String line : after.split("\n")) {
+      String key = outlineKey(line);
+      if (key.isEmpty()) {
+        continue;
+      }
+      if (remaining.merge(key, -1, Integer::sum) < 0) {
+        remaining.put(key, 0);
+        appeared.add(line);
+      }
+    }
+    remaining.remove("");
+    return remaining.values().stream().mapToInt(Integer::intValue).sum();
+  }
+
+  private static String outlineKey(String line) {
+    return OUTLINE_REF.matcher(line).replaceAll("").trim();
+  }
+
   ObjectNode buildPositiveContext(
       GuidedModelRequest.Kind kind,
       JsonNode session,
@@ -306,6 +389,9 @@ public final class GuidedPromptAssembler {
         progress.has("executionEvidence")
             ? progress.path("executionEvidence")
             : com.fasterxml.jackson.databind.node.NullNode.instance);
+    if (kind == GuidedModelRequest.Kind.STEP_CODE) {
+      context.set("pageChanges", pageChanges(session, progress, state));
+    }
     int stepIndex = progress.path("stepIndex").asInt();
     context
         .putObject("coordinate")

@@ -93,7 +93,8 @@ export type VideoEvidencePanelProps =
       readonly guided: GuidedVideoEvidence;
       readonly snapshot?: undefined;
       readonly runInProgress?: undefined;
-      readonly compact?: undefined;
+      /** As for a replay: a playable recording needs no title or statement inside its Proof card. */
+      readonly compact?: boolean;
     };
 
 /** What the panel renders, whichever recording it is. */

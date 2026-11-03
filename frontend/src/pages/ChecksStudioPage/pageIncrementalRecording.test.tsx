@@ -107,7 +107,7 @@ afterAll(() => {
 const StoreProvider = ({ children }: { children?: ReactNode }) => <Provider store={store}>{children}</Provider>;
 
 describe('a learn that does not publish, then another on the same page', () => {
-  it('labels the kept recording "Learning attempt", re-reads it while PROCESSING, and mounts each session\'s own player and seek', async () => {
+  it('shows the kept recording as the failed run\'s steps and player, re-reads it while PROCESSING, and mounts each session\'s own player and seek', async () => {
     const draft = unlearnedDraft;
     // Both sessions stop at step 2; the recording is still `PROCESSING` for the first two result reads.
     setGuidedScenario(
@@ -132,23 +132,19 @@ describe('a learn that does not publish, then another on the same page', () => {
 
     // First attempt: the recording is the learning attempt, not a proof.
     await userEvent.setup({ delay: null }).click(await runButton());
-    await screen.findByTestId('learning-recording-in-logs', {}, WAIT);
-    const proof = screen.getByRole('tabpanel', { name: 'Proof' });
-    expect(within(proof).queryByTestId('video-evidence-player')).toBeNull();
-    expect(document.querySelector('video')).toBeNull();
-    await userEvent.setup({ delay: null }).click(screen.getByRole('tab', { name: 'Logs' }));
     const firstPlayer = await screen.findByTestId('video-evidence-player', {}, WAIT);
-    expect(within(screen.getByRole('tabpanel', { name: 'Logs' })).getByTestId('video-evidence-player')).toBe(firstPlayer);
+    expect(screen.queryByTestId('learning-recording-in-logs')).toBeNull();
+    expect(within(screen.getByRole('tabpanel', { name: 'Proof' })).getByTestId('video-evidence-player')).toBe(firstPlayer);
     const firstSessionId = store.getState().studio.guidedSessionByTestId[draft.id] as string;
     expect(firstPlayer.getAttribute('src')).toBe(studioGuidedApi.videoPath(firstSessionId));
-    expect(screen.getByTestId('guided-attempt-title')).toHaveTextContent('Learning attempt');
-    expect(screen.getByTestId('guided-attempt-note')).toHaveTextContent('It is not a proof');
+    const attempt = screen.getByTestId('guided-attempt');
+    expect(within(attempt).getByTestId('execution-steps')).toBeInTheDocument();
+    expect(within(attempt).getByTestId('video-evidence-player')).toBe(firstPlayer);
+    expect(screen.queryByText('Learning attempt')).toBeNull();
     expect(screen.queryByTestId('guided-proof-receipt')).toBeNull();
     expect(screen.queryByTestId('guided-proof-notice')).toBeNull();
-    // The recording is 50 ms long: step 1 starts at 120 ms, past its end, so its seek is disabled.
-    mediaDuration = 0.05;
-    fireEvent(firstPlayer, new Event('loadedmetadata'));
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Seek to step 1' })).toBeDisabled(), WAIT);
+    expect(screen.getByRole('button', { name: 'Seek to step 1' })).toBeEnabled();
+    expect(screen.getByTestId('step-watch-failure-1')).toBeInTheDocument();
     // The poll stopped after the settled read: two PROCESSING reads and the AVAILABLE one.
     expect(resultReads(firstSessionId)).toHaveLength(3);
 
@@ -166,8 +162,6 @@ describe('a learn that does not publish, then another on the same page', () => {
       WAIT,
     );
     const secondSessionId = store.getState().studio.guidedSessionByTestId[draft.id] as string;
-    expect(document.querySelector('video')).toBeNull();
-    await userEvent.setup({ delay: null }).click(screen.getByRole('tab', { name: 'Logs' }));
     const player = await screen.findByTestId('video-evidence-player', {}, WAIT);
     expect(player.getAttribute('src')).toBe(studioGuidedApi.videoPath(secondSessionId));
     expect(player.getAttribute('src')).not.toBe(studioGuidedApi.videoPath(firstSessionId));
@@ -176,8 +170,8 @@ describe('a learn that does not publish, then another on the same page', () => {
     await new Promise((resolve) => setTimeout(resolve, 150));
     expect(resultReads(secondSessionId)).toHaveLength(3);
 
-    // The first player's 50 ms length is not carried over: the seek is enabled before the new element
-    // has metadata, and stays enabled once the new recording's length is known.
+    // Each session's list seeks its own player: the seek is enabled before the new element has metadata,
+    // and stays enabled once the new recording's length is known.
     const stepSeek = await screen.findByRole('button', { name: 'Seek to step 1' }, WAIT);
     expect(stepSeek).toBeEnabled();
     mediaDuration = 330;
@@ -185,8 +179,8 @@ describe('a learn that does not publish, then another on the same page', () => {
     expect(screen.getByRole('button', { name: 'Seek to step 1' })).toBeEnabled();
     await userEvent.setup({ delay: null }).click(stepSeek);
     expect((player as HTMLVideoElement).currentTime).toBe(0.12);
-    expect(screen.getByRole('tab', { name: 'Logs' })).toHaveAttribute('aria-selected', 'true');
-    expect(within(screen.getByRole('tabpanel', { name: 'Logs' })).getByTestId('video-evidence-player')).toBe(player);
+    expect(screen.getByRole('tab', { name: 'Proof' })).toHaveAttribute('aria-selected', 'true');
+    expect(within(screen.getByRole('tabpanel', { name: 'Proof' })).getByTestId('video-evidence-player')).toBe(player);
     expect(player).toBeInTheDocument();
     // A learning attempt is never followed by a proof replay.
     expect(observed.filter((entry) => /\/studio\/executions\//u.test(entry.path))).toHaveLength(0);
@@ -235,7 +229,7 @@ describe('an incremental attempt whose replayed prefix steps carry no stamps', (
   }
 
   function Surface({ result }: { result: GuidedResult }) {
-    const { videoRef, seekToOffset, recordingDurationMs } = useVideoSeek();
+    const { videoRef, seekToOffset } = useVideoSeek();
     const video = result.evidence.video as VideoEvidence;
     return (
       <>
@@ -243,7 +237,7 @@ describe('an incremental attempt whose replayed prefix steps carry no stamps', (
           ref={videoRef}
           guided={{ sessionId: SESSION, result: { executionId: result.executionId, evidence: { video } } }}
         />
-        <GuidedSeekControls result={result} recording={{ durationMs: recordingDurationMs }} onSeek={seekToOffset} />
+        <GuidedSeekControls result={result} onSeek={seekToOffset} />
       </>
     );
   }
@@ -259,24 +253,20 @@ describe('an incremental attempt whose replayed prefix steps carry no stamps', (
 
     const stepFive = screen.getByRole('button', { name: 'Seek to step 5' });
     expect(stepFive).toBeEnabled();
-    expect(screen.getByRole('button', { name: 'Seek to step 6' })).toBeEnabled();
+    // Step 6 is where the attempt stopped: it offers "Watch the recording at this step", not a plain seek.
+    expect(screen.queryByRole('button', { name: 'Seek to step 6' })).toBeNull();
+    expect(screen.getByTestId('step-watch-failure-5')).toBeEnabled();
+    expect(screen.getByTestId('step-status-5')).toHaveAttribute('data-status', 'FAIL');
     for (const number of [1, 2, 3, 4]) {
+      expect(screen.getByRole('button', { name: `Seek to step ${number}: not attempted` })).toBeDisabled();
       expect(screen.queryByRole('button', { name: `Seek to step ${number}` })).toBeNull();
     }
-    expect(screen.getAllByRole('button', { name: /^Seek to action: / })).toHaveLength(2);
+    expect(screen.queryByRole('button', { name: /^Seek to action/ })).toBeNull();
 
     // The recording is long enough for step 5: the seek lands on its stamp.
     mediaDuration = 330;
     fireEvent(player, new Event('loadedmetadata'));
     await userEvent.setup({ delay: null }).click(stepFive);
     expect(player.currentTime).toBe(203.12);
-  });
-
-  it('keeps the step-5 seek enabled while the recording length is still unknown (live WebM, duration Infinity)', () => {
-    mediaDuration = Number.POSITIVE_INFINITY;
-    render(<Surface result={incrementalResult()} />);
-    const player = screen.getByTestId('video-evidence-player');
-    fireEvent(player, new Event('loadedmetadata'));
-    expect(screen.getByRole('button', { name: 'Seek to step 5' })).toBeEnabled();
   });
 });

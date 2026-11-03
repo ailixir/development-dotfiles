@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -8,8 +8,7 @@ import type { GuidedResult } from '@/types/studio/studioGuidedTypes';
 import { mockExecutions } from '@/services/mocks/studio/fixtures';
 import { studioGuidedApi } from '@/services/api/studioGuidedApi';
 import { VideoEvidencePanel } from './VideoEvidencePanel';
-import { GuidedSeekControls } from './GuidedSeekControls';
-import { guidedSeekTargets } from './guidedSeekTargets';
+import { GuidedSeekControls, guidedStepResults } from './GuidedSeekControls';
 import { useVideoSeek } from './useVideoSeek';
 import { VIDEO_EVIDENCE_NARRATIVES, STOPPED_RUN_RECORDING_STATEMENTS } from './videoEvidenceNarratives';
 
@@ -35,13 +34,12 @@ const SESSION = 'sample-session';
 const STEP = (n: number) => `00000000-0000-4000-8000-00000000000${n}`;
 
 function SeekHarness({ result, onSeek }: { result: RecordedResult; onSeek?: (offsetMs: number) => void }) {
-  const { videoRef, seekToOffset, recordingDurationMs } = useVideoSeek();
+  const { videoRef, seekToOffset } = useVideoSeek();
   return (
     <>
       <VideoEvidencePanel ref={videoRef} guided={{ sessionId: SESSION, result }} />
       <GuidedSeekControls
         result={result}
-        recording={{ durationMs: recordingDurationMs }}
         onSeek={(offsetMs) => {
           onSeek?.(offsetMs);
           seekToOffset(offsetMs);
@@ -98,120 +96,168 @@ describe('AC-7: the guided recording plays from getGuidedSessionVideo (D-2)', ()
   });
 });
 
-/** The recorded actions share one phrase now, so each is found inside its own step's group. */
-const ACTION = 'Seek to action: Ran the step';
-const actionOf = (step: number) => within(screen.getByTestId(`guided-seek-step-${step}`)).queryByRole('button', { name: ACTION });
-
-describe('AC-7 / D-10: named per-step and per-action seek, from server stamps only', () => {
-  it('visible labels "Seek to step N" and "Seek to action: <safe label>" for the landed stamps', () => {
+describe('AC-7 / D-10: a failed learn shows the replay\'s step list (2026-11-03)', () => {
+  it('lists every step like a run: a seek on the passed step, "Watch the recording at this step" on the stopped one', () => {
     render(<GuidedSeekControls result={recordingResult()} onSeek={() => undefined} />);
-    for (const name of ['Seek to step 1', 'Seek to step 2']) {
-      expect(screen.getByRole('button', { name })).toBeEnabled();
-    }
-    expect(actionOf(1)).toBeEnabled();
-    expect(actionOf(2)).toBeEnabled();
+    expect(screen.getByTestId('execution-steps')).toBeInTheDocument();
+    expect(screen.getByTestId('step-text-0')).toHaveTextContent('1. ');
+    expect(screen.getByTestId('step-status-0')).toHaveAttribute('data-status', 'PASS');
+    expect(screen.getByTestId('step-status-1')).toHaveAttribute('data-status', 'FAIL');
+    expect(screen.getByRole('button', { name: 'Seek to step 1' })).toBeEnabled();
+    expect(screen.getByTestId('step-duration-0')).toHaveTextContent('740 ms');
+    // The stopped step was attempted but has no duration reading: no duration, never "not attempted".
+    expect(screen.queryByTestId('step-duration-1')).toBeNull();
+    expect(screen.queryByText('not attempted')).toBeNull();
+    expect(screen.getByTestId('step-watch-failure-1')).toHaveTextContent('Watch the recording at this step');
+    // The stopped step offers the watch control instead of a plain seek, and nothing per action.
+    expect(screen.queryByTestId('step-seek-1')).toBeNull();
+    expect(screen.queryByRole('button', { name: /^Seek to action/ })).toBeNull();
+    expect(screen.getAllByRole('button')).toHaveLength(2);
   });
 
   it('a seek sets currentTime to the stamp / 1000 through the page\'s useVideoSeek', async () => {
     const onSeek = vi.fn();
     render(<SeekHarness result={recordingResult()} onSeek={onSeek} />);
     const video = screen.getByTestId('video-evidence-player') as HTMLVideoElement;
-    await userEvent.click(screen.getByRole('button', { name: 'Seek to step 2' }));
-    expect(onSeek).toHaveBeenCalledWith(1210);
-    expect(video.currentTime).toBe(1.21);
-    await userEvent.click(actionOf(1)!);
+    await userEvent.click(screen.getByRole('button', { name: 'Seek to step 1' }));
+    expect(onSeek).toHaveBeenCalledWith(120);
     expect(video.currentTime).toBe(0.12);
+    await userEvent.click(screen.getByTestId('step-watch-failure-1'));
+    expect(onSeek).toHaveBeenLastCalledWith(1210);
+    expect(video.currentTime).toBe(1.21);
   });
 
-  it('no stamp, no button: a step or action the server did not stamp gets nothing synthesized', () => {
+  it('the stopped step without a stamp of its own seeks to the end of the last stamp', async () => {
     const result = recordingResult();
+    result.actionTimings = result.actionTimings.filter((timing) => timing.stepId !== STEP(2));
+    const onSeek = vi.fn();
+    render(<GuidedSeekControls result={result} onSeek={onSeek} />);
+    await userEvent.click(screen.getByTestId('step-watch-failure-1'));
+    expect(onSeek).toHaveBeenCalledWith(860);
+  });
+
+  it('a step with only an action stamp seeks to that action', async () => {
+    const result = recordingResult();
+    result.explanation.steps[1]!.completed = true;
     result.actionTimings = result.actionTimings.filter(
-      (timing) => !(timing.stepId === STEP(2) && timing.kind === 'step') && timing.admissionId !== 'admission-1',
+      (timing) => !(timing.stepId === STEP(2) && timing.kind === 'step') && timing.stepId !== STEP(1),
     );
-    render(<GuidedSeekControls result={result} onSeek={() => undefined} />);
-    expect(screen.queryByRole('button', { name: 'Seek to step 2' })).toBeNull();
-    expect(actionOf(1)).toBeNull();
-    expect(screen.getByRole('button', { name: 'Seek to step 1' })).toBeInTheDocument();
-    expect(actionOf(2)).toBeInTheDocument();
+    const stepTwoAction = result.actionTimings.find((timing) => timing.stepId === STEP(2) && timing.kind === 'action')!;
+    const onSeek = vi.fn();
+    render(<GuidedSeekControls result={result} onSeek={onSeek} />);
+    expect(screen.getByRole('button', { name: 'Seek to step 1: not attempted' })).toBeDisabled();
+    await userEvent.click(screen.getByRole('button', { name: 'Seek to step 2' }));
+    expect(onSeek).toHaveBeenCalledWith(stepTwoAction.startMs);
   });
 
-  it('prefixReplay and clarificationWait readings are never seek points; an action joins on admissionId and ordinal', () => {
+  it('a step the run never reached is SKIPPED with a disabled seek named "not attempted"', async () => {
     const result = recordingResult();
-    result.actionTimings = [
-      { kind: 'prefixReplay', stepId: STEP(1), admissionId: null, ordinal: null, startMs: 10, endMs: 20 },
-      { kind: 'clarificationWait', stepId: STEP(2), admissionId: null, ordinal: null, startMs: 30, endMs: 40 },
-      { kind: 'action', stepId: STEP(2), admissionId: 'admission-2', ordinal: 1, startMs: 50, endMs: null },
-    ];
-    expect(guidedSeekTargets(result)).toEqual([]);
+    result.explanation.steps.push({
+      ...structuredClone(result.explanation.steps[1]!),
+      stepId: STEP(3),
+      number: 3,
+      actions: [],
+    });
+    const onSeek = vi.fn();
+    render(<GuidedSeekControls result={result} onSeek={onSeek} />);
+    expect(screen.getByTestId('step-status-2')).toHaveAttribute('data-status', 'SKIPPED');
+    const seek = screen.getByRole('button', { name: 'Seek to step 3: not attempted' });
+    expect(seek).toBeDisabled();
+    await userEvent.click(seek, { pointerEventsCheck: 0 });
+    expect(onSeek).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('step-watch-failure-2')).toBeNull();
   });
 
-  it('only an AVAILABLE recording offers seeks', () => {
+  it('only an AVAILABLE recording offers seeks: the list stays, the controls go', () => {
     const result = recordingResult();
     result.evidence.video.status = 'EXPIRED';
-    const { container } = render(<GuidedSeekControls result={result} onSeek={() => undefined} />);
-    expect(container).toBeEmptyDOMElement();
+    render(<GuidedSeekControls result={result} onSeek={() => undefined} />);
+    expect(screen.getByTestId('execution-steps')).toBeInTheDocument();
+    expect(screen.queryByRole('button')).toBeNull();
+    expect(screen.queryByTestId('step-watch-failure-1')).toBeNull();
   });
 
   it('a published learn has no learning recording, so it offers no seek', () => {
     const published = structuredClone(fixtures.documents.publishedResult) as GuidedResult;
     expect(published.evidence.video).toBeNull();
-    expect(guidedSeekTargets(published)).toEqual([]);
-    const { container } = render(<GuidedSeekControls result={published} onSeek={() => undefined} />);
-    expect(container).toBeEmptyDOMElement();
+    render(<GuidedSeekControls result={published} onSeek={() => undefined} />);
+    expect(screen.queryByRole('button')).toBeNull();
+    expect(screen.queryByTestId('step-watch-failure-1')).toBeNull();
+  });
+});
+
+describe('guidedStepResults: a guided result as the replay\'s StepResult list', () => {
+  it('maps completed to PASS, the stopped step to FAIL, offsets from the step stamp and duration from it only', () => {
+    expect(guidedStepResults(recordingResult())).toEqual([
+      { stepIndex: 0, originalText: 'Step 1', status: 'PASS', offsetMs: 120, durationMs: 740, message: null },
+      { stepIndex: 1, originalText: 'Step 2', status: 'FAIL', offsetMs: 1210, durationMs: null, message: null },
+    ]);
   });
 
-  it('a stamp past the known end of the recording is a disabled, still-labelled button', () => {
-    render(<GuidedSeekControls result={recordingResult()} recording={{ durationMs: 1000 }} onSeek={() => undefined} />);
-    expect(screen.getByRole('button', { name: 'Seek to step 1' })).toBeEnabled();
-    expect(screen.getByRole('button', { name: 'Seek to step 2' })).toBeDisabled();
-    expect(actionOf(2)).toBeDisabled();
+  it('a step the run did not reach is SKIPPED with no offset', () => {
+    const result = recordingResult();
+    result.explanation.steps.push({ ...structuredClone(result.explanation.steps[1]!), stepId: STEP(3), number: 3, actions: [] });
+    const steps = guidedStepResults(result);
+    expect(steps[2]).toMatchObject({ stepIndex: 2, status: 'SKIPPED', offsetMs: null, durationMs: null });
   });
 
-  it('narrow layout (AC-8 a): seek buttons stack and fill the width at the base breakpoint', () => {
-    render(<GuidedSeekControls result={recordingResult()} onSeek={() => undefined} />);
-    const button = screen.getByRole('button', { name: 'Seek to step 1' });
-    expect(getComputedStyle(button.parentElement!).flexDirection).toBe('column');
-    expect(getComputedStyle(button).width).toBe('100%');
+  it('prefixReplay and clarificationWait readings are never seek points; an action stamp is the fallback', () => {
+    const result = recordingResult();
+    result.actionTimings = [
+      { kind: 'prefixReplay', stepId: STEP(1), admissionId: null, ordinal: null, startMs: 10, endMs: 20 },
+      { kind: 'clarificationWait', stepId: STEP(2), admissionId: null, ordinal: null, startMs: 30, endMs: 40 },
+    ];
+    expect(guidedStepResults(result).map((step) => step.offsetMs)).toEqual([null, null]);
+
+    result.actionTimings.push({ kind: 'action', stepId: STEP(2), admissionId: 'admission-2', ordinal: 1, startMs: 50, endMs: null });
+    const steps = guidedStepResults(result);
+    expect(steps.map((step) => step.offsetMs)).toEqual([null, 50]);
+    expect(steps.map((step) => step.durationMs)).toEqual([null, null]);
+  });
+
+  it('a published learn has no stopped step: every step is PASS or SKIPPED', () => {
+    const published = structuredClone(fixtures.documents.publishedResult) as GuidedResult;
+    expect(guidedStepResults(published).every((step) => step.status !== 'FAIL')).toBe(true);
   });
 });
 
 describe('round 067 D2: a persistent marker of the last seek', () => {
-  it('the used step button is filled with a caption; an action seek replaces it; there is one marker', async () => {
-    render(<GuidedSeekControls result={recordingResult()} onSeek={() => undefined} />);
-    expect(screen.queryByTestId('guided-seek-marker')).toBeNull();
-    const group = screen.getByTestId('guided-seek-step-2');
+  it('the used step button is outlined with a caption, and there is one marker', async () => {
+    const result = recordingResult();
+    result.explanation.steps[1]!.completed = true;
+    render(<GuidedSeekControls result={result} onSeek={() => undefined} />);
+    expect(screen.queryByTestId('step-seek-marker-0')).toBeNull();
 
     await userEvent.click(screen.getByRole('button', { name: 'Seek to step 2' }));
-    expect(within(group).getByTestId('guided-seek-marker')).toHaveTextContent('Jumped to step 2.');
+    expect(screen.getByTestId('step-seek-marker-1')).toHaveTextContent('Jumped to step 2.');
     expect(screen.getByRole('button', { name: 'Seek to step 2' })).toHaveAttribute('data-seek-active', 'true');
-    expect(screen.getByRole('button', { name: 'Seek to step 2' })).toHaveClass('MuiButton-contained');
+    expect(screen.getByRole('button', { name: 'Seek to step 2' })).toHaveClass('MuiButton-outlined');
     expect(screen.getByRole('button', { name: 'Seek to step 1' })).not.toHaveAttribute('data-seek-active');
 
-    await userEvent.click(actionOf(2)!);
-    expect(within(group).getByTestId('guided-seek-marker')).toHaveTextContent('Jumped to step 2, action: Ran the step.');
-    expect(screen.getAllByTestId('guided-seek-marker')).toHaveLength(1);
+    await userEvent.click(screen.getByRole('button', { name: 'Seek to step 1' }));
+    expect(screen.queryByTestId('step-seek-marker-1')).toBeNull();
+    expect(screen.getByTestId('step-seek-marker-0')).toHaveTextContent('Jumped to step 1.');
     expect(screen.getByRole('button', { name: 'Seek to step 2' })).not.toHaveAttribute('data-seek-active');
-    expect(actionOf(2)).toHaveAttribute('data-seek-active', 'true');
-    // The names are unchanged and "Seek to step 2" stays unique.
-    expect(screen.getAllByRole('button', { name: 'Seek to step 2' })).toHaveLength(1);
-    expect(within(group).getByRole('button', { name: ACTION })).toBeInTheDocument();
   });
 
-  it('a new key (a new recording) starts with no marker, and the marker never touches the video', async () => {
+  it('a new execution (a new recording) starts with no marker, and the marker never touches the video', async () => {
     const onSeek = vi.fn();
     const result = recordingResult();
-    const { rerender } = render(<GuidedSeekControls key="a" result={result} onSeek={onSeek} />);
+    const { rerender } = render(<GuidedSeekControls result={result} onSeek={onSeek} />);
     await userEvent.click(screen.getByRole('button', { name: 'Seek to step 1' }));
     expect(onSeek).toHaveBeenCalledTimes(1);
-    expect(screen.getByTestId('guided-seek-marker')).toBeInTheDocument();
-    rerender(<GuidedSeekControls key="b" result={result} onSeek={onSeek} />);
-    expect(screen.queryByTestId('guided-seek-marker')).toBeNull();
+    expect(screen.getByTestId('step-seek-marker-0')).toBeInTheDocument();
+    rerender(<GuidedSeekControls result={{ ...result, executionId: 'another-execution' }} onSeek={onSeek} />);
+    expect(screen.queryByTestId('step-seek-marker-0')).toBeNull();
     expect(onSeek).toHaveBeenCalledTimes(1);
   });
 
   it('a disabled button sets no marker', async () => {
-    render(<GuidedSeekControls result={recordingResult()} recording={{ durationMs: 1000 }} onSeek={() => undefined} />);
-    await userEvent.click(screen.getByRole('button', { name: 'Seek to step 2' }), { pointerEventsCheck: 0 });
-    expect(screen.queryByTestId('guided-seek-marker')).toBeNull();
+    const result = recordingResult();
+    result.explanation.steps[1]!.completed = true;
+    result.actionTimings = result.actionTimings.filter((timing) => timing.stepId !== STEP(2));
+    render(<GuidedSeekControls result={result} onSeek={() => undefined} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Seek to step 2: not attempted' }), { pointerEventsCheck: 0 });
+    expect(screen.queryByTestId('step-seek-marker-1')).toBeNull();
   });
 });

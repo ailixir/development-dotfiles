@@ -294,7 +294,7 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
    * legacy player, its missing-file fallback, the store-held playback source and the index-derived
    * seek are retired (architecture §6.4: *"No synthetic index-times-ten mapping remains."*).
    */
-  const { videoRef, seekToOffset, recordingDurationMs } = useVideoSeek();
+  const { videoRef, seekToOffset } = useVideoSeek();
   const stepResultsArr = useAppSelector((s: any) => s.studio.stepResults) as Array<{ stepIndex: number; status: 'PENDING' | 'RUNNING' | 'PASS' | 'FAIL' }>;
   const stepResultsMap = useMemo(() => {
     const map: Record<number, 'passed' | 'failed' | 'pending'> = {};
@@ -1036,6 +1036,36 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
    */
   const attemptTestIds = useMemo(() => (selectedScenario ? [selectedScenario] : []), [selectedScenario]);
   const { byTestId: latestAttempts, refresh: refreshLatestAttempt } = useLatestLearningAttempts(attemptTestIds);
+
+  /**
+   * A reload in a fresh tab has no session pointer (it is per tab), so Proof would forget a failed
+   * learn. When the server says the test's latest attempt FAILED, follow that session read-only
+   * (`follow` writes no pointer and starts or finalizes nothing). Once per test, and only while the
+   * page has nothing of its own for the test: no session, no start in flight or refused, no replay,
+   * no pending autorun. Other states (SUCCEEDED, none) keep today's behaviour.
+   */
+  const followedAttemptTestRef = useRef<string | null>(null);
+  const latestAttemptOfSelected = selectedScenario ? latestAttempts.get(selectedScenario) : undefined;
+  const { follow: followGuidedSession } = guided;
+  useEffect(() => {
+    if (!selectedScenario || followedAttemptTestRef.current === selectedScenario) return;
+    if (latestAttemptOfSelected === undefined || latestAttemptOfSelected.state !== 'FAILED') return;
+    if (!latestAttemptOfSelected.sessionId) return;
+    if (guidedView !== null || followedSessionId !== null || guided.startRefusal !== null) return;
+    if (snapshot !== null || isRunning || autorunWanted.current || autorunRequest !== null) return;
+    followedAttemptTestRef.current = selectedScenario;
+    followGuidedSession(latestAttemptOfSelected.sessionId);
+  }, [
+    selectedScenario,
+    latestAttemptOfSelected,
+    guidedView,
+    followedSessionId,
+    guided.startRefusal,
+    snapshot,
+    isRunning,
+    autorunRequest,
+    followGuidedSession,
+  ]);
 
   /**
    * A guided session this page followed has just ended: read the test again, because its readiness
@@ -1966,10 +1996,28 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                           {guidedCopy('proofWillReplay')}
                         </Typography>
                       )}
-                      {guidedTerminal && attemptVideo !== null && (
-                        <Typography variant="body2" color="text.secondary" data-testid="learning-recording-in-logs">
-                          No execution proof is available for this learning attempt. Its recording is available in Logs.
-                        </Typography>
+                      {rightTab === 'proof' && guidedTerminal && attemptVideo !== null && guided.result !== null && (
+                        /* User decision 2026-11-03: the same Steps list and recording card a successful run shows. */
+                        <Box data-testid="guided-attempt" sx={{ minWidth: 0 }}>
+                          <Box sx={{ mb: 2 }}>
+                            <GuidedSeekControls
+                              key={guided.result.sessionId}
+                              result={guided.result}
+                              test={draft}
+                              onSeek={seekToOffset}
+                            />
+                          </Box>
+                          <Paper variant="outlined" sx={{ p: 2 }}>
+                            <VideoEvidencePanel
+                              ref={videoRef}
+                              guided={{
+                                sessionId: guided.result.sessionId,
+                                result: { executionId: guided.result.executionId, evidence: { video: attemptVideo } },
+                              }}
+                              compact
+                            />
+                          </Paper>
+                        </Box>
                       )}
                     </Stack>
                   ) : (
@@ -2061,34 +2109,7 @@ const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions 
                   </Typography>
                   {guidedVisible && guidedView ? (
                     /* A learning run has no log stream: what it did, from its counters and explanation (AC-03). */
-                    <>
-                      <GuidedLearningLog session={guidedView.session} result={guided.result} pausedForEditStep={pausedForEditStepFor(guided.result)} />
-                      {rightTab === 'logs' && guidedTerminal && attemptVideo !== null && guided.result !== null && (
-                        <Paper variant="outlined" sx={{ p: 2, minWidth: 0 }} data-testid="guided-attempt">
-                          <Stack spacing={1.5}>
-                            <Typography variant="subtitle2" component="h3" data-testid="guided-attempt-title">
-                              {guidedCopy('learningAttemptTitle')}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary" data-testid="guided-attempt-note">
-                              {guidedCopy('learningAttemptNote')}
-                            </Typography>
-                            <VideoEvidencePanel
-                              ref={videoRef}
-                              guided={{
-                                sessionId: guided.result.sessionId,
-                                result: { executionId: guided.result.executionId, evidence: { video: attemptVideo } },
-                              }}
-                            />
-                            <GuidedSeekControls
-                              key={guided.result.sessionId}
-                              result={guided.result}
-                              onSeek={seekToOffset}
-                              recording={{ durationMs: recordingDurationMs }}
-                            />
-                          </Stack>
-                        </Paper>
-                      )}
-                    </>
+                    <GuidedLearningLog session={guidedView.session} result={guided.result} pausedForEditStep={pausedForEditStepFor(guided.result)} />
                   ) : (
                     <>
                     {proofOfLearn && guidedView && <GuidedLearningLog session={guidedView.session} result={guided.result} pausedForEditStep={pausedForEditStepFor(guided.result)} />}

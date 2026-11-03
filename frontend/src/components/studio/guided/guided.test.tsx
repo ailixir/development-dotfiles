@@ -799,6 +799,63 @@ describe('GuidedCompletion: a failed learn names the step it stopped at (STUDIO-
     });
   });
 
+  describe('a learn that FAILED with MISSING_SOURCE names what to fix (2026-11-03)', () => {
+    const renderWithDraft = (result: GuidedResult) =>
+      render(
+        <GuidedCompletion
+          input={{ kind: 'guided', result }}
+          draftStepIds={DRAFT}
+          test={draftOver()}
+          onGoToStep={noop}
+          onOpenVariables={noop}
+        />,
+      );
+
+    it('at a known step: title with the step number, body quoting the step, code kept as a caption', () => {
+      const result = headingShape('MISSING_SOURCE');
+      expect(guidedCompletionView(result, null, draftOver())).toEqual({
+        kind: 'targetNotFound',
+        code: 'MISSING_SOURCE',
+        title: "Studio couldn't find what step 2 describes",
+        lines: [
+          'Studio looked at the page after the previous step and found nothing that matches "Authored sentence 2". Watch the recording to see what the page showed at that moment, then reword the step to name the element by the text it shows (for example, the option or button label), and press Run.',
+        ],
+      });
+      renderWithDraft(result);
+      const completion = screen.getByTestId('guided-completion');
+      expect(completion).toHaveAttribute('data-kind', 'targetNotFound');
+      expect(completion).toHaveTextContent("Studio couldn't find what step 2 describes");
+      expect(completion).toHaveTextContent('"Authored sentence 2"');
+      expect(completion).not.toHaveTextContent(GUIDED_COPY.failedUnnamed.template);
+      expect(completion).not.toHaveTextContent(/logs/iu);
+      expect(screen.getByTestId('guided-completion-code')).toHaveTextContent('MISSING_SOURCE');
+    });
+
+    it('at step 1 it does not say "after the previous step"', () => {
+      const result = failedOver('MISSING_SOURCE', explStep(1, false, 'SUCCEEDED'), explStep(2, false));
+      const view = guidedCompletionView(result, null, draftOver());
+      expect(view).toMatchObject({ kind: 'targetNotFound', title: "Studio couldn't find what step 1 describes" });
+      expect(view?.kind === 'targetNotFound' ? view.lines[0] : '').toBe(
+        'Studio looked at the page and found nothing that matches "Authored sentence 1". Watch the recording to see what the page showed at that moment, then reword the step to name the element by the text it shows (for example, the option or button label), and press Run.',
+      );
+    });
+
+    it('without the authored sentence or a known step it keeps the raw-code view', () => {
+      expect(guidedCompletionView(headingShape('MISSING_SOURCE'))?.kind).toBe('failedUnnamed');
+      const noAction = failedOver('MISSING_SOURCE', explStep(1, false), explStep(2, false));
+      expect(guidedCompletionView(noAction, null, draftOver())?.kind).toBe('failedUnnamed');
+      renderWithDraft(noAction);
+      expect(screen.getByTestId('guided-completion')).toHaveTextContent(GUIDED_COPY.failedUnnamed.template);
+      expect(screen.getByTestId('guided-completion-code')).toHaveTextContent('MISSING_SOURCE');
+    });
+
+    it('the start refusal MISSING_SOURCE still offers Open Variables', () => {
+      expect(
+        guidedStartFeedbackView({ kind: 'refusal', refusal: refusal(409, { code: 'MISSING_SOURCE', messageCode: 'AUTHORING_REFERENCE_MISSING' }) }),
+      ).toMatchObject({ lines: [GUIDED_COPY.referenceMissing.template], action: 'openVariables' });
+    });
+  });
+
   it('FAILED with no reason still names the step', () => {
     const result = headingShape('X');
     result.errorCode = null;

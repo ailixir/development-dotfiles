@@ -154,6 +154,9 @@ const StepTimings: React.FC<{ step: StepResult; runEnded: boolean }> = ({ step, 
       </Typography>
     );
   }
+  // A passed or failed step was attempted (a learn may reuse a step from an earlier run): with no
+  // duration reading it shows none, never "not attempted".
+  if ((step.status === 'FAIL' || step.status === 'PASS') && step.durationMs === null) return null;
   return (
     <Typography
       variant="caption"
@@ -283,18 +286,18 @@ const StepSeekControl: React.FC<{
  * (`video.status` is `AVAILABLE`) and the step has a reading to seek to; the caller's `onSeekStep`
  * switches to the Proof tab and seeks, the same path as the per-step seek control.
  */
-function failureSeekOffset(snapshot: ExecutionSnapshot, step: StepResult): number | null {
-  if (step.status !== 'FAIL' || snapshot.video.status !== 'AVAILABLE') return null;
+function failureSeekOffset(videoAvailable: boolean, step: StepResult): number | null {
+  if (step.status !== 'FAIL' || !videoAvailable) return null;
   const eligibility = seekEligibility(step);
   return eligibility.seekable ? eligibility.offsetMs : null;
 }
 
 const WatchFailureControl: React.FC<{
-  snapshot: ExecutionSnapshot;
+  videoAvailable: boolean;
   step: StepResult;
   onSeekStep: (offsetMs: number) => void;
-}> = ({ snapshot, step, onSeekStep }) => {
-  const offsetMs = failureSeekOffset(snapshot, step);
+}> = ({ videoAvailable, step, onSeekStep }) => {
+  const offsetMs = failureSeekOffset(videoAvailable, step);
   if (offsetMs === null) return null;
   return (
     <Box>
@@ -309,6 +312,86 @@ const WatchFailureControl: React.FC<{
         {WATCH_FAILURE_LABEL}
       </Button>
     </Box>
+  );
+};
+
+export interface ExecutionStepListProps {
+  /** Keys the last-seek marker, so a new run (or recording) starts with none. */
+  readonly executionId: string;
+  readonly stepResults: readonly StepResult[];
+  readonly runEnded: boolean;
+  /** "Watch the recording at this step" is offered only beside an AVAILABLE recording. */
+  readonly videoAvailable: boolean;
+  /** Console errors per step: a passed step whose page reported errors is marked. */
+  readonly pageErrorsByStep?: ReadonlyMap<number, number>;
+  /** When present, every step gets a seek control (Story 10.16a, AC-8 – AC-10). */
+  readonly onSeekStep?: (offsetMs: number) => void;
+}
+
+const NO_PAGE_ERRORS: ReadonlyMap<number, number> = new Map();
+
+/**
+ * The "Steps" list of a run: status icon, "N. step text", timing, the per-step seek and, for the
+ * failed step, "Watch the recording at this step". One list for every recording on Proof: a replay
+ * snapshot's steps, and a failed learn's steps (`GuidedSeekControls`, user decision 2026-11-03: the
+ * failure shows the same list as a successful run).
+ */
+export const ExecutionStepList: React.FC<ExecutionStepListProps> = ({
+  executionId,
+  stepResults,
+  runEnded,
+  videoAvailable,
+  pageErrorsByStep = NO_PAGE_ERRORS,
+  onSeekStep,
+}) => {
+  // Round 067 D2: the step seek control last used, keyed by execution so a new run starts with none.
+  const [lastSeek, setLastSeek] = React.useState<{ executionId: string; stepIndex: number } | null>(null);
+  return (
+    <>
+      <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
+        Steps
+      </Typography>
+      <List dense disablePadding data-testid="execution-steps">
+        {stepResults.map((step) => {
+          const pageErrors = step.status === 'PASS' ? (pageErrorsByStep.get(step.stepIndex) ?? 0) : 0;
+          return (
+            <ListItem key={step.stepIndex} disableGutters alignItems="flex-start" sx={{ py: 0.5 }}>
+              <Stack direction="row" spacing={1} alignItems="flex-start" sx={{ width: '100%', minWidth: 0 }}>
+                <Box sx={{ pt: 0.25 }}>
+                  <StepStatusIcon step={step} pageErrors={pageErrors} />
+                </Box>
+                <Stack spacing={0.25} sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography variant="body2" data-testid={`step-text-${step.stepIndex}`} sx={{ minWidth: 0, overflowWrap: 'anywhere' }}>
+                    {`${step.stepIndex + 1}. ${step.originalText}`}
+                  </Typography>
+                  <Stack direction="row" alignItems="center" columnGap={1} rowGap={0.25} flexWrap="wrap">
+                    <StepTimings step={step} runEnded={runEnded} />
+                    {pageErrors > 0 && (
+                      <Chip
+                        size="small"
+                        color="warning"
+                        label={`${pageErrors} page ${pageErrors === 1 ? 'error' : 'errors'}`}
+                        data-testid={`step-page-errors-${step.stepIndex}`}
+                      />
+                    )}
+                    {onSeekStep && failureSeekOffset(videoAvailable, step) === null && (
+                      <StepSeekControl
+                        step={step}
+                        onSeekStep={onSeekStep}
+                        active={lastSeek?.executionId === executionId && lastSeek.stepIndex === step.stepIndex}
+                        onUsed={() => setLastSeek({ executionId, stepIndex: step.stepIndex })}
+                      />
+                    )}
+                  </Stack>
+                  <StepMessage step={step} />
+                  {onSeekStep && <WatchFailureControl videoAvailable={videoAvailable} step={step} onSeekStep={onSeekStep} />}
+                </Stack>
+              </Stack>
+            </ListItem>
+          );
+        })}
+      </List>
+    </>
   );
 };
 
@@ -430,8 +513,6 @@ export const ExecutionProgressView: React.FC<ExecutionProgressViewProps> = ({
   showSteps = true,
   replayContext,
 }) => {
-  // Round 067 D2: the step seek control last used, keyed by execution so a new run starts with none.
-  const [lastSeek, setLastSeek] = React.useState<{ executionId: string; stepIndex: number } | null>(null);
   if (!snapshot) {
     return (
       <Box data-testid="execution-progress-empty">
@@ -537,53 +618,14 @@ export const ExecutionProgressView: React.FC<ExecutionProgressViewProps> = ({
       )}
 
       {showSteps && (
-        <>
-          <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
-            Steps
-          </Typography>
-          <List dense disablePadding data-testid="execution-steps">
-            {snapshot.stepResults.map((step) => {
-              const pageErrors = step.status === 'PASS' ? (pageErrorsByStep.get(step.stepIndex) ?? 0) : 0;
-              return (
-                <ListItem key={step.stepIndex} disableGutters alignItems="flex-start" sx={{ py: 0.5 }}>
-                  <Stack direction="row" spacing={1} alignItems="flex-start" sx={{ width: '100%', minWidth: 0 }}>
-                    <Box sx={{ pt: 0.25 }}>
-                      <StepStatusIcon step={step} pageErrors={pageErrors} />
-                    </Box>
-                    <Stack spacing={0.25} sx={{ flex: 1, minWidth: 0 }}>
-                      <Typography variant="body2" data-testid={`step-text-${step.stepIndex}`} sx={{ minWidth: 0, overflowWrap: 'anywhere' }}>
-                        {`${step.stepIndex + 1}. ${step.originalText}`}
-                      </Typography>
-                      <Stack direction="row" alignItems="center" columnGap={1} rowGap={0.25} flexWrap="wrap">
-                        <StepTimings step={step} runEnded={isTerminalExecutionStatus(snapshot.status)} />
-                        {pageErrors > 0 && (
-                          <Chip
-                            size="small"
-                            color="warning"
-                            label={`${pageErrors} page ${pageErrors === 1 ? 'error' : 'errors'}`}
-                            data-testid={`step-page-errors-${step.stepIndex}`}
-                          />
-                        )}
-                        {onSeekStep && failureSeekOffset(snapshot, step) === null && (
-                          <StepSeekControl
-                            step={step}
-                            onSeekStep={onSeekStep}
-                            active={lastSeek?.executionId === snapshot.executionId && lastSeek.stepIndex === step.stepIndex}
-                            onUsed={() => setLastSeek({ executionId: snapshot.executionId, stepIndex: step.stepIndex })}
-                          />
-                        )}
-                      </Stack>
-                      <StepMessage step={step} />
-                      {onSeekStep && (
-                        <WatchFailureControl snapshot={snapshot} step={step} onSeekStep={onSeekStep} />
-                      )}
-                    </Stack>
-                  </Stack>
-                </ListItem>
-              );
-            })}
-          </List>
-        </>
+        <ExecutionStepList
+          executionId={snapshot.executionId}
+          stepResults={snapshot.stepResults}
+          runEnded={isTerminalExecutionStatus(snapshot.status)}
+          videoAvailable={snapshot.video.status === 'AVAILABLE'}
+          pageErrorsByStep={pageErrorsByStep}
+          onSeekStep={onSeekStep}
+        />
       )}
 
       {showLogs && (

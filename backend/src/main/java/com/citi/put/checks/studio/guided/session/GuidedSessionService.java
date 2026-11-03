@@ -1260,6 +1260,10 @@ public final class GuidedSessionService {
           if (publication != null) {
             publication.admitted(session.document(), action, proposal, clock.instant());
           }
+          // The next step's request shows what appeared after this action: keep the sanitized
+          // outline this action was generated against and its code (the outline itself is not
+          // touched; the next observation overwrites progress.observation).
+          rememberLastAction(session.progress(), coordinate.path("stepId").asText(), proposal);
           session.document().put("state", incremental.pending(id) ? "REPLAYING_PREFIX" : "ACTING");
           repository.save(session);
           // STUDIO-OBS-014 AC-10: emitted after this transaction commits, never on rollback.
@@ -1267,6 +1271,20 @@ public final class GuidedSessionService {
               session.document(), action.path("admission").path("admissionId").asText(), proposal);
           return action.deepCopy();
         });
+  }
+
+  private static void rememberLastAction(ObjectNode progress, String stepId, JsonNode proposal) {
+    JsonNode outline = progress.path("observation").path("outline");
+    JsonNode code = proposal.path("operation").path("code");
+    if (outline.isTextual() && code.isTextual()) {
+      progress.set("outlineBeforeLastAction", outline.deepCopy());
+      progress.put("lastActionStepId", stepId);
+      progress.set("lastActionCode", code.deepCopy());
+    } else {
+      progress.remove("outlineBeforeLastAction");
+      progress.remove("lastActionStepId");
+      progress.remove("lastActionCode");
+    }
   }
 
   /**

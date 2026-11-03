@@ -109,6 +109,13 @@ export interface UseGuidedSessionResult {
    * that got no answer. Does nothing without a followed session.
    */
   retryFinalize: () => void;
+  /**
+   * Follows an already ended session of this test read-only (a failed learn found through the
+   * latest-attempt read after a reload in a fresh tab). It only puts the `sessionId` in the store, so
+   * the poll reads the view and result. No pointer is written, nothing is started or finalized, and
+   * it does nothing when this test already has a session or a pointer (a start in flight).
+   */
+  follow: (sessionId: string) => void;
 }
 
 /** Timing knobs. Tests pass small values; the defaults are for a person watching a run. */
@@ -609,6 +616,16 @@ export function useGuidedSession(
     [testId, store, forget, performStart, safeSetRefusal, safeSetPending],
   );
 
+  const follow = useCallback(
+    (followSessionId: string): void => {
+      if (!testId || !followSessionId) return;
+      if (store.getState().studio.guidedSessionByTestId[testId]) return;
+      if (readGuidedPointer(testId)) return;
+      dispatch(setGuidedSession({ testId, sessionId: followSessionId }));
+    },
+    [testId, store, dispatch],
+  );
+
   /** One keyed mutation, shared by concurrent callers, with the common HTTP outcomes mapped. */
   const mutate = useCallback(
     async <T,>(logicalOperation: string, send: (key: string) => Promise<T>): Promise<T | null> => {
@@ -675,7 +692,7 @@ export function useGuidedSession(
 
   const unreadable = unreadableSessionId !== null && unreadableSessionId === sessionId && view === null;
 
-  return { view, result, clarification, answeredSteps, startRefusal, pending, unreadable, startLearn, answer, cancel, clear, retryFinalize };
+  return { view, result, clarification, answeredSteps, startRefusal, pending, unreadable, startLearn, answer, cancel, clear, retryFinalize, follow };
 }
 
 export default useGuidedSession;

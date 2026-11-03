@@ -39,7 +39,7 @@ class GuidedStepCodePromptTest {
   void theStepCodeContractStatesTheInjectedNamesTheKeyFormsAndBothOutcomeRules()
       throws IOException {
     String contract = resource("/studio/guided-step-code-contract.md");
-    assertThat(contract.getBytes(StandardCharsets.UTF_8).length).isLessThanOrEqualTo(10240);
+    assertThat(contract.getBytes(StandardCharsets.UTF_8).length).isLessThanOrEqualTo(12288);
     assertThat(contract)
         .contains(
             "`page`",
@@ -484,6 +484,110 @@ class GuidedStepCodePromptTest {
       assertThat(request.projection().document().toString()).doesNotContain(CANARY);
       assertThat(request.responseSchema().toString()).doesNotContain(CANARY);
     }
+  }
+
+  @Test
+  void pageChangesListsWhatAppearedSincePreviousStepsOutlineAndIsNullOnTheFirstStep()
+      throws Exception {
+    String before =
+        "- main [e1]\n  - textbox \"Find a venue\" [e4]\n  - paragraph \"Welcome\" [e5]";
+    String after =
+        "- main [e1]\n"
+            + "  - textbox \"Find a venue\" [e46]\n"
+            + "  - tooltip [e59] {value withheld}\n"
+            + "    - button [e62] {value withheld}\n"
+            + "      - text \"Harbour Lights\" [e64]\n"
+            + "    - button [e66] {value withheld}\n"
+            + "  - text \"Choose a venue.\" [e67]";
+    var fixture = fixture(after, 0);
+
+    // First step: nothing came before.
+    var first =
+        ASSEMBLER.buildPositiveContext(
+            GuidedModelRequest.Kind.STEP_CODE,
+            fixture[0],
+            fixture[1],
+            fixture[2],
+            fixture[3],
+            fixture[4],
+            JSON.createArrayNode(),
+            List.of());
+    assertThat(first.has("pageChanges")).isTrue();
+    assertThat(first.path("pageChanges").isNull()).isTrue();
+
+    // Second step: the previous step ran against `before`; refs differ and are ignored.
+    ObjectNode session = (ObjectNode) fixture[0];
+    session
+        .withArray("sourceSteps")
+        .addObject()
+        .put("stepId", "22222222-2222-4222-8222-222222222222");
+    ObjectNode progress = (ObjectNode) fixture[1];
+    progress
+        .put("stepIndex", 1)
+        .put("outlineBeforeLastAction", before)
+        .put("lastActionStepId", STEP)
+        .put("lastActionCode", "await page.getByLabel('Find a venue').fill('harb');");
+    ((ObjectNode) fixture[2].path("manifest").path("sourceSteps").get(0))
+        .put("text", "Type harb into the venue box");
+    var second =
+        ASSEMBLER.buildPositiveContext(
+            GuidedModelRequest.Kind.STEP_CODE,
+            session,
+            progress,
+            fixture[2],
+            fixture[3],
+            fixture[4],
+            JSON.createArrayNode(),
+            List.of());
+    JsonNode changes = second.path("pageChanges");
+    assertThat(changes.path("previousStep").path("number").asInt()).isEqualTo(1);
+    assertThat(changes.path("previousStep").path("text").asText())
+        .isEqualTo("Type harb into the venue box");
+    assertThat(changes.path("previousStep").path("code").asText()).contains(".fill('harb')");
+    List<String> appeared = new ArrayList<>();
+    changes.path("appeared").forEach(n -> appeared.add(n.asText()));
+    assertThat(appeared)
+        .containsExactly(
+            "  - tooltip [e59] {value withheld}",
+            "    - button [e62] {value withheld}",
+            "      - text \"Harbour Lights\" [e64]",
+            "    - button [e66] {value withheld}",
+            "  - text \"Choose a venue.\" [e67]");
+    assertThat(changes.path("goneCount").asInt()).isEqualTo(1); // the "Welcome" paragraph
+    // The outline itself is untouched and the projection accepts the new key.
+    assertThat(second.path("observation").asText()).isEqualTo(after);
+    new GuidedModelProjection(second);
+
+    // No recorded before-outline (for example a replayed prefix): null, not a guess.
+    progress.remove("outlineBeforeLastAction");
+    assertThat(
+            ASSEMBLER
+                .buildPositiveContext(
+                    GuidedModelRequest.Kind.STEP_CODE,
+                    session,
+                    progress,
+                    fixture[2],
+                    fixture[3],
+                    fixture[4],
+                    JSON.createArrayNode(),
+                    List.of())
+                .path("pageChanges")
+                .isNull())
+        .isTrue();
+    // SOURCE_PLAN requests never carry it.
+    assertThat(
+            ASSEMBLER
+                .buildPositiveContext(
+                    GuidedModelRequest.Kind.SOURCE_PLAN,
+                    session,
+                    progress,
+                    fixture[2],
+                    fixture[3],
+                    fixture[4],
+                    JSON.createArrayNode(),
+                    List.of())
+                .has("pageChanges"))
+        .isFalse();
   }
 
   // ---- fixtures ----

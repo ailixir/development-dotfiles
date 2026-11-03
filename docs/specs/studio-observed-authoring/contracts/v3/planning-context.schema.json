@@ -456,6 +456,64 @@
     "learningWindow": {
       "$ref": "https://checks.citi.example/contracts/observed/v3/planning-context.schema.json#/definitions/LearningWindow"
     },
+    "pageChanges": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "previousStep": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "number": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100
+                },
+                "text": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000
+                },
+                "code": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 16384
+                }
+              },
+              "required": [
+                "number",
+                "text",
+                "code"
+              ]
+            },
+            "appeared": {
+              "type": "array",
+              "maxItems": 40,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4000
+              }
+            },
+            "goneCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "previousStep",
+            "appeared",
+            "goneCount"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "repair": {
       "oneOf": [
         {
