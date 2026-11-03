@@ -14,7 +14,6 @@ import AttentionPanel from '@/components/home/AttentionPanel';
 import ActivityFeed from '@/components/home/ActivityFeed';
 import ReportsSnapshot from '@/components/home/ReportsSnapshot';
 import UpcomingSchedules from '@/components/home/UpcomingSchedules';
-import PinnedCSIs from '@/components/home/PinnedCSIs';
 import EmptyState from '@/components/shared/States/EmptyState';
 
 const HomePage: React.FC = () => {
@@ -66,15 +65,11 @@ const HomePage: React.FC = () => {
       {/* GlobalSearch moved to layout header */}
 
       <Grid container spacing={3}>
-        <Grid item xs={12}>
-          <PinnedCSIs />
-        </Grid>
-
         {!searchContext.csiId ? (
           <Grid item xs={12}>
             <EmptyState
               title="Select a CSI to view data"
-              description="Use the global search above to choose a CSI. You can also set one from My CSIs."
+              description="Use the global search above to choose a CSI."
             />
           </Grid>
         ) : (
