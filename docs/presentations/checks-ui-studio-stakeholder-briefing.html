@@ -482,8 +482,53 @@ h2.tight{font-size:clamp(24px,2.9vw,40px);max-width:46ch}
   </div>
 </section>
 
-<!-- 7 · architecture -->
-<section class="slide" id="s7" data-label="Architecture" hidden>
+<!-- 7 · how studio learns a step -->
+<section class="slide" id="s7" data-label="How Studio learns" hidden>
+  <div class="frame">
+    <p class="eyebrow">How Studio learns</p>
+    <h2 class="tight">For every step, Studio looks at the page, decides, tries it and proves it.</h2>
+    <div class="diagram">
+    <svg viewBox="0 0 1240 310" role="img" aria-labelledby="lrnT lrnD"><title id="lrnT">How Studio learns each step</title><desc id="lrnD">1. The author writes a step in plain English. 2. Studio looks at the page and reads what is really on the screen. 3. The AI model picks the action for the step. 4. Studio tries it in a real browser and checks what changed; if it fails or is unclear it tries again with what the page showed, or asks the author. 5. The step is replayed without the model; if it passes, the step is learned. This repeats for every step in the test.</desc>
+      <defs><marker id="la" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="d-head"/></marker></defs>
+      <rect class="d-ext" x="20" y="80" width="200" height="124" rx="12"/>
+      <text class="d-t" x="36" y="114">1 · Write a step</text>
+      <text class="d-s" x="36" y="142">The author describes it</text>
+      <text class="d-s" x="36" y="164">in plain English.</text>
+      <rect class="d-core" x="270" y="80" width="200" height="124" rx="12"/>
+      <text class="d-t" x="286" y="114">2 · Look at the page</text>
+      <text class="d-s" x="286" y="142">Studio reads what is</text>
+      <text class="d-s" x="286" y="164">really on the screen.</text>
+      <rect class="d-core" x="520" y="80" width="200" height="124" rx="12"/>
+      <text class="d-t" x="536" y="114">3 · Pick the action</text>
+      <text class="d-s" x="536" y="142">The AI model picks what</text>
+      <text class="d-s" x="536" y="164">to do for this step.</text>
+      <rect class="d-core" x="770" y="80" width="200" height="124" rx="12"/>
+      <text class="d-t" x="786" y="114">4 · Try it</text>
+      <text class="d-s" x="786" y="142">Runs in a real browser,</text>
+      <text class="d-s" x="786" y="164">then checks what</text>
+      <text class="d-s" x="786" y="186">changed.</text>
+      <rect class="d-core" x="1020" y="80" width="200" height="124" rx="12"/>
+      <text class="d-t" x="1036" y="114">5 · Prove and keep</text>
+      <text class="d-s" x="1036" y="142">Replayed without the</text>
+      <text class="d-s" x="1036" y="164">model. If it passes, the</text>
+      <text class="d-s" x="1036" y="186">step is learned.</text>
+      <path class="d-line" d="M224,142 H266" marker-end="url(#la)"/>
+      <path class="d-line" d="M474,142 H516" marker-end="url(#la)"/>
+      <path class="d-line" d="M724,142 H766" marker-end="url(#la)"/>
+      <path class="d-line" d="M974,142 H1016" marker-end="url(#la)"/>
+      <path class="d-line" d="M870,80 V48 H620 V76" marker-end="url(#la)"/>
+      <text class="d-lbl" x="745" y="38" text-anchor="middle">Failed or unclear? Try again with what the page showed, or ask the author.</text>
+      <path class="d-line" d="M1120,204 V262 H120 V208" marker-end="url(#la)"/>
+      <text class="d-lbl" x="620" y="288" text-anchor="middle">Repeat for every step in the test</text>
+    </svg>
+    </div>
+    <div class="legend"><span><i class="ext"></i>The author</span><span><i class="core"></i>Studio</span></div>
+    <p class="note">A step is only kept once it has passed on its own. Later runs replay it without the AI model.</p>
+  </div>
+</section>
+
+<!-- 8 · architecture -->
+<section class="slide" id="s8" data-label="Architecture" hidden>
   <div class="frame">
     <p class="eyebrow">Architecture</p>
     <h2 class="tight">How the pieces fit together</h2>
@@ -556,8 +601,8 @@ h2.tight{font-size:clamp(24px,2.9vw,40px);max-width:46ch}
   </div>
 </section>
 
-<!-- 8 · secrets -->
-<section class="slide" id="s8" data-label="Secrets &amp; Vault" hidden>
+<!-- 9 · secrets -->
+<section class="slide" id="s9" data-label="Secrets &amp; Vault" hidden>
   <div class="frame">
     <p class="eyebrow">Secrets &amp; compliance</p>
     <h2 class="tight">Secrets go straight to Vault. Studio borrows one only for the length of a run.</h2>
@@ -626,8 +671,8 @@ h2.tight{font-size:clamp(24px,2.9vw,40px);max-width:46ch}
   </div>
 </section>
 
-<!-- 9 · scope -->
-<section class="slide" id="s9" data-label="V1 scope" hidden>
+<!-- 10 · scope -->
+<section class="slide" id="s10" data-label="V1 scope" hidden>
   <div class="frame">
     <p class="eyebrow">MVP (V1) scope</p>
     <h2>What V1 delivers</h2>
@@ -648,8 +693,8 @@ h2.tight{font-size:clamp(24px,2.9vw,40px);max-width:46ch}
   </div>
 </section>
 
-<!-- 10 · beyond v1 -->
-<section class="slide" id="s10" data-label="Beyond V1" hidden>
+<!-- 11 · beyond v1 -->
+<section class="slide" id="s11" data-label="Beyond V1" hidden>
   <div class="frame">
     <p class="eyebrow">Beyond the MVP</p>
     <h2>What follows V1, and what V1 deliberately leaves out</h2>
@@ -678,8 +723,8 @@ h2.tight{font-size:clamp(24px,2.9vw,40px);max-width:46ch}
   </div>
 </section>
 
-<!-- 11 · timeline -->
-<section class="slide" id="s11" data-label="Timeline" hidden>
+<!-- 12 · timeline -->
+<section class="slide" id="s12" data-label="Timeline" hidden>
   <div class="frame">
     <p class="eyebrow">Timeline</p>
     <h2>From build to MVP v1 and general availability</h2>
@@ -698,7 +743,7 @@ h2.tight{font-size:clamp(24px,2.9vw,40px);max-width:46ch}
 <nav class="nav" aria-label="Slides">
   <button class="btn" id="prev" type="button" aria-label="Previous slide">‹ <span class="pt">Prev</span></button>
   <div class="nav-scrub" id="scrub"><div class="track"></div><div class="fill" id="fill"></div></div>
-  <div class="nav-title"><b id="count">1 / 11</b><span class="t" id="label">Overview</span></div>
+  <div class="nav-title"><b id="count">1 / 12</b><span class="t" id="label">Overview</span></div>
   <button class="btn" id="next" type="button" aria-label="Next slide"><span class="pt">Next</span> ›</button>
 </nav>
 </div>

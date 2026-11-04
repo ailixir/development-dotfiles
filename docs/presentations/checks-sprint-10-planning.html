@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Checks Sprint 10 Planning</title>
+<style>
+:root{
+  --paper:#F5F7FA; --surface:#FFFFFF; --surface-2:#EDF1F6; --ink:#0F1E36; --ink-2:#34445E; --muted:#5A6A82; --line:#D8E0EA;
+  --accent:#0E7C6B; --accent-ink:#0A6E5E; --accent-soft:#DDF1EC; --on-accent:#FFFFFF;
+  --amber:#8A5710; --amber-soft:#FBEFD9; --red:#B83A3A; --red-soft:#F9E1E1;
+  --p1:#DDF1EC; --p2:#E3E9F7; --p3:#F6EAD8; --p4:#ECE4F3;
+  --shadow:0 1px 2px rgba(15,30,54,.06),0 10px 28px rgba(15,30,54,.07);
+  --display:'Archivo','Arial Narrow',Arial,sans-serif;
+  --body:'IBM Plex Sans','Segoe UI',Helvetica,Arial,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --paper:#0B1424; --surface:#111D33; --surface-2:#172642; --ink:#E8EEF7; --ink-2:#C4D0E2; --muted:#98A9C2; --line:#26385A;
+    --accent:#3BBFA8; --accent-ink:#3BBFA8; --accent-soft:#103430; --on-accent:#06201C;
+    --amber:#E3AA4D; --amber-soft:#34260F; --red:#F07A7A; --red-soft:#3A1A1C;
+    --p1:#123A34; --p2:#1A2A4A; --p3:#3A2C15; --p4:#2C2340;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#0B1424; --surface:#111D33; --surface-2:#172642; --ink:#E8EEF7; --ink-2:#C4D0E2; --muted:#98A9C2; --line:#26385A;
+  --accent:#3BBFA8; --accent-ink:#3BBFA8; --accent-soft:#103430; --on-accent:#06201C;
+  --amber:#E3AA4D; --amber-soft:#34260F; --red:#F07A7A; --red-soft:#3A1A1C;
+  --p1:#123A34; --p2:#1A2A4A; --p3:#3A2C15; --p4:#2C2340;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+[hidden]{display:none!important}
+
+.deck{height:100%;display:flex;flex-direction:column}
+.stage{flex:1;min-height:0;position:relative}
+.slide{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:clamp(18px,4vh,56px) clamp(16px,4vw,96px) clamp(18px,3vh,40px);display:flex}
+.frame{width:100%;max-width:1240px;margin:auto;display:flex;flex-direction:column;gap:clamp(12px,2.4vh,28px);min-width:0}
+.slide.is-entering .frame{animation:rise .35s ease both}
+@keyframes rise{from{opacity:.001;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){.slide.is-entering .frame{animation:none}.nav-scrub .fill{transition:none}}
+
+.eyebrow{font-family:var(--mono);font-size:13px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0}
+h1,h2,h3{font-family:var(--display);font-stretch:112%;margin:0;text-wrap:balance;color:var(--ink)}
+h1{font-size:clamp(48px,8vw,104px);font-weight:800;line-height:.98;letter-spacing:-.01em}
+h2{font-size:clamp(26px,3.4vw,46px);font-weight:750;line-height:1.08;letter-spacing:-.005em;max-width:36ch}
+h3{font-size:clamp(17px,1.6vw,22px);font-weight:700;line-height:1.2}
+p{margin:0}
+.lede{font-size:clamp(17px,1.6vw,22px);color:var(--ink-2);max-width:44ch;line-height:1.45}
+.note{font-size:15px;color:var(--muted);max-width:92ch}
+.grid{display:grid;gap:clamp(12px,1.6vw,20px)}
+.g2{grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr))}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:clamp(14px,1.8vw,24px);display:flex;flex-direction:column;gap:8px;min-width:0}
+.panel p{color:var(--ink-2)}
+.chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:12.5px;font-weight:500;letter-spacing:.04em;padding:4px 10px;border-radius:999px;white-space:nowrap;width:fit-content}
+.chip.done{background:var(--accent-soft);color:var(--accent-ink)}
+.chip.open{background:var(--amber-soft);color:var(--amber)}
+.chip.next{background:var(--surface-2);color:var(--ink-2)}
+.chip.fail{background:var(--red-soft);color:var(--red)}
+.chip::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.lab{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+ul.clean{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px}
+ul.clean li{padding-left:18px;position:relative;color:var(--ink-2);font-size:16px}
+ul.clean li::before{content:"";position:absolute;left:2px;top:.62em;width:7px;height:7px;border-radius:2px;background:var(--accent)}
+.scopegrid{display:grid;grid-template-columns:minmax(0,2.1fr) minmax(0,1fr);gap:clamp(12px,1.6vw,20px)}
+@media (max-width:900px){.scopegrid{grid-template-columns:1fr}}
+ol.ms{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.ms li{display:grid;grid-template-columns:104px minmax(0,1fr);gap:4px 14px;padding-top:10px;border-top:1px solid var(--line)}
+.ms li:first-child{border-top:0;padding-top:0}
+.ms .when{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--accent-ink);padding-top:3px}
+.ms h3{font-size:clamp(16px,1.3vw,18px)}
+.ms p{grid-column:2;font-size:15.5px}
+@media (max-width:520px){.ms li{grid-template-columns:1fr}.ms p{grid-column:1}}
+.mark{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:600}
+.mark.ok{background:var(--accent-soft);color:var(--accent-ink)}
+.mark.bad{background:var(--red-soft);color:var(--red)}
+
+/* cover */
+.cover{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:clamp(24px,5vw,72px);align-items:center}
+.cover .meta{display:flex;flex-direction:column;gap:4px;font-family:var(--mono);font-size:13.5px;color:var(--muted)}
+.report{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;margin:0}
+.report header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 18px;background:var(--surface-2);border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+.report ol{list-style:none;margin:0;padding:8px 0}
+.report li{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 18px;font-size:15.5px;color:var(--ink)}
+.report li .sub{display:block;font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+
+/* before / after */
+.cmp{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:12px clamp(10px,2vw,28px);align-items:stretch}
+.cmp .hd{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.cmp .cell{border:1px solid var(--line);border-radius:14px;padding:clamp(12px,2vh,20px) clamp(16px,1.8vw,24px);font-size:clamp(16px,1.5vw,21px);font-weight:600;color:var(--ink);display:flex;flex-direction:column;justify-content:center;gap:2px}
+.cmp .cell.was{background:var(--surface-2);color:var(--ink-2);font-weight:500}
+.cmp .cell.now{background:var(--accent-soft);border-color:var(--accent)}
+.cmp .cell small{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.cmp .arr{font-family:var(--mono);font-size:26px;color:var(--accent);align-self:center}
+
+/* problem */
+.quote{border-left:3px solid var(--accent);padding:4px 0 4px clamp(14px,2vw,24px);display:flex;flex-direction:column;gap:8px}
+.quote blockquote{margin:0;font-family:var(--display);font-stretch:106%;font-weight:600;font-size:clamp(19px,2.2vw,30px);line-height:1.25;color:var(--ink);max-width:72ch;text-wrap:balance}
+.quote cite{font-style:normal;font-size:15px;color:var(--muted)}
+.sym p{font-size:15.5px}
+.sym .arrow{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+
+/* product mock */
+.mock{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.35fr) minmax(0,1fr);gap:clamp(10px,1.2vw,16px)}
+.pane{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow)}
+.pane > header{padding:9px 14px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:var(--surface-2)}
+.pane .body{padding:6px 14px 10px;display:flex;flex-direction:column;flex:1}
+.mrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:15px;color:var(--ink)}
+.mrow:last-child{border-bottom:0}
+.mrow.sel{background:var(--accent-soft);margin:0 -14px;padding:8px 14px;border-radius:0}
+.mrow small{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-left:6px}
+.mrow .tt{display:flex;align-items:baseline;flex-wrap:wrap;min-width:0}
+.mkv{display:flex;flex-direction:column;gap:2px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:14.5px;color:var(--ink-2)}
+.mkv b{color:var(--ink);font-size:15.5px}
+.runbtn{align-self:flex-start;margin-top:10px;background:var(--accent);color:var(--on-accent);font-weight:600;font-size:14px;border-radius:10px;padding:7px 14px}
+.strip{font-size:16px;color:var(--ink-2);padding:10px 16px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2)}
+.strip b{color:var(--ink)}
+
+/* personas */
+.persona{display:grid;grid-template-columns:auto 1fr;gap:12px 16px;align-items:start}
+.avatar{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-stretch:110%;font-weight:750;font-size:22px;color:var(--ink)}
+.persona .who{display:flex;flex-direction:column;gap:2px}
+.persona .role{font-size:14.5px;color:var(--muted)}
+.persona .body{grid-column:1/-1;display:flex;flex-direction:column;gap:8px}
+.tag{font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-ink)}
+
+/* journey */
+.who-strip{display:flex;align-items:center;gap:14px}
+.who-strip .avatar{width:44px;height:44px;font-size:19px}
+.journey{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(10px,1.2vw,16px);counter-reset:j}
+.journey li{counter-increment:j;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.journey li::before{content:counter(j);font-family:var(--display);font-stretch:112%;font-weight:800;font-size:32px;line-height:1;color:var(--accent-ink)}
+.journey li p{font-size:15px;color:var(--ink-2)}
+
+/* check types */
+.kinds .card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:clamp(16px,2.4vw,32px);display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow)}
+.kinds .card.star{border:2px solid var(--accent);background:var(--accent-soft)}
+.kinds .card h3{font-size:clamp(21px,2.1vw,28px)}
+.kinds .card p{font-size:clamp(16px,1.4vw,19px);color:var(--ink-2)}
+.ico{width:clamp(48px,9vh,80px);height:auto;fill:none;stroke:var(--accent);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+
+/* diagrams */
+.diagram{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:clamp(8px,1.2vw,16px)}
+.diagram svg{display:block;width:100%;height:auto;max-height:44vh}
+.diagram-narrow{display:none}
+.d-zone{fill:var(--surface-2);stroke:var(--line);stroke-width:1.5}
+.d-box{fill:var(--surface);stroke:var(--line);stroke-width:1.5}
+.d-core{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5}
+.d-ext{fill:var(--paper);stroke:var(--muted);stroke-width:1.5;stroke-dasharray:5 4}
+.d-t{font-family:var(--body);font-size:19px;font-weight:600;fill:var(--ink)}
+.d-s{font-family:var(--body);font-size:15px;fill:var(--ink-2)}
+.d-lbl{font-family:var(--body);font-size:14px;fill:var(--muted)}
+.d-line{stroke:var(--ink-2);stroke-width:2;fill:none}
+.d-head{fill:var(--ink-2)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 22px;font-size:14.5px;color:var(--muted);align-items:center}
+.legend span{display:inline-flex;align-items:center;gap:8px}
+.legend i{display:inline-block;width:22px;height:14px;border-radius:4px}
+.legend i.core{background:var(--accent-soft);border:1.5px solid var(--accent)}
+.legend i.ext{background:var(--paper);border:1.5px dashed var(--muted)}
+.lanes{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.lanes li{border:1px solid var(--line);border-radius:12px;padding:10px 14px;background:var(--surface);display:flex;flex-direction:column;position:relative;margin-bottom:22px}
+.lanes li:last-child{margin-bottom:0}
+.lanes li:not(:last-child)::after{content:"\2193";position:absolute;left:50%;bottom:-22px;transform:translateX(-50%);font-family:var(--mono);color:var(--accent);font-size:18px;line-height:22px}
+.lanes li.core{background:var(--accent-soft);border-color:var(--accent)}
+.lanes li.ext{background:var(--paper);border-style:dashed}
+.lanes b{font-size:16px;color:var(--ink)}
+.lanes span{font-size:14.5px;color:var(--ink-2)}
+
+/* timeline */
+.tl{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(var(--n,5),minmax(0,1fr));gap:12px;position:relative}
+.tl::before{content:"";position:absolute;left:10px;right:10px;top:9px;height:4px;border-radius:2px;background:linear-gradient(90deg,var(--accent) 0 var(--fill,12%),var(--line) var(--fill,12%) 100%)}
+.tl li{position:relative;padding-top:34px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.tl li::before{content:"";position:absolute;top:0;left:0;width:22px;height:22px;border-radius:50%;background:var(--surface);border:3px solid var(--line)}
+.tl li.done::before{background:var(--accent);border-color:var(--accent)}
+.tl li.open::before{border-color:var(--amber)}
+.tl li.next::before{border-color:var(--ink-2)}
+.tl p{font-size:14.5px;color:var(--ink-2)}
+.asks{counter-reset:a;list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(10px,1.4vw,18px)}
+.asks li{counter-increment:a;display:grid;grid-template-columns:30px 1fr;gap:8px;align-items:start;background:var(--accent-soft);border:1px solid var(--accent);border-radius:12px;padding:12px 14px;font-size:15.5px;font-weight:600;color:var(--ink)}
+.asks li::before{content:counter(a);font-family:var(--display);font-stretch:112%;font-weight:800;font-size:24px;line-height:1.1;color:var(--accent-ink)}
+
+.fill{background:var(--amber-soft);color:var(--amber);border:1px dashed var(--amber);border-radius:6px;padding:0 6px;font-family:var(--mono);font-size:.88em}
+
+/* nav as a video scrubber */
+.nav{flex:none;border-top:1px solid var(--line);background:var(--surface);padding:10px clamp(16px,3vw,32px) calc(10px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:auto 1fr auto auto;gap:clamp(10px,2vw,20px);align-items:center}
+.nav button{font:inherit;cursor:pointer}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;height:38px;min-width:38px;padding:0 12px;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:14px;font-weight:500}
+.btn:hover{background:var(--surface-2)}
+.btn:disabled{opacity:.4;cursor:default}
+.nav-scrub{position:relative;height:32px;margin:0 8px}
+.nav-scrub .track{position:absolute;left:0;right:0;top:14px;height:4px;border-radius:2px;background:var(--line)}
+.nav-scrub .fill{position:absolute;left:0;top:14px;height:4px;border-radius:2px;background:var(--accent);transition:width .25s ease}
+.nav-scrub button{position:absolute;top:8px;width:16px;height:16px;transform:translateX(-50%);border-radius:50%;border:2px solid var(--line);background:var(--surface);padding:0}
+.nav-scrub button.past{border-color:var(--accent);background:var(--accent)}
+.nav-scrub button.cur{border-color:var(--accent);background:var(--surface);box-shadow:0 0 0 4px var(--accent-soft)}
+.nav-title{font-family:var(--mono);font-size:12.5px;color:var(--muted);white-space:nowrap;display:flex;gap:10px;align-items:center}
+.nav-title b{color:var(--ink);font-weight:500;font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+@media (max-width:1000px){
+  .cover{grid-template-columns:1fr}
+  .mock{grid-template-columns:1fr}
+  .journey{grid-template-columns:1fr 1fr}
+  .tl{grid-template-columns:1fr;gap:16px}
+  .tl::before{left:9px;right:auto;top:10px;bottom:10px;width:4px;height:auto;background:linear-gradient(180deg,var(--accent) 0 var(--fill,12%),var(--line) var(--fill,12%) 100%)}
+  .tl li{padding-top:0;padding-left:38px}
+  .asks{grid-template-columns:1fr}
+  .cmp{grid-template-columns:1fr}
+  .cmp .arr{transform:rotate(90deg);justify-self:center}
+  .cmp .hd{display:none}
+  .cell.was::before,.cell.now::before{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  .cell.was::before{content:"At the start of the sprint"}
+  .cell.now::before{content:"Now"}
+}
+@media (max-width:900px){
+  .diagram svg.diagram-wide{display:none}
+  .diagram-narrow{display:block}
+}
+@media (max-width:640px){
+  body{font-size:16px}
+  .journey{grid-template-columns:1fr}
+  .nav{gap:8px}
+  .nav-title{gap:0}
+  .nav-title .t{display:none}
+  .nav .pt{display:none}
+}
+@media print{
+  html,body{height:auto}
+  .deck{display:block;height:auto}
+  .stage{position:static}
+  .slide,.slide[hidden]{display:flex!important;position:static;overflow:visible;min-height:100vh;break-after:page}
+  .nav{display:none}
+}
+</style>
+<noscript><style>.slide[hidden]{display:flex!important}.deck{height:auto}.stage{position:static}.slide{position:static;min-height:100vh}.nav{display:none}</style></noscript>
+</head>
+<body>
+<div class="deck" id="deck">
+<!--
+TEMPLATE: Checks Sprint 10 Planning (derived from checks-sprint-demo-planning.html) (stakeholders: PO, director, PMs)
+Each deck covers only two sprints: the one being closed and the next one. Past sprints are not repeated. Sprints are called "previous"/"current" and "next"; the Sprint 10 deck names the number on the cover and the last slide at the product owner's request.
+Write the headline and the story fresh every sprint. Do not reuse the previous deck's wording.
+Source of truth: the Jira sprint board (current sprint = closed items, next sprint = planned items). Every item on the board appears in the deck, in functional language.
+Reuse the structure, in this order:
+  1 Cover                PER-SPRINT: one-sentence hook, card rows, demo or no demo
+  2 Current: the story   PER-SPRINT: what the main capability can now do, told as a walk-through of the finished items; add a demo slide after it when there is something to show
+  3 The engine           PER-SPRINT: the main capability being built and how it is measured, in plain words
+  4 Current: the rest    PER-SPRINT: security and operations items; fill the amber fields (class="fill") or delete the slide
+  5 Next: the main work  PER-SPRINT: the capability work, with what is proposed for the next demo
+  6 Next: the rest       PER-SPRINT: delivery, platform and operations items
+Audience rule: functional language only. No story points, no assignees, no technical terms without a plain explanation. No Jira keys on the slides; keys stay in the HTML source comments only.
+Keep one HTML comment above each slide naming where its facts came from.
+-->
+<main class="stage" id="stage" aria-live="polite">
+
+<!-- PER-SPRINT. sources: user direction 3 Nov 2026 (Sprint 10 started 3 Nov; previous sprint 20 Oct - 2 Nov finished; all stories that were "next" in the 21 Oct deck are now finished; 30+ CVE patches handled; production deployment planned for the previous sprint did not happen and moves to Sprint 10; demo this sprint). Sprint 10 end date 16 Nov is an assumption (two-week cadence, previous sprint ended on the next one's start) -->
+<section class="slide" id="s1" data-label="Overview">
+  <div class="frame cover">
+    <div style="display:flex;flex-direction:column;gap:22px">
+      <p class="eyebrow">Checks · EAMP Platform · Sprint 10 Planning</p>
+      <h1>Checks</h1>
+      <p class="lede">Studio is taking shape for the alpha. Authors can now see what Studio will do for each step they wrote, and jump from any step to that moment in the video of the run. More than 30 security patches are done.</p>
+      <div class="meta"><span>November 2026</span><span>Includes a demo of what the previous sprint delivered.</span></div>
+    </div>
+    <figure class="report" aria-label="Where Checks stands: previous sprint done, production deployment carried over, Sprint 10 planned">
+      <header><span>Checks · Previous sprint to Sprint 10</span><span class="chip open">Planning</span></header>
+      <ol>
+        <li><span class="mark ok" aria-label="done">✓</span><span>Previous sprint · 20 Oct – 2 Nov<span class="sub">step review, jump to a step in the video, access rules, 30+ security patches</span></span><span class="chip done">Done</span></li>
+        <li><span class="mark ok" aria-label="carried over">→</span><span>Production deployment<span class="sub">planned for the previous sprint, moves to Sprint 10</span></span><span class="chip open">Carried over</span></li>
+        <li><span class="mark ok" aria-label="planned">→</span><span>Sprint 10 · from 3 Nov<span class="sub">planning today</span></span><span class="chip next">Planning today</span></li>
+      </ol>
+    </figure>
+  </div>
+</section>
+
+<!-- PER-SPRINT. sources: review and jump-to-step items from the 21 Oct deck (finished per user, 3 Nov 2026); access rules from the same deck, kept as a note; page-aware learning per user direction, 3 Nov 2026 (agentic workflow), supported by git: 4cc0f4a59 per-session guided learning, 66286e43d generated step code with proof, e15d32112 learning from page changes; the "still in development for alpha" framing per user. Secrets vault is NOT claimed as done -->
+<section class="slide" id="s2" data-label="Previous sprint: progress toward alpha" hidden>
+  <div class="frame">
+    <p class="eyebrow">Previous sprint · Studio on the way to the alpha</p>
+    <h2>What Studio can do now that it could not at the start of the sprint</h2>
+    <div class="cmp">
+      <div class="hd"><span class="chip next">At the start of the sprint</span></div><div class="hd"></div><div class="hd"><span class="chip done">Now</span></div>
+      <div class="cell was"><small>Writing a test</small>Steps were written in plain English, but there was no way to see what Studio would do for each one.</div>
+      <div class="arr">→</div>
+      <div class="cell now"><small>Writing a test</small>Each step shows what Studio will do for it.</div>
+      <div class="cell was"><small>Checking a run</small>A run produced a video, with no way to go straight from a step to its moment.</div>
+      <div class="arr">→</div>
+      <div class="cell now"><small>Checking a run</small>After a run finishes, open the recording and click a step to land on that moment, instead of searching the video by hand.</div>
+      <div class="cell was"><small>Studio learning a test</small>Studio turned the written words into steps.</div>
+      <div class="arr">→</div>
+      <div class="cell now"><small>Studio learning a test</small>Studio works through the test one step at a time. For each step it looks at the real page, decides what to do, tries it and checks what changed, so it acts on what is actually there.</div>
+    </div>
+    <p class="note">Every Studio action also checks who is allowed to do it, and a refusal never reveals whether the item exists. Studio is still in development for the alpha.</p>
+  </div>
+</section>
+
+<!-- PER-SPRINT. sources: git 4cc0f4a59 (per-session guided learning), 66286e43d + 9bbd8ecc9 (generated step code, model-free proof and replay), ccc7686e5 (clarification choices shown on the page), e15d32112 (learning from page changes); docs/architecture/ADR-SC-008-generated-step-code.md (a step is learned when its frozen code passes the model-free proof replay; repair receives diagnostics). Simplified for stakeholders: no code or tool names -->
+<section class="slide" id="s3" data-label="How Studio learns a step" hidden>
+  <div class="frame">
+    <p class="eyebrow">Studio · How it learns</p>
+    <h2>For every step, Studio looks, decides, tries and proves</h2>
+    <div class="diagram">
+      <svg class="diagram-wide" viewBox="0 0 1240 310" role="img" aria-label="Learning loop for one step: write, look at the page, decide, try, prove and keep; retry loop; repeat for each step">
+    <defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path class="d-head" d="M0,0 L10,5 L0,10z"/></marker></defs>
+    <rect class="d-ext" x="20" y="80" width="200" height="124" rx="12"/>
+    <text class="d-t" x="36" y="114">1 · Write a step</text>
+    <text class="d-s" x="36" y="142">The author describes it</text>
+    <text class="d-s" x="36" y="164">in plain English.</text>
+    <rect class="d-core" x="270" y="80" width="200" height="124" rx="12"/>
+    <text class="d-t" x="286" y="114">2 · Look at the page</text>
+    <text class="d-s" x="286" y="142">Studio reads what is</text>
+    <text class="d-s" x="286" y="164">really on the screen.</text>
+    <rect class="d-core" x="520" y="80" width="200" height="124" rx="12"/>
+    <text class="d-t" x="536" y="114">3 · Pick the action</text>
+    <text class="d-s" x="536" y="142">The AI model picks what</text>
+    <text class="d-s" x="536" y="164">to do for this step.</text>
+    <rect class="d-core" x="770" y="80" width="200" height="124" rx="12"/>
+    <text class="d-t" x="786" y="114">4 · Try it</text>
+    <text class="d-s" x="786" y="142">Runs in a real browser,</text>
+    <text class="d-s" x="786" y="164">then checks what</text>
+    <text class="d-s" x="786" y="186">changed.</text>
+    <rect class="d-core" x="1020" y="80" width="200" height="124" rx="12"/>
+    <text class="d-t" x="1036" y="114">5 · Prove and keep</text>
+    <text class="d-s" x="1036" y="142">Replayed without the</text>
+    <text class="d-s" x="1036" y="164">model. If it passes, the</text>
+    <text class="d-s" x="1036" y="186">step is learned.</text>
+    <path class="d-line" d="M224,142 H266" marker-end="url(#ah)"/>
+    <path class="d-line" d="M474,142 H516" marker-end="url(#ah)"/>
+    <path class="d-line" d="M724,142 H766" marker-end="url(#ah)"/>
+    <path class="d-line" d="M974,142 H1016" marker-end="url(#ah)"/>
+    <path class="d-line" d="M870,80 V48 H620 V76" marker-end="url(#ah)"/>
+    <text class="d-lbl" x="745" y="38" text-anchor="middle">Failed or unclear? Try again with what the page showed, or ask the author.</text>
+    <path class="d-line" d="M1120,204 V262 H120 V208" marker-end="url(#ah)"/>
+    <text class="d-lbl" x="620" y="288" text-anchor="middle">Repeat for every step in the test</text>
+  </svg>
+      <div class="diagram-narrow"><ol class="lanes">
+        <li class="ext"><b>1 · Write a step</b><span>The author describes it in plain English.</span></li>
+        <li class="core"><b>2 · Look at the page</b><span>Studio reads what is really on the screen.</span></li>
+        <li class="core"><b>3 · Pick the action</b><span>The AI model picks what to do for this step.</span></li>
+        <li class="core"><b>4 · Try it</b><span>Runs in a real browser, then checks what changed. If it fails or is unclear, it tries again with what the page showed, or asks the author.</span></li>
+        <li class="core"><b>5 · Prove and keep</b><span>Replayed without the model. If it passes, the step is learned. Then on to the next step.</span></li>
+      </ol></div>
+    </div>
+    <div class="legend"><span><i class="ext"></i>The author</span><span><i class="core"></i>Studio</span></div>
+    <p class="strip"><b>Why it matters.</b> A step is only kept once it has passed on its own. Later runs replay it without the AI model.</p>
+  </div>
+</section>
+
+<!-- PER-SPRINT. sources: user direction 3 Nov 2026 ("+30 CVEs patches" handled; exact count and severity not given, so the slide says "more than 30" and names no severity); Feedback and Ops improvements item (SMBFPM-98701) finished per user. The production deployment (SMBFPM-98703) did not happen, hence the last line -->
+<section class="slide" id="s4" data-label="Previous sprint: security and operations" hidden>
+  <div class="frame">
+    <p class="eyebrow">Previous sprint · Security and operations</p>
+    <h2>More than 30 known security weaknesses patched</h2>
+    <div class="grid g2">
+      <div class="panel">
+        <span class="chip done">Done</span>
+        <h3>Security patches: 30+ CVEs</h3>
+        <p>A CVE is a publicly catalogued weakness in software. More than 30 of them were patched, closing known gaps before the alpha goes to production.</p>
+      </div>
+      <div class="panel">
+        <span class="chip done">Done</span>
+        <h3>Feedback and operations improvements</h3>
+        <p>Improvements based on feedback from users and the operations team, so Checks is easier to use and to run day to day.</p>
+      </div>
+    </div>
+    <p class="strip"><b>Not yet in production.</b> The production deployment planned for the previous sprint did not happen. It moves to Sprint 10.</p>
+  </div>
+</section>
+
+<!-- PER-SPRINT. sources: demo confirmed by user, 3 Nov 2026. Flow taken from the proposed demo in the 21 Oct deck (review, start a run, watch the video, jump to a step); approval and live following removed per user, 3 Nov 2026 (tests are auto-approved; the video is only available after the run finishes); presenter to confirm the exact flow before presenting -->
+<section class="slide" id="s5" data-label="Demo" hidden>
+  <div class="frame">
+    <p class="eyebrow">Demo · Previous sprint</p>
+    <h2>From a written test to a step in the video</h2>
+    <div class="scopegrid">
+      <div class="panel">
+        <ol class="ms">
+          <li><span class="when">1 · Review</span><h3>See what each written step will do</h3><p>Each line the author wrote, shown with what Studio will do for it.</p></li>
+          <li><span class="when">2 · Run</span><h3>Start a run</h3><p>The test runs in a real browser, from beginning to end.</p></li>
+          <li><span class="when">3 · Watch</span><h3>Open the recording when the run is finished</h3><p>The full video of what happened, available once the run has ended.</p></li>
+          <li><span class="when">4 · Jump</span><h3>Click a step, land on that moment in the video</h3><p>Proof of what happened, found without searching the video.</p></li>
+        </ol>
+      </div>
+      <div class="panel">
+        <span class="chip done">Demo</span>
+        <h3>What to look for</h3>
+        <p>Everything shown was finished in the previous sprint. The video opens after the run ends, not while it runs.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PER-SPRINT. sources: user direction 3 Nov 2026: production deployment carried over (Jira SMBFPM-98703), Vault integration, Studio UI work and fixing a couple of critical failures, benchmark and fine-tune of the learning process; roadmap line from checks-product-stakeholder-briefing.html slide 9. The earlier amber placeholder was removed on the assumption that these are the stories set in planning; confirm there are no others -->
+<section class="slide" id="s6" data-label="Sprint 10" hidden>
+  <div class="frame">
+    <p class="eyebrow">Sprint 10 · from 3 Nov</p>
+    <h2>Sprint 10: production, Vault, and a more dependable Studio</h2>
+    <div class="grid g2">
+      <div class="panel">
+        <span class="chip open">Carried over</span>
+        <h3>Production deployment: alpha and security image patch</h3>
+        <p>The alpha goes to production, with the security image patch applied: the packaged version of Checks that gets deployed, updated with security fixes. It was planned for the previous sprint and moves here.</p>
+      </div>
+      <div class="panel">
+        <span class="chip next">Planned</span>
+        <h3>Integration with Vault</h3>
+        <p>Studio will read and write secrets such as passwords in Vault, the secrets vault, so sensitive values are kept in a dedicated, secured store.</p>
+      </div>
+      <div class="panel">
+        <span class="chip next">Planned</span>
+        <h3>Studio screens and critical failures</h3>
+        <p>Work on the Studio user interface, including fixing the critical failures found so far, so the experience holds up for the alpha.</p>
+      </div>
+      <div class="panel">
+        <span class="chip next">Planned</span>
+        <h3>Measure and fine-tune how Studio learns</h3>
+        <p>Benchmark how reliably Studio learns tests, then fine-tune the learning process based on the results.</p>
+      </div>
+    </div>
+    <p class="strip"><b>On the roadmap:</b> the UI Studio alpha is targeted for November 2026.</p>
+  </div>
+</section>
+
+</main>
+
+<nav class="nav" aria-label="Slides">
+  <button class="btn" id="prev" type="button" aria-label="Previous slide">‹ <span class="pt">Prev</span></button>
+  <div class="nav-scrub" id="scrub"><div class="track"></div><div class="fill" id="fill"></div></div>
+  <div class="nav-title"><b id="count">1 / 6</b><span class="t" id="label">Overview</span></div>
+  <button class="btn" id="next" type="button" aria-label="Next slide"><span class="pt">Next</span> ›</button>
+</nav>
+</div>
+
+<script>
+(function(){
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var total = slides.length, cur = 0;
+  var scrub = document.getElementById('scrub'), fill = document.getElementById('fill');
+  var count = document.getElementById('count'), label = document.getElementById('label');
+  var prev = document.getElementById('prev'), next = document.getElementById('next');
+  var ticks = slides.map(function(s, k){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.style.left = (total > 1 ? (k / (total - 1)) * 100 : 0) + '%';
+    b.setAttribute('aria-label', 'Go to slide ' + (k + 1) + ': ' + s.getAttribute('data-label'));
+    b.addEventListener('click', function(){ go(k); });
+    scrub.appendChild(b);
+    return b;
+  });
+  function go(n){
+    n = Math.max(0, Math.min(total - 1, n));
+    if (n !== cur) {
+      slides[cur].hidden = true;
+      slides[cur].classList.remove('is-entering');
+    }
+    cur = n;
+    var s = slides[cur];
+    s.hidden = false;
+    s.scrollTop = 0;
+    s.classList.remove('is-entering'); void s.offsetWidth; s.classList.add('is-entering');
+    fill.style.width = (total > 1 ? (cur / (total - 1)) * 100 : 0) + '%';
+    ticks.forEach(function(t, k){ t.classList.toggle('past', k < cur); t.classList.toggle('cur', k === cur); if (k === cur) t.setAttribute('aria-current', 'step'); else t.removeAttribute('aria-current'); });
+    count.textContent = (cur + 1) + ' / ' + total;
+    label.textContent = s.getAttribute('data-label');
+    prev.disabled = cur === 0;
+    next.disabled = cur === total - 1;
+    var h = '#s' + (cur + 1);
+    if (location.hash !== h) { try { history.replaceState(null, '', h); } catch (e) {} }
+  }
+  function fromHash(){ var m = /^#s(\d+)$/.exec(location.hash || ''); return m ? parseInt(m[1], 10) - 1 : null; }
+  prev.addEventListener('click', function(){ go(cur - 1); });
+  next.addEventListener('click', function(){ go(cur + 1); });
+  document.addEventListener('keydown', function(e){
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    var t = e.target, tag = t && t.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+    var k = e.key;
+    if (k === 'ArrowRight' || k === 'PageDown' || (k === ' ' && !e.shiftKey && tag !== 'BUTTON')) { e.preventDefault(); go(cur + 1); }
+    else if (k === 'ArrowLeft' || k === 'PageUp' || (k === ' ' && e.shiftKey && tag !== 'BUTTON')) { e.preventDefault(); go(cur - 1); }
+    else if (k === 'Home') { e.preventDefault(); go(0); }
+    else if (k === 'End') { e.preventDefault(); go(total - 1); }
+  });
+  window.addEventListener('hashchange', function(){ var n = fromHash(); if (n !== null) go(n); });
+  var sx = null, sy = null;
+  var stage = document.getElementById('stage');
+  stage.addEventListener('touchstart', function(e){ var t = e.touches[0]; sx = t.clientX; sy = t.clientY; }, {passive:true});
+  stage.addEventListener('touchend', function(e){
+    if (sx === null) return;
+    var t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) go(cur + (dx < 0 ? 1 : -1));
+    sx = sy = null;
+  }, {passive:true});
+  var start = fromHash();
+  cur = 0;
+  go(start === null ? 0 : start);
+})();
+</script>
+</body>
+</html>
