@@ -1,0 +1,28 @@
+# Line endings: LF in the repository and in every checkout, Windows included, so hashed files,
+# parsed resources and shell scripts are byte-identical on Windows and Linux (ADR-SC-009).
+* text=auto eol=lf
+# Windows-only scripts keep CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+# Binaries are never converted.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webm binary
+*.mp4 binary
+*.pdf binary
+*.jar binary
+*.p12 binary
+*.pfx binary
+*.zip binary
+*.gz binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.pptx binary
+*.docx binary
+# AIOX framework files (L1/L2) are left exactly as committed.
+.aiox-core/** -text
