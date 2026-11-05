@@ -1,5 +1,5 @@
 // Local stand-in for PUT Core's session identity API (GET /api/v1/users/me[/permissions]) on
-// PUT_CHECKS_CORE_PORT (default 8081, loopback only). Started by backend/dev.sh.
+// PUT_CHECKS_CORE_PORT (default 8081, loopback only). Started by backend/scripts/dev.mjs.
 // The guided publication and replay-authorization steps re-check the caller against Core with the
 // browser's put_session cookie ("fresh Core at the actual commit"). Locally there is no Core, so this
 // answers the same developer identity LocalDevAuthFilter injects (bb12345, checks-admin) for exactly

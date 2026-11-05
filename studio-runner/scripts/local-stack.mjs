@@ -1,24 +1,29 @@
 #!/usr/bin/env node
 /**
- * Local stack material for studio-runner/dev.sh (no Docker): private TLS, the two service identities, the guided
- * token issuer's keys, the observed catalog, and the files the backend sources. Everything lives in ONE directory
+ * Local stack material for scripts/dev.mjs (no Docker): private TLS, the two service identities, the guided
+ * token issuer's keys, the observed catalog, and the files the backend reads. Everything lives in ONE directory
  * outside the repository (PUT_CHECKS_LOCAL_DIR, default ~/.put-checks/local) and survives restarts, so the runner and
  * the backend can each restart alone.
  *
  *   node scripts/local-stack.mjs init   [<dir>]   idempotent: reuse what is valid, write the files below
  *   node scripts/local-stack.mjs health [<dir>]   strict mutual-TLS GET /health; exit 0 when healthy
- *   node scripts/local-stack.mjs run    [<dir>]   replace this process with the runner (cwd must be studio-runner/)
+ *   node scripts/local-stack.mjs run    [<dir>]   run the runner in the foreground (cwd must hold dist/main.js)
  *
  * Layout: tls/ identity/ issuer/ tokens/ journal/ objects/ scratch/ tmp/ logs/, catalog.json, backend-overlay.yml,
- * backend.env (export lines for the backend to `source`), runner-environment.json (the runner's whole environment).
+ * backend.env (dotenv KEY=value lines that backend/scripts/dev.mjs reads), runner-environment.json (the runner's whole
+ * environment). The launchers keep their PID files in pids/.
+ *
+ * File modes: on POSIX every directory is 0700 and every file 0600, and supplied secret files must have no group/other
+ * bits. Windows has no mode bits (Node reports 0o666); there the per-user profile ACL of %USERPROFILE% covers the
+ * default directory, so the mode checks run on POSIX only.
  */
 import { createPrivateKey, createPublicKey, generateKeyPairSync, randomBytes, X509Certificate } from 'node:crypto';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
 import { chmodSync, existsSync, lstatSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { request } from 'node:https';
-import { homedir } from 'node:os';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { constants, homedir } from 'node:os';
+import { delimiter, dirname, join, resolve } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const REQUIRED = ['STUDIO_RUNNER_TLS_KEY_FILE', 'STUDIO_RUNNER_TLS_CERT_FILE',
   'STUDIO_RUNNER_TLS_CA_FILE', 'STUDIO_RUNNER_CONTROLLER_CERTIFICATE_FINGERPRINT256',
@@ -38,9 +43,9 @@ const DOMAINS = 'localhost,example.com,practicetestautomation.com';
 const ISSUER = 'local-ux-issuer', CONTROLLER = 'local-ux-controller', WORKER = 'local-ux-worker';
 const RUNNER_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
-const shellQuote = (value) => `'${value.replaceAll("'", "'\\''")}'`;
 const fail = (message) => { throw new Error(message); };
-/** Writes through a temp file so a reader (the backend sourcing backend.env) never sees a half-written file. */
+const POSIX = process.platform !== 'win32';
+/** Writes through a temp file so a reader (the backend reading backend.env) never sees a half-written file. */
 const privateWrite = (path, value) => {
   const temp = `${path}.tmp`;
   writeFileSync(temp, value, { mode: 0o600 });
@@ -49,9 +54,50 @@ const privateWrite = (path, value) => {
 };
 export const defaultDir = (env = process.env) => env.PUT_CHECKS_LOCAL_DIR || join(env.HOME || homedir(), '.put-checks', 'local');
 
-function command(program, args, cwd) {
-  try { return execFileSync(program, args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }); }
-  catch { return fail(`Local TLS preparation failed in ${program === 'openssl' ? 'OpenSSL' : 'JDK keytool'}; verify installed tools and TLS files (tool output kept private).`); }
+/** Windows environment names are case-insensitive; a copied environment object keeps whichever spelling it had (`Path`). */
+export function envGet(env, key, platform = process.platform) {
+  if (env[key] !== undefined || platform !== 'win32') return env[key];
+  return Object.entries(env).find(([name]) => name.toUpperCase() === key.toUpperCase())?.[1];
+}
+
+/** The first `name` on PATH (with `.exe` on Windows), or undefined. */
+function onPath(name, env, platform) {
+  const file = platform === 'win32' ? `${name}.exe` : name;
+  for (const directory of (envGet(env, 'PATH', platform) ?? '').split(platform === 'win32' ? ';' : delimiter)) {
+    if (directory && existsSync(join(directory, file))) return join(directory, file);
+  }
+  return undefined;
+}
+
+/**
+ * OpenSSL: PATH first; on Windows then Git for Windows, which ships it (mingw64 is the native build, usr/bin the MSYS one).
+ * `exists` is injectable so the Windows lookup is testable on any OS.
+ */
+export function findOpenssl(env = process.env, platform = process.platform, exists = existsSync) {
+  const found = onPath('openssl', env, platform);
+  if (found) return found;
+  if (platform === 'win32') {
+    const roots = [envGet(env, 'ProgramFiles', platform), envGet(env, 'ProgramW6432', platform), envGet(env, 'ProgramFiles(x86)', platform),
+      envGet(env, 'LOCALAPPDATA', platform) && join(envGet(env, 'LOCALAPPDATA', platform), 'Programs')].filter(Boolean);
+    for (const root of roots) {
+      for (const candidate of [join(root, 'Git', 'mingw64', 'bin', 'openssl.exe'), join(root, 'Git', 'usr', 'bin', 'openssl.exe')]) {
+        if (exists(candidate)) return candidate;
+      }
+    }
+    return fail('Local TLS preparation needs openssl: install Git for Windows (it ships openssl.exe) or put openssl.exe on PATH.');
+  }
+  return fail('Local TLS preparation needs openssl on PATH.');
+}
+
+/** The JDK keytool: JAVA_HOME/bin when JAVA_HOME is set, otherwise the one on PATH. */
+export function keytool(env = process.env, platform = process.platform) {
+  const javaHome = envGet(env, 'JAVA_HOME', platform);
+  return javaHome ? join(javaHome, 'bin', platform === 'win32' ? 'keytool.exe' : 'keytool') : 'keytool';
+}
+
+function command(tool, args, cwd) {
+  try { return execFileSync(tool.path, args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }); }
+  catch { return fail(`Local TLS preparation failed in ${tool.label}; verify installed tools and TLS files (tool output kept private).`); }
 }
 function privateDir(path) {
   mkdirSync(path, { recursive: true, mode: 0o700 });
@@ -62,15 +108,12 @@ function privateDir(path) {
 function readable(path, key, secret = false) {
   try {
     if (!lstatSync(path).isFile() || readFileSync(path).length === 0) throw new Error();
-    if (secret && (lstatSync(path).mode & 0o077) !== 0) throw new Error();
-  } catch { fail(`${key} must name a readable nonempty file${secret ? ' with no group/other permissions' : ''}.`); }
+    if (secret && POSIX && (lstatSync(path).mode & 0o077) !== 0) throw new Error();
+  } catch { fail(`${key} must name a readable nonempty file${secret && POSIX ? ' with no group/other permissions' : ''}.`); }
 }
 function certificate(path) {
   try { return new X509Certificate(readFileSync(path)); }
   catch { return fail('Local TLS certificate is invalid; configure valid PEM certificates.'); }
-}
-function keytool(env) {
-  return env.JAVA_HOME ? join(env.JAVA_HOME, 'bin', 'keytool') : 'keytool';
 }
 function port(env, key, fallback) {
   const value = env[key] || fallback;
@@ -117,20 +160,20 @@ function generatedTlsUsable(tlsDir) {
   } catch { return false; }
 }
 
-function generateTls(tlsDir, env) {
+function generateTls(tlsDir, tools) {
   privateWrite(join(tlsDir, 'ca.cnf'), '[req]\ndistinguished_name=dn\nx509_extensions=ext\nprompt=no\n[dn]\nCN=Checks local CA\n[ext]\nbasicConstraints=critical,CA:TRUE\nkeyUsage=critical,keyCertSign,cRLSign\nsubjectKeyIdentifier=hash\nauthorityKeyIdentifier=keyid:always\n');
-  command('openssl', ['genrsa', '-out', 'ca.key', '2048'], tlsDir);
-  command('openssl', ['req', '-new', '-x509', '-sha256', '-key', 'ca.key', '-out', 'ca.crt', '-days', String(CERT_DAYS), '-config', 'ca.cnf'], tlsDir);
+  command(tools.openssl, ['genrsa', '-out', 'ca.key', '2048'], tlsDir);
+  command(tools.openssl, ['req', '-new', '-x509', '-sha256', '-key', 'ca.key', '-out', 'ca.crt', '-days', String(CERT_DAYS), '-config', 'ca.cnf'], tlsDir);
   privateWrite(join(tlsDir, 'leaf.ext'), 'basicConstraints=critical,CA:FALSE\nkeyUsage=critical,digitalSignature,keyEncipherment\nextendedKeyUsage=serverAuth,clientAuth\nsubjectAltName=DNS:localhost,IP:127.0.0.1\nsubjectKeyIdentifier=hash\nauthorityKeyIdentifier=keyid,issuer\n');
   for (const name of ['backend', 'runner']) {
-    command('openssl', ['genrsa', '-out', `${name}.key`, '2048'], tlsDir);
-    command('openssl', ['req', '-new', '-key', `${name}.key`, '-out', `${name}.csr`, '-subj', '/CN=localhost'], tlsDir);
-    command('openssl', ['x509', '-req', '-sha256', '-in', `${name}.csr`, '-CA', 'ca.crt', '-CAkey', 'ca.key', '-CAcreateserial', '-out', `${name}.crt`, '-days', String(CERT_DAYS), '-extfile', 'leaf.ext'], tlsDir);
+    command(tools.openssl, ['genrsa', '-out', `${name}.key`, '2048'], tlsDir);
+    command(tools.openssl, ['req', '-new', '-key', `${name}.key`, '-out', `${name}.csr`, '-subj', '/CN=localhost'], tlsDir);
+    command(tools.openssl, ['x509', '-req', '-sha256', '-in', `${name}.csr`, '-CA', 'ca.crt', '-CAkey', 'ca.key', '-CAcreateserial', '-out', `${name}.crt`, '-days', String(CERT_DAYS), '-extfile', 'leaf.ext'], tlsDir);
   }
   privateWrite(join(tlsDir, 'store.pass'), randomBytes(32).toString('base64url'));
-  command('openssl', ['pkcs12', '-export', '-in', 'backend.crt', '-inkey', 'backend.key', '-certfile', 'ca.crt', '-out', 'backend.p12', '-passout', 'file:store.pass'], tlsDir);
+  command(tools.openssl, ['pkcs12', '-export', '-in', 'backend.crt', '-inkey', 'backend.key', '-certfile', 'ca.crt', '-out', 'backend.p12', '-passout', 'file:store.pass'], tlsDir);
   rmSync(join(tlsDir, 'trust.p12'), { force: true }); // keytool refuses an existing alias
-  command(keytool(env), ['-importcert', '-noprompt', '-alias', 'local-ca', '-file', 'ca.crt', '-keystore', 'trust.p12', '-storetype', 'PKCS12', '-storepass:file', 'store.pass'], tlsDir);
+  command(tools.keytool, ['-importcert', '-noprompt', '-alias', 'local-ca', '-file', 'ca.crt', '-keystore', 'trust.p12', '-storetype', 'PKCS12', '-storepass:file', 'store.pass'], tlsDir);
 }
 
 function observedCatalog(runnerRoot) {
@@ -140,12 +183,49 @@ function observedCatalog(runnerRoot) {
   return { text, catalog: JSON.parse(text) };
 }
 
+/**
+ * One backend.env line. The file is plain dotenv: `KEY=value`, no quoting, no expansion, read verbatim by
+ * backend/scripts/dev.mjs (parseEnvFile below is the same reading). A value that dotenv would misread is refused.
+ */
+function envLine([key, value]) {
+  if (/[\r\n]/.test(value) || /^['"]/.test(value) || /\s#/.test(value) || value !== value.trim()) fail(`Local stack: ${key} cannot be written to backend.env as a plain value.`);
+  return `${key}=${value}\n`;
+}
+
+/**
+ * Reads a dotenv file: `KEY=value` lines, `#` comments, an optional `export ` prefix and optional matching quotes
+ * around the value (taken literally: no escapes, no `$VAR` expansion). Used for `.env.local` and backend.env.
+ */
+export function parseEnvFile(text) {
+  const values = {};
+  for (const raw of text.split(/\r?\n/)) {
+    const match = /^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=(.*)$/.exec(raw);
+    if (!match || raw.trimStart().startsWith('#')) continue;
+    const value = match[2].trim(), quote = value[0];
+    values[match[1]] = (quote === '"' || quote === "'") && value.length > 1 && value.endsWith(quote)
+      ? value.slice(1, -1) : value.replace(/\s+#.*$/, '');
+  }
+  return values;
+}
+
+/**
+ * What a Windows process needs beyond PATH and HOME: without SystemRoot Winsock cannot load its providers (no network),
+ * and TEMP/TMP are what os.tmpdir() reads there, so they point at the same tmp/ that TMPDIR names on POSIX.
+ */
+export function windowsEnv(env, dir, platform = process.platform) {
+  if (platform !== 'win32') return {};
+  const kept = ['SystemRoot', 'windir', 'USERPROFILE', 'LOCALAPPDATA', 'APPDATA', 'ComSpec']
+    .map((key) => [key, envGet(env, key, platform)]).filter(([, value]) => value);
+  return { ...Object.fromEntries(kept), TEMP: join(dir, 'tmp'), TMP: join(dir, 'tmp') };
+}
+
 export function init(localDirectory, env = process.env) {
   process.umask(0o077);
   const dir = resolve(localDirectory ?? defaultDir(env));
   privateDir(dir);
   for (const name of ['tls', 'identity', 'issuer', 'tokens', 'journal', 'objects', 'scratch', 'tmp', 'logs']) privateDir(join(dir, name));
   const tlsDir = join(dir, 'tls');
+  const tools = { openssl: { path: findOpenssl(env), label: 'OpenSSL' }, keytool: { path: keytool(env), label: 'JDK keytool' } };
   const runnerPort = port(env, 'PUT_CHECKS_RUNNER_PORT', '8090'), backendPort = port(env, 'PUT_CHECKS_BACKEND_PORT', '8080'),
     guidedPort = port(env, 'PUT_CHECKS_GUIDED_PORT', '8092');
 
@@ -164,7 +244,7 @@ export function init(localDirectory, env = process.env) {
   } else {
     if (!generatedTlsUsable(tlsDir)) {
       tlsRegenerated = existsSync(join(tlsDir, 'ca.crt'));
-      generateTls(tlsDir, env);
+      generateTls(tlsDir, tools);
     }
     Object.assign(tls, {
       STUDIO_RUNNER_TLS_KEY_FILE: join(tlsDir, 'runner.key'), STUDIO_RUNNER_TLS_CERT_FILE: join(tlsDir, 'runner.crt'),
@@ -182,10 +262,10 @@ export function init(localDirectory, env = process.env) {
   // Health material: the backend's identity as a PKCS12 the readiness probe presents, rebuilt on every init.
   privateWrite(join(tlsDir, 'health.pass'), randomBytes(32).toString('base64url'));
   rmSync(join(tlsDir, 'health.p12'), { force: true });
-  command(keytool(env), ['-importkeystore', '-noprompt', '-srckeystore', tls.STUDIO_RUNNER_TLS_KEY_STORE,
+  command(tools.keytool, ['-importkeystore', '-noprompt', '-srckeystore', tls.STUDIO_RUNNER_TLS_KEY_STORE,
     '-srcstoretype', tls.STUDIO_RUNNER_TLS_KEY_STORE_TYPE, '-srcstorepass:file', tls.STUDIO_RUNNER_TLS_KEY_STORE_PASSWORD_FILE,
     '-destkeystore', join(tlsDir, 'health.p12'), '-deststoretype', 'PKCS12', '-deststorepass:file', join(tlsDir, 'health.pass')], tlsDir);
-  command('openssl', ['pkcs12', '-in', 'health.p12', '-passin', 'file:health.pass', '-nokeys', '-out', 'health.crt'], tlsDir);
+  command(tools.openssl, ['pkcs12', '-in', 'health.p12', '-passin', 'file:health.pass', '-nokeys', '-out', 'health.crt'], tlsDir);
   const backend = certificate(join(tlsDir, 'health.crt')), runner = certificate(tls.STUDIO_RUNNER_TLS_CERT_FILE);
   if (backend.fingerprint256 !== tls.STUDIO_RUNNER_CONTROLLER_CERTIFICATE_FINGERPRINT256) fail('STUDIO_RUNNER_CONTROLLER_CERTIFICATE_FINGERPRINT256 does not match the backend key store certificate.');
   for (const leaf of [backend, runner]) {
@@ -198,11 +278,11 @@ export function init(localDirectory, env = process.env) {
     const publicKey = createPublicKey(createPrivateKey(readFileSync(tls.STUDIO_RUNNER_TLS_KEY_FILE))).export({ type: 'spki', format: 'der' });
     if (!publicKey.equals(runner.publicKey.export({ type: 'spki', format: 'der' }))) fail('Runner TLS key and certificate do not match.');
   } catch { fail('Runner TLS key and certificate must be a matching, unencrypted PEM pair.'); }
-  const trust = command(keytool(env), ['-list', '-rfc', '-keystore', tls.STUDIO_RUNNER_TLS_TRUST_STORE,
+  const trust = command(tools.keytool, ['-list', '-rfc', '-keystore', tls.STUDIO_RUNNER_TLS_TRUST_STORE,
     '-storetype', tls.STUDIO_RUNNER_TLS_TRUST_STORE_TYPE, '-storepass:file', tls.STUDIO_RUNNER_TLS_TRUST_STORE_PASSWORD_FILE], tlsDir);
   privateWrite(join(tlsDir, 'backend-trust.pem'), (trust.match(/-----BEGIN CERTIFICATE-----[\s\S]*?-----END CERTIFICATE-----/g) ?? []).join('\n'));
   for (const [leaf, ca] of [[tls.STUDIO_RUNNER_TLS_CERT_FILE, join(tlsDir, 'backend-trust.pem')], [join(tlsDir, 'health.crt'), tls.STUDIO_RUNNER_TLS_CA_FILE]]) {
-    for (const purpose of ['sslserver', 'sslclient']) command('openssl', ['verify', '-CAfile', ca, '-untrusted', leaf, '-purpose', purpose, '-verify_hostname', 'localhost', leaf], tlsDir);
+    for (const purpose of ['sslserver', 'sslclient']) command(tools.openssl, ['verify', '-CAfile', ca, '-untrusted', leaf, '-purpose', purpose, '-verify_hostname', 'localhost', leaf], tlsDir);
   }
 
   // Identities and the guided issuer's keys (the tokens themselves are minted by local-tokens.mjs).
@@ -249,12 +329,14 @@ studio:
     ...Object.fromEntries(BACKEND_TLS.map((key) => [key, tls[key]])),
     STUDIO_EVIDENCE_PROVIDER: 'local',
     STUDIO_EVIDENCE_DIRECTORY: join(dir, 'objects'),
-    SPRING_CONFIG_ADDITIONAL_LOCATION: `file:${join(dir, 'backend-overlay.yml')}`,
+    // A file: URL (file:///C:/... on Windows), so a drive letter is never read as a URL scheme.
+    SPRING_CONFIG_ADDITIONAL_LOCATION: pathToFileURL(join(dir, 'backend-overlay.yml')).href,
   };
-  privateWrite(join(dir, 'backend.env'), Object.entries(backendEnv).map(([key, value]) => `export ${key}=${shellQuote(value)}\n`).join(''));
+  privateWrite(join(dir, 'backend.env'), Object.entries(backendEnv).map(envLine).join(''));
 
   const runnerEnv = {
-    PATH: env.PATH || '', HOME: env.HOME || '', TMPDIR: join(dir, 'tmp'),
+    PATH: envGet(env, 'PATH') || '', HOME: env.HOME || '', TMPDIR: join(dir, 'tmp'),
+    ...windowsEnv(env, dir),
     ...(env.PLAYWRIGHT_BROWSERS_PATH ? { PLAYWRIGHT_BROWSERS_PATH: env.PLAYWRIGHT_BROWSERS_PATH } : {}),
     STUDIO_RUNNER_HOST: '127.0.0.1', STUDIO_RUNNER_PORT: runnerPort, STUDIO_RUNNER_POOL_SIZE: '1',
     STUDIO_RUNNER_INSTANCE_ID: 'local-ux-runner',
@@ -299,6 +381,17 @@ export async function health(localDirectory) {
   });
 }
 
+/**
+ * Starts the runner with exactly the environment in runner-environment.json (its config loader refuses any unknown
+ * STUDIO_RUNNER_* key, and the backend's own STUDIO_RUNNER_* variables are such keys). On POSIX it gets its own process
+ * group, so a terminal Ctrl+C reaches only the caller, which then signals the runner's PID: the runner drains, and the
+ * drain is what ends the Chromium trees it forked. On Windows it shares the console, so Ctrl+C reaches it directly.
+ */
+export function startRunner(localDirectory, { cwd = process.cwd(), stdio = 'inherit' } = {}) {
+  const env = JSON.parse(readFileSync(join(resolve(localDirectory ?? defaultDir()), 'runner-environment.json'), 'utf8'));
+  return spawn(process.execPath, [resolve(cwd, 'dist', 'main.js')], { cwd, env, stdio, detached: POSIX });
+}
+
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
     const [mode, directory] = process.argv.slice(2);
@@ -309,10 +402,11 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       if (result.tlsRegenerated) process.stdout.write('Local TLS was regenerated (the old certificates were near expiry or unusable): restart the backend.\n');
     } else if (mode === 'health') process.exitCode = await health(directory) ? 0 : 1;
     else {
-      const env = JSON.parse(readFileSync(join(resolve(directory ?? defaultDir()), 'runner-environment.json'), 'utf8'));
-      if (typeof process.execve !== 'function') fail('Local runner requires Node 24 with process.execve support.');
-      // The absolute entry path puts the checkout in the command line, which is how dev.sh recognises its own runner.
-      process.execve(process.execPath, [process.execPath, resolve('dist/main.js')], env);
+      // The runner gets the stopping signal from this process only (its own group on POSIX); on Windows the console
+      // delivers Ctrl+C to it directly, and a signal sent from here would be a hard kill, so nothing is forwarded.
+      const child = startRunner(directory, { stdio: 'inherit' });
+      for (const signal of ['SIGTERM', 'SIGINT', 'SIGHUP']) process.on(signal, () => { if (POSIX) child.kill(signal); });
+      process.exitCode = await new Promise((done) => child.once('exit', (code, signal) => done(code ?? 128 + (constants.signals[signal] ?? 0))));
     }
   } catch (error) {
     // Only our fixed messages reach stderr; parser/tool exceptions may contain private file values.

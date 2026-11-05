@@ -1,5 +1,7 @@
-// Checks for local-stack.mjs / local-tokens.mjs. Run with `node --test scripts/local-stack.check.mjs` (needs openssl, a JDK keytool and
-// the built runner). Not named *.test.* on purpose: the vitest unit tier must not pick it up.
+// Checks for local-stack.mjs / local-tokens.mjs and the process helpers of dev.mjs. Run with
+// `node --test scripts/local-stack.check.mjs` (needs openssl, a JDK keytool and the built runner). Not named *.test.* on purpose:
+// the vitest unit tier must not pick it up. POSIX mode bits do not exist on Windows (Node reports 0o666; the profile ACL
+// stands in), so the mode assertions run on POSIX only.
 import assert from 'node:assert/strict';
 import { Buffer } from 'node:buffer';
 import { after, before, test } from 'node:test';
@@ -8,10 +10,13 @@ import { createServer, request } from 'node:https';
 import { createServer as createTcpServer } from 'node:net';
 import { spawn, execFileSync } from 'node:child_process';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { tmpdir } from 'node:os';
 import { createPublicKey, randomBytes, verify, X509Certificate } from 'node:crypto';
-import { health, init } from './local-stack.mjs';
+import { envGet, findOpenssl, health, init, parseEnvFile, windowsEnv } from './local-stack.mjs';
+import { freePort, isAlive, portBusy, readPidFile, stopProcess, writePidFile } from './dev.mjs';
+
+const POSIX = process.platform !== 'win32';
 
 const runnerRoot = fileURLToPath(new URL('..', import.meta.url));
 const script = (name) => fileURLToPath(new URL(name, import.meta.url));
@@ -56,8 +61,10 @@ test('generated material has separate loopback identities, proper CA usage and p
     const days = (Date.parse(cert.validTo) - Date.now()) / 86_400_000;
     assert.ok(days > 29 && days <= 30, `leaf validity is 30 days, got ${days}`);
   }
-  assert.equal(statSync(generated.dir).mode & 0o777, 0o700);
-  for (const path of walk(generated.dir)) assert.equal(statSync(path).mode & 0o777, statSync(path).isDirectory() ? 0o700 : 0o600, path);
+  if (POSIX) {
+    assert.equal(statSync(generated.dir).mode & 0o777, 0o700);
+    for (const path of walk(generated.dir)) assert.equal(statSync(path).mode & 0o777, statSync(path).isDirectory() ? 0o700 : 0o600, path);
+  }
 });
 
 test('the shared layout is complete', () => {
@@ -148,17 +155,20 @@ test('runner environment is enumerated and backend.env carries exactly the backe
   const file = join(generated.dir, 'backend.env');
   const text = readFileSync(file, 'utf8');
   assert.equal(text.includes(readFileSync(tlsFile(generated, 'store.pass'), 'utf8')), false, 'passwords stay in files');
-  const keys = text.split('\n').filter(Boolean).map((line) => /^export ([A-Z0-9_]+)='/.exec(line)?.[1]);
-  assert.deepEqual(keys, ['STUDIO_RUNNER_BASE_URL', 'STUDIO_RUNNER_SERVICE_TOKEN', 'STUDIO_CALLBACK_SERVICE_TOKEN',
+  // Plain dotenv: KEY=value, no export, no quoting; backend/scripts/dev.mjs reads it verbatim.
+  const lines = text.split('\n').filter(Boolean);
+  for (const line of lines) assert.match(line, /^[A-Z0-9_]+=[^'"\s]/, line.split('=')[0]);
+  assert.deepEqual(lines.map((line) => line.split('=')[0]), ['STUDIO_RUNNER_BASE_URL', 'STUDIO_RUNNER_SERVICE_TOKEN', 'STUDIO_CALLBACK_SERVICE_TOKEN',
     'STUDIO_RUNNER_TLS_KEY_STORE', 'STUDIO_RUNNER_TLS_KEY_STORE_PASSWORD_FILE', 'STUDIO_RUNNER_TLS_KEY_STORE_TYPE',
     'STUDIO_RUNNER_TLS_TRUST_STORE', 'STUDIO_RUNNER_TLS_TRUST_STORE_PASSWORD_FILE', 'STUDIO_RUNNER_TLS_TRUST_STORE_TYPE',
     'STUDIO_EVIDENCE_PROVIDER', 'STUDIO_EVIDENCE_DIRECTORY', 'SPRING_CONFIG_ADDITIONAL_LOCATION']);
-  const print = (name) => execFileSync('bash', ['-c', 'source "$1"; printf "%s" "${!2}"', 'local-stack-check', file, name], { encoding: 'utf8' });
-  assert.equal(print('STUDIO_RUNNER_SERVICE_TOKEN'), config.STUDIO_RUNNER_SERVICE_IDENTITY);
-  assert.equal(print('STUDIO_CALLBACK_SERVICE_TOKEN'), config.STUDIO_RUNNER_CALLBACK_IDENTITY);
-  assert.equal(print('STUDIO_RUNNER_TLS_KEY_STORE'), generated.tls.STUDIO_RUNNER_TLS_KEY_STORE);
-  assert.equal(print('STUDIO_EVIDENCE_DIRECTORY'), config.STUDIO_RUNNER_OBJECT_STORE_DIR);
-  assert.equal(print('SPRING_CONFIG_ADDITIONAL_LOCATION'), `file:${join(generated.dir, 'backend-overlay.yml')}`);
+  const values = parseEnvFile(text);
+  assert.equal(values.STUDIO_RUNNER_SERVICE_TOKEN, config.STUDIO_RUNNER_SERVICE_IDENTITY);
+  assert.equal(values.STUDIO_CALLBACK_SERVICE_TOKEN, config.STUDIO_RUNNER_CALLBACK_IDENTITY);
+  assert.equal(values.STUDIO_RUNNER_TLS_KEY_STORE, generated.tls.STUDIO_RUNNER_TLS_KEY_STORE);
+  assert.equal(values.STUDIO_EVIDENCE_DIRECTORY, config.STUDIO_RUNNER_OBJECT_STORE_DIR);
+  assert.equal(values.SPRING_CONFIG_ADDITIONAL_LOCATION, pathToFileURL(join(generated.dir, 'backend-overlay.yml')).href);
+  assert.match(values.SPRING_CONFIG_ADDITIONAL_LOCATION, /^file:\/\/\//);
 });
 
 test('complete explicit JKS operator stores remain supported', () => {
@@ -239,7 +249,8 @@ test('complete backend intermediate chain is preserved for explicit store valida
   assert.equal((readFileSync(tlsFile(explicit, 'health.crt'), 'utf8').match(/BEGIN CERTIFICATE/g) ?? []).length, 3);
 });
 
-test('launcher execs the real TLS-only runner and drains only its owned child', async () => {
+// A SIGTERM sent from Node on Windows is a hard kill (there is no drain to observe), so this one is POSIX-only.
+test('run mode starts the real TLS-only runner and drains only its owned child', { skip: !POSIX && 'no programmatic graceful signal on Windows' }, async () => {
   const reservation = createTcpServer();
   await new Promise((resolve) => reservation.listen(0, '127.0.0.1', resolve));
   const port = reservation.address().port;
@@ -294,7 +305,7 @@ test('the token issuer mints three verifiable 240 s tokens from the shared direc
   for (const [file, aud, role] of [['runner-controller.jwt', 'studio-guided-runner', 'backend-controller'],
     ['translation-controller.jwt', 'studio-guided-controller', 'backend-controller'], ['worker-callback.jwt', 'studio-guided-controller', 'owning-worker']]) {
     const token = readFileSync(join(generated.dir, 'tokens', file), 'utf8');
-    assert.equal(statSync(join(generated.dir, 'tokens', file)).mode & 0o777, 0o600);
+    if (POSIX) assert.equal(statSync(join(generated.dir, 'tokens', file)).mode & 0o777, 0o600);
     const [header, claims, signature] = token.split('.');
     assert.equal(verify('RSA-SHA256', Buffer.from(`${header}.${claims}`), publicKey, Buffer.from(signature, 'base64url')), true);
     const body = JSON.parse(Buffer.from(claims, 'base64url').toString());
@@ -312,4 +323,58 @@ test('the allow-all option is left to its default (on) locally unless STUDIO_ALL
     const set = init(join(root, `allow-all-${value}`), { ...baseEnv, ...generated.tls, STUDIO_ALLOW_ALL_DOMAINS: value });
     assert.equal(runnerEnvironment(set).STUDIO_RUNNER_ALLOW_ALL_DOMAINS, value);
   }
+});
+
+test('dotenv reading: comments, export prefix, quotes taken literally, inline comments, Windows paths kept', () => {
+  assert.deepEqual(parseEnvFile('# note\nexport A=1\nB="two words"\nC=\'$HOME\'\nD=plain # comment\n\nE=C:\\Users\\x\\tls\\b.p12\r\nnot a line\nF=\n'),
+    { A: '1', B: 'two words', C: '$HOME', D: 'plain', E: 'C:\\Users\\x\\tls\\b.p12', F: '' });
+});
+
+test('Windows runner environment: system keys from any spelling, TEMP and TMP on the private tmp/', () => {
+  const env = { SYSTEMROOT: 'C:\\Windows', windir: 'C:\\Windows', USERPROFILE: 'C:\\Users\\dev', LOCALAPPDATA: 'L', APPDATA: 'A', COMSPEC: 'cmd', Path: 'P' };
+  assert.deepEqual(windowsEnv(env, '/local', 'win32'), { SystemRoot: 'C:\\Windows', windir: 'C:\\Windows', USERPROFILE: 'C:\\Users\\dev',
+    LOCALAPPDATA: 'L', APPDATA: 'A', ComSpec: 'cmd', TEMP: join('/local', 'tmp'), TMP: join('/local', 'tmp') });
+  assert.deepEqual(windowsEnv(env, '/local', 'linux'), {});
+  assert.equal(envGet(env, 'PATH', 'win32'), 'P');
+  assert.equal(envGet(env, 'PATH', 'linux'), undefined);
+  if (POSIX) assert.equal('SystemRoot' in runnerEnvironment(generated), false);
+});
+
+test('openssl lookup: PATH first, then Git for Windows, else a clear error', () => {
+  assert.ok(findOpenssl({ PATH: process.env.PATH }).endsWith(POSIX ? 'openssl' : 'openssl.exe'));
+  const git = (root) => join(root, 'Git', 'mingw64', 'bin', 'openssl.exe');
+  assert.equal(findOpenssl({ PATH: '', ProgramFiles: 'C:/PF' }, 'win32', (path) => path === git('C:/PF')), git('C:/PF'));
+  const user = join('C:/U/AppData/Local', 'Programs', 'Git', 'usr', 'bin', 'openssl.exe');
+  assert.equal(findOpenssl({ PATH: '', LOCALAPPDATA: 'C:/U/AppData/Local' }, 'win32', (path) => path === user), user);
+  assert.throws(() => findOpenssl({ PATH: '' }, 'win32', () => false), /Git for Windows/);
+  assert.throws(() => findOpenssl({ PATH: '' }, 'linux'), /needs openssl on PATH/);
+});
+
+test('launcher process helpers: bind test, PID files, a leftover is stopped and a stranger is reported', async () => {
+  const dir = join(root, 'pids-check');
+  const holder = createTcpServer();
+  await new Promise((resolve) => holder.listen(0, '127.0.0.1', resolve));
+  const port = holder.address().port;
+  try {
+    assert.equal(await portBusy(port), true);
+    assert.match(await freePort({ dir, name: 'x', port, checkout: runnerRoot, label: 'x', hint: 'pick another.' }), /did not start/);
+    writePidFile(dir, 'x', { pid: process.pid, port, checkout: '/elsewhere', group: false });
+    assert.deepEqual(readPidFile(dir, 'x'), { pid: process.pid, port, checkout: '/elsewhere', group: false });
+    if (POSIX) assert.equal(statSync(join(dir, 'pids', 'x.json')).mode & 0o777, 0o600);
+    assert.match(await freePort({ dir, name: 'x', port, checkout: runnerRoot, label: 'x', hint: 'pick another.' }), /not from/);
+  } finally { await new Promise((resolve) => holder.close(resolve)); }
+  assert.equal(await portBusy(port), false);
+  // A recorded PID with a free port is a stale file, never a reason to signal anything.
+  assert.equal(await freePort({ dir, name: 'x', port, checkout: runnerRoot, label: 'x', hint: '' }), null);
+  // A leftover of this checkout that still holds its port is stopped.
+  const child = spawn(process.execPath, ['-e', `require('net').createServer().listen(${port}, '127.0.0.1')`], { stdio: 'ignore' });
+  const exited = new Promise((resolve) => child.once('exit', resolve));
+  try {
+    for (let i = 0; i < 40 && !(await portBusy(port)); i += 1) await new Promise((resolve) => setTimeout(resolve, 50));
+    writePidFile(dir, 'x', { pid: child.pid, port, checkout: runnerRoot, group: false });
+    assert.equal(await freePort({ dir, name: 'x', port, checkout: runnerRoot, label: 'x', hint: '', graceMs: 5000 }), null);
+    await exited;
+    assert.equal(isAlive(child.pid), false);
+  } finally { if (child.exitCode === null && child.signalCode === null) child.kill('SIGKILL'); }
+  await stopProcess(child.pid); // already gone: a no-op
 });

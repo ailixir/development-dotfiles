@@ -898,7 +898,7 @@ objectStore:
   bucket: put-checks-studio-evidence
   pathStyleAccess: true
   # In local mode every API, worker and runner pod mounts this one RWX claim at this path. Local
-  # development uses studio-runner/dev.sh instead and shares its local directory directly.
+  # development uses studio-runner/scripts/dev.mjs instead and shares its local directory directly.
   localDirectory: /var/lib/studio-objects
   local:
     createClaim: true

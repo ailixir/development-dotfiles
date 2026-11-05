@@ -1,12 +1,15 @@
 #!/usr/bin/env node
 /**
- * Local guided-bridge token issuer for studio-runner/dev.sh: mints the three short-lived RS256 service JWTs the guided
+ * Local guided-bridge token issuer for scripts/dev.mjs: mints the three short-lived RS256 service JWTs the guided
  * hops need and refreshes them in place every 30 s (they live 240 s).
  *
  *   node scripts/local-tokens.mjs once|serve        (default: serve)
  *
  * The signing key (issuer/) and the token files (tokens/) live in PUT_CHECKS_LOCAL_DIR (default ~/.put-checks/local),
  * outside the repository. `local-stack.mjs init` creates the key; the backend reads the tokens.
+ *
+ * `serve` exits on its own once the process that started it is gone (checked on every refresh), so a launcher that was
+ * hard-killed leaves no issuer behind.
  */
 import { Buffer } from 'node:buffer';
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
@@ -47,7 +50,12 @@ function mint() {
 
 mint();
 if (mode === 'serve') {
-  const timer = setInterval(mint, REFRESH_MS);
+  const parent = process.ppid;
+  const parentAlive = () => {
+    if (process.ppid !== parent) return false; // POSIX re-parents an orphan
+    try { process.kill(parent, 0); return true; } catch (error) { return error.code === 'EPERM'; }
+  };
+  const timer = setInterval(() => { if (parentAlive()) mint(); else { clearInterval(timer); process.exit(0); } }, REFRESH_MS);
   for (const signal of ['SIGTERM', 'SIGINT']) process.once(signal, () => { clearInterval(timer); process.exit(0); });
   process.stdout.write('local guided token issuer serving\n');
 }

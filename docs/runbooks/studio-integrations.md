@@ -8,26 +8,24 @@ service token from the container environment; the token is never embedded in a c
 
 ## Local development
 
-Install the runner dependencies and its pinned browser once:
+Each component has its own Node launcher (no Docker, no bash; Windows, macOS and Linux). Start them in this order,
+each in its own terminal:
 
 ```sh
-cd studio-runner
-npm ci
-npm run browsers:install
-cd ..
-./dev.sh --studio
+cd studio-runner && node scripts/dev.mjs   # builds and starts the runner on https://127.0.0.1:8090 (mutual TLS)
+cd backend && node scripts/dev.mjs         # Spring Boot (local profile) on :8080 + Core stand-in
+cd frontend && node scripts/dev.mjs        # Vite on :5173
 ```
 
-`--studio` also works with `--backend-only` or `--seed`. It builds and starts the runner on
-`127.0.0.1:8082`, enables the dispatcher/recovery schedules in the local backend, and generates
-matching service tokens for that invocation unless they were supplied in `.env.local`.
-The runner receives an enumerated environment, without the backend's Vertex/vault/database
-credentials. The existing frontend MSW configuration is unchanged.
+The runner launcher installs the pinned Chromium when it is missing and writes the shared directory
+`$PUT_CHECKS_LOCAL_DIR` (default `~/.put-checks/local`): local TLS, the two service identities, the guided tokens and
+`backend.env`, which the backend launcher reads. The local backend profile runs the dispatcher and recovery schedules
+itself. The runner receives an enumerated environment (`runner-environment.json`), without the backend's
+Vertex/vault/database credentials. The existing frontend MSW configuration is unchanged.
 
-The API and runner share an `objects` directory under the per-invocation runner work directory
-that `./dev.sh --studio` creates (`$TMPDIR/put-checks-studio-runner.*`), exported to the API as
-`STUDIO_EVIDENCE_DIRECTORY`. It is outside scratch, which is deleted at startup and shutdown. API video reads use file ranges,
-and recovery deserializes the runner's result manifest from that same directory. Local storage
+The API and runner share the `objects/` directory of that shared directory, exported to the API as
+`STUDIO_EVIDENCE_DIRECTORY`. It is outside `scratch/`, which the runner deletes at startup and shutdown. API video
+reads use file ranges, and recovery deserializes the runner's result manifest from that same directory. Local storage
 has logical API expiry but no automatic physical cleanup; remove old files when no longer needed.
 
 When starting processes manually, set these matching values:
@@ -49,9 +47,9 @@ Compilation of free-form English needs the Vertex/R2D2 integration configured in
 `STUDIO_GATEWAY_PROVIDER=vertex`, `STUDIO_GATEWAY_ENDPOINT`, `STUDIO_GATEWAY_PROJECT`,
 `STUDIO_GATEWAY_LOCATION`, `STUDIO_GATEWAY_MODEL`, and the appropriate
 `STUDIO_GATEWAY_CREDENTIALS_MODE` (`application-default` or `service-account-file`).
-For the latter, also set `STUDIO_GATEWAY_CREDENTIALS_KEY_FILE`. `./dev.sh` defaults to
-`recorded-fixture`, which answers only the recorded plain-English fixtures;
-`credentials.mode=none` is for a local stub only. No live R2D2 credentials or model verification
+For the latter, also set `STUDIO_GATEWAY_CREDENTIALS_KEY_FILE`. The backend launcher defaults
+`STUDIO_GATEWAY_PROVIDER` to `disabled`, so Run Test answers that learning is unavailable until Vertex is
+configured (in `backend/.env.local`). No live R2D2 credentials or model verification
 are supplied by this change.
 
 ## Remote environments — provision later

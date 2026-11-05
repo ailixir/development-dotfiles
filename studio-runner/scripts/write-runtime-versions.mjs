@@ -19,11 +19,10 @@
  * build arg is recorded as `null`, not as `""` (see `optionalEnv`).
  */
 import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
-import { homedir } from 'node:os';
 import { createHash } from 'node:crypto';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import {readBrowserProvenance,fileSha256} from './browser-provenance.mjs';
+import {readBrowserProvenance,fileSha256,envBrowserRoot} from './browser-provenance.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 
@@ -103,8 +102,6 @@ export function buildRuntimeVersions({ root, env, nodeVersion }) {
     image: optionalEnv(env.IMAGE_TAG),
   };
 }
-
-export function envBrowserRoot(env){return env.PLAYWRIGHT_BROWSERS_PATH ?? (process.platform==='darwin'?join(homedir(),'Library','Caches','ms-playwright'):process.platform==='linux'?join(homedir(),'.cache','ms-playwright'):join(homedir(),'AppData','Local','ms-playwright'));}
 
 /** Builds the record and writes it to `<root>/dist/runtime-versions.json`. Returns the path. */
 export function writeRuntimeVersionsFile(input) {

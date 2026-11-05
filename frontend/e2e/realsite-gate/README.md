@@ -112,7 +112,7 @@ and measure actual elapsed time without load-based exceptions. Historical eviden
 
 Runs only after WI-1..WI-4 are integrated and their own checks are green. Use Node 24
 (`PATH=/Users/brunobuger/.local/share/fnm/node-versions/v24.20.0/installation/bin:$PATH`). `gate-stack.sh` reuses
-`studio-runner/scripts/local-stack.mjs` for the runner TLS steps exactly as `studio-runner/dev.sh` does.
+`studio-runner/scripts/local-stack.mjs` for the runner TLS steps exactly as `studio-runner/scripts/dev.mjs` does.
 
 1. **Freeze.** No other session edits `backend/`, `studio-runner/` or `docs/specs/` during a run; the start and end
    working-tree digests (deletions included) turn a mid-run change into INVALID.

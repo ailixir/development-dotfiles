@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           // Guided publication and replay re-check Core with the browser's put_session cookie.
           // Locally there is no Core login, and backend/scripts/local-core.mjs accepts exactly
-          // this dev value. Only active when ./dev.sh sets VITE_DEV_SESSION_COOKIE.
+          // this dev value. Only active when scripts/dev.mjs sets VITE_DEV_SESSION_COOKIE.
           configure: (proxy) => {
             const devSession = env.VITE_DEV_SESSION_COOKIE;
             if (!devSession) return;

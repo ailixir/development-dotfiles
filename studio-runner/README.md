@@ -110,28 +110,37 @@ delivery. The former artifact-1 `resolvedVars` correspondence validator is retir
 
 ## Run locally
 
-No Docker. Prerequisites: Node 24 (`.nvmrc`), `openssl`, a JDK `keytool` (JDK 21), and the pinned Chromium,
-installed once with `npm run browsers:install`.
+No Docker, no bash. Prerequisites: Node 24 (`.nvmrc`), `openssl` and a JDK `keytool` (JDK 21, `JAVA_HOME`).
 
 ```bash
-./dev.sh          # from studio-runner/: build, prepare the shared files, start the runner on https://127.0.0.1:8090
+node scripts/dev.mjs   # from studio-runner/: build, prepare the shared files, start the runner on https://127.0.0.1:8090
 ```
 
 It runs in the foreground; Ctrl+C drains the runner (up to 30 s) and stops its token issuer. Start order is
-**runner, then `backend/dev.sh`, then `frontend/dev.sh`**. The backend without the runner's files still starts,
-but Studio runs close `ERROR/DISPATCH_FAILED`.
+**runner, then the backend, then the frontend** (`node scripts/dev.mjs` in `backend/` and in `frontend/`). The backend
+without the runner's files still starts, but Studio runs close `ERROR/DISPATCH_FAILED`.
 
-`dev.sh` depends on this folder only. It checks Node, `keytool` and Chromium, runs `npm ci` when `node_modules` is
-missing, runs `npm run build`, and frees the port only if the listener runs from this checkout (any other listener
-is reported by PID and left alone). It then runs `scripts/local-stack.mjs init`, starts `scripts/local-tokens.mjs`,
-and starts the runner under `env -i` (its config loader refuses any unknown `STUDIO_RUNNER_*` key) with the whole
-environment from `runner-environment.json`. Guided learning (capacity 1) and observed replay are on. Per-developer
-overrides go in `studio-runner/.env.local` (gitignored).
+`scripts/dev.mjs` depends on this folder only. It checks Node, `npm`, `openssl` and `keytool`, runs `npm ci` when
+`node_modules` is missing, installs the pinned Chromium when it is missing (into `PLAYWRIGHT_BROWSERS_PATH`, default
+`$PUT_CHECKS_LOCAL_DIR/ms-playwright-<pinned playwright version>`, outside the repository, so a checkout on another
+Playwright pin can never make the root mixed-version), and runs
+`npm run build`. It then frees the port: the runner's PID file (`pids/studio-runner.json` in the shared directory)
+names a leftover of this checkout, which is stopped only while it is alive and the port is still busy; any other
+listener (found by a connect and bind test, no `lsof`) is reported and left alone. It runs
+`scripts/local-stack.mjs init`, starts `scripts/local-tokens.mjs` (which exits on its own once the launcher is gone),
+and spawns the runner with an explicit environment: exactly `runner-environment.json` (its config loader refuses any
+unknown `STUDIO_RUNNER_*` key). Guided learning (capacity 1) and observed replay are on. Per-developer overrides go in
+`studio-runner/.env.local` (gitignored; dotenv `KEY=value` lines, taken literally, no `$VAR` expansion).
+
+Stopping: on macOS and Linux the runner and the issuer run in their own process groups, so Ctrl+C reaches only the
+launcher, which sends SIGTERM to the runner's PID (KILL after 30 s). On Windows the console delivers Ctrl+C to the
+runner and the issuer directly; the launcher waits 30 s and then ends anything left with `taskkill /PID <pid> /T /F`.
 
 ### The shared directory
 
 The runner and the backend share state only through `$PUT_CHECKS_LOCAL_DIR` (default `~/.put-checks/local`, mode
-700, every file 0600). `init` is idempotent: it reuses what is valid, so a restart of either side keeps the same identity.
+700, every file 0600 on macOS and Linux; Windows has no mode bits, so there the per-user ACL of your profile folder
+protects it and the mode checks are skipped). `init` is idempotent: it reuses what is valid, so a restart of either side keeps the same identity.
 
 | Path | Holds |
 |---|---|
@@ -139,8 +148,9 @@ The runner and the backend share state only through `$PUT_CHECKS_LOCAL_DIR` (def
 | `identity/service.token`, `identity/callback.token` | the two bearer identities (backend to runner, runner to backend) |
 | `issuer/issuer.{private,public}.pem`, `tokens/*.jwt` | guided-bridge issuer key and the 240 s service JWTs, refreshed every 30 s |
 | `catalog.json`, `backend-overlay.yml` | the runner build's observed catalog; the backend's guided/replay overlay (public values only) |
-| `backend.env` | `export` lines the backend `source`s: runner URL, both tokens, its TLS stores, local evidence store, overlay location |
+| `backend.env` | dotenv `KEY=value` lines the backend launcher reads: runner URL, both tokens, its TLS stores, local evidence store, overlay location (a `file:` URL) |
 | `runner-environment.json`, `journal/`, `objects/`, `scratch/`, `tmp/`, `logs/` | the runner's environment and working data; `objects/` is also what the backend plays back; `logs/runner.log` is the runner's log |
+| `pids/` | the launchers' PID files (`studio-runner.json`, the backend's `backend.json` and `core.json`, the frontend's `frontend.json`) |
 
 Certificates and the CA are valid 30 days and are regenerated when they would expire within a day.
 
@@ -152,6 +162,8 @@ Certificates and the CA are valid 30 days and are regenerated when they would ex
 | `PUT_CHECKS_RUNNER_PORT` | 8090 | the runner |
 | `PUT_CHECKS_BACKEND_PORT` | 8080 | where the runner reports back |
 | `PUT_CHECKS_GUIDED_PORT` | 8092 | the backend's guided connector |
+| `PLAYWRIGHT_BROWSERS_PATH` | `$PUT_CHECKS_LOCAL_DIR/ms-playwright-<pinned playwright version>` | where the pinned Chromium is installed and launched from (one revision only) |
+| `PLAYWRIGHT_DOWNLOAD_HOST` | Playwright's CDN | the mirror the launcher's Chromium install downloads from |
 | `STUDIO_ALLOW_ALL_DOMAINS` | unset (on) | `true`/`false`, passed to the runner as `STUDIO_RUNNER_ALLOW_ALL_DOMAINS` |
 | `STUDIO_RUNNER_SERVICE_TOKEN`, `STUDIO_CALLBACK_SERVICE_TOKEN` | stored | use these identities instead |
 
@@ -161,7 +173,7 @@ for now), the same list the backend's `application-local.yml` carries.
 ### Restarting
 
 The runner can restart alone: the same CA, tokens and keys come back, so a running backend keeps dispatching. After a
-rebuild that changes the observed catalog (or after TLS is regenerated) `dev.sh` prints "restart the backend", because
+rebuild that changes the observed catalog (or after TLS is regenerated) the launcher prints "restart the backend", because
 the backend reads `catalog.json` and its key stores at start.
 
 ### Your own TLS identities
@@ -171,13 +183,38 @@ with generated trust: `STUDIO_RUNNER_TLS_KEY_FILE`, `STUDIO_RUNNER_TLS_CERT_FILE
 `STUDIO_RUNNER_CONTROLLER_CERTIFICATE_FINGERPRINT256` (backend leaf, uppercase colon-separated SHA256),
 `STUDIO_RUNNER_TLS_KEY_STORE`, `STUDIO_RUNNER_TLS_KEY_STORE_PASSWORD_FILE`, `STUDIO_RUNNER_TLS_TRUST_STORE`,
 `STUDIO_RUNNER_TLS_TRUST_STORE_PASSWORD_FILE`. `..._KEY_STORE_TYPE` and `..._TRUST_STORE_TYPE` default to `PKCS12`
-(`JKS` is accepted). Key, store and password files must have no group/other permissions; leaves need loopback SANs and
+(`JKS` is accepted). Key, store and password files must have no group/other permissions (checked on macOS and Linux); leaves need loopback SANs and
 both serverAuth and clientAuth usages; the runner CA file authenticates the backend, the backend trust store
 authenticates the runner (they may be independent issuers). Operator files are left untouched.
 
 The helper's checks run with `node --test scripts/local-stack.check.mjs` (temporary directories and an owned mTLS
-listener; they touch no port you run). `npm run test:fixtures` is the real-browser tier; `../tools/corun.sh` is the
+listener; they touch no port you run). They also cover the launcher's PID files, bind test and Windows environment. `npm run test:fixtures` is the real-browser tier; `../tools/corun.sh` is the
 automated backend-plus-runner run.
+
+### Windows
+
+**Windows: not verified.** No Windows run is recorded yet; everything below follows from Node, libuv and Playwright
+documentation until one is.
+
+Local development only: production stays the Linux image. Prerequisites, natively (no Docker, no WSL):
+
+- **Node 24** and npm.
+- **JDK 21** with `JAVA_HOME` set (the launcher uses `%JAVA_HOME%\bin\keytool.exe`).
+- **Git for Windows**: it ships `openssl.exe`, which the launcher finds on PATH or under the Git install
+  (`Git\mingw64\bin`, then `Git\usr\bin`).
+- `git config --global core.longpaths true` and a **short clone path** (for example `C:\src\put-checks`).
+- A **non-admin shell** (the backend's embedded Postgres refuses an elevated one).
+- `PLAYWRIGHT_DOWNLOAD_HOST` pointing at the bank Artifactory mirror, so the launcher can install the pinned Chromium.
+
+Start it the same way: `node scripts/dev.mjs`. Ctrl+C stops it (see "Stopping" above). On Windows the shared directory
+is `%USERPROFILE%\.put-checks\local`, protected by the profile ACL instead of mode bits.
+
+The checks run natively too: `npm ci`, `npm run type-check`, `npm run lint`, `npm run check:pins`,
+`npm test -- --coverage.enabled=false` (coverage stays a Linux gate) and `npm run build`; `ci/stages.md` has the stage.
+
+Linux-only, and staying so: the image build, the deployment tier (`npm run test:deployment`, needs Helm and a
+container runtime), the perception tier (`test:perception`, machine-bound), Helm, and the frontend's realsite-gate
+(needs Docker).
 
 ## The real browser (story 10.12)
 

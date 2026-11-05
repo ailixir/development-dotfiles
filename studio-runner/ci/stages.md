@@ -323,6 +323,45 @@ vitest run --config vitest.perception.config.ts        # the package script is `
 | 8 | Helm lint/template | `helm lint` / `helm template` | no | rendered manifests |
 | 9 | **Deployment evidence** | `npm run test:deployment` | **yes — and Helm, and `STUDIO_RUNNER_IMAGE`; fails closed without either** | story 10.18a's AC-1 – AC-12 and AC-4a part 3 evidence |
 | 10 | **Perception tier** | `test:perception` (`vitest run --config vitest.perception.config.ts`) | no — needs the pinned Chromium build; no Helm; never touches `dist/` | — |
+| 11 | **Windows developer stage** | runner `npm ci`/`type-check`/`lint`/`check:pins`/`test` (coverage off)/`build`; frontend `pnpm install --frozen-lockfile`/`type-check`/`lint`/`vitest run`/`build`/`playwright test --project=msw`; backend `gradlew.bat check` | no — native Windows, no Docker | — |
+
+## Stage 11. Windows developer stage — native, no Docker
+
+The maintaining developers work on Windows with no Docker and no WSL, so this stage proves the three components build
+and test natively there. Production stays Linux: stages 6–10 are not repeated here. (It sits after the summary so the stage-10 section, which
+`test/run/importBoundary.test.ts` reads up to `## Summary`, stays exactly stage 10.) Run it on a Windows agent (or,
+until the bank CI has one, as a recorded developer run with logs and the commit SHA). Use a non-admin agent account
+(the backend's embedded Postgres refuses an elevated one), `git config core.longpaths true` and a short checkout path.
+
+```powershell
+# studio-runner/ (Node 24; PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 as everywhere)
+npm ci
+npm run type-check
+npm run lint
+npm run check:pins
+npm test -- --coverage.enabled=false   # coverage is the Linux gate (stage 4); off on win32
+npm run build
+
+# frontend/ (pnpm; the sibling put-core-components checkout built first)
+pnpm install --frozen-lockfile
+pnpm run type-check
+pnpm run lint
+pnpm exec vitest run
+pnpm run build                          # webpack --node-env production: no POSIX VAR=x syntax
+pnpm exec playwright install chromium   # PLAYWRIGHT_DOWNLOAD_HOST = the Artifactory mirror
+pnpm exec playwright test --project=msw
+
+# backend/ (JDK 21 via JAVA_HOME; embedded Postgres, no Docker)
+.\gradlew.bat check
+```
+
+- **Image:** none; a plain Windows agent with Node 24, pnpm, JDK 21 and Git for Windows (which provides `openssl`).
+- **Produces:** nothing beyond each component's own build output; gates on exit codes.
+- **Every win32 skip** in the runner suite goes through `test/helpers/platform.ts` with a reason, and the Linux run of
+  stage 4 has none.
+- **Not here, Linux-only:** the image build (7), Helm (8), the deployment tier (9), the perception tier (10), the
+  in-image fixture corpus (6) and the frontend realsite-gate (it needs Docker).
+- **Status:** not yet run. Until a Windows run is recorded, the READMEs say "Windows: not verified".
 
 ## Open items owned outside this package
 

@@ -22,19 +22,24 @@ put-checks/
 
 ## Quick Start
 
-Each component starts with its own `dev.sh`, in its own terminal, in this order. No Docker.
+Each component starts with its own Node launcher, `scripts/dev.mjs`, in its own terminal, in this order.
+No Docker and no bash: the launchers are plain Node, for Windows, macOS and Linux alike (PowerShell 5.1 has no
+`&&`, so there run the `cd` and the `node` command one after the other).
 
 ```bash
-cd studio-runner && ./dev.sh   # 1. browser runner (and the shared local setup the backend reads)
-cd backend && ./dev.sh         # 2. Spring Boot on :8080 (--seed for sample data) + Core stand-in
-cd frontend && ./dev.sh        # 3. Vite on :5173, proxying /api/v1 to the backend
+cd studio-runner && node scripts/dev.mjs   # 1. browser runner (and the shared local setup the backend reads)
+cd backend && node scripts/dev.mjs         # 2. Spring Boot on :8080 (--seed for sample data) + Core stand-in
+cd frontend && node scripts/dev.mjs        # 3. Vite on :5173, proxying /api/v1 to the backend
 ```
 
-Each can be restarted on its own. See "Run locally" in [`studio-runner/README.md`](./studio-runner/README.md),
-[`backend/README.md`](./backend/README.md) and [`frontend/README.md`](./frontend/README.md) for
-prerequisites, ports, the shared directory and `.env.local` keys (including Vertex for Run Test).
+Each can be restarted on its own; Ctrl+C stops only what that launcher started. See "Run locally" in
+[`studio-runner/README.md`](./studio-runner/README.md), [`backend/README.md`](./backend/README.md) and
+[`frontend/README.md`](./frontend/README.md) for prerequisites, ports, the shared directory and `.env.local` keys
+(including Vertex for Run Test), and each README's "Windows" section for what Windows needs and what stays Linux-only.
+Windows: not verified (no Windows run is recorded yet).
 
-Tests: `cd frontend && pnpm exec vitest run` (MSW runs in Node); `cd backend && ./gradlew test`.
+Tests: `cd frontend && pnpm exec vitest run` (MSW runs in Node); `cd backend && ./gradlew test` (`gradlew.bat test` on
+Windows; embedded Postgres, no Docker).
 
 ## Development Methodology
 

@@ -10,18 +10,24 @@
 
 ## Run locally
 
-Prerequisites: Node.js, pnpm (never npm or yarn; `.npmrc` sets `node-linker=hoisted`, which the webpack build needs) and a built `@put/core-components` (`cd ../../put-core-components && npm run build`, then `pnpm install` here). No Docker.
+Prerequisites: Node.js (24, like the runner), pnpm (never npm or yarn; `.npmrc` sets `node-linker=hoisted`, which the webpack build needs) and a built `@put/core-components` (`cd ../../put-core-components && npm run build`, then `pnpm install` here). No Docker, no bash.
 
 ```bash
-./dev.sh              # Vite standalone on http://localhost:5173
-./dev.sh --port 5190  # or PUT_CHECKS_FRONTEND_PORT=5190
+node scripts/dev.mjs              # Vite standalone on http://localhost:5173 (also: pnpm run dev:local)
+node scripts/dev.mjs --port 5190  # or PUT_CHECKS_FRONTEND_PORT=5190
 ```
 
-`dev.sh` installs dependencies when `node_modules` is missing, frees its port only if this checkout's Vite holds it (any other process on the port stops the script and is named), then runs Vite in the foreground. Ctrl+C stops it.
+`scripts/dev.mjs` installs dependencies when `node_modules` is missing, frees its port only if this checkout's Vite holds it (its PID file is `pids/frontend.json` in `PUT_CHECKS_LOCAL_DIR`, default `~/.put-checks/local`; any other process on the port stops the script), then runs Vite in the foreground. Ctrl+C stops it.
 
-Start order for the whole local stack: `studio-runner/dev.sh`, then `backend/dev.sh`, then `frontend/dev.sh`. The frontend alone works against any backend listening on `PUT_CHECKS_BACKEND_PORT` (default 8080). With a non-default frontend port, start the backend with the same `PUT_CHECKS_FRONTEND_PORT`: `backend/dev.sh` adds that origin to its CORS list.
+Start order for the whole local stack: the studio-runner, then the backend, then the frontend (`node scripts/dev.mjs` in each). The frontend alone works against any backend listening on `PUT_CHECKS_BACKEND_PORT` (default 8080). With a non-default frontend port, start the backend with the same `PUT_CHECKS_FRONTEND_PORT`: the backend launcher adds that origin to its CORS list.
 
-The dev server proxies `/api/v1` to `http://localhost:$PUT_CHECKS_BACKEND_PORT` and adds the local dev session cookie (`put_session=local-dev-session`, via `VITE_DEV_SESSION_COOKIE`) unless the request already carries one. Guided publication and replay re-check Core with that cookie, and the local Core stand-in started by `backend/dev.sh` accepts it. Vite also reads `frontend/.env.local` (not committed).
+The dev server proxies `/api/v1` to `http://localhost:$PUT_CHECKS_BACKEND_PORT` and adds the local dev session cookie (`put_session=local-dev-session`, via `VITE_DEV_SESSION_COOKIE`) unless the request already carries one. Guided publication and replay re-check Core with that cookie, and the local Core stand-in started by the backend launcher accepts it. Vite also reads `frontend/.env.local` (not committed).
+
+### Windows
+
+**Windows: not verified.** No Windows run is recorded yet.
+
+Local development only. Prerequisites, natively (no Docker, no WSL): Node 24 and pnpm; Git for Windows with `git config --global core.longpaths true` and a short clone path (for example `C:\src\put-checks`); the sibling `put-core-components` checkout next to this repository (`../../put-core-components` from `frontend/`), built before `pnpm install`; a non-admin shell for the backend's embedded Postgres; and `PLAYWRIGHT_DOWNLOAD_HOST` pointing at the bank Artifactory mirror for `pnpm exec playwright install chromium`. The commands are the same: `node scripts/dev.mjs`, `pnpm run type-check`, `pnpm run lint`, `pnpm exec vitest run`, `pnpm run build` (the build script no longer sets `NODE_ENV` the POSIX way; it passes `--node-env production` to webpack) and `pnpm exec playwright test --project=msw`. The realsite-gate (`e2e/realsite-gate`) needs Docker and stays Linux/macOS-only, like the image build and Helm.
 
 `pnpm run dev` (Webpack Module Federation, port 3002) is for integrating with the PUT platform host shell, not for running the app locally.
 

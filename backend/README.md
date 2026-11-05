@@ -9,7 +9,8 @@ Part of the [Project Checks monorepo](../README.md). Frontend lives under `../fr
 ## Prerequisites
 
 - **JDK 21** (temurin-21 recommended). Gradle toolchains will auto-download if your default JDK is older, but a system JDK 21 is faster.
-- **No local Postgres needed for M1.** Story 1.2 wires Zonky embedded Postgres (runs in-process) for the `local` profile; Testcontainers-PG for the `test` profile.
+- **No local Postgres needed for M1.** Story 1.2 wires Zonky embedded Postgres (runs in-process) for the `local` profile; the tests use Zonky embedded Postgres 15.6 too, one shared instance per test JVM, so no Docker is needed.
+- **Node** (24, like the runner) for the local launcher and the Core stand-in.
 
 ### Citi Artifactory access
 
@@ -40,7 +41,7 @@ Run from `backend/`:
 
 | Command | Purpose |
 |---|---|
-| `./dev.sh` (`--seed` for sample data) | Run the backend locally on `:8080` with hot reload and the Core stand-in; see [Run locally](#run-locally). Health probe: `GET /actuator/health` → `{"status":"UP"}`. |
+| `node scripts/dev.mjs` (`--seed` for sample data) | Run the backend locally on `:8080` with hot reload and the Core stand-in; see [Run locally](#run-locally). Health probe: `GET /actuator/health` → `{"status":"UP"}`. |
 | `./gradlew check` | Full quality gate: Spotless (format), Checkstyle, SpotBugs, JUnit 5, JaCoCo 80% line coverage. |
 | `./gradlew bootJar` | Build the executable jar at `build/libs/checks-backend-0.1.0-SNAPSHOT.jar`. |
 
@@ -62,14 +63,14 @@ Five Spring profiles are defined. Activate via `--spring.profiles.active=<name>`
 |---|---|---|
 | `local` | Local dev (Zonky embedded Postgres) | Clean schema, no sample data. |
 | `dev` | Local dev + sample data (Zonky embedded Postgres) | Pre-populated platform data; Studio starts empty. |
-| `test` | Integration tests (Testcontainers) | Clean schema per test. |
+| `test` | Integration tests (embedded Zonky Postgres, no Docker) | `test`-profile classes share one `checks` database per JVM; classes that had their own container get a fresh database. |
 | `staging` | Staging environment (env-var driven) | Placeholder; ready for 5.x stories. |
 | `prod` | Production (env-var driven) | Placeholder; ready for 5.x stories. |
 
 ### Dev profile (sample data for development and demos)
 
 ```bash
-./dev.sh --seed
+node scripts/dev.mjs --seed
 ```
 
 Starts the app (profiles `local,dev`) with Zonky embedded Postgres pre-populated with realistic sample data:
@@ -86,25 +87,31 @@ Use for development, frontend integration, and stakeholder presentations.
 
 ## Run locally
 
-One command, no Docker:
+One command, no Docker, no bash (Windows, macOS and Linux):
 
 ```bash
-./dev.sh          # backend (local profile) + Core stand-in
-./dev.sh --seed   # same, with sample CSIs, checks and executions (local alone has none)
+node scripts/dev.mjs          # backend (local profile) + Core stand-in
+node scripts/dev.mjs --seed   # same, with sample CSIs, checks and executions (local alone has none)
 ```
 
-Needs JDK 21 (found automatically; otherwise Gradle provisions one), Node (for the Core stand-in)
-and `lsof`. The script runs in the foreground and Ctrl+C stops only what it started. If the backend
-or Core port is held by a leftover of this checkout it stops that one; any other process is reported
-by PID and left alone.
+Needs JDK 21 (`JAVA_HOME`, else `java` on PATH; on macOS it also looks in `java_home`, Homebrew and `~/.jdks`;
+otherwise Gradle provisions one) and Node (it runs the launcher and the Core stand-in). The script runs in the
+foreground and Ctrl+C stops only what it started. Its PID files (`pids/backend.json` for the bootRun JVM,
+`pids/core.json` for the stand-in, in the shared directory below) name a leftover of this checkout, which is stopped
+when it still holds its port; any other process on a port (found by a connect and bind test, no `lsof`) is reported
+and left alone. The bootRun JVM is forked by the Gradle daemon, so the launcher learns its PID from `/actuator/info`
+(`MANAGEMENT_INFO_PROCESS_ENABLED=true`, set for this local run only). On macOS and Linux each child runs in its own
+process group and is stopped with SIGTERM (KILL after the grace period). On Windows the console delivers Ctrl+C to
+Gradle and the stand-in directly, and whatever is left after the grace period is ended with `taskkill /PID <pid> /T /F`.
 
-**Start order.** Three components, each in its own terminal and each with its own `dev.sh`:
-`studio-runner/dev.sh`, then `backend/dev.sh`, then `frontend/dev.sh`. The backend works without the
-runner, but a Studio run then closes `ERROR`/`DISPATCH_FAILED` (the script warns "studio-runner not
-prepared"). If you rebuild the runner and its catalog changes, restart the backend.
+**Start order.** Three components, each in its own terminal and each with its own `node scripts/dev.mjs`:
+the studio-runner, then the backend, then the frontend. The backend works without the runner, but a Studio run then
+closes `ERROR`/`DISPATCH_FAILED` (the script warns "studio-runner not prepared"). If you rebuild the runner and its
+catalog changes, restart the backend.
 
 **Shared directory.** `PUT_CHECKS_LOCAL_DIR` (default `$HOME/.put-checks/local`) is the only thing the
-components share. `studio-runner/dev.sh` writes `backend.env` there; this script `source`s it. It
+components share. The studio-runner launcher writes `backend.env` there (dotenv `KEY=value` lines); this script reads
+it. It
 carries the wiring the backend needs, so you never set these by hand:
 
 | Setting | Source | Without it |
@@ -124,7 +131,7 @@ from a non-default port gets `403 Invalid CORS request`.
 
 **Learning (Run Test).** Plain-English steps are translated by Vertex. By default
 `STUDIO_GATEWAY_PROVIDER=disabled`, so Run Test answers that learning is unavailable. To enable it,
-put these in `backend/.env.local` (gitignored, loaded by `dev.sh`):
+put these in `backend/.env.local` (gitignored, loaded by `scripts/dev.mjs`; dotenv lines, no `$VAR` expansion):
 
 ```bash
 STUDIO_GATEWAY_PROVIDER=vertex
@@ -139,15 +146,15 @@ Credentials come from Application Default Credentials (`gcloud auth application-
 Startup refuses an incomplete Vertex configuration.
 
 **Core stand-in.** Guided publication and replay re-check the caller against PUT Core with the
-browser's `put_session` cookie. Locally there is no Core, so `dev.sh` starts
+browser's `put_session` cookie. Locally there is no Core, so `scripts/dev.mjs` starts
 `scripts/local-core.mjs` on `PUT_CHECKS_CORE_PORT` and points `CHECKS_CORE_SERVICE_URL` at it. It
 answers `GET /api/v1/users/me[/permissions]` with the developer identity for exactly one fixed cookie
 value (`put_session=local-dev-session`) and `401` for anything else. The frontend dev proxy adds that
-cookie, which is why you reach the backend through `frontend/dev.sh` rather than calling the API
+cookie, which is why you reach the backend through the frontend's dev server rather than calling the API
 without it.
 
 **Embedded database.** The `local` profile uses Zonky embedded Postgres in the JVM, so data is reset
-on every restart. That includes the DevTools restarts `dev.sh` triggers whenever Gradle recompiles a
+on every restart. That includes the DevTools restarts the launcher triggers whenever Gradle recompiles a
 class (a continuous `classes` build runs alongside `bootRun`). Use `--seed` to get sample data back.
 
 **Allowed domains (STUDIO-FLEX-001).** Where Studio may navigate is one deployment list,
@@ -185,6 +192,25 @@ not invent an available recording.
 **The automated version.** `../tools/corun.sh` runs `StudioCoRunIT`: the real API and the real
 runner in one JVM session, five legs, the last of which runs a real Chromium against a page the test
 serves on loopback and requires the execution `PASSED` and its ledger row `DONE`.
+
+### Windows
+
+**Windows: not verified.** No Windows run is recorded yet; the notes below are inferred from the Gradle, Java and
+Zonky documentation until one is.
+
+Local development only: production stays Linux. Prerequisites, natively (no Docker, no WSL):
+
+- **JDK 21** with `JAVA_HOME` set (Gradle reads it; `gradle.properties` pins no JDK path).
+- **Node 24** for `node scripts/dev.mjs` and the Core stand-in.
+- **Git for Windows**, `git config --global core.longpaths true` and a **short clone path** (for example
+  `C:\src\put-checks`).
+- A **non-admin shell**: Zonky's embedded Postgres refuses to start elevated.
+- The Microsoft Visual C++ runtime, which the embedded Postgres binaries need.
+- Artifactory credentials in `%USERPROFILE%\.gradle\gradle.properties` (see above).
+
+`node scripts/dev.mjs` runs `gradlew.bat` for you. The quality gate is `gradlew.bat check` and the tests are
+`gradlew.bat test`; both use embedded Postgres and need no Docker. The studio-runner and the frontend have their own
+Windows notes; the image build, the deployment and perception tiers, Helm and the realsite-gate stay Linux-only.
 
 ---
 

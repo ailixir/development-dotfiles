@@ -15,9 +15,9 @@
 # No dist build: WI-4 builds studio-runner/dist once. `up` verifies it read-only (no old resolver, not stale against
 # src, `check:pins`, optional CHECKS_GATE_EXPECT_DIST_SHA) and copies it to a frozen directory.
 #
-# Why not dev.sh: the gate's next-day pass needs the learned tests to survive >= 24 h. dev.sh runs the backend with
-# bootRun + DevTools + `gradlew -t classes`, so any sibling Gradle run hot-restarts the JVM and wipes the embedded
-# Postgres. Here the backend is an isolated-build JAR (java -jar, no watcher), and the runner runs from the frozen copy.
+# Why not the dev launchers (scripts/dev.mjs): the gate's next-day pass needs the learned tests to survive >= 24 h. The
+# backend launcher runs bootRun + DevTools + `gradlew -t classes`, so any sibling Gradle run hot-restarts the JVM and
+# wipes the embedded Postgres. Here the backend is an isolated-build JAR (java -jar, no watcher), and the runner runs from the frozen copy.
 #
 # Everything lives in CHECKS_GATE_STACK_DIR (outside the repo): keys, tokens, journal, jar, frozen runner, logs.
 # No secret value is printed. Run it with the Node 24 PATH and JDK 21 (JAVA_HOME_21 or the Homebrew default).
@@ -159,8 +159,11 @@ EOF
   LOCAL_STACK="$ROOT/studio-runner/scripts/local-stack.mjs"
   PUT_CHECKS_RUNNER_PORT="$RUNNER_PORT" PUT_CHECKS_BACKEND_PORT="$BACKEND_PORT" PUT_CHECKS_GUIDED_PORT="$CONNECTOR_PORT" \
     PUT_CHECKS_RUNNER_DIR="$STACK/runner-frozen" node "$LOCAL_STACK" init "$WORK"
+  # backend.env is plain dotenv (KEY=value, no export): auto-export while sourcing it.
+  set -a
   # shellcheck disable=SC1091
   source "$WORK/backend.env"
+  set +a
   export STUDIO_RUNNER_BASE_URL="https://127.0.0.1:${RUNNER_PORT}"
   export STUDIO_EVIDENCE_PROVIDER=local STUDIO_EVIDENCE_DIRECTORY="$WORK/objects"
   mkdir -p "$WORK/objects"

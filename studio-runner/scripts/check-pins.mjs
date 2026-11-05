@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import { createHash } from 'node:crypto';
-import {readBrowserProvenance,fileSha256} from './browser-provenance.mjs';
-import {envBrowserRoot} from './write-runtime-versions.mjs';
+import {readBrowserProvenance,fileSha256,envBrowserRoot} from './browser-provenance.mjs';
 /**
  * Pin consistency check (AC-1, ADR-001 §4.2, architecture §4.3).
  *
