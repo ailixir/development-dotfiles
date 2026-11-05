@@ -9,23 +9,17 @@ import ch.qos.logback.core.read.ListAppender;
 import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.guided.session.GuidedSessionException;
+import com.citi.put.checks.studio.support.RunnerTestTls;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsServer;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.security.KeyStore;
-import java.security.SecureRandom;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -39,8 +33,6 @@ class GuidedRunnerContextRefusalTest {
 
   private static final String CANARY = "refusal-body-canary-5521";
 
-  @TempDir Path temporary;
-
   private final GuidedContracts contracts = new GuidedContracts();
   private final AtomicReference<byte[]> reply = new AtomicReference<>();
   private final AtomicReference<Integer> status = new AtomicReference<>(409);
@@ -50,7 +42,7 @@ class GuidedRunnerContextRefusalTest {
 
   @BeforeEach
   void start() throws Exception {
-    SSLContext tls = certificate();
+    SSLContext tls = RunnerTestTls.shared().localhostContext();
     server = HttpsServer.create(new InetSocketAddress("localhost", 0), 0);
     server.setHttpsConfigurator(new HttpsConfigurator(tls));
     server.createContext(
@@ -178,56 +170,5 @@ class GuidedRunnerContextRefusalTest {
     StringBuilder out = new StringBuilder();
     logs.list.forEach(event -> out.append(event.getFormattedMessage()).append('\n'));
     return out.toString();
-  }
-
-  private SSLContext certificate() throws Exception {
-    run(
-        "openssl",
-        "req",
-        "-x509",
-        "-newkey",
-        "rsa:2048",
-        "-nodes",
-        "-keyout",
-        temporary.resolve("key.pem").toString(),
-        "-out",
-        temporary.resolve("cert.pem").toString(),
-        "-days",
-        "1",
-        "-subj",
-        "/CN=localhost",
-        "-addext",
-        "subjectAltName=DNS:localhost");
-    run(
-        "openssl",
-        "pkcs12",
-        "-export",
-        "-inkey",
-        temporary.resolve("key.pem").toString(),
-        "-in",
-        temporary.resolve("cert.pem").toString(),
-        "-out",
-        temporary.resolve("fixture.p12").toString(),
-        "-passout",
-        "pass:fixture");
-    var store = KeyStore.getInstance("PKCS12");
-    try (var in = Files.newInputStream(temporary.resolve("fixture.p12"))) {
-      store.load(in, "fixture".toCharArray());
-    }
-    var keys = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-    keys.init(store, "fixture".toCharArray());
-    var trust = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-    trust.init(store);
-    var tls = SSLContext.getInstance("TLS");
-    tls.init(keys.getKeyManagers(), trust.getTrustManagers(), new SecureRandom());
-    return tls;
-  }
-
-  private void run(String... command) throws Exception {
-    var process = new ProcessBuilder(command).redirectErrorStream(true).start();
-    try (var in = process.getInputStream()) {
-      in.transferTo(java.io.OutputStream.nullOutputStream());
-    }
-    assertThat(process.waitFor()).isZero();
   }
 }

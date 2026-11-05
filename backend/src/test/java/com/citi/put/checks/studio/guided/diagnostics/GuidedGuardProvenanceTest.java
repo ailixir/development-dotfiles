@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 
 import com.citi.put.checks.studio.guided.diagnostics.GuidedGuardProvenance.Guard;
 import com.citi.put.checks.studio.guided.diagnostics.GuidedGuardProvenance.Transaction;
+import com.citi.put.checks.studio.support.PosixTestFiles;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
@@ -33,6 +34,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.UnexpectedRollbackException;
@@ -349,6 +352,9 @@ class GuidedGuardProvenanceTest {
   }
 
   @Test
+  @DisabledOnOs(
+      value = OS.WINDOWS,
+      disabledReason = "the private sink is bound by POSIX mode, uid, dev and inode (unix:*)")
   void nativeWriterQuotaAndExactFixedReceipt() throws Exception {
     Path file = privateFile("quota");
     var sink = publisher(file);
@@ -368,6 +374,9 @@ class GuidedGuardProvenanceTest {
   }
 
   @Test
+  @DisabledOnOs(
+      value = OS.WINDOWS,
+      disabledReason = "the private sink is bound by POSIX mode, uid, dev and inode (unix:*)")
   void permissionSymlinkHardlinkForeignIdentityAndReplacementRefuse() throws Exception {
     Path file = privateFile("mode");
     var target = target(file);
@@ -414,6 +423,9 @@ class GuidedGuardProvenanceTest {
   }
 
   @Test
+  @DisabledOnOs(
+      value = OS.WINDOWS,
+      disabledReason = "the private sink is bound by POSIX mode, uid, dev and inode (unix:*)")
   void productOfferDoesNoFileWorkAndSinkFailureRetiresWithoutRetry() throws Exception {
     FileChannel channel = mock(FileChannel.class);
     var entered = new java.util.concurrent.CountDownLatch(1);
@@ -442,15 +454,29 @@ class GuidedGuardProvenanceTest {
     assertEquals(0, Files.size(file));
   }
 
+  @Test
+  void aFileSystemWithoutPosixAttributesLeavesTheDiagnosticUnavailable() throws Exception {
+    assertEquals(
+        !PosixTestFiles.WINDOWS, GuidedGuardProvenance.posixDiagnosticsAvailable(temporary));
+    // A zip file system has neither the posix nor the unix view, like a Windows volume.
+    try (var zip =
+        java.nio.file.FileSystems.newFileSystem(
+            temporary.resolve("no-posix.zip"), java.util.Map.of("create", "true"))) {
+      Path root = Files.createDirectory(zip.getPath("/sink"));
+      Path file = Files.createFile(root.resolve("guard.jsonl"));
+      assertFalse(GuidedGuardProvenance.posixDiagnosticsAvailable(file));
+      var refusal =
+          assertThrows(
+              UnsupportedOperationException.class,
+              () -> new GuidedGuardProvenance.Target(root, 1, 1, 1, 1, 1).verify());
+      assertEquals(GuidedGuardProvenance.POSIX_ONLY, refusal.getMessage());
+    }
+  }
+
   private Path privateFile(String name) throws Exception {
     Files.setPosixFilePermissions(temporary, PosixFilePermissions.fromString("rwx------"));
-    Path root =
-        Files.createDirectory(
-            temporary.resolve(name),
-            PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwx------")));
-    return Files.createFile(
-        root.resolve("guard.jsonl"),
-        PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------")));
+    Path root = PosixTestFiles.createDirectory(temporary.resolve(name), "rwx------");
+    return PosixTestFiles.createFile(root.resolve("guard.jsonl"), "rw-------");
   }
 
   private static GuidedGuardProvenance.Target target(Path file) throws Exception {

@@ -187,10 +187,12 @@ public final class GuidedGuardProvenance {
    */
   static void attachInheritedDescriptor() {
     try {
+      Target target = Target.fromProperties();
+      if (!posixDiagnosticsAvailable(target.root())) {
+        return; // POSIX_ONLY: diagnostics stay disabled.
+      }
       FileOutputStream output = new FileOutputStream(FileDescriptor.in);
-      configured =
-          new GuidedGuardProvenance(
-              new FilePublisher(output.getChannel(), Target.fromProperties()));
+      configured = new GuidedGuardProvenance(new FilePublisher(output.getChannel(), target));
     } catch (Throwable unavailable) {
       // Custody is already EOF; attachment failure leaves diagnostics disabled.
     }
@@ -271,8 +273,24 @@ public final class GuidedGuardProvenance {
     }
   }
 
+  /**
+   * The private sink is bound by POSIX mode, owner, device, inode and link count. A file system
+   * without the {@code posix} and {@code unix} attribute views (Windows) cannot be verified, so
+   * there this POSIX-only diagnostic is unavailable: no sink is attached and nothing is written.
+   * Product behaviour is the same either way.
+   */
+  static final String POSIX_ONLY = "POSIX-only diagnostics unavailable";
+
+  static boolean posixDiagnosticsAvailable(Path path) {
+    Set<String> views = path.getFileSystem().supportedFileAttributeViews();
+    return views.contains("posix") && views.contains("unix");
+  }
+
   static void verifyNode(Path path, long uid, long dev, long ino, boolean directory)
       throws Exception {
+    if (!posixDiagnosticsAvailable(path)) {
+      throw new UnsupportedOperationException(POSIX_ONLY);
+    }
     BasicFileAttributes attributes =
         Files.readAttributes(path, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
     Set<PosixFilePermission> expected =

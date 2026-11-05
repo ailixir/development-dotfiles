@@ -479,6 +479,18 @@ public final class RunnerTestTls {
   }
 
   /**
+   * A TLS context for a localhost HTTPS test double whose test plays both peers: it presents the
+   * {@link Identity#RUNNER} certificate (SAN {@code localhost}) and trusts the CA, so one context
+   * serves the {@code HttpsServer} and the client that calls it. Built from this CA's {@code
+   * keytool} material, so no {@code openssl} is needed.
+   *
+   * @return a context for {@code HttpsConfigurator} and for the client
+   */
+  public SSLContext localhostContext() {
+    return serverContext(Identity.RUNNER, trustStore(), trustStorePasswordFile());
+  }
+
+  /**
    * The password of an identity's key store, for tests that assemble their own stores. Test
    * material only; never log it.
    *
@@ -702,12 +714,7 @@ public final class RunnerTestTls {
   /** Creates (or truncates) a file that only the owner can read where POSIX permissions exist. */
   private static Path privateFile(Path file) throws IOException {
     Files.deleteIfExists(file);
-    try {
-      return Files.createFile(
-          file, PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------")));
-    } catch (UnsupportedOperationException notPosix) {
-      return Files.createFile(file);
-    }
+    return PosixTestFiles.createFile(file, "rw-------");
   }
 
   private static void keytool(String... arguments) throws IOException {

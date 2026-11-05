@@ -12,6 +12,7 @@ import com.citi.put.checks.studio.secrets.SecretUseAuditRecorder;
 import com.citi.put.checks.studio.secrets.StudioVaultProvider;
 import com.citi.put.checks.studio.secrets.VaultScope;
 import com.citi.put.checks.studio.secrets.VaultStudioReferenceResolver;
+import com.citi.put.checks.studio.support.PosixTestFiles;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sun.net.httpserver.HttpServer;
@@ -25,7 +26,6 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -59,10 +59,7 @@ public class ObservedResolverProcessCrashIT {
   @ParameterizedTest
   @EnumSource(Cut.class)
   void realResolverJvmCrashSettlesActualCommittedCutWithoutAnotherRead(Cut cut) throws Exception {
-    Path scratch =
-        Files.createTempDirectory(
-            "observed-resolver-crash-",
-            PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwx------")));
+    Path scratch = PosixTestFiles.createTempDirectory("observed-resolver-crash-", "rwx------");
     Process child = null;
     HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
     AtomicInteger reads = new AtomicInteger();
@@ -108,9 +105,7 @@ public class ObservedResolverProcessCrashIT {
               .put("stage", scratch.resolve("stage").toString());
       config.set("binding", fixture.original());
       Path configuration =
-          Files.createFile(
-              scratch.resolve("configuration.json"),
-              PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------")));
+          PosixTestFiles.createFile(scratch.resolve("configuration.json"), "rw-------");
       Files.write(configuration, JSON.writeValueAsBytes(config));
       child =
           new ProcessBuilder(
@@ -306,9 +301,7 @@ public class ObservedResolverProcessCrashIT {
 
     private static void pause(Path stage, String fixedLabel) {
       try {
-        Files.createFile(
-            stage,
-            PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------")));
+        PosixTestFiles.createFile(stage, "rw-------");
         Files.writeString(stage, fixedLabel, StandardCharsets.UTF_8);
         if (new CountDownLatch(1).await(40, TimeUnit.SECONDS)) {
           throw new IllegalStateException("Unreachable child release");

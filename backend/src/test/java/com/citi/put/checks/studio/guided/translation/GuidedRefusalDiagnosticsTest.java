@@ -19,6 +19,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.citi.put.checks.studio.guided.translation.GuidedRefusalDiagnostics.Gate;
+import com.citi.put.checks.studio.support.PosixTestFiles;
 import com.sun.security.auth.module.UnixSystem;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
@@ -35,6 +36,8 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.UnexpectedRollbackException;
@@ -347,6 +350,9 @@ class GuidedRefusalDiagnosticsTest {
   }
 
   @Test
+  @DisabledOnOs(
+      value = OS.WINDOWS,
+      disabledReason = "the private sink is bound by POSIX mode, uid, dev and inode (unix:*)")
   void precreatedPrivateSinkIsBoundedAndChangedTargetFailsClosed() throws Exception {
     Path file = privateFile("bounded");
     var sink = publisher(file);
@@ -362,9 +368,7 @@ class GuidedRefusalDiagnosticsTest {
     waitUntil(() -> Files.size(changed) > 0);
     Path old = changed.resolveSibling("old-private");
     Files.move(changed, old);
-    Files.createFile(
-        changed,
-        PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------")));
+    PosixTestFiles.createFile(changed, "rw-------");
     bound.accept(receipt(Gate.APPLICATION));
     waitUntil(() -> !available(bound));
     assertEquals(0, Files.size(changed));
@@ -372,6 +376,9 @@ class GuidedRefusalDiagnosticsTest {
   }
 
   @Test
+  @DisabledOnOs(
+      value = OS.WINDOWS,
+      disabledReason = "the private sink is bound by POSIX mode, uid, dev and inode (unix:*)")
   void badModesSymlinksForeignOwnerAndNonemptyFilesRefuseWithoutFallback() throws Exception {
     Path file = privateFile("bad-mode");
     Files.setPosixFilePermissions(file, PosixFilePermissions.fromString("rw-r-----"));
@@ -423,6 +430,9 @@ class GuidedRefusalDiagnosticsTest {
   }
 
   @Test
+  @DisabledOnOs(
+      value = OS.WINDOWS,
+      disabledReason = "the private sink is bound by POSIX mode, uid, dev and inode (unix:*)")
   void asynchronousOfferNeverWaitsForBlockedWriterAndFailureRetiresPermanently() throws Exception {
     Path file = privateFile("blocked-writer");
     FileChannel channel = mock(FileChannel.class);
@@ -452,6 +462,9 @@ class GuidedRefusalDiagnosticsTest {
   }
 
   @Test
+  @DisabledOnOs(
+      value = OS.WINDOWS,
+      disabledReason = "the private sink is bound by POSIX mode, uid, dev and inode (unix:*)")
   void modeLinkAndExternalSizeChangesRefuseFurtherWrites() throws Exception {
     for (String kind : List.of("mode", "link", "size")) {
       Path file = privateFile("change-" + kind);
@@ -478,6 +491,9 @@ class GuidedRefusalDiagnosticsTest {
   }
 
   @Test
+  @DisabledOnOs(
+      value = OS.WINDOWS,
+      disabledReason = "the private sink is bound by POSIX mode, uid, dev and inode (unix:*)")
   void retirementPrecedesPotentiallyBlockedCloseAndEmbeddedProcessDefaultsDoNotInheritStdin()
       throws Exception {
     var process = new ProcessBuilder("PUBLIC_UNEXECUTED_SYNTHETIC_COMMAND");
@@ -513,16 +529,30 @@ class GuidedRefusalDiagnosticsTest {
     release.countDown();
   }
 
+  @Test
+  void aFileSystemWithoutPosixAttributesLeavesTheDiagnosticUnavailable() throws Exception {
+    assertEquals(
+        !PosixTestFiles.WINDOWS, GuidedRefusalDiagnostics.posixDiagnosticsAvailable(temporary));
+    // A zip file system has neither the posix nor the unix view, like a Windows volume.
+    try (var zip =
+        java.nio.file.FileSystems.newFileSystem(
+            temporary.resolve("no-posix.zip"), java.util.Map.of("create", "true"))) {
+      Path root = Files.createDirectory(zip.getPath("/sink"));
+      Path file = Files.createFile(root.resolve("gate.jsonl"));
+      assertFalse(GuidedRefusalDiagnostics.posixDiagnosticsAvailable(file));
+      var refusal =
+          assertThrows(
+              UnsupportedOperationException.class,
+              () -> new GuidedRefusalDiagnostics.Target(root, 1, 1, 1, 1, 1).verify());
+      assertEquals(GuidedRefusalDiagnostics.POSIX_ONLY, refusal.getMessage());
+    }
+  }
+
   private Path privateFile(String name) throws Exception {
     temporary = temporary.toRealPath();
     Files.setPosixFilePermissions(temporary, PosixFilePermissions.fromString("rwx------"));
-    Path root =
-        Files.createDirectory(
-            temporary.resolve(name),
-            PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwx------")));
-    return Files.createFile(
-        root.resolve("gate.jsonl"),
-        PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------")));
+    Path root = PosixTestFiles.createDirectory(temporary.resolve(name), "rwx------");
+    return PosixTestFiles.createFile(root.resolve("gate.jsonl"), "rw-------");
   }
 
   private static GuidedRefusalDiagnostics.Target target(Path file) throws Exception {

@@ -7,6 +7,7 @@ import com.citi.put.checks.studio.dispatch.DispatchTestAccess;
 import com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.secrets.SecretValue;
+import com.citi.put.checks.studio.support.RunnerTestTls;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsServer;
@@ -15,21 +16,14 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.KeyStore;
-import java.security.SecureRandom;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 
 /**
  * Actual HTTPS producer seam; this alone does not claim a joined browser or G1 deployment proof.
  */
 class GuidedSecretByteBodyTest {
-  @TempDir Path temporary;
-
   @Test
   void guidedPublisherUsesOwnedBytesAndErasesBothBuffersAfterAckAndLostAck() throws Exception {
     var contracts = new GuidedContracts();
@@ -43,7 +37,7 @@ class GuidedSecretByteBodyTest {
     ObjectNode metadata = (ObjectNode) dispatch.remove("secrets").get(0).deepCopy();
     metadata.remove("value");
     String canary = "GUIDED-BYTE-CANARY-" + java.util.UUID.randomUUID();
-    SSLContext tls = certificate();
+    SSLContext tls = RunnerTestTls.shared().localhostContext();
     var server = HttpsServer.create(new InetSocketAddress("localhost", 0), 0);
     server.setHttpsConfigurator(new HttpsConfigurator(tls));
     var received = new AtomicReference<byte[]>();
@@ -132,7 +126,7 @@ class GuidedSecretByteBodyTest {
     var headers = new java.util.concurrent.CountDownLatch(1);
     var disconnected = new java.util.concurrent.CountDownLatch(1);
     var certified = new java.util.concurrent.atomic.AtomicBoolean();
-    SSLContext tls = certificate();
+    SSLContext tls = RunnerTestTls.shared().localhostContext();
     var server = HttpsServer.create(new InetSocketAddress("localhost", 0), 0);
     server.setHttpsConfigurator(
         new HttpsConfigurator(tls) {
@@ -239,57 +233,6 @@ class GuidedSecretByteBodyTest {
     }
   }
 
-  private SSLContext certificate() throws Exception {
-    run(
-        "openssl",
-        "req",
-        "-x509",
-        "-newkey",
-        "rsa:2048",
-        "-nodes",
-        "-keyout",
-        temporary.resolve("key.pem").toString(),
-        "-out",
-        temporary.resolve("cert.pem").toString(),
-        "-days",
-        "1",
-        "-subj",
-        "/CN=localhost",
-        "-addext",
-        "subjectAltName=DNS:localhost");
-    run(
-        "openssl",
-        "pkcs12",
-        "-export",
-        "-inkey",
-        temporary.resolve("key.pem").toString(),
-        "-in",
-        temporary.resolve("cert.pem").toString(),
-        "-out",
-        temporary.resolve("fixture.p12").toString(),
-        "-passout",
-        "pass:fixture");
-    var store = KeyStore.getInstance("PKCS12");
-    try (var in = Files.newInputStream(temporary.resolve("fixture.p12"))) {
-      store.load(in, "fixture".toCharArray());
-    }
-    var keys = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-    keys.init(store, "fixture".toCharArray());
-    var trust = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-    trust.init(store);
-    var tls = SSLContext.getInstance("TLS");
-    tls.init(keys.getKeyManagers(), trust.getTrustManagers(), new SecureRandom());
-    return tls;
-  }
-
-  private void run(String... command) throws Exception {
-    var process = new ProcessBuilder(command).redirectErrorStream(true).start();
-    try (var in = process.getInputStream()) {
-      in.transferTo(java.io.OutputStream.nullOutputStream());
-    }
-    assertThat(process.waitFor()).isZero();
-  }
-
   @Test
   void twoSecretsTravelInOneSecretsArrayAndBothBuffersAreErased() throws Exception {
     var contracts = new GuidedContracts();
@@ -306,7 +249,7 @@ class GuidedSecretByteBodyTest {
     second.put("secretId", "TOKEN");
     String canaryOne = "GUIDED-BYTE-ONE-" + java.util.UUID.randomUUID();
     String canaryTwo = "GUIDED-BYTE-TWO-" + java.util.UUID.randomUUID();
-    SSLContext tls = certificate();
+    SSLContext tls = RunnerTestTls.shared().localhostContext();
     var server = HttpsServer.create(new InetSocketAddress("localhost", 0), 0);
     server.setHttpsConfigurator(new HttpsConfigurator(tls));
     var received = new AtomicReference<byte[]>();

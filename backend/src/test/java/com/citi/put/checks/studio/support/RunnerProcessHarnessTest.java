@@ -611,10 +611,12 @@ class RunnerProcessHarnessTest {
 
   @Test
   void theMainInvocationImportsMainJsAndCallsItWithTheProcessStreams() {
-    String call = RunnerProcessHarness.mainInvocation(Path.of("/x/dist/main.js"));
+    Path main = Path.of("/x/dist/main.js");
+    String call = RunnerProcessHarness.mainInvocation(main);
 
+    // file:///x/dist/main.js on POSIX; on Windows the absolute path gains the current drive.
     assertThat(call)
-        .contains("await import(\"file:///x/dist/main.js\")")
+        .contains("await import(\"" + main.toAbsolutePath().toUri() + "\")")
         .contains("await main({env:process.env")
         .contains("onSignal:(signal,handler)=>{process.on(signal,handler);}")
         .contains("RUNNER_START_FAILED");
@@ -910,7 +912,12 @@ class RunnerProcessHarnessTest {
         .callbackBaseUrl("https://127.0.0.1:1")
         .workDirectory(temp.resolve("work-" + workDirs.incrementAndGet()))
         .graceTimeout(Duration.ofMillis(300))
-        .reapTimeout(Duration.ofMillis(300));
+        .reapTimeout(Duration.ofMillis(300))
+        .signaller(
+            (signal, pid) -> {
+              // The fake processes' pids are not this machine's: never signal them for real (on
+              // Windows the teardown sends KILL_TREE through this seam).
+            });
   }
 
   private RunnerProcessHarness start(RunnerProcessHarness.Builder builder, Capture capture) {

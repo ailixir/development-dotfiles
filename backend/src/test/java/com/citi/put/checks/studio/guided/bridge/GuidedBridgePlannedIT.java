@@ -124,7 +124,10 @@ class GuidedBridgePlannedIT {
     try {
       ENV =
           new GuidedBridgeFixture(
-              "guided-bridge-planned-", Path.of("/tmp/studio-obs015-bridge-planned-worker.json"));
+              "guided-bridge-planned-",
+              Path.of(
+                  System.getProperty("java.io.tmpdir"),
+                  "studio-obs015-bridge-planned-worker.json"));
       PROVIDER = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
       PROVIDER.createContext(
           "/",

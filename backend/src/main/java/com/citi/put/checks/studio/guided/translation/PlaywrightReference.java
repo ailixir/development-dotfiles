@@ -49,6 +49,19 @@ public final class PlaywrightReference {
     } catch (IOException error) {
       throw new IllegalStateException("Cannot read Playwright reference resource");
     }
+    return parse(bytes);
+  }
+
+  /**
+   * Parses the reference. Line endings may be LF or CRLF (a Windows checkout): CRLF is normalised
+   * to LF first, so the sections and the {@link #referenceHash()} are the same as for the LF bytes
+   * the generator writes.
+   */
+  static PlaywrightReference parse(byte[] raw) {
+    String decoded = new String(raw, StandardCharsets.UTF_8);
+    String text = decoded.replace("\r\n", "\n");
+    // LF input is hashed exactly as read.
+    byte[] bytes = text.equals(decoded) ? raw : text.getBytes(StandardCharsets.UTF_8);
     var preamble = new StringBuilder();
     var index = new StringBuilder();
     Map<String, Section> sections = new LinkedHashMap<>();
@@ -56,7 +69,7 @@ public final class PlaywrightReference {
     String id = null;
     String title = null;
     boolean core = false;
-    for (String line : new String(bytes, StandardCharsets.UTF_8).split("\n", -1)) {
+    for (String line : text.split("\n", -1)) {
       if (line.startsWith("@@")) {
         if (id != null) {
           sections.put(id, new Section(id, core, title, block.toString()));
@@ -92,7 +105,10 @@ public final class PlaywrightReference {
         Collections.unmodifiableMap(sections));
   }
 
-  /** SHA-256 of the resource bytes: the pin of this reference in the run's environment record. */
+  /**
+   * SHA-256 of the resource bytes with LF line endings: the pin of this reference in the run's
+   * environment record.
+   */
   public String referenceHash() {
     return referenceHash;
   }

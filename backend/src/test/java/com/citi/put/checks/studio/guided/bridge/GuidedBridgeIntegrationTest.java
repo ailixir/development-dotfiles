@@ -72,7 +72,8 @@ class GuidedBridgeIntegrationTest {
     try {
       ENV =
           new GuidedBridgeFixture(
-              "guided-bridge-", Path.of("/tmp/studio-obs004-tested-worker.json"));
+              "guided-bridge-",
+              Path.of(System.getProperty("java.io.tmpdir"), "studio-obs004-tested-worker.json"));
       ENV.start();
     } catch (Exception failure) {
       throw new ExceptionInInitializerError(failure);

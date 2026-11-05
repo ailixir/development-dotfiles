@@ -16,7 +16,6 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -36,6 +35,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.Assumptions;
 
 /**
  * Spawns the one {@code studio-runner} process (STUDIO-OBS-009 AC-3 over TLS, AC-12 h and i, AC-11
@@ -249,9 +249,19 @@ public final class RunnerProcessHarness implements AutoCloseable {
 
     /**
      * Fails unless the runner left by itself, with exit code 0, inside the grace (ruling W1.5 part
-     * 1, I-T1). A forced kill is recorded in this report and is never silently accepted.
+     * 1, I-T1). A forced kill is recorded in this report and is never silently accepted. On Windows
+     * it fails unless the runner exited and nothing it left behind is still running.
      */
     public void assertCleanExit() {
+      if (PosixTestFiles.WINDOWS) {
+        // Java can't deliver SIGINT/SIGBREAK, so the graceful drain isn't exercisable from the JVM
+        // on Windows (ADR-SC-009, no SIGTERM drain): require only that the runner and its tree end.
+        if (exitCode == null) {
+          throw new AssertionError("the runner did not exit");
+        }
+        assertNoSurvivors();
+        return;
+      }
       if (exitCode == null || exitCode != 0 || escalatedToForce) {
         throw new AssertionError(
             "the runner did not leave cleanly: exit code "
@@ -280,7 +290,8 @@ public final class RunnerProcessHarness implements AutoCloseable {
 
   /**
    * Sends a stop or continue signal to a process: a seam so the unit test needs no real process.
-   * The signal is {@code STOP} or {@code CONT}; the JDK cannot send either.
+   * The signal is {@code STOP} or {@code CONT} (POSIX), which the JDK cannot send, or {@code
+   * KILL_TREE} (Windows only): end the process and its live descendants at once.
    */
   @FunctionalInterface
   public interface Signaller {
@@ -332,7 +343,7 @@ public final class RunnerProcessHarness implements AutoCloseable {
     private Duration graceTimeout = Duration.ofSeconds(20);
     private Duration guidedMinimumGrace = GUIDED_MINIMUM_GRACE;
     private Duration reapTimeout = Duration.ofSeconds(5);
-    private Signaller signaller = RunnerProcessHarness::signalWithShell;
+    private Signaller signaller = RunnerProcessHarness::signalWithoutShell;
     private String preload;
 
     private Builder(RunnerTestTls tls) {
@@ -571,8 +582,7 @@ public final class RunnerProcessHarness implements AutoCloseable {
       this.workDir = dir;
       this.tmpDirectory = Files.createDirectories(dir.resolve("t"));
       this.log = dir.resolve("runner.log");
-      Files.createFile(
-          log, PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------")));
+      PosixTestFiles.createFile(log, "rw-------");
       if (port == 0) {
         port = exclusivelyFreePort();
       }
@@ -978,6 +988,9 @@ public final class RunnerProcessHarness implements AutoCloseable {
    * @throws IllegalArgumentException when a fact is not a surviving guided browser of this harness
    */
   public synchronized List<ProcessFact> freeze(List<ProcessFact> browsers) {
+    Assumptions.assumeFalse(
+        PosixTestFiles.WINDOWS,
+        "SIGSTOP has no Windows equivalent: the wedged-browser fault (freeze) is POSIX-only");
     List<Held> candidates = guidedBrowsers();
     List<Held> targets = new ArrayList<>();
     for (ProcessFact fact : browsers) {
@@ -1052,6 +1065,14 @@ public final class RunnerProcessHarness implements AutoCloseable {
     boolean escalated = false;
     ProcessHandle parent = process.toHandle();
     if (process.isAlive()) {
+      if (PosixTestFiles.WINDOWS) {
+        // Windows has no SIGTERM to send and destroy() ends the runner alone: end its live tree.
+        try {
+          signaller.signal("KILL_TREE", parent.pid());
+        } catch (IOException failed) {
+          // destroy() below still ends the runner; the captured descendants are handled after it.
+        }
+      }
       process.destroy();
       if (!waitDead(parent, graceTimeout)) {
         escalated = true;
@@ -1209,15 +1230,34 @@ public final class RunnerProcessHarness implements AutoCloseable {
     return builder.start();
   }
 
-  private static void signalWithShell(String signal, long pid) throws IOException {
-    if (!signal.equals("STOP") && !signal.equals("CONT")) {
+  /**
+   * The default {@link Signaller}, with no shell: {@code STOP} and {@code CONT} run {@code kill}
+   * directly (POSIX); {@code KILL_TREE} runs {@code taskkill /PID <pid> /T /F} (Windows).
+   */
+  private static void signalWithoutShell(String signal, long pid) throws IOException {
+    boolean posixSignal = signal.equals("STOP") || signal.equals("CONT");
+    boolean treeKill = signal.equals("KILL_TREE");
+    if (PosixTestFiles.WINDOWS ? !treeKill : !posixSignal) {
       throw new IOException("unsupported signal");
     }
     if (pid <= 1) {
       throw new IOException("refused pid");
     }
+    List<String> command =
+        treeKill
+            ? List.of(
+                Path.of(
+                        System.getenv().getOrDefault("SystemRoot", "C:\\Windows"),
+                        "System32",
+                        "taskkill.exe")
+                    .toString(),
+                "/PID",
+                Long.toString(pid),
+                "/T",
+                "/F")
+            : List.of("kill", "-" + signal, Long.toString(pid));
     Process process =
-        new ProcessBuilder("/bin/sh", "-c", "kill -" + signal + " " + pid)
+        new ProcessBuilder(command)
             .redirectErrorStream(true)
             .redirectOutput(ProcessBuilder.Redirect.DISCARD)
             .start();

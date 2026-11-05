@@ -14,14 +14,32 @@ class PlaywrightReferenceTest {
 
   @Test
   void theReferenceHashIsTheSha256OfTheResourceBytes() throws Exception {
-    byte[] bytes;
-    try (var in = getClass().getResourceAsStream("/studio/playwright-reference/reference.txt")) {
-      bytes = in.readAllBytes();
-    }
+    byte[] bytes = lfResource();
     assertThat(REFERENCE.referenceHash())
         .hasSize(64)
         .isEqualTo(HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes)));
     assertThat(PlaywrightReference.load().referenceHash()).isEqualTo(REFERENCE.referenceHash());
+  }
+
+  @Test
+  void aCrlfCheckoutParsesToTheSameSectionsAndHash() throws Exception {
+    String text = new String(lfResource(), StandardCharsets.UTF_8);
+    PlaywrightReference crlf =
+        PlaywrightReference.parse(text.replace("\n", "\r\n").getBytes(StandardCharsets.UTF_8));
+    assertThat(crlf.referenceHash()).isEqualTo(REFERENCE.referenceHash());
+    assertThat(crlf.sectionIds()).isEqualTo(REFERENCE.sectionIds());
+    assertThat(crlf.index()).isEqualTo(REFERENCE.index());
+    List<String> all = REFERENCE.sectionIds();
+    assertThat(crlf.select(all)).isEqualTo(REFERENCE.select(all)).doesNotContain("\r");
+  }
+
+  /** The resource bytes as the generator writes them (LF), whatever the checkout's line endings. */
+  private byte[] lfResource() throws Exception {
+    try (var in = getClass().getResourceAsStream("/studio/playwright-reference/reference.txt")) {
+      return new String(in.readAllBytes(), StandardCharsets.UTF_8)
+          .replace("\r\n", "\n")
+          .getBytes(StandardCharsets.UTF_8);
+    }
   }
 
   @Test
