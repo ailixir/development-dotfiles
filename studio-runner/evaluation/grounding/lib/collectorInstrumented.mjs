@@ -39,9 +39,12 @@ export function patchSource(sourceText, { pinned = PINNED_SOURCE_SHA256 } = {}) 
   return header + withoutMap.replace(PATCH.anchor, () => PATCH.insertion);
 }
 
+/** The frozen source in its LF form, so the pin also matches on a CRLF (Windows) checkout; an LF file is unchanged. */
+export const readSource = () => readFileSync(SOURCE_PATH, 'utf8').replace(/\r\n/gu, '\n');
+
 /** Write generated/observationCollector.instrumented.mjs (idempotent) and return its path. */
 export function generate() {
-  const text = patchSource(readFileSync(SOURCE_PATH, 'utf8'));
+  const text = patchSource(readSource());
   mkdirSync(GENERATED_DIR, { recursive: true });
   if (!existsSync(GENERATED_PATH) || readFileSync(GENERATED_PATH, 'utf8') !== text) writeFileSync(GENERATED_PATH, text);
   writeFileSync(`${GENERATED_DIR}observationCollector.instrumented.meta.json`, `${JSON.stringify({ sourceSha256: PINNED_SOURCE_SHA256, outputSha256: sha256(text), patch: '__spk07Element(nodeId) inserted before collect(identity)' }, null, 1)}\n`);

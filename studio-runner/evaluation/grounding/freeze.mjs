@@ -6,7 +6,7 @@
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { dirname, join, relative } from 'node:path';
+import { dirname, join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export const GROUNDING_ROOT = dirname(fileURLToPath(import.meta.url));
@@ -34,7 +34,8 @@ function listFiles(dir, { excludedDirs = new Set() } = {}) {
 
 function hashFiles(root, files) {
   const hashes = {};
-  for (const path of files) hashes[relative(root, path)] = sha256(readFileSync(path));
+  // Keys are '/'-separated on every OS, so a freeze written on one platform verifies on another.
+  for (const path of files) hashes[relative(root, path).split(sep).join('/')] = sha256(readFileSync(path));
   return hashes;
 }
 

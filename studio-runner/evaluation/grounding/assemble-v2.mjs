@@ -12,7 +12,7 @@
 // Every S4 row and every wave-1 S3 row of the base is dropped. --fresh-only keeps only the wave-2 tasks of the wave2 run.
 // Copy-only: a source dir is never modified, and an existing --out is refused.
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { basename, dirname, join, resolve } from 'node:path';
+import { basename, dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
@@ -69,7 +69,8 @@ export function assemble({ out, base, s3v2, wave2, corpus, freshOnly = false }) 
     if (!existsSync(dir)) throw new Error(`SOURCE_MISSING ${name}: ${dir}`);
   }
   if (existsSync(OUT)) throw new Error(`OUT_EXISTS ${OUT}`);
-  for (const dir of Object.values(dirs)) if (OUT === dir || OUT.startsWith(`${dir}/`) || dir.startsWith(`${OUT}/`)) throw new Error(`OUT_OVERLAPS_SOURCE ${dir}`);
+  const contains = (parent, child) => { const rel = relative(parent, child); return rel === '' || (!rel.startsWith('..') && !isAbsolute(rel)); };
+  for (const dir of Object.values(dirs)) if (contains(dir, OUT) || contains(OUT, dir)) throw new Error(`OUT_OVERLAPS_SOURCE ${dir}`);
 
   const corpusRows = readRows(R(corpus)).rows.map(item => item.row);
   const waveOf = task => (task.wave ?? 1);

@@ -8,7 +8,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 interface Instrumented {
-  patchSource(text: string, options?: { pinned?: string }): string; generate(): string; PINNED_SOURCE_SHA256: string; SOURCE_PATH: string; PATCH: { anchor: string; insertion: string };
+  patchSource(text: string, options?: { pinned?: string }): string; generate(): string; PINNED_SOURCE_SHA256: string; SOURCE_PATH: string; readSource(): string; PATCH: { anchor: string; insertion: string };
   loadInstrumented(): Promise<{ installObservationCollector: (...args: never[]) => unknown }>;
 }
 const collector = (await import(new URL('../../evaluation/grounding/lib/collectorInstrumented.mjs', import.meta.url).href)) as Instrumented;
@@ -16,7 +16,7 @@ const sha = (text: string) => createHash('sha256').update(text).digest('hex');
 
 describe('instrumented collector generation', () => {
   it('refuses a source whose sha256 is not the pinned one', () => {
-    const source = readFileSync(collector.SOURCE_PATH, 'utf8');
+    const source = collector.readSource();
     expect(() => collector.patchSource(`${source} `)).toThrow('COLLECTOR_SOURCE_PIN_MISMATCH');
   });
 
@@ -27,7 +27,7 @@ describe('instrumented collector generation', () => {
   });
 
   it('the current dist source matches the pin, and the output is the source plus exactly one inserted method', () => {
-    const source = readFileSync(collector.SOURCE_PATH, 'utf8');
+    const source = collector.readSource();
     expect(sha(source)).toBe(collector.PINNED_SOURCE_SHA256);
     const output = collector.patchSource(source);
     const body = output.split('\n').slice(2).join('\n'); // drop the two-line generated header
@@ -40,7 +40,7 @@ describe('instrumented collector generation', () => {
 
   it('generates a loadable module exposing the same factory', async () => {
     const path = collector.generate();
-    expect(readFileSync(path, 'utf8')).toBe(collector.patchSource(readFileSync(collector.SOURCE_PATH, 'utf8')));
+    expect(readFileSync(path, 'utf8')).toBe(collector.patchSource(collector.readSource()));
     const module = await collector.loadInstrumented();
     expect(String(module.installObservationCollector)).toContain('__spk07Element');
   });

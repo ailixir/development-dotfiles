@@ -21,7 +21,10 @@ import * as S from './lib/stepcode.mjs';
 const HERE = dirname(fileURLToPath(import.meta.url));
 export const E18 = join(HERE, 'e18');
 export const RUNS = join(HERE, 'runs');
-export const EVID = '/Users/brunobuger/.aiox-lean/put-checks-ui-studio/SC008/work/SC008-E18/evidence';
+// The evidence directory lives outside the repo: SC008_E18_EVIDENCE_DIR names it. Unset, the original author's path is used, and
+// main() refuses with a clear error when that path's work directory is not on this machine (it would otherwise be created).
+const DEFAULT_EVID = '/Users/brunobuger/.aiox-lean/put-checks-ui-studio/SC008/work/SC008-E18/evidence';
+export const EVID = process.env.SC008_E18_EVIDENCE_DIR || DEFAULT_EVID;
 const REPO = resolve(HERE, '../../..');
 const CORPUS = join(HERE, 'corpus', 'tasks.jsonl');
 const HAR_DIR = join(RUNS, 'e18-har');
@@ -634,6 +637,9 @@ async function main() {
   // Code that floats a Playwright promise can reject after its step ended; that must not kill a run of hundreds of units.
   process.on('unhandledRejection', reason => { unhandled++; if (unhandled <= 5) console.error(`unhandledRejection (kept running): ${String(reason?.message ?? reason).split('\n')[0].slice(0, 160)}`); });
   const args = parse(process.argv.slice(2)); const cmd = args._[0];
+  if (!process.env.SC008_E18_EVIDENCE_DIR && !existsSync(dirname(DEFAULT_EVID))) {
+    throw new Error(`SC008_E18_EVIDENCE_DIR is not set and the default evidence directory's parent (${dirname(DEFAULT_EVID)}) does not exist on this machine; set SC008_E18_EVIDENCE_DIR to the SC008-E18 evidence directory.`);
+  }
   mkdirSync(EVID, { recursive: true });
   if (cmd === 'split') { const s = computeSplit(); write(join(E18, 'split.json'), s); console.log(JSON.stringify(s.counts), JSON.stringify(s.overlap)); }
   else if (cmd === 'record') await record(args);

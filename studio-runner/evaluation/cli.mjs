@@ -5,7 +5,7 @@ import { Buffer } from 'node:buffer';
 // eslint-disable-next-line no-restricted-imports -- Fixed evaluation self-test executable and file paths; no model input.
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { dirname, resolve } from 'node:path';
+import { basename, dirname, resolve } from 'node:path';
 import { validateManifest } from './oracle.mjs';
 import { buildReport, renderReport, reportExitCode } from './report.mjs';
 import {
@@ -118,7 +118,7 @@ async function main() {
     }
   }
   if (command === 'b7') {
-    const docs = args.slice(1).filter((x) => !x.startsWith('--')).map((file) => ({ label: file.split('/').at(-1), ...JSON.parse(readFileSync(file, 'utf8')) }));
+    const docs = args.slice(1).filter((x) => !x.startsWith('--')).map((file) => ({ label: basename(file), ...JSON.parse(readFileSync(file, 'utf8')) }));
     out(measureProposals(docs));
     return 0;
   }

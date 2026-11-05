@@ -12,7 +12,7 @@
 // into dollars, and nothing here invents a price or a headroom.
 import { createHash, randomUUID } from 'node:crypto';
 import { existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, isAbsolute, join, relative as relativePath, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { startCorpusPages } from './pages/server.mjs';
 
@@ -37,7 +37,10 @@ const SUCCESS_STATES = ['SUCCEEDED', 'FINALIZING', 'PUBLICATION_CONFLICT'];
 // Utilities
 // ---------------------------------------------------------------------------------------------
 export const sha256Hex = (data) => createHash('sha256').update(data).digest('hex');
-export const sha256File = (path) => sha256Hex(readFileSync(path));
+/** CRLF -> LF, byte-preserving otherwise (latin1 round-trip): an LF file hashes exactly as before. */
+const lfBytes = (bytes) => (bytes.includes(0x0d) ? Buffer.from(bytes.toString('latin1').replace(/\r\n/gu, '\n'), 'latin1') : bytes);
+/** sha256 of a tracked text file, taken over its LF form so a pin also matches on a CRLF (Windows) checkout. */
+export const sha256File = (path) => sha256Hex(lfBytes(readFileSync(path)));
 
 /** Key-sorted compact JSON, the form every harness digest is taken over. */
 export function canonicalJson(value) {
@@ -88,7 +91,8 @@ const CASE_CLASSES = ['P', 'F', 'N'];
 /** Resolves a manifest-relative path inside the observed-authoring directory (no traversal). */
 export function resolveInside(root, relative) {
   const full = resolve(root, relative);
-  if (!full.startsWith(`${resolve(root)}/`)) throw new Error(`path escapes the corpus directory: ${relative}`);
+  const rel = relativePath(resolve(root), full);
+  if (rel === '' || rel.startsWith('..') || isAbsolute(rel)) throw new Error(`path escapes the corpus directory: ${relative}`);
   return full;
 }
 
