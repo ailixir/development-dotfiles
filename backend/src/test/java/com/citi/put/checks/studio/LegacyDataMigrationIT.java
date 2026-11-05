@@ -3,6 +3,7 @@ package com.citi.put.checks.studio;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.citi.put.checks.support.TestPostgresDatabase;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -13,8 +14,6 @@ import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * Story 10.1 AC-9/AC-10/AC-11/AC-17 — the Studio baseline (V12–V18, STUDIO-OBS-012A / ADR-SC-005
@@ -33,17 +32,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * empty schema: the executions CSI backfill and quarantine, the logs TEXT -&gt; JSONB conversion,
  * and the partition-locator insert into the V13 ledger.
  */
-@Testcontainers(disabledWithoutDocker = true)
 class LegacyDataMigrationIT {
 
   private static final String MIGRATIONS = "classpath:db/migration";
   private static final String REGISTERED_CSI = "60001";
 
-  private static final PostgreSQLContainer<?> POSTGRES =
-      new PostgreSQLContainer<>("postgres:15-alpine")
-          .withDatabaseName("checks_legacy_v14")
-          .withUsername("test")
-          .withPassword("test");
+  private static final TestPostgresDatabase POSTGRES =
+      new TestPostgresDatabase().withDatabaseName("checks_legacy_v14");
 
   private static UUID chromeTestId;
   private static UUID firefoxTestId;

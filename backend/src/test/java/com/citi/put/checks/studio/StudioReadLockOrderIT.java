@@ -22,7 +22,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * STUDIO-OBS-009 AC-9 obligation TF-3 (STUDIO-OBS-015 advisory S1): {@code GET /tests/{id}} takes
@@ -53,7 +52,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  */
 @SpringBootTest
 @ActiveProfiles("test")
-@Testcontainers(disabledWithoutDocker = true)
 class StudioReadLockOrderIT {
 
   private static final String CSI_ID = "60491";

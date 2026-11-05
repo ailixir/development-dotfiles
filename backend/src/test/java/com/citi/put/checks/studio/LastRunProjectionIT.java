@@ -21,7 +21,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * Story 10.1 AC-19 — a late completion never rewrites a newer run's verdict.
@@ -32,7 +31,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  */
 @SpringBootTest
 @ActiveProfiles("test")
-@Testcontainers(disabledWithoutDocker = true)
 @Import(ObservedPublicationFixture.FreshAuthority.class)
 class LastRunProjectionIT {
 

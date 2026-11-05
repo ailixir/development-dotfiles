@@ -20,6 +20,7 @@ import com.citi.put.checks.studio.guided.translation.GuidedTranslationStore;
 import com.citi.put.checks.studio.secrets.SecretAuditLifecycle;
 import com.citi.put.checks.studio.secrets.SecretUseAuditRecorder;
 import com.citi.put.checks.studio.support.ObservedPublicationFixture;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.file.Files;
@@ -39,7 +40,6 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
  * STUDIO-OBS-009 AC-11 obligation R1 (STUDIO-OBS-015 KL-015-R1): recording-evidence identity during
@@ -96,8 +96,7 @@ class GuidedEvidencePendingAppendIT {
   private static final GuidedContracts C = new GuidedContracts();
   private static final String ORIGIN = "https://orders.example.test";
   private static final String EMAIL = "r1-probe@example.test";
-  private static final PostgreSQLContainer<?> DATABASE =
-      new PostgreSQLContainer<>("postgres:15-alpine");
+  private static final TestPostgresDatabase DATABASE = new TestPostgresDatabase();
   private static final Map<UUID, Source> SOURCES = new ConcurrentHashMap<>();
 
   private static JdbcTemplate jdbc;

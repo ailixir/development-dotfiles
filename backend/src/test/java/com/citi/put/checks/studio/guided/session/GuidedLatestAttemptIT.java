@@ -30,7 +30,6 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * STUDIO-UNIFY-001.6 AC-09: the read of the caller's latest terminal learning attempt per test,
@@ -40,7 +39,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@Testcontainers(disabledWithoutDocker = true)
 @Import(ObservedPublicationFixture.FreshAuthority.class)
 class GuidedLatestAttemptIT {
 

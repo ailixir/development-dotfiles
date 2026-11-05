@@ -50,7 +50,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * STUDIO-OBS-009 AC-4 (design I-B7): a database-wide canary scan after a full run returns zero
@@ -77,7 +76,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@Testcontainers(disabledWithoutDocker = true)
 @Import(ObservedPublicationFixture.FreshAuthority.class)
 class DatabaseCanaryScanIT {
 

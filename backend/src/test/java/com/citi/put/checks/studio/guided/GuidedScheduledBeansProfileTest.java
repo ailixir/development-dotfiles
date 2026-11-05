@@ -36,7 +36,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * STUDIO-OBS-009 AC-5 (architect ruling A5): the two {@code @Scheduled} guided beans run on the
@@ -168,7 +167,6 @@ class GuidedScheduledBeansProfileTest {
   @Nested
   @SpringBootTest(classes = ChecksApplication.class)
   @ActiveProfiles({"test", "worker"})
-  @Testcontainers(disabledWithoutDocker = true)
   @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
   class WorkerRole {
     @Autowired ApplicationContext context;
@@ -192,7 +190,6 @@ class GuidedScheduledBeansProfileTest {
   @Nested
   @SpringBootTest(classes = ChecksApplication.class)
   @ActiveProfiles({"test", "api"})
-  @Testcontainers(disabledWithoutDocker = true)
   @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
   class ApiRole {
     @Autowired ApplicationContext context;

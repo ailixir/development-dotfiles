@@ -13,11 +13,6 @@ plugins {
     jacoco
 }
 
-// Keep every Testcontainers module on the explicitly selected version; Boot otherwise
-// managed JDBC/core at 1.19.8 beside the declared PostgreSQL/JUnit 1.20.2 modules.
-val testcontainersVersion = "1.20.2"
-extra["testcontainers.version"] = testcontainersVersion
-
 group = "com.citi.put"
 version = "0.1.0-SNAPSHOT"
 description = "PUT Checks — backend service"
@@ -78,23 +73,21 @@ dependencies {
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
     runtimeOnly("org.postgresql:postgresql")
 
-    // Zonky embedded Postgres — local profile only. Pinned to PG 15.6 (matches target RDS minor per ZK-R3).
-    // embedded-postgres is the low-level builder. Tests use Testcontainers, not Zonky.
+    // Zonky embedded Postgres, pinned to PG 15.6 (matches target RDS minor per ZK-R3). The local profile
+    // and the tests (one shared instance per test JVM, no Docker) use it; embedded-postgres is the builder.
     implementation(platform("io.zonky.test.postgres:embedded-postgres-binaries-bom:15.6.0"))
     implementation("io.zonky.test:embedded-postgres:2.0.7")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.assertj:assertj-core")
-    testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
-    testImplementation("org.testcontainers:junit-jupiter:$testcontainersVersion")
     testImplementation("org.wiremock:wiremock-standalone:3.3.1")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("com.icegreen:greenmail-junit5:2.0.1")
 }
 
-// Make the Zonky embedded-postgres dependency local-profile-only at runtime:
-// it's on the main classpath (so LocalEmbeddedPostgresConfig compiles) but the @Profile("local")
-// guard ensures EmbeddedPostgres only starts when explicitly activated.
+// The Zonky embedded-postgres dependency is on the main classpath (so LocalEmbeddedPostgresConfig compiles),
+// and so on the test classpath too. In the application the @Profile("local") guard ensures EmbeddedPostgres
+// only starts when explicitly activated; tests start it through the test-only SharedTestPostgres.
 
 tasks.withType<JavaCompile>().configureEach {
     options.compilerArgs.add("-parameters")
@@ -116,8 +109,8 @@ tasks.withType<Test>().configureEach {
     jvmArgs("-Xmx1g")
     forkEvery = 12
 
-    // Keep context reuse bounded and efficient. The test profile explicitly uses TC_DAEMON=true,
-    // so connection/pool churn cannot stop its shared database while cached contexts still use it.
+    // Keep context reuse bounded and efficient. The test profile's shared embedded database lives for the
+    // whole test JVM, so connection/pool churn cannot stop it while cached contexts still use it.
     systemProperty("spring.test.context.cache.maxSize", "64")
 
 }
@@ -154,7 +147,7 @@ val verifyRunnerDist = tasks.register("verifyRunnerDist") {
     outputs.upToDateWhen { false }
     doLast {
         if (!entry.isFile) {
-            throw GradleException("studio-runner/dist/main.js is missing. Build the runner first (cd studio-runner; pnpm run build); the backend build never builds it.")
+            throw GradleException("studio-runner/dist/main.js is missing. Build the runner first (cd studio-runner; npm run build); the backend build never builds it.")
         }
         val newest = fileTree(sources).files.maxByOrNull { it.lastModified() }
             ?: throw GradleException("No files under studio-runner/src")
@@ -176,6 +169,7 @@ spotless {
         trimTrailingWhitespace()
         endWithNewline()
     }
+    lineEndings = com.diffplug.spotless.LineEnding.UNIX
 }
 
 checkstyle {
@@ -348,21 +342,6 @@ tasks.check {
     dependsOn("rdsParityLint")
     dependsOn("antiRegressionCheck")
 }
-
-// Mixed JDBC/core/database modules caused intermittent initialization retries in the full suite.
-tasks.register("testcontainersAlignmentCheck") {
-    group = "verification"
-    doLast {
-        val modules = configurations["testRuntimeClasspath"].resolvedConfiguration.resolvedArtifacts
-            .map { it.moduleVersion.id }
-            .filter { it.group == "org.testcontainers" }
-        check(modules.isNotEmpty() && modules.all { it.version == testcontainersVersion }) {
-            "Testcontainers modules must all resolve to $testcontainersVersion: ${modules.joinToString()}"
-        }
-        logger.lifecycle("testcontainersAlignmentCheck: ${modules.size} modules aligned at $testcontainersVersion")
-    }
-}
-tasks.named("check") { dependsOn("testcontainersAlignmentCheck") }
 
 // Package the frozen observed contract directly; do not maintain a second Java schema copy.
 tasks.processResources {

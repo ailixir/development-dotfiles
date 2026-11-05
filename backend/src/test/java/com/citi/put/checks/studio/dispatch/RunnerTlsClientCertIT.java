@@ -61,7 +61,6 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * STUDIO-OBS-009 AC-2 and AC-3, backend half: the four runner-facing clients and the API pod's
@@ -437,7 +436,6 @@ class RunnerTlsClientCertIT {
       classes = ChecksApplication.class,
       webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
   @ActiveProfiles("test")
-  @Testcontainers(disabledWithoutDocker = true)
   @org.springframework.test.annotation.DirtiesContext(
       classMode = org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS)
   class OneIdentityInARealContext {
@@ -537,7 +535,6 @@ class RunnerTlsClientCertIT {
       classes = ChecksApplication.class,
       webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
   @ActiveProfiles("test")
-  @Testcontainers(disabledWithoutDocker = true)
   @org.springframework.test.annotation.DirtiesContext(
       classMode = org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS)
   class GuidedConnectorInARealContext {

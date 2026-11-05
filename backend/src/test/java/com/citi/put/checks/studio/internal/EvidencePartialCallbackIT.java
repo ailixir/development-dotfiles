@@ -29,7 +29,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * Story 10.14 AC-10 (`DEF-02`) — the API accepts the {@code FINAL} the merged runner actually
@@ -55,7 +54,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     properties = "studio.execution.callback.service-token=partial-callback-token")
 @ActiveProfiles("test")
 @Import({TestEvidenceStores.class, ObservedPublicationFixture.FreshAuthority.class})
-@Testcontainers(disabledWithoutDocker = true)
 class EvidencePartialCallbackIT {
 
   @DynamicPropertySource

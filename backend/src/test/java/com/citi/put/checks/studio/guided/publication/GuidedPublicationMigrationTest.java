@@ -9,6 +9,7 @@ import com.citi.put.checks.studio.dto.AuthoringStep;
 import com.citi.put.checks.studio.dto.AuthoringV2Request;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.guided.session.GuidedSessionRepository;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -25,7 +26,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 public class GuidedPublicationMigrationTest {
   static final GuidedContracts C = new GuidedContracts();
@@ -50,7 +50,7 @@ public class GuidedPublicationMigrationTest {
   }
 
   static final class Database implements AutoCloseable {
-    final PostgreSQLContainer<?> pg = new PostgreSQLContainer<>("postgres:15-alpine");
+    final TestPostgresDatabase pg = new TestPostgresDatabase();
     final JdbcTemplate jdbc;
     final TransactionTemplate tx;
     final GuidedPublicationBaseRepository bases;
@@ -1359,7 +1359,7 @@ public class GuidedPublicationMigrationTest {
 
   @Test
   void freshCoreToHeadHasNoCutoverAndNoLegacyRevisionFamily() throws Exception {
-    try (var pg = new PostgreSQLContainer<>("postgres:15-alpine")) {
+    try (var pg = new TestPostgresDatabase()) {
       pg.start();
       var ds = new DriverManagerDataSource(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
       var jdbc = new JdbcTemplate(ds);
@@ -3424,7 +3424,7 @@ public class GuidedPublicationMigrationTest {
 
   @Test
   void realLegacyChromeUpgradeAndMillisecondNormalization() throws Exception {
-    try (var pg = new PostgreSQLContainer<>("postgres:15-alpine")) {
+    try (var pg = new TestPostgresDatabase()) {
       pg.start();
       var ds = new DriverManagerDataSource(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
       var jdbc = new JdbcTemplate(ds);

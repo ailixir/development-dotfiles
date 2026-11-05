@@ -105,7 +105,6 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingRequestWrapper;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * STUDIO-OBS-009 AC-11 base legs on the folded runner (lane F, ruling A16).
@@ -136,7 +135,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT,
     properties = {"spring.main.banner-mode=off", "logging.level.root=WARN"})
 @ActiveProfiles("test")
-@Testcontainers(disabledWithoutDocker = true)
 @Import({ObservedPublicationFixture.FreshAuthority.class, ObservedCoRunIT.Wiring.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ObservedCoRunIT {

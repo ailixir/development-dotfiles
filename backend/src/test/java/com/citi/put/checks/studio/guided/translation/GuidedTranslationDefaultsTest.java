@@ -15,6 +15,7 @@ import com.citi.put.checks.studio.guided.publication.ObservedRevisionVerifier;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.guided.session.GuidedSessionProperties;
 import com.citi.put.checks.studio.guided.session.GuidedSessionService;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
@@ -33,7 +34,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 /** Starts the actual application/PostgreSQL with no guided configuration overrides. */
 @SpringBootTest(
@@ -43,7 +43,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 @org.springframework.test.annotation.DirtiesContext(
     classMode = org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS)
 class GuidedTranslationDefaultsTest {
-  static final PostgreSQLContainer<?> PG = new PostgreSQLContainer<>("postgres:15-alpine");
+  static final TestPostgresDatabase PG = new TestPostgresDatabase();
 
   static {
     PG.start();

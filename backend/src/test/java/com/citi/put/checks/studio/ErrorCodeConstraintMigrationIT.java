@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.citi.put.checks.studio.dto.ExecutionErrorCode;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -20,8 +21,6 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * Story 10.14 AC-16 — the error-code CHECK proven against a database that <em>already holds</em>
@@ -40,8 +39,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * stop between them; so this test migrates to the <b>head</b>, removes only this CHECK on the
  * disposable database, <b>seeds</b>, and then applies <b>the migration's own two statements</b> —
  * read out of V13 by {@link ErrorCodeVocabularyTest#constraintStatements()}, never transcribed — in
- * one transaction, as Flyway does. It does so twice, against two databases in one container,
- * because the constraint has two outcomes and both are decided rather than discovered:
+ * one transaction, as Flyway does. It does so twice, against two databases in one instance, because
+ * the constraint has two outcomes and both are decided rather than discovered:
  *
  * <ul>
  *   <li><b>clean</b> — rows across {@code ui_test_executions_2026_06} and the <b>DEFAULT</b>
@@ -57,7 +56,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * <p>The vocabulary is read from {@link ExecutionErrorCode#values()} and never transcribed here; a
  * hardcoded list would be a third copy and is the failure mode O-11 exists because of.
  */
-@Testcontainers(disabledWithoutDocker = true)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ErrorCodeConstraintMigrationIT {
 
@@ -83,11 +81,8 @@ class ErrorCodeConstraintMigrationIT {
   /** Only a restored dump or a manual repair can produce one (§15.5). */
   private static final String OUT_OF_VOCABULARY = "RESTORED_FROM_DUMP";
 
-  private static final PostgreSQLContainer<?> POSTGRES =
-      new PostgreSQLContainer<>("postgres:15-alpine")
-          .withDatabaseName("checks_error_code_clean")
-          .withUsername("test")
-          .withPassword("test");
+  private static final TestPostgresDatabase POSTGRES =
+      new TestPostgresDatabase().withDatabaseName("checks_error_code_clean");
 
   private static String cleanUrl;
   private static String dirtyUrl;
@@ -371,12 +366,7 @@ class ErrorCodeConstraintMigrationIT {
   // ── Plumbing ────────────────────────────────────────────────────────────────
 
   private static String urlFor(String database) {
-    return "jdbc:postgresql://"
-        + POSTGRES.getHost()
-        + ":"
-        + POSTGRES.getMappedPort(PostgreSQLContainer.POSTGRESQL_PORT)
-        + "/"
-        + database;
+    return "jdbc:postgresql://" + POSTGRES.getHost() + ":" + POSTGRES.getPort() + "/" + database;
   }
 
   private static void flywayTo(String url, String target) {

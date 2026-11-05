@@ -4,7 +4,7 @@ A Gradle task that statically scans Flyway migrations for PostgreSQL features un
 
 ## Why
 
-Zonky (local) and Testcontainers (CI) run as SUPERUSER by default. A migration that works locally might fail on RDS at deploy time because RDS restricts SUPERUSER operations, non-allowlisted extensions, and server-side file access. This lint catches those issues before code leaves the developer's machine.
+Zonky embedded Postgres (local and tests, on every OS) runs as SUPERUSER by default. A migration that works locally might fail on RDS at deploy time because RDS restricts SUPERUSER operations, non-allowlisted extensions, and server-side file access. This lint catches those issues before code leaves the developer's machine.
 
 Research references: ZK-04 (Zonky SUPERUSER), ZK-06 (RDS extension allowlist), ZK-R2 (lint gate recommendation).
 

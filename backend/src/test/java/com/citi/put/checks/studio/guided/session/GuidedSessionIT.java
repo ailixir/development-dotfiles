@@ -21,6 +21,7 @@ import com.citi.put.checks.studio.guided.publication.GuidedPublicationProperties
 import com.citi.put.checks.studio.guided.publication.GuidedPublicationRepository;
 import com.citi.put.checks.studio.guided.publication.ObservedReplayPins;
 import com.citi.put.checks.studio.guided.publication.ObservedReplayProperties;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -46,14 +47,10 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testcontainers.containers.PostgreSQLContainer;
 
-/**
- * Real PostgreSQL, intentionally no disabledWithoutDocker skip: concurrency evidence is mandatory.
- */
+/** Real PostgreSQL, never skipped: concurrency evidence is mandatory. */
 class GuidedSessionIT {
-  private static final PostgreSQLContainer<?> POSTGRES =
-      new PostgreSQLContainer<>("postgres:15-alpine");
+  private static final TestPostgresDatabase POSTGRES = new TestPostgresDatabase();
   private static JdbcTemplate jdbc;
   private static JsonNode fixtures;
   private static JsonNode documents;

@@ -17,6 +17,7 @@ import com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService;
 import com.citi.put.checks.studio.guided.bridge.GuidedPreparationStore;
 import com.citi.put.checks.studio.guided.bridge.GuidedSourceReferenceValidator;
 import com.citi.put.checks.studio.secrets.SecretAuditLifecycle;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -38,7 +39,6 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
  * STUDIO-OBS-009 AC-11 obligation LIFECYCLE-REASON-01 (LR a-c): the context lifecycle callback maps
@@ -71,8 +71,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
  * these with them.
  */
 class GuidedLifecycleReasonIT {
-  private static final PostgreSQLContainer<?> POSTGRES =
-      new PostgreSQLContainer<>("postgres:15-alpine");
+  private static final TestPostgresDatabase POSTGRES = new TestPostgresDatabase();
   private static JsonNode documents;
 
   private final GuidedContracts contracts = new GuidedContracts();

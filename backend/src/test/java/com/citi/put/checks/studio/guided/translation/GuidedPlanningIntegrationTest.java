@@ -14,6 +14,7 @@ import com.citi.put.checks.studio.guided.session.GuidedSessionException;
 import com.citi.put.checks.studio.guided.translation.GroundingItHarness.ReachedRunner;
 import com.citi.put.checks.studio.guided.translation.GroundingItHarness.Spec;
 import com.citi.put.checks.studio.support.ObservationFixtures;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
@@ -26,7 +27,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
  * ADR-SC-008 D2/D3: the planning-to-proposal path of the learning loop, end to end on a real
@@ -42,8 +42,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
  */
 class GuidedPlanningIntegrationTest {
   private static final GuidedContracts C = new GuidedContracts();
-  private static final PostgreSQLContainer<?> POSTGRES =
-      new PostgreSQLContainer<>("postgres:15-alpine");
+  private static final TestPostgresDatabase POSTGRES = new TestPostgresDatabase();
 
   @BeforeAll
   static void start() {

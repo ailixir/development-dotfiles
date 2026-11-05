@@ -30,6 +30,7 @@ import com.citi.put.checks.studio.secrets.VaultScope;
 import com.citi.put.checks.studio.secrets.VaultStudioReferenceResolver;
 import com.citi.put.checks.studio.support.RunnerProcessHarness;
 import com.citi.put.checks.studio.support.RunnerTestTls;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -76,7 +77,6 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
  * W53 (STUDIO-OBS-009/010, real-stack case 432): the whole controller-to-runner path of the login
@@ -106,7 +106,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
     })
 class GuidedLoginJourneyJoinedIT {
   static final GuidedContracts CONTRACTS = new GuidedContracts();
-  static final PostgreSQLContainer<?> DATABASE = new PostgreSQLContainer<>("postgres:15-alpine");
+  static final TestPostgresDatabase DATABASE = new TestPostgresDatabase();
   static final Path TEMP;
   static final RunnerTestTls RUNNER_TLS;
   static final SSLContext TLS;

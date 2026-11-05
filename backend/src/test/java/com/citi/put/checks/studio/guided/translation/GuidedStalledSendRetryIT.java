@@ -38,6 +38,7 @@ import com.citi.put.checks.studio.guided.translation.GuidedSourceInputResolver;
 import com.citi.put.checks.studio.guided.translation.GuidedTranslationProperties;
 import com.citi.put.checks.studio.guided.translation.GuidedTranslationService;
 import com.citi.put.checks.studio.guided.translation.GuidedTranslationStore;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -69,7 +70,6 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
  * Round 067, Candidate B (architect ruling): a provider send that receives no response headers
@@ -83,8 +83,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
  * bootstrap.
  */
 class GuidedStalledSendRetryIT {
-  private static final PostgreSQLContainer<?> POSTGRES =
-      new PostgreSQLContainer<>("postgres:15-alpine");
+  private static final TestPostgresDatabase POSTGRES = new TestPostgresDatabase();
   private static final GuidedContracts C = new GuidedContracts();
   private static final ObjectMapper JSON = new ObjectMapper();
   private static final long BASE_MILLIS = 250;

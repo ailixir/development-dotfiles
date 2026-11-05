@@ -3,6 +3,7 @@ package com.citi.put.checks.studio.guided;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.citi.put.checks.support.TestPostgresDatabase;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -15,8 +16,6 @@ import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * STUDIO-OBS-014 V19 ({@code V19__guided_governance.sql}) on the Flyway head, per architect ruling
@@ -34,11 +33,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * live. The seeded rows are FK-consistent with each other so that the FK-ordered deletes are real.
  * Every case runs in a transaction that is rolled back.
  */
-@Testcontainers(disabledWithoutDocker = true)
 class GuidedGovernanceMigrationIT {
 
-  private static final PostgreSQLContainer<?> POSTGRES =
-      new PostgreSQLContainer<>("postgres:15-alpine").withDatabaseName("guided_governance");
+  private static final TestPostgresDatabase POSTGRES =
+      new TestPostgresDatabase().withDatabaseName("guided_governance");
   private static final String UPGRADED_DB = "guided_governance_upgraded";
   private static final String TERMINAL =
       "('SUCCEEDED','PUBLICATION_CONFLICT','FAILED','UNKNOWN_OUTCOME','CANCELLED','EXPIRED')";

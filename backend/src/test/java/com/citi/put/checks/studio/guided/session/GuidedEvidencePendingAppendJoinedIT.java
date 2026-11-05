@@ -47,6 +47,7 @@ import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import com.citi.put.checks.studio.support.RunnerProcessHarness;
 import com.citi.put.checks.studio.support.RunnerTestTls;
 import com.citi.put.checks.studio.support.RunnerTestTls.Identity;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -98,7 +99,6 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
  * STUDIO-OBS-009 AC-11 R1 d, the joined proof (W1.5 ruling part 2 §1.4, B-W3): a guided session
@@ -140,7 +140,8 @@ import org.testcontainers.containers.PostgreSQLContainer;
  * trimmed copy of {@code GuidedBridgePlannedIT}'s), keeping that class's rules: hand-crafted
  * proposals are probes only and the model only ever selects. It adds the evidence beans and the
  * filesystem store. Credit it only on the F-merge {@code dist} digest (AC-12 i): the digest of the
- * spawned {@code dist} is recorded in {@code /tmp/studio-obs009-r1-joined-worker.json}.
+ * spawned {@code dist} is recorded in {@code studio-obs009-r1-joined-worker.json} under {@code
+ * java.io.tmpdir}.
  */
 @SpringBootTest(
     classes = GuidedEvidencePendingAppendJoinedIT.Application.class,
@@ -153,7 +154,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
     })
 class GuidedEvidencePendingAppendJoinedIT {
   static final GuidedContracts CONTRACTS = new GuidedContracts();
-  static final PostgreSQLContainer<?> DATABASE = new PostgreSQLContainer<>("postgres:15-alpine");
+  static final TestPostgresDatabase DATABASE = new TestPostgresDatabase();
   static final Path TEMP;
   static final Path OBJECTS;
   static final Path DIST;
@@ -204,7 +205,8 @@ class GuidedEvidencePendingAppendJoinedIT {
                         .digest(Files.readAllBytes(DIST.resolve(relative)))));
       }
       Files.writeString(
-          Path.of("/tmp/studio-obs009-r1-joined-worker.json"), workerEvidence.toString());
+          Path.of(System.getProperty("java.io.tmpdir"), "studio-obs009-r1-joined-worker.json"),
+          workerEvidence.toString());
       // One test CA (lane D3.0): the runner and the backend certificates chain to it, the runner
       // pins the backend certificate, and the backend trusts only the CA.
       RUNNER_TLS = RunnerTestTls.shared();

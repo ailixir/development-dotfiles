@@ -4,20 +4,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.citi.put.checks.studio.guided.bridge.GuidedPreparationStore;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.sql.Timestamp;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 class GuidedPreparationJoinTest {
 
   @Test
   void exactPreparationIdAndOperationJoinsRejectAlternateProof() {
     var c = new GuidedContracts();
-    try (var pg = new PostgreSQLContainer<>("postgres:15-alpine")) {
+    try (var pg = new TestPostgresDatabase()) {
       pg.start();
       var jdbc =
           new JdbcTemplate(

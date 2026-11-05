@@ -72,7 +72,7 @@ pnpm run test:e2e         # Playwright, MSW project (CHECKS_E2E_REAL_BACKEND=1 s
 cd backend/
 
 ./gradlew bootRun        # Spring Boot :8080 (local profile → Zonky embedded Postgres)
-./gradlew test           # JUnit 5 + Testcontainers
+./gradlew test           # JUnit 5 + Zonky embedded Postgres
 ./gradlew check          # Full build gate (spotless, checkstyle, spotbugs, jacoco)
 ```
 

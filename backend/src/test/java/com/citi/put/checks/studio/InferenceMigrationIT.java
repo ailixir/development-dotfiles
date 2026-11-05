@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -15,8 +16,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * The revision and execution-evidence half of the former inference migrations (V18/V19), on the
@@ -26,11 +25,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * survives execution retention. The compile request/outcome/step registries and the staged V19
  * cutover are retired with the compile path (their tests are deleted by name in the Lane M ledger).
  */
-@Testcontainers(disabledWithoutDocker = true)
 class InferenceMigrationIT {
 
-  private static final PostgreSQLContainer<?> POSTGRES =
-      new PostgreSQLContainer<>("postgres:15-alpine").withDatabaseName("inference_migration");
+  private static final TestPostgresDatabase POSTGRES =
+      new TestPostgresDatabase().withDatabaseName("inference_migration");
   private static final UUID TEST_ID = UUID.randomUUID();
   private static final UUID LEGACY_EXECUTION = UUID.randomUUID();
   private static final String HASH = "a".repeat(64);

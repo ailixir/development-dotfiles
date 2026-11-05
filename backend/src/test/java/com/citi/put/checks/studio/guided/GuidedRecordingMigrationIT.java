@@ -3,6 +3,7 @@ package com.citi.put.checks.studio.guided;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.citi.put.checks.support.TestPostgresDatabase;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -15,8 +16,6 @@ import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * STUDIO-OBS-013 V20 ({@code V20__guided_session_recording.sql}) on the Flyway head, per architect
@@ -25,11 +24,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * only, storable states AVAILABLE | FAILED | UNAVAILABLE. Every case runs in a transaction that is
  * rolled back.
  */
-@Testcontainers(disabledWithoutDocker = true)
 class GuidedRecordingMigrationIT {
 
-  private static final PostgreSQLContainer<?> POSTGRES =
-      new PostgreSQLContainer<>("postgres:15-alpine").withDatabaseName("guided_recording");
+  private static final TestPostgresDatabase POSTGRES =
+      new TestPostgresDatabase().withDatabaseName("guided_recording");
   private static final String SCOPE = "a".repeat(64);
 
   @BeforeAll

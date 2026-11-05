@@ -12,6 +12,7 @@ import com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.guided.session.GuidedInternalSecurity;
 import com.citi.put.checks.studio.guided.session.GuidedSessionRepository;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.Duration;
@@ -28,7 +29,6 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
  * STUDIO-OBS-013 AR-1 R3/R5/R6 on real PostgreSQL: the recording-evidence acceptance predicate, the
@@ -40,8 +40,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
  */
 class GuidedSessionEvidenceTest {
 
-  private static final PostgreSQLContainer<?> POSTGRES =
-      new PostgreSQLContainer<>("postgres:15-alpine");
+  private static final TestPostgresDatabase POSTGRES = new TestPostgresDatabase();
   private static final Duration RETENTION = Duration.ofDays(30);
 
   private final GuidedContracts contracts = new GuidedContracts();

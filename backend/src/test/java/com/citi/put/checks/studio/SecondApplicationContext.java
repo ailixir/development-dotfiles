@@ -16,11 +16,11 @@ import org.springframework.context.ConfigurableApplicationContext;
  * two beans in one context share caches, one Hibernate session factory and one JVM's worth of
  * in-memory state, so a guard that is really a private field passes anyway.
  *
- * <p>Both contexts use the same test-profile JDBC URL, cached by the aligned Testcontainers driver
- * within this JVM. The test profile keeps that container alive across connection/pool churn with
- * {@code TC_DAEMON=true}; each context still owns its own pool and services. The cross-replica test
- * compares actual JDBC URLs to verify that both reach the same database. Neither context enables
- * the local profile, which would create an independent embedded database.
+ * <p>Both contexts use the same test-profile JDBC URL, resolved from {@code
+ * checks.test.shared-postgres.url} to the JVM's one shared embedded PostgreSQL, which lives for the
+ * whole JVM regardless of connection/pool churn; each context still owns its own pool and services.
+ * The cross-replica test compares actual JDBC URLs to verify that both reach the same database.
+ * Neither context enables the local profile, which would create an independent embedded database.
  */
 public final class SecondApplicationContext implements AutoCloseable {
 
@@ -47,8 +47,8 @@ public final class SecondApplicationContext implements AutoCloseable {
   }
 
   private SecondApplicationContext(DataSource sharedWith, boolean observed, String... extra) {
-    // Touch the first context's datasource so its container is definitely up before the second
-    // context asks the Testcontainers driver for the same URL.
+    // Touch the first context's datasource so its database is definitely up before the second
+    // context resolves the same URL.
     try (java.sql.Connection connection = sharedWith.getConnection()) {
       connection.getMetaData().getURL();
     } catch (SQLException e) {
@@ -57,7 +57,7 @@ public final class SecondApplicationContext implements AutoCloseable {
     // Command-line arguments, not SpringApplicationBuilder.properties()/profiles(): those are
     // *default* properties and sit below application.yml, whose `spring.profiles.active: local`
     // would otherwise stay on and hand this context a Zonky embedded Postgres of its own. Both
-    // symptoms — a second Testcontainers database and a second embedded one — look identical from
+    // symptoms — a second test database and a second local embedded one — look identical from
     // the outside: the second context simply sees an empty schema, and a cross-replica test built
     // on it would have been comparing two unrelated databases.
     java.util.List<String> arguments =
@@ -65,17 +65,14 @@ public final class SecondApplicationContext implements AutoCloseable {
             java.util.List.of(
                 "--spring.profiles.active=test",
                 "--server.port=0",
-                // No datasource override: application-test.yml's Testcontainers JDBC URL is
-                // cached by the driver per JVM, so the second context attaches to the *same*
-                // container. Handing it a resolved host:port instead looks equivalent and is not:
-                // it survives only as long as that exact container, and a context eviction or a
-                // restart turns it into "Connection refused" in the suite while passing in
-                // isolation.
+                // No datasource override: application-test.yml's URL resolves to the JVM's one
+                // shared embedded database, so the second context attaches to the *same*
+                // database the first one uses.
                 //
                 // The schema is already migrated by the first context; running Flyway again here
                 // is at best a no-op and at worst a race between two contexts starting together.
                 "--spring.flyway.enabled=false",
-                // Several contexts share one container; a 30-connection default each
+                // Several contexts share one database server; a 30-connection default each
                 // is how a suite exhausts max_connections.
                 "--spring.datasource.hikari.maximum-pool-size=5"));
     SpringApplicationBuilder builder = new SpringApplicationBuilder(ChecksApplication.class);

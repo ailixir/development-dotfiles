@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -15,29 +16,23 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * Story 10.4 AC-15 — V12 applied on top of a V1–V11 database that already holds legacy drafts,
  * including a draft with no CSI and a draft whose CSI is not registered.
  *
- * <p>Runs Flyway in stages against a real PostgreSQL container so the seeded rows exist
+ * <p>Runs Flyway in stages against a real PostgreSQL database so the seeded rows exist
  * <em>before</em> V12 executes; a plain application-context test could never observe that ordering.
  * Since the STUDIO-OBS-012A re-baseline (ADR-SC-005 D-B) V12 carries no compile state, and every
  * revision is an observed publication that arrives confirmed; the revision cases therefore run on
  * the current head against a genuine publication made by the production writers.
  */
-@Testcontainers(disabledWithoutDocker = true)
 class RevisionMigrationIT {
 
   private static final String MIGRATIONS = "classpath:db/migration";
 
-  private static final PostgreSQLContainer<?> POSTGRES =
-      new PostgreSQLContainer<>("postgres:15-alpine")
-          .withDatabaseName("checks_v12")
-          .withUsername("test")
-          .withPassword("test");
+  private static final TestPostgresDatabase POSTGRES =
+      new TestPostgresDatabase().withDatabaseName("checks_v12");
 
   private static UUID validTestId;
   private static UUID nullCsiTestId;

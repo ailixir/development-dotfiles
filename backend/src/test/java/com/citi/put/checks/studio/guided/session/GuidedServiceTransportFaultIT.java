@@ -26,6 +26,9 @@ import com.citi.put.checks.studio.secrets.SecretUseAuditRecorder;
 import com.citi.put.checks.studio.secrets.StudioVaultProvider;
 import com.citi.put.checks.studio.secrets.VaultScope;
 import com.citi.put.checks.studio.secrets.VaultStudioReferenceResolver;
+import com.citi.put.checks.studio.support.PosixTestFiles;
+import com.citi.put.checks.studio.support.RunnerTestTls;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sun.net.httpserver.HttpsConfigurator;
@@ -96,7 +99,6 @@ import org.springframework.test.context.TestExecutionListener;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
  * Actual services, PostgreSQL and authenticated relay; fixture outcomes are not browser effects.
@@ -118,8 +120,7 @@ class GuidedServiceTransportFaultIT {
   private static final String ORIGIN = "https://orders.example.test";
   private static final String EMAIL = "service-fault@example.test";
   private static final String ISSUER_NAME = "service-fault-issuer";
-  private static final PostgreSQLContainer<?> DATABASE =
-      new PostgreSQLContainer<>("postgres:15-alpine");
+  private static final TestPostgresDatabase DATABASE = new TestPostgresDatabase();
   private static final Map<UUID, Scenario> BY_TEST = new ConcurrentHashMap<>();
   private static final Map<String, Scenario> BY_SESSION = new ConcurrentHashMap<>();
   private static final ExecutorService PEERS = Executors.newVirtualThreadPerTaskExecutor();
@@ -691,7 +692,7 @@ class GuidedServiceTransportFaultIT {
   @Test
   void genuinePrivatePgRouteFailureRetainsInterruptedUnknownWithoutInventingTerminalCommit()
       throws Exception {
-    try (var route = new PrivatePgRoute(DATABASE.getHost(), DATABASE.getMappedPort(5432))) {
+    try (var route = new PrivatePgRoute(DATABASE.getHost(), DATABASE.getPort())) {
       var routedSource =
           new DriverManagerDataSource(
               "jdbc:postgresql://127.0.0.1:"
@@ -1070,7 +1071,7 @@ class GuidedServiceTransportFaultIT {
 
   @Test
   void actualHeldGuidedSessionRowDefersReconciliationUntilOwnHolderReleased() throws Exception {
-    try (var route = new PrivatePgRoute(DATABASE.getHost(), DATABASE.getMappedPort(5432))) {
+    try (var route = new PrivatePgRoute(DATABASE.getHost(), DATABASE.getPort())) {
       var setup = new HeldRowSetup();
       Thread caller = null;
       java.sql.Connection lockingConnection = null;
@@ -1595,7 +1596,7 @@ class GuidedServiceTransportFaultIT {
     setup.observationStage = stage;
     AssertionError observation = new AssertionError("CONTROLLED_OBSERVATION_FAILURE_" + stage);
     setup.observationError = observation;
-    try (var route = new PrivatePgRoute(DATABASE.getHost(), DATABASE.getMappedPort(5432))) {
+    try (var route = new PrivatePgRoute(DATABASE.getHost(), DATABASE.getPort())) {
       Throwable primary = null;
       try {
         heldRowFixture(route, setup);
@@ -2652,11 +2653,7 @@ class GuidedServiceTransportFaultIT {
     var owner = new SourceStopOwner(actualJdbc.getDataSource());
     Scenario[] created = new Scenario[1];
     GuidedSessionService[] controllerService = new GuidedSessionService[1];
-    Path scratch =
-        Files.createTempDirectory(
-            "guided-controller-cut-",
-            java.nio.file.attribute.PosixFilePermissions.asFileAttribute(
-                java.nio.file.attribute.PosixFilePermissions.fromString("rwx------")));
+    Path scratch = PosixTestFiles.createTempDirectory("guided-controller-cut-", "rwx------");
     var provider =
         com.sun.net.httpserver.HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
     var providerPeers = Executors.newVirtualThreadPerTaskExecutor();
@@ -2734,11 +2731,7 @@ class GuidedServiceTransportFaultIT {
       configuration.set("source", scenario.source);
       configuration.set("configuration", scenario.configuration);
       configuration.set("advance", fixture.advance());
-      Path config =
-          Files.createFile(
-              scratch.resolve("configuration.json"),
-              java.nio.file.attribute.PosixFilePermissions.asFileAttribute(
-                  java.nio.file.attribute.PosixFilePermissions.fromString("rw-------")));
+      Path config = PosixTestFiles.createFile(scratch.resolve("configuration.json"), "rw-------");
       Files.writeString(config, configuration.toString(), StandardCharsets.UTF_8);
       child =
           new ProcessBuilder(
@@ -3616,7 +3609,7 @@ class GuidedServiceTransportFaultIT {
 
   private void actualStopControl(StopControl control) throws Exception {
     boolean priorInterrupt = Thread.interrupted();
-    try (var route = new PrivatePgRoute(DATABASE.getHost(), DATABASE.getMappedPort(5432))) {
+    try (var route = new PrivatePgRoute(DATABASE.getHost(), DATABASE.getPort())) {
       var source =
           new DriverManagerDataSource(
               "jdbc:postgresql://127.0.0.1:"
@@ -5965,35 +5958,26 @@ class GuidedServiceTransportFaultIT {
   }
 
   private static SSLContext certificate() throws Exception {
-    command(
-        "openssl",
-        "req",
-        "-x509",
-        "-newkey",
-        "rsa:2048",
-        "-nodes",
-        "-keyout",
-        TEMP.resolve("key.pem").toString(),
-        "-out",
-        TEMP.resolve("cert.pem").toString(),
-        "-days",
-        "1",
-        "-subj",
-        "/CN=localhost",
-        "-addext",
-        "subjectAltName=DNS:localhost");
-    command(
-        "openssl",
-        "pkcs12",
-        "-export",
-        "-inkey",
-        TEMP.resolve("key.pem").toString(),
-        "-in",
-        TEMP.resolve("cert.pem").toString(),
-        "-out",
-        TEMP.resolve("fixture.p12").toString(),
-        "-passout",
-        "pass:fixture");
+    // The fixture identity is the shared test CA's RUNNER leaf, minted with the JDK keytool (no
+    // openssl): serverAuth and clientAuth, SAN localhost, so both TLS peers present it.
+    RunnerTestTls ca = RunnerTestTls.shared();
+    String alias = RunnerTestTls.Identity.RUNNER.fileStem();
+    KeyStore issued = ca.loadKeyStore(RunnerTestTls.Identity.RUNNER);
+    char[] issuedPassword = ca.keyStorePassword(RunnerTestTls.Identity.RUNNER);
+    var fixture = KeyStore.getInstance("PKCS12");
+    fixture.load(null, "fixture".toCharArray());
+    try {
+      fixture.setKeyEntry(
+          "fixture",
+          issued.getKey(alias, issuedPassword),
+          "fixture".toCharArray(),
+          issued.getCertificateChain(alias));
+    } finally {
+      Arrays.fill(issuedPassword, '\0');
+    }
+    try (var out = Files.newOutputStream(TEMP.resolve("fixture.p12"))) {
+      fixture.store(out, "fixture".toCharArray());
+    }
     var store = KeyStore.getInstance("PKCS12");
     try (var in = Files.newInputStream(TEMP.resolve("fixture.p12"))) {
       store.load(in, "fixture".toCharArray());
@@ -6002,7 +5986,9 @@ class GuidedServiceTransportFaultIT {
     keys.init(store, "fixture".toCharArray());
     var anchors = KeyStore.getInstance("PKCS12");
     anchors.load(null, "fixture".toCharArray());
-    var fixtureCertificate = store.getCertificate(store.aliases().nextElement());
+    // Trust only the chain's root, the test CA that issued the fixture leaf.
+    var chain = store.getCertificateChain("fixture");
+    var fixtureCertificate = chain[chain.length - 1];
     assertThat(fixtureCertificate).isNotNull();
     anchors.setCertificateEntry("fixture-certificate", fixtureCertificate);
     assertThat(anchors.isCertificateEntry("fixture-certificate")).isTrue();
@@ -6014,16 +6000,6 @@ class GuidedServiceTransportFaultIT {
     var tls = SSLContext.getInstance("TLS");
     tls.init(keys.getKeyManagers(), trust.getTrustManagers(), new SecureRandom());
     return tls;
-  }
-
-  private static void command(String... command) throws Exception {
-    var process = new ProcessBuilder(command).redirectErrorStream(true).start();
-    try {
-      assertThat(process.waitFor(15, TimeUnit.SECONDS)).isTrue();
-      assertThat(process.exitValue()).isZero();
-    } finally {
-      process.destroyForcibly();
-    }
   }
 
   private static boolean zero(byte[] bytes) {

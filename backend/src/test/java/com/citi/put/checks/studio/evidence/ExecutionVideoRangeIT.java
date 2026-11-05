@@ -28,7 +28,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * Story 10.15 AC-12, AC-13, AC-14, AC-15, AC-16 — Range, asserted on the bytes.
@@ -47,7 +46,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @Import({TestEvidenceStores.class, ObservedPublicationFixture.FreshAuthority.class})
-@Testcontainers(disabledWithoutDocker = true)
 class ExecutionVideoRangeIT {
 
   @DynamicPropertySource

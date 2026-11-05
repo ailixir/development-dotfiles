@@ -13,13 +13,13 @@ import com.citi.put.checks.studio.guided.session.GuidedSessionException;
 import com.citi.put.checks.studio.guided.translation.GroundingItHarness.ReachedRunner;
 import com.citi.put.checks.studio.guided.translation.GroundingItHarness.Spec;
 import com.citi.put.checks.studio.support.ObservationFixtures;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
  * ADR-SC-008 D3.3/D6: the learning loop of one step, end to end on a real PostgreSQL. The real
@@ -32,8 +32,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
  * progress.refusalGate}), the reservations and the model requests that were spent.
  */
 class GuidedGateAuditIT {
-  private static final PostgreSQLContainer<?> POSTGRES =
-      new PostgreSQLContainer<>("postgres:15-alpine");
+  private static final TestPostgresDatabase POSTGRES = new TestPostgresDatabase();
 
   @BeforeAll
   static void start() {

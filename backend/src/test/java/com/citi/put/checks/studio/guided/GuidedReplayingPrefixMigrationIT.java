@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -25,7 +26,6 @@ import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
  * OBS-015's 48 frozen migration cases, on PostgreSQL 15 and actual Flyway/table triggers.
@@ -35,8 +35,8 @@ import org.testcontainers.containers.PostgreSQLContainer;
  * storage tests for the separate joined browser/model acceptance matrix.
  */
 class GuidedReplayingPrefixMigrationIT {
-  private static final PostgreSQLContainer<?> PG =
-      new PostgreSQLContainer<>("postgres:15-alpine").withDatabaseName("obs015_migrations");
+  private static final TestPostgresDatabase PG =
+      new TestPostgresDatabase().withDatabaseName("obs015_migrations");
   private static final GuidedContracts C = new GuidedContracts();
   private static final String H = "a".repeat(64);
   private static final String STEP1 = "11111111-1111-4111-8111-111111111111";

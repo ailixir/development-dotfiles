@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 import com.citi.put.checks.scheduling.partitioning.PartitionManager;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -31,8 +32,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * STUDIO-OBS-008 T0 ruling A1 (A1.3, A1.5 case 18): {@code V22__execution_replay_failure.sql} on
@@ -41,7 +40,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * step index and the login boolean; {@code TARGET_DRIFT} with step ID and step index and a NULL
  * login boolean.
  *
- * <p>Four databases in one container:
+ * <p>Four databases in one PostgreSQL instance:
  *
  * <ul>
  *   <li><b>head</b>: fresh V1..head. Shape and catalog cases run here, each in a rolled-back
@@ -54,7 +53,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  *       in DEFAULT is moved into its new month with its replay failure intact.
  * </ul>
  */
-@Testcontainers(disabledWithoutDocker = true)
 class ExecutionReplayFailureMigrationIT {
 
   private static final String MIGRATIONS = "classpath:db/migration";
@@ -79,8 +77,8 @@ class ExecutionReplayFailureMigrationIT {
           + "snapshot_revision,tableoid::regclass::text)::text, ',' ORDER BY id))"
           + " FROM ui_test_executions";
 
-  private static final PostgreSQLContainer<?> POSTGRES =
-      new PostgreSQLContainer<>("postgres:15-alpine").withDatabaseName("replay_failure_head");
+  private static final TestPostgresDatabase POSTGRES =
+      new TestPostgresDatabase().withDatabaseName("replay_failure_head");
 
   private static String headUrl;
   private static String upgradeUrl;

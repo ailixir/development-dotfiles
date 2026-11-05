@@ -40,7 +40,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * Story 10.15 AC-1, AC-2, AC-3, AC-4, AC-19a — who may fetch a recording, and by which decision.
@@ -60,7 +59,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @Import({TestEvidenceStores.class, ObservedPublicationFixture.FreshAuthority.class})
-@Testcontainers(disabledWithoutDocker = true)
 class ExecutionVideoAuthorizationIT {
 
   @DynamicPropertySource

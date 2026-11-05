@@ -33,7 +33,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * Story 10.31 AC-7 — the two refusals {@code getExecutionVideo} can actually send, captured as
@@ -59,7 +58,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @Import({TestEvidenceStores.class, ObservedPublicationFixture.FreshAuthority.class})
-@Testcontainers(disabledWithoutDocker = true)
 class ExecutionVideoRefusalEnvelopeIT {
 
   @DynamicPropertySource

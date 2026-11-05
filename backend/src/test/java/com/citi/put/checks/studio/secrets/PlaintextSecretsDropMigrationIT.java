@@ -2,6 +2,7 @@ package com.citi.put.checks.studio.secrets;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.citi.put.checks.support.TestPostgresDatabase;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -11,22 +12,16 @@ import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * {@code V18__drop_plaintext_secrets} (studio-vault-secrets, AC-V1-1; the former V25, re-numbered
  * by the STUDIO-OBS-012A / ADR-SC-005 D-B re-baseline): the plaintext {@code secrets} table and its
  * indexes are gone, rows included. Vault is the only secret store.
  */
-@Testcontainers(disabledWithoutDocker = true)
 class PlaintextSecretsDropMigrationIT {
 
-  private static final PostgreSQLContainer<?> POSTGRES =
-      new PostgreSQLContainer<>("postgres:15-alpine")
-          .withDatabaseName("checks_v18")
-          .withUsername("test")
-          .withPassword("test");
+  private static final TestPostgresDatabase POSTGRES =
+      new TestPostgresDatabase().withDatabaseName("checks_v18");
 
   @BeforeAll
   static void migrate() throws SQLException {

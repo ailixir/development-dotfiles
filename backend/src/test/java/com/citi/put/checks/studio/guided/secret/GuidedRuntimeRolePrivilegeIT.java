@@ -10,6 +10,7 @@ import com.citi.put.checks.studio.secrets.SecretUseAuditRecorder.ResolutionOutco
 import com.citi.put.checks.studio.secrets.SecretUseAuditRecorder.Scope;
 import com.citi.put.checks.studio.secrets.SecretUseAuditRecorder.UsageOutcome;
 import com.citi.put.checks.studio.support.GuidedLedgerSeed;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -33,7 +34,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
  * STUDIO-OBS-009 AC-4 TF-5 b: the privilege delta a non-owner runtime role needs for every object
@@ -49,7 +49,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
  * docs/qa/evidence/STUDIO-OBS-009/execution-20261018/de/runtime-role-grants-v19-v23.sql}.
  */
 class GuidedRuntimeRolePrivilegeIT {
-  private static final PostgreSQLContainer<?> PG = new PostgreSQLContainer<>("postgres:15-alpine");
+  private static final TestPostgresDatabase PG = new TestPostgresDatabase();
   private static final String PRINCIPAL = "owner@example.test";
   private static final String HASH = "a".repeat(64);
   private static final GuidedContracts CONTRACTS = new GuidedContracts();

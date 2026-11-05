@@ -15,18 +15,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
- * Same assertions as SchemaSmokeTest but against a real PostgreSQL 15 container. Proves Zonky ↔
- * Testcontainers DDL parity — catches any divergence (e.g., SUPERUSER-only features, extensions,
- * CHECK constraint dialects).
- *
- * <p>Runs only when Docker is available on the CI runner (@Testcontainers disabledWithoutDocker).
+ * Same assertions as SchemaSmokeTest but through the {@code test} profile's real PostgreSQL 15.6
+ * (the shared embedded test instance) — catches DDL divergence (e.g., SUPERUSER-only features,
+ * extensions, CHECK constraint dialects).
  */
 @SpringBootTest
 @ActiveProfiles("test")
-@Testcontainers(disabledWithoutDocker = true)
 @Transactional
 class SchemaSmokeContainerIT {
 

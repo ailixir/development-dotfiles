@@ -30,7 +30,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * Story 10.7 AC-33 — <b>a callback committed on replica A becomes visible to an SSE subscriber on
@@ -56,7 +55,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
       "studio.execution.sse.lifetime=30s"
     })
 @ActiveProfiles("test")
-@Testcontainers(disabledWithoutDocker = true)
 @Import(ObservedPublicationFixture.FreshAuthority.class)
 class SseCrossReplicaIT {
 

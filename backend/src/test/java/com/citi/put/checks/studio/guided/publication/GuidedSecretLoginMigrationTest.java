@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.file.Files;
@@ -28,7 +29,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
  * Database-only proof for the secret-login DDL (OBS-007's former V34, re-authored into V13–V17 by
@@ -36,7 +36,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
  * belong to their lanes.
  */
 public class GuidedSecretLoginMigrationTest {
-  private static final PostgreSQLContainer<?> PG = new PostgreSQLContainer<>("postgres:15-alpine");
+  private static final TestPostgresDatabase PG = new TestPostgresDatabase();
   private static final ObjectMapper JSON = new ObjectMapper();
   private static final GuidedContracts C = new GuidedContracts();
   private static final String OWNER = "owner@example.test";

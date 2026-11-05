@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
@@ -20,8 +21,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * Story 10.23 AC-5 on the <em>current</em> Flyway head. Since the STUDIO-OBS-012A re-baseline
@@ -35,11 +34,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * against the schema a real deployment actually reaches. Every case runs in a transaction that is
  * rolled back.
  */
-@Testcontainers(disabledWithoutDocker = true)
 class InferenceMigrationLatestIT {
 
-  private static final PostgreSQLContainer<?> POSTGRES =
-      new PostgreSQLContainer<>("postgres:15-alpine").withDatabaseName("inference_latest");
+  private static final TestPostgresDatabase POSTGRES =
+      new TestPostgresDatabase().withDatabaseName("inference_latest");
   private static final String FRESH_DB = "inference_latest_fresh";
   private static final String CSI = "71023";
   private static final String OTHER_CSI = "71024";

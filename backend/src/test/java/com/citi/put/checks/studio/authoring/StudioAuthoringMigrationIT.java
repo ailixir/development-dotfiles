@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -15,22 +16,16 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * Authoring-capture migration coverage (the former V21, now part of the STUDIO-OBS-012A /
  * ADR-SC-005 D-B {@code V12__tests_revisions}) against a real, populated, untouched core V11
  * database, upgraded to the current head.
  */
-@Testcontainers(disabledWithoutDocker = true)
 class StudioAuthoringMigrationIT {
 
-  private static final PostgreSQLContainer<?> POSTGRES =
-      new PostgreSQLContainer<>("postgres:15-alpine")
-          .withDatabaseName("checks_v18")
-          .withUsername("test")
-          .withPassword("test");
+  private static final TestPostgresDatabase POSTGRES =
+      new TestPostgresDatabase().withDatabaseName("checks_v18");
 
   private static UUID testId;
 

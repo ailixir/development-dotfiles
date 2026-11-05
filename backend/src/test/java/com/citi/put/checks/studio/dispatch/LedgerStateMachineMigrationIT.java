@@ -3,6 +3,7 @@ package com.citi.put.checks.studio.dispatch;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.citi.put.checks.support.TestPostgresDatabase;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -13,8 +14,6 @@ import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * Story 10.7 AC-2 — the ledger state machine, now installed by {@code V13__executions_ledger}
@@ -35,17 +34,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * constructor) and admitted identities are all inside the enumerated set, and the backfilled rows
  * are not rewritten by any later migration.
  */
-@Testcontainers(disabledWithoutDocker = true)
 class LedgerStateMachineMigrationIT {
 
   private static final String MIGRATIONS = "classpath:db/migration";
   private static final String CSI_ID = "60452";
 
-  private static final PostgreSQLContainer<?> POSTGRES =
-      new PostgreSQLContainer<>("postgres:15-alpine")
-          .withDatabaseName("checks_ledger_v15")
-          .withUsername("test")
-          .withPassword("test");
+  private static final TestPostgresDatabase POSTGRES =
+      new TestPostgresDatabase().withDatabaseName("checks_ledger_v15");
 
   private static UUID queuedExecutionId;
   private static UUID doneExecutionId;

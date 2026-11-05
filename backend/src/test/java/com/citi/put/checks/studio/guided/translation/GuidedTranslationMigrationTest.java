@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.guided.session.GuidedSessionRepository;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.time.Instant;
 import java.util.UUID;
@@ -15,7 +16,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 class GuidedTranslationMigrationTest {
   static final GuidedContracts C = new GuidedContracts();
@@ -25,7 +25,7 @@ class GuidedTranslationMigrationTest {
    * Each fixture uses a real independent database, including a V14→V18 upgrade with existing rows.
    */
   static final class Database implements AutoCloseable {
-    final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
+    final TestPostgresDatabase postgres = new TestPostgresDatabase();
     final DataSource source;
     final JdbcTemplate jdbc;
     final TransactionTemplate tx;

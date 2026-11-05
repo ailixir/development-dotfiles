@@ -16,7 +16,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * ADR-SC-008 FR-3, joined with a real published revision (every SQL guard active; no browser, no
@@ -24,7 +23,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * runs, before any job exists. Nothing downstream is reached, so no execution, ledger or
  * secret-read row appears.
  */
-@Testcontainers(disabledWithoutDocker = true)
 class GuidedStepTamperIT {
   private static final GuidedContracts C = new GuidedContracts();
 

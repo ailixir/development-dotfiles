@@ -14,6 +14,7 @@ import com.citi.put.checks.studio.dispatch.ReferenceDeclarations;
 import com.citi.put.checks.studio.dispatch.StudioDispatcher;
 import com.citi.put.checks.studio.dispatch.StudioReferenceResolver;
 import com.citi.put.checks.studio.support.ObservedPublicationFixture;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import java.sql.Timestamp;
@@ -47,9 +48,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * Actual common coordinator, registered check executors and a UI test's shared schedule admitted
@@ -68,7 +66,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
       "management.server.port=0"
     })
 @ActiveProfiles({"test", "worker"})
-@Testcontainers(disabledWithoutDocker = true)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @Import(ObservedPublicationFixture.FreshAuthority.class)
 class SharedSchedulingIT {
@@ -78,8 +75,7 @@ class SharedSchedulingIT {
     ObservedPublicationFixture.register(registry);
   }
 
-  @Container
-  static final PostgreSQLContainer<?> DATABASE = new PostgreSQLContainer<>("postgres:15-alpine");
+  static final TestPostgresDatabase DATABASE = new TestPostgresDatabase();
 
   static final WireMockServer SERVER =
       new WireMockServer(WireMockConfiguration.options().dynamicPort());
@@ -215,6 +211,7 @@ class SharedSchedulingIT {
   @AfterAll
   static void closeServer() {
     SERVER.stop();
+    DATABASE.stop();
   }
 
   /** A due, enabled shared schedule of a UI test; yearly, so one slot is the only slot. */

@@ -38,7 +38,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * Story 10.7 AC-38 — <b>Studio overload does not exhaust ordinary check and REST capacity</b>
@@ -76,7 +75,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
       "studio.execution.dispatcher.batch-size=4"
     })
 @ActiveProfiles("test")
-@Testcontainers(disabledWithoutDocker = true)
 @Import(ObservedPublicationFixture.FreshAuthority.class)
 class StudioOverloadIT {
 

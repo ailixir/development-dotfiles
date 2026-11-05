@@ -45,7 +45,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * Story 10.7 AC-32, AC-34 – AC-37a — streaming over <b>real HTTP against the running application,
@@ -70,7 +69,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
       "studio.execution.sse.max-streams-per-pod=50"
     })
 @ActiveProfiles("test")
-@Testcontainers(disabledWithoutDocker = true)
 @ExtendWith(OutputCaptureExtension.class)
 @Import(ObservedPublicationFixture.FreshAuthority.class)
 class SseStreamingIT {

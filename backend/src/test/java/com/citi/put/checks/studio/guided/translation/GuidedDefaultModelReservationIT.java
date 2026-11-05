@@ -25,6 +25,7 @@ import com.citi.put.checks.studio.guided.translation.GuidedPromptAssembler;
 import com.citi.put.checks.studio.guided.translation.GuidedSourceClassifier;
 import com.citi.put.checks.studio.guided.translation.GuidedTranslationProperties;
 import com.citi.put.checks.studio.guided.translation.GuidedTranslationStore;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -51,7 +52,6 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
  * Real service/store accounting with a counted controlled gateway port, not SDK HTTP, Core or
@@ -59,8 +59,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
  * assert the translation orchestrator's retry policy or manufacture successful plans/actions.
  */
 class GuidedDefaultModelReservationIT {
-  private static final PostgreSQLContainer<?> POSTGRES =
-      new PostgreSQLContainer<>("postgres:15-alpine");
+  private static final TestPostgresDatabase POSTGRES = new TestPostgresDatabase();
   private static final GuidedContracts C = new GuidedContracts();
   private static final ObjectMapper JSON = new ObjectMapper();
   private final Clock clock = Clock.systemUTC();

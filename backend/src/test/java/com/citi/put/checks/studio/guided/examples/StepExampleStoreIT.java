@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.citi.put.checks.studio.guided.examples.StepExampleSnapshots.SnapshotContaminatedException;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -26,8 +27,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * V35 on the Flyway head: the insert guard (AC1), derived eligibility (AC3), the recorder (AC8) and
@@ -38,10 +37,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * throwaway database. The V35 triggers are switched to ENABLE ALWAYS so they still fire; they are
  * the thing under test.
  */
-@Testcontainers(disabledWithoutDocker = true)
 class StepExampleStoreIT {
-  private static final PostgreSQLContainer<?> POSTGRES =
-      new PostgreSQLContainer<>("postgres:15-alpine").withDatabaseName("step_examples");
+  private static final TestPostgresDatabase POSTGRES =
+      new TestPostgresDatabase().withDatabaseName("step_examples");
   private static final ObjectMapper MAPPER = new ObjectMapper();
   private static final String CSI = "100";
 

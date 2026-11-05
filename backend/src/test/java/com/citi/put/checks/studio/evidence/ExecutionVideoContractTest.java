@@ -23,11 +23,11 @@ import org.junit.jupiter.api.Test;
  * Story 10.15 AC-4, AC-21, AC-23 — what the frozen document says about {@code getExecutionVideo},
  * and what nothing else in it may lose while this story edits it.
  *
- * <p><b>Deliberately not a Spring test.</b> Everything here reads files. A Testcontainers-gated
- * class is silently skipped on a machine with no Docker, and story 10.18a's QA gate found exactly
- * that shape reporting a green tier that enforced nothing. The half of AC-21 that needs the running
- * application — <i>the route really is reachable</i> — lives in {@code StudioContractTest}, which
- * needs a context for other reasons.
+ * <p><b>Deliberately not a Spring test.</b> Everything here reads files. A Docker-gated class (as
+ * the suite once had) is silently skipped on a machine with no Docker, and story 10.18a's QA gate
+ * found exactly that shape reporting a green tier that enforced nothing. The half of AC-21 that
+ * needs the running application — <i>the route really is reachable</i> — lives in {@code
+ * StudioContractTest}, which needs a context for other reasons.
  */
 class ExecutionVideoContractTest {
 

@@ -2,6 +2,7 @@ package com.citi.put.checks.studio.guided;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.citi.put.checks.support.TestPostgresDatabase;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -11,8 +12,6 @@ import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * V28 ({@code V28__allowed_domains.sql}) on top of V1 to V27: the deployment's allowed domains are
@@ -20,10 +19,9 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * origin lists lose those keys. The remaining origin pattern check on {@code initialContext.origin}
  * stays.
  */
-@Testcontainers(disabledWithoutDocker = true)
 class GuidedAllowedDomainsMigrationIT {
-  private static final PostgreSQLContainer<?> POSTGRES =
-      new PostgreSQLContainer<>("postgres:15-alpine").withDatabaseName("allowed_domains");
+  private static final TestPostgresDatabase POSTGRES =
+      new TestPostgresDatabase().withDatabaseName("allowed_domains");
 
   @BeforeAll
   static void migrate() {

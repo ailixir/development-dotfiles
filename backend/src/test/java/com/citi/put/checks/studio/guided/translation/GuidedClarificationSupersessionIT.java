@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.citi.put.checks.studio.guided.translation.GroundingItHarness.Spec;
 import com.citi.put.checks.studio.support.ObservationFixtures;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
@@ -12,7 +13,6 @@ import java.util.Map;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
  * ADR-SC-007 D-6, on a real PostgreSQL: an earlier answer of the author is only a semantic choice
@@ -22,8 +22,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
  * part in any later decision, and never enter the publication basis.
  */
 class GuidedClarificationSupersessionIT {
-  private static final PostgreSQLContainer<?> POSTGRES =
-      new PostgreSQLContainer<>("postgres:15-alpine");
+  private static final TestPostgresDatabase POSTGRES = new TestPostgresDatabase();
 
   @BeforeAll
   static void start() {

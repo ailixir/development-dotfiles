@@ -44,7 +44,6 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * STUDIO-OBS-012A ruling R9: replay grants are minted and judged on the database clock ({@code
@@ -53,13 +52,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * behind the database neither refuses a live grant at the trigger nor accepts an expired one in
  * Java. The trigger itself is unchanged: zero tolerance, 30 s cap.
  *
- * <p>Real Testcontainers Postgres and the real {@code studio_observed_execution_guard}. The
- * application {@link Clock} bean is replaced by an offset clock only to model JVM skew; it is not
- * the clock under test.
+ * <p>Real PostgreSQL and the real {@code studio_observed_execution_guard}. The application {@link
+ * Clock} bean is replaced by an offset clock only to model JVM skew; it is not the clock under
+ * test.
  */
 @SpringBootTest(properties = "studio.execution.callback.service-token=grant-clock-service-token")
 @ActiveProfiles("test")
-@Testcontainers(disabledWithoutDocker = true)
 @Import({ObservedPublicationFixture.FreshAuthority.class, ObservedGrantClockIT.SkewedJvm.class})
 class ObservedGrantClockIT {
   private static final String CSI_ID = "60487";

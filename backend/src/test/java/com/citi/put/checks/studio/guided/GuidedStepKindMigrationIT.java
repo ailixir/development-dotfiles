@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.file.Files;
@@ -17,8 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * V33 ({@code V33__step_kind.sql}, ADR-SC-008 D2): the SQL rules that encoded the ten typed
@@ -26,9 +25,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * real-source assertion binding are replaced by the one {@code step} kind. The documents inserted
  * here are E5's frozen fixtures, not hand-written ones.
  */
-@Testcontainers(disabledWithoutDocker = true)
 class GuidedStepKindMigrationIT {
-  private static final PostgreSQLContainer<?> PG = new PostgreSQLContainer<>("postgres:15-alpine");
+  private static final TestPostgresDatabase PG = new TestPostgresDatabase();
   private static final GuidedContracts C = new GuidedContracts();
   private static JsonNode documents;
 

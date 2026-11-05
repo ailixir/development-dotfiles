@@ -2,6 +2,7 @@ package com.citi.put.checks.studio;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.citi.put.checks.support.TestPostgresDatabase;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -16,22 +17,16 @@ import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /** The development seed loads cleanly without inventing Studio tests or run results. */
-@Testcontainers(disabledWithoutDocker = true)
 class StudioSeedIT {
 
   private static final String SEED_RESOURCE = "/db/seed/R__sample_data.sql";
   private static final String SEED_TEST_PREFIX = "b8c9d0e1-0001-4000-8000-";
   private static final String SEED_EXECUTION_PREFIX = "c9d0e1f2-0001-4000-8000-";
 
-  private static final PostgreSQLContainer<?> POSTGRES =
-      new PostgreSQLContainer<>("postgres:15-alpine")
-          .withDatabaseName("checks_seed")
-          .withUsername("test")
-          .withPassword("test");
+  private static final TestPostgresDatabase POSTGRES =
+      new TestPostgresDatabase().withDatabaseName("checks_seed");
 
   @BeforeAll
   static void migrateWithSeed() {

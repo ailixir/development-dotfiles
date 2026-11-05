@@ -42,7 +42,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * Story 10.15 AC-5, AC-6, AC-7, AC-8, AC-9, AC-10, AC-11, AC-17 — what the route serves, what it
@@ -51,7 +50,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @Import({TestEvidenceStores.class, ObservedPublicationFixture.FreshAuthority.class})
-@Testcontainers(disabledWithoutDocker = true)
 class ExecutionVideoEvidenceIT {
 
   @DynamicPropertySource

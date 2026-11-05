@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.citi.put.checks.studio.support.RunnerProcessHarness;
 import com.citi.put.checks.studio.support.RunnerTestTls;
 import com.citi.put.checks.studio.support.RunnerTestTls.Identity;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sun.net.httpserver.HttpServer;
 import java.net.InetSocketAddress;
@@ -30,7 +31,6 @@ import org.flywaydb.core.Flyway;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.test.context.DynamicPropertyRegistry;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
  * Shared transport/application fixture with one independently owned instance per bridge test class.
@@ -39,7 +39,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
  */
 final class GuidedBridgeFixture {
   final GuidedContracts contracts = new GuidedContracts();
-  final PostgreSQLContainer<?> database = new PostgreSQLContainer<>("postgres:15-alpine");
+  final TestPostgresDatabase database = new TestPostgresDatabase();
   final Path temp;
   final Path dist;
   final RunnerTestTls runnerTls;

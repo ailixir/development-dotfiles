@@ -11,11 +11,11 @@ import static org.mockito.Mockito.verify;
 import com.citi.put.checks.studio.guided.session.GuidedSessionException;
 import com.citi.put.checks.studio.guided.translation.GroundingItHarness.Spec;
 import com.citi.put.checks.studio.support.ObservationFixtures;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import java.util.List;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
  * SC008-FIX-8 (supersedes the FIX-5 refresh): the first turn of a session. Bootstrap leaves the
@@ -25,8 +25,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
  * observation on any other page is still refused.
  */
 class GuidedFirstTurnObservationIT {
-  private static final PostgreSQLContainer<?> POSTGRES =
-      new PostgreSQLContainer<>("postgres:15-alpine");
+  private static final TestPostgresDatabase POSTGRES = new TestPostgresDatabase();
 
   @BeforeAll
   static void start() {

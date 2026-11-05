@@ -15,6 +15,7 @@ import com.citi.put.checks.studio.secrets.SecretUseAuditRecorder.ResolutionOutco
 import com.citi.put.checks.studio.secrets.SecretUseAuditRecorder.Scope;
 import com.citi.put.checks.studio.secrets.SecretUseAuditRecorder.UsageOutcome;
 import com.citi.put.checks.studio.support.GuidedLedgerSeed;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Clock;
@@ -37,13 +38,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
  * Real PostgreSQL and actual Java recorder/partition managers; no Vault or browser proof claimed.
  */
 class SecretUseAuditIT {
-  private static final PostgreSQLContainer<?> PG = new PostgreSQLContainer<>("postgres:15-alpine");
+  private static final TestPostgresDatabase PG = new TestPostgresDatabase();
   private static final String PRINCIPAL = "owner@example.test";
   private static final String HASH = "a".repeat(64);
   private static final GuidedContracts CONTRACTS = new GuidedContracts();

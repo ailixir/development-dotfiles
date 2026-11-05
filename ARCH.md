@@ -134,7 +134,7 @@ The backend is a **Java 21 / Spring Boot 3** application, designed for modern co
 | Email | Spring Mail (`JavaMailSender`) via enterprise SMTP relay |
 | Object storage | AWS SDK v2 (`software.amazon.awssdk:s3`) for UI test videos |
 | Observability | Micrometer → Prometheus + **OpenTelemetry** auto-instrumentation agent; structured JSON logs via Logback + `logstash-logback-encoder` |
-| Testing | JUnit 5, AssertJ, Mockito, `@SpringBootTest`, `@DataJpaTest`, **Testcontainers-PostgreSQL** for CI integration tests, Zonky embedded Postgres for local integration tests |
+| Testing | JUnit 5, AssertJ, Mockito, `@SpringBootTest`, `@DataJpaTest`, Zonky embedded Postgres 15.6 for integration tests on every OS, CI included (no Docker) |
 | Code quality | Spotless (google-java-format), Checkstyle, SpotBugs, JaCoCo (80% line coverage gate matching §9.1) |
 
 ### **4.2. Asynchronous Execution**
@@ -673,7 +673,7 @@ Notify Subscribers → Update Cache
     - Backend: **JUnit 5 + AssertJ + Mockito**; slice tests with `@WebMvcTest`, `@DataJpaTest`, `@JsonTest`
 
 - **Integration Tests:** Critical paths
-    - `@SpringBootTest` with **Testcontainers-PostgreSQL** in CI, **Zonky embedded Postgres** locally (identical Postgres 15 binary both sides, so test parity is preserved)
+    - `@SpringBootTest` with **Zonky embedded Postgres** 15.6 locally and in CI (one shared instance per test JVM, no Docker)
     - External service connectors verified against **WireMock** stubs for Splunk/Grafana/ITRS/AppDynamics
     - Contract tests for the REST API generated from the OpenAPI spec via `springdoc-openapi`
 

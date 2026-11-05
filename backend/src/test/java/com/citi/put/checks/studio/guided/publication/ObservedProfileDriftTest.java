@@ -18,6 +18,7 @@ import com.citi.put.checks.studio.guided.translation.GuidedLlmGatewayClient;
 import com.citi.put.checks.studio.guided.translation.GuidedProductionSessionAccess;
 import com.citi.put.checks.studio.guided.translation.GuidedTranslationService;
 import com.citi.put.checks.studio.readiness.ExecutionReadinessService;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpServer;
@@ -45,7 +46,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestContextManager;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 /** Boots the real application. The only custom bean is the documented account connection SPI. */
 @org.junit.jupiter.api.parallel.Execution(org.junit.jupiter.api.parallel.ExecutionMode.SAME_THREAD)
@@ -131,7 +131,7 @@ class ObservedProfileDriftTest {
   @CsvSource({"false,false", "false,true", "true,false", "true,true"})
   void realApplicationComposesAllFlagPairsAndRetainsProfileBoundaries(
       boolean publication, boolean replay) throws Exception {
-    try (var database = new PostgreSQLContainer<>("postgres:15-alpine");
+    try (var database = new TestPostgresDatabase();
         var peer = new Peer()) {
       database.start();
       Path controllerToken = Files.createTempFile("profile-controller-", ".token");

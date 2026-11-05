@@ -7,14 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * Story 10.15 AC-20, the half that needs a context — <b>the injected store really is the fake</b>.
  *
  * <p>Named from {@code ExecutionVideoExternallyGatedCriteriaTest}, which carries the rest of AC-20
- * and which deliberately needs no Docker. This one does, and that is stated rather than hidden: it
- * is the only AC-20 assertion that can be skipped by an environment.
+ * and which deliberately needs no database. This one needs the application context and its
+ * database.
  *
  * <p>Why it exists at all: AC-18b is recorded <i>skipped, never passed</i> because `ED-03` has not
  * provided a real Sonic endpoint. Somebody who wired a real client under the fake's bean name could
@@ -24,7 +23,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @Import(TestEvidenceStores.class)
-@Testcontainers(disabledWithoutDocker = true)
 class ExecutionVideoStoreBindingIT {
 
   @Autowired private VideoObjectStore injected;

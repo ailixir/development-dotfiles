@@ -43,7 +43,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * Story 10.7 AC-28 – AC-31 — restart recovery, both reapers and finalization reconciliation.
@@ -64,7 +63,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
   TestEvidenceStores.class,
   ObservedPublicationFixture.FreshAuthority.class
 })
-@Testcontainers(disabledWithoutDocker = true)
 class RecoveryIT {
 
   @DynamicPropertySource

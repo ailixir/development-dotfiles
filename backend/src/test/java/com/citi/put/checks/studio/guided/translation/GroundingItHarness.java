@@ -26,6 +26,7 @@ import com.citi.put.checks.studio.guided.session.GuidedSessionService;
 import com.citi.put.checks.studio.guided.session.GuidedTestIdentities;
 import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import com.citi.put.checks.studio.support.TestDomains;
+import com.citi.put.checks.support.TestPostgresDatabase;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -49,7 +50,6 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 /**
  * A real PostgreSQL, real session service, real translation service and real stores, with a
@@ -117,11 +117,11 @@ final class GroundingItHarness {
   private final Map<String, Integer> limits;
   private List<Spec> plan = List.of();
 
-  GroundingItHarness(PostgreSQLContainer<?> postgres, String... steps) throws Exception {
+  GroundingItHarness(TestPostgresDatabase postgres, String... steps) throws Exception {
     this(postgres, Map.of(), steps);
   }
 
-  GroundingItHarness(PostgreSQLContainer<?> postgres, Map<String, Integer> limits, String... steps)
+  GroundingItHarness(TestPostgresDatabase postgres, Map<String, Integer> limits, String... steps)
       throws Exception {
     this.limits = limits;
     this.steps = List.of(steps);
