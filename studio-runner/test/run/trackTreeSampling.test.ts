@@ -15,7 +15,8 @@
  * `node:child_process` (`fork`) and the process-table readers are mocked, so nothing here forks.
  * `observedWriterQuiescence.test.ts` proves the same retention against a real detached writer.
  */
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { describePosixOnly } from '../helpers/platform.js';
 
 import { createForkSpawner } from '../../src/run/launcher.js';
 import type { ProcessRow } from '../../src/run/tree.js';
@@ -30,7 +31,9 @@ const mocks = vi.hoisted(() => ({
   signalProcessTree: vi.fn<(pid: number) => { signalled: number[] }>(),
 }));
 vi.mock('../../src/run/tree.js', async (importOriginal) => ({ ...(await importOriginal<object>()), ...mocks }));
+// `execFile`: the host module (`src/run/host/win32Files.ts`) binds it at load on every platform; it is never called.
 vi.mock('node:child_process', () => ({
+  execFile: vi.fn(),
   fork: vi.fn(() => ({ pid: LEADER, connected: false, exitCode: null, signalCode: null, on: vi.fn(), stdout: null, stderr: null })),
 }));
 
@@ -63,7 +66,8 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-describe('tracking samples the process table without blocking the event loop', () => {
+const POSIX_ONLY = 'drives the posix host interval sampler of the tree; win32 takes one snapshot after ready instead';
+describePosixOnly(POSIX_ONLY, 'tracking samples the process table without blocking the event loop', () => {
   it('skips ticks while a sample is in flight, resumes after it lands, and never reads synchronously', async () => {
     vi.useFakeTimers();
     const first = deferred();
@@ -90,7 +94,7 @@ describe('tracking samples the process table without blocking the event loop', (
   });
 });
 
-describe('quiescence keeps every tree guarantee on the asynchronous reader', () => {
+describePosixOnly(POSIX_ONLY, 'quiescence keeps every tree guarantee on the asynchronous reader', () => {
   it('awaits the in-flight sample, then kills every descendant it retained even after re-parenting', async () => {
     const inFlight = deferred();
     // Later readings: the leader is gone and its descendants are re-parented to init, so only the

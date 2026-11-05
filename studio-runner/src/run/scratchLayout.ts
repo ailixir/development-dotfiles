@@ -22,28 +22,37 @@ export const SCRATCH_SUBDIRECTORIES = {
   temp: 'tmp',
 } as const;
 
-import {mkdirSync,openSync,closeSync,fstatSync,lstatSync,realpathSync,readSync,writeSync,fsyncSync,fchmodSync,constants,existsSync} from 'node:fs';
-import type {Stats} from 'node:fs';
+import {mkdirSync,closeSync,fstatSync,lstatSync,readSync,writeSync,fsyncSync,fchmodSync,existsSync} from 'node:fs';
+import type {BigIntStats,Stats} from 'node:fs';
 import {join,dirname,basename,resolve} from 'node:path';
+import {host} from './host/index.js';
+import {openFencedSync} from './host/fence.js';
 
 export const BROWSER_PREFERENCES = Object.freeze({
   credentials_enable_service: false,
   autofill: Object.freeze({ profile_enabled: false, credit_card_enabled: false }),
   session: Object.freeze({ restore_on_startup: 5 }),
 });
-interface DirectoryPin {readonly path:string;readonly dev:number;readonly ino:number;readonly uid:number}
+// F6: where opens are fenced (win32) node ids are read as bigint, because NTFS file ids exceed 2^53; posix reads Numbers as it always did.
+type NodeStats=Stats|BigIntStats;
+const wideIds=host.files.fencesOpens;
+const lstatNode=(path:string):NodeStats=>wideIds?lstatSync(path,{bigint:true}):lstatSync(path);
+const fstatNode=(fd:number):NodeStats=>wideIds?fstatSync(fd,{bigint:true}):fstatSync(fd);
+const mtimeOf=(stat:NodeStats):number|bigint=>'mtimeNs' in stat?stat.mtimeNs:stat.mtimeMs;
+interface DirectoryPin {readonly path:string;readonly dev:number|bigint;readonly ino:number|bigint;readonly uid:number|bigint}
 export interface BrowserProfileConfinement {readonly scratch:DirectoryPin;readonly profile:DirectoryPin;readonly defaultProfile:DirectoryPin}
-interface PreparedProfile extends BrowserProfileConfinement {readonly file:{readonly dev:number;readonly ino:number;readonly uid:number}}
+interface PreparedProfile extends BrowserProfileConfinement {readonly file:{readonly dev:number|bigint;readonly ino:number|bigint;readonly uid:number|bigint}}
 const preparedProfiles=new Map<string,PreparedProfile>();
 const MAX_PREFERENCE_BYTES=65536;
 function refused():never{throw new Error('PROFILE_PREFERENCES_REQUIRED');}
-function owned(stat:Stats):boolean{return typeof process.getuid==='function'&&stat.uid===process.getuid();}
-function directory(path:string):DirectoryPin{const stat=lstatSync(path);if(!stat.isDirectory()||stat.isSymbolicLink()||!owned(stat)||(stat.mode&0o777)!==0o700)refused();return {path:realpathSync(path),dev:stat.dev,ino:stat.ino,uid:stat.uid};}
+// Ownership and permission bits are the host's (posix: uid and mode; win32: the private root's ACL). Opens are checked by fence.ts.
+function owned(stat:NodeStats):boolean{return host.files.isOwnNode(stat);}
+function directory(path:string):DirectoryPin{const stat=lstatNode(path);if(!stat.isDirectory()||stat.isSymbolicLink()||!owned(stat)||!host.files.hasMode(stat,0o700))refused();return {path:host.files.canonical(path),dev:stat.dev,ino:stat.ino,uid:stat.uid};}
 function sameDirectory(pin:DirectoryPin):void{const actual=directory(pin.path);if(actual.dev!==pin.dev||actual.ino!==pin.ino||actual.uid!==pin.uid)refused();}
 /** The trusted parent calls this before capturing private video/scratch identities. */
 export function secureScratchDirectory(path:string):string{
- try{const before=lstatSync(path);if(!before.isDirectory()||before.isSymbolicLink()||!owned(before)||(before.mode&0o022)!==0)refused();
-  const fd=openSync(path,constants.O_RDONLY|constants.O_DIRECTORY|constants.O_NOFOLLOW);try{const actual=fstatSync(fd);if(actual.dev!==before.dev||actual.ino!==before.ino)refused();if((actual.mode&0o777)!==0o700){if(existsSync(join(path,'runner-private')))refused();fchmodSync(fd,0o700);}}finally{closeSync(fd);}
+ try{const before=lstatNode(path);if(!before.isDirectory()||before.isSymbolicLink()||!owned(before)||!host.files.lacksMode(before,0o022))refused();
+  const fd=openFencedSync(path,host.files.flags.directory);try{const actual=fstatNode(fd);if(actual.dev!==before.dev||actual.ino!==before.ino)refused();if(!host.files.hasMode(actual,0o700)){if(existsSync(join(path,'runner-private')))refused();fchmodSync(fd,0o700);}}finally{closeSync(fd);}
   const secured=directory(path);if(secured.dev!==before.dev||secured.ino!==before.ino)refused();return secured.path;
  }catch{refused();}
 }
@@ -58,15 +67,15 @@ export function prepareBrowserProfile(scratchPath:string):string{
  let preparedKey:string|undefined;
  try{const scratch=secureScratchDirectory(scratchPath),profile=join(scratch,SCRATCH_SUBDIRECTORIES.profile);preparedKey=profile;if(preparedProfiles.has(profile)){requireBrowserPreferences(profile);return profile;}
   createDirectory(profile);createDirectory(join(profile,'Default'));const confinement={scratch:directory(scratch),profile:directory(profile),defaultProfile:directory(join(profile,'Default'))},filePath=join(profile,'Default','Preferences'),bytes=Buffer.from(JSON.stringify(BROWSER_PREFERENCES));
-  const fd=openSync(filePath,constants.O_WRONLY|constants.O_CREAT|constants.O_EXCL|constants.O_NOFOLLOW,0o600);let stat:Stats;try{if(writeSync(fd,bytes)!==bytes.length)refused();fsyncSync(fd);stat=fstatSync(fd);}finally{closeSync(fd);}sameDirectory(confinement.scratch);sameDirectory(confinement.profile);sameDirectory(confinement.defaultProfile);
+  const fd=openFencedSync(filePath,host.files.flags.createExclusive,0o600);let stat:NodeStats;try{if(writeSync(fd,bytes)!==bytes.length)refused();fsyncSync(fd);stat=fstatNode(fd);}finally{closeSync(fd);}sameDirectory(confinement.scratch);sameDirectory(confinement.profile);sameDirectory(confinement.defaultProfile);
   preparedProfiles.set(profile,{...confinement,file:{dev:stat.dev,ino:stat.ino,uid:stat.uid}});requireBrowserPreferences(profile);return profile;
  }catch{if(preparedKey)preparedProfiles.delete(preparedKey);refused();}
 }
 export function requireBrowserPreferences(profile:string):void{
  let fd:number|undefined;
- try{const confinement=browserProfileConfinement(profile),pin=preparedProfiles.get(confinement.profile.path);if(!pin)refused();const path=join(confinement.defaultProfile.path,'Preferences'),before=lstatSync(path);if(before.isSymbolicLink()||!before.isFile()||!owned(before)||before.nlink!==1||(before.mode&0o777)!==0o600||before.dev!==pin.file.dev||before.ino!==pin.file.ino||before.uid!==pin.file.uid||before.size>MAX_PREFERENCE_BYTES)refused();
-  fd=openSync(path,constants.O_RDONLY|constants.O_NOFOLLOW|constants.O_NONBLOCK);const stat=fstatSync(fd);if(!stat.isFile()||stat.dev!==before.dev||stat.ino!==before.ino||stat.nlink!==1||!owned(stat)||(stat.mode&0o777)!==0o600)refused();const buffer=Buffer.alloc(MAX_PREFERENCE_BYTES+1),count=readSync(fd,buffer,0,buffer.length,0);if(count!==stat.size||count>MAX_PREFERENCE_BYTES)refused();const actual=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(buffer.subarray(0,count))) as unknown;if(JSON.stringify(actual)!==JSON.stringify(BROWSER_PREFERENCES))refused();
-  browserProfileConfinement(profile);const after=lstatSync(path);if(after.dev!==stat.dev||after.ino!==stat.ino||after.nlink!==1||after.size!==stat.size||after.mtimeMs!==stat.mtimeMs||after.isSymbolicLink()||!owned(after)||(after.mode&0o777)!==0o600)refused();
+ try{const confinement=browserProfileConfinement(profile),pin=preparedProfiles.get(confinement.profile.path);if(!pin)refused();const path=join(confinement.defaultProfile.path,'Preferences'),before=lstatNode(path);if(before.isSymbolicLink()||!before.isFile()||!owned(before)||Number(before.nlink)!==1||!host.files.hasMode(before,0o600)||before.dev!==pin.file.dev||before.ino!==pin.file.ino||before.uid!==pin.file.uid||Number(before.size)>MAX_PREFERENCE_BYTES)refused();
+  fd=openFencedSync(path,host.files.flags.noFollowNonBlock);const stat=fstatNode(fd);if(!stat.isFile()||stat.dev!==before.dev||stat.ino!==before.ino||Number(stat.nlink)!==1||!owned(stat)||!host.files.hasMode(stat,0o600))refused();const buffer=Buffer.alloc(MAX_PREFERENCE_BYTES+1),count=readSync(fd,buffer,0,buffer.length,0);if(count!==Number(stat.size)||count>MAX_PREFERENCE_BYTES)refused();const actual=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(buffer.subarray(0,count))) as unknown;if(JSON.stringify(actual)!==JSON.stringify(BROWSER_PREFERENCES))refused();
+  browserProfileConfinement(profile);const after=lstatNode(path);if(after.dev!==stat.dev||after.ino!==stat.ino||Number(after.nlink)!==1||after.size!==stat.size||mtimeOf(after)!==mtimeOf(stat)||after.isSymbolicLink()||!owned(after)||!host.files.hasMode(after,0o600))refused();
  }catch{refused();}finally{if(fd!==undefined)closeSync(fd);}
 }
 export interface EffectiveBrowserPreferences {credentialsEnableService:unknown;autofillProfileEnabled:unknown;autofillCreditCardEnabled:unknown;restoreOnStartup:unknown}

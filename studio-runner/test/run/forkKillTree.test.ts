@@ -11,7 +11,8 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { afterEach, expect, it, vi } from 'vitest';
+import { afterEach, expect, vi } from 'vitest';
+import { itPosixOnly } from '../helpers/platform.js';
 
 /**
  * Every `spawnSync` the package makes, by command. `tree.ts` reads the process table with `spawnSync('ps')`, which blocks
@@ -70,7 +71,8 @@ async function leaderWithDetachedGrandchild(): Promise<{ handle: ChildProcessHan
   return { handle, grandchild, exited };
 }
 
-it('kills a live leader and the detached descendant that leads its own group', async () => {
+const POSIX_ONLY = 'the grandchild leads its own process group and the kill reads `ps`; the win32 kill is the job object plus taskkill';
+itPosixOnly(POSIX_ONLY, 'kills a live leader and the detached descendant that leads its own group', async () => {
   const { handle, grandchild, exited } = await leaderWithDetachedGrandchild();
   const leader = handle.pid;
   if (leader === null) throw new Error('NO_PID');
@@ -88,7 +90,7 @@ it('kills a live leader and the detached descendant that leads its own group', a
   await vi.waitFor(() => { expect(isAlive(grandchild)).toBe(false); }, { timeout: 2000 });
 });
 
-it('does not signal again once the child has exited (no stray signal to a recycled pid)', async () => {
+itPosixOnly(POSIX_ONLY, 'does not signal again once the child has exited (no stray signal to a recycled pid)', async () => {
   const { handle, exited } = await leaderWithDetachedGrandchild();
   handle.kill();
   await exited;
@@ -105,7 +107,7 @@ it('does not signal again once the child has exited (no stray signal to a recycl
 
 const psCalls = (): number => synchronous.commands.filter((command) => command === 'ps').length;
 
-it('kills the leader and the detached descendant from the latest asynchronous sample, never reaching the synchronous ps', async () => {
+itPosixOnly(POSIX_ONLY, 'kills the leader and the detached descendant from the latest asynchronous sample, never reaching the synchronous ps', async () => {
   const { handle, grandchild, exited } = await leaderWithDetachedGrandchild();
   const leader = handle.pid;
   if (leader === null) throw new Error('NO_PID');
@@ -124,7 +126,7 @@ it('kills the leader and the detached descendant from the latest asynchronous sa
   expect(psCalls() - before).toBe(0);
 });
 
-it('with no sample yet (the tree was never tracked) it reads one asynchronously before signalling, and still reaches the descendant', async () => {
+itPosixOnly(POSIX_ONLY, 'with no sample yet (the tree was never tracked) it reads one asynchronously before signalling, and still reaches the descendant', async () => {
   const { handle, grandchild, exited } = await leaderWithDetachedGrandchild();
   expect(isAlive(grandchild)).toBe(true);
 

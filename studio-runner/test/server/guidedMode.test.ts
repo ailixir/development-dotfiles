@@ -20,6 +20,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { isWindows, itPosixOnly } from '../helpers/platform.js';
 
 import { domainAllowed, isAllowAll } from '../../src/allowedDomains.js';
 import { resetRuntimeVersionsCache } from '../../src/compat/index.js';
@@ -397,7 +398,8 @@ describe('the switch and the cross-field rules', () => {
   it('repeats the disjointness test after realpath, so a symlinked journal cannot hide inside scratch', async () => {
     const root = scratchRoot();
     mkdirSync(join(root, 'scratch'), { recursive: true });
-    symlinkSync(join(root, 'scratch'), join(root, 'alias'));
+    // A directory link: a junction on win32, where a symlink needs admin or Developer Mode (`type` is ignored on posix).
+    symlinkSync(join(root, 'scratch'), join(root, 'alias'), isWindows ? 'junction' : 'dir');
     const env = { ...guidedEnv(root), [`${P}GUIDED_JOURNAL_DIR`]: join(root, 'alias', 'journal') };
     // Lexically disjoint, really inside scratch.
     expect(loadGuidedConfig(env).enabled).toBe(true);
@@ -607,7 +609,7 @@ describe('RUNNER-SCRATCH — the recording-scratch sweep is part of the one star
     await stop(started);
   });
 
-  it('reclaims the residue of a SIGKILLed worker before it can be assigned a session, and keeps a live one', async () => {
+  itPosixOnly('the dead owner is a real unused pid probed with kill(pid, 0) against the posix recording-scratch ownership (uid, mode bits); the win32 sweep has its own host tests', 'reclaims the residue of a SIGKILLed worker before it can be assigned a session, and keeps a live one', async () => {
     const root = scratchRoot();
     vi.stubEnv('TMPDIR', root);
     const env = guidedEnv(root);

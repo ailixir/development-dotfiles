@@ -6,6 +6,7 @@ import {mkdtemp,mkdir,readdir,readFile,rm,stat,symlink,writeFile} from 'node:fs/
 import {tmpdir} from 'node:os';
 import {dirname,join,resolve} from 'node:path';
 import {expect,it} from 'vitest';
+import { describePosixOnly } from '../helpers/platform.js';
 import {descendantsOf,isAlive,signalProcessTree} from '../../src/run/tree.js';
 import {startSecretLoginFixture} from '../fixtures/secret-login/server.js';
 import {evidencePath} from '../helpers/evidenceOut.js';
@@ -21,6 +22,8 @@ async function exists(path:string):Promise<boolean>{return stat(path).then(()=>t
 async function exited(child:ChildProcess):Promise<void>{await until(()=>child.exitCode!==null||child.signalCode!==null);}
 async function bytes(directory:string):Promise<number>{return (await Promise.all((await readdir(directory)).map(async file=>(await stat(join(directory,file))).size))).reduce((a,b)=>a+b,0);}
 
+// ADR-SC-009: skipped on Windows; the body is not re-indented, to keep the diff to the gate itself.
+describePosixOnly('SIGKILLs only the parent and SIGTERMs the live worker, plants a directory symlink and sweeps by posix pid ownership; Windows has no parent-only kill that leaves the job alive', 'guided recording kill', () => {
 it.each([false,true])('parent-only SIGKILL leaves real app video; same-scope restart removes only dead-owned bytes (external symlink=%s)',async link=>{
  const fixture=await startSecretLoginFixture('kill-login-secret-canary'),root=await mkdtemp(join(tmpdir(),'recording-kill-'));await mkdir(join(root,'evidence'));
  const workers:ReturnType<typeof worker>[]=[],pids=new Set<number>(),profiles=new Set<string>();
@@ -48,4 +51,5 @@ it('actual SIGINT gracefully settles real guided recorder and removes its owned 
  const fixture=await startSecretLoginFixture('signal-login-canary'),root=await mkdtemp(join(tmpdir(),'recording-signal-'));await mkdir(join(root,'evidence'));const w=worker(root,fixture.origin),pids=new Set<number>();
  try{await until(()=>w.messages.some(m=>m.kind==='recording')||w.child.exitCode!==null);expect(w.child.exitCode,w.output.join('')).toBeNull();expect(w.messages.find(m=>m.kind==='signalOptions')).toMatchObject({handleSIGINT:false,handleSIGTERM:false});const message=w.messages.find(m=>m.kind==='recording');if(!message?.directory)throw Error('RECORDING');expect(await bytes(message.directory)).toBeGreaterThan(128);if(w.child.pid)for(const pid of descendantsOf(w.child.pid))pids.add(pid);w.child.kill('SIGINT');await exited(w.child);expect(w.child.exitCode,w.output.join('')).toBe(0);expect(w.messages.filter(m=>m.kind==='callback')).toHaveLength(1);expect(w.messages.find(m=>m.kind==='settled')?.state).toBe('STORED');expect(await exists(message.directory)).toBe(false);await until(()=>[...pids].every(pid=>!isAlive(pid)));}
  finally{if(w.child.pid&&w.child.exitCode===null&&w.child.signalCode===null){for(const pid of descendantsOf(w.child.pid))pids.add(pid);signalProcessTree(w.child.pid);}for(const pid of [...pids].reverse())if(isAlive(pid))signalProcessTree(pid);await until(()=>[...pids].every(pid=>!isAlive(pid)));await exited(w.child);for(const message of w.messages)if(message.profile)await rm(message.profile,{recursive:true,force:true});await fixture.close();await rm(root,{recursive:true,force:true});}
+});
 });

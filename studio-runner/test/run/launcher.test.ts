@@ -682,8 +682,10 @@ describe('AC-19 — this story left the production seams no wider than it found 
     expect(source).not.toContain("'inherit'");
     // The child leads its own group. Necessary but, as the fixtures tier established, not
     // sufficient — Playwright starts the browser in a group of its own, so `src/run/tree.ts`
-    // enumerates. Asserted here so a future removal of `detached` is visible.
-    expect(source).toContain('detached: true');
+    // enumerates. The fork takes its options from the host; the posix value lives in `src/run/host/posix.ts`
+    // (pinned by `test/run/host/posix.test.ts`). Asserted here so a future removal of `detached` is visible.
+    expect(source).toContain('...host.process.fork');
+    expect(readFileSync(join(packageRoot, 'src', 'run', 'host', 'posix.ts'), 'utf8')).toContain('fork: Object.freeze({ detached: true })');
     // Unchanged, and it is the other half of the environment allowlist (SEC-1).
     expect(source).toContain('execArgv: []');
   });

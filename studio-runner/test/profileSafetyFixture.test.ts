@@ -1,6 +1,7 @@
 import {afterEach,beforeEach,describe,expect,it,vi} from 'vitest';
 import {ProfileSafetyFixture,ProfileFixtureError,profilePidRows,probeOwnedProfilePid,performLiveProfileRedirect,profileDiagnosticCode} from './helpers/profileSafetyFixture.js';
 import type {OwnedContext,PidSession,PidState,ProfileFixturePorts,ProfileFixtureFailure,ProfileRedirectSteps} from './helpers/profileSafetyFixture.js';
+import { describePosixOnly } from './helpers/platform.js';
 
 function deferred<T>(){let resolve!:(value:T)=>void,reject!:(error?:unknown)=>void;const promise=new Promise<T>((yes,no)=>{resolve=yes;reject=no;});return{promise,resolve,reject};}
 async function throwsUndefined():Promise<void>{
@@ -29,6 +30,8 @@ function rig(mode:'contextClose'|'terminate'='contextClose'){
 beforeEach(()=>{vi.useFakeTimers();});afterEach(()=>{vi.useRealTimers();vi.restoreAllMocks();});
 async function finish<T>(promise:Promise<T>):Promise<T>{await flush();await vi.runAllTimersAsync();return promise;}
 
+// ADR-SC-009: skipped on Windows; the body is not re-indented, to keep the diff to the gate itself.
+describePosixOnly('tests the fixture of the POSIX-only browser-profile-safety tier (signal-0 PID liveness and a symlink profile redirect)', 'profile safety fixture', () => {
 describe('postlaunch fixture ownership and error-preserving cleanup',()=>{
  it.each(['capture','rename','canary','symlink','verify'] as const)('actual attack sequencing stops at %s failure, hands off and never credits partial attack',async failed=>{
   const r=rig(),order:string[]=[],names=['capture','rename','canary','symlink','verify'] as const;
@@ -191,4 +194,5 @@ describe('terminate oracle for a failed launch (no production context.close, eve
   const r=rig('terminate');r.ports.probe.mockReturnValueOnce('LIVE');const o=await finish(failedLaunch(r,()=>{r.emit();}));
   expect(o.error?.facts.productionRealCloseRequests).toBe(0);expect(o.error?.facts.rawCloseRequests).toBe(1);
  });
+});
 });

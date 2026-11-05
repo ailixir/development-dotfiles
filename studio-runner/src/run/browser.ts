@@ -33,11 +33,12 @@ import { domainAllowed, OriginNotAllowed } from '../allowedDomains.js';
 import { GuidedLaunchFailure, GUIDED_START_BUDGET_MS, GUIDED_START_RESERVE_MS, guidedCloseStages, launchFailureCause } from './guidedBrowser.js';
 import type { LaunchedBrowser, GuidedLaunchPhase, GuidedLossReason, GuidedRecordingRequest, GuidedStartup } from './guidedBrowser.js';
 import { killLaunchTree, survivorsOf } from './tree.js';
+import { host } from './host/index.js';
 import { chromium } from 'playwright';
 import { expect } from 'playwright/test';
 import { randomUUID } from 'node:crypto';
 import type { BrowserContext, Page, Frame, CDPSession } from 'playwright';
-import { readdir, rm, mkdtemp,realpath,lstat } from 'node:fs/promises';
+import { readdir, rm, mkdtemp,lstat } from 'node:fs/promises';
 import { join,dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 
@@ -58,15 +59,15 @@ import type {BrowserPreferenceEvidence} from './scratchLayout.js';
 async function verifyBrowserPreferences(page:Page,profile:string):Promise<BrowserPreferenceEvidence>{
   const expected=browserProfileConfinement(profile).defaultProfile.path;
   await page.goto('chrome://version/');const {profilePath:path,executablePath:executable}=await readVersionPaths(page);
-  if(!path||await realpath(path)!==expected)throw new Error('PROFILE_PREFERENCES_REQUIRED');
-  if(!executable||await realpath(executable)!==await realpath(chromium.executablePath()))throw new Error('PROFILE_MISMATCH');
+  if(!path||await host.files.canonicalAsync(path)!==expected)throw new Error('PROFILE_PREFERENCES_REQUIRED');
+  if(!executable||await host.files.canonicalAsync(executable)!==await host.files.canonicalAsync(chromium.executablePath()))throw new Error('PROFILE_MISMATCH');
   await page.goto('chrome://prefs-internals/');
   const effective=await page.evaluate(()=>{
     const p=JSON.parse(document.body.innerText) as {credentials_enable_service?:{value?:unknown};autofill?:{profile_enabled?:{value?:unknown};credit_card_enabled?:{value?:unknown}};session?:{restore_on_startup?:{value?:unknown}}};
     return {credentialsEnableService:p.credentials_enable_service?.value,autofillProfileEnabled:p.autofill?.profile_enabled?.value,autofillCreditCardEnabled:p.autofill?.credit_card_enabled?.value,restoreOnStartup:p.session?.restore_on_startup?.value};
   });
   assertEffectiveBrowserPreferences(effective);if(browserProfileConfinement(profile).defaultProfile.path!==expected)throw new Error('PROFILE_PREFERENCES_REQUIRED');await page.goto('about:blank');browserProfileConfinement(profile);
-  return {channel:'chromium',browserVersion:page.context().browser()?.version()??'UNKNOWN',activeProfilePath:expected,executablePath:await realpath(executable),effective};
+  return {channel:'chromium',browserVersion:page.context().browser()?.version()??'UNKNOWN',activeProfilePath:expected,executablePath:await host.files.canonicalAsync(executable),effective};
 }
 
 // The return window lives in observationDeadline.ts (Playwright-free, so the guided child proxy can size its observe bound from it).
@@ -228,7 +229,7 @@ export const playwrightBrowserFactory: BrowserFactory = {
       const startupVideo=page.video();if(!startupVideo)throw new Error('RECORDING_FAILED');
       preferenceEvidence=await boundedStartup(()=>verifyBrowserPreferences(page,join(request.scratchPath,SCRATCH_SUBDIRECTORIES.profile)),deadline,signal);guard.check();
       await boundedStartup(()=>page.close(),deadline,signal,5000);guard.check();
-      const path=await boundedStartup(()=>startupVideo.path(),deadline,signal,5000),root=await realpath(request.scratchPath),directory=await realpath(videoDir),actual=await realpath(path),file=await lstat(path);
+      const path=await boundedStartup(()=>startupVideo.path(),deadline,signal,5000),root=await host.files.canonicalAsync(request.scratchPath),directory=await host.files.canonicalAsync(videoDir),actual=await host.files.canonicalAsync(path),file=await lstat(path);
       if(directory!==join(root,SCRATCH_SUBDIRECTORIES.video)||(await lstat(videoDir)).isSymbolicLink()||file.isSymbolicLink()||!file.isFile()||dirname(actual)!==directory)throw new Error('RECORDING_FAILED');
       await boundedStartup(()=>startupVideo.delete(),deadline,signal,5000);guard.check();
       if((await readdir(videoDir)).length!==0)throw new Error('RECORDING_FAILED');guard.startupRemoved(context.pages());guard.beginApp();
@@ -374,6 +375,8 @@ export async function launchGuidedBrowser(config: ObservationConfig, contextId: 
   const bounded = <T,>(work: () => Promise<T>): Promise<T> => boundedStartup(work, deadline, signal);
   // Playwright's own `timeout` below ends its launch progress here; a Chrome it has not spawned by then is never spawned.
   let backstopAt = deadline + GUIDED_START_RESERVE_MS;
+  // A host with process creation times (win32) selects this launch's children only from here on.
+  const launchStartedAt = Date.now();
   const scratchDirectory = await mkdtemp(join(process.env.TMPDIR ?? tmpdir(), 'checks-guided-'));
   let context:BrowserContext|undefined;
   let launching:Promise<BrowserContext>|undefined;
@@ -383,7 +386,7 @@ export async function launchGuidedBrowser(config: ObservationConfig, contextId: 
   let preparedProfile=join(scratchDirectory,SCRATCH_SUBDIRECTORIES.profile);
   // Run once: the graceful close, the hard teardown and a failed launch's cleanup can all reach it (KL-015-D5).
   let scratchDisposal:Promise<void>|null=null;
-  const disposeScratchOnce=async():Promise<void>=>{releaseBrowserProfile(preparedProfile);await rm(scratchDirectory,{recursive:true,force:true});};
+  const disposeScratchOnce=async():Promise<void>=>{releaseBrowserProfile(preparedProfile);await host.files.remove(scratchDirectory);};
   const disposeScratch=():Promise<void>=>scratchDisposal??=disposeScratchOnce();
   try {
   const profile = prepareBrowserProfile(scratchDirectory);preparedProfile=profile;requireBrowserPreferences(profile);
@@ -391,7 +394,7 @@ export async function launchGuidedBrowser(config: ObservationConfig, contextId: 
   // `timeout` is only a backstop that ends Playwright's own progress; it fires after the runner deadline, so the reported cause is the runner's.
   const backstopMs = Math.max(1, deadline - Date.now() + GUIDED_START_RESERVE_MS);
   backstopAt = Date.now() + backstopMs;
-  const starting = chromium.launchPersistentContext(profile, { channel:'chromium',headless: true, handleSIGINT: false, handleSIGTERM: false, chromiumSandbox: true, args: [], acceptDownloads: false, serviceWorkers: 'block', timeout: backstopMs, ...(recording ? { recordVideo: { dir: recording.dir, size: { width: recording.size.width, height: recording.size.height } } } : {}), env: { PATH: process.env.PATH ?? '', HOME: process.env.HOME ?? '', TMPDIR: scratchDirectory } });
+  const starting = chromium.launchPersistentContext(profile, { channel:'chromium',headless: true, handleSIGINT: false, handleSIGTERM: false, chromiumSandbox: true, args: [], acceptDownloads: false, serviceWorkers: 'block', timeout: backstopMs, ...(recording ? { recordVideo: { dir: recording.dir, size: { width: recording.size.width, height: recording.size.height } } } : {}), env: host.process.browserEnv(process.env, scratchDirectory) });
   launching = starting;
   context = await bounded(() => starting);
   const live = context;
@@ -409,7 +412,7 @@ export async function launchGuidedBrowser(config: ObservationConfig, contextId: 
     phase = 'STARTUP_PAGE';
     const closeStartupPage = async (): Promise<void> => {
       await startupPage.close();
-      const path = await startupVideo.path(), directory = await realpath(recording.dir), actual = await realpath(path), file = await lstat(path);
+      const path = await startupVideo.path(), directory = await host.files.canonicalAsync(recording.dir), actual = await host.files.canonicalAsync(path), file = await lstat(path);
       if ((await lstat(recording.dir)).isSymbolicLink() || file.isSymbolicLink() || !file.isFile() || dirname(actual) !== directory) throw new Error('RECORDING_FAILED');
       await startupVideo.delete();
       if ((await readdir(recording.dir)).length !== 0) throw new Error('RECORDING_FAILED');
@@ -458,7 +461,7 @@ export async function launchGuidedBrowser(config: ObservationConfig, contextId: 
   const finalizeRecording = async (boundMs: number): Promise<boolean> => {
     if (!recording) return false;
     if (await stages.gracefulFulfilledWithin(boundMs)) return true;
-    try { const killed = killLaunchTree(await launchMarkers(recording.dir)); await survivorsOf([...killed], 500); } catch { /* the settlement reports a salvaged prefix either way */ }
+    try { const killed = await killLaunchTree(await launchMarkers(recording.dir), { since: launchStartedAt }); await survivorsOf([...killed], 500); } catch { /* the settlement reports a salvaged prefix either way */ }
     return false;
   };
   // Valid after close: Playwright finalizes the webm when the context closes (§6.1).
@@ -518,7 +521,7 @@ export async function launchGuidedBrowser(config: ObservationConfig, contextId: 
     // Every other teardown (a start that failed, `terminate` alone) has no recording to finish and kills it with the rest, as before.
     const markers=await launchMarkers(...(gracefulStarted?[scratchDirectory]:[scratchDirectory,recording?.dir]));
     // Throws when the process table cannot show this worker: "nothing to kill" must never mean "could not look".
-    const seen=new Set<number>(killLaunchTree(markers));
+    const seen=new Set<number>(await killLaunchTree(markers,{since:launchStartedAt}));
     // An abandoned launch may still hand back a context, or spawn its Chrome, after that first listing. Where the
     // listing found something the launch fails by itself within a moment, so a second of grace is enough. Where it
     // found nothing the Chrome may simply not exist yet: wait for the launch to settle, but no later than Playwright's
@@ -531,7 +534,7 @@ export async function launchGuidedBrowser(config: ObservationConfig, contextId: 
       if(late)await boundedStartup(()=>late.close(),Date.now()+1000,undefined,1000).catch(()=>undefined);
     }
     // Once more, for a Chrome that spawned after the first listing.
-    for(const pid of killLaunchTree(markers))seen.add(pid);
+    for(const pid of await killLaunchTree(markers,{since:launchStartedAt}))seen.add(pid);
     if((await survivorsOf([...seen],500)).length>0)throw new Error('CONTEXT_LOST');
     await disposeScratch();
   }
@@ -540,6 +543,6 @@ export async function launchGuidedBrowser(config: ObservationConfig, contextId: 
 /** The launch's own absolute paths, as written and as resolved, for matching its children by command line. */
 async function launchMarkers(...paths:(string|undefined)[]):Promise<string[]>{
   const out=new Set<string>();
-  for(const path of paths){if(!path)continue;out.add(path);try{out.add(await realpath(path));}catch{/* The path is gone or unreadable; the written form still matches. */}}
+  for(const path of paths){if(!path)continue;out.add(path);try{out.add(await host.files.canonicalAsync(path));}catch{/* The path is gone or unreadable; the written form still matches. */}}
   return [...out];
 }

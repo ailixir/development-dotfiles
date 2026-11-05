@@ -25,6 +25,7 @@ import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
  * `checks-guided-` scratch directory, and their descendants. Read-only `ps` listings before and after are the lane receipt's job (`ps -axo pid,ppid,command`).
  */
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { describePosixOnly } from '../helpers/platform.js';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -67,7 +68,8 @@ afterAll(async () => {
   if (out) await writeFile(out, `${text}\n`);
 });
 
-describe('KL-015-D5 the close of a guided browser is bounded (frozen Chromium, real runner)', () => {
+const POSIX_ONLY = 'freezes Chromium with SIGSTOP on its process group, so only the runner kill can end it; Windows has neither';
+describePosixOnly(POSIX_ONLY, 'KL-015-D5 the close of a guided browser is bounded (frozen Chromium, real runner)', () => {
   it('F1 (i) frozen after a completed start: the stop replies 200 once the close settled, within the grace plus the teardown', async () => {
     const control = newControl();
     const harness = await startHarness(launcherFreezing('NEVER', control), control);

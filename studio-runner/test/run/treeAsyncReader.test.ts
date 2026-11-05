@@ -7,11 +7,13 @@
  * replacement reads the same table *without* holding the loop: a callback queued after the read
  * starts runs before the read finishes, which a blocking reader cannot allow.
  */
-import { expect, it } from 'vitest';
+import { expect } from 'vitest';
+import { itPosixOnly } from '../helpers/platform.js';
 
 import { canEnumerateProcessTree, descendantsOf, readProcessTable, readProcessTableAsync } from '../../src/run/tree.js';
 
-it('yields the event loop while ps runs, then answers a table that contains this process', async () => {
+const POSIX_ONLY = 'reads the real `ps` table; the win32 CIM reader has its own host tests';
+itPosixOnly(POSIX_ONLY, 'yields the event loop while ps runs, then answers a table that contains this process', async () => {
   const order: string[] = [];
   const pending = readProcessTableAsync(5000).then((table) => {
     order.push('table');
@@ -25,7 +27,7 @@ it('yields the event loop while ps runs, then answers a table that contains this
   expect(table.find((row) => row.pid === process.pid)?.ppid).toBe(process.ppid);
 });
 
-it('reads the same tree shape as the synchronous reader', async () => {
+itPosixOnly(POSIX_ONLY, 'reads the same tree shape as the synchronous reader', async () => {
   const [syncTable, asyncTable] = [readProcessTable(5000), await readProcessTableAsync(5000)];
   // Both see this process under its parent; the rest of the table is live and may differ.
   for (const table of [syncTable, asyncTable]) {

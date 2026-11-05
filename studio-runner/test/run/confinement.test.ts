@@ -338,11 +338,12 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
     // OBS-007 deliberately pins the whole document, retaining the three-route presence check.
     const observedRoutes=new Set(['/v2/validate-observed','/v2/runs','/internal/studio/executions/{id}/observed-admission']);
     let observed=false;const seen=new Map<string,number>();
-    for(const line of readFileSync(contract,'utf8').split('\n')){
+    for(const line of readFileSync(contract,'utf8').replace(/\r\n/gu,'\n').split('\n')){
       if(/^ {2}\/|^[^ ]/u.test(line)){const route=/^ {2}(\/[^:]+):$/u.exec(line)?.[1];observed=route!==undefined&&observedRoutes.has(route);if(observed&&route!==undefined)seen.set(route,(seen.get(route)??0)+1);}
     }
     expect([...seen.entries()].sort()).toEqual([...observedRoutes].sort().map(route=>[route,1]));
-    const actual = createHash('sha256').update(readFileSync(contract)).digest('hex');
+    // A Windows checkout may carry CRLF; the digest is of the LF form, so an LF file's digest is unchanged.
+    const actual = createHash('sha256').update(readFileSync(contract, 'utf8').replace(/\r\n/gu, '\n'), 'utf8').digest('hex');
     expect(actual, 'the reviewed full-document contract digest changed').toBe(BASE_SHA256);
   });
 

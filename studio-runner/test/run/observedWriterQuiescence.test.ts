@@ -1,11 +1,13 @@
 import {mkdtemp,writeFile,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {expect,it} from 'vitest';
+import {expect} from 'vitest';
+import { itPosixOnly } from '../helpers/platform.js';
 import {createForkSpawner} from '../../src/run/launcher.js';
 import {isAlive,signalProcessTree} from '../../src/run/tree.js';
 /** Actual Node process tracking only; Chromium/encoder proof lives in the fixtures tier. */
-it('retains an actual detached writer across leader exit and bounds its separate quiescence wait',async()=>{
+const POSIX_ONLY = 'the writer leads its own process group and is tracked by the posix `ps` sampler; win32 has no sampler';
+itPosixOnly(POSIX_ONLY, 'retains an actual detached writer across leader exit and bounds its separate quiescence wait',async()=>{
  const root=await mkdtemp(join(tmpdir(),'writer-quiescence-')),writer=join(root,'writer.mjs'),leader=join(root,'leader.mjs');let writerPid=0;
  await writeFile(writer,'setInterval(()=>{},1000);\n');await writeFile(leader,`import {spawn} from 'node:child_process';console.log('SAFE_WRITER_STDOUT');console.error('SAFE_WRITER_STDERR');const writer=spawn(process.execPath,[${JSON.stringify(writer)}],{detached:true,stdio:'ignore'});process.send({pid:writer.pid});process.on('message',()=>{process.exit(0);});\n`);
  const handle=createForkSpawner().spawn({modulePath:leader,args:[],env:{PATH:process.env.PATH??''}});

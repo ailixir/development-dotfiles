@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join, basename } from 'node:path';
 import { afterEach, expect, it } from 'vitest';
 import { prepareRecordingScratch } from '../../src/run/recordingScratch.js';
+import { describePosixOnly } from '../helpers/platform.js';
 const roots: string[] = [];
 afterEach(async () => { for (const root of roots.splice(0)) await rm(root, { recursive: true, force: true }); });
 async function fixture() {
@@ -17,6 +18,8 @@ async function dead(options: Awaited<ReturnType<typeof fixture>>['options']) {
  return { first, leaf, incarnation, marker };
 }
 async function exists(path: string): Promise<boolean> { return lstat(path).then(() => true, () => false); }
+// ADR-SC-009: skipped on Windows; the body is not re-indented, to keep the diff to the gate itself.
+describePosixOnly('owner-only mode bits (0o077/0o600), symlink and hardlink refusal and inode replacement of the POSIX recording scratch; the win32 host ACL and file-id fence have their own tests', 'recording scratch ownership and reclamation', () => {
 it('disposes only allocated bytes, preserving another leaf and private closed ownership', async () => {
  const {options}=await fixture(), scratch=await prepareRecordingScratch(options), a=await scratch.allocate(), b=await scratch.allocate();
  await writeFile(join(a,'video.webm'),'video');await writeFile(join(b,'video.webm'),'other');await scratch.dispose(a);
@@ -97,4 +100,5 @@ it('observed incarnation inode replacement after quarantine refuses readiness',a
 });
 it('deadline during deletion retains marker, reports no reclamation and next startup completes',async()=>{
  const {options}=await fixture(),old=await dead(options);let elapsed=0;const first=await prepareRecordingScratch({...options,probe:pid=>pid===2147483647?'dead':'live',now:()=>elapsed,limits:{deadlineMs:1},removeFile:async path=>{await rm(path);elapsed=2;}});expect(first.report).toMatchObject({bounded:true,reclaimed:0});expect(await exists(old.marker)).toBe(true);expect((await prepareRecordingScratch({...options,probe:pid=>pid===2147483647?'dead':'live'})).report.reclaimed).toBe(1);
+});
 });

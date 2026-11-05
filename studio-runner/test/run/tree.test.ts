@@ -18,6 +18,7 @@
  * any kill look correct.
  */
 import { describe, expect, it } from 'vitest';
+import { describePosixOnly, itPosixOnly } from '../helpers/platform.js';
 
 import {
   canEnumerateLaunchTree,
@@ -52,7 +53,8 @@ const PLAYWRIGHT_TREE = [
   { pid: 16_366, ppid: 16_343 }, // GPU process, pgid 16343
 ];
 
-describe('AC-11a — killing the tree is not killing the child', () => {
+const POSIX_ONLY = 'asserts the posix host: process-group kills by negative pid, `ps` listings and posix launch markers; the win32 tree kill and markers have their own host tests';
+describePosixOnly(POSIX_ONLY, 'AC-11a — killing the tree is not killing the child', () => {
   it('reaches the browser and the encoder, which are not in the fork’s process group', () => {
     const targets: { pid: number; signal: string }[] = [];
     const outcome = signalProcessTree(
@@ -173,7 +175,7 @@ describe('AC-11a — the observation helpers the fixtures tier asserts with', ()
 });
 
 describe('Studio v1 WP16 — the tree can only be killed where it can be enumerated', () => {
-  it('holds on this machine, where `ps` lists this process', () => {
+  itPosixOnly(POSIX_ONLY, 'holds on this machine, where `ps` lists this process', () => {
     expect(canEnumerateProcessTree()).toBe(true);
   });
 
@@ -221,7 +223,7 @@ describe('REL-001/D4 (Quinn F1) — the guided worker starts only where its own 
     expect(canEnumerateLaunchTree(701, readers)).toBe(false);
   });
 
-  it('holds on this machine, where both `ps` forms list this test process', () => {
+  itPosixOnly(POSIX_ONLY, 'holds on this machine, where both `ps` forms list this test process', () => {
     expect(process.pid).toBeGreaterThan(1);
     expect(canEnumerateLaunchTree()).toBe(true);
   });
@@ -258,11 +260,11 @@ describe('REL-001/D4 — a missed start deadline kills this launch\'s own proces
     row(9_001, WORKER, '/bin/sh -c sleep 100'),
   ];
 
-  it('chooses the browser by the scratch directory and the encoder by the recording directory', () => {
+  itPosixOnly(POSIX_ONLY, 'chooses the browser by the scratch directory and the encoder by the recording directory', () => {
     expect(selectLaunchRoots(TABLE, WORKER, [SCRATCH, RECORDING])).toEqual([6_001, 6_010]);
   });
 
-  it('does not choose another session\'s browser, a look-alike directory or a process that merely appeared', () => {
+  itPosixOnly(POSIX_ONLY, 'does not choose another session\'s browser, a look-alike directory or a process that merely appeared', () => {
     const chosen = selectLaunchRoots(TABLE, WORKER, [SCRATCH, RECORDING]);
     for (const other of [7_001, 7_010, 8_001, 9_001]) expect(chosen).not.toContain(other);
     expect(selectLaunchRoots(TABLE, WORKER, ['/var/folders/zz/T/checks-guided-Other9'])).toEqual([7_001]);
@@ -291,9 +293,9 @@ describe('REL-001/D4 — a missed start deadline kills this launch\'s own proces
     expect(commandLineNames('x /a/b.c', '/a/bxc')).toBe(false);
   });
 
-  it('kills the enumerated trees deepest-first and returns every pid it found, killing nothing else', () => {
+  itPosixOnly(POSIX_ONLY, 'kills the enumerated trees deepest-first and returns every pid it found, killing nothing else', async () => {
     const signals: [number, NodeJS.Signals][] = [];
-    const pids = killLaunchTree([SCRATCH, RECORDING], { parentPid: WORKER, readTable: () => TABLE, kill: (target, signal) => { signals.push([target, signal]); } });
+    const pids = await killLaunchTree([SCRATCH, RECORDING], { parentPid: WORKER, readTable: () => TABLE, kill: (target, signal) => { signals.push([target, signal]); } });
     expect([...pids].sort((a, b) => a - b)).toEqual([6_001, 6_002, 6_003, 6_010]);
     const direct = signals.filter(([target]) => target > 0).map(([target]) => target);
     expect(direct).toEqual([6_003, 6_002, 6_001, 6_010]);
@@ -302,30 +304,30 @@ describe('REL-001/D4 — a missed start deadline kills this launch\'s own proces
     for (const protectedPid of [22_246, 44_737, 13_577, 13_581, 1, WORKER, 7_001, 7_010, 8_001, 9_001]) expect(touched.has(protectedPid)).toBe(false);
   });
 
-  it('signals nothing and returns nothing when the table is readable and no child names the launch', () => {
+  it('signals nothing and returns nothing when the table is readable and no child names the launch', async () => {
     const signals: number[] = [];
     const kill = (target: number): void => { signals.push(target); };
-    expect(killLaunchTree(['/var/folders/zz/T/checks-guided-Nobody1'], { parentPid: WORKER, readTable: () => TABLE, kill })).toEqual([]);
+    await expect(killLaunchTree(['/var/folders/zz/T/checks-guided-Nobody1'], { parentPid: WORKER, readTable: () => TABLE, kill })).resolves.toEqual([]);
     expect(signals).toEqual([]);
   });
 
-  it('Quinn F1: throws, and signals nothing, where "nothing found" would only mean "could not look"', () => {
+  it('Quinn F1: throws, and signals nothing, where "nothing found" would only mean "could not look"', async () => {
     const signals: number[] = [];
     const kill = (target: number): void => { signals.push(target); };
     // `ps` timed out or failed: it reads as an empty table.
-    expect(() => killLaunchTree([SCRATCH], { parentPid: WORKER, readTable: () => [], kill })).toThrow('PROCESS_TABLE_UNREADABLE');
+    await expect(killLaunchTree([SCRATCH], { parentPid: WORKER, readTable: () => [], kill })).rejects.toThrow('PROCESS_TABLE_UNREADABLE');
     // A table that does not list the worker (another namespace, a truncated read), even if it lists a matching browser.
     const withoutWorker = TABLE.filter((r) => r.pid !== WORKER);
-    expect(() => killLaunchTree([SCRATCH], { parentPid: WORKER, readTable: () => withoutWorker, kill })).toThrow('PROCESS_TABLE_UNREADABLE');
+    await expect(killLaunchTree([SCRATCH], { parentPid: WORKER, readTable: () => withoutWorker, kill })).rejects.toThrow('PROCESS_TABLE_UNREADABLE');
     // A worker that is init: selection refuses it, so the empty answer would be a lie even over a perfect table.
-    expect(() => killLaunchTree([SCRATCH], { parentPid: 1, readTable: () => TABLE, kill })).toThrow('PROCESS_TABLE_UNREADABLE');
-    expect(() => killLaunchTree([SCRATCH], { parentPid: 0, readTable: () => TABLE, kill })).toThrow('PROCESS_TABLE_UNREADABLE');
+    await expect(killLaunchTree([SCRATCH], { parentPid: 1, readTable: () => TABLE, kill })).rejects.toThrow('PROCESS_TABLE_UNREADABLE');
+    await expect(killLaunchTree([SCRATCH], { parentPid: 0, readTable: () => TABLE, kill })).rejects.toThrow('PROCESS_TABLE_UNREADABLE');
     expect(signals).toEqual([]);
   });
 
-  it('finds a late spawn on the second listing', () => {
+  itPosixOnly(POSIX_ONLY, 'finds a late spawn on the second listing', async () => {
     const late = [...TABLE.filter((r) => r.pid !== 6_001 && r.pid !== 6_002 && r.pid !== 6_003), row(6_500, WORKER, `/pw/chrome --user-data-dir=${SCRATCH}/profile`)];
-    expect(killLaunchTree([SCRATCH], { parentPid: WORKER, readTable: () => late, kill: () => undefined })).toEqual([6_500]);
+    await expect(killLaunchTree([SCRATCH], { parentPid: WORKER, readTable: () => late, kill: () => undefined })).resolves.toEqual([6_500]);
   });
 
   it('reports survivors after a bounded wait, and none when they are gone', async () => {
@@ -340,7 +342,7 @@ describe('REL-001/D4 — a missed start deadline kills this launch\'s own proces
     expect(clock).toBeLessThan(500);
   });
 
-  it('reads the real command line of this process from `ps`', () => {
+  itPosixOnly(POSIX_ONLY, 'reads the real command line of this process from `ps`', () => {
     const mine = readProcessTableWithArgs().find((r) => r.pid === process.pid);
     expect(mine?.ppid).toBe(process.ppid);
     expect(mine?.args.length).toBeGreaterThan(0);

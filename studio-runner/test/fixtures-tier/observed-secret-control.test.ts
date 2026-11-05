@@ -7,6 +7,7 @@ import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {expect,it} from 'vitest';
+import { describePosixOnly } from '../helpers/platform.js';
 import corpusJson from '../../../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json' with {type:'json'};
 import type {PublicationDocument} from '../helpers/publicationFixture.js';
 import type {ObservedJob,BuildIdentity} from '../../src/executor/observedOperations.js';
@@ -36,6 +37,8 @@ function controlledJob(origin:string,build:BuildIdentity):{job:ObservedJob}{
   return {job:{...job,secrets:{PASS:CANARY,NEXT:CANARY+'-next'}}};
 }
 
+// ADR-SC-009: skipped on Windows; the body is not re-indented, to keep the diff to the gate itself.
+describePosixOnly('reads the whole process table synchronously on every child message inside a 2 s cutoff bound, which only the posix `ps` read is fast enough for', 'observed secret control', () => {
 it.each(modes)('proves actual secret-bearing observed control cutoff: %s',async mode=>{
   const directory=await mkdtemp(join(tmpdir(),'observed-secret-control-'));
   const reports:ReportBody[]=[],controls:{started:number;completed?:number;timeoutMs?:number}[]=[],nativeEntries:number[]=[],nativeEnds:number[]=[],childMessages:unknown[]=[],rawOutput:string[]=[];
@@ -118,3 +121,4 @@ it.each(modes)('proves actual secret-bearing observed control cutoff: %s',async 
     if(handle?.pid&&isAlive(handle.pid))handle.kill();await rm(directory,{recursive:true,force:true});
   }
 },45000);
+});

@@ -37,9 +37,10 @@
 import { createReadStream } from 'node:fs';
 import type {VerifiedVideoFile} from './appVideoOwnership.js';
 import { mkdir, rename, writeFile } from 'node:fs/promises';
-import { dirname, join, resolve, sep } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { pipeline } from 'node:stream/promises';
 import { createWriteStream } from 'node:fs';
+import { host } from './host/index.js';
 
 /** What the caller hands the client. Never a `Buffer` of a recording (AC-5). */
 export type ObjectBody =
@@ -155,7 +156,7 @@ export function createLocalObjectStore(options: LocalObjectStoreOptions): Object
 /** Resolves a key under the root and refuses one that would escape it. */
 function resolveKey(root: string, key: string): string {
   const target = resolve(join(root, key));
-  if (target !== root && !target.startsWith(root + sep)) {
+  if (target !== root && !host.files.isInside(root, target)) {
     throw new ObjectStorePutError('The object key resolves outside the store root.');
   }
   return target;

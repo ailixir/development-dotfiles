@@ -99,7 +99,8 @@ describe('AC-7a — the manifest carries what §5.3 names', () => {
   it('still produces the committed fixture byte for byte', () => {
     // The backend deserializes this same file through `ResultManifest`. If this goes red, one of
     // the two sides moved and the other did not — which is exactly what the fixture is for.
-    expect(serialize(FIXTURE_INPUT)).toBe(readFileSync(FIXTURE, 'utf8').trimEnd());
+    // CRLF -> LF first: a CRLF (Windows) checkout of the fixture is the same bytes on an LF one.
+    expect(serialize(FIXTURE_INPUT)).toBe(readFileSync(FIXTURE, 'utf8').replace(/\r\n/gu, '\n').trimEnd());
   });
 
   it('has no browser duration before the browser started', () => {

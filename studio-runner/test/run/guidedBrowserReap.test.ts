@@ -20,6 +20,7 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
+import { describePosixOnly } from '../helpers/platform.js';
 import { createForkSpawner } from '../../src/run/launcher.js';
 import type { ChildProcessHandle } from '../../src/run/launcher.js';
 import { isAlive, killLaunchTree, readProcessTableWithArgs, selectLaunchRoots, signalProcessTree, survivorsOf } from '../../src/run/tree.js';
@@ -72,7 +73,8 @@ async function fakeLaunch(label: string): Promise<Launch> {
 
 const namesLaunch = (scratch: string): number => readProcessTableWithArgs().filter((row) => row.args.includes(scratch)).length;
 
-describe('KL-015-D5 / AC-11 k: a guided launch is reaped by its own markers, whole tree, and nothing else', () => {
+const POSIX_ONLY = 'a real detached process tree reaped by posix launch markers through `ps`; the win32 launch kill has its own host tests';
+describePosixOnly(POSIX_ONLY, 'KL-015-D5 / AC-11 k: a guided launch is reaped by its own markers, whole tree, and nothing else', () => {
   it('kills the launch\'s leader and its detached descendant, confirms them gone, and leaves another launch untouched', async () => {
     const mine = await fakeLaunch('mine');
     const other = await fakeLaunch('other');
@@ -82,7 +84,7 @@ describe('KL-015-D5 / AC-11 k: a guided launch is reaped by its own markers, who
     expect(namesLaunch(mine.scratch)).toBeGreaterThanOrEqual(1);
     expect(namesLaunch(other.scratch)).toBeGreaterThanOrEqual(1);
     expect(selectLaunchRoots(readProcessTableWithArgs(), process.pid, [mine.scratch])).toEqual([leader]);
-    const enumerated = killLaunchTree([mine.scratch]);
+    const enumerated = await killLaunchTree([mine.scratch]);
     expect([...enumerated].sort()).toEqual([leader, mine.grandchild].sort());
     expect(await survivorsOf(enumerated, 2_000)).toEqual([]);
     expect(isAlive(leader)).toBe(false);
@@ -97,7 +99,7 @@ describe('KL-015-D5 / AC-11 k: a guided launch is reaped by its own markers, who
   it('reports a survivor when the kill does not take, so the teardown rejects and the slot stays held', async () => {
     const launch = await fakeLaunch('survivor');
     // A kill that signals nothing (a process the kernel will not end): the very condition `hardTeardown` fails closed on.
-    const enumerated = killLaunchTree([launch.scratch], { kill: () => undefined });
+    const enumerated = await killLaunchTree([launch.scratch], { kill: () => undefined });
     expect([...enumerated].sort()).toEqual([launch.handle.pid ?? 0, launch.grandchild].sort());
     const left = await survivorsOf(enumerated, 150);
     expect([...left].sort()).toEqual([launch.handle.pid ?? 0, launch.grandchild].sort());
@@ -105,7 +107,7 @@ describe('KL-015-D5 / AC-11 k: a guided launch is reaped by its own markers, who
 
   it('fails closed on a process table that cannot show this worker: nothing is signalled and nothing is reported gone', async () => {
     const launch = await fakeLaunch('unreadable');
-    expect(() => killLaunchTree([launch.scratch], { readTable: () => [] })).toThrow('PROCESS_TABLE_UNREADABLE');
+    await expect(killLaunchTree([launch.scratch], { readTable: () => [] })).rejects.toThrow('PROCESS_TABLE_UNREADABLE');
     expect(isAlive(launch.handle.pid ?? 0)).toBe(true);
     expect(isAlive(launch.grandchild)).toBe(true);
   }, 30_000);

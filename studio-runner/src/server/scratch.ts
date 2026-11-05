@@ -9,9 +9,10 @@
  * duration of the run and are wiped when it ends; they are not written to scratch, not placed in
  * a retry buffer and not queued in a report body (AC-21, architecture §9.2).
  */
-import { mkdir, readdir, rm } from 'node:fs/promises';
+import { mkdir, readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 
+import { host } from '../run/host/index.js';
 import type { RunScratch, ScratchStore } from './adapters.js';
 
 /** Run ids reach this module from the server; keep them to a shape that cannot escape the root. */
@@ -30,13 +31,13 @@ export function createFsScratchStore(root: string): ScratchStore {
       return {
         path,
         async clear(): Promise<void> {
-          await rm(path, { recursive: true, force: true });
+          await host.files.remove(path);
         },
       };
     },
 
     async clearAll(): Promise<void> {
-      await rm(rootPath, { recursive: true, force: true });
+      await host.files.remove(rootPath);
       await mkdir(rootPath, { recursive: true });
     },
 

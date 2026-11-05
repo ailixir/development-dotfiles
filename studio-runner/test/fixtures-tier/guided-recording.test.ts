@@ -55,13 +55,12 @@ import type {PublicationDocument} from '../helpers/publicationFixture.js';
 import { startSecretLoginFixture } from '../fixtures/secret-login/server.js';
 import { dispatch, guidedContext, proposal } from '../helpers/guided.js';
 import {evidencePath} from '../helpers/evidenceOut.js';
+import { describePosixOnly } from '../helpers/platform.js';
 // Typed view of the static JSON import: the file exceeds tsserver's 4 MiB non-TS limit, so ESLint's projectService types it as `error`.
 const publication=publicationJson as unknown as PublicationDocument;
 
 const CANARY = 'obs013-guided-recording-canary-5c2e';
 let fixture: Awaited<ReturnType<typeof startSecretLoginFixture>>;
-beforeAll(async () => { fixture = await startSecretLoginFixture(CANARY); });
-afterAll(async () => { await fixture.close(); });
 
 async function scan(directory: string): Promise<string[]> {
   const hits: string[] = [];
@@ -203,6 +202,10 @@ async function guidedLearnRun(fault: 'none' | 'recorderFileLost' | 'published') 
   return { root, objects, evidenceRoot, context, messages, outcomes, ordering, request, scratch };
 }
 
+// ADR-SC-009: skipped on Windows; the body is not re-indented, to keep the diff to the gate itself. The fixture hooks sit inside the gate so a Windows run starts no server.
+describePosixOnly('the guided test child listens on a Unix domain socket probe file (helpers/guidedTestChildCore.mjs), and the launch-phase case refuses a directory symlink as the recording dir', 'guided recording', () => {
+beforeAll(async () => { fixture = await startSecretLoginFixture(CANARY); });
+afterAll(async () => { await fixture.close(); });
 describe('guided learn run recording on real Chromium (STUDIO-OBS-013)', () => {
   it('records the persistent context, uploads after browser scratch disposal, and reports one timing per dispatched action', async () => {
     const run = await guidedLearnRun('none');
@@ -338,4 +341,5 @@ describe('guided learn run recording on real Chromium (STUDIO-OBS-013)', () => {
       expect(guided.scratchDirectory && existsSync(guided.scratchDirectory)).toBe(false);
     } finally { await handle.dispose(); await rm(root, { recursive: true, force: true }); }
   });
+});
 });

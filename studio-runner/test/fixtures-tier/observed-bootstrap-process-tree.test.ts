@@ -6,6 +6,7 @@ import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {expect,it} from 'vitest';
+import { describePosixOnly } from '../helpers/platform.js';
 import corpus from '../../../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json' with {type:'json'};
 import {createChildBrowserLauncher,createForkSpawner} from '../../src/run/launcher.js';
 import type {ChildProcessHandle} from '../../src/run/launcher.js';
@@ -24,6 +25,8 @@ import {createFsScratchStore} from '../../src/server/scratch.js';
 import {untilMs} from './realRunner.js';
 import {nativeEvidenceDirectory,nativeJson,archiveNativeVideo,decodeNativeBlank} from './nativeBlankVideo.js';
 function filesUnder(root:string):string[]{return !existsSync(root)?[]:readdirSync(root).flatMap(name=>{const path=join(root,name);return statSync(path).isDirectory()?filesUnder(path):[path];});}
+// ADR-SC-009: skipped on Windows; the body is not re-indented, to keep the diff to the gate itself.
+describePosixOnly('freezes the Chromium and encoder tree with SIGSTOP/SIGCONT and observes it through the `ps -o stat=` oracle; Windows has neither', 'observed bootstrap process tree', () => {
 it.each(['no-app','captured-unpublished','committed-before-ready','committed-before-ready-orderly','ready-sent-dropped','ready-received-stop'] as const)('settles actual compiled %s Chromium/encoder tree and exact native ownership while releasing scratch/capacity',async phase=>{
  const diagnostics=await nativeEvidenceDirectory('process-tree-'+phase);
  const directory=await mkdtemp(join(tmpdir(),'bootstrap-tree-')),marker=join(directory,'context-created'),reports:Record<string,unknown>[]=[],messages:unknown[]=[];let handle:ChildProcessHandle|undefined,applicationVisits=0,executeSends=0;const suspended:number[]=[],quiescenceFacts:Record<string,unknown>={},nativeFacts:Record<string,unknown>={};
@@ -54,3 +57,4 @@ it.each(['no-app','captured-unpublished','committed-before-ready','committed-bef
   }finally{await app.drain();}
  }finally{for(const pid of suspended){if(isAlive(pid)){try{process.kill(pid,'SIGCONT');process.kill(pid,'SIGKILL');}catch{/* failed-test cleanup only */}}}if(handle?.pid&&isAlive(handle.pid))handle.kill();await new Promise<void>(r=>server.close(()=>{r();}));await rm(directory,{recursive:true,force:true});}
 },30000);
+});

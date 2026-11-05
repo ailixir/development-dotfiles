@@ -1,6 +1,7 @@
 import { isAbsolute, relative, resolve } from 'node:path';
 
 import { applyAllowAll, parseAllowAllDomainsEnv, parseAllowedDomainsEnv } from '../allowedDomains.js';
+import { host } from '../run/host/index.js';
 
 /**
  * Runner configuration (AC-22c, architecture §8.5).
@@ -204,12 +205,13 @@ const KEY_SPECS: Readonly<Record<string, KeySpec>> = {
   SERVICE_IDENTITY: { field: 'serviceIdentityToken', kind: 'string', required: true },
   CALLBACK_IDENTITY: { field: 'callbackIdentityToken', kind: 'string', required: true },
   CALLBACK_BASE_URL: { field: 'callbackBaseUrl', kind: 'string', required: true },
-  SCRATCH_DIR: { field: 'scratchDir', kind: 'string', required: false, fallback: '/tmp/studio-runner' },
+  // The defaults are the host's (posix `/tmp/studio-runner[-objects]`; win32 under `os.tmpdir()`, ADR-SC-009).
+  SCRATCH_DIR: { field: 'scratchDir', kind: 'string', required: false, fallback: host.files.defaultRoots.scratch },
   OBJECT_STORE_DIR: {
     field: 'objectStoreDir',
     kind: 'string',
     required: false,
-    fallback: '/tmp/studio-runner-objects',
+    fallback: host.files.defaultRoots.objects,
   },
   OBJECT_STORE_PROVIDER: {
     field: 'objectStoreProvider',

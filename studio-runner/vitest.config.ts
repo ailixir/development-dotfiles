@@ -29,7 +29,8 @@ export default defineConfig({
     include: ['test/**/*.test.ts'],
     exclude: [...configDefaults.exclude, 'test/fixtures-tier/**', 'test/deployment/**'],
     coverage: {
-      enabled: true,
+      // ADR-SC-009: the POSIX-only tests are skipped on Windows, so the gate is enforced on Linux and macOS only.
+      enabled: process.platform !== 'win32',
       provider: 'v8',
       reportsDirectory: 'coverage',
       reporter: ['text', 'json-summary'],
@@ -67,8 +68,12 @@ export default defineConfig({
         'src/run/child.ts',
         'src/run/perceptionInPage.ts',
         'src/run/pageStateInPage.ts',
-        // Local-start tooling (dev.sh): checked by `node --test scripts/local-stack.check.mjs` against real openssl/keytool
+        // ADR-SC-009: Windows-only edges (CIM, taskkill, ACLs), exercised only on Windows; their pure logic in `win32*Model.ts` stays measured.
+        'src/run/host/win32Process.ts',
+        'src/run/host/win32Files.ts',
+        // Local-start tooling (`node scripts/dev.mjs`): checked by `node --test scripts/local-stack.check.mjs` against real openssl/keytool
         // and the real runner, which the unit tier's v8 run cannot see. Not shipped; not part of the `scripts/**` gate.
+        'scripts/dev.mjs',
         'scripts/local-stack.mjs',
         'scripts/local-tokens.mjs',
         'scripts/local-stack.check.mjs',

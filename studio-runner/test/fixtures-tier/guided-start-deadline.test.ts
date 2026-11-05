@@ -21,6 +21,7 @@ import { TEST_DOMAINS } from '../helpers/allowedDomains.js';
  * launcher's own `checks-guided-` scratch directory.
  */
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describePosixOnly } from '../helpers/platform.js';
 // eslint-disable-next-line no-restricted-imports -- Stand-in "Chrome" for the late-spawn case: a fixed `node -e` helper whose only input is a path this test built.
 import { spawn } from 'node:child_process';
 import { readdirSync } from 'node:fs';
@@ -90,7 +91,8 @@ async function recordingDirectory(): Promise<string> {
   return dir;
 }
 
-describe('REL-001/D4 — a launch hung by a frozen browser is cut off and fully torn down', () => {
+const POSIX_ONLY = 'a watcher SIGSTOPs the browser process group (negative pid) to freeze the launch; Windows has no process groups or SIGSTOP';
+describePosixOnly(POSIX_ONLY, 'REL-001/D4 — a launch hung by a frozen browser is cut off and fully torn down', () => {
   it('rejects at the deadline with TIMEOUT, and after close() no process, scratch or recording file remains', async () => {
     const dir = await recordingDirectory();
     const watcher = freezeOwnBrowser();

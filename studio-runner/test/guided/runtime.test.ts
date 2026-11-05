@@ -13,6 +13,7 @@ import { OriginNotAllowed } from '../../src/allowedDomains.js';
 import { ClosedActionError } from '../../src/run/closedError.js';
 import { guidedContext, dispatch, proposal, sessionStub } from '../helpers/guided.js';
 import { inProcessBrowser } from '../helpers/guidedStepService.js';
+import { isWindows } from '../helpers/platform.js';
 import { GuidedLaunchFailure, GUIDED_RECORDING_FINALIZE_MS, GUIDED_START_BUDGET_MS, GUIDED_START_RESERVE_MS, GUIDED_START_TRANSPORT_CEILING_MS, launchFailureCause } from '../../src/run/guidedBrowser.js';
 import {PasswordNoEffect} from '../../src/run/passwordControl.js';
 import type { GuidedBrowser, GuidedRecordingRequest, GuidedStartup } from '../../src/run/guidedBrowser.js';
@@ -529,13 +530,14 @@ describe('guided session recording on the runtime (STUDIO-OBS-013 AC-1, AC-2)', 
     let nodes=0;
     const inspect=async(path:string,depth:number,scope:string|null,nonce:string|null):Promise<void>=>{
       expect(++nodes).toBeLessThanOrEqual(5);expect(depth).toBeLessThanOrEqual(4);
-      const stats=await lstat(path);expect(stats.isSymbolicLink()).toBe(false);expect(stats.uid).toBe(process.getuid?.());
+      // ADR-SC-009: uid, mode bits and nlink are POSIX file metadata, checked on Linux and macOS only; the tree's shape is checked everywhere.
+      const stats=await lstat(path);expect(stats.isSymbolicLink()).toBe(false);if(!isWindows)expect(stats.uid).toBe(process.getuid?.());
       if(depth===4){
-        expect(stats.isFile()).toBe(true);expect(stats.mode&0o777).toBe(0o600);expect(stats.nlink).toBe(1);expect(stats.size).toBeGreaterThan(0);expect(stats.size).toBeLessThanOrEqual(32768);
+        expect(stats.isFile()).toBe(true);if(!isWindows){expect(stats.mode&0o777).toBe(0o600);expect(stats.nlink).toBe(1);}expect(stats.size).toBeGreaterThan(0);expect(stats.size).toBeLessThanOrEqual(32768);
         const owner:unknown=JSON.parse(await readFile(path,'utf8'));
         expect(owner).toEqual({version:1,pid:process.pid,nonce,scope});return;
       }
-      expect(stats.isDirectory()).toBe(true);expect(stats.mode&0o777).toBe(0o700);
+      expect(stats.isDirectory()).toBe(true);if(!isWindows)expect(stats.mode&0o777).toBe(0o700);
       const entries=await readdir(path);expect(entries).toHaveLength(1);const entry=entries[0];if(entry===undefined)throw new Error('OWNERSHIP_ENTRY_MISSING');
       if(depth===0)expect(entry).toBe('.checks-guided-recordings');
       else if(depth===1){expect(entry).toMatch(/^[a-f0-9]{64}$/u);scope=entry;}

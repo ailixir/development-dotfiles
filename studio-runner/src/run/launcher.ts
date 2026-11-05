@@ -81,12 +81,15 @@ import { signalProcessTree } from './tree.js';
 import {descendantsOf,isAlive,canEnumerateProcessTree,readProcessTableAsync} from './tree.js';
 import type {ProcessRow} from './tree.js';
 import {createAppVideoRegistry,sealAppVideoOwner,observeOwnedAppRecording} from './appVideoOwnership.js';
+import { host } from './host/index.js';
 import type {AppVideoSnapshot} from './appVideoOwnership.js';
 
 /** A spawned child, reduced to what the launcher needs. Injected so the unit tier spawns none. */
 export interface ChildProcessHandle {
   /** Private observed recovery: retain live descendants and prove all writers stopped. */
   trackTree?():void;
+  /** Called once the child is ready. A host that does not sample (`host.process.samplesTree` false) records the tree here, once; elsewhere a no-op. */
+  snapshotTree?():void;
   quiesce?(remainingMs:number):Promise<boolean>;
   /** Any JSON-serialisable frame: the replay protocol's `ParentMessage` or a guided child frame. */
   send(message: unknown): void;
@@ -173,15 +176,7 @@ export interface ChildLauncherOptions {
  * re-checks the *constructed* environment on every launch, so a future addition to this list fails
  * the launch loudly instead of quietly widening the browser process's trust boundary.
  */
-export const INHERITED_ENV_KEYS: readonly string[] = [
-  'PATH',
-  'HOME',
-  'LANG',
-  'LC_ALL',
-  'PLAYWRIGHT_BROWSERS_PATH',
-  'DISPLAY',
-  'XDG_RUNTIME_DIR',
-];
+export const INHERITED_ENV_KEYS: readonly string[] = host.process.inheritedEnvKeys;
 
 /**
  * Namespaces whose variables can make a process load code it was not asked to load.
@@ -198,13 +193,21 @@ export const INHERITED_ENV_KEYS: readonly string[] = [
  *   This one reaches the *browser* binary, not just Node.
  * - `DYLD_*` — the same thing on macOS, where the fixtures tier runs.
  * - `OPENSSL_*` — `OPENSSL_CONF` loads providers and engines, which are shared objects.
+ * - `COR_*` and `CORECLR_*` — the .NET Framework and .NET Core profiler hooks (`COR_PROFILER`, `COR_PROFILER_PATH*`,
+ *   `CORECLR_PROFILER*`, `*_ENABLE_PROFILING`) load a DLL into any .NET process. Windows, but guarded on every OS.
+ * - `DOTNET_*` — `DOTNET_STARTUP_HOOKS` (and `DOTNET_ADDITIONAL_DEPS`) load assemblies before `Main`.
+ *
+ * Plus one family that is a single name, {@link CODE_LOADING_ENV_NAMES}.
  */
-export const CODE_LOADING_ENV_PREFIXES: readonly string[] = ['NODE_', 'LD_', 'DYLD_', 'OPENSSL_'];
+export const CODE_LOADING_ENV_PREFIXES: readonly string[] = ['NODE_', 'LD_', 'DYLD_', 'OPENSSL_', 'COR_', 'CORECLR_', 'DOTNET_'];
+
+/** Code-loading variables that are one name rather than a prefix: `PSModulePath` decides which modules PowerShell autoloads. Upper case. */
+export const CODE_LOADING_ENV_NAMES: readonly string[] = ['PSMODULEPATH'];
 
 /** True when a variable name belongs to one of the code-loading families above. */
 export function isCodeLoadingEnvKey(key: string): boolean {
   const upper = key.toUpperCase();
-  return CODE_LOADING_ENV_PREFIXES.some((prefix) => upper.startsWith(prefix));
+  return CODE_LOADING_ENV_PREFIXES.some((prefix) => upper.startsWith(prefix)) || CODE_LOADING_ENV_NAMES.includes(upper);
 }
 
 /**
@@ -246,10 +249,11 @@ export function createForkSpawner(): ChildSpawner {
         // length cap in front of output this package did not format — a Playwright exception or a
         // Chromium warning (AC-8).
         stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
-        // The child leads its **own process group**, so one signal reaches Chromium and every
-        // process below it. Without this, `kill` reaches Node and orphans the browser (AC-11a).
-        // Deliberately not `unref`ed: the parent still waits on this child and still reaps it.
-        detached: true,
+        // From the host. posix: `detached: true` — the child leads its **own process group**, so one
+        // signal reaches Chromium and every process below it; without it, `kill` reaches Node and
+        // orphans the browser (AC-11a). win32: not detached, so the OS job object ends the browser
+        // with the child. Deliberately not `unref`ed: the parent still waits on this child and still reaps it.
+        ...host.process.fork,
         serialization: 'json',
       });
       // Descendant tracking for observed recovery. Sampling is **asynchronous and never
@@ -263,12 +267,19 @@ export function createForkSpawner(): ChildSpawner {
       // `kill()` signals from it, so the kill path never blocks the event loop on a synchronous `ps` (AC-11 j, R10-OBS-1).
       let latest:readonly ProcessRow[]|null=null;
       const absorb=(table:readonly ProcessRow[]):void=>{if(table.length>0)latest=table;if(child.pid)for(const pid of descendantsOf(child.pid,table))remembered.add(pid);};
-      const sample=():void=>{if(sampling||!child.pid)return;sampling=readProcessTableAsync(100).then(absorb).finally(()=>{sampling=undefined;});};
+      const sample=():void=>{if(sampling||!child.pid)return;sampling=readProcessTableAsync(host.process.sampleTimeoutMs).then(absorb).finally(()=>{sampling=undefined;});};
       const remaining=(end:number):number=>Math.max(1,Math.min(100,end-Date.now()));
       return {
-        trackTree(){if(!tracking){sample();tracking=setInterval(sample,25);}},
+        // A host that does not sample (win32: a table read takes 0.3–2 s) runs no interval: one snapshot after `ready`.
+        trackTree(){if(host.process.samplesTree&&!tracking){sample();tracking=setInterval(sample,host.process.sampleIntervalMs);}},
+        snapshotTree(){if(!host.process.samplesTree)sample();},
         async quiesce(remainingMs){
           const end=Date.now()+Math.max(1,remainingMs);if(tracking){clearInterval(tracking);tracking=undefined;}
+          // No sampler: terminate the child (its job object takes the browser and the encoder with it), then poll the child
+          // and the snapshot pids inside the same cleanup window. Snapshot pids are polled, never signalled: a reused pid is
+          // somebody else's process. A process born after the snapshot is the job's.
+          if(!host.process.samplesTree){const pid=child.pid;if(!pid)return false;const pids=[...remembered,pid];if(isAlive(pid))signalProcessTree(pid,'SIGKILL',undefined,latest??[]);
+            while(pids.some(member=>isAlive(member))){if(Date.now()>=end)return false;await new Promise<void>(r=>{setTimeout(r,Math.max(1,Math.min(5,end-Date.now())));});}return true;}
           // A sample already in flight may hold the only reading of a descendant that has since
           // been re-parented away from the exited leader, so it is awaited, never discarded —
           // but only within this cleanup window.
@@ -320,7 +331,8 @@ export function createForkSpawner(): ChildSpawner {
             signalProcessTree(pid, 'SIGKILL', undefined, table);
             for (const member of remembered) if (member !== pid && isAlive(member)) signalProcessTree(member, 'SIGKILL', undefined, table);
           };
-          if (latest !== null) { sweep(latest); return; }
+          // A host that does not sample signals at once, from its one snapshot if it has landed: the job object covers the rest.
+          if (latest !== null || !host.process.samplesTree) { sweep(latest ?? []); return; }
           // No reading has landed yet (spawned a moment ago, or never tracked). Enumerate before signalling, always (tree.ts): read
           // one table asynchronously, then signal. An unreadable `ps` still signals the leader's group and pid.
           void readProcessTableAsync(100).then((table) => {
@@ -338,7 +350,7 @@ export function createForkSpawner(): ChildSpawner {
 }
 
 /**
- * The one environment a browser child is given, replay and guided alike: the allowlist above, `TMPDIR` at the caller's directory (replay: the
+ * The one environment a browser child is given, replay and guided alike: the allowlist above, the temp keys (posix `TMPDIR`) at the caller's directory (replay: the
  * run's scratch temp directory; guided: the session's private 0700 directory), and the navigation whitelist. Nothing else is inherited.
  */
 export function confinedEnvironment(
@@ -346,13 +358,9 @@ export function confinedEnvironment(
   tmpDir: string,
   allowedDomains: readonly string[],
 ): Record<string, string> {
-  const env: Record<string, string> = {};
-  for (const key of INHERITED_ENV_KEYS) {
-    const value = parentEnv[key];
-    if (value !== undefined && value !== '') env[key] = value;
-  }
-  // Chromium's temporary output follows `TMPDIR` into the per-run scratch directory (AC-22).
-  env.TMPDIR = tmpDir;
+  // The allowlist, and the host's temp-directory keys at `tmpDir`: Chromium's temporary output follows them into the
+  // per-run scratch directory (AC-22). posix: `TMPDIR`.
+  const env = host.process.childEnv(parentEnv, tmpDir);
   // The browsers come from the image; a child must never fetch one at run time (ADR-001 §4.2).
   env.PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = '1';
   // The one runner fact the child needs: the navigation whitelist. Always written (empty denies everything); an inherited
@@ -473,6 +481,7 @@ async function launchObservedChild(options: ChildLauncherOptions, launchOptions:
                 demand(!ready && !result);
                 validateObserved('replay-ipc#/definitions/Ready3', m, OBSERVED_LIMITS.ready);
                 ready = m;
+                child.snapshotTree?.();
             }
             else if (m.kind === 'result') {
                 demand(!result && (m.ok ? m.errorCode === null : m.errorCode !== null));

@@ -12,6 +12,8 @@
  *
  * **Startup order is normative (drop D1.0 section 3), and nothing listens before the last step:**
  *
+ * 0. a host that does not support production (win32, ADR-SC-009: Windows is local development only) refuses
+ *    `NODE_ENV=production` (`HOST_UNSUPPORTED`, exit 78);
  * 1. configuration: `loadConfig`, `loadListenerConfig`, `loadGuidedConfig`; every problem is one
  *    `configuration rejected: <problem>` line and exit 78;
  * 2. the process table must list this process (exit 69);
@@ -23,7 +25,7 @@
  * 7. guided only: the RUNNER-SCRATCH sweep (`prepareRecordingScratch`), so SIGKILL residue is reclaimed
  *    before a session can be assigned (`GUIDED_WORKER_UNAVAILABLE`, exit 1);
  * 8. the application is built and listens (any failure: `RUNNER_START_FAILED`, exit 1);
- * 9. one `SIGTERM`/`SIGINT` drain is registered.
+ * 9. one drain is registered, on each of the host's drain signals (posix `SIGTERM`/`SIGINT`).
  *
  * Every refusal is one value-free stderr line. None names a path, a variable value or a byte of a file,
  * so `terminationMessagePolicy: FallbackToLogsOnError` can show them in a pod description safely.
@@ -41,10 +43,9 @@
  * against 10.6's in-process fake and `npm test` launches no browser (AC-25).
  */
 import { createPublicKey } from 'node:crypto';
-import { existsSync, readFileSync, realpathSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { basename, dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 import { isAllowAll } from './allowedDomains.js';
 import { currentRuntimeVersions } from './compat/index.js';
@@ -55,6 +56,7 @@ import { launchGuidedChild } from './run/guidedChildLauncher.js';
 import { prepareRecordingScratch } from './run/recordingScratch.js';
 import type { RecordingScratch } from './run/recordingScratch.js';
 import { canEnumerateLaunchTree } from './run/tree.js';
+import { host } from './run/host/index.js';
 import type { BrowserLauncher } from './server/adapters.js';
 import { createApplication } from './server/application.js';
 import type { GuidedModeDependencies, RunnerApplication } from './server/application.js';
@@ -132,7 +134,7 @@ export interface GuidedStartupSeams {
 export interface MainOptions {
   readonly env: Readonly<Record<string, string | undefined>>;
   /** Registers a signal handler. Injected so the drain path is testable without real signals. */
-  readonly onSignal: (signal: 'SIGTERM' | 'SIGINT', handler: () => void) => void;
+  readonly onSignal: (signal: NodeJS.Signals, handler: () => void) => void;
   readonly write: (line: string) => void;
   readonly setExitCode: (code: number) => void;
   readonly launcher?: BrowserLauncher | undefined;
@@ -172,6 +174,10 @@ export const CONFIGURATION_DENIED_LAUNCH_TREE = 'CONFIGURATION_DENIED LAUNCH_TRE
 export const GUIDED_WORKER_UNAVAILABLE = 'GUIDED_WORKER_UNAVAILABLE';
 /** Any other failure after configuration was accepted (for example the listener could not bind). */
 export const RUNNER_START_FAILED = 'RUNNER_START_FAILED';
+/** A production start on a host that supports local development only. Value-free; exit {@link CONFIG_EXIT_CODE}. */
+export const HOST_PRODUCTION_UNSUPPORTED =
+  'HOST_UNSUPPORTED production: this host is supported for local development only (ADR-SC-009: Windows is local ' +
+  'development only; production runs on Linux). Refusing to start with NODE_ENV=production.';
 
 const DEBUG_ENVIRONMENT = ['DEBUG', 'PWDEBUG', 'NODE_DEBUG', 'NODE_OPTIONS'] as const;
 
@@ -192,10 +198,17 @@ function realResolve(path: string): string {
     tail.unshift(basename(current));
     current = parent;
   }
-  return join(realpathSync(current), ...tail);
+  return join(host.files.canonical(current), ...tail);
 }
 
 export async function main(options: MainOptions): Promise<MainResult> {
+  // ── 0. The host. Production is Linux; a development-only host never starts as production. ────
+  if (!host.process.productionSupported && options.env.NODE_ENV === 'production') {
+    options.write(HOST_PRODUCTION_UNSUPPORTED);
+    options.setExitCode(CONFIG_EXIT_CODE);
+    return { started: false };
+  }
+
   // ── 1. Configuration: every loader reports every problem, and one exit covers them all. ──────
   const problems: string[] = [];
   const collect = <T>(load: () => T): T | undefined => {
@@ -329,8 +342,7 @@ export async function main(options: MainOptions): Promise<MainResult> {
         },
       );
     };
-    options.onSignal('SIGTERM', drain);
-    options.onSignal('SIGINT', drain);
+    for (const signal of host.process.drainSignals) options.onSignal(signal, drain);
 
     return { started: true, port, application };
   } catch {
@@ -364,7 +376,7 @@ function guidedModeDependencies(
 
 // Not reachable under vitest: the module is imported, never invoked as the entry point.
 /* v8 ignore start */
-if (process.argv[1] !== undefined && process.argv[1] === fileURLToPath(import.meta.url)) {
+if (host.process.isEntryPoint(import.meta.url)) {
   void main({
     env: process.env,
     onSignal: (signal, handler) => {

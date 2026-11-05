@@ -23,15 +23,16 @@
  * disconnects. (f) One close bound, measured from sending `close`, covers a hung step and a frozen Chrome. (g) Every term is a hard cap:
  * close bound 4.5 s + kill step 0.3 s (+ the lifecycle callback's 10 s) stays inside the backend's 15 s per call.
  */
-import { lstat, mkdtemp, rm } from 'node:fs/promises';
+import { lstat, mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, resolve, sep } from 'node:path';
+import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ClosedActionError } from './closedError.js';
 import { GUIDED_CLOSE_GRACE_MS, GUIDED_RECORDING_FINALIZE_MS, GuidedLaunchFailure, launchFailureCause } from './guidedBrowser.js';
 import type { GuidedBrowser, GuidedLaunch, GuidedLaunchPhase, GuidedStepHooks, GuidedStepResult } from './guidedBrowser.js';
 import { decodeError, guidedFrameCap, parseChildFrame, parseReplyValue } from './guidedChildProtocol.js';
 import type { CloseReply, GuidedChildFrame, GuidedChildRequest, LaunchReply, ReplyContext } from './guidedChildProtocol.js';
+import { host } from './host/index.js';
 import { confinedEnvironment, createForkSpawner } from './launcher.js';
 import type { ChildProcessHandle, ChildSpawner } from './launcher.js';
 import { OBSERVATION_DEADLINE_MS, RETURN_WINDOW_MS } from './observationDeadline.js';
@@ -223,8 +224,7 @@ class ChildSession {
   private confined(videoPath: string | null): boolean {
     if (videoPath === null) return true;
     if (this.recordingDir === null || !videoPath.endsWith('.webm')) return false;
-    const resolved = resolve(videoPath);
-    return resolved.startsWith(`${this.recordingDir}${sep}`);
+    return host.files.isInside(this.recordingDir, resolve(videoPath));
   }
 
   private fence(req: number): void {
@@ -294,7 +294,7 @@ class ChildSession {
     const began = Date.now();
     this.child.kill();
     const quiet = this.child.quiesce === undefined ? true : await within(this.child.quiesce(bound), bound, false);
-    await within(rm(this.directory, { recursive: true, force: true }).catch(() => undefined), bound - (Date.now() - began), undefined);
+    await within(host.files.remove(this.directory).catch(() => undefined), bound - (Date.now() - began), undefined);
     if (!quiet) { this.lateGone = this.confirmGone(); this.lateGone.catch(() => undefined); throw lost(); }
   }
 
@@ -307,7 +307,7 @@ class ChildSession {
       await new Promise<void>(done => { setTimeout(done, GUIDED_LATE_QUIESCE_INTERVAL_MS); });
       this.child.kill();
       if (this.child.quiesce === undefined || await within(this.child.quiesce(GUIDED_LATE_QUIESCE_BOUND_MS), GUIDED_LATE_QUIESCE_BOUND_MS, false)) {
-        await rm(this.directory, { recursive: true, force: true }).catch(() => undefined);
+        await host.files.remove(this.directory).catch(() => undefined);
         return;
       }
     }
@@ -415,7 +415,7 @@ export function createGuidedChildLauncher(options: GuidedChildLauncherOptions = 
     try {
       child = spawner.spawn({ modulePath, args: [], env: confinedEnvironment(parentEnv, directory, config.allowedDomains) });
     } catch {
-      await rm(directory, { recursive: true, force: true }).catch(() => undefined);
+      await host.files.remove(directory).catch(() => undefined);
       throw new GuidedLaunchFailure(() => Promise.resolve(), new Error('CONTEXT_LOST'));
     }
     const session = new ChildSession(child, directory, settings, onLost);
@@ -442,6 +442,8 @@ export function createGuidedChildLauncher(options: GuidedChildLauncherOptions = 
       signal.removeEventListener('abort', onAbort);
     }
     session.ready = true;
+    // A host that does not sample its process table records the child's tree once, now that the browser exists.
+    child.snapshotTree?.();
     return browserOf(session, config, reply, settings);
   };
 }

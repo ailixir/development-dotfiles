@@ -22,21 +22,23 @@
  * the pinned image and on the developer machines `ED-05`'s `gate_note` permits this tier to run
  * on. They are observation helpers; nothing on the production path depends on their output.
  *
+ * ## The host seam
+ *
+ * The OS-specific edges — the `ps` readers, the group-plus-pid signal, the marker rules — live in
+ * `src/run/host/` (ADR-SC-009). This module is the stable surface over them: posix is the code that
+ * was here, moved verbatim; win32 keeps the same contracts with its own table and kill.
+ *
  * `node:child_process` and `node:process` are confined to `src/run/**` by ADR-001 §6, and this
  * module is inside it. It adds **no** dependency: the closure stays `playwright`,
  * `playwright-core`, `typescript` (AC-20).
  */
 
-import { execFile, spawnSync } from 'node:child_process';
+import { host } from './host/index.js';
+import type { ProcessRow, ProcessRowWithArgs, TreeSignalOutcome } from './host/index.js';
 
-/** One row of the process table, reduced to the two columns a tree needs. */
-export interface ProcessRow {
-  readonly pid: number;
-  readonly ppid: number;
-}
-
-/** The one `ps` invocation both readers use: every process, pid and parent pid, no header. */
-const PS_ARGUMENTS = ['-A', '-o', 'pid=,ppid='] as const;
+export type { ProcessRow, ProcessRowWithArgs, TreeSignalOutcome } from './host/index.js';
+/** The posix marker matcher (`host/posix.ts`), re-exported where it always was. */
+export { commandLineNames } from './host/posix.js';
 
 /**
  * The whole process table, or an empty list when it cannot be read.
@@ -44,21 +46,10 @@ const PS_ARGUMENTS = ['-A', '-o', 'pid=,ppid='] as const;
  * Empty rather than throwing: this is used by cleanup and by assertions, and a cleanup path that
  * throws because a diagnostic tool is missing has made the situation worse. A caller that needs to
  * distinguish "nothing is running" from "nothing could be read" asks {@link isAlive} about a pid it
- * knows.
+ * knows. The reader is the host's (`ps -A -o pid=,ppid=` on posix).
  */
-export function readProcessTable(timeoutMs=5000): readonly ProcessRow[] {
-  try {
-    const listing = spawnSync('ps', [...PS_ARGUMENTS], {
-      encoding: 'utf8',
-      // A process listing is bounded; a hang here would be a new way to stall the very path this
-      // story exists to keep responsive.
-      timeout: Math.max(1,timeoutMs),
-    });
-    if (listing.status !== 0 || typeof listing.stdout !== 'string') return [];
-    return parseProcessTable(listing.stdout);
-  } catch {
-    return [];
-  }
+export function readProcessTable(timeoutMs=host.process.tableTimeoutMs): readonly ProcessRow[] {
+  return host.process.readTable(timeoutMs);
 }
 
 /**
@@ -75,27 +66,8 @@ export function readProcessTable(timeoutMs=5000): readonly ProcessRow[] {
  * expiry `ps` is killed and the answer is empty), and a missing or failing `ps` resolves to an
  * empty table — it never rejects, because its callers are tracking and cleanup paths.
  */
-export function readProcessTableAsync(timeoutMs=5000): Promise<readonly ProcessRow[]> {
-  return new Promise((resolve) => {
-    try {
-      execFile('ps', [...PS_ARGUMENTS], { encoding: 'utf8', timeout: Math.max(1,timeoutMs) }, (error, stdout) => {
-        resolve(error === null && typeof stdout === 'string' ? parseProcessTable(stdout) : []);
-      });
-    } catch {
-      resolve([]);
-    }
-  });
-}
-
-function parseProcessTable(stdout: string): readonly ProcessRow[] {
-  const rows: ProcessRow[] = [];
-  for (const line of stdout.split('\n')) {
-    const parts = line.trim().split(/\s+/u);
-    const pid = Number(parts[0]);
-    const ppid = Number(parts[1]);
-    if (Number.isInteger(pid) && Number.isInteger(ppid)) rows.push({ pid, ppid });
-  }
-  return rows;
+export function readProcessTableAsync(timeoutMs=host.process.tableTimeoutMs): Promise<readonly ProcessRow[]> {
+  return host.process.readTableAsync(timeoutMs);
 }
 
 /**
@@ -129,26 +101,7 @@ export function canEnumerateProcessTree(
  * happens to form a cycle in a stale reading cannot loop forever.
  */
 export function descendantsOf(pid: number, table: readonly ProcessRow[] = readProcessTable()): readonly number[] {
-  const children = new Map<number, number[]>();
-  for (const row of table) {
-    const list = children.get(row.ppid);
-    if (list === undefined) children.set(row.ppid, [row.pid]);
-    else list.push(row.pid);
-  }
-  const found: number[] = [];
-  const seen = new Set<number>([pid]);
-  const queue = [pid];
-  while (queue.length > 0) {
-    const next = queue.shift();
-    if (next === undefined) break;
-    for (const child of children.get(next) ?? []) {
-      if (seen.has(child)) continue;
-      seen.add(child);
-      found.push(child);
-      queue.push(child);
-    }
-  }
-  return found;
+  return host.process.descendants(pid, table);
 }
 
 /** Whether a pid still exists. Signal `0` checks for the process without disturbing it. */
@@ -159,36 +112,6 @@ export function isAlive(pid: number): boolean {
   } catch (error) {
     // EPERM means it exists and belongs to somebody else — still alive.
     return (error as NodeJS.ErrnoException).code === 'EPERM';
-  }
-}
-
-/** How a tree signal landed. Returned rather than logged so a caller can assert on it. */
-export interface TreeSignalOutcome {
-  /** Pids signalled, deepest-first, ending with the root. */
-  readonly signalled: readonly number[];
-}
-
-/**
- * Signals one process **and the group it leads**, if it leads one. Never throws.
- *
- * Both, not one: `-pid` reaches everything that stayed in that process's group — Chromium's
- * renderers do — and `pid` reaches the process itself whether or not it is a group leader. Doing
- * only the first misses a non-leader; doing only the second misses the renderers.
- */
-function signalOne(
-  pid: number,
-  signal: NodeJS.Signals,
-  kill: (target: number, signal: NodeJS.Signals) => void,
-): void {
-  try {
-    kill(-pid, signal);
-  } catch {
-    // Not a group leader, or the group is already gone.
-  }
-  try {
-    kill(pid, signal);
-  } catch {
-    // Already gone, or not ours.
   }
 }
 
@@ -237,50 +160,17 @@ export function signalProcessTree(
   },
   table: readonly ProcessRow[] = readProcessTable(),
 ): TreeSignalOutcome {
-  const descendants = descendantsOf(pid, table);
-  const signalled: number[] = [];
-  // Deepest-first: `descendantsOf` is breadth-first, so reversing it puts the leaves first.
-  for (const descendant of [...descendants].reverse()) {
-    signalOne(descendant, signal, kill);
-    signalled.push(descendant);
-  }
-  signalOne(pid, signal, kill);
-  signalled.push(pid);
-  return { signalled };
+  // Group plus pid for every member on posix (`host/posix.ts`); the host owns how one member is signalled.
+  return host.process.signalTree(pid, signal, kill, table);
 }
 
 /**
- * One row of the process table with its command line (STUDIO-OBS-015 REL-001/D4).
- *
- * The command line is read only to decide, in memory, which children belong to one guided launch. It
- * is never logged, returned to a caller outside this module's pure selection, or written anywhere.
+ * {@link readProcessTable} with command lines (STUDIO-OBS-015 REL-001/D4). Same contract: bounded, and `[]` when `ps`
+ * cannot be read. The command line is read only to decide, in memory, which children belong to one guided launch; it is
+ * never logged, returned to a caller outside this module's pure selection, or written anywhere (`ps -ww ... args=` on posix).
  */
-export interface ProcessRowWithArgs extends ProcessRow {
-  readonly args: string;
-}
-
-/** {@link PS_ARGUMENTS} plus the full command line, unwrapped (`-ww`), as the last column. */
-const PS_ARGUMENTS_WITH_ARGS = ['-A', '-ww', '-o', 'pid=,ppid=,args='] as const;
-
-function parseProcessTableWithArgs(stdout: string): readonly ProcessRowWithArgs[] {
-  const rows: ProcessRowWithArgs[] = [];
-  for (const line of stdout.split('\n')) {
-    const match = /^\s*(\d+)\s+(\d+)\s+(.*)$/u.exec(line);
-    if (match === null) continue;
-    rows.push({ pid: Number(match[1]), ppid: Number(match[2]), args: match[3] ?? '' });
-  }
-  return rows;
-}
-
-/** {@link readProcessTable} with command lines. Same contract: bounded, and `[]` when `ps` cannot be read. */
-export function readProcessTableWithArgs(timeoutMs = 5000): readonly ProcessRowWithArgs[] {
-  try {
-    const listing = spawnSync('ps', [...PS_ARGUMENTS_WITH_ARGS], { encoding: 'utf8', timeout: Math.max(1, timeoutMs), maxBuffer: 64 * 1024 * 1024 });
-    if (listing.status !== 0 || typeof listing.stdout !== 'string') return [];
-    return parseProcessTableWithArgs(listing.stdout);
-  } catch {
-    return [];
-  }
+export function readProcessTableWithArgs(timeoutMs = host.process.tableTimeoutMs): readonly ProcessRowWithArgs[] {
+  return host.process.readTableWithArgs(timeoutMs);
 }
 
 /** Injectable readers of {@link canEnumerateLaunchTree}. */
@@ -303,24 +193,6 @@ export function canEnumerateLaunchTree(self: number = process.pid, readers: Laun
   return canEnumerateProcessTree((readers.readTable ?? readProcessTable)(), self, withArgs);
 }
 
-function escapeRegExp(text: string): string {
-  return text.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&');
-}
-
-/**
- * Whether a command line names `marker` as a path of its own: preceded by the start, whitespace, `=`
- * or a quote, and followed by the end, whitespace, a quote or `/`. So `/tmp/checks-guided-ab` is not
- * found inside `/tmp/checks-guided-abc/profile`, and a longer sibling directory never matches.
- */
-export function commandLineNames(args: string, marker: string): boolean {
-  return new RegExp(`(?:^|[\\s='"])${escapeRegExp(marker)}(?:$|[\\s'"/])`, 'u').test(args);
-}
-
-/** A marker is a launch's own absolute temp path. Anything shorter than two segments could match too much. */
-function usableMarker(marker: string): boolean {
-  return marker.startsWith('/') && marker.split('/').filter((segment) => segment.length > 0).length >= 2;
-}
-
 /**
  * The processes one guided launch started, and only those (REL-001/D4, ruling section 3).
  *
@@ -331,20 +203,17 @@ function usableMarker(marker: string): boolean {
  * chosen, which would break the moment capacity is above 1. The worker itself, pid 1 and anything
  * below it are never chosen, so no marker, however odd, can reach an unrelated process.
  */
-export function selectLaunchRoots(table: readonly ProcessRowWithArgs[], parentPid: number, markers: readonly string[]): readonly number[] {
-  const own = markers.filter(usableMarker);
-  // A "worker" that is init (or not a real pid) would make every orphan a candidate.
-  if (own.length === 0 || !Number.isInteger(parentPid) || parentPid <= 1) return [];
-  return table
-    .filter((row) => row.ppid === parentPid && row.pid > 1 && row.pid !== parentPid && own.some((marker) => commandLineNames(row.args, marker)))
-    .map((row) => row.pid);
+export function selectLaunchRoots(table: readonly ProcessRowWithArgs[], parentPid: number, markers: readonly string[], sinceEpochMs?: number): readonly number[] {
+  return host.process.launchRoots(table, parentPid, markers, sinceEpochMs);
 }
 
 /** Injectable edges of {@link killLaunchTree}, so the unit tier can drive it without a process. */
 export interface LaunchTreeEdges {
   readonly parentPid?: number;
-  readonly readTable?: () => readonly ProcessRowWithArgs[];
+  readonly readTable?: () => readonly ProcessRowWithArgs[] | Promise<readonly ProcessRowWithArgs[]>;
   readonly kill?: (target: number, signal: NodeJS.Signals) => void;
+  /** When the launch began (epoch ms). A host with creation times (win32) only selects processes created at or after it. */
+  readonly since?: number;
 }
 
 /**
@@ -358,13 +227,16 @@ export interface LaunchTreeEdges {
  * itself**: `ps` timed out or failed (it reads as `[]`), or the worker is pid 1, which selection refuses.
  * "Nothing found" over a table that could not be read is not "nothing to kill"; the caller must treat the
  * launch as not confirmed gone and keep its slot held. A readable table with no match returns `[]`.
+ *
+ * Asynchronous because a host may only snapshot its table asynchronously (win32). On posix the default reader is still the
+ * synchronous `ps -ww` read, taken at the call, before the first await.
  */
-export function killLaunchTree(markers: readonly string[], edges: LaunchTreeEdges = {}): readonly number[] {
+export async function killLaunchTree(markers: readonly string[], edges: LaunchTreeEdges = {}): Promise<readonly number[]> {
   const parentPid = edges.parentPid ?? process.pid;
-  const table = (edges.readTable ?? readProcessTableWithArgs)();
+  const table = await (edges.readTable ?? (() => host.process.readLaunchTable(host.process.tableTimeoutMs)))();
   if (!Number.isInteger(parentPid) || parentPid <= 1 || !canEnumerateProcessTree(table, parentPid)) throw new Error('PROCESS_TABLE_UNREADABLE');
   const pids = new Set<number>();
-  for (const root of selectLaunchRoots(table, parentPid, markers)) {
+  for (const root of selectLaunchRoots(table, parentPid, markers, edges.since)) {
     for (const member of [...descendantsOf(root, table), root]) pids.add(member);
     signalProcessTree(root, 'SIGKILL', edges.kill, table);
   }

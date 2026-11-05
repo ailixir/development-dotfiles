@@ -1,5 +1,5 @@
 import { prepareBrowserProfile } from './scratchLayout.js';
-import { fileURLToPath } from 'node:url';
+import { host } from './host/index.js';
 /**
  * The browser child's process entry (AC-5).
  *
@@ -47,7 +47,7 @@ export function startChild(processLike: ChildProcessLike, allowedDomains: readon
 // Not reachable under vitest: the module is imported by the fixtures tier, never invoked as the
 // entry point there. `src/main.ts` guards its own entry the same way.
 /* v8 ignore start */
-if (process.send !== undefined && process.argv[1] === fileURLToPath(import.meta.url)) {
+if (process.send !== undefined && host.process.isEntryPoint(import.meta.url)) {
   const build=loadObservedBuild();
   // The launcher always writes the whitelist (empty denies everything) and the allow-all key (an unset key would mean on); a malformed value is a launcher fault, so the child does not start.
   const domains=resolveAllowedDomains(process.env[ALLOWED_DOMAINS_ENV_KEY],process.env[ALLOW_ALL_DOMAINS_ENV_KEY]);

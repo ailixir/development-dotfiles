@@ -28,6 +28,10 @@ import { createApplication } from '../../src/server/application.js';
 import { GuidedOwnership } from '../../src/guided/ownership.js';
 import { prepareRecordingScratch } from '../../src/run/recordingScratch.js';
 import { testFingerprint, testTls } from '../helpers/guidedTls.js';
+import { isWindows } from '../helpers/platform.js';
+
+/** The first drain signal the host wires: what a pod stop (posix) or a Ctrl+C (win32) delivers. */
+const DRAIN_SIGNAL = isWindows ? 'SIGINT' : 'SIGTERM';
 
 const tlsFile = (name: string): string => fileURLToPath(new URL(`../fixtures/guided-tls/${name}.fixture`, import.meta.url));
 
@@ -133,7 +137,7 @@ describe('src/main.ts — process entry point', () => {
     [`${CONFIG_PREFIX}SERVICE_IDENTITY`]: SERVICE_TOKEN,
     [`${CONFIG_PREFIX}CALLBACK_IDENTITY`]: 'outbound',
     [`${CONFIG_PREFIX}CALLBACK_BASE_URL`]: 'https://api.internal.example',
-    [`${CONFIG_PREFIX}SCRATCH_DIR`]: '/tmp/studio-runner-main-test',
+    [`${CONFIG_PREFIX}SCRATCH_DIR`]: join(tmpdir(), 'studio-runner-main-test'),
     // The one listener is TLS in every deployment (STUDIO-OBS-009 AC-3): the four listener keys are required.
     [`${CONFIG_PREFIX}TLS_KEY_FILE`]: tlsFile('key'),
     [`${CONFIG_PREFIX}TLS_CERT_FILE`]: tlsFile('cert'),
@@ -160,11 +164,12 @@ describe('src/main.ts — process entry point', () => {
 
     expect(result.started).toBe(true);
     expect(result.port).toBeGreaterThan(0);
-    expect(signals).toEqual(['SIGTERM', 'SIGINT']);
+    // The host's drain signals (ADR-SC-009): posix SIGTERM and SIGINT; win32 has no SIGTERM to receive.
+    expect(signals).toEqual(isWindows ? ['SIGINT', 'SIGBREAK', 'SIGHUP'] : ['SIGTERM', 'SIGINT']);
 
-    handlers.get('SIGTERM')?.();
+    handlers.get(DRAIN_SIGNAL)?.();
     // Repeated signals do not start a second drain.
-    handlers.get('SIGTERM')?.();
+    handlers.get(DRAIN_SIGNAL)?.();
     await until(() => result.application?.pool.draining === true);
     await result.application?.drain();
   });
@@ -501,7 +506,7 @@ describe('STUDIO-OBS-009 AC-1 — one SIGTERM drain for both halves', () => {
         },
       });
       expect(result.started).toBe(true);
-      handlers.get('SIGTERM')?.();
+      handlers.get(DRAIN_SIGNAL)?.();
       await until(() => result.application?.pool.draining === true);
       await until(() => !(result.application?.server.raw.listening ?? true));
       await until(() => exitCode === (unconfirmed ? 1 : null) && result.application?.server.raw.listening === false);

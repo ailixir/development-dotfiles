@@ -6,6 +6,7 @@ import type * as PromiseFs from 'node:fs/promises';
 import {basename,dirname,join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {afterEach,expect,it,vi} from 'vitest';
+import { describePosixOnly } from '../helpers/platform.js';
 import corpusJson from '../../../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json' with {type:'json'};
 import type {PublicationDocument} from '../helpers/publicationFixture.js';
 import type {Scope} from '../../src/executor/observedOperations.js';
@@ -23,6 +24,8 @@ vi.mock('node:fs/promises',async importOriginal=>{const actual=await importOrigi
 afterEach(()=>{fault.unsafePreparation=false;vi.restoreAllMocks();vi.unstubAllEnvs();});
 const config={sessionId:'00000000-0000-4000-8000-000000000099',scopeHash:'a'.repeat(64),allowedDomains: TEST_DOMAINS,knownSecrets:[]};
 const scope={...corpus.job.binding.scope} as Scope;
+// ADR-SC-009: skipped on Windows; the body is not re-indented, to keep the diff to the gate itself.
+describePosixOnly('plants file symlinks and hardlinks and asserts the POSIX owner, mode (0o600/0o700) and inode confinement of the profile; the win32 ACL and file-id fence have their own tests', 'browser profile safety', () => {
 it.each(['preferences-symlink','default-symlink','preferences-replacement','preferences-hardlink','default-replacement'] as const)('refuses unsafe %s before invoking any browser launch',async kind=>{
  const scratch=await promises.mkdtemp(join(tmpdir(),'prelaunch-profile-')),outside=await promises.mkdtemp(join(tmpdir(),'prelaunch-external-')),profile=prepareBrowserProfile(scratch),pref=join(profile,'Default','Preferences');const launch=vi.spyOn(chromium,'launchPersistentContext');try{
   if(kind==='preferences-symlink'){await promises.writeFile(join(outside,'Preferences'),JSON.stringify(BROWSER_PREFERENCES),{mode:0o600});await promises.rm(pref);await promises.symlink(join(outside,'Preferences'),pref);}
@@ -118,4 +121,5 @@ it('refuses a Default directory redirected after actual launch rather than accep
 });
 it('launches the actual owned confined guided profile and removes it only after successful close',async()=>{
  const root=await promises.mkdtemp(join(tmpdir(),'guided-owned-positive-'));vi.stubEnv('TMPDIR',root);try{const browser=await launchGuidedBrowser(config,'context',()=>undefined);const evidence=browser.preferenceEvidence;if(!evidence||!browser.scratchDirectory)throw Error('EVIDENCE');expect(evidence.activeProfilePath).toBe(join(await promises.realpath(browser.scratchDirectory),'browser-profile','Default'));expect(evidence.effective).toEqual({credentialsEnableService:false,autofillProfileEnabled:false,autofillCreditCardEnabled:false,restoreOnStartup:5});expect((await promises.stat(evidence.activeProfilePath)).mode&0o777).toBe(0o700);await browser.close();expect(await promises.readdir(root)).toEqual([]);}finally{await promises.rm(root,{recursive:true,force:true});}
+});
 });

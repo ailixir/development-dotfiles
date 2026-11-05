@@ -4,9 +4,11 @@ import type { BridgeNativeFenceEvent } from './types.js';
 import { canonical } from './contracts.js';
 import { join, dirname, resolve } from 'node:path';
 import { hash, insist } from './contracts.js';
+import { host } from '../run/host/index.js';
 
 /** Append-only, data-free consumption records. Directory and record are fsynced before effects.
  * A partial write or damaged record poisons recovery; uncertainty never authorizes replay.
+ * Directory fsync is the host's (`host.files.syncDirectory`; win32: a no-op, ADR-SC-009).
  */
 export class GuidedJournal {
   private readonly consumed = new Set<string>();
@@ -19,7 +21,7 @@ export class GuidedJournal {
     await mkdir(directory, { recursive: true, mode: 0o700 });
     // Persist any newly created directory entries as well as the eventual journal inode.
     for (let current = resolve(directory); ; current = dirname(current)) {
-      const ancestor = await open(current, 'r'); try { await ancestor.sync(); } finally { await ancestor.close(); }
+      await host.files.syncDirectory(current);
       if (current === dirname(current)) break;
     }
     const journal = new GuidedJournal(directory, join(directory, `${hash(sessionId)}.journal`));
@@ -28,9 +30,9 @@ export class GuidedJournal {
     let owner;
     try { owner = await open(`${journal.path}.owner`, 'wx', 0o600); } catch { throw new Error('CONTEXT_LOST'); }
     try { await owner.sync(); } finally { await owner.close(); }
-    const parent = await open(directory, 'r'); try { await parent.sync(); } finally { await parent.close(); }
+    await host.files.syncDirectory(directory);
     const file = await open(journal.path, 'wx', 0o600); try { await file.sync(); } finally { await file.close(); }
-    const dir = await open(directory, 'r'); try { await dir.sync(); } finally { await dir.close(); }
+    await host.files.syncDirectory(directory);
     return journal;
   }
   get recovered(): boolean { return this.poisoned || this.consumed.size > 0; }
@@ -64,7 +66,7 @@ export class GuidedJournal {
         const persisted = await file.write(record, 0, record.length, Buffer.byteLength(this.written));
         insist(persisted.bytesWritten === record.length, 'JOURNAL_UNAVAILABLE'); await file.sync(); this.written += `${key}\n`;
       } finally { await file.close(); }
-      const dir = await open(this.directory, 'r'); try { await dir.sync(); } finally { await dir.close(); }
+      await host.files.syncDirectory(this.directory);
     } catch { this.poisoned = true; throw new Error('JOURNAL_UNAVAILABLE'); } finally { this.writing = false; }
   }
 }

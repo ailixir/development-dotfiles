@@ -17,7 +17,8 @@
 import { X509Certificate } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { get } from 'node:https';
-import { fileURLToPath } from 'node:url';
+
+import { host } from './run/host/index.js';
 
 export interface ProbeTls {
   readonly key: Buffer | string;
@@ -85,7 +86,7 @@ export function probe(
   });
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (host.process.isEntryPoint(import.meta.url)) {
   const path = process.argv[2];
   if (path !== '/health' && path !== '/ready') {
     process.exitCode = 1;

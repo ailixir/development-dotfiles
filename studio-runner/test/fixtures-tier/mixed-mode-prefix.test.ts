@@ -20,6 +20,7 @@ import {guidedContext,proposal,dispatch} from '../helpers/guided.js';
 import type {GuidedBrowser} from '../../src/run/guidedBrowser.js';
 import type {Action,BridgeBootstrap,BridgeObservation,BridgePrefixPrepare,ConsumerEdge,PrefixProgram,Producer,ExecutionEvidence,Observation,Guard,PrefixAction,BridgePreparation} from '../../src/guided/types.js';
 import {startGuidedDataflowFixture,canary} from '../fixtures/guided-dataflow/visibleTextServer.js';
+import { describePosixOnly } from '../helpers/platform.js';
 const ids=Array.from({length:10},(_,i)=>`00000000-0000-4000-8000-${String(i+1).padStart(12,'0')}`);
 const REFERENCE='page.getByRole("status", { name: "Business reference" })',DESTINATION='page.getByRole("textbox", { name: "Destination" })',SUBMIT='page.getByRole("button", { name: "Submit" })';
 const useBinding=[{kind:'binding' as const,id:'stable-reference'}];
@@ -39,6 +40,8 @@ const operations:Action['operation'][]=[
 function guardFor(p:Action,index:number):Guard {
   return {guardId:`g${String(index)}`,origin:p.executionEvidence.kind==='initialBlank'?null:p.executionEvidence.origin};
 }
+// ADR-SC-009: skipped on Windows; the body is not re-indented, to keep the diff to the gate itself.
+describePosixOnly('the guided test child listens on a Unix domain socket probe file (helpers/guidedTestChildCore.mjs, helpers/childPage.ts)', 'mixed-mode prefix, recorded session', () => {
 describe('mixed prefix and suffix on one actual recorded guided session',()=>{
   it('recaptures a stable binding, preserves exact prepared lineage, crosses at4 and records both modes',async()=>{
     let liveValue='base-reference-value';const fixture=await startGuidedDataflowFixture('mixedVisible',()=>liveValue),root=await mkdtemp(join(tmpdir(),'mixed-prefix-native-'));
@@ -84,6 +87,7 @@ describe('mixed prefix and suffix on one actual recorded guided session',()=>{
       expect(JSON.stringify(mixed.recording)).not.toContain(liveValue);expect(JSON.stringify(mixed.recording)).not.toContain(canary);
     }finally{await fixture.close();await rm(root,{recursive:true,force:true});}
   });
+});
 });
 
 // R1 native companion only: local source/admission metadata never stands for actual PG publication.
@@ -209,4 +213,7 @@ async function verifyMixedPrefixReplacement():Promise<void>{
     expect(site.requests()-before).toBe(2);expect(new Set(launchRuns).size).toBe(2);for(const value of ['partial-base-private','partial-new-session-private','partial-ordinary-native-one','partial-ordinary-native-two'])expect(immutable).not.toContain(value);
   },()=>site.close(),()=>rm(root,{recursive:true,force:true}));
 }
+// ADR-SC-009: skipped on Windows; the body is not re-indented, to keep the diff to the gate itself.
+describePosixOnly('the guided test child listens on a Unix domain socket probe file (helpers/guidedTestChildCore.mjs, helpers/childPage.ts)', 'mixed-mode prefix, replacement', () => {
 it('retains actual read ordinal0 inside drift step2, spends only failed ordinal1, then natively recaptures twice under identical fixture artifact bytes',()=>verifyMixedPrefixReplacement());
+});

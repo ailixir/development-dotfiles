@@ -11,9 +11,12 @@ import corpusJson from '../../../docs/specs/studio-observed-authoring/contracts/
 import type {PublicationDocument} from '../helpers/publicationFixture.js';
 import {playwrightBrowserFactory} from './preparedBrowser.js';
 import {evidencePath} from '../helpers/evidenceOut.js';
+import { describePosixOnly } from '../helpers/platform.js';
 // Typed view of the static JSON import: the file exceeds tsserver's 4 MiB non-TS limit, so ESLint's projectService types it as `error`.
 const corpus=corpusJson as unknown as PublicationDocument;
 afterEach(()=>{vi.restoreAllMocks();});
+// ADR-SC-009: skipped on Windows; the body is not re-indented, to keep the diff to the gate itself.
+describePosixOnly('the symlink-video fault plants a file symlink, and the prepared profile goes through the POSIX owner and mode scratch confinement (scratchLayout)', 'observed bootstrap refusal', () => {
 it('deletes only the captured startup-native capability before creating the distinct sole app page in the same recorded context',async()=>{
  const scratch=await mkdtemp(join(tmpdir(),'bootstrap-capability-')),launch=chromium.launchPersistentContext.bind(chromium);let startupPath='',deleteCount=0,emptyBeforeCreation=false;
  let startupVideo:unknown;
@@ -61,3 +64,4 @@ it('keeps startup readiness false after an unexpected extra page and never delet
   }finally{await browser.dispose();}
  }finally{await rm(scratch,{recursive:true,force:true});}
 },15000);
+});

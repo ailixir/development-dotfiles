@@ -18,6 +18,9 @@ import { defineConfig } from 'vitest/config';
  * default run reddens.
  *
  * `passWithNoTests` is deliberately NOT set: an empty run here would be a silent pass.
+ *
+ * Linux and macOS only, by plan (ADR-SC-009): the tier is machine-bound (`parity.test.ts` pins a darwin/arm64
+ * baseline fingerprint), so it is not run on Windows and its files carry no per-file platform gates.
  */
 export default defineConfig({
   test: {

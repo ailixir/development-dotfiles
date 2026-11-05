@@ -1,4 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { describePosixOnly } from '../helpers/platform.js';
 import type { MockInstance } from 'vitest';
 import { bootstrapTreeGone, captureBootstrapTree, confirmBootstrapTreeSuspended, probeBootstrapPid } from '../helpers/bootstrapProcessTreeObservation.js';
 import type { BootstrapProcessTree } from '../helpers/bootstrapProcessTreeObservation.js';
@@ -45,7 +46,8 @@ beforeEach(() => {
 });
 afterEach(() => { vi.restoreAllMocks(); });
 
-describe('bootstrap process-tree observation', () => {
+const POSIX_ONLY = 'the oracle reads `ps -o stat=` and suspends with SIGSTOP; neither exists on Windows';
+describePosixOnly(POSIX_ONLY, 'bootstrap process-tree observation', () => {
   it("captures one coherent complete inventory when a transient member leaves before a later legacy label query", () => {
     let capture: BootstrapProcessTree | undefined, failureCode: string | undefined;
     expect(typeof captureBootstrapTree).toBe('function');
@@ -298,7 +300,7 @@ describe('bootstrap process-tree observation', () => {
 
 });
 
-describe('bootstrap process-tree observation', () => {
+describePosixOnly(POSIX_ONLY, 'bootstrap process-tree observation', () => {
   it("captures the complete owned inventory despite explicitly unknown unrelated process metadata", () => {
     expect(typeof captureBootstrapTree).toBe('function');
     for (const metadata of [

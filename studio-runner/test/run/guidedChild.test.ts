@@ -28,7 +28,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { describePosixOnly } from '../helpers/platform.js';
 
 import { ALLOW_ALL_DOMAINS_ENV_KEY, ALLOWED_DOMAINS_ENV_KEY } from '../../src/allowedDomains.js';
 import { GuidedLaunchFailure } from '../../src/run/guidedBrowser.js';
@@ -156,7 +157,8 @@ function loopLag(): { stop(): number } {
   return { stop: () => { clearInterval(timer); return worst; } };
 }
 
-describe('AC1: stall isolation', () => {
+const POSIX_ONLY = 'forks real children into their own process groups, kills them by negative pid and asserts the posix child environment';
+describePosixOnly(POSIX_ONLY, 'AC1: stall isolation', () => {
   it('a busy-looping step is killed by the proxy deadline: only its session ends, grandchild and temp dir included; the other session keeps working', async () => {
     const launch = launcher({ killGraceMs: 500 });
     const a = await start(launch), b = await start(launch);
@@ -198,7 +200,7 @@ describe('AC1: stall isolation', () => {
   });
 });
 
-describe('AC2: environment confinement (narrowed; see R-1b in the header)', () => {
+describePosixOnly(POSIX_ONLY, 'AC2: environment confinement (narrowed; see R-1b in the header)', () => {
   it('the spawn request is exactly the allow-listed environment, and step code that escapes to Node finds none of the server\'s identity, TLS or credentials', async () => {
     const { browser, index } = await start(launcher());
     expect(record.requests[index]).toEqual({
@@ -227,7 +229,7 @@ describe('AC2: environment confinement (narrowed; see R-1b in the header)', () =
   });
 });
 
-describe('AC3: secret scoping', () => {
+describePosixOnly(POSIX_ONLY, 'AC3: secret scoping', () => {
   it('a secret value reaches only its own session\'s child, only in the dispatching step message, and is read only after the fence ack', async () => {
     const launch = launcher();
     const a = await start(launch), b = await start(launch);
@@ -279,7 +281,7 @@ describe('AC3: secret scoping', () => {
   });
 });
 
-describe('AC5: lifecycle', () => {
+describePosixOnly(POSIX_ONLY, 'AC5: lifecycle', () => {
   it('a graceful stop kills the child and confirms it gone before close() resolves; so does a recorded orderly close', async () => {
     const launch = launcher();
     const plain = await start(launch);
@@ -372,7 +374,7 @@ describe('AC5: lifecycle', () => {
   });
 });
 
-describe('SC008-E15 QA fixes', () => {
+describePosixOnly(POSIX_ONLY, 'SC008-E15 QA fixes', () => {
   it('F1: an unconfirmed quiesce inside the end cap rejects close(), but the tree is confirmed gone in the background and the slot can be released', async () => {
     let quiesces = 0;
     const spawner = observedSpawner(handle => ({ quiesce: remaining => (quiesces++ === 0 ? Promise.resolve(false) : (handle.quiesce?.(remaining) ?? Promise.resolve(true))) }));
@@ -412,7 +414,7 @@ describe('SC008-E15 QA fixes', () => {
   });
 });
 
-describe('AC8: close ordering', () => {
+describePosixOnly(POSIX_ONLY, 'AC8: close ordering', () => {
   it('a recorded non-orderly close resolves at the reply, keeps the child until `finalized`, then kills it', async () => {
     const recording = { dir: join(root, 'rec'), size: { width: 1280, height: 720 }, ready: vi.fn() };
     const { browser, index } = await start(launcher(), 'orderly=0&finalize=800', recording);

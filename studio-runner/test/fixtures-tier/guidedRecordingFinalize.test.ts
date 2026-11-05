@@ -20,6 +20,7 @@ import { launchGuidedBrowser } from '../../src/run/browser.js';
 import { GUIDED_CLOSE_GRACE_MS } from '../../src/run/guidedBrowser.js';
 import { startSecretLoginFixture } from '../fixtures/secret-login/server.js';
 import { gotoPage, sleep } from './helpers/guidedLaunch.js';
+import { describePosixOnly } from '../helpers/platform.js';
 
 const run = (command: string, args: string[]): string => { try { return execFileSync(command, args, { encoding: 'utf8' }).trim(); } catch { return ''; } };
 const hasFfprobe = run('ffprobe', ['-version']) !== '';
@@ -27,6 +28,8 @@ const hasFfprobe = run('ffprobe', ['-version']) !== '';
 const durationOf = (path: string): number => Number(run('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'default=nw=1:nk=1', path]) || 'NaN');
 const recorderPids = (directory: string): number[] => run('pgrep', ['-P', String(process.pid), '-f', directory]).split('\n').filter(Boolean).map(Number).filter((pid) => run('ps', ['-p', String(pid), '-o', 'command=']).includes('ffmpeg'));
 
+// ADR-SC-009: skipped on Windows; the body is not re-indented, to keep the diff to the gate itself.
+describePosixOnly('finds the recorder with pgrep/ps and slows it with SIGSTOP/SIGCONT, which Windows has no equivalent of', 'guided recording finalize', () => {
 describe.skipIf(!hasFfprobe)('a guided close that outlasts the grace still finalizes the recording', () => {
   let fixture: Awaited<ReturnType<typeof startSecretLoginFixture>>;
   beforeAll(async () => { fixture = await startSecretLoginFixture('r065-finalize-canary'); });
@@ -70,4 +73,5 @@ describe.skipIf(!hasFfprobe)('a guided close that outlasts the grace still final
       expect(recorderPids(dir)).toEqual([]);                               // no orphan ffmpeg
     } finally { await rm(dir, { recursive: true, force: true }); }
   }, 120_000);
+});
 });

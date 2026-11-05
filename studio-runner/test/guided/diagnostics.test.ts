@@ -5,6 +5,7 @@ import {tmpdir} from 'node:os';
 import {GuidedDiagnostics,GuidedStartFailure,describeStartFailure,redactFailure} from '../../src/guided/diagnostics.js';
 import {hash} from '../../src/guided/contracts.js';
 import {GuidedLaunchFailure} from '../../src/run/guidedBrowser.js';
+import {isWindows} from '../helpers/platform.js';
 const paths:string[]=[];
 afterEach(async()=>{for(const path of paths.splice(0))await rm(path,{recursive:true,force:true});});
 async function directory(){const path=await mkdtemp(join(tmpdir(),'guided-diagnostics-'));paths.push(path);return path;}
@@ -25,7 +26,9 @@ describe('separate bounded non-authoritative diagnostics',()=>{
     expect(await sink.record(identity,new Error('secret-value'),['secret-value'],stderr)).toBe('Error: [REDACTED]');
     await sink.record(identity,new Error('second'),[],stderr);
     const bytes=await readFile(sink.path,'utf8'),lines=bytes.trim().split('\n');expect(lines).toHaveLength(1);expect(JSON.parse(lines[0]??'')).toEqual({...identity,errorMessage:'Error: [REDACTED]'});
-    expect(bytes).not.toContain('secret-value');expect(stderr).toHaveBeenCalledOnce();expect((await stat(sink.path)).mode&0o777).toBe(0o600);
+    expect(bytes).not.toContain('secret-value');expect(stderr).toHaveBeenCalledOnce();
+    // ADR-SC-009: the 0o600 mode is POSIX file metadata, checked on Linux and macOS only; the rest of this test runs everywhere.
+    if(!isWindows)expect((await stat(sink.path)).mode&0o777).toBe(0o600);
   });
   it('enforces total byte budget and ignores delivery or filesystem failures',async()=>{
     const path=await directory(),stderr=vi.fn(),limited=new GuidedDiagnostics(path,'budget',10,1);

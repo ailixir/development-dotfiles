@@ -4,6 +4,9 @@
  * Two oracles say which production call confirms the browser closed. `contextClose` (default; a started session) requires exactly
  * one real `context.close()`. `terminate` (a launch that fails after context acquisition, pre-F-merge ruling item 1 / F-R2-1)
  * requires zero real `context.close()` requests and every owned PID gone at the first probe: that path takes the hard teardown.
+ *
+ * POSIX only (ADR-SC-009): the PID probe is signal-0 liveness and the redirect is a symlink swap of the profile, so this fixture and
+ * its users (`test/profileSafetyFixture.test.ts`, `test/fixtures-tier/browser-profile-safety.test.ts`) are POSIX-only tests.
  */
 export type ProductionTeardown='contextClose'|'terminate';
 export type PidState='DEAD'|'LIVE'|'UNKNOWN';

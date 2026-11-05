@@ -5,13 +5,13 @@
  * Deliberately thin, like `child.ts` and `main.ts`: bind process IPC to the service and get out of the way. The service itself is
  * `guidedChildService.ts`; this is the only module that hands it the real browser launch.
  */
-import { fileURLToPath } from 'node:url';
 import { launchGuidedBrowser } from './browser.js';
 import { serveGuidedChild } from './guidedChildService.js';
+import { host } from './host/index.js';
 
 // Not reachable under vitest: the module is imported by the fixtures tier, never invoked as the entry point there.
 /* v8 ignore start */
-if (process.send !== undefined && process.argv[1] === fileURLToPath(import.meta.url)) {
+if (process.send !== undefined && host.process.isEntryPoint(import.meta.url)) {
   serveGuidedChild({
     send: frame => { process.send?.(frame); },
     onMessage: listener => { process.on('message', listener); },

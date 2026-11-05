@@ -3,8 +3,11 @@ import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {afterEach,expect,it,vi} from 'vitest';
 import {BROWSER_PREFERENCES, prepareBrowserProfile, requireBrowserPreferences,assertEffectiveBrowserPreferences,browserProfileConfinement,releaseBrowserProfile,secureScratchDirectory} from '../../src/run/scratchLayout.js';
+import { describePosixOnly } from '../helpers/platform.js';
 afterEach(()=>{vi.restoreAllMocks();});
 
+// ADR-SC-009: skipped on Windows; the body is not re-indented, to keep the diff to the gate itself.
+describePosixOnly('the prepared profile is confined by 0o700/0o600 modes, the owner uid, symlink/hardlink refusal and inode identity, which are POSIX file metadata', 'browser profile preferences confinement', () => {
 it('requires the exact password/autofill/session preferences before Chromium can start', async () => {
   const scratch=await mkdtemp(join(tmpdir(),'profile-preferences-'));
   try {
@@ -44,4 +47,5 @@ it('requires actual supported effective values; obsolete key history grants no e
   const effective={credentialsEnableService:false,autofillProfileEnabled:false,autofillCreditCardEnabled:false,restoreOnStartup:5};expect(()=>{assertEffectiveBrowserPreferences(effective);}).not.toThrow();
   for(const key of Object.keys(effective))for(const value of [undefined,null,true,'false',0])expect(()=>{assertEffectiveBrowserPreferences({...effective,[key]:value});}).toThrow('PROFILE_PREFERENCES_REQUIRED');
   expect(BROWSER_PREFERENCES).not.toHaveProperty('profile.password_manager_enabled');
+});
 });

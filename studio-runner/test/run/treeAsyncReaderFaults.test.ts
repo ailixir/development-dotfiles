@@ -7,7 +7,8 @@
  *
  * `node:child_process` is mocked for this whole file, so nothing here forks.
  */
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, expect, it, vi } from 'vitest';
+import { describePosixOnly } from '../helpers/platform.js';
 
 import { readProcessTableAsync } from '../../src/run/tree.js';
 
@@ -15,7 +16,8 @@ type Callback = (error: Error | null, stdout: string) => void;
 const execFile = vi.hoisted(() => vi.fn<(file: string, args: string[], options: { timeout: number }, callback: Callback) => void>());
 vi.mock('node:child_process', () => ({ execFile, spawnSync: vi.fn() }));
 
-describe('the asynchronous process-table reader', () => {
+const POSIX_ONLY = 'node:child_process is mocked and the `ps` argv asserted is the posix host; the win32 CIM reader has its own host tests';
+describePosixOnly(POSIX_ONLY, 'the asynchronous process-table reader', () => {
   beforeEach(() => {
     execFile.mockReset();
   });

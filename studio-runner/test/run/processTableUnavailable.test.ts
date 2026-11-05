@@ -9,7 +9,8 @@
  *
  * `node:child_process` is mocked for this whole file, so nothing here forks.
  */
-import { describe, expect, it, vi } from 'vitest';
+import { expect, it, vi } from 'vitest';
+import { describePosixOnly } from '../helpers/platform.js';
 
 import { canEnumerateLaunchTree, canEnumerateProcessTree, descendantsOf, killLaunchTree, readProcessTable, readProcessTableWithArgs, signalProcessTree } from '../../src/run/tree.js';
 
@@ -18,10 +19,12 @@ const spawnSync = vi.hoisted(() =>
     throw Object.assign(new Error('spawnSync ps EAGAIN'), { code: 'EAGAIN' });
   }),
 );
-// `tree.ts` imports only `spawnSync`; the module is replaced, never driven.
-vi.mock('node:child_process', () => ({ spawnSync }));
+// `tree.ts` reads only `spawnSync` here; the module is replaced, never driven. `execFile` is there because the host
+// module (`src/run/host/win32Files.ts`) binds it at load on every platform; it is never called.
+vi.mock('node:child_process', () => ({ spawnSync, execFile: vi.fn() }));
 
-describe('a ps that cannot be spawned', () => {
+const POSIX_ONLY = 'node:child_process is mocked and the assertions are the posix host reading `ps`; the win32 CIM reader has its own host tests';
+describePosixOnly(POSIX_ONLY, 'a ps that cannot be spawned', () => {
   it('reads as an empty table, never as a throw, and passes the bounded timeout through', () => {
     expect(readProcessTable(7)).toEqual([]);
     expect(spawnSync).toHaveBeenCalledWith('ps', ['-A', '-o', 'pid=,ppid='], expect.objectContaining({ timeout: 7 }));
@@ -38,11 +41,11 @@ describe('a ps that cannot be spawned', () => {
     expect(canEnumerateProcessTree()).toBe(false);
   });
 
-  it('REL-001/D4: keeps the guided worker from starting, and makes its launch kill refuse rather than report a clean teardown', () => {
+  it('REL-001/D4: keeps the guided worker from starting, and makes its launch kill refuse rather than report a clean teardown', async () => {
     expect(readProcessTableWithArgs()).toEqual([]);
     expect(canEnumerateLaunchTree()).toBe(false);
     // Default readers, as the hard teardown calls it: an unreadable table is an error, not "nothing to kill".
-    expect(() => killLaunchTree(['/var/folders/zz/T/checks-guided-AbC123'])).toThrow('PROCESS_TABLE_UNREADABLE');
+    await expect(killLaunchTree(['/var/folders/zz/T/checks-guided-AbC123'])).rejects.toThrow('PROCESS_TABLE_UNREADABLE');
   });
 
   it('degrades a tree kill to the root and its group, still without throwing', () => {

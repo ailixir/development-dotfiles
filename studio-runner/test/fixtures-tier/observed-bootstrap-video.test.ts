@@ -9,6 +9,7 @@ import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {expect,it} from 'vitest';
+import { describePosixOnly } from '../helpers/platform.js';
 import corpus from '../../../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json' with {type:'json'};
 import {createChildBrowserLauncher,createForkSpawner} from '../../src/run/launcher.js';
 import type {ChildProcessHandle} from '../../src/run/launcher.js';
@@ -20,6 +21,8 @@ import {hashObserved,OBSERVED_PROFILE,OBSERVED_SCHEMA_BUNDLE_HASH} from '../../s
 import {writeRuntimeVersionsFile} from '../../scripts/write-runtime-versions.mjs';
 import {envBrowserRoot} from '../../scripts/browser-provenance.mjs';
 import {nativeEvidenceDirectory,nativeJson,archiveNativeVideo,decodeNativeBlank} from './nativeBlankVideo.js';
+// ADR-SC-009: skipped on Windows; the body is not re-indented, to keep the diff to the gate itself.
+describePosixOnly('freezes the Chromium and encoder tree with SIGSTOP/SIGCONT to force the loss cases; Windows has no equivalent', 'observed bootstrap video', () => {
 it.each(['normal-failure','forced-step-loss','completed-pass-lost-final'] as const)('decodes actual compiled %s full-Chromium app video after bootstrap deletion and retains native timing/partial facts',async mode=>{
  const diagnostics=await nativeEvidenceDirectory('native-timing-'+mode);
  let handle:ChildProcessHandle|undefined;const suspended:number[]=[];let actualFinalDropped=false;
@@ -49,3 +52,4 @@ it.each(['normal-failure','forced-step-loss','completed-pass-lost-final'] as con
   }finally{await session.close();}
  }finally{for(const pid of suspended)if(isAlive(pid)){try{process.kill(pid,'SIGCONT');process.kill(pid,'SIGKILL');}catch{/* failed-test cleanup */}}if(handle?.pid&&isAlive(handle.pid))handle.kill();await new Promise<void>(r=>server.close(()=>{r();}));await rm(directory,{recursive:true,force:true});}
 },45000);
+});

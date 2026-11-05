@@ -22,6 +22,7 @@
  *    added to the options type — fails here rather than shipping.
  */
 import { readFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { describe, expect, it, vi } from 'vitest';
@@ -117,7 +118,7 @@ describe('MED-2 — the production path supplies no test seam', () => {
     [`${CONFIG_PREFIX}SERVICE_IDENTITY`]: SERVICE_TOKEN,
     [`${CONFIG_PREFIX}CALLBACK_IDENTITY`]: 'outbound',
     [`${CONFIG_PREFIX}CALLBACK_BASE_URL`]: 'https://api.internal.example',
-    [`${CONFIG_PREFIX}SCRATCH_DIR`]: '/tmp/studio-runner-production-seams',
+    [`${CONFIG_PREFIX}SCRATCH_DIR`]: join(tmpdir(), 'studio-runner-production-seams'),
   });
 
   /** The complete set production is allowed to construct. Asserted as equality, not containment. */
