@@ -23,8 +23,9 @@ put-checks/
 ## Quick Start
 
 Each component starts with its own Node launcher, `scripts/dev.mjs`, in its own terminal, in this order.
-No Docker and no bash: the launchers are plain Node, for Windows, macOS and Linux alike (PowerShell 5.1 has no
-`&&`, so there run the `cd` and the `node` command one after the other).
+No Docker: the launchers are plain Node, for Windows, macOS and Linux alike (PowerShell 5.1 has no `&&`, so there
+run the `cd` and the `node` command one after the other). In Git Bash, macOS or Linux, `./dev.sh` in each component
+does the same: it runs `node scripts/dev.mjs` with the same flags.
 
 ```bash
 cd studio-runner && node scripts/dev.mjs   # 1. browser runner (and the shared local setup the backend reads)

@@ -17,6 +17,8 @@ cd backend && node scripts/dev.mjs         # Spring Boot (local profile) on :808
 cd frontend && node scripts/dev.mjs        # Vite on :5173
 ```
 
+In Git Bash, macOS or Linux, `./dev.sh` in each component runs the same launcher with the same flags.
+
 The runner launcher installs the pinned Chromium when it is missing and writes the shared directory
 `$PUT_CHECKS_LOCAL_DIR` (default `~/.put-checks/local`): local TLS, the two service identities, the guided tokens and
 `backend.env`, which the backend launcher reads. The local backend profile runs the dispatcher and recovery schedules

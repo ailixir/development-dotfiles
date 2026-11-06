@@ -110,7 +110,7 @@ delivery. The former artifact-1 `resolvedVars` correspondence validator is retir
 
 ## Run locally
 
-No Docker, no bash. Prerequisites: Node 24 (`.nvmrc`), `openssl` and a JDK `keytool` (JDK 21, `JAVA_HOME`).
+No Docker. `./dev.sh` (Git Bash, macOS, Linux) runs the same launcher with the same flags. Prerequisites: Node 24 (`.nvmrc`), `openssl` and a JDK `keytool` (JDK 21, `JAVA_HOME`).
 
 ```bash
 node scripts/dev.mjs   # from studio-runner/: build, prepare the shared files, start the runner on https://127.0.0.1:8090

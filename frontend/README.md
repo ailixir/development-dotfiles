@@ -10,7 +10,7 @@
 
 ## Run locally
 
-Prerequisites: Node.js (24, like the runner), pnpm (never npm or yarn; `.npmrc` sets `node-linker=hoisted`, which the webpack build needs) and a built `@put/core-components` (`cd ../../put-core-components && npm run build`, then `pnpm install` here). No Docker, no bash.
+Prerequisites: Node.js (24, like the runner), pnpm (never npm or yarn; `.npmrc` sets `node-linker=hoisted`, which the webpack build needs) and a built `@put/core-components` (`cd ../../put-core-components && npm run build`, then `pnpm install` here). No Docker. `./dev.sh` (Git Bash, macOS, Linux) runs the same launcher with the same flags.
 
 ```bash
 node scripts/dev.mjs              # Vite standalone on http://localhost:5173 (also: pnpm run dev:local)

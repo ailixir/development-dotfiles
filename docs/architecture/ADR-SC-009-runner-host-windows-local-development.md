@@ -99,7 +99,7 @@ Playwright stays **1.63.0** (Chromium rev 1243). On win32 it never detaches brow
   The component READMEs list them (W7).
 - **Verification status: not verified on Windows until a recorded Windows run.** Every Windows behaviour above is [V] from code or source, or [I], until a Windows CI run, or a developer run with logs and the commit SHA, records plan ACs 6–13. Until then the READMEs say "Windows: not verified". The W0 preflight on a bank laptop comes first. It measures CIM latency against the guided 4.5 s close bound; if that latency is too high, the guided teardown design is revisited in W5.
 - **Two hosts can drift.** Shared contract tests run against both hosts on fake edges. The win32 pure models (CIM rows, creation-time tree, markers, SDDL/ACE) are unit-tested on every OS. Windows-only and posix-only tests go through `studio-runner/test/helpers/platform.ts` with a stated reason, and a Linux run has 0 platform skips.
-- **Local stack.** It starts with `node scripts/dev.mjs` in each component (runner, then backend, then frontend). The bash `dev.sh` files are removed.
+- **Local stack.** It starts with `node scripts/dev.mjs` in each component (runner, then backend, then frontend). Each `dev.sh` stays as a thin wrapper for Git Bash, macOS and Linux that runs `node scripts/dev.mjs` with the same flags; the old bash launchers needed `lsof`, `ps` and process groups, which Git Bash does not provide for native Windows processes.
 - **Open risks.**
   - Endpoint-security DLL injection into Chromium renderers.
   - Defender sharing violations.

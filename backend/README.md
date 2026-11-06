@@ -87,7 +87,8 @@ Use for development, frontend integration, and stakeholder presentations.
 
 ## Run locally
 
-One command, no Docker, no bash (Windows, macOS and Linux):
+One command, no Docker (Windows, macOS and Linux). `./dev.sh` (Git Bash, macOS, Linux) runs the same launcher with the
+same flags:
 
 ```bash
 node scripts/dev.mjs          # backend (local profile) + Core stand-in
